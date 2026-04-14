@@ -20,7 +20,6 @@ import {
   Checkbox,
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
-import { CategoryToggles } from "@/components/CategoryToggles";
 import { fetchOrganizations, suggestTags } from "@/services/api";
 import {
   APIResponse,
@@ -114,20 +113,6 @@ function TypeSelect({
 }
 
 const REUSE_TOGGLE_FILTERS = {
-  tipo_reutilizacao: {
-    title: "Tipo de reutilização",
-    options: [
-      { id: "all", label: "Todos", count: "2,8 mil" },
-      { id: "visualization", label: "Visualização", count: "1,1 mil" },
-      { id: "application", label: "Aplicação", count: "1 mil" },
-      { id: "blog_post", label: "Partilha no portal", count: "238" },
-      { id: "press_article", label: "Artigo de imprensa", count: "184" },
-      { id: "api", label: "API", count: "129" },
-      { id: "scientific", label: "Publicação científica", count: "68" },
-      { id: "idea", label: "Ideia", count: "32" },
-      { id: "hardware", label: "Hardware conectado", count: "3" },
-    ],
-  },
   atualizacao: {
     title: "Data da atualização",
     options: [
@@ -135,17 +120,6 @@ const REUSE_TOGGLE_FILTERS = {
       { id: "30_days", label: "Os últimos 30 dias", count: "96" },
       { id: "12_months", label: "Os últimos 12 meses", count: "279" },
       { id: "3_years", label: "Os últimos 3 anos", count: "352" },
-    ],
-  },
-  organizacao: {
-    title: "Tipo de organização",
-    options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "public_service", label: "Serviço público", count: "259" },
-      { id: "local_authority", label: "Autoridade local", count: "54" },
-      { id: "business", label: "Negócios", count: "8" },
-      { id: "association", label: "Associação", count: "6" },
-      { id: "user", label: "Utilizador", count: "7" },
     ],
   },
 };
@@ -178,9 +152,7 @@ export default function ReusesClient({
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<
     Record<ReuseFilterKey, string>
   >({
-    tipo_reutilizacao: "all",
     atualizacao: "all",
-    organizacao: "all",
   });
 
   const handleToggleFilterChange = (filterKey: ReuseFilterKey, optionId: string) => {
@@ -262,18 +234,6 @@ export default function ReusesClient({
       param: "organization",
       data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
       searchable: true,
-    },
-    {
-      name: "Tipo de organização",
-      param: "org_type",
-      data: [
-        { id: "public_service", name: "Serviço público" },
-        { id: "local_authority", name: "Autoridade local" },
-        { id: "business", name: "Negócios" },
-        { id: "association", name: "Associação" },
-        { id: "user", name: "Utilizador" },
-      ],
-      searchable: false,
     },
     {
       name: "Palavras-chave",
@@ -455,12 +415,6 @@ export default function ReusesClient({
             {/* Sidebar */}
             {filtersOpen && (
               <div className="xl:col-span-5 xl:block">
-                {siteMetrics && (
-                  <div>
-                    <CategoryToggles siteMetrics={siteMetrics} searchQuery={initialFilters?.q} />
-                  </div>
-                )}
-
                 <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
                   <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
                   {(Object.keys(REUSE_TOGGLE_FILTERS) as ReuseFilterKey[]).map((filterKey) => {
@@ -622,9 +576,7 @@ export default function ReusesClient({
                     appearance="outline"
                     onClick={() => {
                       setSelectedToggleFilters({
-                        tipo_reutilizacao: "all",
                         atualizacao: "all",
-                        organizacao: "all",
                       });
                       router.push("/pages/reuses");
                     }}

@@ -7,7 +7,6 @@ import {
   fetchOrganizations,
   fetchLicenses,
   fetchFrequencies,
-  fetchDatasetBadges,
   fetchGranularities,
   suggestFormats,
   suggestTags,
@@ -22,7 +21,7 @@ interface FilterOption {
 
 const DATASET_TOGGLE_FILTERS = {
   formato: {
-    title: "Formato dos dados",
+    title: "Formato dos recursos",
     options: [
       { id: "all", label: "Todos", count: "45 mil" },
       { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet...", count: "14 mil" },
@@ -32,43 +31,11 @@ const DATASET_TOGGLE_FILTERS = {
       { id: "other", label: "Outro", count: "29 mil" },
     ],
   },
-  metodo: {
-    title: "Métodos de acesso",
-    options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "free_download", label: "Download gratuito", count: "230" },
-      { id: "open_conditions", label: "Aberto sob certas condições", count: "16" },
-      { id: "auth_access", label: "Acesso mediante autorização", count: "106" },
-    ],
-  },
-  atualizacao: {
-    title: "Data da atualização",
-    options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "30_days", label: "Os últimos 30 dias", count: "96" },
-      { id: "12_months", label: "Os últimos 12 meses", count: "279" },
-      { id: "3_years", label: "Os últimos 3 anos", count: "352" },
-    ],
-  },
-  organizacao: {
-    title: "Tipo de organização",
-    options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "public_service", label: "Serviço público", count: "259" },
-      { id: "local_authority", label: "Autoridade local", count: "54" },
-      { id: "business", label: "Negócios", count: "8" },
-      { id: "association", label: "Associação", count: "6" },
-      { id: "user", label: "Utilizador", count: "7" },
-    ],
-  },
   rotulo: {
-    title: "Rótulo de dados",
+    title: "Tipo de dados",
     options: [
       { id: "all", label: "Todos", count: "45 mil" },
-      { id: "high_value", label: "Conjuntos de dados de alto valor", count: "591" },
-      { id: "inspire", label: "Inspirar", count: "16 mil" },
-      { id: "public_reference", label: "Serviço público de dados de referência", count: "9" },
-      { id: "statistics", label: "Séries estatísticas de interesse geral", count: "11" },
+      { id: "high_value", label: "Conjuntos de dados de Elevado Valor", count: "591" },
     ],
   },
 };
@@ -82,9 +49,6 @@ export const DatasetsFilters = () => {
 
   const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>({
     formato: "all",
-    metodo: "all",
-    atualizacao: "all",
-    organizacao: "all",
     rotulo: "all",
   });
 
@@ -95,7 +59,6 @@ export const DatasetsFilters = () => {
   const [organizations, setOrganizations] = React.useState<Organization[]>([]);
   const [licenses, setLicenses] = React.useState<License[]>([]);
   const [frequencies, setFrequencies] = React.useState<Frequency[]>([]);
-  const [badges, setBadges] = React.useState<FilterOption[]>([]);
   const [granularities, setGranularities] = React.useState<Granularity[]>([]);
   const [tagOptions, setTagOptions] = React.useState<FilterOption[]>([]);
   const [formatOptions, setFormatOptions] = React.useState<FilterOption[]>([]);
@@ -106,18 +69,16 @@ export const DatasetsFilters = () => {
   React.useEffect(() => {
     async function loadFilterData() {
       try {
-        const [orgsRes, licensesRes, frequenciesRes, badgesRes, granularitiesRes] =
+        const [orgsRes, licensesRes, frequenciesRes, granularitiesRes] =
           await Promise.all([
             fetchOrganizations(1, 100, { sort: "-datasets" }),
             fetchLicenses(),
             fetchFrequencies(),
-            fetchDatasetBadges(),
             fetchGranularities(),
           ]);
         setOrganizations(orgsRes.data);
         setLicenses(licensesRes);
         setFrequencies(frequenciesRes);
-        setBadges(Object.entries(badgesRes).map(([key, label]) => ({ id: key, name: label })));
         setGranularities(granularitiesRes);
       } catch (error) {
         console.error("Failed to load filter data", error);
@@ -215,18 +176,6 @@ export const DatasetsFilters = () => {
       searchable: true,
     },
     {
-      name: "Tipo de Organização",
-      param: "organization_type",
-      data: [
-        { id: "public_service", name: "Serviço público" },
-        { id: "local_authority", name: "Autoridade local" },
-        { id: "business", name: "Negócios" },
-        { id: "association", name: "Associação" },
-        { id: "user", name: "Utilizador" },
-      ],
-      searchable: false,
-    },
-    {
       name: "Palavras-chave",
       param: "tag",
       data: tagOptions,
@@ -250,12 +199,6 @@ export const DatasetsFilters = () => {
       name: "Frequência",
       param: "frequency",
       data: frequencies.map((f) => ({ id: f.id, name: f.label })),
-      searchable: true,
-    },
-    {
-      name: "Plano",
-      param: "badge",
-      data: badges,
       searchable: true,
     },
     {
@@ -425,9 +368,6 @@ export const DatasetsFilters = () => {
           onClick={() => {
             setSelectedToggleFilters({
               formato: "all",
-              metodo: "all",
-              atualizacao: "all",
-              organizacao: "all",
               rotulo: "all",
             });
             router.replace("/pages/datasets", { scroll: false });
