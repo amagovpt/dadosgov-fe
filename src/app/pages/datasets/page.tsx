@@ -29,10 +29,26 @@ export default async function Page({
     apiFilters.sort = '-created';
   }
 
-  const [initialData, siteInfo] = await Promise.all([
-    fetchDatasets(page, 20, apiFilters),
-    fetchSiteInfo(),
-  ]);
+  const [initialData, siteInfo, totalRes, tabularRes, structuredRes, geoRes, docsRes, hvdRes] =
+    await Promise.all([
+      fetchDatasets(page, 20, apiFilters),
+      fetchSiteInfo(),
+      fetchDatasets(1, 1),
+      fetchDatasets(1, 1, { format: ["csv", "xls", "xlsx", "ods", "parquet", "tsv"] }),
+      fetchDatasets(1, 1, { format: ["json", "rdf", "xml", "sql", "ndjson", "jsonl"] }),
+      fetchDatasets(1, 1, { format: ["geojson", "shp", "kml", "kmz", "gpx", "wfs", "wms"] }),
+      fetchDatasets(1, 1, { format: ["pdf", "doc", "docx", "md", "txt", "odt", "rtf"] }),
+      fetchDatasets(1, 1, { tag: "hvd" }),
+    ]);
+
+  const filterCounts = {
+    all: totalRes.total,
+    tabular: tabularRes.total,
+    structured: structuredRes.total,
+    geographic: geoRes.total,
+    documents: docsRes.total,
+    high_value: hvdRes.total,
+  };
 
   return (
     <DatasetsClient
@@ -40,6 +56,7 @@ export default async function Page({
       currentPage={page}
       siteMetrics={siteInfo.metrics}
       initialFilters={filters}
+      filterCounts={filterCounts}
     />
   );
 }

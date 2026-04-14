@@ -29,6 +29,7 @@ interface DatasetsClientProps {
   currentPage: number;
   siteMetrics?: SiteMetrics;
   initialFilters?: DatasetFilters;
+  filterCounts?: Record<string, number>;
 }
 
 const SORT_OPTIONS: Record<string, string> = {
@@ -50,6 +51,7 @@ export default function DatasetsClient({
   currentPage,
   siteMetrics,
   initialFilters = {},
+  filterCounts,
 }: DatasetsClientProps) {
   const router = useRouter();
   const { data: datasets, total, page_size } = initialData;
@@ -242,7 +244,7 @@ export default function DatasetsClient({
             {/* Sidebar */}
             {filtersOpen && (
               <div className="xl:col-span-5 xl:block">
-                <DatasetsFilters />
+                <DatasetsFilters filterCounts={filterCounts} />
               </div>
             )}
 

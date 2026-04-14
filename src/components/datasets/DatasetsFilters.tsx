@@ -4,7 +4,6 @@ import React from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Sidebar, SidebarItem, Checkbox, InputSearch, Icon, Toggle, Pill, Button } from "@ama-pt/agora-design-system";
 import {
-  fetchDatasets,
   fetchOrganizations,
   fetchLicenses,
   fetchFrequencies,
@@ -75,7 +74,11 @@ function detectRotuloFromParams(params: URLSearchParams): string {
   return "all";
 }
 
-export const DatasetsFilters = () => {
+interface DatasetsFiltersProps {
+  filterCounts?: Record<string, number>;
+}
+
+export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -121,7 +124,7 @@ export const DatasetsFilters = () => {
   const [zoneOptions, setZoneOptions] = React.useState<FilterOption[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchQueries, setSearchQueries] = React.useState<Record<string, string>>({});
-  const [filterCounts, setFilterCounts] = React.useState<Record<string, number>>({});
+  const filterCounts = serverCounts || {};
 
   React.useEffect(() => {
     async function loadFilterData() {
@@ -143,31 +146,7 @@ export const DatasetsFilters = () => {
         setIsLoading(false);
       }
     }
-    async function loadFilterCounts() {
-      try {
-        const [totalRes, tabularRes, structuredRes, geoRes, docsRes, hvdRes] =
-          await Promise.all([
-            fetchDatasets(1, 1),
-            fetchDatasets(1, 1, { format: FORMAT_GROUP_MAP.tabular }),
-            fetchDatasets(1, 1, { format: FORMAT_GROUP_MAP.structured }),
-            fetchDatasets(1, 1, { format: FORMAT_GROUP_MAP.geographic }),
-            fetchDatasets(1, 1, { format: FORMAT_GROUP_MAP.documents }),
-            fetchDatasets(1, 1, { tag: "hvd" }),
-          ]);
-        setFilterCounts({
-          all: totalRes.total,
-          tabular: tabularRes.total,
-          structured: structuredRes.total,
-          geographic: geoRes.total,
-          documents: docsRes.total,
-          high_value: hvdRes.total,
-        });
-      } catch (error) {
-        console.error("Failed to load filter counts", error);
-      }
-    }
     loadFilterData();
-    loadFilterCounts();
   }, []);
 
   const handleTagSearch = React.useCallback(async (query: string) => {
