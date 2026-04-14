@@ -23,6 +23,7 @@ const DATASET_TOGGLE_FILTERS = {
   formato: {
     title: "Formato dos recursos",
     options: [
+<<<<<<< HEAD
       { id: "all", label: "Todos", description: undefined as string | undefined },
       { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet..." },
       { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL..." },
@@ -38,13 +39,26 @@ const DATASET_TOGGLE_FILTERS = {
       { id: "30_days", label: "Os últimos 30 dias", description: undefined as string | undefined },
       { id: "12_months", label: "Os últimos 12 meses", description: undefined as string | undefined },
       { id: "3_years", label: "Os últimos 3 anos", description: undefined as string | undefined },
+=======
+      { id: "all", label: "Todos", count: "45 mil" },
+      { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet...", count: "14 mil" },
+      { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL...", count: "9,3 mil" },
+      { id: "geographic", label: "Geográfico", description: "geojson, shp, kml...", count: "4,6 mil" },
+      { id: "documents", label: "Documentos", description: "pdf, doc, docx, md, txt, ...", count: "2,8 mil" },
+      { id: "other", label: "Outro", count: "29 mil" },
+>>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
     ],
   },
   rotulo: {
     title: "Tipo de dados",
     options: [
+<<<<<<< HEAD
       { id: "all", label: "Todos", description: undefined as string | undefined },
       { id: "high_value", label: "Conjuntos de dados de Elevado Valor", description: undefined as string | undefined },
+=======
+      { id: "all", label: "Todos", count: "45 mil" },
+      { id: "high_value", label: "Conjuntos de dados de Elevado Valor", count: "591" },
+>>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
     ],
   },
 };
@@ -119,11 +133,18 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+<<<<<<< HEAD
   const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>(() => ({
     formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
     atualizacao: detectAtualizacaoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
     rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
   }));
+=======
+  const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>({
+    formato: "all",
+    rotulo: "all",
+  });
+>>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
 
   const handleToggleFilterChange = (filterKey: ToggleFilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
@@ -472,7 +493,10 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
           onClick={() => {
             setSelectedToggleFilters({
               formato: "all",
+<<<<<<< HEAD
               atualizacao: "all",
+=======
+>>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
               rotulo: "all",
             });
             router.replace("/pages/datasets", { scroll: false });
