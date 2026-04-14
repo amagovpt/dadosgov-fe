@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Sidebar, SidebarItem, Checkbox, InputSearch, Icon, Toggle, Pill, Button } from "@ama-pt/agora-design-system";
 import {
+  fetchDatasets,
   fetchOrganizations,
   fetchLicenses,
   fetchFrequencies,
@@ -23,22 +24,30 @@ const DATASET_TOGGLE_FILTERS = {
   formato: {
     title: "Formato dos recursos",
     options: [
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet...", count: "14 mil" },
-      { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL...", count: "9,3 mil" },
-      { id: "geographic", label: "Geográfico", description: "geojson, shp, kml...", count: "4,6 mil" },
-      { id: "documents", label: "Documentos", description: "pdf, doc, docx, md, txt, ...", count: "2,8 mil" },
-      { id: "other", label: "Outro", count: "29 mil" },
+      { id: "all", label: "Todos", description: undefined as string | undefined },
+      { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet..." },
+      { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL..." },
+      { id: "geographic", label: "Geográfico", description: "geojson, shp, kml..." },
+      { id: "documents", label: "Documentos", description: "pdf, doc, docx, md, txt, ..." },
+      { id: "other", label: "Outro", description: undefined as string | undefined },
     ],
   },
   rotulo: {
     title: "Tipo de dados",
     options: [
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "high_value", label: "Conjuntos de dados de Elevado Valor", count: "591" },
+      { id: "all", label: "Todos", description: undefined as string | undefined },
+      { id: "high_value", label: "Conjuntos de dados de Elevado Valor", description: undefined as string | undefined },
     ],
   },
 };
+
+function formatCount(n: number): string {
+  if (n >= 1000) {
+    const k = n / 1000;
+    return k % 1 === 0 ? `${k} mil` : `${k.toFixed(1).replace(".", ",")} mil`;
+  }
+  return n.toLocaleString("pt-PT");
+}
 
 type ToggleFilterKey = keyof typeof DATASET_TOGGLE_FILTERS;
 
@@ -112,6 +121,7 @@ export const DatasetsFilters = () => {
   const [zoneOptions, setZoneOptions] = React.useState<FilterOption[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchQueries, setSearchQueries] = React.useState<Record<string, string>>({});
+  const [filterCounts, setFilterCounts] = React.useState<Record<string, number>>({});
 
   React.useEffect(() => {
     async function loadFilterData() {
@@ -133,7 +143,31 @@ export const DatasetsFilters = () => {
         setIsLoading(false);
       }
     }
+    async function loadFilterCounts() {
+      try {
+        const [totalRes, tabularRes, structuredRes, geoRes, docsRes, hvdRes] =
+          await Promise.all([
+            fetchDatasets(1, 1),
+            fetchDatasets(1, 1, { format: FORMAT_GROUP_MAP.tabular }),
+            fetchDatasets(1, 1, { format: FORMAT_GROUP_MAP.structured }),
+            fetchDatasets(1, 1, { format: FORMAT_GROUP_MAP.geographic }),
+            fetchDatasets(1, 1, { format: FORMAT_GROUP_MAP.documents }),
+            fetchDatasets(1, 1, { tag: "hvd" }),
+          ]);
+        setFilterCounts({
+          all: totalRes.total,
+          tabular: tabularRes.total,
+          structured: structuredRes.total,
+          geographic: geoRes.total,
+          documents: docsRes.total,
+          high_value: hvdRes.total,
+        });
+      } catch (error) {
+        console.error("Failed to load filter counts", error);
+      }
+    }
     loadFilterData();
+    loadFilterCounts();
   }, []);
 
   const handleTagSearch = React.useCallback(async (query: string) => {
@@ -305,14 +339,16 @@ export const DatasetsFilters = () => {
                           {option.description}
                         </span>
                       )}
-                      <Pill
-                        variant="neutral"
-                        appearance="outline"
-                        circular={false}
-                        className="text-xs font-medium text-neutral-500 ml-16"
-                      >
-                        {option.count}
-                      </Pill>
+                      {filterCounts[option.id] !== undefined && (
+                        <Pill
+                          variant="neutral"
+                          appearance="outline"
+                          circular={false}
+                          className="text-xs font-medium text-neutral-500 ml-16"
+                        >
+                          {formatCount(filterCounts[option.id])}
+                        </Pill>
+                      )}
                     </div>
                   </Toggle>
                 );
