@@ -42,18 +42,65 @@ const DATASET_TOGGLE_FILTERS = {
 
 type ToggleFilterKey = keyof typeof DATASET_TOGGLE_FILTERS;
 
+const FORMAT_GROUP_MAP: Record<string, string[]> = {
+  tabular: ["csv", "xls", "xlsx", "ods", "parquet", "tsv"],
+  structured: ["json", "rdf", "xml", "sql", "ndjson", "jsonl"],
+  geographic: ["geojson", "shp", "kml", "kmz", "gpx", "wfs", "wms"],
+  documents: ["pdf", "doc", "docx", "md", "txt", "odt", "rtf"],
+};
+
+function detectFormatoFromParams(params: URLSearchParams): string {
+  const formats = params.getAll("format");
+  if (formats.length === 0) return "all";
+  for (const [groupId, groupFormats] of Object.entries(FORMAT_GROUP_MAP)) {
+    if (formats.length > 0 && formats.every((f) => groupFormats.includes(f.toLowerCase()))) {
+      return groupId;
+    }
+  }
+  return "other";
+}
+
+function detectRotuloFromParams(params: URLSearchParams): string {
+  const tags = params.getAll("tag");
+  if (tags.includes("hvd")) return "high_value";
+  return "all";
+}
+
 export const DatasetsFilters = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>({
-    formato: "all",
-    rotulo: "all",
-  });
+  const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>(() => ({
+    formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
+    rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
+  }));
 
   const handleToggleFilterChange = (filterKey: ToggleFilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
+
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+
+    if (filterKey === "formato") {
+      current.delete("format");
+      if (optionId !== "all" && optionId !== "other") {
+        const formats = FORMAT_GROUP_MAP[optionId];
+        if (formats) {
+          formats.forEach((f) => current.append("format", f));
+        }
+      }
+    } else if (filterKey === "rotulo") {
+      const tags = current.getAll("tag").filter((t) => t !== "hvd");
+      current.delete("tag");
+      tags.forEach((t) => current.append("tag", t));
+      if (optionId === "high_value") {
+        current.append("tag", "hvd");
+      }
+    }
+
+    current.set("page", "1");
+    const search = current.toString();
+    router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
   };
 
   const [organizations, setOrganizations] = React.useState<Organization[]>([]);
