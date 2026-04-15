@@ -257,7 +257,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   const handleSearchChange = (groupName: string, value: string) => {
     setSearchQueries((prev) => ({ ...prev, [groupName]: value }));
 
-    if (groupName === "Etiquetas") handleTagSearch(value);
+    if (groupName === "Palavras-chave") handleTagSearch(value);
     if (groupName === "Formatos") handleFormatSearch(value);
     if (groupName === "Cobertura Espacial") handleZoneSearch(value);
   };
