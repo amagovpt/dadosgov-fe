@@ -98,7 +98,7 @@ export default function OrganizationsNewClient() {
 
   const auxiliarItems = [
     {
-      title: "Dar um nome à sua organização.",
+      title: "Dar um nome à sua organização",
       content: "Nome público da sua organização.",
       hasError: !!formErrors.orgName,
     },
