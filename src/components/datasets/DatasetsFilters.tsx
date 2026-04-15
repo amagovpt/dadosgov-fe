@@ -31,6 +31,15 @@ const DATASET_TOGGLE_FILTERS = {
       { id: "other", label: "Outro", description: undefined as string | undefined },
     ],
   },
+  atualizacao: {
+    title: "Data da atualização",
+    options: [
+      { id: "all", label: "Todos", description: undefined as string | undefined },
+      { id: "30_days", label: "Os últimos 30 dias", description: undefined as string | undefined },
+      { id: "12_months", label: "Os últimos 12 meses", description: undefined as string | undefined },
+      { id: "3_years", label: "Os últimos 3 anos", description: undefined as string | undefined },
+    ],
+  },
   rotulo: {
     title: "Tipo de dados",
     options: [
@@ -85,6 +94,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
 
   const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>(() => ({
     formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
+    atualizacao: "all",
     rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
   }));
 
@@ -430,6 +440,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
           onClick={() => {
             setSelectedToggleFilters({
               formato: "all",
+              atualizacao: "all",
               rotulo: "all",
             });
             router.replace("/pages/datasets", { scroll: false });
