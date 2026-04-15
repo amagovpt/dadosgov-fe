@@ -165,7 +165,6 @@ export default function UserProfileClient() {
       setIsDeleting(false);
     }
   };
-
   const handleToggleActive = async () => {
     try {
       const updated = await updateUser(userId, { active: !user?.active });
