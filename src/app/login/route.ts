@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     if (redirectLocation.includes("/login")) {
       responseHeaders.set("Content-Type", "application/json");
       return NextResponse.json(
-        { message: "Autenticação falhada - identidade ou senha/código inválido" },
+        { message: "Autenticação falhada - E-mail ou senha/código inválido" },
         { status: 401, headers: responseHeaders }
       );
     }
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
   const errorMatch = responseBody.match(/class="help-block">([^<]+)</);
   const errorMessage = errorMatch
     ? errorMatch[1].trim()
-    : "Autenticação falhada - identidade ou senha/código inválido";
+    : "Autenticação falhada - E-mail ou senha/código inválido";
 
   responseHeaders.set("Content-Type", "application/json");
   return NextResponse.json(
