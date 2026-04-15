@@ -25,6 +25,7 @@ import {
   DropdownSection,
   DropdownOption,
   Switch,
+  usePopupContext,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -37,6 +38,7 @@ import {
   scheduleHarvester,
   unscheduleHarvester,
   previewHarvestSource,
+  deleteHarvester,
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/types/api";
@@ -71,11 +73,40 @@ const JOB_STATUS_LABELS: Record<string, string> = {
   failed: "Falhado",
 };
 
+function DeleteHarvesterPopupContent({
+  onClose,
+  onConfirm,
+}: {
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-[16px]">
+      <p>Esta ação é irreversível. Tem a certeza que quer eliminar este harvester?</p>
+      <div className="flex justify-end gap-16 pt-16">
+        <Button appearance="outline" variant="neutral" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button
+          variant="danger"
+          onClick={onConfirm}
+          hasIcon
+          leadingIcon="agora-line-trash"
+          leadingIconHover="agora-solid-trash"
+        >
+          Eliminar
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function HarvesterDetailClient({ slug }: HarvesterDetailClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isConfigTab = searchParams.get("tab") === "config";
   const { user } = useAuth();
+  const { show, hide } = usePopupContext();
   const [source, setSource] = useState<HarvestSource | null>(null);
   const [jobs, setJobs] = useState<HarvestJob[]>([]);
   const [jobsTotal, setJobsTotal] = useState(0);
@@ -273,6 +304,18 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
       );
     } finally {
       setIsPreviewing(false);
+    }
+  };
+
+  const handleDeleteHarvester = async () => {
+    if (!source) return;
+    try {
+      await deleteHarvester(source.id);
+      hide();
+      router.push("/pages/admin/system/harvesters");
+    } catch (error) {
+      console.error("Error deleting harvester:", error);
+      hide();
     }
   };
 
@@ -895,6 +938,21 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                           hasIcon
                           trailingIcon="agora-line-arrow-right-circle"
                           trailingIconHover="agora-solid-arrow-right-circle"
+                          onClick={(e: React.MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            show(
+                              <DeleteHarvesterPopupContent
+                                onClose={hide}
+                                onConfirm={handleDeleteHarvester}
+                              />,
+                              {
+                                title: "Eliminar o harvester",
+                                closeAriaLabel: "Fechar",
+                                dimensions: "m",
+                              },
+                            );
+                          }}
                         >
                           Eliminar o harvester
                         </Button>
