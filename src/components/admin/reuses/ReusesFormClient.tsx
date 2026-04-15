@@ -641,7 +641,7 @@ export default function ReusesFormClient({
                               <span>{selectedDataset.metrics?.resources_downloads || 0}</span>
                             </div>
                             <div className="flex items-center gap-8" title="Reutilizações">
-                              <img src="/Icons/bar_chart.svg" alt="" aria-hidden="true" />
+                              <img src="/Icons/bar_chart_primary.svg" alt="" aria-hidden="true" />
                               <span>{selectedDataset.metrics?.reuses || 0}</span>
                             </div>
                             <div className="flex items-center gap-8" title="Favoritos">
@@ -940,7 +940,7 @@ export default function ReusesFormClient({
                       hasIcon: false,
                       children: (
                         <span className="flex items-center gap-8">
-                          <img src="/Icons/bar_chart.svg" alt="" aria-hidden="true" />
+                          <img src="/Icons/bar_chart_primary.svg" alt="" aria-hidden="true" />
                           <span>0</span>
                         </span>
                       ),

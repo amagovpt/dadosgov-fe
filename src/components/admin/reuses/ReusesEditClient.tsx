@@ -847,7 +847,7 @@ export default function ReusesEditClient() {
                                 </span>
                               </div>
                               <div className="flex items-center gap-8" title="Reutilizações">
-                                <img src="/Icons/bar_chart.svg" className="" alt="" aria-hidden="true" />
+                                <img src="/Icons/bar_chart_primary.svg" className="" alt="" aria-hidden="true" />
                                 <span>{dataset.metrics?.reuses || 0}</span>
                               </div>
                               <div className="flex items-center gap-8" title="Favoritos">
@@ -906,7 +906,7 @@ export default function ReusesEditClient() {
                                 <span>{selectedDataset.metrics?.resources_downloads || 0}</span>
                               </div>
                               <div className="flex items-center gap-8" title="Reutilizações">
-                                <img src="/Icons/bar_chart.svg" className="" alt="" aria-hidden="true" />
+                                <img src="/Icons/bar_chart_primary.svg" className="" alt="" aria-hidden="true" />
                                 <span>{selectedDataset.metrics?.reuses || 0}</span>
                               </div>
                               <div className="flex items-center gap-8" title="Favoritos">

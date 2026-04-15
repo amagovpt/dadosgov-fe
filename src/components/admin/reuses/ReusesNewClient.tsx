@@ -18,7 +18,7 @@ export default function ReusesNewClient() {
 
   const stepTitles: Record<number, string> = {
     1: "Descreva a sua reutilização",
-    2: "Associe os conjuntos de dados e APIs",
+    2: "Associe os conjuntos de dados",
     3: "Finalize a publicação da sua reutilização",
   };
 
