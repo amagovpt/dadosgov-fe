@@ -822,7 +822,7 @@ export default function DatasetsAdminClient({
               restrinjam o uso dos dados (por exemplo, o uso de software pago);
             </li>
             <li>
-              <strong>facilmente reutilizável:</strong> um formato facilmente reutilizável implica
+              <strong>Facilmente reutilizável:</strong> um formato facilmente reutilizável implica
               que qualquer pessoa ou servidor pode reutilizar facilmente o conjunto de dados;
             </li>
             <li>
