@@ -328,14 +328,14 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
                           {option.description}
                         </span>
                       )}
-                      {filterCounts[option.id] !== undefined && (
+                      {filterCounts[`${filterKey}_${option.id}`] !== undefined && (
                         <Pill
                           variant="neutral"
                           appearance="outline"
                           circular={false}
                           className="text-xs font-medium text-neutral-500 ml-16"
                         >
-                          {formatCount(filterCounts[option.id])}
+                          {formatCount(filterCounts[`${filterKey}_${option.id}`])}
                         </Pill>
                       )}
                     </div>

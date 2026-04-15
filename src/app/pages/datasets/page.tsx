@@ -41,13 +41,14 @@ export default async function Page({
       fetchDatasets(1, 1, { tag: "hvd" }),
     ]);
 
-  const filterCounts = {
-    all: totalRes.total,
-    tabular: tabularRes.total,
-    structured: structuredRes.total,
-    geographic: geoRes.total,
-    documents: docsRes.total,
-    high_value: hvdRes.total,
+  const filterCounts: Record<string, number> = {
+    formato_all: totalRes.total,
+    formato_tabular: tabularRes.total,
+    formato_structured: structuredRes.total,
+    formato_geographic: geoRes.total,
+    formato_documents: docsRes.total,
+    rotulo_all: totalRes.total,
+    rotulo_high_value: hvdRes.total,
   };
 
   return (
