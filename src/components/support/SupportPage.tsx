@@ -9,6 +9,7 @@ import {
   InputText,
   InputTextArea,
   Button,
+  StatusCard,
 } from "@ama-pt/agora-design-system";
 import PageBanner from "@/components/PageBanner";
 
@@ -108,10 +109,38 @@ const SupportPage = () => {
   const [expandedId, setExpandedId] = React.useState<string | null>("0-1");
   const [selectedToggle, setSelectedToggle] = React.useState<string | null>(null);
   const [subjectBody, setSubjectBody] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [errors, setErrors] = React.useState({ email: "", subject: "", description: "" });
+  const [successMessage, setSuccessMessage] = React.useState("");
+
+  const TOGGLE_SUCCESS_MAP: Record<string, string> = {
+    question: "Pergunta enviada com sucesso.",
+    bug: "Problema reportado com sucesso.",
+    feedback: "Feedback enviado com sucesso.",
+  };
+
+  const handleSubmit = () => {
+    const newErrors = {
+      email: email.trim() ? "" : "Campo obrigatório",
+      subject: subjectBody.trim() ? "" : "Campo obrigatório",
+      description: description.trim() ? "" : "Campo obrigatório",
+    };
+    setErrors(newErrors);
+    const hasErrors = Object.values(newErrors).some(Boolean);
+    if (!hasErrors) {
+      setSuccessMessage(TOGGLE_SUCCESS_MAP[selectedToggle!]);
+      setSelectedToggle(null);
+      setEmail("");
+      setSubjectBody("");
+      setDescription("");
+      setErrors({ email: "", subject: "", description: "" });
+    }
+  };
 
   const TOGGLE_PREFIX_MAP: Record<string, string> = {
     question: "Pergunta",
-    bug: "Bug",
+    bug: "Problema",
     feedback: "Feedback",
   };
 
@@ -944,6 +973,10 @@ const SupportPage = () => {
               const selected = val.length > 0 ? val[0] : null;
               setSelectedToggle(selected);
               setSubjectBody("");
+              setEmail("");
+              setDescription("");
+              setErrors({ email: "", subject: "", description: "" });
+              setSuccessMessage("");
             }}
           >
             <Toggle
@@ -980,42 +1013,74 @@ const SupportPage = () => {
 
               <div>
                 <div className="mt-[20px]">
-                  <InputText label="O seu e-mail *" type="email" required />
+                  <InputText
+                    label="O seu e-mail *"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setEmail(e.target.value);
+                      if (e.target.value.trim()) setErrors((prev) => ({ ...prev, email: "" }));
+                    }}
+                    hasError={!!errors.email}
+                    errorFeedbackText={errors.email}
+                  />
                 </div>
 
                 <div className="mt-[20px]">
-                  <div className="agora-input-text-wrapper">
-                    <label className="input-text-label">
-                      {TOGGLE_SUBJECT_LABEL_MAP[selectedToggle]}
-                    </label>
-                    <div
-                      className="flex items-center w-full rounded-[4px] border-[2px] border-neutral-700 bg-white px-[16px]"
-                      style={{ height: "60px" }}
-                    >
-                      {/*<span className="text-neutral-900 whitespace-nowrap text-base">
-                        {TOGGLE_PREFIX_MAP[selectedToggle]} -&nbsp;
-                      </span>*/}
-                      <input
-                        type="text"
-                        className="flex-1 bg-transparent outline-none text-neutral-900 text-base placeholder:text-neutral-700"
-                        placeholder=""
-                        value={subjectBody}
-                        onChange={(e) => setSubjectBody(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
+                  <InputText
+                    label={TOGGLE_SUBJECT_LABEL_MAP[selectedToggle]}
+                    value={`${TOGGLE_PREFIX_MAP[selectedToggle]} - ${subjectBody}`}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const prefix = `${TOGGLE_PREFIX_MAP[selectedToggle]} - `;
+                      if (e.target.value.startsWith(prefix)) {
+                        const body = e.target.value.slice(prefix.length);
+                        setSubjectBody(body);
+                        if (body.trim()) setErrors((prev) => ({ ...prev, subject: "" }));
+                      }
+                    }}
+                    onSelect={(e: React.SyntheticEvent<HTMLInputElement>) => {
+                      const prefix = `${TOGGLE_PREFIX_MAP[selectedToggle]} - `;
+                      const input = e.currentTarget;
+                      if (input.selectionStart !== null && input.selectionStart < prefix.length) {
+                        input.setSelectionRange(
+                          prefix.length,
+                          Math.max(prefix.length, input.selectionEnd ?? prefix.length)
+                        );
+                      }
+                    }}
+                    hasError={!!errors.subject}
+                    errorFeedbackText={errors.subject}
+                    required
+                  />
                 </div>
 
                 <div className="mt-[20px]">
-                  <InputTextArea label={TOGGLE_CONTENT_LABEL_MAP[selectedToggle]}
-                    required rows={5} />
+                  <InputTextArea
+                    label={TOGGLE_CONTENT_LABEL_MAP[selectedToggle]}
+                    required
+                    rows={5}
+                    value={description}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                      setDescription(e.target.value);
+                      if (e.target.value.trim())
+                        setErrors((prev) => ({ ...prev, description: "" }));
+                    }}
+                    hasError={!!errors.description}
+                    errorFeedbackText={errors.description}
+                  />
                 </div>
 
                 <div className="mt-[20px]">
-                  <Button>Enviar</Button>
+                  <Button onClick={handleSubmit}>Enviar</Button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="mt-[32px] max-w-2xl">
+              <StatusCard type="success" description={successMessage} />
             </div>
           )}
         </div>
