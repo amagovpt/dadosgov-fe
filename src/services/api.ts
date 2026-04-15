@@ -132,7 +132,7 @@ export async function login(formData: FormData): Promise<{ message: string; redi
  * Perform logout
  */
 export async function logout(): Promise<void> {
-  const res = await fetch("/logout/", { method: "GET" });
+  const res = await fetch("/logout", { method: "GET" });
   if (!res.ok) throw new Error("Logout failed");
 }
 
