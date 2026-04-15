@@ -80,8 +80,6 @@ export const OrganizationsFilters = ({
 
   return (
     <div className="h-full organizations-filters">
-      <CategoryToggles siteMetrics={siteMetrics} searchQuery={initialFilters.q} />
-
       <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
         <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
         {(Object.keys(ORG_TOGGLE_FILTERS) as OrgFilterKey[]).map((filterKey) => {
