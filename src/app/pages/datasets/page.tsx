@@ -22,6 +22,7 @@ export default async function Page({
   if (resolved?.badge) filters.badge = resolved.badge;
   if (resolved?.sort) filters.sort = String(resolved.sort);
   if (resolved?.featured) filters.featured = resolved.featured === 'true';
+  if (resolved?.modified_since) filters.modified_since = String(resolved.modified_since);
 
   // Relevance sort: when no search query, fall back to default (most recent first)
   const apiFilters = { ...filters };

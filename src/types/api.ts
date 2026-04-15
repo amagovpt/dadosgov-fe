@@ -337,6 +337,7 @@ export interface ReuseFilters {
   owner?: string;
   dataset?: string;
   sort?: string;
+  modified_since?: string;
 }
 
 export interface ReuseTopic {

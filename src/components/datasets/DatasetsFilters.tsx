@@ -66,6 +66,33 @@ const FORMAT_GROUP_MAP: Record<string, string[]> = {
   documents: ["pdf", "doc", "docx", "md", "txt", "odt", "rtf"],
 };
 
+const DATE_RANGE_MAP: Record<string, () => string> = {
+  "30_days": () => {
+    const d = new Date(); d.setDate(d.getDate() - 30);
+    return d.toISOString().slice(0, 10);
+  },
+  "12_months": () => {
+    const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+    return d.toISOString().slice(0, 10);
+  },
+  "3_years": () => {
+    const d = new Date(); d.setFullYear(d.getFullYear() - 3);
+    return d.toISOString().slice(0, 10);
+  },
+};
+
+function detectAtualizacaoFromParams(params: URLSearchParams): string {
+  const since = params.get("modified_since");
+  if (!since) return "all";
+  const now = new Date();
+  const sinceDate = new Date(since);
+  const diffDays = Math.round((now.getTime() - sinceDate.getTime()) / (86400000));
+  if (diffDays <= 31) return "30_days";
+  if (diffDays <= 366) return "12_months";
+  if (diffDays <= 1096) return "3_years";
+  return "all";
+}
+
 function detectFormatoFromParams(params: URLSearchParams): string {
   const formats = params.getAll("format");
   if (formats.length === 0) return "all";
@@ -94,7 +121,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
 
   const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>(() => ({
     formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
-    atualizacao: "all",
+    atualizacao: detectAtualizacaoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
     rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
   }));
 
@@ -110,6 +137,11 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
         if (formats) {
           formats.forEach((f) => current.append("format", f));
         }
+      }
+    } else if (filterKey === "atualizacao") {
+      current.delete("modified_since");
+      if (optionId !== "all" && DATE_RANGE_MAP[optionId]) {
+        current.set("modified_since", DATE_RANGE_MAP[optionId]());
       }
     } else if (filterKey === "rotulo") {
       const tags = current.getAll("tag").filter((t) => t !== "hvd");

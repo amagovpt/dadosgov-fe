@@ -116,13 +116,46 @@ const REUSE_TOGGLE_FILTERS = {
   atualizacao: {
     title: "Data da atualização",
     options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "30_days", label: "Os últimos 30 dias", count: "96" },
-      { id: "12_months", label: "Os últimos 12 meses", count: "279" },
-      { id: "3_years", label: "Os últimos 3 anos", count: "352" },
+      { id: "all", label: "Todos" },
+      { id: "30_days", label: "Os últimos 30 dias" },
+      { id: "12_months", label: "Os últimos 12 meses" },
+      { id: "3_years", label: "Os últimos 3 anos" },
     ],
   },
 };
+
+const DATE_RANGE_MAP: Record<string, () => string> = {
+  "30_days": () => {
+    const d = new Date(); d.setDate(d.getDate() - 30);
+    return d.toISOString().slice(0, 10);
+  },
+  "12_months": () => {
+    const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+    return d.toISOString().slice(0, 10);
+  },
+  "3_years": () => {
+    const d = new Date(); d.setFullYear(d.getFullYear() - 3);
+    return d.toISOString().slice(0, 10);
+  },
+};
+
+function detectAtualizacaoFromParams(filters?: ReuseFilters): string {
+  const since = filters?.modified_since;
+  if (!since) return "all";
+  const diffDays = Math.round((Date.now() - new Date(since).getTime()) / 86400000);
+  if (diffDays <= 31) return "30_days";
+  if (diffDays <= 366) return "12_months";
+  if (diffDays <= 1096) return "3_years";
+  return "all";
+}
+
+function formatCount(n: number): string {
+  if (n >= 1000) {
+    const k = n / 1000;
+    return k % 1 === 0 ? `${k} mil` : `${k.toFixed(1).replace(".", ",")} mil`;
+  }
+  return n.toLocaleString("pt-PT");
+}
 
 type ReuseFilterKey = keyof typeof REUSE_TOGGLE_FILTERS;
 
@@ -132,6 +165,7 @@ interface ReusesClientProps {
   initialFilters?: ReuseFilters;
   reuseTypes?: ReuseType[];
   siteMetrics?: SiteMetrics;
+  filterCounts?: Record<string, number>;
 }
 
 export default function ReusesClient({
@@ -140,6 +174,7 @@ export default function ReusesClient({
   initialFilters,
   reuseTypes = [],
   siteMetrics,
+  filterCounts = {},
 }: ReusesClientProps) {
   const router = useRouter();
   const { data: reuses, total, page_size } = initialData;
@@ -152,11 +187,23 @@ export default function ReusesClient({
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<
     Record<ReuseFilterKey, string>
   >({
-    atualizacao: "all",
+    atualizacao: detectAtualizacaoFromParams(initialFilters),
   });
 
   const handleToggleFilterChange = (filterKey: ReuseFilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
+
+    if (filterKey === "atualizacao") {
+      const params = new URLSearchParams(
+        typeof window !== "undefined" ? window.location.search : ""
+      );
+      params.delete("modified_since");
+      if (optionId !== "all" && DATE_RANGE_MAP[optionId]) {
+        params.set("modified_since", DATE_RANGE_MAP[optionId]());
+      }
+      params.set("page", "1");
+      router.push(`/pages/reuses?${params.toString()}`);
+    }
   };
 
   // Advanced filters state
@@ -450,14 +497,16 @@ export default function ReusesClient({
                                 >
                                   {option.label}
                                 </span>
-                                <Pill
-                                  variant="neutral"
-                                  appearance="outline"
-                                  circular={false}
-                                  className="text-xs font-medium text-neutral-500 ml-16"
-                                >
-                                  {option.count}
-                                </Pill>
+                                {filterCounts[`${filterKey}_${option.id}`] !== undefined && (
+                                  <Pill
+                                    variant="neutral"
+                                    appearance="outline"
+                                    circular={false}
+                                    className="text-xs font-medium text-neutral-500 ml-16"
+                                  >
+                                    {formatCount(filterCounts[`${filterKey}_${option.id}`])}
+                                  </Pill>
+                                )}
                               </div>
                             </Toggle>
                           );
