@@ -6,20 +6,13 @@ import { Sidebar, SidebarItem, InputSearch, Icon, Pill, Toggle, Button } from "@
 import { OrgBadges, OrganizationFilters, SiteMetrics } from "@/types/api";
 import { CategoryToggles } from "@/components/CategoryToggles";
 
-const ORG_TOGGLE_FILTERS = {
-  organizacao: {
-    title: "Tipo de organização",
-    options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "public_service", label: "Serviço público", count: "259" },
-      { id: "local_authority", label: "Autoridade local", count: "54" },
-      { id: "business", label: "Negócios", count: "8" },
-      { id: "association", label: "Associação", count: "6" },
-    ],
-  },
-};
-
-type OrgFilterKey = keyof typeof ORG_TOGGLE_FILTERS;
+const ORG_TYPE_OPTIONS = [
+  { id: "all", label: "Todos", badge: "" },
+  { id: "public-service", label: "Serviço público", badge: "public-service" },
+  { id: "local-authority", label: "Autoridade local", badge: "local-authority" },
+  { id: "company", label: "Negócios", badge: "company" },
+  { id: "association", label: "Associação", badge: "association" },
+];
 
 interface OrganizationsFiltersProps {
   siteMetrics: SiteMetrics;
@@ -44,15 +37,23 @@ export const OrganizationsFilters = ({
 }: OrganizationsFiltersProps) => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<OrgFilterKey, string>>({
-    organizacao: "all",
-  });
-
-  const handleToggleFilterChange = (filterKey: OrgFilterKey, optionId: string) => {
-    setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
-  };
 
   const activeBadge = initialFilters.badge || "";
+  const selectedOrgType = activeBadge || "all";
+
+  const totalOrgs = Object.values(orgBadgeCounts).reduce((sum, c) => sum + c, 0);
+
+  const handleOrgTypeChange = (optionId: string) => {
+    const newParams = new URLSearchParams();
+    if (initialFilters.q) newParams.set("q", initialFilters.q);
+    if (initialFilters.sort) newParams.set("sort", initialFilters.sort);
+    if (optionId !== "all") {
+      newParams.set("badge", optionId);
+    }
+    newParams.set("page", "1");
+    const qs = newParams.toString();
+    router.replace(`/pages/organizations${qs ? `?${qs}` : ""}`, { scroll: false });
+  };
 
   const entries = Object.keys(orgBadges).map((kind) => ({
     kind,
@@ -84,54 +85,52 @@ export const OrganizationsFilters = ({
 
       <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
         <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
-        {(Object.keys(ORG_TOGGLE_FILTERS) as OrgFilterKey[]).map((filterKey) => {
-          const section = ORG_TOGGLE_FILTERS[filterKey];
-          return (
-            <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
-              <h3 className="font-bold text-base text-neutral-900 mb-8">
-                {section.title}
-              </h3>
-              {section.options.map((option) => {
-                const isSelected = selectedToggleFilters[filterKey] === option.id;
-                return (
-                  <Toggle
-                    key={option.id}
-                    id={`org-filter-${filterKey}-${option.id}`}
-                    name={`org-filter-${filterKey}`}
-                    value={option.id}
-                    appearance="icon"
-                    variant="primary"
-                    checked={isSelected}
-                    onChange={() => handleToggleFilterChange(filterKey, option.id)}
-                    iconOnly={false}
-                    fullWidth={true}
-                    className="w-full"
+        <div className="pr-32 max-w-[592px] flex flex-col gap-8">
+          <h3 className="font-bold text-base text-neutral-900 mb-8">
+            Tipo de organização
+          </h3>
+          {ORG_TYPE_OPTIONS.map((option) => {
+            const isSelected = selectedOrgType === option.id;
+            const count = option.id === "all"
+              ? totalOrgs
+              : (orgBadgeCounts[option.badge] ?? 0);
+            return (
+              <Toggle
+                key={option.id}
+                id={`org-filter-type-${option.id}`}
+                name="org-filter-type"
+                value={option.id}
+                appearance="icon"
+                variant="primary"
+                checked={isSelected}
+                onChange={() => handleOrgTypeChange(option.id)}
+                iconOnly={false}
+                fullWidth={true}
+                className="w-full"
+              >
+                <div className="flex items-center gap-12 font-bold text-sm">
+                  <span
+                    className={
+                      isSelected
+                        ? "text-primary-600 font-bold"
+                        : "text-neutral-900 font-bold"
+                    }
                   >
-                    <div className="flex items-center gap-12 font-bold text-sm">
-                      <span
-                        className={
-                          isSelected
-                            ? "text-primary-600 font-bold"
-                            : "text-neutral-900 font-bold"
-                        }
-                      >
-                        {option.label}
-                      </span>
-                      <Pill
-                        variant="neutral"
-                        appearance="outline"
-                        circular={false}
-                        className="text-xs font-medium text-neutral-500 ml-16"
-                      >
-                        {option.count}
-                      </Pill>
-                    </div>
-                  </Toggle>
-                );
-              })}
-            </div>
-          );
-        })}
+                    {option.label}
+                  </span>
+                  <Pill
+                    variant="neutral"
+                    appearance="outline"
+                    circular={false}
+                    className="text-xs font-medium text-neutral-500 ml-16"
+                  >
+                    {count.toLocaleString("pt-PT")}
+                  </Pill>
+                </div>
+              </Toggle>
+            );
+          })}
+        </div>
       </div>
 
       <h2 className="font-bold text-xl text-neutral-900 mt-64 mb-32">Filtros avançados</h2>
@@ -202,7 +201,6 @@ export const OrganizationsFilters = ({
           variant="primary"
           appearance="outline"
           onClick={() => {
-            setSelectedToggleFilters({ organizacao: "all" });
             router.replace("/pages/organizations", { scroll: false });
           }}
         >
