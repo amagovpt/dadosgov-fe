@@ -15,6 +15,8 @@ import {
   updateHomeFeaturedDatasets,
   fetchHomeFeaturedReuses,
   updateHomeFeaturedReuses,
+  searchDatasets,
+  searchReuses,
 } from "@/services/api";
 import type { Dataset, Reuse } from "@/types/api";
 
@@ -430,10 +432,69 @@ function AccordionEditor({
 function FeaturedDatasetsEditor({
   data,
   onChange,
+  nameMap,
+  onNameMapUpdate,
 }: {
   data: FeaturedDatasetsData;
   onChange: (d: FeaturedDatasetsData) => void;
+  nameMap?: Record<string, string>;
+  onNameMapUpdate?: (id: string, title: string) => void;
 }) {
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Dataset[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showSearch) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target as Node)
+      ) {
+        setShowSearch(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showSearch]);
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await searchDatasets(searchQuery, 1, 8);
+        setSearchResults(
+          response.data.filter((d) => !data.datasetIds.includes(d.id))
+        );
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [searchQuery, data.datasetIds]);
+
+  const handleSelectDataset = (dataset: Dataset) => {
+    onChange({ ...data, datasetIds: [...data.datasetIds, dataset.id] });
+    onNameMapUpdate?.(dataset.id, dataset.title);
+    setShowSearch(false);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
   return (
     <div className="bg-white rounded-[8px] py-[24px]">
       <input
@@ -457,7 +518,9 @@ function FeaturedDatasetsEditor({
             key={id}
             className="flex items-center gap-[8px] px-[12px] py-[8px] border border-neutral-200 rounded-[8px] bg-neutral-50 text-sm"
           >
-            <span className="text-neutral-600 truncate max-w-[200px]">{id}</span>
+            <span className="text-neutral-600 truncate max-w-[200px]">
+              {nameMap?.[id] || id}
+            </span>
             <button
               type="button"
               onClick={() =>
@@ -473,14 +536,71 @@ function FeaturedDatasetsEditor({
           </div>
         ))}
 
-        {data.datasetIds.length < 4 && (
+        {data.datasetIds.length < 4 && !showSearch && (
           <button
             type="button"
+            onClick={() => setShowSearch(true)}
             className="flex flex-col items-center justify-center w-[200px] h-[100px] border-2 border-dashed border-neutral-300 rounded-[8px] text-neutral-400 hover:border-neutral-400 hover:text-neutral-500 transition-colors"
           >
             <Icon name="agora-line-plus-circle" className="w-[20px] h-[20px] mb-[4px]" />
             <span className="text-xs">Adicionar um conjunto de dados</span>
           </button>
+        )}
+
+        {showSearch && (
+          <div ref={searchContainerRef} className="w-full mt-[8px] relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Pesquisar conjunto de dados..."
+              className="w-full px-[12px] py-[10px] border border-neutral-300 rounded-[8px] text-sm outline-none focus:border-primary-500"
+              autoFocus
+            />
+            {isSearching && (
+              <p className="text-xs text-neutral-400 mt-[4px]">A pesquisar...</p>
+            )}
+            {searchResults.length > 0 && (
+              <ul className="absolute z-10 w-full mt-[4px] bg-white border border-neutral-200 rounded-[8px] shadow-lg max-h-[240px] overflow-y-auto">
+                {searchResults.map((d) => (
+                  <li key={d.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectDataset(d)}
+                      className="w-full text-left px-[12px] py-[8px] text-sm hover:bg-neutral-50 transition-colors"
+                    >
+                      <span className="font-medium text-neutral-800">
+                        {d.title}
+                      </span>
+                      {d.organization?.name && (
+                        <span className="text-neutral-400 ml-[8px]">
+                          — {d.organization.name}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {searchQuery.length >= 2 &&
+              !isSearching &&
+              searchResults.length === 0 && (
+                <p className="text-xs text-neutral-400 mt-[4px]">
+                  Nenhum resultado encontrado
+                </p>
+              )}
+            <button
+              type="button"
+              onClick={() => {
+                setShowSearch(false);
+                setSearchQuery("");
+                setSearchResults([]);
+              }}
+              className="mt-[4px] text-xs text-neutral-400 hover:text-neutral-600"
+            >
+              Cancelar
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -490,10 +610,69 @@ function FeaturedDatasetsEditor({
 function FeaturedReusesEditor({
   data,
   onChange,
+  nameMap,
+  onNameMapUpdate,
 }: {
   data: FeaturedReusesData;
   onChange: (d: FeaturedReusesData) => void;
+  nameMap?: Record<string, string>;
+  onNameMapUpdate?: (id: string, title: string) => void;
 }) {
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Reuse[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showSearch) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target as Node)
+      ) {
+        setShowSearch(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showSearch]);
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await searchReuses(searchQuery, 1, 8);
+        setSearchResults(
+          response.data.filter((r) => !data.reuseIds.includes(r.id))
+        );
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [searchQuery, data.reuseIds]);
+
+  const handleSelectReuse = (reuse: Reuse) => {
+    onChange({ ...data, reuseIds: [...data.reuseIds, reuse.id] });
+    onNameMapUpdate?.(reuse.id, reuse.title);
+    setShowSearch(false);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
   return (
     <div className="bg-white rounded-[8px] py-[24px]">
       <input
@@ -517,7 +696,9 @@ function FeaturedReusesEditor({
             key={id}
             className="flex items-center gap-[8px] px-[12px] py-[8px] border border-neutral-200 rounded-[8px] bg-neutral-50 text-sm"
           >
-            <span className="text-neutral-600 truncate max-w-[200px]">{id}</span>
+            <span className="text-neutral-600 truncate max-w-[200px]">
+              {nameMap?.[id] || id}
+            </span>
             <button
               type="button"
               onClick={() =>
@@ -533,14 +714,66 @@ function FeaturedReusesEditor({
           </div>
         ))}
 
-        {data.reuseIds.length < 4 && (
+        {data.reuseIds.length < 4 && !showSearch && (
           <button
             type="button"
+            onClick={() => setShowSearch(true)}
             className="flex flex-col items-center justify-center w-[200px] h-[100px] border-2 border-dashed border-neutral-300 rounded-[8px] text-neutral-400 hover:border-neutral-400 hover:text-neutral-500 transition-colors"
           >
             <Icon name="agora-line-plus-circle" className="w-[20px] h-[20px] mb-[4px]" />
             <span className="text-xs">Adicione uma reutilização</span>
           </button>
+        )}
+
+        {showSearch && (
+          <div ref={searchContainerRef} className="w-full mt-[8px] relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Pesquisar reutilização..."
+              className="w-full px-[12px] py-[10px] border border-neutral-300 rounded-[8px] text-sm outline-none focus:border-primary-500"
+              autoFocus
+            />
+            {isSearching && (
+              <p className="text-xs text-neutral-400 mt-[4px]">A pesquisar...</p>
+            )}
+            {searchResults.length > 0 && (
+              <ul className="absolute z-10 w-full mt-[4px] bg-white border border-neutral-200 rounded-[8px] shadow-lg max-h-[240px] overflow-y-auto">
+                {searchResults.map((r) => (
+                  <li key={r.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectReuse(r)}
+                      className="w-full text-left px-[12px] py-[8px] text-sm hover:bg-neutral-50 transition-colors"
+                    >
+                      <span className="font-medium text-neutral-800">
+                        {r.title}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {searchQuery.length >= 2 &&
+              !isSearching &&
+              searchResults.length === 0 && (
+                <p className="text-xs text-neutral-400 mt-[4px]">
+                  Nenhum resultado encontrado
+                </p>
+              )}
+            <button
+              type="button"
+              onClick={() => {
+                setShowSearch(false);
+                setSearchQuery("");
+                setSearchResults([]);
+              }}
+              className="mt-[4px] text-xs text-neutral-400 hover:text-neutral-600"
+            >
+              Cancelar
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -818,9 +1051,17 @@ function MarkdownEditor({
 function BlockEditor({
   block,
   onUpdate,
+  datasetNameMap,
+  reuseNameMap,
+  onDatasetNameMapUpdate,
+  onReuseNameMapUpdate,
 }: {
   block: ContentBlock;
   onUpdate: (data: BlockData) => void;
+  datasetNameMap?: Record<string, string>;
+  reuseNameMap?: Record<string, string>;
+  onDatasetNameMapUpdate?: (id: string, title: string) => void;
+  onReuseNameMapUpdate?: (id: string, title: string) => void;
 }) {
   switch (block.type) {
     case "hero":
@@ -832,6 +1073,8 @@ function BlockEditor({
         <FeaturedDatasetsEditor
           data={block.data as FeaturedDatasetsData}
           onChange={onUpdate}
+          nameMap={datasetNameMap}
+          onNameMapUpdate={onDatasetNameMapUpdate}
         />
       );
     case "featured-reuses":
@@ -839,6 +1082,8 @@ function BlockEditor({
         <FeaturedReusesEditor
           data={block.data as FeaturedReusesData}
           onChange={onUpdate}
+          nameMap={reuseNameMap}
+          onNameMapUpdate={onReuseNameMapUpdate}
         />
       );
     case "featured-links":
@@ -862,6 +1107,10 @@ function BlockWrapper({
   onMoveUp,
   onMoveDown,
   onUpdate,
+  datasetNameMap,
+  reuseNameMap,
+  onDatasetNameMapUpdate,
+  onReuseNameMapUpdate,
 }: {
   block: ContentBlock;
   index: number;
@@ -870,6 +1119,10 @@ function BlockWrapper({
   onMoveUp: () => void;
   onMoveDown: () => void;
   onUpdate: (data: BlockData) => void;
+  datasetNameMap?: Record<string, string>;
+  reuseNameMap?: Record<string, string>;
+  onDatasetNameMapUpdate?: (id: string, title: string) => void;
+  onReuseNameMapUpdate?: (id: string, title: string) => void;
 }) {
   return (
     <div className="flex gap-[8px]">
@@ -903,7 +1156,14 @@ function BlockWrapper({
       </div>
 
       <div className="flex-1">
-        <BlockEditor block={block} onUpdate={onUpdate} />
+        <BlockEditor
+          block={block}
+          onUpdate={onUpdate}
+          datasetNameMap={datasetNameMap}
+          reuseNameMap={reuseNameMap}
+          onDatasetNameMapUpdate={onDatasetNameMapUpdate}
+          onReuseNameMapUpdate={onReuseNameMapUpdate}
+        />
       </div>
     </div>
   );
@@ -915,10 +1175,18 @@ function BlockList({
   blocks,
   setBlocks,
   setHasChanges,
+  datasetNameMap,
+  reuseNameMap,
+  onDatasetNameMapUpdate,
+  onReuseNameMapUpdate,
 }: {
   blocks: ContentBlock[];
   setBlocks: React.Dispatch<React.SetStateAction<ContentBlock[]>>;
   setHasChanges: (v: boolean) => void;
+  datasetNameMap?: Record<string, string>;
+  reuseNameMap?: Record<string, string>;
+  onDatasetNameMapUpdate?: (id: string, title: string) => void;
+  onReuseNameMapUpdate?: (id: string, title: string) => void;
 }) {
   const addBlock = (type: BlockType, atIndex?: number) => {
     const newBlock: ContentBlock = {
@@ -982,6 +1250,10 @@ function BlockList({
             onMoveUp={() => moveBlock(index, "up")}
             onMoveDown={() => moveBlock(index, "down")}
             onUpdate={(data) => updateBlock(block.id, data)}
+            datasetNameMap={datasetNameMap}
+            reuseNameMap={reuseNameMap}
+            onDatasetNameMapUpdate={onDatasetNameMapUpdate}
+            onReuseNameMapUpdate={onReuseNameMapUpdate}
           />
 
           {index === blocks.length - 1 && (
@@ -998,8 +1270,6 @@ function BlockList({
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export default function SystemEditorialClient() {
-  const [featuredDatasets, setFeaturedDatasets] = useState<Dataset[]>([]);
-  const [featuredReuses, setFeaturedReuses] = useState<Reuse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [datasetBlocks, setDatasetBlocks] = useState<ContentBlock[]>([]);
   const [reuseBlocks, setReuseBlocks] = useState<ContentBlock[]>([]);
@@ -1009,6 +1279,10 @@ export default function SystemEditorialClient() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [datasetNameMap, setDatasetNameMap] = useState<Record<string, string>>({});
+  const [reuseNameMap, setReuseNameMap] = useState<Record<string, string>>({});
+  const initialDatasetsRef = useRef<Dataset[]>([]);
+  const initialReusesRef = useRef<Reuse[]>([]);
 
   useEffect(() => {
     async function loadFeatured() {
@@ -1018,8 +1292,39 @@ export default function SystemEditorialClient() {
           fetchHomeFeaturedDatasets(),
           fetchHomeFeaturedReuses(),
         ]);
-        setFeaturedDatasets(datasets);
-        setFeaturedReuses(reuses);
+        initialDatasetsRef.current = datasets;
+        initialReusesRef.current = reuses;
+
+        const dsMap: Record<string, string> = {};
+        datasets.forEach((d) => { dsMap[d.id] = d.title; });
+        setDatasetNameMap(dsMap);
+
+        const rMap: Record<string, string> = {};
+        reuses.forEach((r) => { rMap[r.id] = r.title; });
+        setReuseNameMap(rMap);
+
+        if (datasets.length > 0) {
+          setDatasetBlocks([{
+            id: crypto.randomUUID(),
+            type: "featured-datasets",
+            data: {
+              title: "",
+              legend: "",
+              datasetIds: datasets.map((d) => d.id),
+            } as FeaturedDatasetsData,
+          }]);
+        }
+        if (reuses.length > 0) {
+          setReuseBlocks([{
+            id: crypto.randomUUID(),
+            type: "featured-reuses",
+            data: {
+              title: "",
+              legend: "",
+              reuseIds: reuses.map((r) => r.id),
+            } as FeaturedReusesData,
+          }]);
+        }
       } catch (error) {
         console.error("Error loading featured content:", error);
       } finally {
@@ -1040,8 +1345,12 @@ export default function SystemEditorialClient() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setIsSaving(true);
     try {
-      const datasetIds = featuredDatasets.map((d) => d.id);
-      const reuseIds = featuredReuses.map((r) => r.id);
+      const datasetIds = datasetBlocks
+        .filter((b) => b.type === "featured-datasets")
+        .flatMap((b) => (b.data as FeaturedDatasetsData).datasetIds);
+      const reuseIds = reuseBlocks
+        .filter((b) => b.type === "featured-reuses")
+        .flatMap((b) => (b.data as FeaturedReusesData).reuseIds);
       await Promise.all([
         updateHomeFeaturedDatasets(datasetIds),
         updateHomeFeaturedReuses(reuseIds),
@@ -1057,8 +1366,34 @@ export default function SystemEditorialClient() {
   };
 
   const handleCancel = () => {
-    setDatasetBlocks([]);
-    setReuseBlocks([]);
+    const datasets = initialDatasetsRef.current;
+    const reuses = initialReusesRef.current;
+    setDatasetBlocks(
+      datasets.length > 0
+        ? [{
+            id: crypto.randomUUID(),
+            type: "featured-datasets" as const,
+            data: {
+              title: "",
+              legend: "",
+              datasetIds: datasets.map((d) => d.id),
+            } as FeaturedDatasetsData,
+          }]
+        : []
+    );
+    setReuseBlocks(
+      reuses.length > 0
+        ? [{
+            id: crypto.randomUUID(),
+            type: "featured-reuses" as const,
+            data: {
+              title: "",
+              legend: "",
+              reuseIds: reuses.map((r) => r.id),
+            } as FeaturedReusesData,
+          }]
+        : []
+    );
     setHasChanges(false);
   };
 
@@ -1161,6 +1496,10 @@ export default function SystemEditorialClient() {
                 blocks={datasetBlocks}
                 setBlocks={setDatasetBlocks}
                 setHasChanges={setHasChanges}
+                datasetNameMap={datasetNameMap}
+                onDatasetNameMapUpdate={(id, title) =>
+                  setDatasetNameMap((prev) => ({ ...prev, [id]: title }))
+                }
               />
               {datasetBlocks.length > 0 && (
                 <div className="flex justify-end gap-[8px] pt-[16px] mt-[16px]">
@@ -1194,6 +1533,10 @@ export default function SystemEditorialClient() {
                 blocks={reuseBlocks}
                 setBlocks={setReuseBlocks}
                 setHasChanges={setHasChanges}
+                reuseNameMap={reuseNameMap}
+                onReuseNameMapUpdate={(id, title) =>
+                  setReuseNameMap((prev) => ({ ...prev, [id]: title }))
+                }
               />
               {reuseBlocks.length > 0 && (
                 <div className="flex justify-end gap-[8px] pt-[16px] mt-[16px]">
