@@ -130,7 +130,7 @@ export default function OrganizationsNewClient() {
     {
       title: "Descrever a organização",
       content:
-        "Descreva de forma clara a atividade e missão da sua organização. Inclua também informações de contacto essenciais, como e‑mail, morada ou redes sociais. Estas informações ajudam os utilizadores a compreender o papel da sua organização e a contactar‑la facilmente, sempre que necessário.",
+        "Descreva de forma clara a atividade e missão da sua organização. Inclua também informações de contacto essenciais, como e‑mail, morada ou redes sociais. Estas informações ajudam os utilizadores a compreender o papel da sua organização e a contactá‑la facilmente, sempre que necessário.",
       hasError: !!formErrors.orgDescription,
     },
     {
