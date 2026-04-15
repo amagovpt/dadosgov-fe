@@ -1257,7 +1257,7 @@ export async function fetchPosts(
 export async function fetchHomepageData(): Promise<HomepageData> {
   try {
     const res = await fetch(`${API_BASE_URL}/site/home/`, {
-      next: { revalidate: 10 },
+      cache: "no-store",
     });
 
     if (!res.ok) {
