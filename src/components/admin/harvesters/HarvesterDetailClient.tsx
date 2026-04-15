@@ -402,7 +402,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
       {validationState === "pending" && (
         <div className="bg-neutral-100 rounded p-[24px] flex flex-col gap-8 mb-[24px]" style={{ maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))" }}>
           <p className="text-sm font-bold text-neutral-900">
-            O seu harvester foi criado e está a aguardar validação da equipa de administração da plataforma.
+            O seu harvester foi criado e está a aguardar validação da equipa de administração do portal.
           </p>
           <p className="text-sm text-neutral-700">
             Informe-nos através do formulário de contacto abaixo se deseja que validemos o seu harvester. Será notificado da aprovação (ou rejeição).

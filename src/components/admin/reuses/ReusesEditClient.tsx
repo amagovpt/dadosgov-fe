@@ -677,7 +677,7 @@ export default function ReusesEditClient() {
                       description={
                         <>
                           <strong>
-                            Uma reutilização arquivada deixa de estar indexada na plataforma, mas
+                            Uma reutilização arquivada deixa de estar indexada no portal, mas
                             permanece acessível através de um link direto.
                           </strong>
                           <br />
