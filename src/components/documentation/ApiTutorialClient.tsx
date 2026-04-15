@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
 
 const SWAGGER_JSON_URL = "/api/1/swagger.json";
@@ -84,13 +83,7 @@ export default function ApiTutorialClient() {
               <section className="mb-[48px]">
                 <h2 className="text-[20px] font-bold text-[#021C51] mb-[16px]">Autenticação</h2>
                 <p className="text-[16px] leading-[28px] text-[#2b363c] mb-[16px]">
-                  Para poder executar operações de escrita, é necessário obter uma{" "}
-                  <Link
-                    href="/pages/admin/me"
-                    className="text-[#034AD8] underline font-medium hover:text-primary-700"
-                  >
-                    Chave de API
-                  </Link>{" "}
+                  Para poder executar operações de escrita, é necessário obter uma Chave de API
                   nas definições do seu perfil.
                 </p>
                 <p className="text-[16px] leading-[28px] text-[#2b363c]">
