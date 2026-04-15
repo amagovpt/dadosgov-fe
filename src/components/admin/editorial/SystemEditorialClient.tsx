@@ -536,7 +536,7 @@ function FeaturedDatasetsEditor({
           </div>
         ))}
 
-        {data.datasetIds.length < 4 && !showSearch && (
+        {data.datasetIds.length < 6 && !showSearch && (
           <button
             type="button"
             onClick={() => setShowSearch(true)}
@@ -714,7 +714,7 @@ function FeaturedReusesEditor({
           </div>
         ))}
 
-        {data.reuseIds.length < 4 && !showSearch && (
+        {data.reuseIds.length < 6 && !showSearch && (
           <button
             type="button"
             onClick={() => setShowSearch(true)}
