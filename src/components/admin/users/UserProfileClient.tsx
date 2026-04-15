@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { fetchUser, fetchUserActivity, updateUser } from "@/services/api";
 import { Activity, UserAdmin } from "@/types/api";
 import { format } from "date-fns";
@@ -24,6 +25,7 @@ import {
 export default function UserProfileClient() {
   const params = useParams();
   const router = useRouter();
+  const { isAdmin } = useAuth();
   const userId = params.userId as string;
 
   const [user, setUser] = useState<UserAdmin | null>(null);
@@ -33,6 +35,7 @@ export default function UserProfileClient() {
   const [lastName, setLastName] = useState("");
   const [about, setAbout] = useState("");
   const [website, setWebsite] = useState("");
+  const [role, setRole] = useState("editor");
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -57,6 +60,7 @@ export default function UserProfileClient() {
         setLastName(data.last_name || "");
         setAbout(data.about || "");
         setWebsite(data.website || "");
+        setRole(data.roles?.includes("admin") ? "admin" : "editor");
       } catch (error) {
         console.error("Error loading user:", error);
       } finally {
@@ -85,6 +89,17 @@ export default function UserProfileClient() {
 
   const totalActivityPages = Math.ceil(activityTotal / activityPageSize);
 
+  const handleToggleActive = async () => {
+    try {
+      const updated = await updateUser(userId, { active: !user?.active });
+      if (updated) {
+        setUser(updated);
+      }
+    } catch (error) {
+      console.error("Error toggling user active status:", error);
+    }
+  };
+
   const handleSave = async () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setIsSaving(true);
@@ -96,6 +111,7 @@ export default function UserProfileClient() {
         last_name: lastName,
         about,
         website,
+        roles: role === "admin" ? ["admin"] : [],
       });
       if (updated) {
         setUser(updated);
@@ -178,7 +194,7 @@ export default function UserProfileClient() {
               leadingIconHover="agora-solid-eye"
               onClick={() => router.push(`/pages/users/${user.slug}`)}
             >
-              Ver perfil publico
+              Ver perfil público
             </Button>
           </div>
         </div>
@@ -239,6 +255,50 @@ export default function UserProfileClient() {
                     }
                   />
 
+                  {isAdmin && (
+                  <div className="flex flex-col gap-[12px]">
+                    <span className="text-primary-900 text-base font-medium leading-7">
+                      Perfil <span className="text-danger-600">*</span>
+                    </span>
+                    <div className="flex gap-[24px]">
+                      {[
+                        { value: "admin", label: "Administrador" },
+                        { value: "editor", label: "Editor" },
+                      ].map(({ value, label }) => (
+                        <button
+                          key={value}
+                          type="button"
+                          role="radio"
+                          aria-checked={role === value}
+                          onClick={() => setRole(value)}
+                          className="flex items-start gap-[8px] bg-transparent border-0 cursor-pointer p-0 min-h-[44px]"
+                        >
+                          <div className="p-[10px]">
+                            <div
+                              className={`flex min-h-[24px] min-w-[24px] items-center justify-center rounded-full ${
+                                role === value
+                                  ? "border-[6px] border-primary-600 bg-primary-600"
+                                  : "border-2 border-neutral-900"
+                              }`}
+                            >
+                              {role === value && (
+                                <span className="block h-[12px] w-[12px] rounded-full bg-white" />
+                              )}
+                            </div>
+                          </div>
+                          <span
+                            className={`pt-[10px] text-base leading-7 ${
+                              role === value ? "text-primary-600" : "text-neutral-900"
+                            }`}
+                          >
+                            {label}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  )}
+
                   <InputText
                     label="Site da Internet"
                     placeholder="Insira o URL aqui"
@@ -272,6 +332,36 @@ export default function UserProfileClient() {
                     {isSaving ? "A guardar..." : "Guardar"}
                   </Button>
                 </div>
+
+                {isAdmin && <div className="dataset-edit-danger-actions">
+                  <StatusCard
+                    type="warning"
+                    description={
+                      <>
+                        <strong>
+                          {user.active
+                            ? "Uma conta desativada impede o utilizador de iniciar sessão no portal, mas os seus dados permanecem acessíveis."
+                            : "Esta conta está desativada. O utilizador não consegue iniciar sessão no portal."}
+                        </strong>
+                        <br />
+                        <Button
+                          appearance="link"
+                          variant="primary"
+                          hasIcon
+                          trailingIcon="agora-line-arrow-right-circle"
+                          trailingIconHover="agora-solid-arrow-right-circle"
+                          onClick={(e: React.MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleToggleActive();
+                          }}
+                        >
+                          {user.active ? "Desativar conta" : "Ativar conta"}
+                        </Button>
+                      </>
+                    }
+                  />
+                </div>}
               </div>
             </TabBody>
           </Tab>
