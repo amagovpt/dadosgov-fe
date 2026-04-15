@@ -20,15 +20,12 @@ import { fetchCsrfToken, login } from "@/services/api";
 
 function LoginContent() {
   const [cmdModalOpen, setCmdModalOpen] = useState(false);
-  const [ccModalOpen, setCcModalOpen] = useState(false);
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
   const [isHoveredClose, setIsHoveredClose] = useState(false);
   const [isHoveredNacional, setIsHoveredNacional] = useState(false);
   const [isHoveredEstrangeiro, setIsHoveredEstrangeiro] = useState(false);
-  const [isHoveredCCCreate, setIsHoveredCCCreate] = useState(false);
   const [isHoveredEidasCreate, setIsHoveredEidasCreate] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isHoveredCC, setIsHoveredCC] = useState(false);
   const [isHoveredEidas, setIsHoveredEidas] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +34,6 @@ function LoginContent() {
   const [migrationRequired, setMigrationRequired] = useState(false);
   const [citizenType, setCitizenType] = useState<string | null>(null);
   const [termsCmdAccepted, setTermsCmdAccepted] = useState(false);
-  const [termsCCAccepted, setTermsCCAccepted] = useState(false);
   const [termsEidasAccepted, setTermsEidasAccepted] = useState(false);
 
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
@@ -99,10 +95,6 @@ function LoginContent() {
     submitSamlForm("/saml/login");
   };
 
-  const handleCCLogin = () => {
-    submitSamlForm("/saml/cc/login");
-  };
-
   const handleEidasLogin = () => {
     submitSamlForm("/saml/eidas/login");
   };
@@ -160,7 +152,7 @@ function LoginContent() {
     <main className="flex-grow bg-white min-h-screen relative">
       <div className="container mx-auto px-16 pt-32 pb-64 max-w-7xl login-page">
         {/* Breadcrumb */}
-        {!cmdModalOpen && !ccModalOpen && !eidasModalOpen && (
+        {!cmdModalOpen && !eidasModalOpen && (
           <div>
             <Breadcrumb items={breadcrumbItems} />
           </div>
@@ -207,92 +199,6 @@ function LoginContent() {
                 Criar conta com Autenticação Europeia
                 <Icon
                   name={isHoveredEidasCreate ? "agora-solid-arrow-right-circle" : "agora-line-arrow-right-circle"}
-                  className="w-20 h-20"
-                />
-              </a>
-            </div>
-          </div>
-        ) : ccModalOpen ? (
-          <div className="mt-24 flex flex-col gap-24">
-            <div className="flex justify-end">
-              <button
-                onClick={() => setCcModalOpen(false)}
-                onMouseEnter={() => setIsHoveredClose(true)}
-                onMouseLeave={() => setIsHoveredClose(false)}
-                className="flex items-center gap-8 text-sm text-neutral-900 hover:text-neutral-700"
-              >
-                Fechar
-                <Icon
-                  name={isHoveredClose ? "agora-solid-x" : "agora-line-x"}
-                  className="w-20 h-20"
-                />
-              </button>
-            </div>
-            <h2 className="text-xl-bold text-brand-blue-dark">
-              O que precisa para criar uma conta?
-            </h2>
-            <ul className="flex flex-col gap-16">
-              <li className="flex items-start gap-16">
-                <Icon name="agora-line-check" className="w-20 h-20 text-primary-600 shrink-0 mt-2" />
-                <span>
-                  Ser portador de Cartão de Cidadão válido.{" "}
-                  <a
-                    href="https://www.autenticacao.gov.pt/cc-video-tutorial"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                  >
-                    Ver vídeo tutorial
-                  </a>
-                  .
-                </span>
-              </li>
-              <li className="flex items-start gap-16">
-                <Icon name="agora-line-check" className="w-20 h-20 text-primary-600 shrink-0 mt-2" />
-                <span>
-                  Precisa de ter um Cartão de Cidadão válido, PIN de autenticação, leitor de cartões,
-                  e de ter o plugin Autenticação.gov instalado no seu computador.{" "}
-                  <a
-                    href="https://www.autenticacao.gov.pt/cc-software"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold underline"
-                  >
-                    Faça o download do plugin em Autenticacao.gov
-                  </a>
-                  .
-                </span>
-              </li>
-              <li className="flex items-start gap-16">
-                <Icon name="agora-line-check" className="w-20 h-20 text-primary-600 shrink-0 mt-2" />
-                <span>
-                  O registo com Cartão de Cidadão permite a realização de todos os serviços online
-                  disponibilizados neste portal. Este registo será feito através dos meios de
-                  identificação eletrónica disponíveis em{" "}
-                  <a
-                    href="https://www.autenticacao.gov.pt"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold underline"
-                  >
-                    autenticação.gov
-                  </a>
-                  .
-                </span>
-              </li>
-            </ul>
-            <div className="flex flex-col gap-24 mt-32 items-start">
-              <a
-                href="https://www.autenticacao.gov.pt/cc-pedido"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary-600 flex items-center gap-8 text-sm"
-                onMouseEnter={() => setIsHoveredCCCreate(true)}
-                onMouseLeave={() => setIsHoveredCCCreate(false)}
-              >
-                Criar conta com o Cartão de Cidadão
-                <Icon
-                  name={isHoveredCCCreate ? "agora-solid-arrow-right-circle" : "agora-line-arrow-right-circle"}
                   className="w-20 h-20"
                 />
               </a>
@@ -474,89 +380,6 @@ function LoginContent() {
                       disabled={!samlEnabled || !citizenType || !termsCmdAccepted}
                     >
                       Entrar com Chave Móvel Digital
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </TabBody>
-          </Tab>
-          <Tab>
-            <TabHeader>Cartão de Cidadão</TabHeader>
-            <TabBody>
-              <div className="rounded-8">
-                <div className="flex flex-col gap-40">
-                  <div className="flex items-center justify-between gap-32">
-                    <div className="flex flex-col gap-8">
-                      <h2 className="text-base font-bold text-brand-blue-dark">
-                        Antes de começar...
-                      </h2>
-                      <p className="text-[#2B363C]">
-                        Precisa do Cartão de Cidadão válido, PIN de autenticação, leitor de
-                        cartões, e de ter o plugin Autenticação.gov instalado no seu computador.
-                      </p>
-                    </div>
-                    <div className="shrink-0">
-                      <NextImage
-                        src="/cardpersonal.svg"
-                        alt="Cartão de Cidadão"
-                        width={160}
-                        height={100}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-8 mt-32">
-                    <p className="text-sm text-neutral-900">
-                      <strong>Não tem autenticação com Cartão de Cidadão?</strong>
-                    </p>
-                    <button
-                      className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
-                      onClick={() => setCcModalOpen(true)}
-                    >
-                      Descubra como criar conta
-                    </button>
-                  </div>
-                  <div className="w-full h-[2px] bg-neutral-400 my-[32px]"></div>
-                  <div className="flex flex-col gap-24">
-                    <div className="flex flex-col gap-8 mt-8">
-                      <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
-                      <p className="text-sm">
-                        Deve ler atentamente os{" "}
-                        <a
-                          href="/pages/faqs/terms"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
-                        >
-                          Termos e condições para o tratamento dos seus dados
-                        </a>
-                      </p>
-                      <Checkbox
-                        id="terms-cc"
-                        className="text-sm text-neutral-700 leading-relaxed"
-                        onChange={(e) => setTermsCCAccepted(e.target.checked)}
-                      >
-                        Declaro que li e aceito os termos e condições para o tratamento dos
-                        meus dados pessoais no acesso e utilização da Área Reservada do
-                        dadosgov.pt.
-                      </Checkbox>
-                    </div>
-                  </div>
-                  <div className="mt-16">
-                    <Button
-                      variant="primary"
-                      className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                      hasIcon={true}
-                      trailingIcon={
-                        isHoveredCC
-                          ? "agora-solid-arrow-right-circle"
-                          : "agora-line-arrow-right-circle"
-                      }
-                      onMouseEnter={() => setIsHoveredCC(true)}
-                      onMouseLeave={() => setIsHoveredCC(false)}
-                      onClick={handleCCLogin}
-                      disabled={!samlEnabled || !termsCCAccepted}
-                    >
-                      Entrar com Cartão de Cidadão
                     </Button>
                   </div>
                 </div>

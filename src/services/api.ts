@@ -2740,6 +2740,31 @@ export async function fetchMyFollowing(
   }
 }
 
+export async function fetchUserFollowing(
+  userId: string,
+  page: number = 1,
+  pageSize: number = 100
+): Promise<APIResponse<UserFollowing>> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/users/${userId}/following/?page=${page}&page_size=${pageSize}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error(`Failed to fetch user following: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching user following:", error);
+    return {
+      data: [],
+      page: 1,
+      page_size: pageSize,
+      total: 0,
+      next_page: null,
+      previous_page: null,
+    };
+  }
+}
+
 export async function followEntity(
   entityType: FollowableEntityType,
   id: string
@@ -2818,6 +2843,21 @@ export async function uploadAvatar(file: File): Promise<{ image: string }> {
   const formData = new FormData();
   formData.append("file", file);
   const res = await fetch(`${API_AUTH_URL}/me/avatar/`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+  return await res.json();
+}
+
+export async function uploadUserAvatar(userId: string, file: File): Promise<{ image: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_AUTH_URL}/users/${userId}/avatar/`, {
     method: "POST",
     credentials: "include",
     body: formData,
