@@ -393,7 +393,6 @@ export default function DatasetsAdminClient({
       const next = { ...prev };
       delete next.temporalCoverage;
       delete next.temporalCoverageInvalidFormat;
-      delete next.temporalCoverageBothRequired;
       return next;
     });
   };
@@ -438,14 +437,10 @@ export default function DatasetsAdminClient({
     const startTime = startRaw ? parseInputDateToTime(startRaw) : null;
     const endTime = endRaw ? parseInputDateToTime(endRaw) : null;
 
-    if ((startRaw && !endRaw) || (!startRaw && endRaw)) {
-      errors.temporalCoverageBothRequired = true;
-    }
     if ((startRaw && startTime === null) || (endRaw && endTime === null)) {
       errors.temporalCoverageInvalidFormat = true;
     }
     if (
-      !errors.temporalCoverageBothRequired &&
       !errors.temporalCoverageInvalidFormat &&
       startTime !== null &&
       endTime !== null &&
@@ -455,8 +450,7 @@ export default function DatasetsAdminClient({
     }
     if (
       (errors.temporalCoverage ||
-        errors.temporalCoverageInvalidFormat ||
-        errors.temporalCoverageBothRequired) &&
+        errors.temporalCoverageInvalidFormat) &&
       Object.keys(errors).length === 1
     ) {
       e?.preventDefault();
@@ -494,10 +488,10 @@ export default function DatasetsAdminClient({
       if (selectedContactPointIds.length > 0) {
         payload.contact_points = selectedContactPointIds;
       }
-      if (temporalStart) {
+      if (startRaw || endRaw) {
         payload.temporal_coverage = {
-          start: temporalStart,
-          ...(temporalEnd ? { end: temporalEnd } : {}),
+          ...(startRaw ? { start: startRaw } : {}),
+          ...(endRaw ? { end: endRaw } : {}),
         };
       }
 
@@ -807,13 +801,10 @@ export default function DatasetsAdminClient({
     currentStep === 3 || currentStep === 4 ? auxiliarItemsStep3 : auxiliarItemsStep2;
   const hasTemporalCoverageError =
     !!formErrors.temporalCoverage ||
-    !!formErrors.temporalCoverageInvalidFormat ||
-    !!formErrors.temporalCoverageBothRequired;
+    !!formErrors.temporalCoverageInvalidFormat;
   const temporalCoverageErrorText = formErrors.temporalCoverageInvalidFormat
     ? "Formato de data inválido. Utilize o formato dd/mm/aaaa."
-    : formErrors.temporalCoverageBothRequired
-      ? "Preencha as duas datas da cobertura temporal ou remova a data preenchida."
-      : "A data de início não pode ser posterior à data de fim.";
+    : "A data de início não pode ser posterior à data de fim.";
 
   return (
     <>
