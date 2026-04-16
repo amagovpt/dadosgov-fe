@@ -2,7 +2,7 @@
 
 import { Button } from "@ama-pt/agora-design-system";
 
-const SUPPORT_PAGE_PATH = "/pages/support";
+const SUPPORT_PAGE_PATH = "/pages/support#ajuda";
 
 export default function PublicationFeedbackButton() {
   return (
