@@ -408,23 +408,6 @@ export default function DatasetsClient({
                                         <span>{formatMetric(dataset.metrics?.followers)}</span>
                                       </div>
                                     </div>
-                                    <div className="mt-8">
-                                      <Button
-                                        appearance="link"
-                                        variant="danger"
-                                        hasIcon
-                                        leadingIcon="agora-line-trash"
-                                        leadingIconHover="agora-solid-trash"
-                                        className="!p-0"
-                                        onClick={(e: React.MouseEvent) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          handleDeleteDataset(dataset);
-                                        }}
-                                      >
-                                        Eliminar
-                                      </Button>
-                                    </div>
                                     <div className="flex items-center gap-8 text-primary-600 mt-8">
                                       <Icon
                                         name="agora-line-arrow-right-circle"
