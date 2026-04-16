@@ -104,10 +104,20 @@ const FAQ_DATA = [
   },
 ];
 
+const shouldPreselectFeedbackFromUrl = (): boolean => {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("toggle") === "feedback";
+};
+
 const SupportPage = () => {
-  const [activeItem, setActiveItem] = React.useState("Nesta página");
+  const [activeItem, setActiveItem] = React.useState(() =>
+    shouldPreselectFeedbackFromUrl() ? "Ajuda" : "Nesta página",
+  );
   const [expandedId, setExpandedId] = React.useState<string | null>("0-1");
-  const [selectedToggle, setSelectedToggle] = React.useState<string | null>(null);
+  const [selectedToggle, setSelectedToggle] = React.useState<string | null>(() =>
+    shouldPreselectFeedbackFromUrl() ? "feedback" : null,
+  );
   const [subjectBody, setSubjectBody] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -969,6 +979,7 @@ const SupportPage = () => {
 
           <ToggleGroup
             multiple={false}
+            value={selectedToggle ?? ""}
             onChange={(val) => {
               const selected = val.length > 0 ? val[0] : null;
               setSelectedToggle(selected);

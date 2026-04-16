@@ -18,6 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { createHarvester, previewHarvestSource } from "@/services/api";
 import { HarvestSourceCreatePayload, HarvestPreviewJob } from "@/types/api";
 
@@ -834,16 +835,7 @@ export default function HarvestersNewClient() {
               )}
 
               <div className="flex justify-start mt-[16px]">
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                  onClick={() => window.open("https://dados.gov.pt/pt/contact", "_blank")}
-                >
-                  Dê-nos o seu feedback sobre o processo de publicação.
-                </Button>
+                <PublicationFeedbackButton />
               </div>
 
               <div className="admin-page__actions">
