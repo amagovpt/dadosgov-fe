@@ -33,6 +33,7 @@ import { pt } from "date-fns/locale";
 import Link from "next/link";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 
 interface ReusesFormClientProps {
@@ -974,15 +975,7 @@ export default function ReusesFormClient({
                 />
               </div>
 
-              <Button
-                appearance="link"
-                variant="primary"
-                hasIcon
-                trailingIcon="agora-line-external-link"
-                trailingIconHover="agora-solid-external-link"
-              >
-                Dê-nos o seu feedback sobre o processo de publicação.
-              </Button>
+              <PublicationFeedbackButton />
 
               {apiError && (
                 <div className="mt-[32px] mb-[16px]">

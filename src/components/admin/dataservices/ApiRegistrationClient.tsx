@@ -18,6 +18,7 @@ import {
 import { createDataservice } from "@/services/api";
 import type { Dataservice } from "@/types/api";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 
 interface ApiRegistrationClientProps {
@@ -560,15 +561,7 @@ export default function ApiRegistrationClient({
                 }}
               />
 
-              <Button
-                appearance="link"
-                variant="primary"
-                hasIcon
-                trailingIcon="agora-line-external-link"
-                trailingIconHover="agora-solid-external-link"
-              >
-                Dê-nos o seu feedback sobre o processo de publicação.
-              </Button>
+              <PublicationFeedbackButton />
 
               <div className="admin-page__actions flex justify-end gap-[18px]">
                 <Button appearance="outline" variant="neutral">
