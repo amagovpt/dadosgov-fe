@@ -163,9 +163,9 @@ export default function CommunityResourceFormClient({
 
   const auxiliarItems = [
     {
-      title: "Escolha o link correto",
+      title: "Escolher o link correto",
       content:
-        "É recomendável criar um link para o próprio arquivo em vez de uma página da web para permitir que o {site} o analise.",
+        "É recomendável criar um link para o próprio arquivo em vez de uma página da web para permitir que o site o analise.",
       hasError: !!formErrors.resourceUrl,
     },
     {
@@ -245,24 +245,30 @@ export default function CommunityResourceFormClient({
         </>
       </DropdownSection>
     ),
-    [user],
+    [user]
   );
 
-  const typeOptions = useMemo(() => (
-    <DropdownSection name="types">
-      {resourceTypes.map((t) => (
-        <DropdownOption key={t.id} value={t.id}>
-          {t.label}
-        </DropdownOption>
-      ))}
-    </DropdownSection>
-  ), [resourceTypes]);
+  const typeOptions = useMemo(
+    () => (
+      <DropdownSection name="types">
+        {resourceTypes.map((t) => (
+          <DropdownOption key={t.id} value={t.id}>
+            {t.label}
+          </DropdownOption>
+        ))}
+      </DropdownSection>
+    ),
+    [resourceTypes]
+  );
 
-  const schemaOptions = useMemo(() => (
-    <DropdownSection name="schemas">
-      <DropdownOption value="">Nenhum</DropdownOption>
-    </DropdownSection>
-  ), []);
+  const schemaOptions = useMemo(
+    () => (
+      <DropdownSection name="schemas">
+        <DropdownOption value="">Nenhum</DropdownOption>
+      </DropdownSection>
+    ),
+    []
+  );
 
   return (
     <>
@@ -308,16 +314,12 @@ export default function CommunityResourceFormClient({
                 </IsolatedSelect>
 
                 <div className="admin-page__org-card">
-                  <p className="admin-page__org-card-title">
-                    Não pertence a nenhuma organização.
-                  </p>
+                  <p className="admin-page__org-card-title">Não pertence a nenhuma organização.</p>
                   <p className="admin-page__org-card-description">
-                    Quando o conjunto de dados for produzido no contexto de atividade profissional, é recomendável que seja publicado em nome da organização responsável.
+                    Quando o conjunto de dados for produzido no contexto de atividade profissional,
+                    é recomendável que seja publicado em nome da organização responsável.
                   </p>
-                  <a
-                    href="/pages/admin/organizations/new"
-                    className="admin-page__org-card-link"
-                  >
+                  <a href="/pages/admin/organizations/new" className="admin-page__org-card-link">
                     Crie ou integre uma organização em dados.gov.pt
                     <Icon name="agora-line-arrow-right-circle" className="w-[24px] h-[24px]" />
                   </a>
@@ -446,9 +448,7 @@ export default function CommunityResourceFormClient({
                       className="cursor-pointer text-neutral-900"
                       variant="transparent"
                       image={{
-                        src:
-                          dataset.organization?.logo ||
-                          "/images/placeholders/organization.png",
+                        src: dataset.organization?.logo || "/images/placeholders/organization.png",
                         alt: dataset.organization?.name || "Organização sem logo",
                       }}
                       category={dataset.organization?.name}
@@ -460,7 +460,11 @@ export default function CommunityResourceFormClient({
                           </p>
                           <div className="flex flex-wrap gap-8 items-center mt-[8px]">
                             <span className="text-sm font-medium text-neutral-900">
-                              Metadados: {dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0}%
+                              Metadados:{" "}
+                              {dataset.quality?.score != null
+                                ? Math.round(dataset.quality.score * 100)
+                                : 0}
+                              %
                             </span>
                           </div>
                           <div className="flex items-center flex-wrap gap-[32px] text-xs mt-[32px] text-[#034AD8] mb-[32px]">
@@ -469,7 +473,9 @@ export default function CommunityResourceFormClient({
                               <span>
                                 {dataset.metrics?.views
                                   ? dataset.metrics.views >= 1000000
-                                    ? (dataset.metrics.views / 1000000).toFixed(1).replace(".", ",") + " M"
+                                    ? (dataset.metrics.views / 1000000)
+                                        .toFixed(1)
+                                        .replace(".", ",") + " M"
                                     : dataset.metrics.views >= 1000
                                       ? (dataset.metrics.views / 1000).toFixed(0) + " mil"
                                       : dataset.metrics.views
@@ -481,17 +487,28 @@ export default function CommunityResourceFormClient({
                               <span>
                                 {dataset.metrics?.resources_downloads
                                   ? dataset.metrics.resources_downloads >= 1000
-                                    ? (dataset.metrics.resources_downloads / 1000).toFixed(0) + " mil"
+                                    ? (dataset.metrics.resources_downloads / 1000).toFixed(0) +
+                                      " mil"
                                     : dataset.metrics.resources_downloads
                                   : "0"}
                               </span>
                             </div>
                             <div className="flex items-center gap-8" title="Reutilizações">
-                              <img src="/Icons/bar_chart.svg" className="" alt="" aria-hidden="true" />
+                              <img
+                                src="/Icons/bar_chart.svg"
+                                className=""
+                                alt=""
+                                aria-hidden="true"
+                              />
                               <span>{dataset.metrics?.reuses || 0}</span>
                             </div>
                             <div className="flex items-center gap-8" title="Favoritos">
-                              <img src="/Icons/favorite.svg" className="" alt="" aria-hidden="true" />
+                              <img
+                                src="/Icons/favorite.svg"
+                                className=""
+                                alt=""
+                                aria-hidden="true"
+                              />
                               <span>
                                 {dataset.metrics?.followers
                                   ? dataset.metrics.followers >= 1000
@@ -611,15 +628,9 @@ export default function CommunityResourceFormClient({
                     className="cursor-pointer text-neutral-900"
                     variant="transparent"
                     category={
-                      createdResource.format
-                        ? createdResource.format.toUpperCase()
-                        : "Recurso"
+                      createdResource.format ? createdResource.format.toUpperCase() : "Recurso"
                     }
-                    title={
-                      <div className="underline text-xl-bold">
-                        {createdResource.title}
-                      </div>
-                    }
+                    title={<div className="underline text-xl-bold">{createdResource.title}</div>}
                     description={
                       <div className="flex flex-col gap-4 mt-[8px] pb-[32px]">
                         <p className="text-sm text-neutral-900">
@@ -628,17 +639,30 @@ export default function CommunityResourceFormClient({
                             ? ` –  ${createdResource.format.toUpperCase()}`
                             : ""}
                           {createdResource.filesize
-                            ? ` (${createdResource.filesize >= 1048576
-                                ? (createdResource.filesize / 1048576).toFixed(1).replace(".", ",") + " MB"
-                                : createdResource.filesize >= 1024
-                                  ? (createdResource.filesize / 1024).toFixed(1).replace(".", ",") + " KB"
-                                  : createdResource.filesize + " B"})`
+                            ? ` (${
+                                createdResource.filesize >= 1048576
+                                  ? (createdResource.filesize / 1048576)
+                                      .toFixed(1)
+                                      .replace(".", ",") + " MB"
+                                  : createdResource.filesize >= 1024
+                                    ? (createdResource.filesize / 1024)
+                                        .toFixed(1)
+                                        .replace(".", ",") + " KB"
+                                    : createdResource.filesize + " B"
+                              })`
                             : ""}
                         </p>
                         {createdResource.url && (
                           <p className="flex items-center gap-8 text-sm text-neutral-900 mt-8">
                             <Icon name="agora-line-map-pin" className="w-[16px] h-[16px]" />
-                            Localização: {(() => { try { return new URL(createdResource.url).hostname; } catch { return createdResource.url; } })()}
+                            Localização:{" "}
+                            {(() => {
+                              try {
+                                return new URL(createdResource.url).hostname;
+                              } catch {
+                                return createdResource.url;
+                              }
+                            })()}
                           </p>
                         )}
                         {createdResource.checksum && (
@@ -649,9 +673,7 @@ export default function CommunityResourceFormClient({
                         )}
                       </div>
                     }
-                    date={
-                      <span className="font-[300]">Atualizado hoje</span>
-                    }
+                    date={<span className="font-[300]">Atualizado hoje</span>}
                     blockedLink={true}
                   />
                   <div className="admin-page__actions flex justify-end gap-[18px] mt-[8px]">
@@ -676,7 +698,6 @@ export default function CommunityResourceFormClient({
                   <StatusCard type="danger" description={apiError} />
                 </div>
               )}
-
             </>
           )}
         </div>
