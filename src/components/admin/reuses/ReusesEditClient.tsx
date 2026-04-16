@@ -741,26 +741,26 @@ export default function ReusesEditClient() {
                   <AuxiliarList
                     items={[
                       {
-                        title: "Dê um nome à sua reutilização.",
+                        title: "Dar um nome à reutilização.",
                         content:
-                          'Prefira um título que permita entender como os dados são usados, em vez do nome do site ou aplicativo ("Mecanismo de Busca de Acordos Comerciais" em vez de "Acordos-Comerciais.fr", por exemplo).',
+                          'Prefira um título que permita entender como os dados são usados, em vez do nome do site ou aplicação ("Mecanismo de Busca de Acordos Comerciais" em vez de "Acordos-Comerciais.fr", por exemplo).',
                         hasError: !!formErrors.title,
                       },
                       {
-                        title: "Qual link preencher?",
+                        title: "Escolher o link",
                         content:
                           "Insira o link para a página onde a reutilização é visível. Aponte para a reutilização em si, e não para uma página inicial. Certifique-se de que a ligação esteja estável ao longo do tempo.",
                         hasError: !!formErrors.url,
                       },
                       {
-                        title: "Escolha um tipo",
+                        title: "Escolher um tipo",
                         content:
                           "Indique o tipo em que deve ser classificada a reutilização (API, aplicação, artigo de imprensa, visualização, etc.).",
                       },
                       {
-                        title: "Descreva sua reutilização",
+                        title: "Descrever a reutilização",
                         content:
-                          "Você pode preencher o método de criação da reutilização, o que a reutilização permite que você faça, mostre ou diga mais sobre si mesmo e o contexto dessa reutilização. É melhor manter um tom neutro: se a reutilização parecer muito uma mensagem promocional, podemos removê-la.",
+                          "Pode preencher o método de criação da reutilização, o que a reutilização permite que faça, mostre ou diga mais sobre si mesmo e o contexto dessa reutilização. É aconselhado que mantenha um tom neutro: se a reutilização parecer uma mensagem promocional, podemos removê-la.",
                         hasError: !!formErrors.description,
                       },
                       {
@@ -783,7 +783,7 @@ export default function ReusesEditClient() {
                         ),
                       },
                       {
-                        title: "Escolha uma imagem",
+                        title: "Escolher uma imagem",
                         content:
                           'Se a sua reutilização assumir a forma de uma representação gráfica, pode fornecer uma pré-visualização usando uma imagem ou captura de ecrã. Esta imagem aparecerá na secção "Reutilizações" da página do conjunto de dados associado.',
                       },
