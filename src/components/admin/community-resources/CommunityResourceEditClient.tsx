@@ -673,7 +673,7 @@ export default function CommunityResourceEditClient() {
                 type="danger"
                 description={
                   <>
-                    <strong>Atenção Esta ação é irreversível.</strong>
+                    <strong>Atenção esta ação é irreversível.</strong>
                     <br />
                     <Button
                       appearance="link"
