@@ -134,7 +134,7 @@ export default function DatasetsAdminClient({
   ]);
 
   // Step 3 state
-  const [resourceUrl, setResourceUrl] = useState("");
+  const [resourceUrls, setResourceUrls] = useState<string[]>([]);
 
   // API state
   const [createdDataset, setCreatedDataset] = useState<Dataset | null>(null);
@@ -586,18 +586,18 @@ export default function DatasetsAdminClient({
   };
 
   const handleStep3Next = async () => {
-    const trimmedUrl = resourceUrl.trim();
+    const trimmedUrls = resourceUrls.map((u) => u.trim()).filter(Boolean);
     const hasFiles = uploadedFiles.length > 0;
-    const hasUrl = trimmedUrl.length > 0;
-    const hasValidUrl = hasUrl && isValidHttpsUrl(trimmedUrl);
+    const hasUrls = trimmedUrls.length > 0;
+    const invalidUrl = trimmedUrls.find((u) => !isValidHttpsUrl(u));
 
-    if (!hasFiles && !hasUrl) {
+    if (!hasFiles && !hasUrls) {
       setShowFileError(true);
       setShowInvalidUrlError(false);
       return;
     }
 
-    if (hasUrl && !hasValidUrl) {
+    if (invalidUrl) {
       setShowInvalidUrlError(true);
       setShowFileError(false);
       return;
@@ -615,11 +615,11 @@ export default function DatasetsAdminClient({
           await uploadResource(createdDataset.id, file);
         }
       }
-      if (hasValidUrl) {
+      for (const url of trimmedUrls) {
         await createResource(createdDataset.id, {
-          title: trimmedUrl,
+          title: url,
           type: "main",
-          url: trimmedUrl,
+          url,
           filetype: "remote",
           format: "",
         });
@@ -1336,8 +1336,7 @@ export default function DatasetsAdminClient({
               <div className="admin-page__form">
                 <FileUploadModal
                   uploadedFiles={uploadedFiles}
-                  resourceUrl={resourceUrl}
-                  hasValidUrl={isValidHttpsUrl(resourceUrl.trim())}
+                  resourceUrls={resourceUrls}
                   hasError={showFileError}
                   onFilesChange={(files) => {
                     setUploadedFiles(files);
@@ -1346,17 +1345,18 @@ export default function DatasetsAdminClient({
                       setShowInvalidUrlError(false);
                     }
                   }}
-                  onUrlChange={(url) => {
-                    setResourceUrl(url);
-                    const trimmedUrl = url.trim();
-                    if (!trimmedUrl) {
-                      setShowInvalidUrlError(false);
-                      return;
-                    }
-                    if (isValidHttpsUrl(trimmedUrl)) {
+                  onUrlAdd={(url) => {
+                    setResourceUrls((prev) => {
+                      if (prev.includes(url)) return prev;
+                      return [...prev, url];
+                    });
+                    if (isValidHttpsUrl(url.trim())) {
                       setShowFileError(false);
                       setShowInvalidUrlError(false);
                     }
+                  }}
+                  onUrlRemove={(url) => {
+                    setResourceUrls((prev) => prev.filter((u) => u !== url));
                   }}
                 />
                 {showInvalidUrlError && (
