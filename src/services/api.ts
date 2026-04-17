@@ -590,7 +590,7 @@ export async function deleteOrganization(org: string): Promise<void> {
 export async function uploadOrgLogo(org: string, file: File): Promise<Organization> {
   const formData = new FormData();
   formData.append("file", file);
-  const res = await fetch(`${API_AUTH_URL}/organizations/${org}/logo`, {
+  const res = await fetch(`${API_AUTH_URL}/organizations/${org}/logo/`, {
     method: "POST",
     credentials: "include",
     body: formData,
