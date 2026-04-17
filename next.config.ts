@@ -125,6 +125,11 @@ const nextConfig: NextConfig = {
           source: "/saml/eidas/sso_logout",
           destination: `${BACKEND_URL}/saml/eidas/sso_logout`,
         },
+        // Static file storage served by flask_storage at /s/<bucket>/<path>
+        {
+          source: "/s/:path*",
+          destination: `${BACKEND_URL}/s/:path*`,
+        },
         // API routes — must be in beforeFiles to avoid redirect loops
         // when Flask returns 308 trailing-slash redirects
         {
