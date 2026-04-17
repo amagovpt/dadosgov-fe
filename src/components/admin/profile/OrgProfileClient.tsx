@@ -281,6 +281,8 @@ export default function OrgProfileClient() {
                     accept=".jpg,.jpeg,.png"
                     maxSize={4194304}
                     maxCount={1}
+                    maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                    forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
                     onChange={handleLogoUpload}
                   />
                 </div>
