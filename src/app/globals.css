@@ -153,12 +153,51 @@ header.sticky .languages-panel-menu {
   flex-direction: column !important;
 }
 
+
+
 .agora-header .icon-container {
   border-width: 0;
   border-radius: 0%;
   padding: 0px;
   display: flex;
   align-items: baseline;
+}
+
+/* Ecossistema: layout with arte logo */
+li.ecosystem-panel-menu {
+  gap: 8px;
+}
+
+/* Ecosystem panel container: fixed below the panels-menu bar, above the nav bar */
+.ecosystem-panel-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+.ecosystem-custom-panel {
+  background-color: rgb(241, 243, 248);
+  box-shadow: 0px 16px 16px 0px #00000029;
+  border-top: 4px solid var(--Neutral-200, #E1E4EA);
+}
+
+
+/* Blue bottom bar scoped to the button span (icon + "Ecossistema" text only) */
+li.ecosystem-panel-menu .panel-menu-link-wrapper {
+  position: relative;
+  align-self: stretch;
+}
+
+li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  height: 4px;
+  width: 100%;
+  background-color: var(--color-primary-600);
 }
 
 /* Target icons that should be white */
@@ -385,6 +424,28 @@ header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-lin
   height: 4px;
   width: 100%;
   background-color: var(--color-primary-600);
+}
+
+/* Hide "Autenticar" active state (bar + text + icon) when any other panel is open */
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper::after,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper::after {
+  display: none;
+}
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper {
+  color: inherit;
+}
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .solid,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .solid {
+  display: none;
+}
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .line,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .line {
+  display: block;
+}
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper svg,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper svg {
+  fill: currentColor;
 }
 
 header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper {
