@@ -12,7 +12,6 @@ import {
   updateProfile,
   uploadAvatar,
   generateApiKey,
-  clearApiKey,
   requestEmailChange,
   fetchMyFollowing,
 } from "@/services/api";
@@ -81,7 +80,6 @@ export default function ProfileClient() {
         setLastName(data.last_name || "");
         setAbout(data.about || "");
         setWebsite(data.website || "");
-        setApiKey(data.apikey || "");
         setEmail(data.email || "");
       } catch (error) {
         console.error("Error loading profile:", error);

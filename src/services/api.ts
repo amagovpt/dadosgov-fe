@@ -2893,17 +2893,19 @@ export async function fetchFullProfile(): Promise<UserPublic> {
 }
 
 export async function generateApiKey(): Promise<string> {
-  const res = await fetch(`${API_AUTH_URL}/me/apikey`, {
+  const res = await fetch(`${API_AUTH_URL}/me/api_tokens/`, {
     method: "POST",
     credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
   });
   if (!res.ok) throw new Error(`Failed to generate API key: ${res.statusText}`);
   const data = await res.json();
-  return data.apikey;
+  return data.token;
 }
 
-export async function clearApiKey(): Promise<void> {
-  const res = await fetch(`${API_AUTH_URL}/me/apikey`, {
+export async function clearApiKey(tokenId: string): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/me/api_tokens/${tokenId}/`, {
     method: "DELETE",
     credentials: "include",
   });
