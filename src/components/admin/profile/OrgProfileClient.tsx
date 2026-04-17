@@ -64,6 +64,7 @@ export default function OrgProfileClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [nameError, setNameError] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!orgId) {
@@ -134,8 +135,14 @@ export default function OrgProfileClient() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!org || !files || files.length === 0) return;
+    const file = files[0];
+    if (file.size > 4194304) {
+      setLogoError("O ficheiro excede o tamanho máximo de 4 MB.");
+      return;
+    }
+    setLogoError(null);
     try {
-      await uploadOrgLogo(org.id, files[0]);
+      await uploadOrgLogo(org.id, file);
       const updated = await fetchOrganization(org.id);
       if (updated) setOrg(updated);
     } catch (error) {
@@ -281,6 +288,12 @@ export default function OrgProfileClient() {
                     accept=".jpg,.jpeg,.png"
                     maxSize={4194304}
                     maxCount={1}
+                    maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                    forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                    hasError={!!logoError}
+                    hasFeedback={!!logoError}
+                    feedbackState="danger"
+                    feedbackText={logoError ?? undefined}
                     onChange={handleLogoUpload}
                   />
                 </div>
