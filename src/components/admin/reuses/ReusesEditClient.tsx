@@ -741,7 +741,7 @@ export default function ReusesEditClient() {
                   <AuxiliarList
                     items={[
                       {
-                        title: "Dar um nome à reutilização.",
+                        title: "Dar um nome à reutilização",
                         content:
                           'Prefira um título que permita entender como os dados são usados, em vez do nome do site ou aplicação ("Mecanismo de Busca de Acordos Comerciais" em vez de "Acordos-Comerciais.fr", por exemplo).',
                         hasError: !!formErrors.title,
