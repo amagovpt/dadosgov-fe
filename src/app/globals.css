@@ -2272,3 +2272,11 @@ div.max-w-ch,
 .markdown-container p {
   margin-bottom: 1em !important;
 }
+
+/* Fix: agora-file-list overrides block the outline button hover fill */
+.agora-file-list .delete-action.error .agora-btn-outline-danger:hover:not(:disabled) .icon,
+.agora-file-list .delete-action.error .agora-btn-outline-danger:hover:not(:disabled) svg,
+.agora-file-list .replace-action .agora-btn-outline-primary:hover:not(:disabled) .icon,
+.agora-file-list .replace-action .agora-btn-outline-primary:hover:not(:disabled) svg {
+  fill: #fff !important;
+}

@@ -311,14 +311,26 @@ function ResourceDetailPopupContent({
         </table>
       </div>
       <div className="flex justify-between pt-[8px]">
-        <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Fechar
+        <Button appearance="outline" variant="primary" onClick={onClose}>
+          Cancelar
         </Button>
         <div className="flex gap-[8px]">
-          <Button variant="danger" onClick={onDelete}>
+          <Button
+            variant="danger"
+            hasIcon
+            leadingIcon="agora-line-trash"
+            leadingIconHover="agora-solid-trash"
+            onClick={onDelete}
+          >
             Eliminar
           </Button>
-          <Button variant="primary" onClick={onEdit}>
+          <Button
+            variant="primary"
+            hasIcon
+            leadingIcon="agora-line-edit"
+            leadingIconHover="agora-solid-edit"
+            onClick={onEdit}
+          >
             Editar
           </Button>
         </div>
@@ -346,7 +358,8 @@ function ResourceEditPopupContent({
   const [resourceFormat, setResourceFormat] = useState(resource.format || "");
   const [mime, setMime] = useState(resource.mime || "");
   const [filesize, setFilesize] = useState(resource.filesize ? String(resource.filesize) : "");
-  const [resourceType, setResourceType] = useState(resource.type || "main");
+  const resourceTypeRef = useRef(resource.type || "main");
+  const replaceFileInputRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isReplacing, setIsReplacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -364,7 +377,7 @@ function ResourceEditPopupContent({
         format: resourceFormat.trim() || undefined,
         mime: mime.trim() || undefined,
         filesize: filesize ? Number(filesize) : undefined,
-        type: resourceType,
+        type: resourceTypeRef.current,
       });
       onSaved();
     } catch (err) {
@@ -408,23 +421,21 @@ function ResourceEditPopupContent({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
         />
 
-        <div className="flex flex-col gap-[4px]">
-          <label htmlFor="res-edit-type" className="text-primary-900 text-sm font-medium">
-            Tipo *
-          </label>
-          <select
-            id="res-edit-type"
-            className="rounded-lg border border-neutral-300 p-[10px] text-sm"
-            value={resourceType}
-            onChange={(e) => setResourceType(e.target.value)}
-          >
+        <IsolatedSelect
+          label="Tipo *"
+          placeholder="Selecione um tipo..."
+          id="res-edit-type"
+          defaultValue={resource.type || "main"}
+          onChangeRef={resourceTypeRef}
+        >
+          <DropdownSection name="resource-types">
             {resourceTypes.map((rt) => (
-              <option key={rt.id} value={rt.id}>
+              <DropdownOption key={rt.id} value={rt.id} selected={rt.id === (resource.type || "main")}>
                 {rt.label}
-              </option>
+              </DropdownOption>
             ))}
-          </select>
-        </div>
+          </DropdownSection>
+        </IsolatedSelect>
 
         <InputTextArea
           label="Descrição"
@@ -480,21 +491,25 @@ function ResourceEditPopupContent({
       </div>
 
       <div className="flex justify-between pt-[8px]">
-        <Button appearance="outline" variant="neutral" onClick={onCancel}>
+        <Button appearance="outline" variant="primary" onClick={onCancel}>
           Cancelar
         </Button>
         <div className="flex gap-[8px]">
-          <label className="cursor-pointer">
-            <input
-              type="file"
-              className="hidden"
-              onChange={handleReplaceFile}
-              disabled={isReplacing}
-            />
-            <span className="inline-flex items-center gap-[6px] rounded-lg border border-primary-600 text-primary-600 px-[16px] py-[10px] text-sm font-medium hover:bg-primary-50">
-              {isReplacing ? "A substituir..." : "Substituir o ficheiro"}
-            </span>
-          </label>
+          <input
+            ref={replaceFileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleReplaceFile}
+            disabled={isReplacing}
+          />
+          <Button
+            appearance="outline"
+            variant="primary"
+            onClick={() => replaceFileInputRef.current?.click()}
+            disabled={isReplacing}
+          >
+            {isReplacing ? "A substituir..." : "Substituir o ficheiro"}
+          </Button>
           <Button
             variant="primary"
             hasIcon
@@ -976,6 +991,29 @@ export default function DatasetsEditClient() {
   const refreshDataset = async () => {
     const updated = await fetchDataset(slug);
     setDataset(updated);
+  };
+
+  const handleResourceEdit = (resource: Resource) => {
+    if (!dataset) return;
+    show(
+      <ResourceEditPopupContent
+        resource={resource}
+        datasetId={dataset.id}
+        resourceTypes={resourceTypes}
+        onSaved={async () => {
+          hide();
+          await refreshDataset();
+          setApiSuccess("Recurso atualizado com sucesso.");
+          setTimeout(() => setApiSuccess(null), 10000);
+        }}
+        onCancel={hide}
+      />,
+      {
+        title: resource.title,
+        closeAriaLabel: "Fechar",
+        dimensions: "l",
+      }
+    );
   };
 
   const handleResourceClick = (resource: Resource) => {
@@ -1728,7 +1766,7 @@ export default function DatasetsEditClient() {
                             <button
                               className="text-primary-500 hover:text-primary-700"
                               title="Editar recurso"
-                              onClick={() => handleResourceClick(resource)}
+                              onClick={() => handleResourceEdit(resource)}
                             >
                               <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
                             </button>

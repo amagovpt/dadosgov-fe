@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, ButtonUploader, InputText, usePopupContext } from "@ama-pt/agora-design-system";
+import { Button, DragAndDropUploader, InputText, usePopupContext } from "@ama-pt/agora-design-system";
 
 interface FileUploadPopupContentProps {
   onConfirm: (files: File[], url: string) => void;
@@ -21,7 +21,8 @@ export default function FileUploadPopupContent({
 
   return (
     <div className="flex flex-col gap-6 p-2">
-      <ButtonUploader
+      <div className="[&_.download-icon]:hidden">
+      <DragAndDropUploader
         multiple
         label="Ficheiros"
         inputLabel="Selecione ou arraste os ficheiros"
@@ -38,6 +39,7 @@ export default function FileUploadPopupContent({
           });
         }}
       />
+      </div>
 
       <div className="flex items-center gap-4">
         <div className="flex-1 border-t border-neutral-300" />
