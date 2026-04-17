@@ -1,11 +1,9 @@
-import StatusCard from '@/components/datastories/Components/Primitives/StatusCard';
 import { InfoBlock } from '@/components/datastories/Components/Shared/InfoBlock';
 import Section from '@/components/datastories/Components/Shared/Section';
 import { Metadata } from 'next';
 import { CardCompound } from '@/components/datastories/Components/Shared/CardCompound';
 import FooterReference from '@/components/datastories/Components/Shared/FooterReference';
 import DataSourcesSection, { DataSourcesSectionProps } from '@/components/datastories/Components/Shared/DataSourcesSection';
-import { SourceInfoFooter } from '@/components/datastories/Components/Shared/SourceInfoFooter';
 
 export const metadata: Metadata = {
     title: 'Data Story - dados.gov.pt',
@@ -50,14 +48,13 @@ export default function DataStoryDetailPage() {
                 update: "2026-03-19T00:00:00Z",
                 download: "#",
             },
-            label: "Esta visualização permite identificar períodos de maior presença turística e compreender como o turismo altera temporariamente a dimensão da população no território."
         }, {
             title: 'Como se distribuem os hóspedes e a população residente no território?',
             description: "Observe como a atividade turística se distribui no território e como varia ao longo do tempo. Esta visualização permite comparar territórios e identificar onde o número de visitantes assume maior expressão face à população residente. ",
             className: 'bg-white',
             extraPy: 'pt-[64px]',
             iFrame: {
-                className: 'min-[1440px]:!h-[860px] min-[1024px]:!h-[662px] min-[768px]:!h-[505px] min-[425px]:!h-[332px] min-[375px]:!h-[300px] min-[320px]:!h-[380px]',
+                className: 'min-[1440px]:!h-[870px] min-[1024px]:!h-[662px] min-[768px]:!h-[505px] min-[425px]:!h-[332px] min-[375px]:!h-[300px] min-[320px]:!h-[380px]',
                 src: 'https://app.powerbi.com/view?r=eyJrIjoiMGYxNjMzNjgtYmFmYy00Njg2LWExY2QtMmY4MjgwNjM1YmExIiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
             source: {
@@ -65,7 +62,6 @@ export default function DataStoryDetailPage() {
                 update: "2026-03-19T00:00:00Z",
                 download: "#",
             },
-            label: "Analise a distribuição do número de hóspedes e da população residente em Portugal."
         },
         {
             title: 'Proporção entre o número de hóspedes e residentes por município',
@@ -73,7 +69,7 @@ export default function DataStoryDetailPage() {
             className: 'bg-white',
             extraPy: 'pt-[64px]',
             iFrame: {
-                className: 'min-[1440px]:!h-[860px] min-[1024px]:!h-[662px] min-[768px]:!h-[505px] min-[425px]:!h-[332px] min-[375px]:!h-[300px] min-[320px]:!h-[380px]',
+                className: 'min-[1440px]:!h-[870px] min-[1024px]:!h-[662px] min-[768px]:!h-[505px] min-[425px]:!h-[332px] min-[375px]:!h-[300px] min-[320px]:!h-[380px]',
                 src: 'https://app.powerbi.com/view?r=eyJrIjoiMzdlYWZjYjItZjMwZS00ZGZiLTgxY2MtMTE4YmJkY2I2ZmMwIiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
             source: {
@@ -81,7 +77,6 @@ export default function DataStoryDetailPage() {
                 update: "2026-03-19T00:00:00Z",
                 download: "#",
             },
-            label: "Este gráfico permite analisar a relação entre visitantes e população local em cada território. Utilize os filtros para explorar os dados por ano ou mês."
         },
         {
             title: 'Percentagem do número de hóspedes face à população residente em cada município',
@@ -89,7 +84,7 @@ export default function DataStoryDetailPage() {
             className: 'bg-white',
             extraPy: 'py-[64px]',
             iFrame: {
-                className: 'min-[1440px]:!h-[860px] min-[1024px]:!h-[662px] min-[768px]:!h-[505px] min-[425px]:!h-[332px] min-[375px]:!h-[300px] min-[320px]:!h-[380px]',
+                className: 'min-[1440px]:!h-[870px] min-[1024px]:!h-[662px] min-[768px]:!h-[505px] min-[425px]:!h-[332px] min-[375px]:!h-[300px] min-[320px]:!h-[380px]',
                 src: 'https://app.powerbi.com/view?r=eyJrIjoiODU5YzhhZDgtNTdlNC00MGIzLTlhMjgtZTRkNjZlYjc2NjIwIiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
             source: {
@@ -97,7 +92,6 @@ export default function DataStoryDetailPage() {
                 update: "2026-03-19T00:00:00Z",
                 download: "#",
             },
-            label: "Explore a percentagem de hóspedes em relação à população residente. Territórios com percentagens mais elevadas indicam uma presença turística mais intensa em relação à população local. Utilize os filtros temporais para observar como esta relação varia ao longo do tempo. "
         }],
         dataSourcesSection: {
             title: 'Datasets utilizados nesta página',
@@ -144,20 +138,21 @@ export default function DataStoryDetailPage() {
                 </InfoBlock.Root>
             </Section>
             {data.sections.map((section, index) => (
-                <Section className={"flex items-center justify-center " + section.className} key={index}>
+                <Section className={"flex flex-col items-center justify-center gap-[64px] " + section.className} key={index}>
                     <InfoBlock.Root className={(section.extraPy ? section.extraPy : 'pt-[64px]') + ' gap-64'}>
                         <InfoBlock.Header className='gap-16'>
                             <InfoBlock.Title titleLevel="h2" title={section.title} className='text-2xl font-bold text-primary-900' />
                             <InfoBlock.Description className='whitespace-pre-wrap text-m-light text-black max-w-[500px] ' description={section.description} />
                         </InfoBlock.Header>
-                        <InfoBlock.IFrame
-                            src={section.iFrame.src}
-                            className={section.iFrame.className}
-                        />
-                        <InfoBlock.Content>
-                            <InfoBlock.Description className='text-m-regular text-black' description={section.label} />
-                        </InfoBlock.Content>
                     </InfoBlock.Root>
+                    <div className='w-full flex flex-col items-center justify-center gap-[128px] pt-[32px]  bg-primary-100'>
+                        <div className='container -mb-[54px] '>
+                            <InfoBlock.IFrame
+                                src={section.iFrame.src}
+                                className={section.iFrame.className}
+                            />
+                        </div>
+                    </div>
                 </Section>
             ))}
             <DataSourcesSection {...data.dataSourcesSection as DataSourcesSectionProps} className='mt-[96px]' />
