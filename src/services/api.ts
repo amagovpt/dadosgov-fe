@@ -457,8 +457,20 @@ export async function fetchOrganizations(
 
     if (filters) {
       if (filters.q) params.set("q", filters.q);
-      if (filters.badge) params.set("badge", filters.badge);
       if (filters.sort) params.set("sort", filters.sort);
+
+      const arrayParams: [string, string | string[] | undefined][] = [
+        ["badge", filters.badge],
+        ["organization", filters.organization],
+      ];
+      for (const [key, value] of arrayParams) {
+        if (!value) continue;
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.set(key, value);
+        }
+      }
     }
 
     const url = `${API_BASE_URL}/organizations/?${params.toString()}`;

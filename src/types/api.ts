@@ -139,8 +139,9 @@ export interface OrgBadges {
 
 export interface OrganizationFilters {
   q?: string;
-  badge?: string;
+  badge?: string | string[];
   sort?: string;
+  organization?: string | string[];
 }
 
 export interface Metric {

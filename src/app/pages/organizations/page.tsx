@@ -18,7 +18,8 @@ export default async function OrganizationsPage({
 
     const filters: OrganizationFilters = {};
     if (resolved?.q) filters.q = String(resolved.q);
-    if (resolved?.badge) filters.badge = String(resolved.badge);
+    if (resolved?.badge) filters.badge = resolved.badge;
+    if (resolved?.organization) filters.organization = resolved.organization;
     if (resolved?.sort) filters.sort = String(resolved.sort);
 
     // Relevance sort: when no search query, fall back to default (most recent first)
@@ -27,10 +28,11 @@ export default async function OrganizationsPage({
         apiFilters.sort = '-last_modified';
     }
 
-    const [initialData, siteInfo, orgBadges] = await Promise.all([
+    const [initialData, siteInfo, orgBadges, allOrgsRes] = await Promise.all([
         fetchOrganizations(page, 20, apiFilters),
         fetchSiteInfo(),
         fetchOrgBadges(),
+        fetchOrganizations(1, 500, { sort: 'name' }),
     ]);
 
     const badgeKeys = Object.keys(orgBadges);
@@ -49,6 +51,7 @@ export default async function OrganizationsPage({
             orgBadges={orgBadges}
             orgBadgeCounts={orgBadgesWithCounts}
             initialFilters={filters}
+            allOrganizations={allOrgsRes.data}
         />
     );
 }
