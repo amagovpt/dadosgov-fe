@@ -116,13 +116,10 @@ const REUSE_TOGGLE_FILTERS = {
   atualizacao: {
     title: "Data da atualização",
     options: [
-<<<<<<< HEAD
       { id: "all", label: "Todos" },
       { id: "30_days", label: "Os últimos 30 dias" },
       { id: "12_months", label: "Os últimos 12 meses" },
       { id: "3_years", label: "Os últimos 3 anos" },
-=======
->>>>>>> main
     ],
   },
 };
@@ -190,11 +187,7 @@ export default function ReusesClient({
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<
     Record<ReuseFilterKey, string>
   >({
-<<<<<<< HEAD
     atualizacao: detectAtualizacaoFromParams(initialFilters),
-=======
-    atualizacao: detectAtualizacaoFromParams(initialFilters),
->>>>>>> main
   });
 
   const handleToggleFilterChange = (filterKey: ReuseFilterKey, optionId: string) => {

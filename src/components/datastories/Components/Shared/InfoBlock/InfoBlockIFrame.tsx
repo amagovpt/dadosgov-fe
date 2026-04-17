@@ -34,15 +34,13 @@ export default function InfoBlockIFrame({
 
 
     return (
-        <div
-            className={twJoin("relative overflow-hidden pb-[56%] flex item-center justify-center h-full", className)}
-        >
+        <div className={twJoin("relative overflow-hidden flex item-center justify-center h-full", className)}>
             <iframe
                 ref={iframeRef}
                 src={embedUrl}
                 className='absolute top-0 left-0 w-full h-full'
                 style={{
-                    clipPath: 'inset(0 0 115px 0)',
+                    clipPath: 'inset(0 0 118px 0)',
                     top: 0,
                 }}
                 allow="fullscreen"

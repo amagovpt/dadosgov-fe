@@ -13,55 +13,55 @@ export default function DataStoryDetailPage() {
 
     const data = {
         hero: {
-            title: 'Esperança de vida em Portugal: evolução e diferenças no território',
-            description: `A esperança de vida da população em Portugal pode ser analisada a partir de dois indicadores relevantes: a esperança de vida à nascença e a esperança de vida aos 65 anos. Ambos contribuem para compreender as condições de vida da população e a evolução do bem-estar ao longo do tempo, sendo calculados com base em períodos de referência de três anos consecutivos.
-                        \nA esperança de vida à nascença representa o número médio de anos que uma pessoa pode esperar viver, com base nas taxas de mortalidade do período em análise. Já a esperança de vida após os 65 anos corresponde ao número médio de anos adicionais que uma pessoa pode esperar viver a partir dessa idade, considerando essas mesmas taxas de mortalidade do mesmo período.
-                        \nA leitura conjunta destes dois indicadores permite analisar a previsão da esperança de vida  da população, a sua evolução ao longo do tempo e como se distribui pelo país, revelando diferenças visíveis em todo o território.`,
+            title: 'A densidade populacional influencia o consumo doméstico de energia elétrica?',
+            description: `A distribuição da população pelo território nacional influencia a forma como se vive e se consome energia em casa. Territórios mais povoados (mais densos) são diferentes de territórios menos povoados (mais dispersos) em termos de habitação, infraestruturas e necessidades de conforto térmico, o que tem um impacto direto no consumo doméstico de eletricidade.
+                        \nA densidade populacional mede a intensidade do povoamento, tendo em conta o número de pessoas por quilómetro quadrado. Já o consumo doméstico de energia elétrica mede os quilowatt-hora por habitante, e está associado a fatores como a tipologia e estado dos edifícios, a eficiência energética, as infraestruturas, os equipamentos e o clima.
+                        \nA análise conjunta dos dois indicadores, densidade populacional e consumo doméstico de energia elétrica, permite identificar alguns padrões no território. Por exemplo, por norma, regiões mais povoadas consomem menos eletricidade em casa, por oposição a regiões menos povoadas, que tendem a ser mais dispersas, com menor acesso a serviços, e mais expostas a temperaturas extremas.`,
             bigCards: [
                 {
-                    icon: 'agora-line-user',
-                    number: "81,5",
-                    detail: "anos",
-                    subtitle: "Esperança de vida à nascença",
-                    description: "Valor médio nacional",
+                    icon: 'agora-line-user-group',
+                    number: "117",
+                    detail: "hab. / km2",
+                    subtitle: "Densidade populacional",
+                    description: "Média nacional",
                 },
                 {
                     icon: 'agora-line-user-group',
-                    number: "85",
-                    detail: "anos",
-                    subtitle: "Esperança de vida após os 65 anos",
-                    description: "Valor médio nacional",
+                    number: "4 805",
+                    detail: "kWh / hab.",
+                    subtitle: "Consumo doméstico de energia elétrica por habitante",
+                    description: "Média nacional",
                 },
             ],
-            period: "2022 - 2024"
+            period: "2024"
         },
         sections: [{
             title: 'Como varia a esperança de vida entre sub-regiões?',
-            description: "Explore como estes indicadores se distribuem pelas diferentes sub-regiões do país. A análise territorial ajuda a identificar padrões regionais e a perceber como a esperança de vida e o envelhecimento podem diferir consoante as características dos territórios.",
+            description: "Descubra como a densidade populacional e o consumo doméstico de energia elétrica se distribuem pelo país, comparando sub-regiões com perfis distintos e exple de que forma a população influencia o consumo de energia elétrica por habitante.",
             className: 'bg-white',
             extraPy: 'pt-[64px]',
             iFrame: {
                 className: 'min-[1440px]:!h-[800px] min-[1024px]:!h-[610px] min-[768px]:!h-[470px] min-[425px]:!h-[310px] min-[375px]:!h-[285px] min-[320px]:!h-[285px]',
-                src: 'https://app.powerbi.com/view?r=eyJrIjoiZjRlMjg2MjQtNzJkOS00MGM4LWExNmYtMmJhOTc3NDA2YTQ4IiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
+                src: 'https://app.powerbi.com/view?r=eyJrIjoiMzEzODY5ZjktNDQxMy00Mjc3LWIyZjktMjRlYWQ2ZTU1ZGFkIiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
         }, {
-            title: 'Como evolui a esperança de vida ao longo do tempo?',
-            description: "Acompanhe a evolução da esperança de vida à nascença e após os 65 anos, e observe como estes indicadores ajudam a compreender as mudanças na esperança de vida da população.",
+            title: 'Contrastes municipais em destaque',
+            description: "Explore como os municípios diferem na densidade populacional e no consumo de energia elétrica, evidenciando contrastes territoriais e a forma como locais mais ou menos povoados influenciam os padrões de consumo.",
             className: 'bg-white',
             extraPy: 'pt-[64px]',
             iFrame: {
                 className: 'min-[1440px]:!h-[800px] min-[1024px]:!h-[610px] min-[768px]:!h-[470px] min-[425px]:!h-[310px] min-[375px]:!h-[285px] min-[320px]:!h-[285px]',
-                src: 'https://app.powerbi.com/view?r=eyJrIjoiYzg0ZWE3ZWEtZmM4ZC00NmYxLTlmMTQtZTU4OWM3ZGM5MWIwIiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
+                src: 'https://app.powerbi.com/view?r=eyJrIjoiZDVlZmEzNDktNDgxOC00NWMzLWI1NmEtN2YxYzc0MjEyMGQ5IiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
         },
         {
-            title: 'Que sub-regiões registam maior esperança de vida?',
-            description: "Descubra quais são as sub-regiões que registam os valores mais elevados de esperança de vida à nascença e após os 65 anos, nos diferentes períodos.",
+            title: 'Como varia a densidade populacional e o consumo doméstico de energia elétrica nas sub-regiões?',
+            description: "Descubra como a densidade populacional e o consumo doméstico de energia elétrica, se distribuem pelo país, comparando sub-regiões com perfis distintos.",
             className: 'bg-white',
             extraPy: 'pt-[64px]',
             iFrame: {
                 className: 'min-[1440px]:!h-[800px] min-[1024px]:!h-[610px] min-[768px]:!h-[470px] min-[425px]:!h-[310px] min-[375px]:!h-[285px] min-[320px]:!h-[285px]',
-                src: 'https://app.powerbi.com/view?r=eyJrIjoiMjZhN2Y5NjctZTJlNC00NzNmLWE2NmMtMTQ1ODUzMTBhYzk4IiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
+                src: 'https://app.powerbi.com/view?r=eyJrIjoiOWI0OTQ1N2UtNWE0OC00OWMzLWJiMjAtMGQ1MTU3ZjQyZDI0IiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
         }],
         dataSourcesSection: {
@@ -106,7 +106,7 @@ export default function DataStoryDetailPage() {
                                     </CardCompound.Root>
                                 ))}
                             </div>
-                            <FooterReference text='Período de referência' period={data.hero.period} />
+                            <FooterReference text='Ano de referência' period={data.hero.period} />
                         </div>
                     </InfoBlock.Content>
                 </InfoBlock.Root>
@@ -118,9 +118,10 @@ export default function DataStoryDetailPage() {
                             <InfoBlock.Title titleLevel="h2" title={section.title} className='text-2xl font-bold text-primary-900' />
                             <InfoBlock.Description className='whitespace-pre-wrap text-m-light text-black max-w-[500px] ' description={section.description} />
                         </InfoBlock.Header>
+
                     </InfoBlock.Root>
                     <div className='w-full flex flex-col items-center justify-center gap-[128px] pt-[32px]  bg-primary-100'>
-                        <div className='container -mb-[54px] '>
+                        <div className='container -mb-[54px]'>
                             <InfoBlock.IFrame
                                 src={section.iFrame.src}
                                 className={section.iFrame.className}

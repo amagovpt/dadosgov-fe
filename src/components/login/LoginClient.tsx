@@ -314,7 +314,7 @@ function LoginContent() {
                     </p>
                     <button
                       className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
-                      onClick={() => setCmdModalOpen(true)}
+                      onClick={() => { setCmdModalOpen(true); window.scrollTo(0, 0); }}
                     >
                       Descubra como criar conta
                     </button>
@@ -423,7 +423,7 @@ function LoginContent() {
                     </p>
                     <button
                       className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
-                      onClick={() => setEidasModalOpen(true)}
+                      onClick={() => { setEidasModalOpen(true); window.scrollTo(0, 0); }}
                     >
                       Descubra como criar conta
                     </button>

@@ -2,23 +2,38 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Sidebar, SidebarItem, InputSearch, Icon, Pill, Toggle, Button } from "@ama-pt/agora-design-system";
-import { OrgBadges, OrganizationFilters, SiteMetrics } from "@/types/api";
+import {
+  Sidebar,
+  SidebarItem,
+  InputSearch,
+  Icon,
+  Pill,
+  Toggle,
+  Button,
+  Checkbox,
+} from "@ama-pt/agora-design-system";
+import { OrgBadges, Organization, OrganizationFilters, SiteMetrics } from "@/types/api";
 import { CategoryToggles } from "@/components/CategoryToggles";
 
 const ORG_TYPE_OPTIONS = [
   { id: "all", label: "Todos", badge: "" },
   { id: "public-service", label: "Serviço público", badge: "public-service" },
   { id: "local-authority", label: "Autoridade local", badge: "local-authority" },
-  { id: "company", label: "Negócios", badge: "company" },
+  { id: "company", label: "Empresas", badge: "company" },
   { id: "association", label: "Associação", badge: "association" },
 ];
+
+function toArray(v: string | string[] | undefined): string[] {
+  if (!v) return [];
+  return Array.isArray(v) ? v : [v];
+}
 
 interface OrganizationsFiltersProps {
   siteMetrics: SiteMetrics;
   orgBadges: OrgBadges;
   orgBadgeCounts: Record<string, number>;
   initialFilters: OrganizationFilters;
+  allOrganizations?: Organization[];
 }
 
 const BADGE_LABELS_PT: Record<string, string> = {
@@ -34,25 +49,50 @@ export const OrganizationsFilters = ({
   orgBadges,
   orgBadgeCounts,
   initialFilters,
+  allOrganizations = [],
 }: OrganizationsFiltersProps) => {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [badgeSearch, setBadgeSearch] = React.useState("");
+  const [orgSearch, setOrgSearch] = React.useState("");
 
-  const activeBadge = initialFilters.badge || "";
-  const selectedOrgType = activeBadge || "all";
+  const activeBadges = toArray(initialFilters.badge);
+  const activeOrgs = toArray(initialFilters.organization);
+  const selectedOrgType = activeBadges.length === 1 ? activeBadges[0] : "all";
 
   const totalOrgs = Object.values(orgBadgeCounts).reduce((sum, c) => sum + c, 0);
 
-  const handleOrgTypeChange = (optionId: string) => {
+  const buildUrl = (updates: {
+    badges?: string[];
+    orgs?: string[];
+  }) => {
     const newParams = new URLSearchParams();
     if (initialFilters.q) newParams.set("q", initialFilters.q);
     if (initialFilters.sort) newParams.set("sort", initialFilters.sort);
-    if (optionId !== "all") {
-      newParams.set("badge", optionId);
-    }
+    const badges = updates.badges !== undefined ? updates.badges : activeBadges;
+    const orgs = updates.orgs !== undefined ? updates.orgs : activeOrgs;
+    badges.forEach((b) => newParams.append("badge", b));
+    orgs.forEach((o) => newParams.append("organization", o));
     newParams.set("page", "1");
     const qs = newParams.toString();
     router.replace(`/pages/organizations${qs ? `?${qs}` : ""}`, { scroll: false });
+  };
+
+  const handleOrgTypeChange = (optionId: string) => {
+    buildUrl({ badges: optionId === "all" ? [] : [optionId] });
+  };
+
+  const toggleBadge = (kind: string) => {
+    const next = activeBadges.includes(kind)
+      ? activeBadges.filter((b) => b !== kind)
+      : [...activeBadges, kind];
+    buildUrl({ badges: next });
+  };
+
+  const toggleOrg = (id: string) => {
+    const next = activeOrgs.includes(id)
+      ? activeOrgs.filter((o) => o !== id)
+      : [...activeOrgs, id];
+    buildUrl({ orgs: next });
   };
 
   const entries = Object.keys(orgBadges).map((kind) => ({
@@ -61,23 +101,18 @@ export const OrganizationsFilters = ({
     count: orgBadgeCounts[kind] ?? 0,
   }));
 
-  const filteredEntries = searchQuery.trim()
-    ? entries.filter((entry) => entry.label.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredEntries = badgeSearch.trim()
+    ? entries.filter((entry) => entry.label.toLowerCase().includes(badgeSearch.toLowerCase()))
     : entries;
 
-  const handleBadgeClick = (kind: string) => {
-    const newParams = new URLSearchParams();
-    if (initialFilters.q) newParams.set("q", initialFilters.q);
-    if (initialFilters.sort) newParams.set("sort", initialFilters.sort);
-    if (activeBadge === kind) {
-      newParams.delete("badge");
-    } else {
-      newParams.set("badge", kind);
-    }
-    newParams.set("page", "1");
-    const qs = newParams.toString();
-    router.replace(`/pages/organizations${qs ? `?${qs}` : ""}`, { scroll: false });
-  };
+  const orgItems = allOrganizations.map((o) => ({ id: o.id, name: o.name }));
+  const selectedOrgItems = activeOrgs
+    .filter((id) => !orgItems.some((o) => o.id === id))
+    .map((id) => ({ id, name: id }));
+  const allOrgItems = [...selectedOrgItems, ...orgItems];
+  const filteredOrgs = orgSearch.trim()
+    ? allOrgItems.filter((o) => o.name.toLowerCase().includes(orgSearch.toLowerCase()))
+    : allOrgItems;
 
   return (
     <div className="h-full organizations-filters">
@@ -138,7 +173,56 @@ export const OrganizationsFilters = ({
       <Sidebar variant="filter" className="font-bold">
         <SidebarItem
           variant="filter"
-          open={true}
+          item={{
+            children: <span className="font-bold">Organizações</span>,
+            hasIcon: true,
+            collapsedIconTrailing: "agora-line-minus-circle",
+            collapsedIconHoverTrailing: "agora-solid-minus-circle",
+            expandedIconTrailing: "agora-line-plus-circle",
+            expandedIconHoverTrailing: "agora-solid-plus-circle",
+          }}
+          hasPill={activeOrgs.length > 0}
+          pillValue={activeOrgs.length}
+        >
+          <div className="mt-16">
+            <div className="mb-4 mt-8 relative">
+              <InputSearch
+                label="Pesquisar organização"
+                hideLabel
+                placeholder="Pesquisar"
+                value={orgSearch}
+                onChange={(e) => setOrgSearch(e.target.value)}
+              />
+              <Icon
+                name="agora-solid-search"
+                className="absolute right-12 top-1/2 transform -translate-y-1/2 text-primary-500 w-20 h-20 pointer-events-none"
+                aria-hidden="true"
+              />
+            </div>
+            <div
+              className={`flex flex-col gap-2 mt-16 pb-16 ${filteredOrgs.length > 5 ? "max-h-[225px] overflow-y-auto" : ""}`}
+            >
+              {filteredOrgs.length > 0 ? (
+                filteredOrgs.map((o) => (
+                  <Checkbox
+                    key={o.id}
+                    label={o.name}
+                    className="font-bold"
+                    value={o.id}
+                    name="organization"
+                    checked={activeOrgs.includes(o.id)}
+                    onChange={() => toggleOrg(o.id)}
+                  />
+                ))
+              ) : (
+                <span className="text-sm text-neutral-500">Nenhuma organização encontrada.</span>
+              )}
+            </div>
+          </div>
+        </SidebarItem>
+
+        <SidebarItem
+          variant="filter"
           item={{
             children: <span className="font-bold">Tipo de Organização</span>,
             hasIcon: true,
@@ -147,6 +231,8 @@ export const OrganizationsFilters = ({
             expandedIconTrailing: "agora-line-plus-circle",
             expandedIconHoverTrailing: "agora-solid-plus-circle",
           }}
+          hasPill={activeBadges.length > 0}
+          pillValue={activeBadges.length}
         >
           <div className="mt-16">
             {entries.length > 10 && (
@@ -155,8 +241,8 @@ export const OrganizationsFilters = ({
                   label="Pesquisar badge"
                   hideLabel
                   placeholder="Pesquisar"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={badgeSearch}
+                  onChange={(e) => setBadgeSearch(e.target.value)}
                 />
                 <Icon
                   name="agora-solid-search"
@@ -165,28 +251,17 @@ export const OrganizationsFilters = ({
                 />
               </div>
             )}
-            <div className="flex flex-col gap-8 mt-16 pb-16">
+            <div className="flex flex-col gap-2 mt-16 pb-16">
               {filteredEntries.map((entry) => (
-                <button
+                <Checkbox
                   key={entry.kind}
-                  type="button"
-                  onClick={() => handleBadgeClick(entry.kind)}
-                  className={`flex items-center justify-between w-full px-12 py-8 rounded-8 text-sm transition-colors cursor-pointer ${
-                    activeBadge === entry.kind
-                      ? "bg-primary-100 text-primary-700 font-bold"
-                      : "text-neutral-900 font-bold hover:bg-neutral-100"
-                  }`}
-                >
-                  <span>{entry.label}</span>
-                  <Pill
-                    variant="neutral"
-                    appearance="outline"
-                    circular={false}
-                    className="text-xs font-medium text-neutral-500 ml-8"
-                  >
-                    {entry.count.toLocaleString("pt-PT")}
-                  </Pill>
-                </button>
+                  label={`${entry.label} (${entry.count.toLocaleString("pt-PT")})`}
+                  className="font-bold"
+                  value={entry.kind}
+                  name="badge"
+                  checked={activeBadges.includes(entry.kind)}
+                  onChange={() => toggleBadge(entry.kind)}
+                />
               ))}
               {filteredEntries.length === 0 && (
                 <span className="text-sm text-neutral-500">Nenhum badge encontrado.</span>

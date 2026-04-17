@@ -37,6 +37,7 @@ export default function OrganizationsNewClient() {
   const [orgLogoPreview, setOrgLogoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
+  const [orgLogoError, setOrgLogoError] = useState<string | null>(null);
   const [orgSuggestions, setOrgSuggestions] = useState<OrganizationSuggestion[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
 
@@ -342,8 +343,21 @@ export default function OrganizationsNewClient() {
                     accept=".jpg,.jpeg,.png"
                     maxSize={4194304}
                     maxCount={1}
+                    maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                    forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                    hasError={!!orgLogoError}
+                    hasFeedback={!!orgLogoError}
+                    feedbackState="danger"
+                    feedbackText={orgLogoError ?? undefined}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const file = e.target.files?.[0] || null;
+                      if (file && file.size > 4194304) {
+                        setOrgLogoError("O ficheiro excede o tamanho máximo de 4 MB.");
+                        setOrgLogo(null);
+                        setOrgLogoPreview(null);
+                        return;
+                      }
+                      setOrgLogoError(null);
                       setOrgLogo(file);
                       if (file) {
                         const url = URL.createObjectURL(file);
