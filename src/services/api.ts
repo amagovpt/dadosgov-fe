@@ -1,6 +1,8 @@
 import {
   Activity,
   APIResponse,
+  ApiToken,
+  ApiTokenCreated,
   ContactPoint,
   ContactPointCreatePayload,
   Dataservice,
@@ -2892,24 +2894,32 @@ export async function fetchFullProfile(): Promise<UserPublic> {
   return await res.json();
 }
 
-export async function generateApiKey(): Promise<string> {
+export async function fetchApiTokens(): Promise<ApiToken[]> {
+  const res = await fetch(`${API_AUTH_URL}/me/api_tokens/`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(`Failed to fetch API tokens: ${res.statusText}`);
+  return await res.json();
+}
+
+export async function generateApiKey(name?: string): Promise<ApiTokenCreated> {
   const res = await fetch(`${API_AUTH_URL}/me/api_tokens/`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
+    body: JSON.stringify(name ? { name } : {}),
   });
   if (!res.ok) throw new Error(`Failed to generate API key: ${res.statusText}`);
-  const data = await res.json();
-  return data.token;
+  return await res.json();
 }
 
-export async function clearApiKey(tokenId: string): Promise<void> {
+export async function revokeApiToken(tokenId: string): Promise<void> {
   const res = await fetch(`${API_AUTH_URL}/me/api_tokens/${tokenId}/`, {
     method: "DELETE",
     credentials: "include",
   });
-  if (!res.ok) throw new Error(`Failed to clear API key: ${res.statusText}`);
+  if (!res.ok) throw new Error(`Failed to revoke API token: ${res.statusText}`);
 }
 
 export async function requestEmailChange(
