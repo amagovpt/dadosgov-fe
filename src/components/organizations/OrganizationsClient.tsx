@@ -34,6 +34,7 @@ interface OrganizationsClientProps {
   orgBadges: OrgBadges;
   orgBadgeCounts: Record<string, number>;
   initialFilters: OrganizationFilters;
+  allOrganizations?: Organization[];
 }
 
 const SORT_OPTIONS: Record<string, string> = {
@@ -57,6 +58,7 @@ export default function OrganizationsClient({
   orgBadges,
   orgBadgeCounts,
   initialFilters,
+  allOrganizations,
 }: OrganizationsClientProps) {
   const router = useRouter();
   const { data: organizations, total, page_size } = initialData;
@@ -74,7 +76,18 @@ export default function OrganizationsClient({
     (overrides: Record<string, string | null>) => {
       const params = new URLSearchParams();
       if (initialFilters.q) params.set("q", initialFilters.q);
-      if (initialFilters.badge) params.set("badge", initialFilters.badge);
+      if (initialFilters.badge) {
+        const badges = Array.isArray(initialFilters.badge)
+          ? initialFilters.badge
+          : [initialFilters.badge];
+        badges.forEach((b) => params.append("badge", b));
+      }
+      if (initialFilters.organization) {
+        const orgs = Array.isArray(initialFilters.organization)
+          ? initialFilters.organization
+          : [initialFilters.organization];
+        orgs.forEach((o) => params.append("organization", o));
+      }
       if (initialFilters.sort) params.set("sort", initialFilters.sort);
       for (const [key, value] of Object.entries(overrides)) {
         if (value) {
@@ -215,6 +228,7 @@ export default function OrganizationsClient({
                   orgBadges={orgBadges}
                   orgBadgeCounts={orgBadgeCounts}
                   initialFilters={initialFilters}
+                  allOrganizations={allOrganizations}
                 />
               </div>
             )}
