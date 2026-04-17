@@ -122,11 +122,7 @@ const REUSE_TOGGLE_FILTERS = {
       { id: "12_months", label: "Os últimos 12 meses" },
       { id: "3_years", label: "Os últimos 3 anos" },
 =======
-      { id: "all", label: "Todos", count: "352" },
-      { id: "30_days", label: "Os últimos 30 dias", count: "96" },
-      { id: "12_months", label: "Os últimos 12 meses", count: "279" },
-      { id: "3_years", label: "Os últimos 3 anos", count: "352" },
->>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
+>>>>>>> main
     ],
   },
 };
@@ -197,8 +193,8 @@ export default function ReusesClient({
 <<<<<<< HEAD
     atualizacao: detectAtualizacaoFromParams(initialFilters),
 =======
-    atualizacao: "all",
->>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
+    atualizacao: detectAtualizacaoFromParams(initialFilters),
+>>>>>>> main
   });
 
   const handleToggleFilterChange = (filterKey: ReuseFilterKey, optionId: string) => {

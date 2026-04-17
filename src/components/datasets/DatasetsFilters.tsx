@@ -40,13 +40,7 @@ const DATASET_TOGGLE_FILTERS = {
       { id: "12_months", label: "Os últimos 12 meses", description: undefined as string | undefined },
       { id: "3_years", label: "Os últimos 3 anos", description: undefined as string | undefined },
 =======
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet...", count: "14 mil" },
-      { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL...", count: "9,3 mil" },
-      { id: "geographic", label: "Geográfico", description: "geojson, shp, kml...", count: "4,6 mil" },
-      { id: "documents", label: "Documentos", description: "pdf, doc, docx, md, txt, ...", count: "2,8 mil" },
-      { id: "other", label: "Outro", count: "29 mil" },
->>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
+>>>>>>> main
     ],
   },
   rotulo: {
@@ -56,9 +50,9 @@ const DATASET_TOGGLE_FILTERS = {
       { id: "all", label: "Todos", description: undefined as string | undefined },
       { id: "high_value", label: "Conjuntos de dados de Elevado Valor", description: undefined as string | undefined },
 =======
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "high_value", label: "Conjuntos de dados de Elevado Valor", count: "591" },
->>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
+      { id: "all", label: "Todos", description: undefined as string | undefined },
+      { id: "high_value", label: "Conjuntos de dados de Elevado Valor", description: undefined as string | undefined },
+>>>>>>> main
     ],
   },
 };
@@ -140,11 +134,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
     rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
   }));
 =======
-  const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>({
-    formato: "all",
-    rotulo: "all",
-  });
->>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
+>>>>>>> main
 
   const handleToggleFilterChange = (filterKey: ToggleFilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
@@ -496,7 +486,8 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
 <<<<<<< HEAD
               atualizacao: "all",
 =======
->>>>>>> 765da50 (fix: review frontoffice filters for reuses and datasets pages)
+              atualizacao: "all",
+>>>>>>> main
               rotulo: "all",
             });
             router.replace("/pages/datasets", { scroll: false });
