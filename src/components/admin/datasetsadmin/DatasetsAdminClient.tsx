@@ -22,6 +22,7 @@ import {
   createDataset,
   updateDataset,
   uploadResource,
+  updateResource,
   createResource,
   fetchLicenses,
   fetchFrequencies,
@@ -32,6 +33,7 @@ import {
   suggestTags,
   fetchOrgContactPoints,
   createContactPoint,
+  fetchResourceTypes,
 } from "@/services/api";
 import {
   License,
@@ -41,10 +43,11 @@ import {
   Dataset,
   TagSuggestion,
   ContactPoint,
+  ResourceType,
 } from "@/types/api";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import FileUploadModal from "@/components/admin/FileUploadModal";
+import FileUploadModal, { PendingResourceMeta } from "@/components/admin/FileUploadModal";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
@@ -136,6 +139,8 @@ export default function DatasetsAdminClient({
 
   // Step 3 state
   const [resourceUrls, setResourceUrls] = useState<string[]>([]);
+  const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [resourceMetadata, setResourceMetadata] = useState<Record<string, PendingResourceMeta>>({});
 
   // API state
   const [createdDataset, setCreatedDataset] = useState<Dataset | null>(null);
@@ -396,7 +401,7 @@ export default function DatasetsAdminClient({
   useEffect(() => {
     async function loadDropdownData() {
       try {
-        const [licensesData, frequenciesData, granularitiesData, zonesData, myDatasetsData, tagsData] =
+        const [licensesData, frequenciesData, granularitiesData, zonesData, myDatasetsData, tagsData, resTypes] =
           await Promise.all([
             fetchLicenses(),
             fetchFrequencies(),
@@ -404,6 +409,7 @@ export default function DatasetsAdminClient({
             suggestSpatialZones("pt", 50),
             fetchMyDatasets(1, 1),
             suggestTags("", 50),
+            fetchResourceTypes(),
           ]);
         setLicenses(licensesData);
         setFrequencies(frequenciesData);
@@ -411,6 +417,7 @@ export default function DatasetsAdminClient({
         setSpatialZones(zonesData);
         setHasDatasets(myDatasetsData.data.length > 0);
         setTags(tagsData);
+        setResourceTypes(resTypes);
       } catch (error) {
         console.error("Error loading dropdown data:", error);
       }
@@ -580,6 +587,22 @@ export default function DatasetsAdminClient({
     }
   };
 
+  const handleEditMeta = (key: string, meta: PendingResourceMeta, newUrl?: string) => {
+    if (newUrl !== undefined && key.startsWith("url-")) {
+      const oldUrl = key.slice(4);
+      if (oldUrl !== newUrl) {
+        setResourceUrls((prev) => prev.map((u) => (u === oldUrl ? newUrl : u)));
+        setResourceMetadata((prev) => {
+          const updated = { ...prev, [`url-${newUrl}`]: meta };
+          delete updated[key];
+          return updated;
+        });
+        return;
+      }
+    }
+    setResourceMetadata((prev) => ({ ...prev, [key]: meta }));
+  };
+
   const handleStep3Next = async () => {
     const trimmedUrls = resourceUrls.map((u) => u.trim()).filter(Boolean);
     const hasFiles = uploadedFiles.length > 0;
@@ -607,13 +630,23 @@ export default function DatasetsAdminClient({
     try {
       if (hasFiles) {
         for (const file of uploadedFiles) {
-          await uploadResource(createdDataset.id, file);
+          const meta = resourceMetadata[`file-${file.name}`];
+          const resource = await uploadResource(createdDataset.id, file);
+          if (meta) {
+            await updateResource(createdDataset.id, resource.id, {
+              title: meta.title || file.name,
+              type: meta.resourceType || "main",
+              description: meta.description || undefined,
+            });
+          }
         }
       }
       for (const url of trimmedUrls) {
+        const meta = resourceMetadata[`url-${url}`];
         await createResource(createdDataset.id, {
-          title: url,
-          type: "main",
+          title: meta?.title || url,
+          type: meta?.resourceType || "main",
+          description: meta?.description || undefined,
           url,
           filetype: "remote",
           format: "",
@@ -1350,6 +1383,14 @@ export default function DatasetsAdminClient({
                   onUrlRemove={(url) => {
                     setResourceUrls((prev) => prev.filter((u) => u !== url));
                   }}
+                  onFileReplace={(index, file) => {
+                    const updated = [...uploadedFiles];
+                    updated[index] = file;
+                    setUploadedFiles(updated);
+                  }}
+                  resourceTypes={resourceTypes}
+                  resourceMetadata={resourceMetadata}
+                  onEditMeta={handleEditMeta}
                 />
                 {showInvalidUrlError && (
                   <span className="text-danger-500 text-sm">

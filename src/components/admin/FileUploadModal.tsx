@@ -1,8 +1,24 @@
 "use client";
 
-import React, { useRef } from "react";
-import { Button, usePopupContext } from "@ama-pt/agora-design-system";
+import React, { useRef, useState } from "react";
+import {
+  Button,
+  DropdownOption,
+  DropdownSection,
+  InputText,
+  InputTextArea,
+  StatusCard,
+  usePopupContext,
+} from "@ama-pt/agora-design-system";
 import FileUploadPopupContent from "@/components/admin/FileUploadPopupContent";
+import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import { ResourceType } from "@/types/api";
+
+export interface PendingResourceMeta {
+  title: string;
+  resourceType: string;
+  description: string;
+}
 
 interface FileUploadModalProps {
   uploadedFiles: File[];
@@ -11,60 +27,231 @@ interface FileUploadModalProps {
   onUrlAdd: (url: string) => void;
   onUrlRemove: (url: string) => void;
   hasError?: boolean;
+  resourceTypes: ResourceType[];
+  resourceMetadata: Record<string, PendingResourceMeta>;
+  onEditMeta: (key: string, meta: PendingResourceMeta, newUrl?: string) => void;
+  onFileReplace: (index: number, file: File) => void;
+}
+
+function DeleteConfirmContent({ name, onConfirm }: { name: string; onConfirm: () => void }) {
+  const { hide } = usePopupContext();
+  return (
+    <div className="flex flex-col p-2">
+      <StatusCard type="info" description="Esta ação é irreversível." />
+      <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
+        Tem a certeza que pretende eliminar <span className="font-bold">{name}</span>?
+      </p>
+      <div className="flex justify-end gap-[18px]" style={{ marginTop: "32px" }}>
+        <Button variant="primary" appearance="outline" onClick={hide}>
+          Cancelar
+        </Button>
+        <Button
+          variant="danger"
+          appearance="solid"
+          hasIcon
+          leadingIcon="agora-line-trash"
+          leadingIconHover="agora-solid-trash"
+          onClick={() => {
+            onConfirm();
+            hide();
+          }}
+        >
+          Eliminar
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ResourceEditPendingPopupContent({
+  isUrl,
+  name,
+  initialMeta,
+  resourceTypes,
+  onSave,
+  onReplaceFile,
+}: {
+  isUrl: boolean;
+  name: string;
+  initialMeta: PendingResourceMeta;
+  resourceTypes: ResourceType[];
+  onSave: (meta: PendingResourceMeta, newUrl?: string) => void;
+  onReplaceFile?: (file: File) => void;
+}) {
+  const { hide } = usePopupContext();
+  const replaceFileInputRef = useRef<HTMLInputElement>(null);
+  const defaultType = initialMeta.resourceType || (resourceTypes[0]?.id ?? "main");
+  const [title, setTitle] = useState(initialMeta.title || name);
+  const resourceTypeRef = useRef(defaultType);
+  const [description, setDescription] = useState(initialMeta.description || "");
+  const [url, setUrl] = useState(isUrl ? name : "");
+
+  const handleSave = () => {
+    onSave(
+      { title: title.trim() || name, resourceType: resourceTypeRef.current, description: description.trim() },
+      isUrl ? url.trim() : undefined,
+    );
+    hide();
+  };
+
+  const handleReplaceFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onReplaceFile) return;
+    onSave({ title: title.trim() || name, resourceType: resourceTypeRef.current, description: description.trim() });
+    onReplaceFile(file);
+    hide();
+  };
+
+  return (
+    <div className="flex flex-col gap-[16px]" style={{ minHeight: "40vh" }}>
+      <div className="flex-1 flex flex-col gap-[16px]">
+        <InputText
+          label="Título *"
+          placeholder="Título do recurso"
+          id="pending-res-title"
+          value={title}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+        />
+
+        <IsolatedSelect
+          label="Tipo *"
+          placeholder="Selecione um tipo..."
+          id="pending-res-type"
+          defaultValue={defaultType}
+          onChangeRef={resourceTypeRef}
+        >
+          <DropdownSection name="pending-resource-types">
+            {resourceTypes.map((rt) => (
+              <DropdownOption key={rt.id} value={rt.id} selected={rt.id === defaultType}>
+                {rt.label}
+              </DropdownOption>
+            ))}
+          </DropdownSection>
+        </IsolatedSelect>
+
+        <InputTextArea
+          label="Descrição"
+          placeholder="Descrição do recurso"
+          id="pending-res-description"
+          rows={4}
+          value={description}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
+        />
+
+        {isUrl && (
+          <InputText
+            label="URL"
+            placeholder="https://"
+            id="pending-res-url"
+            value={url}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
+          />
+        )}
+      </div>
+
+      <div className="flex justify-between pt-[8px]">
+        <Button appearance="outline" variant="primary" onClick={hide}>
+          Cancelar
+        </Button>
+        <div className="flex gap-[8px]">
+          {!isUrl && onReplaceFile && (
+            <>
+              <input ref={replaceFileInputRef} type="file" className="hidden" onChange={handleReplaceFile} />
+              <Button
+                appearance="outline"
+                variant="primary"
+                onClick={() => replaceFileInputRef.current?.click()}
+              >
+                Substituir o ficheiro
+              </Button>
+            </>
+          )}
+          <Button
+            variant="primary"
+            hasIcon
+            trailingIcon="agora-line-check-circle"
+            trailingIconHover="agora-solid-check-circle"
+            onClick={handleSave}
+          >
+            Guardar
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function ResourceItem({
   name,
   size,
+  isUrl,
+  resourceTypes,
+  currentMeta,
+  onSaveMeta,
   onReplace,
   onRemove,
 }: {
   name: string;
   size?: string;
+  isUrl: boolean;
+  resourceTypes: ResourceType[];
+  currentMeta: PendingResourceMeta;
+  onSaveMeta: (meta: PendingResourceMeta, newUrl?: string) => void;
   onReplace?: (file: File) => void;
   onRemove: () => void;
 }) {
-  const replaceRef = useRef<HTMLInputElement>(null);
+  const { show } = usePopupContext();
+  const displayName = currentMeta.title || name;
+
+  const handleEdit = () => {
+    show(
+      <ResourceEditPendingPopupContent
+        isUrl={isUrl}
+        name={name}
+        initialMeta={currentMeta}
+        resourceTypes={resourceTypes}
+        onSave={onSaveMeta}
+        onReplaceFile={onReplace}
+      />,
+      { title: displayName, closeAriaLabel: "Fechar", dimensions: "l" },
+    );
+  };
+
+  const handleRemove = () => {
+    show(<DeleteConfirmContent name={displayName} onConfirm={onRemove} />, {
+      title: "Eliminar ficheiro",
+      closeAriaLabel: "Fechar",
+      dimensions: "s",
+    });
+  };
 
   return (
     <div className="file-item">
       <div className="file-info">
-        <span className="name">{name}</span>
+        <span className="name">{displayName}</span>
         {size && <span className="size">{size}</span>}
       </div>
       <div className="actions">
-        {onReplace && (
-          <span className="replace-action">
-            <Button
-              iconOnly
-              appearance="link"
-              variant="neutral"
-              hasIcon
-              leadingIcon="agora-line-refresh-ccw"
-              onClick={() => replaceRef.current?.click()}
-              aria-label={`Substituir ${name}`}
-            />
-            <input
-              ref={replaceRef}
-              type="file"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) onReplace(file);
-              }}
-              style={{ display: "none" }}
-            />
-          </span>
-        )}
-        <span className="delete-action">
+        <Button
+          iconOnly
+          appearance="outline"
+          variant="primary"
+          hasIcon
+          leadingIcon="agora-line-edit"
+          leadingIconHover="agora-solid-edit"
+          onClick={handleEdit}
+          aria-label={`Editar ${displayName}`}
+        />
+        <span className="delete-action error">
           <Button
             iconOnly
-            appearance="link"
-            variant="neutral"
+            appearance="outline"
+            variant="danger"
             hasIcon
             leadingIcon="agora-line-trash"
-            onClick={onRemove}
-            aria-label={`Remover ${name}`}
+            leadingIconHover="agora-solid-trash"
+            onClick={handleRemove}
+            aria-label={`Remover ${displayName}`}
           />
         </span>
       </div>
@@ -78,27 +265,36 @@ function ResourceList({
   onFileReplace,
   onFileRemove,
   onUrlRemove,
+  resourceTypes,
+  resourceMetadata,
+  onEditMeta,
 }: {
   files: File[];
   urls: string[];
   onFileReplace: (index: number, file: File) => void;
   onFileRemove: (index: number) => void;
   onUrlRemove: (url: string) => void;
+  resourceTypes: ResourceType[];
+  resourceMetadata: Record<string, PendingResourceMeta>;
+  onEditMeta: (key: string, meta: PendingResourceMeta, newUrl?: string) => void;
 }) {
-  const items: { key: string; name: string; size?: string; type: "file" | "url"; index: number }[] =
-    [];
+  const items: { key: string; name: string; size?: string; isUrl: boolean; index: number }[] = [];
 
   files.forEach((file, i) => {
     const sizeKB = (file.size / 1024).toFixed(1);
-    const sizeLabel = file.size >= 1024 * 1024
-      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-      : `${sizeKB} KB`;
-    items.push({ key: `file-${file.name}`, name: file.name, size: sizeLabel, type: "file", index: i });
+    const sizeLabel =
+      file.size >= 1024 * 1024
+        ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+        : `${sizeKB} KB`;
+    items.push({ key: `file-${file.name}`, name: file.name, size: sizeLabel, isUrl: false, index: i });
   });
 
   urls.forEach((url, i) => {
-    items.push({ key: `url-${url}`, name: url, type: "url", index: i });
+    items.push({ key: `url-${url}`, name: url, isUrl: true, index: i });
   });
+
+  const getMeta = (key: string, name: string): PendingResourceMeta =>
+    resourceMetadata[key] ?? { title: name, resourceType: "main", description: "" };
 
   return (
     <div className="agora-file-list">
@@ -109,15 +305,13 @@ function ResourceList({
             <ResourceItem
               name={item.name}
               size={item.size}
-              onReplace={
-                item.type === "file"
-                  ? (file) => onFileReplace(item.index, file)
-                  : undefined
-              }
+              isUrl={item.isUrl}
+              resourceTypes={resourceTypes}
+              currentMeta={getMeta(item.key, item.name)}
+              onSaveMeta={(meta, newUrl) => onEditMeta(item.key, meta, newUrl)}
+              onReplace={!item.isUrl ? (file) => onFileReplace(item.index, file) : undefined}
               onRemove={
-                item.type === "file"
-                  ? () => onFileRemove(item.index)
-                  : () => onUrlRemove(urls[item.index])
+                !item.isUrl ? () => onFileRemove(item.index) : () => onUrlRemove(item.name)
               }
             />
           </React.Fragment>
@@ -134,6 +328,10 @@ export default function FileUploadModal({
   onUrlAdd,
   onUrlRemove,
   hasError,
+  resourceTypes,
+  resourceMetadata,
+  onEditMeta,
+  onFileReplace,
 }: FileUploadModalProps) {
   const { show } = usePopupContext();
   const hasSelection = uploadedFiles.length > 0 || resourceUrls.length > 0;
@@ -153,11 +351,7 @@ export default function FileUploadModal({
           }
         }}
       />,
-      {
-        title: "Carregar ficheiros",
-        closeAriaLabel: "Fechar",
-        dimensions: "m",
-      },
+      { title: "Carregar ficheiros", closeAriaLabel: "Fechar", dimensions: "m" },
     );
   };
 
@@ -185,15 +379,14 @@ export default function FileUploadModal({
         <ResourceList
           files={uploadedFiles}
           urls={resourceUrls}
-          onFileReplace={(index, file) => {
-            const updated = [...uploadedFiles];
-            updated[index] = file;
-            onFilesChange(updated);
-          }}
+          onFileReplace={onFileReplace}
           onFileRemove={(index) => {
             onFilesChange(uploadedFiles.filter((_, i) => i !== index));
           }}
           onUrlRemove={onUrlRemove}
+          resourceTypes={resourceTypes}
+          resourceMetadata={resourceMetadata}
+          onEditMeta={onEditMeta}
         />
       )}
     </div>
