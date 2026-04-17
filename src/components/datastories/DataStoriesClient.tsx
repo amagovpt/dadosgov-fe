@@ -18,8 +18,7 @@ import {
 } from '@ama-pt/agora-design-system';
 import { Pagination } from '@/components/Pagination';
 import PageBanner from '@/components/PageBanner';
-import { fetchOrganizations, suggestTags } from '@/services/api';
-import { Organization } from '@/types/api';
+import { suggestTags } from '@/services/api';
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -43,9 +42,10 @@ const ALL_DATA_STORIES = [
     organization: { name: 'Serviços Públicos' },
     tema: 'servicos_publicos',
     image: '/laptop.png',
-    created_at: '2024-03-11T12:00:00Z',
-    metrics: { views: 1250, followers: 12 },
+    created_at: '2024-01-15T12:00:00Z',
+    metrics: { views: 3200, followers: 25 },
     datasets: [1, 2, 3],
+    tags: ['serviços', 'presencial', 'atendimento'],
   },
   {
     id: '2',
@@ -56,9 +56,10 @@ const ALL_DATA_STORIES = [
     organization: { name: 'Territórios Inteligentes' },
     tema: 'territorios_inteligentes',
     image: '/laptop.png',
-    created_at: '2024-03-10T12:00:00Z',
-    metrics: { views: 890, followers: 8 },
+    created_at: '2024-06-20T12:00:00Z',
+    metrics: { views: 450, followers: 5 },
     datasets: [1, 2],
+    tags: ['turismo', 'pressão turística', 'territórios'],
   },
   {
     id: '3',
@@ -69,9 +70,10 @@ const ALL_DATA_STORIES = [
     organization: { name: 'Territórios Inteligentes' },
     tema: 'territorios_inteligentes',
     image: '/laptop.png',
-    created_at: '2024-03-10T12:00:00Z',
-    metrics: { views: 890, followers: 8 },
+    created_at: '2024-11-05T12:00:00Z',
+    metrics: { views: 1800, followers: 14 },
     datasets: [1, 2],
+    tags: ['esperança de vida', 'saúde', 'territórios'],
   },
   {
     id: '4',
@@ -82,32 +84,26 @@ const ALL_DATA_STORIES = [
     organization: { name: 'Territórios Inteligentes' },
     tema: 'territorios_inteligentes',
     image: '/laptop.png',
-    created_at: '2024-03-10T12:00:00Z',
-    metrics: { views: 890, followers: 8 },
+    created_at: '2025-02-10T12:00:00Z',
+    metrics: { views: 720, followers: 9 },
     datasets: [1, 2],
+    tags: ['energia', 'densidade populacional', 'consumo'],
   },
 ];
 
 const TOGGLE_FILTERS = {
-  atualizacao: {
-    title: 'Data da atualização',
-    options: [
-      { id: 'all', label: 'Todos', count: '352' },
-      { id: '30_days', label: 'Os últimos 30 dias', count: '96' },
-      { id: '12_months', label: 'Os últimos 12 meses', count: '279' },
-      { id: '3_years', label: 'Os últimos 3 anos', count: '352' },
-    ],
-  },
-  organizacao: {
-    title: 'Tipo de organização',
-    options: [
-      { id: 'all', label: 'Todos', count: '352' },
-      { id: 'public_service', label: 'Serviço público', count: '259' },
-      { id: 'local_authority', label: 'Autoridade local', count: '54' },
-      { id: 'business', label: 'Negócios', count: '8' },
-      { id: 'association', label: 'Associação', count: '6' },
-      { id: 'user', label: 'Utilizador', count: '7' },
-    ],
+  temas: {
+    title: 'Temas',
+    options: ALL_DATA_STORIES.reduce((acc, story) => {
+      if (!acc.some((option) => option.id === story.tema)) {
+        acc.push({
+          id: story.tema,
+          label: story.organization.name,
+          count: String(ALL_DATA_STORIES.filter((s) => s.tema === story.tema).length),
+        });
+      }
+      return acc;
+    }, [] as { id: string; label: string; count: string }[]),
   },
 };
 
@@ -126,33 +122,21 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<FilterKey, string>>({
-    atualizacao: 'all',
-    organizacao: 'all',
+    temas: 'all',
   });
+  const [currentSortKey, setCurrentSortKey] = useState('recentes');
 
   const handleToggleFilterChange = (filterKey: FilterKey, optionId: string) => {
-    setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
+    setSelectedToggleFilters((prev) => ({
+      ...prev,
+      [filterKey]: prev[filterKey] === optionId ? 'all' : optionId,
+    }));
   };
 
   // Advanced filters state
-  const [filterOrgs, setFilterOrgs] = useState<Organization[]>([]);
   const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
   const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
-  const [isFiltersLoading, setIsFiltersLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadFilterData() {
-      try {
-        const orgsRes = await fetchOrganizations(1, 100, { sort: '-datasets' });
-        setFilterOrgs(orgsRes.data);
-      } catch (error) {
-        console.error('Failed to load filter data', error);
-      } finally {
-        setIsFiltersLoading(false);
-      }
-    }
-    loadFilterData();
-  }, []);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const handleTagSearch = useCallback(async (q: string) => {
     if (q.length < 2) {
@@ -168,33 +152,27 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
   }, []);
 
   const handleAdvancedFilterChange = (paramName: string, value: string) => {
-    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-    const currentValues = params.getAll(paramName);
-    if (currentValues.includes(value)) {
-      params.delete(paramName);
-      currentValues.filter((v) => v !== value).forEach((v) => params.append(paramName, v));
-    } else {
-      params.append(paramName, value);
+    if (paramName === 'tag') {
+      setSelectedTags((prev) =>
+        prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+      );
     }
-    params.set('page', '1');
-    router.push(`/pages/datastories?${params.toString()}`);
   };
 
   const handleClearAdvancedFilter = (paramName: string) => {
-    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-    params.delete(paramName);
-    params.set('page', '1');
-    router.push(`/pages/datastories?${params.toString()}`);
+    if (paramName === 'tag') {
+      setSelectedTags([]);
+    }
   };
 
   const handleFilterSearchChange = (groupName: string, value: string) => {
     setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-    if (groupName === 'Temático') handleTagSearch(value);
+    if (groupName === 'Palavras-chave') handleTagSearch(value);
   };
 
   const getActiveValues = (paramName: string) => {
-    if (typeof window === 'undefined') return [];
-    return new URLSearchParams(window.location.search).getAll(paramName);
+    if (paramName === 'tag') return selectedTags;
+    return [];
   };
 
   const advancedFilterGroups: {
@@ -204,32 +182,14 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
     searchable: boolean;
     suggest?: boolean;
   }[] = [
-    {
-      name: 'Organizações',
-      param: 'organization',
-      data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
-      searchable: true,
-    },
-    {
-      name: 'Tipo de organização',
-      param: 'org_type',
-      data: [
-        { id: 'public_service', name: 'Serviço público' },
-        { id: 'local_authority', name: 'Autoridade local' },
-        { id: 'business', name: 'Negócios' },
-        { id: 'association', name: 'Associação' },
-        { id: 'user', name: 'Utilizador' },
-      ],
-      searchable: false,
-    },
-    {
-      name: 'Palavras-chave',
-      param: 'tag',
-      data: filterTagOptions,
-      searchable: true,
-      suggest: true,
-    },
-  ];
+      {
+        name: 'Palavras-chave',
+        param: 'tag',
+        data: filterTagOptions,
+        searchable: true,
+        suggest: true,
+      },
+    ];
 
   const filteredStories = ALL_DATA_STORIES.filter((story) => {
     const q = searchQuery.toLowerCase();
@@ -240,12 +200,23 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
     ) {
       return false;
     }
+
+    // Toggle filter: temas
+    if (selectedToggleFilters.temas !== 'all' && story.tema !== selectedToggleFilters.temas) {
+      return false;
+    }
+
+    // Advanced filter: tags (local state)
+    if (selectedTags.length > 0 && !selectedTags.some((t) => story.tags.includes(t))) {
+      return false;
+    }
+
     return true;
   });
 
-  const sortKey = initialFilters?.sort || '';
+  const sortValue = SORT_OPTIONS[currentSortKey] || '';
   const sortedStories = [...filteredStories].sort((a, b) => {
-    if (sortKey === '-views') return (b.metrics.views || 0) - (a.metrics.views || 0);
+    if (sortValue === '-views') return (b.metrics.views || 0) - (a.metrics.views || 0);
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
@@ -254,14 +225,12 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
   const pagedStories = sortedStories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const buildUrl = useCallback(
-    (overrides: { q?: string; sort?: string; page?: number } = {}) => {
+    (overrides: { q?: string; page?: number } = {}) => {
       const params = new URLSearchParams();
       const q = overrides.q ?? initialFilters?.q;
-      const sort = 'sort' in overrides ? overrides.sort : initialFilters?.sort;
       const page = overrides.page ?? currentPage;
 
       if (q) params.set('q', q);
-      if (sort) params.set('sort', sort);
       if (page > 1) params.set('page', String(page));
 
       const qs = params.toString();
@@ -286,12 +255,9 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
     router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
   }, [router, buildUrl, searchQuery]);
 
-  const handleSortChange = useCallback(
-    (value: string) => {
-      router.push(buildUrl({ sort: SORT_OPTIONS[value] || undefined, page: 1 }));
-    },
-    [router, buildUrl]
-  );
+  const handleSortChange = useCallback((value: string) => {
+    setCurrentSortKey(value);
+  }, []);
 
   const sortDefault = (() => {
     const reverseMap: Record<string, string> = { '-views': 'visualizados' };
@@ -347,13 +313,13 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                 hasIcon
                 {...(filtersOpen
                   ? {
-                      leadingIcon: 'agora-line-chevron-left',
-                      leadingIconHover: 'agora-solid-chevron-left',
-                    }
+                    leadingIcon: 'agora-line-chevron-left',
+                    leadingIconHover: 'agora-solid-chevron-left',
+                  }
                   : {
-                      trailingIcon: 'agora-line-chevron-right',
-                      trailingIconHover: 'agora-solid-chevron-right',
-                    })}
+                    trailingIcon: 'agora-line-chevron-right',
+                    trailingIconHover: 'agora-solid-chevron-right',
+                  })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? 'Ocultar filtros' : 'Abrir filtros'}
@@ -365,14 +331,14 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
             <div className="xl:col-span-7 flex items-center justify-end py-16">
               <ToggleGroup
                 multiple={false}
-                value={sortDefault}
+                value={currentSortKey}
                 onChange={(val) => {
                   const selected = val.length > 0 ? val[0] : 'recentes';
-                  if (selected !== sortDefault) handleSortChange(selected);
+                  if (selected !== currentSortKey) handleSortChange(selected);
                 }}
               >
                 {Object.entries(SORT_LABELS).map(([key, label]) => (
-                  <Toggle key={key} value={key} selected={sortDefault === key}>
+                  <Toggle key={key} value={key} selected={currentSortKey === key}>
                     {label}
                   </Toggle>
                 ))}
@@ -451,8 +417,8 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
 
                     const selectedItems: { id: string; name: string }[] = group.suggest
                       ? activeValues
-                          .filter((v) => !group.data.some((d) => d.id === v))
-                          .map((v) => ({ id: v, name: v }))
+                        .filter((v) => !group.data.some((d) => d.id === v))
+                        .map((v) => ({ id: v, name: v }))
                       : [];
 
                     const allData = [...selectedItems, ...group.data];
@@ -460,8 +426,8 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                     const filteredData = group.suggest
                       ? allData
                       : allData.filter((item) =>
-                          item.name.toLowerCase().includes(sq.toLowerCase())
-                        );
+                        item.name.toLowerCase().includes(sq.toLowerCase())
+                      );
 
                     const showScroll = filteredData.length > 5;
 
@@ -512,7 +478,7 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                           <div
                             className={`flex flex-col gap-2 ${showScroll ? 'max-h-[225px] overflow-y-auto' : ''}`}
                           >
-                            {isFiltersLoading && !group.suggest ? null : filteredData.length > 0 ? (
+                            {!group.suggest ? null : filteredData.length > 0 ? (
                               filteredData.map((item) => (
                                 <Checkbox
                                   key={item.id}
@@ -547,10 +513,10 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                     variant="primary"
                     appearance="outline"
                     onClick={() => {
-                      setSelectedToggleFilters({
-                        atualizacao: 'all',
-                        organizacao: 'all',
-                      });
+                      setSelectedToggleFilters({ temas: 'all' });
+                      setSearchQuery('');
+                      setCurrentSortKey('recentes');
+                      setSelectedTags([]);
                       router.push('/pages/datastories');
                     }}
                   >
@@ -575,10 +541,10 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                     pagedStories.map((story) => {
                       const timeAgo = story.created_at
                         ? formatDistanceToNow(new Date(story.created_at), { locale: pt })
-                            .replace('aproximadamente ', '')
-                            .replace('quase ', '')
-                            .replace('menos de ', '')
-                            .replace('cerca de ', '')
+                          .replace('aproximadamente ', '')
+                          .replace('quase ', '')
+                          .replace('menos de ', '')
+                          .replace('cerca de ', '')
                         : 'Desconhecido';
 
                       return (
