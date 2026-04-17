@@ -119,9 +119,9 @@ export interface OrganizationCreatePayload {
 
 export interface OrganizationUpdatePayload {
   name?: string;
-  acronym?: string;
+  acronym?: string | null;
   description?: string;
-  url?: string;
+  url?: string | null;
   business_number_id?: string;
 }
 

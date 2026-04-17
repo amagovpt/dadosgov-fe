@@ -64,6 +64,8 @@ export default function OrgProfileClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [nameError, setNameError] = useState(false);
+  const [descriptionError, setDescriptionError] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null);
   const [logoError, setLogoError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -91,10 +93,19 @@ export default function OrgProfileClient() {
     loadOrg();
   }, [orgId]);
 
+  useEffect(() => {
+    if (!saveStatus) return;
+    const timer = setTimeout(() => setSaveStatus(null), 5000);
+    return () => clearTimeout(timer);
+  }, [saveStatus]);
+
   const handleSave = async () => {
     if (!org) return;
-    if (!name.trim()) {
-      setNameError(true);
+    const hasNameError = !name.trim();
+    const hasDescriptionError = !description.trim();
+    if (hasNameError) setNameError(true);
+    if (hasDescriptionError) setDescriptionError(true);
+    if (hasNameError || hasDescriptionError) {
       requestAnimationFrame(() => {
         document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
@@ -102,16 +113,20 @@ export default function OrgProfileClient() {
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setNameError(false);
+    setDescriptionError(false);
     setIsSaving(true);
+    setSaveStatus(null);
     try {
       await updateOrganization(org.id, {
         name,
-        acronym: acronym || undefined,
-        description: description || undefined,
-        url: url || undefined,
+        acronym: acronym || null,
+        description,
+        url: url || null,
       });
+      setSaveStatus("success");
     } catch (error) {
       console.error("Error updating org profile:", error);
+      setSaveStatus("error");
     } finally {
       setIsSaving(false);
     }
@@ -218,7 +233,7 @@ export default function OrgProfileClient() {
                 </span>
                 <span className="flex items-center gap-[4px]">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="text-primary-500">
-                    <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" fill="currentColor"/>
+                    <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" fill="currentColor" />
                   </svg>
                   {org.metrics.reuses} reutilizações
                 </span>
@@ -234,6 +249,17 @@ export default function OrgProfileClient() {
             <h2 className="admin-page__section-title hidden">EDITAR ORGANIZAÇÃO</h2>
 
             <div className="admin-page__fields-group pt-32">
+              {saveStatus && (
+                <StatusCard
+                  type={saveStatus === "success" ? "success" : "danger"}
+                  description={
+                    saveStatus === "success"
+                      ? "Perfil da organização atualizado com sucesso."
+                      : "Ocorreu um erro ao guardar. Por favor, tente novamente."
+                  }
+                />
+              )}
+
               <InputText
                 label="Nome *"
                 placeholder="Insira o nome aqui"
@@ -258,12 +284,19 @@ export default function OrgProfileClient() {
               />
 
               <InputTextArea
-                label="Descrição"
+                label="Descrição *"
                 placeholder="Insira a descrição aqui"
                 id="org-description"
                 rows={4}
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  if (e.target.value.trim()) setDescriptionError(false);
+                }}
+                hasError={descriptionError}
+                hasFeedback={descriptionError}
+                feedbackState="danger"
+                errorFeedbackText="Campo obrigatório"
               />
 
               <InputText
