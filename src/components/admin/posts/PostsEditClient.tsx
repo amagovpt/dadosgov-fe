@@ -20,13 +20,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import {
-  fetchPost,
-  updatePost,
-  uploadPostImage,
-  suggestTags,
-  deletePost,
-} from "@/services/api";
+import { fetchPost, updatePost, uploadPostImage, suggestTags, deletePost } from "@/services/api";
 import type { Post, PostUpdatePayload, TagSuggestion } from "@/types/api";
 import dynamic from "next/dynamic";
 
@@ -87,10 +81,7 @@ export default function PostsEditClient() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [postData, tagsData] = await Promise.all([
-          fetchPost(postId),
-          suggestTags("", 50),
-        ]);
+        const [postData, tagsData] = await Promise.all([fetchPost(postId), suggestTags("", 50)]);
 
         if (postData) {
           setPost(postData);
@@ -114,7 +105,7 @@ export default function PostsEditClient() {
   }, [postId]);
 
   const handleSaveMetadata = async () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (!articleTitle.trim()) return;
 
     setIsSaving(true);
@@ -146,7 +137,7 @@ export default function PostsEditClient() {
   };
 
   const handleSaveContent = async () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (!articleContent.trim()) return;
 
     setIsSaving(true);
@@ -217,9 +208,7 @@ export default function PostsEditClient() {
     }
   };
 
-  const handleImageUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || !files.length) return;
 
@@ -279,9 +268,7 @@ export default function PostsEditClient() {
           <Button
             variant="primary"
             appearance="outline"
-            onClick={() =>
-              window.open(`/pages/posts/${post.slug}`, "_blank")
-            }
+            onClick={() => window.open(`/pages/posts/${post.slug}`, "_blank")}
           >
             <span className="admin-edit-info__btn-content">
               <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
@@ -396,15 +383,20 @@ export default function PostsEditClient() {
                       searchable
                       searchInputPlaceholder="Escreva para pesquisar..."
                       searchNoResultsText="Nenhum resultado encontrado"
+                      pluralSelectedPlaceholder="selecionadas"
+                      hideSectionNames={true}
+                      multiple={true}
                       onChange={(options) => {
-                        setSelectedTags(
-                          options.map((o) => o.value as string)
-                        );
+                        setSelectedTags(options.map((o) => o.value as string));
                       }}
                     >
                       <DropdownSection name="keywords">
                         {tags.map((tag) => (
-                          <DropdownOption key={tag.text} value={tag.text}>
+                          <DropdownOption
+                            key={tag.text}
+                            value={tag.text}
+                            selected={selectedTags.some((s) => s === tag.text)}
+                          >
                             {tag.text}
                           </DropdownOption>
                         ))}
@@ -493,16 +485,12 @@ export default function PostsEditClient() {
                           trailingIconHover="agora-solid-arrow-right-circle"
                           onClick={() => {
                             show(
-                              <DeletePostPopupContent
-                                onClose={hide}
-                                onConfirm={handleDelete}
-                              />,
+                              <DeletePostPopupContent onClose={hide} onConfirm={handleDelete} />,
                               {
-                                title:
-                                  "Tem a certeza que quer eliminar este artigo?",
+                                title: "Tem a certeza que quer eliminar este artigo?",
                                 closeAriaLabel: "Fechar",
                                 dimensions: "m",
-                              },
+                              }
                             );
                           }}
                           disabled={isSaving}

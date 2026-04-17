@@ -66,13 +66,14 @@ import dynamic from "next/dynamic";
 import StatusDot from "@/components/admin/StatusDot";
 import DeleteResourcePopup from "@/components/admin/datasets/DeleteResourcePopup";
 
-const RichTextEditor = dynamic(
-  () => import("@/components/admin/posts/RichTextEditor"),
-  { ssr: false, loading: () => <p>A carregar editor...</p> }
-);
+const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEditor"), {
+  ssr: false,
+  loading: () => <p>A carregar editor...</p>,
+});
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
+import { getGranularityLabel } from "@/utils/granularityLabels";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -124,8 +125,7 @@ function TransferDatasetPopupContent({
         </a>
       </p>
       <p>
-        <strong>Esta ação é irreversível.</strong>&nbsp;
-        Vai deixar de gerir este conjunto de dados
+        <strong>Esta ação é irreversível.</strong>&nbsp; Vai deixar de gerir este conjunto de dados
       </p>
 
       <div className="flex flex-col gap-[8px]">
@@ -144,7 +144,8 @@ function TransferDatasetPopupContent({
           Não pertence a uma organização.
         </h3>
         <p className="text-neutral-700 text-base leading-7">
-          Quando o conjunto de dados for produzido no contexto de atividade profissional, é recomendável que seja publicado em nome da organização responsável.
+          Quando o conjunto de dados for produzido no contexto de atividade profissional, é
+          recomendável que seja publicado em nome da organização responsável.
         </p>
         <Link
           href="/pages/admin/organizations"
@@ -156,15 +157,8 @@ function TransferDatasetPopupContent({
       </div>
 
       <div className="flex flex-col gap-[8px]">
-        <label className="text-primary-900 text-base font-medium leading-7">
-          Comentário
-        </label>
-        <InputTextArea
-          placeholder=""
-          id="transfer-comment"
-          label=""
-          rows={3}
-        />
+        <label className="text-primary-900 text-base font-medium leading-7">Comentário</label>
+        <InputTextArea placeholder="" id="transfer-comment" label="" rows={3} />
       </div>
 
       <div className="flex justify-end gap-16 pt-16">
@@ -197,7 +191,13 @@ function DeleteDatasetPopupContent({
         <Button appearance="outline" variant="neutral" onClick={onClose}>
           Cancelar
         </Button>
-        <Button variant="danger" onClick={onConfirm} hasIcon leadingIcon="agora-line-trash" leadingIconHover="agora-solid-trash">
+        <Button
+          variant="danger"
+          onClick={onConfirm}
+          hasIcon
+          leadingIcon="agora-line-trash"
+          leadingIconHover="agora-solid-trash"
+        >
           Eliminar
         </Button>
       </div>
@@ -223,26 +223,21 @@ function ResourceDetailPopupContent({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const typeLabel = resource.type === "main"
-    ? "Main file"
-    : resource.type || "-";
+  const typeLabel = resource.type === "main" ? "Main file" : resource.type || "-";
 
-  const location = resource.filetype === "remote"
-    ? "Este recurso é um link externo"
-    : "Este recurso encontra-se nos nossos servidores";
+  const location =
+    resource.filetype === "remote"
+      ? "Este recurso é um link externo"
+      : "Este recurso encontra-se nos nossos servidores";
 
   return (
     <div className="flex flex-col gap-[16px]" style={{ minHeight: "60vh" }}>
-      {resource.description && (
-        <p className="text-neutral-700 text-sm">{resource.description}</p>
-      )}
+      {resource.description && <p className="text-neutral-700 text-sm">{resource.description}</p>}
       <div className="flex-1 overflow-y-auto">
         <table className="text-sm w-full">
           <tbody>
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
-                Tipo
-              </td>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">Tipo</td>
               <td className="py-[4px]">{typeLabel}</td>
             </tr>
             <tr>
@@ -252,9 +247,7 @@ function ResourceDetailPopupContent({
               <td className="py-[4px]">{location}</td>
             </tr>
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
-                URL
-              </td>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">URL</td>
               <td className="py-[4px] break-all">
                 <a
                   href={resource.url}
@@ -289,9 +282,7 @@ function ResourceDetailPopupContent({
                 <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
                   {resource.checksum.type}
                 </td>
-                <td className="py-[4px] break-all font-mono text-xs">
-                  {resource.checksum.value}
-                </td>
+                <td className="py-[4px] break-all font-mono text-xs">{resource.checksum.value}</td>
               </tr>
             )}
             <tr>
@@ -299,11 +290,9 @@ function ResourceDetailPopupContent({
                 Criado em
               </td>
               <td className="py-[4px]">
-                {format(
-                  new Date(resource.created_at),
-                  "d 'de' MMMM 'de' yyyy HH:mm",
-                  { locale: pt }
-                )}
+                {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy HH:mm", {
+                  locale: pt,
+                })}
               </td>
             </tr>
             <tr>
@@ -356,16 +345,14 @@ function ResourceEditPopupContent({
   const [resourceUrl, setResourceUrl] = useState(resource.url || "");
   const [resourceFormat, setResourceFormat] = useState(resource.format || "");
   const [mime, setMime] = useState(resource.mime || "");
-  const [filesize, setFilesize] = useState(
-    resource.filesize ? String(resource.filesize) : ""
-  );
+  const [filesize, setFilesize] = useState(resource.filesize ? String(resource.filesize) : "");
   const [resourceType, setResourceType] = useState(resource.type || "main");
   const [isSaving, setIsSaving] = useState(false);
   const [isReplacing, setIsReplacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (!title.trim()) return;
     setIsSaving(true);
     setError(null);
@@ -388,9 +375,7 @@ function ResourceEditPopupContent({
     }
   };
 
-  const handleReplaceFile = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleReplaceFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = (e.target as HTMLInputElement).files;
     if (!files || files.length === 0) return;
     setIsReplacing(true);
@@ -415,102 +400,83 @@ function ResourceEditPopupContent({
       {error && <StatusCard type="danger" description={error} />}
 
       <div className="flex-1 overflow-y-auto flex flex-col gap-[16px]">
-      <InputText
-        label="Título *"
-        placeholder="Título do recurso"
-        id="res-edit-title"
-        value={title}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setTitle(e.target.value)
-        }
-      />
-
-      <div className="flex flex-col gap-[4px]">
-        <label
-          htmlFor="res-edit-type"
-          className="text-primary-900 text-sm font-medium"
-        >
-          Tipo *
-        </label>
-        <select
-          id="res-edit-type"
-          className="rounded-lg border border-neutral-300 p-[10px] text-sm"
-          value={resourceType}
-          onChange={(e) => setResourceType(e.target.value)}
-        >
-          {resourceTypes.map((rt) => (
-            <option key={rt.id} value={rt.id}>
-              {rt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <InputTextArea
-        label="Descrição"
-        placeholder="Descrição do recurso"
-        id="res-edit-description"
-        rows={4}
-        value={description}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-          setDescription(e.target.value)
-        }
-      />
-
-      <InputText
-        label="URL *"
-        placeholder="URL do recurso"
-        id="res-edit-url"
-        value={resourceUrl}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setResourceUrl(e.target.value)
-        }
-      />
-
-      <div className="grid grid-cols-2 gap-[16px]">
         <InputText
-          label="Tamanho"
-          placeholder="Tamanho em bytes"
-          id="res-edit-filesize"
-          value={filesize}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFilesize(e.target.value)
-          }
+          label="Título *"
+          placeholder="Título do recurso"
+          id="res-edit-title"
+          value={title}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
         />
-        <InputText
-          label="Formato *"
-          placeholder="csv, json, xlsx..."
-          id="res-edit-format"
-          value={resourceFormat}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setResourceFormat(e.target.value)
-          }
-        />
-      </div>
 
-      <InputText
-        label="Mime Type"
-        placeholder="application/json, text/csv..."
-        id="res-edit-mime"
-        value={mime}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setMime(e.target.value)
-        }
-      />
-
-      {resource.checksum && (
-        <div className="flex items-center gap-[8px]">
-          <span className="text-sm font-semibold">
-            Soma de verificação
-          </span>
-          <span className="bg-neutral-100 rounded px-[8px] py-[2px] text-xs font-mono">
-            {resource.checksum.type}
-          </span>
-          <span className="text-xs font-mono break-all">
-            {resource.checksum.value}
-          </span>
+        <div className="flex flex-col gap-[4px]">
+          <label htmlFor="res-edit-type" className="text-primary-900 text-sm font-medium">
+            Tipo *
+          </label>
+          <select
+            id="res-edit-type"
+            className="rounded-lg border border-neutral-300 p-[10px] text-sm"
+            value={resourceType}
+            onChange={(e) => setResourceType(e.target.value)}
+          >
+            {resourceTypes.map((rt) => (
+              <option key={rt.id} value={rt.id}>
+                {rt.label}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
+
+        <InputTextArea
+          label="Descrição"
+          placeholder="Descrição do recurso"
+          id="res-edit-description"
+          rows={4}
+          value={description}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
+        />
+
+        <InputText
+          label="URL *"
+          placeholder="URL do recurso"
+          id="res-edit-url"
+          value={resourceUrl}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setResourceUrl(e.target.value)}
+        />
+
+        <div className="grid grid-cols-2 gap-[16px]">
+          <InputText
+            label="Tamanho"
+            placeholder="Tamanho em bytes"
+            id="res-edit-filesize"
+            value={filesize}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilesize(e.target.value)}
+          />
+          <InputText
+            label="Formato *"
+            placeholder="csv, json, xlsx..."
+            id="res-edit-format"
+            value={resourceFormat}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setResourceFormat(e.target.value)}
+          />
+        </div>
+
+        <InputText
+          label="Mime Type"
+          placeholder="application/json, text/csv..."
+          id="res-edit-mime"
+          value={mime}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMime(e.target.value)}
+        />
+
+        {resource.checksum && (
+          <div className="flex items-center gap-[8px]">
+            <span className="text-sm font-semibold">Soma de verificação</span>
+            <span className="bg-neutral-100 rounded px-[8px] py-[2px] text-xs font-mono">
+              {resource.checksum.type}
+            </span>
+            <span className="text-xs font-mono break-all">{resource.checksum.value}</span>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-between pt-[8px]">
@@ -661,10 +627,7 @@ export default function DatasetsEditClient() {
             fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
               const currentIds = currentZones.map((z) => z.id);
               const seen = new Set(currentIds);
-              const merged = [
-                ...currentZones,
-                ...suggestions.filter((z) => !seen.has(z.id)),
-              ];
+              const merged = [...currentZones, ...suggestions.filter((z) => !seen.has(z.id))];
               setSpatialZones(merged);
               setLoadedSpatialZones(currentIds);
               spatialCoverageRef.current = currentIds.join(",");
@@ -721,11 +684,7 @@ export default function DatasetsEditClient() {
   // Memoized children for IsolatedSelect to prevent re-render cascades
   const licenseOptions = useMemo(() => {
     const options = licenses.map((license) => (
-      <DropdownOption
-        key={license.id}
-        value={license.id}
-        selected={license.id === loadedLicense}
-      >
+      <DropdownOption key={license.id} value={license.id} selected={license.id === loadedLicense}>
         {license.title}
       </DropdownOption>
     ));
@@ -734,11 +693,7 @@ export default function DatasetsEditClient() {
 
   const frequencyOptions = useMemo(() => {
     const options = frequencies.map((freq) => (
-      <DropdownOption
-        key={freq.id}
-        value={freq.id}
-        selected={freq.id === loadedFrequency}
-      >
+      <DropdownOption key={freq.id} value={freq.id} selected={freq.id === loadedFrequency}>
         {getFrequencyLabel(freq.id, freq.label)}
       </DropdownOption>
     ));
@@ -747,7 +702,7 @@ export default function DatasetsEditClient() {
 
   const selectedKeywordsSet = useMemo(
     () => new Set(loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
-    [loadedKeywords],
+    [loadedKeywords]
   );
 
   const keywordOptions = useMemo(() => {
@@ -759,7 +714,7 @@ export default function DatasetsEditClient() {
       options.push(
         <DropdownOption key={tag} value={tag} selected>
           {tag}
-        </DropdownOption>,
+        </DropdownOption>
       );
     }
     // Then suggestions and search results (not already selected)
@@ -769,7 +724,7 @@ export default function DatasetsEditClient() {
         options.push(
           <DropdownOption key={t.text} value={t.text}>
             {t.text}
-          </DropdownOption>,
+          </DropdownOption>
         );
       }
     }
@@ -790,17 +745,15 @@ export default function DatasetsEditClient() {
 
   const spatialCoverageOptions = useMemo(() => {
     const options = allSpatialZones.map((z) => (
-      <DropdownOption
-        key={z.id}
-        value={z.id}
-        selected={loadedSpatialZones.includes(z.id)}
-      >
+      <DropdownOption key={z.id} value={z.id} selected={loadedSpatialZones.includes(z.id)}>
         {z.name}
       </DropdownOption>
     ));
     if (options.length === 0) {
       options.push(
-        <DropdownOption key="empty" value="">—</DropdownOption>
+        <DropdownOption key="empty" value="">
+          —
+        </DropdownOption>
       );
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
@@ -808,20 +761,20 @@ export default function DatasetsEditClient() {
 
   const spatialGranularityOptions = useMemo(() => {
     const options = [
-      <DropdownOption key="empty" value="">—</DropdownOption>,
+      <DropdownOption key="empty" value="">
+        —
+      </DropdownOption>,
       ...granularities.map((g) => (
         <DropdownOption
           key={g.id}
           value={g.id}
           selected={g.id === loadedSpatialGranularity}
         >
-          {g.name}
+          {getGranularityLabel(g.id, g.name)}
         </DropdownOption>
       )),
     ];
-    return (
-      <DropdownSection name="spatial-granularity">{options}</DropdownSection>
-    );
+    return <DropdownSection name="spatial-granularity">{options}</DropdownSection>;
   }, [granularities, loadedSpatialGranularity]);
 
   const clearError = (field: string) => {
@@ -842,11 +795,13 @@ export default function DatasetsEditClient() {
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       requestAnimationFrame(() => {
-        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document
+          .querySelector('[aria-invalid="true"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
       });
       return;
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setFormErrors({});
     setApiError(null);
     setApiSuccess(null);
@@ -893,7 +848,9 @@ export default function DatasetsEditClient() {
         const flattenValue = (val: unknown): string => {
           if (Array.isArray(val)) return val.map(flattenValue).join("; ");
           if (val && typeof val === "object")
-            return Object.values(val as Record<string, unknown>).map(flattenValue).join("; ");
+            return Object.values(val as Record<string, unknown>)
+              .map(flattenValue)
+              .join("; ");
           return String(val);
         };
         const messages = Object.entries(err.data)
@@ -972,11 +929,16 @@ export default function DatasetsEditClient() {
         const flattenValue = (val: unknown): string => {
           if (Array.isArray(val)) return val.map(flattenValue).join("; ");
           if (val && typeof val === "object")
-            return Object.values(val as Record<string, unknown>).map(flattenValue).join("; ");
+            return Object.values(val as Record<string, unknown>)
+              .map(flattenValue)
+              .join("; ");
           return String(val);
         };
-        const msg = (err.data.message as string) ||
-          Object.entries(err.data).map(([k, v]) => `${k}: ${flattenValue(v)}`).join(", ");
+        const msg =
+          (err.data.message as string) ||
+          Object.entries(err.data)
+            .map(([k, v]) => `${k}: ${flattenValue(v)}`)
+            .join(", ");
         setApiError(`Erro ao carregar ficheiro(s): ${msg}`);
       } else if (err.message) {
         setApiError(`Erro ao carregar ficheiro(s): ${err.message}`);
@@ -1007,7 +969,7 @@ export default function DatasetsEditClient() {
         title: "Eliminar ficheiro",
         closeAriaLabel: "Fechar",
         dimensions: "m",
-      },
+      }
     );
   };
 
@@ -1038,7 +1000,7 @@ export default function DatasetsEditClient() {
             title: resource.title,
             closeAriaLabel: "Fechar",
             dimensions: "l",
-          },
+          }
         );
       }, 100);
     };
@@ -1061,7 +1023,7 @@ export default function DatasetsEditClient() {
         title: resource.title,
         closeAriaLabel: "Fechar",
         dimensions: "l",
-      },
+      }
     );
   };
 
@@ -1077,10 +1039,7 @@ export default function DatasetsEditClient() {
     return (
       <div className="admin-page">
         <StatusCard type="danger" description="Conjunto de dados não encontrado." />
-        <Button
-          variant="primary"
-          onClick={() => router.push("/pages/admin/me/datasets")}
-        >
+        <Button variant="primary" onClick={() => router.push("/pages/admin/me/datasets")}>
           Voltar
         </Button>
       </div>
@@ -1141,7 +1100,10 @@ export default function DatasetsEditClient() {
         />
       </div>
 
-      <div className="admin-page__header" style={{ flexDirection: "column", alignItems: "flex-start" }}>
+      <div
+        className="admin-page__header"
+        style={{ flexDirection: "column", alignItems: "flex-start" }}
+      >
         <div className="flex justify-end w-full">
           <Button
             variant="primary"
@@ -1157,8 +1119,16 @@ export default function DatasetsEditClient() {
         <h1 className="admin-page__title">{dataset.title}</h1>
       </div>
 
-      {apiError && <div className="my-[24px]"><StatusCard type="danger" description={apiError} /></div>}
-      {apiSuccess && <div className="my-[24px]"><StatusCard type="success" description={apiSuccess} /></div>}
+      {apiError && (
+        <div className="my-[24px]">
+          <StatusCard type="danger" description={apiError} />
+        </div>
+      )}
+      {apiSuccess && (
+        <div className="my-[24px]">
+          <StatusCard type="success" description={apiSuccess} />
+        </div>
+      )}
 
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
@@ -1167,8 +1137,18 @@ export default function DatasetsEditClient() {
           </Pill>
           {dataset.featured && <Pill variant="informative">DESTAQUE</Pill>}
           <span className="admin-edit-info__stat">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="admin-edit-info__stat-icon">
-              <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" fill="#64718B" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="admin-edit-info__stat-icon"
+            >
+              <path
+                d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z"
+                fill="#64718B"
+              />
             </svg>
             {`${(dataset.metrics?.views ?? 0) + (dataset.metrics?.resources_downloads ?? 0) + (dataset.metrics?.reuses ?? 0) + (dataset.metrics?.followers ?? 0)} estatísticas`}
           </span>
@@ -1248,9 +1228,9 @@ export default function DatasetsEditClient() {
                         <>
                           <strong>Modifique a visibilidade do conjunto de dados.</strong>
                           <br />
-                          Este conjunto de dados encontra‑se atualmente em <strong>modo privado</strong>.
-                          {" "}
-                          Apenas os membros da organização o podem visualizar e editar.
+                          Este conjunto de dados encontra‑se atualmente em{" "}
+                          <strong>modo privado</strong>. Apenas os membros da organização o podem
+                          visualizar e editar.
                         </>
                       }
                     />
@@ -1276,16 +1256,15 @@ export default function DatasetsEditClient() {
                   </div>
                 )}
 
-                <form
-                  className="admin-page__form"
-                  onSubmit={(e) => e.preventDefault()}
-                >
+                <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
                   <p className="text-neutral-900 text-base leading-7">
                     Os campos marcados com um asterisco ( * ) são obrigatórios.
                   </p>
 
                   <div>
-                    <h2 className="admin-page__section-title admin-page__section-title--no-top">Destaque</h2>
+                    <h2 className="admin-page__section-title admin-page__section-title--no-top">
+                      Destaque
+                    </h2>
                     <Switch
                       id="edit-featured"
                       label="Destaque"
@@ -1296,7 +1275,9 @@ export default function DatasetsEditClient() {
                     />
                   </div>
 
-                  <h2 className="admin-page__section-title admin-page__section-title--no-top">Descrição</h2>
+                  <h2 className="admin-page__section-title admin-page__section-title--no-top">
+                    Descrição
+                  </h2>
                   <div className="admin-page__fields-group">
                     <InputText
                       label="Título*"
@@ -1317,7 +1298,9 @@ export default function DatasetsEditClient() {
                       placeholder="Insira a sigla aqui"
                       id="edit-acronym"
                       value={acronym}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAcronym(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setAcronym(e.target.value)
+                      }
                     />
                     <div className="flex flex-col gap-[8px]">
                       <span className="text-primary-900 text-base font-medium leading-7">
@@ -1507,7 +1490,7 @@ export default function DatasetsEditClient() {
                                   title: "Transfira o conjunto de dados",
                                   closeAriaLabel: "Fechar",
                                   dimensions: "m",
-                                },
+                                }
                               );
                             }}
                           >
@@ -1520,7 +1503,10 @@ export default function DatasetsEditClient() {
                       type="warning"
                       description={
                         <>
-                          <strong>Um conjunto de dados arquivado deixa de estar indexado no portal, mas permanece acessível através de um link direto.</strong>
+                          <strong>
+                            Um conjunto de dados arquivado deixa de estar indexado no portal, mas
+                            permanece acessível através de um link direto.
+                          </strong>
                           <br />
                           <Button
                             appearance="link"
@@ -1531,9 +1517,7 @@ export default function DatasetsEditClient() {
                             onClick={(e: React.MouseEvent) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              dataset?.archived
-                                ? handleUnarchiveDataset()
-                                : handleArchiveDataset();
+                              dataset?.archived ? handleUnarchiveDataset() : handleArchiveDataset();
                             }}
                           >
                             {dataset?.archived
@@ -1564,11 +1548,10 @@ export default function DatasetsEditClient() {
                                   onConfirm={handleDeleteDataset}
                                 />,
                                 {
-                                  title:
-                                    "Elimine o conjunto de dados",
+                                  title: "Elimine o conjunto de dados",
                                   closeAriaLabel: "Fechar",
                                   dimensions: "m",
-                                },
+                                }
                               );
                             }}
                             disabled={isSubmitting}
@@ -1585,10 +1568,7 @@ export default function DatasetsEditClient() {
               <aside className="admin-page__auxiliar">
                 <div className="admin-page__auxiliar-inner">
                   <div className="admin-page__auxiliar-header">
-                    <Icon
-                      name="agora-line-question-mark"
-                      className="w-[24px] h-[24px]"
-                    />
+                    <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
                     <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                   </div>
                   <AuxiliarList
@@ -1637,7 +1617,9 @@ export default function DatasetsEditClient() {
                         title: "Fornecer  a cobertura de tempo",
                         content: (
                           <>
-                            <p>A abrangência temporal indica o período de tempo dos dados publicados.</p>
+                            <p>
+                              A abrangência temporal indica o período de tempo dos dados publicados.
+                            </p>
                             <p>Por exemplo: de 2012 a 2015.</p>
                           </>
                         ),
@@ -1670,14 +1652,18 @@ export default function DatasetsEditClient() {
               </div>
 
               <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
-                {dataset.resources.length} {dataset.resources.length === 1 ? "FICHEIRO" : "FICHEIROS"}
+                {dataset.resources.length}{" "}
+                {dataset.resources.length === 1 ? "FICHEIRO" : "FICHEIROS"}
               </h2>
 
               {dataset.resources.length === 0 && (
                 <CardNoResults
                   position="center"
                   icon={
-                    <Icon name="agora-line-document" className="w-12 h-12 text-primary-500 icon-xl" />
+                    <Icon
+                      name="agora-line-document"
+                      className="w-12 h-12 text-primary-500 icon-xl"
+                    />
                   }
                   title="Sem ficheiros"
                   description="Este conjunto de dados ainda não tem ficheiros. Adicione ficheiros ou links para começar."
@@ -1713,27 +1699,19 @@ export default function DatasetsEditClient() {
                           <StatusDot variant="success">DISPONÍVEL</StatusDot>
                         </TableCell>
                         <TableCell headerLabel="Tipo">
-                          {resource.type === "main"
-                            ? "Ficheiros principais"
-                            : resource.type || "-"}
+                          {resource.type === "main" ? "Ficheiros principais" : resource.type || "-"}
                         </TableCell>
                         <TableCell headerLabel="Formato">
-                          {resource.format
-                            ? resource.format.toUpperCase()
-                            : "-"}
+                          {resource.format ? resource.format.toUpperCase() : "-"}
                         </TableCell>
                         <TableCell headerLabel="Criado em">
-                          {format(
-                            new Date(resource.created_at),
-                            "d 'de' MMMM 'de' yyyy",
-                            { locale: pt }
-                          )}
+                          {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy", {
+                            locale: pt,
+                          })}
                         </TableCell>
                         <TableCell headerLabel="Atualizado em">
                           {format(
-                            new Date(
-                              resource.last_modified || resource.created_at
-                            ),
+                            new Date(resource.last_modified || resource.created_at),
                             "d 'de' MMMM 'de' yyyy",
                             { locale: pt }
                           )}
@@ -1745,20 +1723,14 @@ export default function DatasetsEditClient() {
                               title="Ver detalhes"
                               onClick={() => handleResourceClick(resource)}
                             >
-                              <Icon
-                                name="agora-line-eye"
-                                className="w-[20px] h-[20px]"
-                              />
+                              <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                             </button>
                             <button
                               className="text-primary-500 hover:text-primary-700"
                               title="Editar recurso"
                               onClick={() => handleResourceClick(resource)}
                             >
-                              <Icon
-                                name="agora-line-edit"
-                                className="w-[20px] h-[20px]"
-                              />
+                              <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
                             </button>
                             <button
                               className="text-danger-500 hover:text-danger-700"
@@ -1766,10 +1738,7 @@ export default function DatasetsEditClient() {
                               onClick={() => handleDeleteResource(resource)}
                               disabled={isSubmitting}
                             >
-                              <Icon
-                                name="agora-line-trash"
-                                className="w-[20px] h-[20px]"
-                              />
+                              <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
                             </button>
                           </div>
                         </TableCell>
@@ -1787,9 +1756,7 @@ export default function DatasetsEditClient() {
           <TabHeader>Discussões ({discussionsTotal ?? 0})</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              {discussionsLoading && (
-                <p className="text-neutral-700 text-sm">A carregar...</p>
-              )}
+              {discussionsLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
               {discussionsLoaded && discussions.length === 0 && (
                 <CardNoResults
                   position="center"
@@ -1817,12 +1784,12 @@ export default function DatasetsEditClient() {
                                 {disc.user.first_name} {disc.user.last_name}
                               </span>
                               {" — Publicado em "}
-                              {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                              {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", {
+                                locale: pt,
+                              })}
                             </p>
                           </div>
-                          <Pill
-                            variant={disc.closed ? "neutral" : "informative"}
-                          >
+                          <Pill variant={disc.closed ? "neutral" : "informative"}>
                             {disc.closed ? "Fechada" : "Aberta"}
                           </Pill>
                         </div>
@@ -1840,11 +1807,11 @@ export default function DatasetsEditClient() {
                                     {msg.posted_by.first_name} {msg.posted_by.last_name}
                                   </span>
                                   {" — "}
-                                  {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                                  {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", {
+                                    locale: pt,
+                                  })}
                                 </p>
-                                <p className="text-neutral-900 text-sm mt-[4px]">
-                                  {msg.content}
-                                </p>
+                                <p className="text-neutral-900 text-sm mt-[4px]">{msg.content}</p>
                               </div>
                             ))}
                           </div>
@@ -1863,9 +1830,7 @@ export default function DatasetsEditClient() {
           <TabHeader>Atividades</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              {activitiesLoading && (
-                <p className="text-neutral-700 text-sm">A carregar...</p>
-              )}
+              {activitiesLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
               {activitiesLoaded && activities.length === 0 && (
                 <CardNoResults
                   position="center"
@@ -1904,8 +1869,7 @@ export default function DatasetsEditClient() {
                               className="text-primary-600 underline"
                             >
                               {activity.actor?.first_name} {activity.actor?.last_name}
-                            </a>
-                            {" "}
+                            </a>{" "}
                             {translateActivityLabel(activity.label)}
                           </p>
                           <p className="text-xs text-neutral-600 mt-[4px]">
@@ -1926,7 +1890,6 @@ export default function DatasetsEditClient() {
             </div>
           </TabBody>
         </Tab>
-
       </Tabs>
     </div>
   );

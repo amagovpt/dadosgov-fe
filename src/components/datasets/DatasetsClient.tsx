@@ -14,7 +14,9 @@ import {
   Pill,
   CardNoResults,
   ProgressBar,
+  usePopupContext,
 } from "@ama-pt/agora-design-system";
+import { deleteDataset } from "@/services/api";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import { APIResponse, Dataset, DatasetFilters, SiteMetrics } from "@/types/api";
@@ -54,7 +56,42 @@ export default function DatasetsClient({
   filterCounts,
 }: DatasetsClientProps) {
   const router = useRouter();
+  const { show, hide } = usePopupContext();
   const { data: datasets, total, page_size } = initialData;
+
+  const handleDeleteDataset = (dataset: { id: string; title: string }) => {
+    show(
+      <div className="flex flex-col gap-[16px]">
+        <p>
+          Essa ação é irreversível.{" "}
+          <span className="text-red-600">Tem a certeza que quer eliminar este conjunto de dados?</span>
+        </p>
+        <div className="flex justify-end gap-16 pt-16">
+          <Button appearance="outline" variant="neutral" onClick={hide}>
+            Cancelar
+          </Button>
+          <Button
+            variant="danger"
+            hasIcon
+            leadingIcon="agora-line-trash"
+            leadingIconHover="agora-solid-trash"
+            onClick={async () => {
+              try {
+                await deleteDataset(dataset.id);
+                hide();
+                router.refresh();
+              } catch {
+                hide();
+              }
+            }}
+          >
+            Eliminar
+          </Button>
+        </div>
+      </div>,
+      { title: "Elimine o conjunto de dados", closeAriaLabel: "Fechar", dimensions: "m" }
+    );
+  };
 
   const currentQuery = initialFilters.q || "";
   const currentSort = initialFilters.sort || "";
@@ -371,7 +408,7 @@ export default function DatasetsClient({
                                         <span>{formatMetric(dataset.metrics?.followers)}</span>
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-8 text-primary-600 mt-16">
+                                    <div className="flex items-center gap-8 text-primary-600 mt-8">
                                       <Icon
                                         name="agora-line-arrow-right-circle"
                                         className="w-32 h-32"

@@ -4,38 +4,38 @@ import React, { useState } from "react";
 import { Button, ButtonUploader, InputText, usePopupContext } from "@ama-pt/agora-design-system";
 
 interface FileUploadPopupContentProps {
-  initialFiles: File[];
-  initialUrl: string;
   onConfirm: (files: File[], url: string) => void;
 }
 
 export default function FileUploadPopupContent({
-  initialFiles,
-  initialUrl,
   onConfirm,
 }: FileUploadPopupContentProps) {
   const { hide } = usePopupContext();
-  const [localFiles, setLocalFiles] = useState<File[]>(initialFiles);
-  const [localUrl, setLocalUrl] = useState(initialUrl);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [localUrl, setLocalUrl] = useState("");
 
   const handleConfirm = () => {
-    onConfirm(localFiles, localUrl);
+    onConfirm(pendingFiles, localUrl);
     hide();
   };
 
   return (
     <div className="flex flex-col gap-6 p-2">
       <ButtonUploader
+        multiple
         label="Ficheiros"
-        inputLabel="Selecione ou arraste o ficheiro"
+        inputLabel="Selecione ou arraste os ficheiros"
         selectedFilesLabel="ficheiros selecionados"
         removeFileButtonLabel="Remover ficheiro"
         replaceFileButtonLabel="Substituir ficheiro"
+        files={pendingFiles}
         onChange={(e) => {
-          const files = (e.target as HTMLInputElement).files;
-          if (files && files.length > 0) {
-            setLocalFiles(Array.from(files));
-          }
+          const picked = Array.from((e.target as HTMLInputElement).files || []);
+          if (picked.length === 0) return;
+          setPendingFiles((prev) => {
+            const names = new Set(prev.map((f) => f.name));
+            return [...prev, ...picked.filter((f) => !names.has(f.name))];
+          });
         }}
       />
 
