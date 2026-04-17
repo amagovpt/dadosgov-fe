@@ -272,7 +272,7 @@ export default function CommunityResourceEditClient() {
 
   const auxiliarItems = [
     {
-      title: "Escolha o link correto",
+      title: "Escolher o link correto",
       hasError: !!formErrors.url,
       content:
         "É recomendável criar um link para o próprio arquivo em vez de uma página da web para permitir que o site o analise.",
