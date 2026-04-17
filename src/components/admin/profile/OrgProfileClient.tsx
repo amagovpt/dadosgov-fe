@@ -64,6 +64,8 @@ export default function OrgProfileClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [nameError, setNameError] = useState(false);
+  const [descriptionError, setDescriptionError] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null);
 
   useEffect(() => {
     if (!orgId) {
@@ -90,10 +92,19 @@ export default function OrgProfileClient() {
     loadOrg();
   }, [orgId]);
 
+  useEffect(() => {
+    if (!saveStatus) return;
+    const timer = setTimeout(() => setSaveStatus(null), 5000);
+    return () => clearTimeout(timer);
+  }, [saveStatus]);
+
   const handleSave = async () => {
     if (!org) return;
-    if (!name.trim()) {
-      setNameError(true);
+    const hasNameError = !name.trim();
+    const hasDescriptionError = !description.trim();
+    if (hasNameError) setNameError(true);
+    if (hasDescriptionError) setDescriptionError(true);
+    if (hasNameError || hasDescriptionError) {
       requestAnimationFrame(() => {
         document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
@@ -101,16 +112,20 @@ export default function OrgProfileClient() {
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setNameError(false);
+    setDescriptionError(false);
     setIsSaving(true);
+    setSaveStatus(null);
     try {
       await updateOrganization(org.id, {
         name,
-        acronym: acronym || undefined,
-        description: description || undefined,
-        url: url || undefined,
+        acronym: acronym || null,
+        description,
+        url: url || null,
       });
+      setSaveStatus("success");
     } catch (error) {
       console.error("Error updating org profile:", error);
+      setSaveStatus("error");
     } finally {
       setIsSaving(false);
     }
@@ -227,6 +242,17 @@ export default function OrgProfileClient() {
             <h2 className="admin-page__section-title hidden">EDITAR ORGANIZAÇÃO</h2>
 
             <div className="admin-page__fields-group pt-32">
+              {saveStatus && (
+                <StatusCard
+                  type={saveStatus === "success" ? "success" : "danger"}
+                  description={
+                    saveStatus === "success"
+                      ? "Perfil da organização atualizado com sucesso."
+                      : "Ocorreu um erro ao guardar. Por favor, tente novamente."
+                  }
+                />
+              )}
+
               <InputText
                 label="Nome *"
                 placeholder="Insira o nome aqui"
@@ -251,12 +277,19 @@ export default function OrgProfileClient() {
               />
 
               <InputTextArea
-                label="Descrição"
+                label="Descrição *"
                 placeholder="Insira a descrição aqui"
                 id="org-description"
                 rows={4}
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  if (e.target.value.trim()) setDescriptionError(false);
+                }}
+                hasError={descriptionError}
+                hasFeedback={descriptionError}
+                feedbackState="danger"
+                errorFeedbackText="Campo obrigatório"
               />
 
               <InputText
