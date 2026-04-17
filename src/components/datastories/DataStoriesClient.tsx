@@ -91,6 +91,33 @@ const ALL_DATA_STORIES = [
   },
 ];
 
+const now = new Date();
+const daysAgo = (dateStr: string, days: number) =>
+  (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24) <= days;
+
+const atualizacaoOptions = [
+  {
+    id: 'all',
+    label: 'Todos',
+    count: String(ALL_DATA_STORIES.length),
+  },
+  {
+    id: '30_days',
+    label: 'Os últimos 30 dias',
+    count: String(ALL_DATA_STORIES.filter(s => daysAgo(s.created_at, 30)).length),
+  },
+  {
+    id: '12_months',
+    label: 'Os últimos 12 meses',
+    count: String(ALL_DATA_STORIES.filter(s => daysAgo(s.created_at, 365)).length),
+  },
+  {
+    id: '3_years',
+    label: 'Os últimos 3 anos',
+    count: String(ALL_DATA_STORIES.filter(s => daysAgo(s.created_at, 365 * 3)).length),
+  },
+];
+
 const TOGGLE_FILTERS = {
   temas: {
     title: 'Temas',
@@ -104,6 +131,10 @@ const TOGGLE_FILTERS = {
       }
       return acc;
     }, [] as { id: string; label: string; count: string }[]),
+  },
+  atualizacao: {
+    title: 'Data da atualização',
+    options: atualizacaoOptions,
   },
 };
 
@@ -123,6 +154,7 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
 
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<FilterKey, string>>({
     temas: 'all',
+    atualizacao: 'all',
   });
   const [currentSortKey, setCurrentSortKey] = useState('recentes');
 
@@ -208,6 +240,26 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
 
     // Advanced filter: tags (local state)
     if (selectedTags.length > 0 && !selectedTags.some((t) => story.tags.includes(t))) {
+      return false;
+    }
+
+    // Filtro de atualização
+    if (
+      selectedToggleFilters.atualizacao === '30_days' &&
+      !daysAgo(story.created_at, 30)
+    ) {
+      return false;
+    }
+    if (
+      selectedToggleFilters.atualizacao === '12_months' &&
+      !daysAgo(story.created_at, 365)
+    ) {
+      return false;
+    }
+    if (
+      selectedToggleFilters.atualizacao === '3_years' &&
+      !daysAgo(story.created_at, 365 * 3)
+    ) {
       return false;
     }
 
@@ -513,7 +565,7 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                     variant="primary"
                     appearance="outline"
                     onClick={() => {
-                      setSelectedToggleFilters({ temas: 'all' });
+                      setSelectedToggleFilters({ temas: 'all', atualizacao: 'all' });
                       setSearchQuery('');
                       setCurrentSortKey('recentes');
                       setSelectedTags([]);
