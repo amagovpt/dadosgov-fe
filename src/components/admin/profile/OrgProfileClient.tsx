@@ -290,13 +290,12 @@ export default function OrgProfileClient() {
                     maxCount={1}
                     maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
                     forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                    hasError={!!logoError}
+                    hasFeedback={!!logoError}
+                    feedbackState="danger"
+                    feedbackText={logoError ?? undefined}
                     onChange={handleLogoUpload}
                   />
-                  {logoError && (
-                    <div className="mt-[8px]">
-                      <StatusCard type="danger" description={logoError} />
-                    </div>
-                  )}
                 </div>
               </div>
 

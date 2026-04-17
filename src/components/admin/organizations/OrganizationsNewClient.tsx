@@ -345,6 +345,10 @@ export default function OrganizationsNewClient() {
                     maxCount={1}
                     maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
                     forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                    hasError={!!orgLogoError}
+                    hasFeedback={!!orgLogoError}
+                    feedbackState="danger"
+                    feedbackText={orgLogoError ?? undefined}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const file = e.target.files?.[0] || null;
                       if (file && file.size > 4194304) {
@@ -363,11 +367,6 @@ export default function OrganizationsNewClient() {
                       }
                     }}
                   />
-                  {orgLogoError && (
-                    <div className="mt-[8px]">
-                      <StatusCard type="danger" description={orgLogoError} />
-                    </div>
-                  )}
                   {orgLogoPreview && (
                     <div className="mt-[12px]">
                       <p className="text-sm text-neutral-600 mb-[8px]">Pré-visualização:</p>
