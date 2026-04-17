@@ -37,6 +37,7 @@ export default function OrganizationsNewClient() {
   const [orgLogoPreview, setOrgLogoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
+  const [orgLogoError, setOrgLogoError] = useState<string | null>(null);
   const [orgSuggestions, setOrgSuggestions] = useState<OrganizationSuggestion[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
 
@@ -346,6 +347,13 @@ export default function OrganizationsNewClient() {
                     forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const file = e.target.files?.[0] || null;
+                      if (file && file.size > 4194304) {
+                        setOrgLogoError("O ficheiro excede o tamanho máximo de 4 MB.");
+                        setOrgLogo(null);
+                        setOrgLogoPreview(null);
+                        return;
+                      }
+                      setOrgLogoError(null);
                       setOrgLogo(file);
                       if (file) {
                         const url = URL.createObjectURL(file);
@@ -355,6 +363,11 @@ export default function OrganizationsNewClient() {
                       }
                     }}
                   />
+                  {orgLogoError && (
+                    <div className="mt-[8px]">
+                      <StatusCard type="danger" description={orgLogoError} />
+                    </div>
+                  )}
                   {orgLogoPreview && (
                     <div className="mt-[12px]">
                       <p className="text-sm text-neutral-600 mb-[8px]">Pré-visualização:</p>
