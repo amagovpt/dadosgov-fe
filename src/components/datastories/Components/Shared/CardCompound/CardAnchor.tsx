@@ -1,5 +1,5 @@
 "use client"
-import { Anchor, AnchorProps, Icon } from '@ama-pt/agora-design-system'
+import { AnchorProps, Icon } from '@ama-pt/agora-design-system'
 import { twJoin } from 'tailwind-merge'
 
 export default function CardAnchor(args: AnchorProps) {
