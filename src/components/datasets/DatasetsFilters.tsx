@@ -23,6 +23,7 @@ const DATASET_TOGGLE_FILTERS = {
   formato: {
     title: "Formato dos recursos",
     options: [
+<<<<<<< HEAD
       { id: "all", label: "Todos", description: undefined as string | undefined },
       { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet..." },
       { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL..." },
@@ -38,13 +39,20 @@ const DATASET_TOGGLE_FILTERS = {
       { id: "30_days", label: "Os últimos 30 dias", description: undefined as string | undefined },
       { id: "12_months", label: "Os últimos 12 meses", description: undefined as string | undefined },
       { id: "3_years", label: "Os últimos 3 anos", description: undefined as string | undefined },
+=======
+>>>>>>> main
     ],
   },
   rotulo: {
     title: "Tipo de dados",
     options: [
+<<<<<<< HEAD
       { id: "all", label: "Todos", description: undefined as string | undefined },
       { id: "high_value", label: "Conjuntos de dados de Elevado Valor", description: undefined as string | undefined },
+=======
+      { id: "all", label: "Todos", description: undefined as string | undefined },
+      { id: "high_value", label: "Conjuntos de dados de Elevado Valor", description: undefined as string | undefined },
+>>>>>>> main
     ],
   },
 };
@@ -119,11 +127,14 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+<<<<<<< HEAD
   const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>(() => ({
     formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
     atualizacao: detectAtualizacaoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
     rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
   }));
+=======
+>>>>>>> main
 
   const handleToggleFilterChange = (filterKey: ToggleFilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
@@ -472,7 +483,11 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
           onClick={() => {
             setSelectedToggleFilters({
               formato: "all",
+<<<<<<< HEAD
               atualizacao: "all",
+=======
+              atualizacao: "all",
+>>>>>>> main
               rotulo: "all",
             });
             router.replace("/pages/datasets", { scroll: false });

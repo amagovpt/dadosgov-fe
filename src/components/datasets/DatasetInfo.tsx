@@ -6,25 +6,12 @@ import { pt } from "date-fns/locale";
 import { Pill, Accordion, AccordionGroup } from "@ama-pt/agora-design-system";
 import { Dataset } from "@/types/api";
 import { frequencyLabelsMap } from "@/utils/frequencyLabels";
+import { getGranularityLabel } from "@/utils/granularityLabels";
 
 interface DatasetInfoProps {
   dataset: Dataset;
 }
 
-const granularityMap: Record<string, string> = {
-  poi: "Ponto de interesse",
-  other: "Outro",
-  country: "País",
-  canton: "Cantão",
-  town: "Cidade",
-  epci: "EPCI",
-  iris: "IRIS",
-  commune: "Município",
-  "fr:commune": "Município",
-  "fr:departement": "Departamento",
-  "fr:region": "Região",
-  "fr:arrondissement": "Distrito",
-};
 
 const licenseMap: Record<string, string> = {
   "cc-by": "Creative Commons Attribution",
@@ -212,7 +199,7 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
                   Granularidade da cobertura territorial
                 </p>
                 <span className="text-neutral-900 text-sm">
-                  {granularityMap[dataset.spatial.granularity] || dataset.spatial.granularity}
+                  {getGranularityLabel(dataset.spatial.granularity, dataset.spatial.granularity)}
                 </span>
               </div>
             )}

@@ -73,6 +73,7 @@ const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEd
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
+import { getGranularityLabel } from "@/utils/granularityLabels";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -764,8 +765,12 @@ export default function DatasetsEditClient() {
         —
       </DropdownOption>,
       ...granularities.map((g) => (
-        <DropdownOption key={g.id} value={g.id} selected={g.id === loadedSpatialGranularity}>
-          {g.name}
+        <DropdownOption
+          key={g.id}
+          value={g.id}
+          selected={g.id === loadedSpatialGranularity}
+        >
+          {getGranularityLabel(g.id, g.name)}
         </DropdownOption>
       )),
     ];
