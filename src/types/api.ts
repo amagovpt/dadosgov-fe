@@ -1,3 +1,20 @@
+export interface ApiToken {
+  id: string;
+  token_prefix: string;
+  name: string | null;
+  scopes: string[];
+  kind: string;
+  created_at: string;
+  last_used_at: string | null;
+  user_agents: string[];
+  revoked_at: string | null;
+  expires_at: string | null;
+}
+
+export interface ApiTokenCreated extends ApiToken {
+  token: string;
+}
+
 export interface UserRef {
   id: string;
   slug: string;

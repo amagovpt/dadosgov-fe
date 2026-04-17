@@ -12,11 +12,13 @@ import {
   updateProfile,
   uploadAvatar,
   generateApiKey,
-  clearApiKey,
+  fetchApiTokens,
+  revokeApiToken,
   requestEmailChange,
   fetchMyFollowing,
 } from "@/services/api";
-import { Activity, UserFollowing, UserPublic } from "@/types/api";
+import { Activity, ApiToken, UserFollowing, UserPublic } from "@/types/api";
+import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
@@ -50,7 +52,11 @@ export default function ProfileClient() {
   const [lastName, setLastName] = useState("");
   const [about, setAbout] = useState("");
   const [website, setWebsite] = useState("");
-  const [apiKey, setApiKey] = useState("");
+  const [apiTokens, setApiTokens] = useState<ApiToken[]>([]);
+  const [newToken, setNewToken] = useState<string | null>(null);
+  const [newTokenName, setNewTokenName] = useState("");
+  const [revokingTokenId, setRevokingTokenId] = useState<string | null>(null);
+  const [tokenCopied, setTokenCopied] = useState(false);
   const [email, setEmail] = useState("");
 
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -81,7 +87,6 @@ export default function ProfileClient() {
         setLastName(data.last_name || "");
         setAbout(data.about || "");
         setWebsite(data.website || "");
-        setApiKey(data.apikey || "");
         setEmail(data.email || "");
       } catch (error) {
         console.error("Error loading profile:", error);
@@ -89,7 +94,16 @@ export default function ProfileClient() {
         setIsLoadingProfile(false);
       }
     }
+    async function loadApiTokens() {
+      try {
+        const tokens = await fetchApiTokens();
+        setApiTokens(tokens);
+      } catch (error) {
+        console.error("Error loading API tokens:", error);
+      }
+    }
     loadProfile();
+    loadApiTokens();
   }, []);
 
   useEffect(() => {
@@ -152,14 +166,55 @@ export default function ProfileClient() {
 
   const handleGenerateApiKey = async () => {
     setIsGeneratingKey(true);
+    setTokenCopied(false);
     try {
-      const newKey = await generateApiKey();
-      setApiKey(newKey);
+      const created = await generateApiKey(newTokenName.trim() || undefined);
+      setNewToken(created.token);
+      setApiTokens((prev) => [
+        {
+          id: created.id,
+          token_prefix: created.token_prefix,
+          name: created.name,
+          scopes: created.scopes,
+          kind: created.kind,
+          created_at: created.created_at,
+          last_used_at: created.last_used_at,
+          user_agents: created.user_agents,
+          revoked_at: created.revoked_at,
+          expires_at: created.expires_at,
+        },
+        ...prev,
+      ]);
+      setNewTokenName("");
     } catch (error) {
       console.error("Error generating API key:", error);
       setSaveError("Erro ao gerar a chave de API. Tente novamente.");
     } finally {
       setIsGeneratingKey(false);
+    }
+  };
+
+  const handleCopyToken = async () => {
+    if (!newToken) return;
+    try {
+      await navigator.clipboard.writeText(newToken);
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 3000);
+    } catch (error) {
+      console.error("Error copying token:", error);
+    }
+  };
+
+  const handleRevokeToken = async (tokenId: string) => {
+    setRevokingTokenId(tokenId);
+    try {
+      await revokeApiToken(tokenId);
+      setApiTokens((prev) => prev.filter((t) => t.id !== tokenId));
+    } catch (error) {
+      console.error("Error revoking API token:", error);
+      setSaveError("Erro ao revogar a chave de API. Tente novamente.");
+    } finally {
+      setRevokingTokenId(null);
     }
   };
 
@@ -361,27 +416,129 @@ export default function ProfileClient() {
                     </div>
                   </div>
 
-                  <div className="flex items-end gap-[16px]">
-                    <div className="flex-1">
-                      <InputText
-                        label="Chave da API"
-                        placeholder="Nenhuma chave gerada"
-                        id="api-key"
-                        value={apiKey}
-                        readOnly
-                      />
+                  <div className="flex flex-col gap-[16px]">
+                    <div>
+                      <p className="text-base font-medium text-neutral-900 mb-[8px]">
+                        Chaves da API
+                      </p>
+                      <p className="text-sm text-neutral-700 mb-[16px]">
+                        Gere uma chave para autenticar pedidos à API. Por motivos de segurança,
+                        a chave completa só é apresentada uma vez no momento da criação —
+                        guarde-a num local seguro.
+                      </p>
                     </div>
-                    <Button
-                      appearance="outline"
-                      variant="primary"
-                      hasIcon
-                      leadingIcon="agora-line-edit"
-                      leadingIconHover="agora-solid-edit"
-                      onClick={handleGenerateApiKey}
-                      disabled={isGeneratingKey}
-                    >
-                      {isGeneratingKey ? "A gerar..." : "Gerar"}
-                    </Button>
+
+                    <div className="flex items-end gap-[16px]">
+                      <div className="flex-1">
+                        <InputText
+                          label="Nome da nova chave (opcional)"
+                          placeholder="Ex.: Script backup, Integração X..."
+                          id="new-token-name"
+                          value={newTokenName}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setNewTokenName(e.target.value)
+                          }
+                        />
+                      </div>
+                      <Button
+                        appearance="outline"
+                        variant="primary"
+                        hasIcon
+                        leadingIcon="agora-line-edit"
+                        leadingIconHover="agora-solid-edit"
+                        onClick={handleGenerateApiKey}
+                        disabled={isGeneratingKey}
+                      >
+                        {isGeneratingKey ? "A gerar..." : "Gerar nova chave"}
+                      </Button>
+                    </div>
+
+                    {newToken && (
+                      <StatusCard
+                        type="warning"
+                        description={
+                          <div className="flex flex-col gap-[8px]">
+                            <p>
+                              <strong>Copie esta chave agora.</strong> Não voltará a ser
+                              apresentada.
+                            </p>
+                            <div className="flex items-center gap-[8px]">
+                              <code className="flex-1 bg-neutral-50 border border-neutral-300 rounded-[4px] px-[12px] py-[8px] text-xs break-all">
+                                {newToken}
+                              </code>
+                              <Button
+                                appearance="outline"
+                                variant="primary"
+                                hasIcon
+                                leadingIcon={tokenCopied ? "agora-line-check" : "agora-line-copy"}
+                                leadingIconHover={
+                                  tokenCopied ? "agora-solid-check" : "agora-solid-copy"
+                                }
+                                onClick={handleCopyToken}
+                              >
+                                {tokenCopied ? "Copiado" : "Copiar"}
+                              </Button>
+                            </div>
+                          </div>
+                        }
+                      />
+                    )}
+
+                    {apiTokens.length > 0 ? (
+                      <div className="flex flex-col gap-[8px]">
+                        <p className="text-sm font-medium text-neutral-900">
+                          Chaves activas ({apiTokens.length})
+                        </p>
+                        <div className="flex flex-col divide-y divide-neutral-200 border border-neutral-200 rounded-[4px]">
+                          {apiTokens.map((token) => (
+                            <div
+                              key={token.id}
+                              className="flex items-center justify-between gap-[16px] px-[16px] py-[12px]"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-[8px]">
+                                  <code className="text-sm font-mono text-neutral-900">
+                                    {token.token_prefix}…
+                                  </code>
+                                  {token.name && (
+                                    <span className="text-sm text-neutral-700">
+                                      — {token.name}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-neutral-700 mt-[4px]">
+                                  Criada em{" "}
+                                  {format(new Date(token.created_at), "dd/MM/yyyy", {
+                                    locale: pt,
+                                  })}
+                                  {token.last_used_at
+                                    ? ` · último uso ${formatDistanceToNow(
+                                        new Date(token.last_used_at),
+                                        { locale: pt, addSuffix: true }
+                                      )}`
+                                    : " · nunca utilizada"}
+                                </p>
+                              </div>
+                              <Button
+                                appearance="outline"
+                                variant="danger"
+                                hasIcon
+                                leadingIcon="agora-line-trash"
+                                leadingIconHover="agora-solid-trash"
+                                onClick={() => handleRevokeToken(token.id)}
+                                disabled={revokingTokenId === token.id}
+                              >
+                                {revokingTokenId === token.id ? "A revogar..." : "Revogar"}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-neutral-700 italic">
+                        Ainda não tem chaves de API geradas.
+                      </p>
+                    )}
                   </div>
 
                   {emailChangeSuccess && (
