@@ -1,15 +1,16 @@
 "use client"
-import { Anchor, AnchorProps } from '@ama-pt/agora-design-system'
+import { Anchor, AnchorProps, Icon } from '@ama-pt/agora-design-system'
 import { twJoin } from 'tailwind-merge'
 
 export default function CardAnchor(args: AnchorProps) {
     return (
-        <div>
-            <Anchor {...args} className={twJoin("!justify-start", args.className)}
-                trailingIcon={args.trailingIcon ?? 'agora-line-arrow-right-circle'}
-                trailingIconActive={args.trailingIconActive ?? 'agora-line-arrow-right-circle'}
-                trailingIconHover={args.trailingIconHover ?? 'agora-solid-arrow-right-circle'}
-            />
+        <div className='group'>
+            <a href={args.href} target={args.target}
+                className={twJoin('flex items-center gap-8 text-primary-400 text-m-light group-hover:text-white', args.className)}>
+                <span>{args.children}</span>
+                <Icon name='agora-line-arrow-right-circle'
+                    className={twJoin('fill-primary-400 group-hover:fill-white', args.className)} />
+            </a>
         </div>
     )
 }
