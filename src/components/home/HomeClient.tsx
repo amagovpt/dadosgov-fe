@@ -434,13 +434,13 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                   image: "/laptop.png",
                   created_at: "2024-03-10T12:00:00Z",
                 },
-                // {
-                //   id: "3",
-                //   slug: "servicos-publicos/o-canal-digital",
-                //   title: "Serviços Públicos: o canal digital",
-                //   image: "/laptop.png",
-                //   created_at: "2024-03-09T12:00:00Z",
-                // },
+                {
+                  id: "3",
+                  slug: "servicos-publicos/o-canal-digital",
+                  title: "Serviços Públicos: o canal digital",
+                  image: "/laptop.png",
+                  created_at: "2024-03-09T12:00:00Z",
+                },
               ].map((story) => (
                 <CardArticle
                   key={story.id}
