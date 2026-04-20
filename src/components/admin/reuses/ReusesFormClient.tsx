@@ -68,6 +68,12 @@ export default function ReusesFormClient({
   const [tags, setTags] = useState<TagSuggestion[]>([]);
   const [keywordSearch, setKeywordSearch] = useState("");
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
+  // Persist selected values across step navigation (uncontrolled IsolatedSelect
+  // remounts when the step 1 JSX unmounts/remounts; state survives because the
+  // parent component does not remount).
+  const [selectedProducerValue, setSelectedProducerValue] = useState("user");
+  const [selectedReuseTypeValue, setSelectedReuseTypeValue] = useState("");
+  const [selectedReuseTopicValue, setSelectedReuseTopicValue] = useState("");
 
   // Step 2 state
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
@@ -154,7 +160,7 @@ export default function ReusesFormClient({
         ? selectedKeywordsValue.split(",").filter(Boolean)
         : [];
 
-      const reuse = await createReuse({
+      const payload = {
         title: reuseName.trim(),
         description: reuseDescription.trim(),
         url,
@@ -165,7 +171,11 @@ export default function ReusesFormClient({
         ...(selectedProducerRef.current && selectedProducerRef.current !== "user"
           ? { organization: selectedProducerRef.current }
           : {}),
-      });
+      };
+
+      const reuse = createdReuse
+        ? await updateReuse(createdReuse.id, payload)
+        : await createReuse(payload);
 
       if (reuseCoverImageFile) {
         await uploadReuseImage(reuse.id, reuseCoverImageFile);
@@ -453,8 +463,12 @@ export default function ReusesFormClient({
                   placeholder="Selecione o produtor..."
                   id="producer-identity"
                   onChangeRef={selectedProducerRef}
-                  defaultValue="user"
-                  onChangeCallback={(value) => setProducerId(value || "user")}
+                  defaultValue={selectedProducerValue}
+                  onChangeCallback={(value) => {
+                    const v = value || "user";
+                    setSelectedProducerValue(v);
+                    setProducerId(v);
+                  }}
                 >
                   {producerOptions}
                 </IsolatedSelect>
@@ -520,6 +534,8 @@ export default function ReusesFormClient({
                     placeholder="Selecione um tipo..."
                     id="reuse-type"
                     onChangeRef={selectedReuseTypeRef}
+                    defaultValue={selectedReuseTypeValue}
+                    onChangeCallback={(v) => setSelectedReuseTypeValue(v || "")}
                     hasError={!!formErrors.reuseType}
                     errorFeedbackText="Campo obrigatório"
                   >
@@ -530,6 +546,8 @@ export default function ReusesFormClient({
                     placeholder="Selecione um tema..."
                     id="reuse-theme"
                     onChangeRef={selectedReuseTopicRef}
+                    defaultValue={selectedReuseTopicValue}
+                    onChangeCallback={(v) => setSelectedReuseTopicValue(v || "")}
                     hasError={!!formErrors.reuseTopic}
                     errorFeedbackText="Campo obrigatório"
                   >
@@ -548,9 +566,8 @@ export default function ReusesFormClient({
                       if (e.target.value.trim()) clearError("reuseDescription");
                     }}
                     hasError={!!formErrors.reuseDescription}
-                    hasFeedback={!!formErrors.reuseDescription || reuseDescription.length < 1000}
-                    feedbackState={formErrors.reuseDescription ? "danger" : "warning"}
-                    feedbackText="Recomenda-se que a descrição tenha pelo menos 1000 caracteres."
+                    hasFeedback={!!formErrors.reuseDescription}
+                    feedbackState="danger"
                     errorFeedbackText="Campo obrigatório"
                   />
                   <IsolatedSelect
@@ -575,7 +592,6 @@ export default function ReusesFormClient({
                     </span>
                     <div className="mt-2">
                       <DragAndDropUploader
-                        key={reuseCoverImageFile?.name}
                         dragAndDropLabel="Arraste e largue a imagem aqui"
                         inputLabel="Selecionar ficheiro"
                         separatorLabel="ou"
