@@ -511,6 +511,36 @@ export default function DatasetsAdminClient({
     ) {
       errors.temporalCoverage = true;
     }
+
+    // Validate contact point fields.
+    // At least one valid contact (saved or draft with name + email/link) is required.
+    const hasSavedContact = selectedContactPointIds.length > 0;
+    const draftErrorsMap: Record<number, Record<string, boolean>> = {};
+    let hasValidDraft = false;
+
+    draftContacts.forEach((draft) => {
+      const draftErrors: Record<string, boolean> = {};
+      if (!draft.name.trim()) draftErrors.name = true;
+      if (!draft.email.trim() && !draft.link.trim()) {
+        draftErrors.email = true;
+        draftErrors.link = true;
+      }
+      if (Object.keys(draftErrors).length === 0) {
+        hasValidDraft = true;
+      } else {
+        draftErrorsMap[draft.id] = draftErrors;
+      }
+    });
+
+    if (!hasSavedContact && !hasValidDraft) {
+      setDraftContacts((prev) =>
+        prev.map((d) =>
+          draftErrorsMap[d.id] ? { ...d, errors: draftErrorsMap[d.id] } : d,
+        ),
+      );
+      errors.contactDrafts = true;
+    }
+
     if (
       (errors.temporalCoverage ||
         errors.temporalCoverageInvalidFormat) &&
@@ -1004,7 +1034,7 @@ export default function DatasetsAdminClient({
                     placeholder="Insira a descrição aqui"
                     id="dataset-description"
                     rows={4}
-                    maxLength={1000}
+                    maxLength={10000}
                     showCharCounter={true}
                     value={datasetDescription}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -1076,7 +1106,7 @@ export default function DatasetsAdminClient({
                 {selectedProducer && selectedProducer !== "user" && (
                   <>
                     <h2 className="admin-page__section-title">
-                      Pontos de contato
+                      Pontos de contacto
                     </h2>
 
                     <div className="admin-page__fields-group">
@@ -1102,7 +1132,7 @@ export default function DatasetsAdminClient({
                                 font-medium leading-7"
                               style={{ paddingBottom: "16px" }}
                             >
-                              Novo ponto de contato
+                              Novo ponto de contacto
                             </div>
                             <div style={{ paddingBottom: "24px" }}>
                               <InputText
@@ -1146,10 +1176,10 @@ export default function DatasetsAdminClient({
                                 hasError={!!draft.errors.email}
                                 hasFeedback={!!draft.errors.email}
                                 feedbackState="danger"
-                                errorFeedbackText="Preencha o e-mail ou a reutilização"
+                                errorFeedbackText="É necessário um endereço de e-mail caso não seja fornecido um link."
                               />
                               <InputText
-                                label="Reutilização"
+                                label="Website"
                                 placeholder="https://..."
                                 id={`contact-link-${draft.id}`}
                                 value={draft.link}
@@ -1165,7 +1195,7 @@ export default function DatasetsAdminClient({
                                 hasError={!!draft.errors.link}
                                 hasFeedback={!!draft.errors.link}
                                 feedbackState="danger"
-                                errorFeedbackText="Preencha o e-mail ou a reutilização"
+                                errorFeedbackText="É necessário um link caso não seja fornecido um endereço de e‑mail."
                               />
                             </div>
                             <div style={{ paddingBottom: "24px" }}>
@@ -1179,7 +1209,7 @@ export default function DatasetsAdminClient({
                                   handleSaveContactDraft(draft.id)
                                 }
                               >
-                                Guardar contato
+                                Guardar contacto
                               </Button>
                             </div>
                           </div>
@@ -1208,7 +1238,7 @@ export default function DatasetsAdminClient({
                             ]);
                           }}
                         >
-                          Novo contato
+                          Novo contacto
                         </Button>
                       </div>
                     </div>
