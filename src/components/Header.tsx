@@ -97,6 +97,10 @@ export const Header = () => {
         panelsList.appendChild(logoutLi);
       }
       setLogoutPortalNode(logoutLi);
+
+      // Keep ecosystem button always rightmost
+      const ecosystemLi = panelsList.querySelector(".ecosystem-panel-menu");
+      if (ecosystemLi) panelsList.appendChild(ecosystemLi);
     } else {
       const existingAdmin = panelsList.querySelector(".admin-panel-menu");
       if (existingAdmin) existingAdmin.remove();
