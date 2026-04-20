@@ -360,7 +360,7 @@ function LoginContent() {
                       >
                         Declaro que li e aceito os termos e condições para o tratamento dos
                         meus dados pessoais no acesso e utilização da Área Reservada do
-                        dadosgov.pt.
+                        dados.gov.pt.
                       </Checkbox>
                     </div>
                   </div>
