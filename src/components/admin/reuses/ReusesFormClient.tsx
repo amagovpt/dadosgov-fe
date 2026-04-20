@@ -25,6 +25,7 @@ import {
   fetchReuseTypes,
   fetchReuseTopics,
   fetchMyDatasets,
+  fetchOrgDatasets,
   suggestTags,
 } from "@/services/api";
 import type { Reuse, ReuseType, ReuseTopic, Dataset, TagSuggestion } from "@/types/api";
@@ -47,7 +48,7 @@ export default function ReusesFormClient({
   onNextStep,
   onPreviousStep,
 }: ReusesFormClientProps) {
-  const { user } = useAuth();
+  const { user, hasOrganization } = useAuth();
   const selectedProducerRef = useRef("");
   const selectedReuseTypeRef = useRef("");
   const selectedReuseTopicRef = useRef("");
@@ -75,13 +76,26 @@ export default function ReusesFormClient({
   const [apiLinkErrors, setApiLinkErrors] = useState<Record<number, string>>({});
   const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
   const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
+  const [producerId, setProducerId] = useState<string>("user");
 
   useEffect(() => {
     fetchReuseTypes().then(setReuseTypes);
     fetchReuseTopics().then(setReuseTopics);
-    fetchMyDatasets(1, 5).then((res) => setMyDatasets(res.data || []));
     suggestTags("", 50).then(setTags);
   }, []);
+
+  useEffect(() => {
+    setSelectedDataset(null);
+    const dedupe = (items: Dataset[]) =>
+      Array.from(new Map(items.map((d) => [d.id, d])).values());
+    if (producerId === "user" || producerId === "") {
+      fetchMyDatasets(1, 100).then((res) => setMyDatasets(dedupe(res.data || [])));
+    } else {
+      fetchOrgDatasets(producerId, 1, 100).then((res) =>
+        setMyDatasets(dedupe(res.data || []))
+      );
+    }
+  }, [producerId]);
 
   useEffect(() => {
     setDatasetLinkErrors({});
@@ -350,20 +364,19 @@ export default function ReusesFormClient({
 
   const auxiliarItems = auxiliarItemsStep1;
 
-  const producerOptions = useMemo(() => (
-    <DropdownSection name="identity">
-      <DropdownOption value="user">
+  const producerOptions = useMemo(() => {
+    const options = [
+      <DropdownOption key="user" value="user">
         {user ? `${user.first_name} ${user.last_name}` : "Eu próprio"}
-      </DropdownOption>
-      <>
-        {(user?.organizations || []).map((org) => (
-          <DropdownOption key={org.id} value={org.id}>
-            {org.name}
-          </DropdownOption>
-        ))}
-      </>
-    </DropdownSection>
-  ), [user]);
+      </DropdownOption>,
+      ...(user?.organizations || []).map((org) => (
+        <DropdownOption key={org.id} value={org.id}>
+          {org.name}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="identity">{options}</DropdownSection>;
+  }, [user]);
 
   const typeOptions = useMemo(() => (
     <DropdownSection name="types">
@@ -374,6 +387,22 @@ export default function ReusesFormClient({
       ))}
     </DropdownSection>
   ), [reuseTypes]);
+
+  const datasetOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const options = myDatasets.reduce<React.ReactElement[]>((acc, d) => {
+      if (!seen.has(d.id)) {
+        seen.add(d.id);
+        acc.push(
+          <DropdownOption key={d.id} value={d.id}>
+            {d.title}
+          </DropdownOption>
+        );
+      }
+      return acc;
+    }, []);
+    return <DropdownSection name="datasets">{options}</DropdownSection>;
+  }, [myDatasets]);
 
   const topicOptions = useMemo(() => (
     <DropdownSection name="themes">
@@ -424,29 +453,33 @@ export default function ReusesFormClient({
                   placeholder="Selecione o produtor..."
                   id="producer-identity"
                   onChangeRef={selectedProducerRef}
+                  defaultValue="user"
+                  onChangeCallback={(value) => setProducerId(value || "user")}
                 >
                   {producerOptions}
                 </IsolatedSelect>
 
-                <div className="admin-page__org-card">
-                  <p className="admin-page__org-card-title">
-                    Não pertence a uma organização.
-                  </p>
-                  <p className="admin-page__org-card-description">
-                    Quando a reutilização for produzida no contexto de atividade profissional, é
-                    recomendável que seja publicada em nome da organização responsável.
-                  </p>
-                  <a
-                    href="/pages/admin/organizations/new"
-                    className="admin-page__org-card-link"
-                  >
-                    Crie ou integre uma organização em dados.gov.pt
-                    <Icon
-                      name="agora-line-arrow-right-circle"
-                      className="w-[24px] h-[24px]"
-                    />
-                  </a>
-                </div>
+                {!hasOrganization && (
+                  <div className="admin-page__org-card">
+                    <p className="admin-page__org-card-title">
+                      Não pertence a uma organização.
+                    </p>
+                    <p className="admin-page__org-card-description">
+                      Quando a reutilização for produzida no contexto de atividade profissional, é
+                      recomendável que seja publicada em nome da organização responsável.
+                    </p>
+                    <a
+                      href="/pages/admin/organizations/new"
+                      className="admin-page__org-card-link"
+                    >
+                      Crie ou integre uma organização em dados.gov.pt
+                      <Icon
+                        name="agora-line-arrow-right-circle"
+                        className="w-[24px] h-[24px]"
+                      />
+                    </a>
+                  </div>
+                )}
 
                 <h2 className="admin-page__section-title">Descrição</h2>
 
@@ -683,13 +716,7 @@ export default function ReusesFormClient({
                     }
                   }}
                 >
-                  <DropdownSection name="datasets">
-                    {myDatasets.map((d) => (
-                      <DropdownOption key={d.id} value={d.id}>
-                        {d.title}
-                      </DropdownOption>
-                    ))}
-                  </DropdownSection>
+                  {datasetOptions}
                 </InputSelect>
 
                 <div className="admin-page__divider-or">
