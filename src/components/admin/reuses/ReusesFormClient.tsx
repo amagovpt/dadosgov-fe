@@ -701,6 +701,7 @@ export default function ReusesFormClient({
                 )}
 
                 <InputSelect
+                  key={`dataset-select-${producerId}`}
                   label="Ficheiro com um conjunto de dados"
                   placeholder="Selecione um conjunto de dados..."
                   id="reuse-dataset-search"
