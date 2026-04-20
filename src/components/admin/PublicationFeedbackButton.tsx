@@ -14,7 +14,7 @@ export default function PublicationFeedbackButton() {
       trailingIconHover="agora-solid-external-link"
       onClick={() => window.open(SUPPORT_PAGE_PATH, "_blank", "noopener,noreferrer")}
     >
-      Dê-nos o seu feedback sobre o processo de publicação.
+      Dê-nos o seu feedback sobre o processo de publicação
     </Button>
   );
 }
