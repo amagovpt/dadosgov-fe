@@ -1242,11 +1242,14 @@ export async function fetchLatestReuses(pageSize: number = 3): Promise<APIRespon
 export async function fetchPosts(
   page: number = 1,
   pageSize: number = 3,
-  sort: string = "-published"
+  sort: string = "-published",
+  q?: string
 ): Promise<APIResponse<Post>> {
   try {
+    const params = new URLSearchParams({ page: String(page), page_size: String(pageSize), sort });
+    if (q) params.set("q", q);
     const res = await fetch(
-      `${API_BASE_URL}/posts/?page=${page}&page_size=${pageSize}&sort=${sort}`,
+      `${API_BASE_URL}/posts/?${params.toString()}`,
       {
         next: { revalidate: 120 },
       }
