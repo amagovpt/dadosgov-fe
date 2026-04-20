@@ -23,17 +23,38 @@ export default function ApiTutorialClient() {
       document.head.appendChild(swaggerUiCss);
     }
 
-    function initSwagger() {
+    async function initSwagger() {
       if (cancelled || !swaggerRef.current) return;
-      if ((window as any).SwaggerUIBundle) {
-        (window as any).SwaggerUIBundle({
-          url: SWAGGER_JSON_URL,
-          domNode: swaggerRef.current,
-          docExpansion: "none",
-          deepLinking: false,
-          layout: "BaseLayout",
-        });
+      if (!(window as any).SwaggerUIBundle) return;
+
+      // Fetch the spec and strip the absolute `host` so that requests go to
+      // the current origin (via the Next.js /api proxy in dev, same-origin in
+      // prod). Avoids CORS errors when the portal and backend run on
+      // different ports in development.
+      let spec: Record<string, unknown> | undefined;
+      try {
+        const res = await fetch(SWAGGER_JSON_URL);
+        if (res.ok) {
+          spec = await res.json();
+          if (spec) {
+            delete spec.host;
+            spec.basePath = "/api/1";
+            spec.schemes = [window.location.protocol.replace(":", "")];
+          }
+        }
+      } catch {
+        // Fall back to url-based loading below
       }
+
+      if (cancelled || !swaggerRef.current) return;
+
+      (window as any).SwaggerUIBundle({
+        ...(spec ? { spec } : { url: SWAGGER_JSON_URL }),
+        domNode: swaggerRef.current,
+        docExpansion: "none",
+        deepLinking: false,
+        layout: "BaseLayout",
+      });
     }
 
     // Load script if not already present
