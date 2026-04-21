@@ -388,6 +388,7 @@ export interface Reuse {
   badges: Badge[];
   datasets: DatasetRef[];
   dataservices: Dataservice[];
+  extras?: Record<string, unknown>;
 }
 
 export interface ReuseCreatePayload {
@@ -410,6 +411,7 @@ export interface ReuseUpdatePayload {
   tags?: string[];
   organization?: string;
   private?: boolean;
+  extras?: Record<string, unknown>;
 }
 
 export interface Dataservice {

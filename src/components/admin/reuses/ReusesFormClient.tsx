@@ -13,7 +13,6 @@ import {
   DropdownSection,
   DropdownOption,
   DragAndDropUploader,
-  CardGeneral,
   CardLinks,
   Tag,
 } from "@ama-pt/agora-design-system";
@@ -27,6 +26,7 @@ import {
   fetchReuseTopics,
   fetchMyDatasets,
   fetchOrgDatasets,
+  searchDatasets,
   suggestTags,
 } from "@/services/api";
 import type { Reuse, ReuseType, ReuseTopic, Dataset, TagSuggestion } from "@/types/api";
@@ -82,7 +82,9 @@ export default function ReusesFormClient({
   const [apiLinks, setApiLinks] = useState([{ url: "" }]);
   const [apiLinkErrors, setApiLinkErrors] = useState<Record<number, string>>({});
   const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
+  const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([]);
+  const [datasetSearch, setDatasetSearch] = useState("");
+  const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
   const [producerId, setProducerId] = useState<string>("user");
 
   useEffect(() => {
@@ -92,22 +94,53 @@ export default function ReusesFormClient({
   }, []);
 
   useEffect(() => {
-    setSelectedDataset(null);
+    setSelectedDatasets([]);
     const dedupe = (items: Dataset[]) =>
       Array.from(new Map(items.map((d) => [d.id, d])).values());
+    // When publishing as the user, preload the pool with the user's own
+    // datasets AND every dataset from each organization the user belongs
+    // to. When publishing as a specific organization, show that org's
+    // datasets only. In both cases the search bar still queries the whole
+    // portal via searchDatasets().
     if (producerId === "user" || producerId === "") {
-      fetchMyDatasets(1, 100).then((res) => setMyDatasets(dedupe(res.data || [])));
+      const personal = fetchMyDatasets(1, 100);
+      const orgs = (user?.organizations || []).map((org) =>
+        fetchOrgDatasets(org.id, 1, 100)
+      );
+      Promise.all([personal, ...orgs]).then((results) => {
+        const all = results.flatMap((r) => r.data || []);
+        setMyDatasets(dedupe(all));
+      });
     } else {
       fetchOrgDatasets(producerId, 1, 100).then((res) =>
         setMyDatasets(dedupe(res.data || []))
       );
     }
-  }, [producerId]);
+  }, [producerId, user?.organizations]);
 
   useEffect(() => {
     setDatasetLinkErrors({});
     setApiLinkErrors({});
   }, [currentStep]);
+
+  // Search datasets across the whole portal when the user types in the
+  // dataset search dropdown. Debounced lightly via the setTimeout below.
+  useEffect(() => {
+    const q = datasetSearch.trim();
+    if (q.length < 2) {
+      setDatasetSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchDatasets(q, 1, 20);
+        setDatasetSearchResults(res.data || []);
+      } catch {
+        setDatasetSearchResults([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [datasetSearch]);
 
   const keywordsChildren = useMemo(() => {
     const trimmed = keywordSearch.trim();
@@ -436,11 +469,23 @@ export default function ReusesFormClient({
 
   const datasetOptions = useMemo(() => {
     const seen = new Set<string>();
-    const options = myDatasets.reduce<React.ReactElement[]>((acc, d) => {
+    const selectedIds = new Set(selectedDatasets.map((d) => d.id));
+    // Show first the selected (keeps them visible even when not in results),
+    // then the search results (if any), then the producer's own datasets.
+    const combined: Dataset[] = [
+      ...selectedDatasets,
+      ...datasetSearchResults,
+      ...myDatasets,
+    ];
+    const options = combined.reduce<React.ReactElement[]>((acc, d) => {
       if (!seen.has(d.id)) {
         seen.add(d.id);
         acc.push(
-          <DropdownOption key={d.id} value={d.id}>
+          <DropdownOption
+            key={d.id}
+            value={d.id}
+            selected={selectedIds.has(d.id)}
+          >
             {d.title}
           </DropdownOption>
         );
@@ -448,7 +493,7 @@ export default function ReusesFormClient({
       return acc;
     }, []);
     return <DropdownSection name="datasets">{options}</DropdownSection>;
-  }, [myDatasets]);
+  }, [myDatasets, datasetSearchResults, selectedDatasets]);
 
   const topicOptions = useMemo(() => (
     <DropdownSection name="themes">
@@ -711,7 +756,13 @@ export default function ReusesFormClient({
               <div className="mb-[24px]">
                 <StatusCard
                   type="info"
-                  description="É importante associar todos os conjuntos de dados, pois ajuda a compreender as referências cruzadas e a melhorar a visibilidade da sua reutilização."
+                  description="É importante associar todos os conjuntos de dados, pois ajuda a compreender as referências cruzadas e a melhorar a visibilidade da sua reutilização. Escolha uma das formas de associar os conjuntos de dados: ou publicados neste portal; ou em alternativa indicar links para conjuntos de dados publicados noutros portais."
+                />
+              </div>
+              <div className="mb-[24px]">
+                <StatusCard
+                  type="warning"
+                  description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
                 />
               </div>
               {apiError && (
@@ -721,83 +772,52 @@ export default function ReusesFormClient({
               )}
 
               <form className="admin-page__form">
-                {/* Conjuntos de dados */}
-                {selectedDataset && (
-                  <div className="agora-card-links-datasets-px0 mt-[16px]">
-                    <CardLinks
-                      onClick={() => {}}
-                      className="cursor-pointer text-neutral-900"
-                      variant="transparent"
-                      image={{
-                        src: selectedDataset.organization?.logo || "/images/placeholders/organization.png",
-                        alt: selectedDataset.organization?.name || "Organização sem logo",
-                      }}
-                      category={selectedDataset.organization?.name}
-                      title={selectedDataset.title}
-                      description={
-                        <div className="flex flex-col gap-12">
-                          <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px]">
-                            {selectedDataset.description}
-                          </p>
-                          <div className="flex flex-wrap gap-8 items-center mt-[8px]">
-                            <span className="text-sm font-medium text-neutral-900">
-                              Metadados: {selectedDataset.quality?.score != null ? Math.round(selectedDataset.quality.score * 100) : 0}%
-                            </span>
-                          </div>
-                          <div className="flex items-center flex-wrap gap-[32px] text-xs mt-[32px] text-[#034AD8] mb-[32px]">
-                            <div className="flex items-center gap-8" title="Visualizações">
-                              <Icon name="agora-line-eye" aria-hidden="true" />
-                              <span>{selectedDataset.metrics?.views || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-8" title="Downloads">
-                              <Icon name="agora-line-download" aria-hidden="true" />
-                              <span>{selectedDataset.metrics?.resources_downloads || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-8" title="Reutilizações">
-                              <img src="/Icons/bar_chart_primary.svg" alt="" aria-hidden="true" />
-                              <span>{selectedDataset.metrics?.reuses || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-8" title="Favoritos">
-                              <img src="/Icons/favorite.svg" alt="" aria-hidden="true" />
-                              <span>{selectedDataset.metrics?.followers || 0}</span>
-                            </div>
-                          </div>
-                        </div>
-                      }
-                      date={
-                        <span className="font-[300]">
-                          {`Atualizado há ${formatDistanceToNow(new Date(selectedDataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
-                        </span>
-                      }
-                      mainLink={
-                        <Link href={`/pages/datasets/${selectedDataset.slug}`}>
-                          <span className="underline">{selectedDataset.title}</span>
-                        </Link>
-                      }
-                      blockedLink={true}
-                    />
-                  </div>
-                )}
-
                 <InputSelect
                   key={`dataset-select-${producerId}`}
-                  label="Ficheiro com um conjunto de dados"
-                  placeholder="Selecione um conjunto de dados..."
+                  label="Pesquisar um conjunto de dados"
+                  placeholder="Selecione conjuntos de dados..."
                   id="reuse-dataset-search"
+                  type="checkbox"
                   searchable
-                  searchInputPlaceholder="Escreva para pesquisar..."
+                  searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
                   searchNoResultsText="Nenhum resultado encontrado"
+                  onSearchInputChange={setDatasetSearch}
                   onChange={(options) => {
-                    if (options.length > 0) {
-                      const found = myDatasets.find((d) => d.id === options[0].value);
-                      setSelectedDataset(found || null);
-                    } else {
-                      setSelectedDataset(null);
+                    const selectedIds = new Set(options.map((o) => o.value as string));
+                    const pool: Dataset[] = [
+                      ...selectedDatasets,
+                      ...datasetSearchResults,
+                      ...myDatasets,
+                    ];
+                    const seen = new Set<string>();
+                    const next: Dataset[] = [];
+                    for (const d of pool) {
+                      if (selectedIds.has(d.id) && !seen.has(d.id)) {
+                        seen.add(d.id);
+                        next.push(d);
+                      }
                     }
+                    setSelectedDatasets(next);
                   }}
                 >
                   {datasetOptions}
                 </InputSelect>
+
+                {selectedDatasets.length > 0 && (
+                  <div className="flex flex-wrap gap-8 mt-[16px]">
+                    {selectedDatasets.map((d) => (
+                      <Tag
+                        key={d.id}
+                        aria-label={`Remover ${d.title}`}
+                        onClick={() => {
+                          setSelectedDatasets((prev) => prev.filter((x) => x.id !== d.id));
+                        }}
+                      >
+                        {d.title}
+                      </Tag>
+                    ))}
+                  </div>
+                )}
 
                 <div className="admin-page__divider-or">
                   <span className="admin-page__divider-or-text">ou</span>
@@ -928,32 +948,48 @@ export default function ReusesFormClient({
                     onClick={async () => {
                       if (!createdReuse) return;
 
-                      const hasDropdownDataset = !!selectedDataset;
-                      const hasUrlDatasets = datasetLinks.some((l) => l.url.trim());
-                      if (!hasDropdownDataset && !hasUrlDatasets) {
-                        setApiError("Associe pelo menos um conjunto de dados antes de avançar.");
+                      const remoteUrls = datasetLinks
+                        .map((l) => l.url.trim())
+                        .filter(Boolean);
+                      const hasLocal = selectedDatasets.length > 0;
+                      const hasRemote = remoteUrls.length > 0;
+
+                      // Mutual exclusion: local datasets OR remote URLs, not both.
+                      if (hasLocal && hasRemote) {
+                        setApiError(
+                          "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
+                        );
                         return;
                       }
 
                       setIsSubmitting(true);
                       setApiError(null);
                       try {
-                        if (selectedDataset) {
-                          const updated = await linkDatasetToReuse(createdReuse.id, selectedDataset.id);
+                        // Local datasets -> link via the reuse/datasets endpoint.
+                        for (const dataset of selectedDatasets) {
+                          const updated = await linkDatasetToReuse(createdReuse.id, dataset.id);
                           setCreatedReuse(updated);
                         }
-                        for (const link of datasetLinks) {
-                          const trimmed = link.url.trim();
-                          if (!trimmed) continue;
-                          const idMatch = trimmed.match(/datasets\/([a-f0-9]{24})\/?/);
-                          const slugMatch = trimmed.match(/datasets\/([^/]+)\/?$/);
-                          const datasetRef = idMatch ? idMatch[1] : slugMatch ? slugMatch[1] : trimmed;
-                          const updated = await linkDatasetToReuse(createdReuse.id, datasetRef);
+                        // Remote datasets -> stored as URLs on the reuse's extras
+                        // field. The backend model only accepts local Dataset
+                        // references on `datasets`, so remote URLs live on
+                        // extras.remote_datasets.
+                        if (hasRemote) {
+                          const updated = await updateReuse(createdReuse.id, {
+                            extras: {
+                              ...(createdReuse.extras || {}),
+                              remote_datasets: remoteUrls,
+                            },
+                          });
                           setCreatedReuse(updated);
                         }
                         for (const link of apiLinks) {
                           if (link.url.trim()) {
-                            await linkDataserviceToReuse(createdReuse.id, link.url.trim());
+                            try {
+                              await linkDataserviceToReuse(createdReuse.id, link.url.trim());
+                            } catch {
+                              // Silent; API links UI is hidden for now.
+                            }
                           }
                         }
                         onNextStep();
@@ -989,7 +1025,7 @@ export default function ReusesFormClient({
                     <>
                       <strong>A sua reutilização foi criada!</strong>
                       <br />
-                      Agora pode publicar ou guardar como rascunho.
+                      Foi guardada automaticamente como rascunho. Pode publicá-la agora ou mais tarde, a partir da lista de reutilizações.
                     </>
                   }
                 />
@@ -1091,25 +1127,6 @@ export default function ReusesFormClient({
               )}
 
               <div className="admin-page__actions flex justify-end gap-[18px]">
-                <Button
-                  appearance="outline"
-                  variant="neutral"
-                  disabled={isSubmitting}
-                  onClick={async () => {
-                    if (!createdReuse) return;
-                    setIsSubmitting(true);
-                    try {
-                      await updateReuse(createdReuse.id, { private: true });
-                      window.location.href = "/pages/admin/me/reuses";
-                    } catch {
-                      setApiError("Erro ao salvar rascunho. Tente novamente.");
-                    } finally {
-                      setIsSubmitting(false);
-                    }
-                  }}
-                >
-                  {isSubmitting ? "A guardar..." : "Guardar o rascunho"}
-                </Button>
                 <Button
                   variant="primary"
                   disabled={isSubmitting}
