@@ -119,23 +119,37 @@ export default function ReusesFormClient({
       seen.add(key);
       return true;
     });
+    const selectedSet = new Set(
+      selectedKeywordsValue
+        .split(",")
+        .map((v) => v.trim().toLowerCase())
+        .filter(Boolean)
+    );
     const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [
-            <DropdownOption key={`__create__${trimmedLower}`} value={trimmed}>
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
               Criar &quot;{trimmed}&quot;
             </DropdownOption>,
           ]
         : []),
       ...uniqueTags.map((tag) => (
-        <DropdownOption key={tag.text.toLowerCase()} value={tag.text}>
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedSet.has(tag.text.toLowerCase())}
+        >
           {tag.text}
         </DropdownOption>
       )),
     ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, keywordSearch]);
+  }, [tags, keywordSearch, selectedKeywordsValue]);
 
   const handleKeywordChange = useCallback((value: string) => {
     setSelectedKeywordsValue(value);
