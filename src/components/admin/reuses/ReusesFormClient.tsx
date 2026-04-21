@@ -558,7 +558,7 @@ export default function ReusesFormClient({
                     placeholder="Insira a descrição aqui"
                     id="reuse-description"
                     rows={4}
-                    maxLength={1000}
+                    maxLength={3000}
                     showCharCounter={true}
                     value={reuseDescription}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
