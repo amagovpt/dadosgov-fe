@@ -17,6 +17,7 @@ import {
   DropdownOption,
   ProgressBar,
   Checkbox,
+  Tag,
 } from "@ama-pt/agora-design-system";
 import {
   createDataset,
@@ -155,6 +156,7 @@ export default function DatasetsAdminClient({
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
   const [tags, setTags] = useState<TagSuggestion[]>([]);
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
+  const [keywordSearch, setKeywordSearch] = useState("");
   const producerDefaultValue =
     selectedProducer ||
     selectedProducerRef.current ||
@@ -216,27 +218,52 @@ export default function DatasetsAdminClient({
   }, [frequencies, frequencyDefaultValue]);
 
   const tagOptions = useMemo(() => {
-    const selectedNotInSuggestions = selectedKeywords.filter(
-      (keyword) => !tags.some((tag) => tag.text === keyword),
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    // Deduplicate tags by lowercased text (keeps the first occurrence).
+    const seen = new Set<string>();
+    const uniqueTags = tags.filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedLowerSet = new Set(
+      selectedKeywords.map((k) => k.toLowerCase()),
     );
+    const selectedNotInSuggestions = selectedKeywords.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
     const options = [
+      ...(showCreate
+        ? [
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
+            </DropdownOption>,
+          ]
+        : []),
       ...selectedNotInSuggestions.map((keyword) => (
-        <DropdownOption key={`selected-${keyword}`} value={keyword} selected>
+        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
           {keyword}
         </DropdownOption>
       )),
-      ...tags.map((tag) => (
+      ...uniqueTags.map((tag) => (
         <DropdownOption
-          key={tag.text}
+          key={tag.text.toLowerCase()}
           value={tag.text}
-          selected={selectedKeywords.includes(tag.text)}
+          selected={selectedLowerSet.has(tag.text.toLowerCase())}
         >
           {tag.text}
         </DropdownOption>
       )),
     ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, selectedKeywords]);
+  }, [tags, selectedKeywords, keywordSearch]);
 
   const allSpatialZones = useMemo(() => {
     const seen = new Set<string>();
@@ -1069,22 +1096,53 @@ export default function DatasetsAdminClient({
                     id="dataset-keywords"
                     type="checkbox"
                     searchable
-                    searchInputPlaceholder="Escreva para pesquisar..."
+                    searchInputPlaceholder="Escreva para pesquisar ou criar..."
                     searchNoResultsText="Nenhum resultado encontrado"
                     defaultValue={keywordsDefaultValue}
                     onChangeRef={selectedKeywordsRef}
+                    onSearchCallback={setKeywordSearch}
                     onChangeCallback={(value) => {
                       setSelectedKeywordsValue(value);
                       const selected = value.split(",").filter(Boolean);
+                      let addedNew = false;
                       selected.forEach((v) => {
-                        if (!tags.some((t) => t.text === v)) {
-                          setTags((prev) => [...prev, { text: v }]);
+                        if (!tags.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+                          addedNew = true;
+                          setTags((prev) => {
+                            if (prev.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+                              return prev;
+                            }
+                            return [...prev, { text: v }];
+                          });
                         }
                       });
+                      if (addedNew) {
+                        setKeywordSearch("");
+                      }
                     }}
                   >
                     {tagOptions}
                   </IsolatedSelect>
+
+                  {selectedKeywords.length > 0 && (
+                    <div className="flex flex-wrap gap-8 -mt-8">
+                      {selectedKeywords.map((keyword) => (
+                        <Tag
+                          key={keyword}
+                          aria-label={`Remover ${keyword}`}
+                          onClick={() => {
+                            const next = selectedKeywords
+                              .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                              .join(",");
+                            setSelectedKeywordsValue(next);
+                            selectedKeywordsRef.current = next;
+                          }}
+                        >
+                          {keyword}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
 
