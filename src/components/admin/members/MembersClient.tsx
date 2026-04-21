@@ -30,7 +30,7 @@ import {
   acceptMembership,
   refuseMembership,
 } from "@/services/api";
-import { OrganizationMember, MembershipRequest, UserSuggestion } from "@/types/api";
+import { Organization, OrganizationMember, MembershipRequest, UserSuggestion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -84,7 +84,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
           fetchMembershipRequests(orgId),
         ]);
         setSuggestions(users);
-        memberIdsRef.current = (org.members || []).map((m: OrganizationMember) => m.user.id);
+        memberIdsRef.current = (org?.members || []).map((m: OrganizationMember) => m.user.id);
         pendingUserIdsRef.current = requests
           .filter((r: MembershipRequest) => r.status === "pending" && r.user)
           .map((r: MembershipRequest) => r.user.id);
@@ -391,11 +391,20 @@ function RefuseMembershipPopupContent({
   );
 }
 
-export default function MembersClient() {
+interface MembersClientProps {
+  orgId?: string;
+}
+
+export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const { show } = usePopupContext();
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+  // Prefer the orgId from the URL params (passed by the server page). Fall
+  // back to the sidebar's active organization when this component is used
+  // in contexts that don't have an org in the URL.
+  const resolvedOrgId = orgId ?? activeOrg?.id;
   const [addMemberOpenKey, setAddMemberOpenKey] = useState(0);
   const [editMemberOpenKey, setEditMemberOpenKey] = useState(0);
+  const [viewedOrg, setViewedOrg] = useState<Organization | null>(null);
   const [members, setMembers] = useState<OrganizationMember[]>([]);
   const [pendingRequests, setPendingRequests] = useState<MembershipRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -404,14 +413,15 @@ export default function MembersClient() {
   const [requestAction, setRequestAction] = useState<string | null>(null);
 
   const loadMembers = useCallback(async () => {
-    if (!activeOrg) return;
+    if (!resolvedOrgId) return;
     setIsLoading(true);
     try {
-      const [org, requests] = await Promise.all([
-        fetchOrganization(activeOrg.id),
-        fetchMembershipRequests(activeOrg.id),
+      const [orgData, requests] = await Promise.all([
+        fetchOrganization(resolvedOrgId),
+        fetchMembershipRequests(resolvedOrgId),
       ]);
-      setMembers(org.members || []);
+      setViewedOrg(orgData);
+      setMembers(orgData?.members || []);
       setPendingRequests(
         requests.filter((r: MembershipRequest) => r.status === "pending")
       );
@@ -420,20 +430,20 @@ export default function MembersClient() {
     } finally {
       setIsLoading(false);
     }
-  }, [activeOrg]);
+  }, [resolvedOrgId]);
 
   useEffect(() => {
-    if (!activeOrg) {
+    if (!resolvedOrgId) {
       setIsLoading(false);
       return;
     }
     loadMembers();
-  }, [activeOrg, loadMembers]);
+  }, [resolvedOrgId, loadMembers]);
 
   const handleAcceptRequest = async (request: MembershipRequest) => {
     setRequestAction(request.id);
     try {
-      await acceptMembership(activeOrg!.id, request.id);
+      await acceptMembership(resolvedOrgId!, request.id);
       await loadMembers();
     } catch (error) {
       console.error("Error accepting membership:", error);
@@ -445,7 +455,7 @@ export default function MembersClient() {
   const handleRefuseRequest = (request: MembershipRequest) => {
     show(
       <RefuseMembershipPopupContent
-        orgId={activeOrg!.id}
+        orgId={resolvedOrgId!}
         request={request}
         onRefused={loadMembers}
       />,
@@ -460,7 +470,7 @@ export default function MembersClient() {
   const handleRemoveMember = (member: OrganizationMember) => {
     show(
       <RemoveMemberPopupContent
-        orgId={activeOrg!.id}
+        orgId={resolvedOrgId!}
         member={member}
         onMemberRemoved={loadMembers}
       />,
@@ -488,8 +498,8 @@ export default function MembersClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: activeOrg?.name || "Organização", url: "#" },
-            { label: "Membros", url: "/pages/admin/org/members" },
+            { label: viewedOrg?.name || activeOrg?.name || "Organização", url: "#" },
+            { label: "Membros", url: "#" },
           ]}
         />
       </div>
@@ -588,7 +598,7 @@ export default function MembersClient() {
             setAddMemberOpenKey(nextKey);
             show(
               <AddMemberPopupContent
-                orgId={activeOrg!.id}
+                orgId={resolvedOrgId!}
                 onMemberAdded={loadMembers}
                 openKey={nextKey}
               />,
@@ -677,7 +687,7 @@ export default function MembersClient() {
                       setEditMemberOpenKey(nextKey);
                       show(
                         <EditRolePopupContent
-                          orgId={activeOrg!.id}
+                          orgId={resolvedOrgId!}
                           member={member}
                           onRoleUpdated={loadMembers}
                           openKey={nextKey}
