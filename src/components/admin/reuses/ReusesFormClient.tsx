@@ -109,31 +109,53 @@ export default function ReusesFormClient({
   }, [currentStep]);
 
   const keywordsChildren = useMemo(() => {
-    const trimmed = keywordSearch.trim().toLowerCase();
-    const showCreate = trimmed.length > 0 && !tags.some((t) => t.text.toLowerCase() === trimmed);
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    const selectedSet = new Set(
+      selectedKeywordsValue
+        .split(",")
+        .map((v) => v.trim().toLowerCase())
+        .filter(Boolean)
+    );
+    // Deduplicate tags by lowercased text (keeps the first occurrence).
+    const seen = new Set<string>();
+    const uniqueTags = tags.filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const existsInTags = seen.has(trimmedLower);
+    const existsInSelected = selectedSet.has(trimmedLower);
+    const showCreate = trimmed.length > 0 && !existsInTags && !existsInSelected;
     const options = [
-      ...tags.map((tag) => (
-        <DropdownOption key={tag.text} value={tag.text}>
-          {tag.text}
-        </DropdownOption>
-      )),
       ...(showCreate
         ? [
-            <DropdownOption key={`__create__${trimmed}`} value={keywordSearch.trim()}>
-              Criar &quot;{keywordSearch.trim()}&quot;
+            <DropdownOption key={`__create__${trimmedLower}`} value={trimmed}>
+              Criar &quot;{trimmed}&quot;
             </DropdownOption>,
           ]
         : []),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption key={tag.text.toLowerCase()} value={tag.text}>
+          {tag.text}
+        </DropdownOption>
+      )),
     ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, keywordSearch]);
+  }, [tags, keywordSearch, selectedKeywordsValue]);
 
   const handleKeywordChange = useCallback((value: string) => {
     setSelectedKeywordsValue(value);
     const selected = value.split(",").filter(Boolean);
     selected.forEach((v) => {
-      if (!tags.some((t) => t.text === v)) {
-        setTags((prev) => [...prev, { text: v }]);
+      if (!tags.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+        setTags((prev) => {
+          if (prev.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+            return prev;
+          }
+          return [...prev, { text: v }];
+        });
       }
     });
   }, [tags]);
