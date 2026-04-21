@@ -3698,6 +3698,9 @@ export async function fetchOrgMetrics(
       members: 0,
       reuses: 0,
       views: 0,
+      resource_downloads: 0,
+      reuse_views: 0,
+      dataservice_views: 0,
     };
   }
 }
