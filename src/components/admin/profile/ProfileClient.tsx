@@ -29,7 +29,7 @@ import {
   Icon,
   InputText,
   InputTextArea,
-  ButtonUploader,
+  DragAndDropUploader,
   StatusCard,
   Tabs,
   Tab,
@@ -68,6 +68,7 @@ export default function ProfileClient() {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [avatarError, setAvatarError] = useState<string | null>(null);
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
@@ -221,8 +222,14 @@ export default function ProfileClient() {
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    const file = files[0];
+    if (file.size > 4194304) {
+      setAvatarError("O ficheiro excede o tamanho máximo de 4 MB.");
+      return;
+    }
+    setAvatarError(null);
     try {
-      await uploadAvatar(files[0]);
+      await uploadAvatar(file);
       const updated = await fetchFullProfile();
       setProfile(updated);
       await refresh();
@@ -402,8 +409,9 @@ export default function ProfileClient() {
                       Foto de perfil
                     </span>
                     <div className="mt-2">
-                      <ButtonUploader
+                      <DragAndDropUploader
                         label="Ficheiros"
+                        dragAndDropLabel="Arraste e largue o ficheiro aqui"
                         inputLabel="Selecione ou arraste o ficheiro"
                         removeFileButtonLabel="Remover ficheiro"
                         replaceFileButtonLabel="Substituir ficheiro"
@@ -411,6 +419,12 @@ export default function ProfileClient() {
                         accept=".jpg,.jpeg,.png"
                         maxSize={4194304}
                         maxCount={1}
+                        maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                        forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                        hasError={!!avatarError}
+                        hasFeedback={!!avatarError}
+                        feedbackState="danger"
+                        feedbackText={avatarError ?? undefined}
                         onChange={handleAvatarChange}
                       />
                     </div>

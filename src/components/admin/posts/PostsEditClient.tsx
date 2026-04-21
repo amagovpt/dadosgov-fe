@@ -10,7 +10,7 @@ import {
   InputText,
   InputTextArea,
   InputSelect,
-  ButtonUploader,
+  DragAndDropUploader,
   RadioButton,
   Icon,
   StatusCard,
@@ -76,6 +76,7 @@ export default function PostsEditClient() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
 
   useEffect(() => {
@@ -211,13 +212,18 @@ export default function PostsEditClient() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || !files.length) return;
-
+    const file = files[0];
+    if (file.size > 4194304) {
+      setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
+      return;
+    }
+    setImageError(null);
     setIsSaving(true);
     setApiError(null);
     setApiSuccess(null);
 
     try {
-      const result = await uploadPostImage(postId, files[0]);
+      const result = await uploadPostImage(postId, file);
       if (result) {
         setPost(result);
         setApiSuccess("Imagem carregada com sucesso.");
@@ -408,8 +414,9 @@ export default function PostsEditClient() {
                         Cobertura *
                       </span>
                       <div className="mt-2">
-                        <ButtonUploader
+                        <DragAndDropUploader
                           label="Ficheiros"
+                          dragAndDropLabel="Arraste e largue o ficheiro aqui"
                           inputLabel="Selecione ou arraste o ficheiro"
                           removeFileButtonLabel="Remover ficheiro"
                           replaceFileButtonLabel="Substituir ficheiro"
@@ -417,6 +424,12 @@ export default function PostsEditClient() {
                           accept=".jpg,.jpeg,.png"
                           maxSize={4194304}
                           maxCount={1}
+                          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                          hasError={!!imageError}
+                          hasFeedback={!!imageError}
+                          feedbackState="danger"
+                          feedbackText={imageError ?? undefined}
                           onChange={handleImageUpload}
                         />
                       </div>

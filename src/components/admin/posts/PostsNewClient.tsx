@@ -10,10 +10,10 @@ import {
   InputText,
   InputTextArea,
   InputSelect,
-  ButtonUploader,
+  DragAndDropUploader,
   RadioButton,
 } from "@ama-pt/agora-design-system";
-import { suggestTags, createPost } from "@/services/api";
+import { suggestTags, createPost, uploadPostImage } from "@/services/api";
 import type { TagSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import type { PostCreatePayload } from "@/types/api";
@@ -37,6 +37,8 @@ export default function PostsNewClient() {
   const [tags, setTags] = useState<TagSuggestion[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   useEffect(() => {
     suggestTags("", 50).then(setTags);
@@ -50,6 +52,17 @@ export default function PostsNewClient() {
         return next;
       });
     }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (file && file.size > 4194304) {
+      setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
+      setImageFile(null);
+      return;
+    }
+    setImageError(null);
+    setImageFile(file);
   };
 
   const handleStep1Next = () => {
@@ -87,6 +100,9 @@ export default function PostsNewClient() {
       };
       const result = await createPost(payload);
       if (result) {
+        if (imageFile) {
+          await uploadPostImage(result.id, imageFile);
+        }
         router.push("/pages/admin/system/posts");
       } else {
         setSaveError("Erro ao guardar o artigo. Verifique a autenticação.");
@@ -272,15 +288,23 @@ export default function PostsNewClient() {
                     Cobertura *
                   </span>
                   <div className="mt-2">
-                    <ButtonUploader
+                    <DragAndDropUploader
                       label="Ficheiros"
-                      inputLabel="Selecione um ficheiro"
+                      dragAndDropLabel="Arraste e largue o ficheiro aqui"
+                      inputLabel="Selecione ou arraste o ficheiro"
                       removeFileButtonLabel="Remover ficheiro"
                       replaceFileButtonLabel="Substituir ficheiro"
                       extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
                       accept=".jpg,.jpeg,.png"
                       maxSize={4194304}
                       maxCount={1}
+                      maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                      forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                      hasError={!!imageError}
+                      hasFeedback={!!imageError}
+                      feedbackState="danger"
+                      feedbackText={imageError ?? undefined}
+                      onChange={handleImageChange}
                     />
                   </div>
                 </div>

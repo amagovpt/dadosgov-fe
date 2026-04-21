@@ -10,7 +10,7 @@ import {
   Icon,
   InputText,
   InputTextArea,
-  ButtonUploader,
+  DragAndDropUploader,
   StatusCard,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
@@ -312,8 +312,9 @@ export default function OrgProfileClient() {
                   Logotipo
                 </span>
                 <div className="mt-2">
-                  <ButtonUploader
+                  <DragAndDropUploader
                     label="Ficheiro"
+                    dragAndDropLabel="Arraste e largue o ficheiro aqui"
                     inputLabel="Selecione ou arraste o ficheiro"
                     removeFileButtonLabel="Remover ficheiro"
                     replaceFileButtonLabel="Substituir ficheiro"
