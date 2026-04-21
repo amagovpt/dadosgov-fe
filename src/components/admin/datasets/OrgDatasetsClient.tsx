@@ -22,6 +22,7 @@ import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useAuth } from "@/context/AuthContext";
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -36,7 +37,8 @@ interface OrgDatasetsClientProps {
 }
 
 export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
-  const orgName = useOrganizationName(orgId);
+  const { user } = useAuth();
+  const orgName = useOrganizationName(orgId, user?.organizations);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);

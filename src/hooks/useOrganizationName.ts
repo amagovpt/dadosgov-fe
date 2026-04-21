@@ -1,37 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { fetchOrganization } from "@/services/api";
+import type { Organization } from "@/types/api";
 
 /**
- * Fetches an organization by id or slug and returns its display name.
+ * Returns the display name of an organization from a list already loaded
+ * by the caller (typically `useActiveOrganization().organizations`).
  *
- * Used primarily by the admin back-office pages to render the organization
- * name in the breadcrumb instead of a literal "Organização".
+ * Synchronous, no network round-trip, no extra React state. This keeps
+ * tab switching in the admin back-office snappy — the caller already
+ * paid for the fetch via useActiveOrganization() and we just reuse it.
  *
- * Returns `null` while loading or if the fetch fails.
+ * Returns `null` when the organization isn't in the provided list (e.g.
+ * user isn't a member). Callers should fall back to `activeOrg?.name` or
+ * the literal "Organização".
  */
-export function useOrganizationName(orgId: string | undefined | null): string | null {
-  const [name, setName] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!orgId) {
-      setName(null);
-      return;
-    }
-    fetchOrganization(orgId)
-      .then((org) => {
-        if (cancelled) return;
-        setName(org?.name ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setName(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [orgId]);
-
-  return name;
+export function useOrganizationName(
+  orgId: string | undefined | null,
+  organizations: Organization[] = [],
+): string | null {
+  if (!orgId) return null;
+  return (
+    organizations.find((o) => o.id === orgId || o.slug === orgId)?.name ?? null
+  );
 }

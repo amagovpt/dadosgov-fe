@@ -23,6 +23,7 @@ import { fetchOrgReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 const formatDate = (dateStr: string) => {
@@ -35,7 +36,8 @@ export default function OrgReusesClient() {
   const routeOrgId = (params?.orgId as string | undefined) ?? undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const resolvedOrgId = routeOrgId ?? activeOrg?.id;
-  const orgName = useOrganizationName(resolvedOrgId);
+  const { user } = useAuth();
+  const orgName = useOrganizationName(resolvedOrgId, user?.organizations);
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [isLoading, setIsLoading] = useState(true);

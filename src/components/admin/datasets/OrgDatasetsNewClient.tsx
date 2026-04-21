@@ -12,6 +12,7 @@ import DatasetsAdminClient from "@/components/admin/datasetsadmin/DatasetsAdminC
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useAuth } from "@/context/AuthContext";
 
 export default function OrgDatasetsNewClient() {
   const searchParams = useSearchParams();
@@ -20,7 +21,8 @@ export default function OrgDatasetsNewClient() {
   const routeOrgId = routeParams?.orgId as string | undefined;
   const { activeOrg } = useActiveOrganization();
   const resolvedOrgId = routeOrgId || activeOrg?.id;
-  const orgName = useOrganizationName(resolvedOrgId);
+  const { user } = useAuth();
+  const orgName = useOrganizationName(resolvedOrgId, user?.organizations);
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);

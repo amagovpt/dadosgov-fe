@@ -6,13 +6,15 @@ import { Breadcrumb } from "@ama-pt/agora-design-system";
 import ReusesFormClient from "@/components/admin/reuses/ReusesFormClient";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useAuth } from "@/context/AuthContext";
 
 export default function OrgReusesNewClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const params = useParams();
   const orgId = params?.orgId as string | undefined;
-  const orgName = useOrganizationName(orgId);
+  const { user } = useAuth();
+  const orgName = useOrganizationName(orgId, user?.organizations);
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
   const totalSegments = 12;

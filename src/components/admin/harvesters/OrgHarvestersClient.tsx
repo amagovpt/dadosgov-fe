@@ -22,6 +22,7 @@ import { fetchOrgHarvesters } from "@/services/api";
 import { HarvestSource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 const formatDate = (dateStr: string) => {
@@ -52,7 +53,8 @@ export default function OrgHarvestersClient() {
   const { activeOrg, isLoading: isOrgLoading, selectOrganization } = useActiveOrganization();
 
   const orgId = orgIdFromUrl || activeOrg?.id;
-  const orgName = useOrganizationName(orgId);
+  const { user } = useAuth();
+  const orgName = useOrganizationName(orgId, user?.organizations);
 
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
