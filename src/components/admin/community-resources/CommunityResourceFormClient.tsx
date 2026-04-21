@@ -12,7 +12,7 @@ import {
   DropdownOption,
   Icon,
   StatusCard,
-  ButtonUploader,
+  DragAndDropUploader,
   CardLinks,
 } from "@ama-pt/agora-design-system";
 import {
@@ -56,6 +56,7 @@ export default function CommunityResourceFormClient({
   const selectedSchemaRef = useRef("");
   const [schemaUrl, setSchemaUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -330,18 +331,32 @@ export default function CommunityResourceFormClient({
 
                 <div className="admin-page__fields-group">
                   <div>
-                    <ButtonUploader
+                    <DragAndDropUploader
                       label="Ficheiros"
+                      dragAndDropLabel="Arraste e largue o ficheiro aqui"
                       inputLabel="Selecione ou arraste o ficheiro"
                       removeFileButtonLabel="Remover ficheiro"
                       replaceFileButtonLabel="Substituir ficheiro"
                       extensionsInstructions="Tamanho máximo: 420 MB."
                       maxSize={440401920}
                       maxCount={1}
+                      maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 420 MB."
+                      forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                      hasError={!!fileError}
+                      hasFeedback={!!fileError}
+                      feedbackState="danger"
+                      feedbackText={fileError ?? undefined}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         const files = e.target.files;
-                        setFile(files && files.length > 0 ? files[0] : null);
-                        if (files && files.length > 0) clearError("resourceUrl");
+                        const selected = files && files.length > 0 ? files[0] : null;
+                        if (selected && selected.size > 440401920) {
+                          setFileError("O ficheiro excede o tamanho máximo de 420 MB.");
+                          setFile(null);
+                          return;
+                        }
+                        setFileError(null);
+                        setFile(selected);
+                        if (selected) clearError("resourceUrl");
                       }}
                     />
                   </div>

@@ -10,7 +10,7 @@ import {
   InputText,
   InputTextArea,
   InputSelect,
-  ButtonUploader,
+  DragAndDropUploader,
   Icon,
   StatusCard,
   Accordion,
@@ -334,8 +334,9 @@ export default function OrganizationsNewClient() {
                 <h2 className="admin-page__section-title">Logotipo</h2>
 
                 <div className="admin-page__fields-group">
-                  <ButtonUploader
+                  <DragAndDropUploader
                     label="Ficheiro"
+                    dragAndDropLabel="Arraste e largue o ficheiro aqui"
                     inputLabel="Selecione ou arraste o ficheiro"
                     removeFileButtonLabel="Remover ficheiro"
                     replaceFileButtonLabel="Substituir ficheiro"

@@ -22,7 +22,7 @@ import {
   TableCell,
   Pill,
   Switch,
-  ButtonUploader,
+  DragAndDropUploader,
   CardNoResults,
   Tabs,
   Tab,
@@ -557,6 +557,7 @@ export default function DatasetsEditClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
+  const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
 
   // Dropdown data
@@ -929,6 +930,7 @@ export default function DatasetsEditClient() {
     if (!files || files.length === 0 || !dataset) return;
     setIsSubmitting(true);
     setApiError(null);
+    setFileUploadError(null);
     try {
       for (const file of Array.from(files)) {
         await uploadResource(dataset.id, file);
@@ -954,12 +956,12 @@ export default function DatasetsEditClient() {
           Object.entries(err.data)
             .map(([k, v]) => `${k}: ${flattenValue(v)}`)
             .join(", ");
-        setApiError(`Erro ao carregar ficheiro(s): ${msg}`);
+        setFileUploadError(`Erro ao carregar ficheiro(s): ${msg}`);
       } else if (err.message) {
-        setApiError(`Erro ao carregar ficheiro(s): ${err.message}`);
+        setFileUploadError(`Erro ao carregar ficheiro(s): ${err.message}`);
       } else {
         const statusHint = err.status ? ` (HTTP ${err.status})` : "";
-        setApiError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
+        setFileUploadError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
       }
     } finally {
       setIsSubmitting(false);
@@ -1676,12 +1678,20 @@ export default function DatasetsEditClient() {
           <TabBody>
             <div className="mt-[24px]">
               <div className="flex items-end gap-[16px] mb-[16px]">
-                <ButtonUploader
+                <DragAndDropUploader
                   label="Ficheiros"
-                  inputLabel="Selecione ou arraste o ficheiro"
+                  dragAndDropLabel="Arraste e largue os ficheiros aqui"
+                  inputLabel="Selecione ou arraste os ficheiros"
                   selectedFilesLabel="ficheiros selecionados"
                   removeFileButtonLabel="Remover ficheiro"
                   replaceFileButtonLabel="Substituir ficheiro"
+                  maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo permitido."
+                  forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                  hasError={!!fileUploadError}
+                  hasFeedback={!!fileUploadError}
+                  feedbackState="danger"
+                  feedbackText={fileUploadError ?? undefined}
+                  multiple
                   onChange={handleFileUpload}
                 />
                 <Button appearance="outline" variant="primary" className="mb-[32px]">

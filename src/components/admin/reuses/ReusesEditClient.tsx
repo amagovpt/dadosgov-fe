@@ -17,7 +17,7 @@ import {
   Switch,
   CardNoResults,
   CardLinks,
-  ButtonUploader,
+  DragAndDropUploader,
   Tabs,
   Tab,
   TabHeader,
@@ -162,6 +162,7 @@ export default function ReusesEditClient() {
   const [featured, setFeatured] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
 
@@ -285,6 +286,30 @@ export default function ReusesEditClient() {
         delete next[field];
         return next;
       });
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !reuse) return;
+    const file = files[0];
+    if (file.size > 4194304) {
+      setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
+      return;
+    }
+    setImageError(null);
+    setIsSubmitting(true);
+    try {
+      const { uploadReuseImage } = await import("@/services/api");
+      await uploadReuseImage(reuse.id, file);
+      const updated = await fetchReuse(reuse.id);
+      setReuse(updated);
+      setApiSuccess("Imagem de capa atualizada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch {
+      setApiError("Erro ao carregar imagem de capa.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -430,9 +455,9 @@ export default function ReusesEditClient() {
           )}
           {" — editou a reutilização — "}
           <span>
-            {format(new Date(reuse.last_modified), "d 'de' MMMM 'de' yyyy", {
-              locale: pt,
-            })}
+            {reuse.last_modified && !isNaN(new Date(reuse.last_modified).getTime())
+              ? format(new Date(reuse.last_modified), "d 'de' MMMM 'de' yyyy", { locale: pt })
+              : "—"}
           </span>
         </p>
       </div>
@@ -597,8 +622,9 @@ export default function ReusesEditClient() {
                         Imagem de capa *
                       </span>
                       <div className="mt-2">
-                        <ButtonUploader
+                        <DragAndDropUploader
                           label="Ficheiros"
+                          dragAndDropLabel="Arraste e largue o ficheiro aqui"
                           inputLabel="Selecione ou arraste o ficheiro"
                           removeFileButtonLabel="Remover ficheiro"
                           replaceFileButtonLabel="Substituir ficheiro"
@@ -606,22 +632,13 @@ export default function ReusesEditClient() {
                           accept=".jpg,.jpeg,.png"
                           maxSize={4194304}
                           maxCount={1}
-                          onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                            const files = e.target.files;
-                            if (!files || files.length === 0 || !reuse) return;
-                            setIsSubmitting(true);
-                            try {
-                              const { uploadReuseImage } = await import("@/services/api");
-                              const updated = await uploadReuseImage(reuse.id, files[0]);
-                              setReuse(updated);
-                              setApiSuccess("Imagem de capa atualizada com sucesso.");
-                              setTimeout(() => setApiSuccess(null), 10000);
-                            } catch {
-                              setApiError("Erro ao carregar imagem de capa.");
-                            } finally {
-                              setIsSubmitting(false);
-                            }
-                          }}
+                          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                          hasError={!!imageError}
+                          hasFeedback={!!imageError}
+                          feedbackState="danger"
+                          feedbackText={imageError ?? undefined}
+                          onChange={handleImageUpload}
                         />
                       </div>
                     </div>
