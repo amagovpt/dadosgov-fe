@@ -756,13 +756,13 @@ export default function ReusesFormClient({
               <div className="mb-[24px]">
                 <StatusCard
                   type="info"
-                  description="É importante associar todos os conjuntos de dados, pois ajuda a compreender as referências cruzadas e a melhorar a visibilidade da sua reutilização."
+                  description="É importante associar todos os conjuntos de dados, pois ajuda a compreender as referências cruzadas e a melhorar a visibilidade da sua reutilização. Escolha uma das formas de associar os conjuntos de dados: ou publicados neste portal; ou em alternativa indicar links para conjuntos de dados publicados noutros portais."
                 />
               </div>
               <div className="mb-[24px]">
                 <StatusCard
                   type="warning"
-                  description="Pode associar conjuntos de dados deste portal OU indicar links para conjuntos de dados remotos (de outros portais), mas não ambos na mesma reutilização."
+                  description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
                 />
               </div>
               {apiError && (
@@ -957,7 +957,7 @@ export default function ReusesFormClient({
                       // Mutual exclusion: local datasets OR remote URLs, not both.
                       if (hasLocal && hasRemote) {
                         setApiError(
-                          "Só pode associar conjuntos de dados deste portal OU indicar links para conjuntos de dados remotos, não os dois em simultâneo.",
+                          "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
                         );
                         return;
                       }
