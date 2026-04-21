@@ -111,12 +111,6 @@ export default function ReusesFormClient({
   const keywordsChildren = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
-    const selectedSet = new Set(
-      selectedKeywordsValue
-        .split(",")
-        .map((v) => v.trim().toLowerCase())
-        .filter(Boolean)
-    );
     // Deduplicate tags by lowercased text (keeps the first occurrence).
     const seen = new Set<string>();
     const uniqueTags = tags.filter((t) => {
@@ -125,9 +119,7 @@ export default function ReusesFormClient({
       seen.add(key);
       return true;
     });
-    const existsInTags = seen.has(trimmedLower);
-    const existsInSelected = selectedSet.has(trimmedLower);
-    const showCreate = trimmed.length > 0 && !existsInTags && !existsInSelected;
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [
@@ -143,13 +135,15 @@ export default function ReusesFormClient({
       )),
     ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, keywordSearch, selectedKeywordsValue]);
+  }, [tags, keywordSearch]);
 
   const handleKeywordChange = useCallback((value: string) => {
     setSelectedKeywordsValue(value);
     const selected = value.split(",").filter(Boolean);
+    let addedNew = false;
     selected.forEach((v) => {
       if (!tags.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+        addedNew = true;
         setTags((prev) => {
           if (prev.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
             return prev;
@@ -158,6 +152,11 @@ export default function ReusesFormClient({
         });
       }
     });
+    // Clear the search input after creating a new tag so the "Criar X" option
+    // disappears and the new tag shows as checked in the list.
+    if (addedNew) {
+      setKeywordSearch("");
+    }
   }, [tags]);
 
   const handleStep1Next = async () => {
@@ -607,6 +606,40 @@ export default function ReusesFormClient({
                   >
                     {keywordsChildren}
                   </IsolatedSelect>
+
+                  {selectedKeywordsValue.trim() && (
+                    <div className="flex flex-wrap gap-8 -mt-8">
+                      {selectedKeywordsValue
+                        .split(",")
+                        .map((v) => v.trim())
+                        .filter(Boolean)
+                        .map((keyword) => (
+                          <span
+                            key={keyword}
+                            className="inline-flex items-center gap-8 bg-primary-50 border border-primary-200 text-primary-900 text-sm font-medium px-12 py-4 rounded-full"
+                          >
+                            {keyword}
+                            <button
+                              type="button"
+                              aria-label={`Remover ${keyword}`}
+                              className="text-primary-600 hover:text-primary-800 font-bold leading-none cursor-pointer"
+                              onClick={() => {
+                                const next = selectedKeywordsValue
+                                  .split(",")
+                                  .map((v) => v.trim())
+                                  .filter(Boolean)
+                                  .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                                  .join(",");
+                                setSelectedKeywordsValue(next);
+                                selectedKeywordsRef.current = next;
+                              }}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                    </div>
+                  )}
 
                   <div>
                     <span className="text-primary-900 text-base font-medium leading-7">
