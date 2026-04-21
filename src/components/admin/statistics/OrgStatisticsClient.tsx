@@ -124,17 +124,17 @@ export default function OrgStatisticsClient() {
                   </CardFrame>
                 </div>
                 <div className="flex-1">
-                  <CardFrame label={String(metrics?.followers ?? 0)}>
+                  <CardFrame label={String(metrics?.resource_downloads ?? 0)}>
                     <p className="text-neutral-700 text-base">Downloads de dados</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
-                  <CardFrame label="0">
+                  <CardFrame label={String(metrics?.dataservice_views ?? 0)}>
                     <p className="text-neutral-700 text-base">Passeios pela API</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
-                  <CardFrame label="0">
+                  <CardFrame label={String(metrics?.reuse_views ?? 0)}>
                     <p className="text-neutral-700 text-base">Visitas a locais de reutilização</p>
                   </CardFrame>
                 </div>

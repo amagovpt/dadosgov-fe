@@ -105,6 +105,9 @@ export interface OrganizationMetrics {
   members: number;
   reuses: number;
   views: number;
+  resource_downloads: number;
+  reuse_views: number;
+  dataservice_views: number;
 }
 
 export interface Organization {
