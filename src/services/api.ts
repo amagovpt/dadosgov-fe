@@ -1369,6 +1369,78 @@ export async function updatePost(
   }
 }
 
+export async function fetchAdminPosts(
+  page: number = 1,
+  pageSize: number = 100,
+  sort: string = "-published"
+): Promise<APIResponse<Post>> {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      page_size: String(pageSize),
+      sort,
+      with_drafts: "true",
+    });
+    const res = await fetch(`${API_AUTH_URL}/posts/?${params.toString()}`, {
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch admin posts: ${res.statusText}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching admin posts:", error);
+    return { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null };
+  }
+}
+
+export async function publishPost(id: string): Promise<Post | null> {
+  try {
+    const res = await fetch(`${API_AUTH_URL}/posts/${id}/publish/`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (res.status === 401) {
+      throw new Error("Authentication required to publish a post");
+    }
+
+    if (!res.ok) {
+      throw new Error(`Failed to publish post: ${res.statusText}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error publishing post:", error);
+    return null;
+  }
+}
+
+export async function unpublishPost(id: string): Promise<Post | null> {
+  try {
+    const res = await fetch(`${API_AUTH_URL}/posts/${id}/publish/`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (res.status === 401) {
+      throw new Error("Authentication required to unpublish a post");
+    }
+
+    if (!res.ok) {
+      throw new Error(`Failed to unpublish post: ${res.statusText}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error unpublishing post:", error);
+    return null;
+  }
+}
+
 export async function deletePost(id: string): Promise<boolean> {
   try {
     const res = await fetch(`${API_AUTH_URL}/posts/${id}/`, {

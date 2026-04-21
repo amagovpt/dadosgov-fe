@@ -20,7 +20,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { fetchPost, updatePost, uploadPostImage, suggestTags, deletePost } from "@/services/api";
+import { fetchPost, updatePost, uploadPostImage, suggestTags, deletePost, unpublishPost, publishPost } from "@/services/api";
 import type { Post, PostUpdatePayload, TagSuggestion } from "@/types/api";
 import dynamic from "next/dynamic";
 
@@ -171,11 +171,7 @@ export default function PostsEditClient() {
     setApiSuccess(null);
 
     try {
-      const payload: PostUpdatePayload = {
-        published: "",
-      };
-
-      const result = await updatePost(postId, payload);
+      const result = await unpublishPost(postId);
       if (result) {
         setPost(result);
         setApiSuccess("Artigo despublicado com sucesso.");
@@ -185,6 +181,27 @@ export default function PostsEditClient() {
       }
     } catch {
       setApiError("Erro ao retirar o artigo.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRepublish = async () => {
+    setIsSaving(true);
+    setApiError(null);
+    setApiSuccess(null);
+
+    try {
+      const result = await publishPost(postId);
+      if (result) {
+        setPost(result);
+        setApiSuccess("Artigo publicado com sucesso.");
+        setTimeout(() => setApiSuccess(null), 10000);
+      } else {
+        setApiError("Erro ao publicar. Verifique a autenticação.");
+      }
+    } catch {
+      setApiError("Erro ao publicar o artigo.");
     } finally {
       setIsSaving(false);
     }
@@ -460,7 +477,7 @@ export default function PostsEditClient() {
                 </form>
 
                 <div className="dataset-edit-danger-actions">
-                  {post.published && (
+                  {post.published ? (
                     <StatusCard
                       type="warning"
                       description={
@@ -479,6 +496,29 @@ export default function PostsEditClient() {
                             disabled={isSaving}
                           >
                             {isSaving ? "A retirar..." : "Retirar"}
+                          </Button>
+                        </>
+                      }
+                    />
+                  ) : (
+                    <StatusCard
+                      type="info"
+                      description={
+                        <>
+                          <strong>Artigo despublicado</strong>
+                          <br />
+                          Este artigo não está visível para o público.
+                          <br />
+                          <Button
+                            appearance="link"
+                            variant="primary"
+                            hasIcon
+                            trailingIcon="agora-line-arrow-right-circle"
+                            trailingIconHover="agora-solid-arrow-right-circle"
+                            onClick={handleRepublish}
+                            disabled={isSaving}
+                          >
+                            {isSaving ? "A publicar..." : "Publicar novamente"}
                           </Button>
                         </>
                       }

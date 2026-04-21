@@ -20,7 +20,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { fetchPosts } from "@/services/api";
+import { fetchAdminPosts } from "@/services/api";
 import { Post } from "@/types/api";
 
 type SortOrder = "none" | "ascending" | "descending";
@@ -53,7 +53,7 @@ export default function SystemPostsClient() {
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const firstResponse = await fetchPosts(1, FETCH_PAGE_SIZE);
+      const firstResponse = await fetchAdminPosts(1, FETCH_PAGE_SIZE);
       let data = firstResponse.data || [];
       const totalAvailable = firstResponse.total || data.length;
       const totalPages = Math.ceil(totalAvailable / FETCH_PAGE_SIZE);
@@ -61,7 +61,7 @@ export default function SystemPostsClient() {
       if (totalPages > 1) {
         const remainingResponses = await Promise.all(
           Array.from({ length: totalPages - 1 }, (_, index) =>
-            fetchPosts(index + 2, FETCH_PAGE_SIZE)
+            fetchAdminPosts(index + 2, FETCH_PAGE_SIZE)
           )
         );
         data = data.concat(remainingResponses.flatMap((res) => res.data || []));
@@ -195,7 +195,7 @@ export default function SystemPostsClient() {
         >
           <DropdownSection name="status">
             <DropdownOption value="published">Publicado</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
+            <DropdownOption value="draft">Despublicado</DropdownOption>
           </DropdownSection>
         </InputSelect>
         <Button
@@ -275,7 +275,7 @@ export default function SystemPostsClient() {
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   <StatusDot variant={post.published ? "success" : "warning"}>
-                    {post.published ? "Publicado" : "Rascunho"}
+                    {post.published ? "Publicado" : "Despublicado"}
                   </StatusDot>
                 </TableCell>
                 <TableCell headerLabel="Criado em">
