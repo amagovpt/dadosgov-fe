@@ -15,6 +15,7 @@ import {
   DragAndDropUploader,
   CardGeneral,
   CardLinks,
+  Tag,
 } from "@ama-pt/agora-design-system";
 import {
   createReuse,
@@ -628,29 +629,25 @@ export default function ReusesFormClient({
                         .map((v) => v.trim())
                         .filter(Boolean)
                         .map((keyword) => (
-                          <span
+                          <Tag
                             key={keyword}
-                            className="inline-flex items-center gap-8 bg-primary-50 border border-primary-200 text-primary-900 text-sm font-medium px-12 py-4 rounded-full"
+                            hasIcon
+                            icon="agora-line-close"
+                            iconHover="agora-solid-close"
+                            aria-label={`Remover ${keyword}`}
+                            onClick={() => {
+                              const next = selectedKeywordsValue
+                                .split(",")
+                                .map((v) => v.trim())
+                                .filter(Boolean)
+                                .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                                .join(",");
+                              setSelectedKeywordsValue(next);
+                              selectedKeywordsRef.current = next;
+                            }}
                           >
                             {keyword}
-                            <button
-                              type="button"
-                              aria-label={`Remover ${keyword}`}
-                              className="text-primary-600 hover:text-primary-800 font-bold leading-none cursor-pointer"
-                              onClick={() => {
-                                const next = selectedKeywordsValue
-                                  .split(",")
-                                  .map((v) => v.trim())
-                                  .filter(Boolean)
-                                  .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
-                                  .join(",");
-                                setSelectedKeywordsValue(next);
-                                selectedKeywordsRef.current = next;
-                              }}
-                            >
-                              ×
-                            </button>
-                          </span>
+                          </Tag>
                         ))}
                     </div>
                   )}
