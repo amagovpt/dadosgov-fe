@@ -97,14 +97,26 @@ export default function ReusesFormClient({
     setSelectedDatasets([]);
     const dedupe = (items: Dataset[]) =>
       Array.from(new Map(items.map((d) => [d.id, d])).values());
+    // When publishing as the user, preload the pool with the user's own
+    // datasets AND every dataset from each organization the user belongs
+    // to. When publishing as a specific organization, show that org's
+    // datasets only. In both cases the search bar still queries the whole
+    // portal via searchDatasets().
     if (producerId === "user" || producerId === "") {
-      fetchMyDatasets(1, 100).then((res) => setMyDatasets(dedupe(res.data || [])));
+      const personal = fetchMyDatasets(1, 100);
+      const orgs = (user?.organizations || []).map((org) =>
+        fetchOrgDatasets(org.id, 1, 100)
+      );
+      Promise.all([personal, ...orgs]).then((results) => {
+        const all = results.flatMap((r) => r.data || []);
+        setMyDatasets(dedupe(all));
+      });
     } else {
       fetchOrgDatasets(producerId, 1, 100).then((res) =>
         setMyDatasets(dedupe(res.data || []))
       );
     }
-  }, [producerId]);
+  }, [producerId, user?.organizations]);
 
   useEffect(() => {
     setDatasetLinkErrors({});
