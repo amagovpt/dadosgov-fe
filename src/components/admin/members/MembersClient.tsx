@@ -32,6 +32,8 @@ import {
 } from "@/services/api";
 import { Organization, OrganizationMember, MembershipRequest, UserSuggestion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
@@ -397,11 +399,15 @@ interface MembersClientProps {
 
 export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const { show } = usePopupContext();
-  const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+  const { user } = useAuth();
+  const { activeOrg } = useActiveOrganization();
   // Prefer the orgId from the URL params (passed by the server page). Fall
   // back to the sidebar's active organization when this component is used
   // in contexts that don't have an org in the URL.
   const resolvedOrgId = orgId ?? activeOrg?.id;
+  // Synchronous name lookup (no network) so the breadcrumb is populated
+  // immediately on first render.
+  const cachedOrgName = useOrganizationName(resolvedOrgId, user?.organizations);
   const [addMemberOpenKey, setAddMemberOpenKey] = useState(0);
   const [editMemberOpenKey, setEditMemberOpenKey] = useState(0);
   const [viewedOrg, setViewedOrg] = useState<Organization | null>(null);
@@ -488,17 +494,13 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     return members.slice(start, start + itemsPerPage);
   }, [members, currentPage, itemsPerPage]);
 
-  if (isOrgLoading || isLoading) {
-    return <div className="admin-page">A carregar...</div>;
-  }
-
   return (
     <div className="admin-page">
       <div className="admin-page__breadcrumb">
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: viewedOrg?.name || activeOrg?.name || "Organização", url: "#" },
+            { label: cachedOrgName || viewedOrg?.name || activeOrg?.name || "Organização", url: "#" },
             { label: "Membros", url: "#" },
           ]}
         />
