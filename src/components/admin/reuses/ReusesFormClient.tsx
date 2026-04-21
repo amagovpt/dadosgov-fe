@@ -759,6 +759,12 @@ export default function ReusesFormClient({
                   description="É importante associar todos os conjuntos de dados, pois ajuda a compreender as referências cruzadas e a melhorar a visibilidade da sua reutilização."
                 />
               </div>
+              <div className="mb-[24px]">
+                <StatusCard
+                  type="warning"
+                  description="Pode associar conjuntos de dados deste portal OU indicar links para conjuntos de dados remotos (de outros portais), mas não ambos na mesma reutilização."
+                />
+              </div>
               {apiError && (
                 <div className="mt-[32px] mb-[16px]">
                   <StatusCard type="danger" description={apiError} />
@@ -942,56 +948,49 @@ export default function ReusesFormClient({
                     onClick={async () => {
                       if (!createdReuse) return;
 
+                      const remoteUrls = datasetLinks
+                        .map((l) => l.url.trim())
+                        .filter(Boolean);
+                      const hasLocal = selectedDatasets.length > 0;
+                      const hasRemote = remoteUrls.length > 0;
+
+                      // Mutual exclusion: local datasets OR remote URLs, not both.
+                      if (hasLocal && hasRemote) {
+                        setApiError(
+                          "Só pode associar conjuntos de dados deste portal OU indicar links para conjuntos de dados remotos, não os dois em simultâneo.",
+                        );
+                        return;
+                      }
+
                       setIsSubmitting(true);
                       setApiError(null);
-                      const failedLinks: string[] = [];
                       try {
+                        // Local datasets -> link via the reuse/datasets endpoint.
                         for (const dataset of selectedDatasets) {
                           const updated = await linkDatasetToReuse(createdReuse.id, dataset.id);
                           setCreatedReuse(updated);
                         }
-                        for (const link of datasetLinks) {
-                          const trimmed = link.url.trim();
-                          if (!trimmed) continue;
-                          // Extract dataset id or slug from common portal URL shapes:
-                          // - /datasets/<id-or-slug>
-                          // - /s/resources/<dataset-slug>/...
-                          // - /resources/<dataset-slug>/...
-                          const idMatch = trimmed.match(/datasets\/([a-f0-9]{24})\b/i);
-                          const slugMatch = trimmed.match(/datasets\/([^/?#]+)/i);
-                          const resourceMatch = trimmed.match(/\/(?:s\/)?resources\/([^/?#]+)/i);
-                          const datasetRef = idMatch
-                            ? idMatch[1]
-                            : slugMatch
-                              ? slugMatch[1]
-                              : resourceMatch
-                                ? resourceMatch[1]
-                                : null;
-                          if (!datasetRef) {
-                            failedLinks.push(trimmed);
-                            continue;
-                          }
-                          try {
-                            const updated = await linkDatasetToReuse(createdReuse.id, datasetRef);
-                            setCreatedReuse(updated);
-                          } catch {
-                            failedLinks.push(trimmed);
-                          }
+                        // Remote datasets -> stored as URLs on the reuse's extras
+                        // field. The backend model only accepts local Dataset
+                        // references on `datasets`, so remote URLs live on
+                        // extras.remote_datasets.
+                        if (hasRemote) {
+                          const updated = await updateReuse(createdReuse.id, {
+                            extras: {
+                              ...(createdReuse.extras || {}),
+                              remote_datasets: remoteUrls,
+                            },
+                          });
+                          setCreatedReuse(updated);
                         }
                         for (const link of apiLinks) {
                           if (link.url.trim()) {
                             try {
                               await linkDataserviceToReuse(createdReuse.id, link.url.trim());
                             } catch {
-                              failedLinks.push(link.url.trim());
+                              // Silent; API links UI is hidden for now.
                             }
                           }
-                        }
-                        if (failedLinks.length > 0) {
-                          setApiError(
-                            `Não foi possível associar os seguintes links (verifique se são URLs de conjuntos de dados do portal):\n${failedLinks.join("\n")}`
-                          );
-                          return;
                         }
                         onNextStep();
                       } catch (error: unknown) {
