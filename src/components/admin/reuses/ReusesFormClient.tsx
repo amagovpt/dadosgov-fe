@@ -15,6 +15,7 @@ import {
   DragAndDropUploader,
   CardGeneral,
   CardLinks,
+  Tag,
 } from "@ama-pt/agora-design-system";
 import {
   createReuse,
@@ -68,6 +69,12 @@ export default function ReusesFormClient({
   const [tags, setTags] = useState<TagSuggestion[]>([]);
   const [keywordSearch, setKeywordSearch] = useState("");
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
+  // Persist selected values across step navigation (uncontrolled IsolatedSelect
+  // remounts when the step 1 JSX unmounts/remounts; state survives because the
+  // parent component does not remount).
+  const [selectedProducerValue, setSelectedProducerValue] = useState("user");
+  const [selectedReuseTypeValue, setSelectedReuseTypeValue] = useState("");
+  const [selectedReuseTopicValue, setSelectedReuseTopicValue] = useState("");
 
   // Step 2 state
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
@@ -103,33 +110,68 @@ export default function ReusesFormClient({
   }, [currentStep]);
 
   const keywordsChildren = useMemo(() => {
-    const trimmed = keywordSearch.trim().toLowerCase();
-    const showCreate = trimmed.length > 0 && !tags.some((t) => t.text.toLowerCase() === trimmed);
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    // Deduplicate tags by lowercased text (keeps the first occurrence).
+    const seen = new Set<string>();
+    const uniqueTags = tags.filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedSet = new Set(
+      selectedKeywordsValue
+        .split(",")
+        .map((v) => v.trim().toLowerCase())
+        .filter(Boolean)
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
     const options = [
-      ...tags.map((tag) => (
-        <DropdownOption key={tag.text} value={tag.text}>
-          {tag.text}
-        </DropdownOption>
-      )),
       ...(showCreate
         ? [
-            <DropdownOption key={`__create__${trimmed}`} value={keywordSearch.trim()}>
-              Criar &quot;{keywordSearch.trim()}&quot;
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
             </DropdownOption>,
           ]
         : []),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedSet.has(tag.text.toLowerCase())}
+        >
+          {tag.text}
+        </DropdownOption>
+      )),
     ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, keywordSearch]);
+  }, [tags, keywordSearch, selectedKeywordsValue]);
 
   const handleKeywordChange = useCallback((value: string) => {
     setSelectedKeywordsValue(value);
     const selected = value.split(",").filter(Boolean);
+    let addedNew = false;
     selected.forEach((v) => {
-      if (!tags.some((t) => t.text === v)) {
-        setTags((prev) => [...prev, { text: v }]);
+      if (!tags.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+        addedNew = true;
+        setTags((prev) => {
+          if (prev.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+            return prev;
+          }
+          return [...prev, { text: v }];
+        });
       }
     });
+    // Clear the search input after creating a new tag so the "Criar X" option
+    // disappears and the new tag shows as checked in the list.
+    if (addedNew) {
+      setKeywordSearch("");
+    }
   }, [tags]);
 
   const handleStep1Next = async () => {
@@ -154,7 +196,7 @@ export default function ReusesFormClient({
         ? selectedKeywordsValue.split(",").filter(Boolean)
         : [];
 
-      const reuse = await createReuse({
+      const payload = {
         title: reuseName.trim(),
         description: reuseDescription.trim(),
         url,
@@ -165,7 +207,11 @@ export default function ReusesFormClient({
         ...(selectedProducerRef.current && selectedProducerRef.current !== "user"
           ? { organization: selectedProducerRef.current }
           : {}),
-      });
+      };
+
+      const reuse = createdReuse
+        ? await updateReuse(createdReuse.id, payload)
+        : await createReuse(payload);
 
       if (reuseCoverImageFile) {
         await uploadReuseImage(reuse.id, reuseCoverImageFile);
@@ -453,8 +499,12 @@ export default function ReusesFormClient({
                   placeholder="Selecione o produtor..."
                   id="producer-identity"
                   onChangeRef={selectedProducerRef}
-                  defaultValue="user"
-                  onChangeCallback={(value) => setProducerId(value || "user")}
+                  defaultValue={selectedProducerValue}
+                  onChangeCallback={(value) => {
+                    const v = value || "user";
+                    setSelectedProducerValue(v);
+                    setProducerId(v);
+                  }}
                 >
                   {producerOptions}
                 </IsolatedSelect>
@@ -520,6 +570,8 @@ export default function ReusesFormClient({
                     placeholder="Selecione um tipo..."
                     id="reuse-type"
                     onChangeRef={selectedReuseTypeRef}
+                    defaultValue={selectedReuseTypeValue}
+                    onChangeCallback={(v) => setSelectedReuseTypeValue(v || "")}
                     hasError={!!formErrors.reuseType}
                     errorFeedbackText="Campo obrigatório"
                   >
@@ -530,6 +582,8 @@ export default function ReusesFormClient({
                     placeholder="Selecione um tema..."
                     id="reuse-theme"
                     onChangeRef={selectedReuseTopicRef}
+                    defaultValue={selectedReuseTopicValue}
+                    onChangeCallback={(v) => setSelectedReuseTopicValue(v || "")}
                     hasError={!!formErrors.reuseTopic}
                     errorFeedbackText="Campo obrigatório"
                   >
@@ -540,7 +594,7 @@ export default function ReusesFormClient({
                     placeholder="Insira a descrição aqui"
                     id="reuse-description"
                     rows={4}
-                    maxLength={1000}
+                    maxLength={3000}
                     showCharCounter={true}
                     value={reuseDescription}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -548,9 +602,8 @@ export default function ReusesFormClient({
                       if (e.target.value.trim()) clearError("reuseDescription");
                     }}
                     hasError={!!formErrors.reuseDescription}
-                    hasFeedback={!!formErrors.reuseDescription || reuseDescription.length < 1000}
-                    feedbackState={formErrors.reuseDescription ? "danger" : "warning"}
-                    feedbackText="Recomenda-se que a descrição tenha pelo menos 1000 caracteres."
+                    hasFeedback={!!formErrors.reuseDescription}
+                    feedbackState="danger"
                     errorFeedbackText="Campo obrigatório"
                   />
                   <IsolatedSelect
@@ -569,13 +622,39 @@ export default function ReusesFormClient({
                     {keywordsChildren}
                   </IsolatedSelect>
 
+                  {selectedKeywordsValue.trim() && (
+                    <div className="flex flex-wrap gap-8 -mt-8">
+                      {selectedKeywordsValue
+                        .split(",")
+                        .map((v) => v.trim())
+                        .filter(Boolean)
+                        .map((keyword) => (
+                          <Tag
+                            key={keyword}
+                            aria-label={`Remover ${keyword}`}
+                            onClick={() => {
+                              const next = selectedKeywordsValue
+                                .split(",")
+                                .map((v) => v.trim())
+                                .filter(Boolean)
+                                .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                                .join(",");
+                              setSelectedKeywordsValue(next);
+                              selectedKeywordsRef.current = next;
+                            }}
+                          >
+                            {keyword}
+                          </Tag>
+                        ))}
+                    </div>
+                  )}
+
                   <div>
                     <span className="text-primary-900 text-base font-medium leading-7">
                       Imagem de capa
                     </span>
                     <div className="mt-2">
                       <DragAndDropUploader
-                        key={reuseCoverImageFile?.name}
                         dragAndDropLabel="Arraste e largue a imagem aqui"
                         inputLabel="Selecionar ficheiro"
                         separatorLabel="ou"
