@@ -632,8 +632,8 @@ export default function ReusesFormClient({
                           <Tag
                             key={keyword}
                             hasIcon
-                            icon="agora-line-close"
-                            iconHover="agora-solid-close"
+                            icon="agora-line-x-circle"
+                            iconHover="agora-solid-x-circle"
                             aria-label={`Remover ${keyword}`}
                             onClick={() => {
                               const next = selectedKeywordsValue
