@@ -189,8 +189,8 @@ export default function OrgProfileClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Perfil", url: "/pages/admin/org/profile" },
+            { label: org?.name || "Organização", url: "#" },
+            { label: "Perfil", url: "#" },
           ]}
         />
       </div>

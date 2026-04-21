@@ -21,6 +21,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgHarvesters } from "@/services/api";
 import { HarvestSource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useOrganizationName } from "@/hooks/useOrganizationName";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 const formatDate = (dateStr: string) => {
@@ -51,6 +52,7 @@ export default function OrgHarvestersClient() {
   const { activeOrg, isLoading: isOrgLoading, selectOrganization } = useActiveOrganization();
 
   const orgId = orgIdFromUrl || activeOrg?.id;
+  const orgName = useOrganizationName(orgId);
 
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -111,7 +113,7 @@ export default function OrgHarvestersClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
+            { label: orgName || activeOrg?.name || "Organização", url: "#" },
             { label: "Harvesters", url: "/pages/admin/org/harvesters" },
           ]}
         />

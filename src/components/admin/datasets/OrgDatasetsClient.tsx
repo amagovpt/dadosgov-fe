@@ -21,6 +21,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { useOrganizationName } from "@/hooks/useOrganizationName";
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -35,6 +36,7 @@ interface OrgDatasetsClientProps {
 }
 
 export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
+  const orgName = useOrganizationName(orgId);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -121,8 +123,8 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Conjuntos de dados", url: "/pages/admin/org/datasets" },
+            { label: orgName || "Organização", url: "#" },
+            { label: "Conjuntos de dados", url: "#" },
           ]}
         />
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Breadcrumb,
   Button,
@@ -11,11 +11,16 @@ import {
 import DatasetsAdminClient from "@/components/admin/datasetsadmin/DatasetsAdminClient";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useOrganizationName } from "@/hooks/useOrganizationName";
 
 export default function OrgDatasetsNewClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const routeParams = useParams();
+  const routeOrgId = routeParams?.orgId as string | undefined;
   const { activeOrg } = useActiveOrganization();
+  const resolvedOrgId = routeOrgId || activeOrg?.id;
+  const orgName = useOrganizationName(resolvedOrgId);
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
@@ -36,8 +41,8 @@ export default function OrgDatasetsNewClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Conjuntos de dados", url: `${orgBase}/datasets` },
+            { label: orgName || activeOrg?.name || "Organização", url: "#" },
+            { label: "Conjuntos de dados", url: resolvedOrgId ? `/pages/admin/org/${resolvedOrgId}/datasets` : "#" },
           ]}
         />
       </div>

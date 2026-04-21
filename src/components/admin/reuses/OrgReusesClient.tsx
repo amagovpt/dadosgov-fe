@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useParams } from "next/navigation";
 import {
   Breadcrumb,
   CardNoResults,
@@ -21,6 +22,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useOrganizationName } from "@/hooks/useOrganizationName";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 const formatDate = (dateStr: string) => {
@@ -29,7 +31,11 @@ const formatDate = (dateStr: string) => {
 };
 
 export default function OrgReusesClient() {
+  const params = useParams();
+  const routeOrgId = (params?.orgId as string | undefined) ?? undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+  const resolvedOrgId = routeOrgId ?? activeOrg?.id;
+  const orgName = useOrganizationName(resolvedOrgId);
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,14 +43,14 @@ export default function OrgReusesClient() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
-    if (!activeOrg) {
+    if (!resolvedOrgId) {
       setIsLoading(false);
       return;
     }
     async function loadReuses() {
       setIsLoading(true);
       try {
-        const data = await fetchOrgReuses(activeOrg!.id);
+        const data = await fetchOrgReuses(resolvedOrgId!);
         setReuses(data || []);
       } catch (error) {
         console.error("Error loading org reuses:", error);
@@ -53,7 +59,7 @@ export default function OrgReusesClient() {
       }
     }
     loadReuses();
-  }, [activeOrg]);
+  }, [resolvedOrgId]);
 
   const totalPages = Math.ceil(reuses.length / itemsPerPage);
   const paginatedReuses = useMemo(() => {
@@ -62,7 +68,7 @@ export default function OrgReusesClient() {
   }, [reuses, currentPage, itemsPerPage]);
 
   if (isOrgLoading) return <p>A carregar...</p>;
-  if (!activeOrg) {
+  if (!resolvedOrgId) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -85,8 +91,8 @@ export default function OrgReusesClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Reutilizações", url: "/pages/admin/org/reuses" },
+            { label: orgName || activeOrg?.name || "Organização", url: "#" },
+            { label: "Reutilizações", url: "#" },
           ]}
         />
       </div>

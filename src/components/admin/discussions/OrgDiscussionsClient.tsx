@@ -16,6 +16,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDiscussions } from "@/services/api";
 import { Discussion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { useOrganizationName } from "@/hooks/useOrganizationName";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -31,6 +32,7 @@ interface OrgDiscussionsClientProps {
 }
 
 export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProps) {
+  const orgName = useOrganizationName(orgId);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,8 +70,8 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Discussões", url: `/pages/admin/org/${orgId}/discussions` },
+            { label: orgName || "Organização", url: "#" },
+            { label: "Discussões", url: "#" },
           ]}
         />
       </div>
