@@ -8,6 +8,7 @@ import { PopupProviderWrapper } from "@/components/PopupProviderWrapper";
 import { AuthProvider } from "@/context/AuthContext";
 import { siteConfig } from "@/config/site";
 import ScrollTop from "@/components/ScrollTop";
+import { ApolloWrapper } from "@/providers/ApolloProvider";
 
 const notoSans = Noto_Sans({
   variable: "--font-noto-sans",
@@ -42,14 +43,16 @@ export default function RootLayout({
     <html lang="pt">
       <body className={`${notoSans.variable} antialiased font-sans`}>
         <AuthProvider>
-          <PopupProviderWrapper>
-            <ScrollTop />
-            <div className="min-h-screen w-full mx-auto flex flex-col">
-              <HeaderWrapper />
-              <div className="grow">{children}</div>
-              <Footer />
-            </div>
-          </PopupProviderWrapper>
+          <ApolloWrapper>
+            <PopupProviderWrapper>
+              <ScrollTop />
+              <div className="min-h-screen w-full mx-auto flex flex-col">
+                <HeaderWrapper />
+                <div className="grow">{children}</div>
+                <Footer />
+              </div>
+            </PopupProviderWrapper>
+          </ApolloWrapper>
         </AuthProvider>
       </body>
     </html>
