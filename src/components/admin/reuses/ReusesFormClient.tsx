@@ -702,6 +702,7 @@ export default function ReusesFormClient({
                       <DragAndDropUploader
                         dragAndDropLabel="Arraste e largue a imagem aqui"
                         inputLabel="Selecionar ficheiro"
+                        selectedFilesLabel="ficheiro selecionado"
                         separatorLabel="ou"
                         removeFileButtonLabel="Remover ficheiro"
                         replaceFileButtonLabel="Substituir ficheiro"

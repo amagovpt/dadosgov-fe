@@ -589,10 +589,13 @@ export async function deleteOrganization(org: string): Promise<void> {
   if (!res.ok) throw new Error(`Failed to delete organization: ${res.statusText}`);
 }
 
-export async function uploadOrgLogo(org: string, file: File): Promise<Organization> {
+export async function uploadOrgLogo(
+  org: string,
+  file: File,
+): Promise<{ success: boolean; image: string }> {
   const formData = new FormData();
   formData.append("file", file);
-  const res = await fetch(`${API_AUTH_URL}/organizations/${org}/logo`, {
+  const res = await fetch(`${API_AUTH_URL}/organizations/${org}/logo/`, {
     method: "POST",
     credentials: "include",
     body: formData,
