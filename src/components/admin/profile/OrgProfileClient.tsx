@@ -142,7 +142,7 @@ export default function OrgProfileClient() {
     try {
       await deleteOrganization(org.id);
       hide();
-      router.push("/pages/admin");
+      router.push("/pages/admin/me/profile");
     } catch (error) {
       console.error("Error deleting organization:", error);
       hide();
