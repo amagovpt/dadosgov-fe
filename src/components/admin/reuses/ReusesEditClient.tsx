@@ -644,6 +644,16 @@ export default function ReusesEditClient() {
                       <span className="text-primary-900 text-base font-medium leading-7">
                         Imagem de capa *
                       </span>
+                      {(reuse.image_thumbnail || reuse.image) && (
+                        <div className="mt-2 mb-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={reuse.image_thumbnail || reuse.image || ""}
+                            alt="Imagem de capa atual"
+                            className="rounded border border-neutral-200 max-h-[180px] object-cover"
+                          />
+                        </div>
+                      )}
                       <div className="mt-2">
                         <DragAndDropUploader
                           label="Ficheiros"
