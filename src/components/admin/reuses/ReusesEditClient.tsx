@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
@@ -42,6 +42,7 @@ import {
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import IsolatedSelect from "@/components/admin/IsolatedSelect";
 
 function TransferReusePopupContent({
   reuseTitle,
@@ -157,6 +158,8 @@ export default function ReusesEditClient() {
   const [description, setDescription] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("");
+  const selectedTypeRef = useRef("");
+  const selectedTopicRef = useRef("");
 
   // API state
   const [featured, setFeatured] = useState(false);
@@ -206,6 +209,8 @@ export default function ReusesEditClient() {
         setDescription(r.description);
         setSelectedType(r.type || "");
         setSelectedTopic(r.topic || "");
+        selectedTypeRef.current = r.type || "";
+        selectedTopicRef.current = r.topic || "";
         setFeatured(r.featured || false);
         setReuseTypes(types);
         setReuseTopics(topics);
@@ -337,8 +342,8 @@ export default function ReusesEditClient() {
         title: title.trim(),
         url: url.trim(),
         description: description.trim(),
-        type: selectedType || undefined,
-        topic: selectedTopic || undefined,
+        type: selectedTypeRef.current || undefined,
+        topic: selectedTopicRef.current || undefined,
       });
       setReuse(updated);
       setApiSuccess("Reutilização atualizada com sucesso.");
@@ -562,17 +567,16 @@ export default function ReusesEditClient() {
                       feedbackState="danger"
                       errorFeedbackText="Campo obrigatório"
                     />
-                    <InputSelect
+                    <IsolatedSelect
                       label="Tipo *"
                       placeholder="Selecione um tipo..."
                       id="edit-type"
                       searchable
                       searchInputPlaceholder="Escreva para pesquisar..."
                       searchNoResultsText="Nenhum resultado encontrado"
+                      onChangeRef={selectedTypeRef}
                       defaultValue={selectedType}
-                      onChange={(options) => {
-                        if (options.length > 0) setSelectedType(options[0].value as string);
-                      }}
+                      onChangeCallback={(v) => setSelectedType(v || "")}
                     >
                       <DropdownSection name="types">
                         {reuseTypes.map((t) => (
@@ -581,7 +585,26 @@ export default function ReusesEditClient() {
                           </DropdownOption>
                         ))}
                       </DropdownSection>
-                    </InputSelect>
+                    </IsolatedSelect>
+                    <IsolatedSelect
+                      label="Tema *"
+                      placeholder="Selecione um tema..."
+                      id="edit-topic"
+                      searchable
+                      searchInputPlaceholder="Escreva para pesquisar..."
+                      searchNoResultsText="Nenhum resultado encontrado"
+                      onChangeRef={selectedTopicRef}
+                      defaultValue={selectedTopic}
+                      onChangeCallback={(v) => setSelectedTopic(v || "")}
+                    >
+                      <DropdownSection name="topics">
+                        {reuseTopics.map((t) => (
+                          <DropdownOption key={t.id} value={t.id}>
+                            {t.label}
+                          </DropdownOption>
+                        ))}
+                      </DropdownSection>
+                    </IsolatedSelect>
                     <InputTextArea
                       label="Descrição *"
                       placeholder="Insira a descrição aqui"
