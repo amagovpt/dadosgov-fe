@@ -34,6 +34,7 @@ import { pt } from "date-fns/locale";
 
 import PageBanner from "@/components/PageBanner";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { localizeReuseType } from "@/lib/reuse-labels";
 
 const SORT_OPTIONS: Record<string, string> = {
   relevancia: "",
@@ -80,7 +81,8 @@ function TypeSelect({
   }, [mounted, onTypeChange]);
 
   if (!mounted) {
-    const label = reuseTypes.find((rt) => rt.id === currentType)?.label || "Todos os tipos";
+    const match = reuseTypes.find((rt) => rt.id === currentType);
+    const label = match ? localizeReuseType(match) : "Todos os tipos";
     return (
       <div>
         <label className="text-s-regular text-neutral-700 mb-4 block">Tipo:</label>
@@ -104,7 +106,7 @@ function TypeSelect({
         </DropdownOption>
         {reuseTypes.map((rt) => (
           <DropdownOption key={rt.id} value={rt.id} selected={currentType === rt.id}>
-            {rt.label}
+            {localizeReuseType(rt)}
           </DropdownOption>
         ))}
       </FlexDropdownSection>

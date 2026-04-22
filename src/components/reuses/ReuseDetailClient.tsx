@@ -27,24 +27,15 @@ import {
   usePopupContext,
 } from '@ama-pt/agora-design-system';
 import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from '@/types/api';
-import { fetchDataset, fetchReuse, fetchDiscussions, createDiscussion, replyToDiscussion } from '@/services/api';
+import { fetchDataset, fetchReuse, fetchDiscussions, createDiscussion, replyToDiscussion, followEntity, unfollowEntity, isFollowing } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import IsolatedSelect from '@/components/admin/IsolatedSelect';
 import EditDiscussionPopup from '@/components/discussions/EditDiscussionPopup';
 import DeleteDiscussionPopup from '@/components/discussions/DeleteDiscussionPopup';
+import { localizeReuseTypeId } from '@/lib/reuse-labels';
 
 import { format, formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
-
-const REUSE_TYPE_LABELS: Record<string, string> = {
-  visualization: "Visualização",
-  application: "Aplicação",
-  blog_post: "Publicação no blog",
-  press_article: "Artigo de imprensa",
-  api: "API",
-  idea: "Ideia",
-  hardware: "Hardware conectado",
-};
 
 interface ReuseDetailClientProps {
   slug: string;
@@ -52,7 +43,16 @@ interface ReuseDetailClientProps {
 
 export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const canEdit = Boolean(
+    user &&
+      (isAdmin ||
+        (reuse?.owner && reuse.owner.id === user.id) ||
+        (reuse?.organization &&
+          user.organizations?.some(
+            (org) => org.id === reuse.organization?.id,
+          ))),
+  );
   const { show, hide } = usePopupContext();
   const [reuse, setReuse] = useState<Reuse | null>(null);
   const [isLoadingReuse, setIsLoadingReuse] = useState(true);
@@ -69,6 +69,9 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const [replyMessage, setReplyMessage] = useState('');
   const replyIdentityRef = useRef('');
   const [isReplying, setIsReplying] = useState(false);
+
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   const [descExpanded, setDescExpanded] = useState(false);
   const [descOverflowing, setDescOverflowing] = useState(false);
@@ -143,6 +146,10 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
       try {
         const data = await fetchReuse(slug);
         setReuse(data);
+        if (user && data) {
+          const following = await isFollowing("reuses", data.id, user.id);
+          setIsFavorite(following);
+        }
       } catch (error) {
         console.error("Error loading reuse:", error);
       } finally {
@@ -150,7 +157,29 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
       }
     }
     loadReuse();
-  }, [slug]);
+  }, [slug, user]);
+
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      router.push("/pages/login");
+      return;
+    }
+    if (!reuse || isTogglingFavorite) return;
+    setIsTogglingFavorite(true);
+    try {
+      if (isFavorite) {
+        await unfollowEntity("reuses", reuse.id);
+        setIsFavorite(false);
+      } else {
+        await followEntity("reuses", reuse.id);
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
   const [datasetsPage, setDatasetsPage] = useState(1);
   const datasetsPageSize = 6;
 
@@ -272,13 +301,15 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               <div className="flex flex-wrap items-center gap-16">
                 <Button
                   variant="primary"
-                  appearance="outline"
+                  appearance={isFavorite ? "solid" : "outline"}
                   darkMode={false}
                   hasIcon={true}
-                  leadingIcon="agora-line-star"
+                  leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
                   leadingIconHover="agora-solid-star"
+                  onClick={handleToggleFavorite}
+                  disabled={isTogglingFavorite}
                 >
-                  Adicionar aos favoritos
+                  {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                 </Button>
                 <Button
                   variant="primary"
@@ -289,9 +320,30 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 >
                   Veja reutilização
                 </Button>
+                {canEdit && (
+                  <Link href={`/pages/admin/me/reuses/edit?id=${reuse.id}`}>
+                    <Button
+                      variant="primary"
+                      hasIcon={true}
+                      leadingIcon="agora-line-edit"
+                      leadingIconHover="agora-solid-edit"
+                    >
+                      Editar
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Draft indicator (visible to the producer / org members) */}
+          {reuse.private && (
+            <div className="mt-16">
+              <Pill variant="warning" appearance="solid">
+                RASCUNHO
+              </Pill>
+            </div>
+          )}
 
           {/* Owner line */}
           {reuse.owner && (
@@ -354,7 +406,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 <div className="flex flex-col gap-24 h-full">
                   <div className="flex items-center flex-wrap gap-16 text-[15px]">
                     <span className="font-semibold text-neutral-900">
-                      {REUSE_TYPE_LABELS[reuse.type] || reuse.type || 'Aplicação'}
+                      {localizeReuseTypeId(reuse.type) || 'Aplicação'}
                     </span>
                     <div className="flex items-center gap-8">
                       <Icon

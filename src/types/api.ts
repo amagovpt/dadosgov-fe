@@ -411,6 +411,7 @@ export interface ReuseUpdatePayload {
   tags?: string[];
   organization?: string;
   private?: boolean;
+  archived?: string | null;
   extras?: Record<string, unknown>;
 }
 
