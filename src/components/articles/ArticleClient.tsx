@@ -189,10 +189,6 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
             ) : (
               <div className="grid xs:grid-cols-1 sm:grid-cols-2 gap-32">
                 {posts.map((post) => {
-                  const authorName = post.owner
-                    ? `${post.owner.first_name} ${post.owner.last_name}`.trim()
-                    : "";
-
                   return (
                     <Link
                       key={post.id}
@@ -209,16 +205,9 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
                         }}
                         subtitleText={
                           (
-                            <div className="flex flex-col">
-                              <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                                {formatPostDate(post)}
-                              </span>
-                              {authorName && (
-                                <span style={{ fontSize: "16px", fontWeight: 300 }} className="text-neutral-900 mt-4">
-                                  {authorName}
-                                </span>
-                              )}
-                            </div>
+                            <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                              {formatPostDate(post)}
+                            </span>
                           ) as unknown as string
                         }
                         titleText={post.name}
