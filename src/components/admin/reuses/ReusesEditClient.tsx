@@ -422,6 +422,44 @@ export default function ReusesEditClient() {
     }
   };
 
+  const handleArchiveReuse = async () => {
+    if (!reuse) return;
+    setApiError(null);
+    setApiSuccess(null);
+    setIsSubmitting(true);
+    try {
+      const updated = await updateReuse(reuse.id, {
+        archived: new Date().toISOString(),
+      });
+      setReuse(updated);
+      setApiSuccess("Reutilização arquivada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch (error) {
+      console.error("Error archiving reuse:", error);
+      setApiError("Erro ao arquivar a reutilização.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUnarchiveReuse = async () => {
+    if (!reuse) return;
+    setApiError(null);
+    setApiSuccess(null);
+    setIsSubmitting(true);
+    try {
+      const updated = await updateReuse(reuse.id, { archived: null });
+      setReuse(updated);
+      setApiSuccess("Reutilização desarquivada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch (error) {
+      console.error("Error unarchiving reuse:", error);
+      setApiError("Erro ao desarquivar a reutilização.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="admin-page">
@@ -782,8 +820,9 @@ export default function ReusesEditClient() {
                       description={
                         <>
                           <strong>
-                            Uma reutilização arquivada deixa de estar indexada no portal, mas
-                            permanece acessível através de um link direto.
+                            {reuse.archived
+                              ? "Esta reutilização está arquivada. Pode desarquivar para voltar a indexá-la no portal."
+                              : "Uma reutilização arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto."}
                           </strong>
                           <br />
                           <Button
@@ -792,8 +831,16 @@ export default function ReusesEditClient() {
                             hasIcon
                             trailingIcon="agora-line-arrow-right-circle"
                             trailingIconHover="agora-solid-arrow-right-circle"
+                            onClick={
+                              reuse.archived
+                                ? handleUnarchiveReuse
+                                : handleArchiveReuse
+                            }
+                            disabled={isSubmitting}
                           >
-                            Arquivar a reutilização
+                            {reuse.archived
+                              ? "Desarquivar a reutilização"
+                              : "Arquivar a reutilização"}
                           </Button>
                         </>
                       }
