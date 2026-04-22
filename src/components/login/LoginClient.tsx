@@ -25,8 +25,6 @@ function LoginContent() {
   const [isHoveredNacional, setIsHoveredNacional] = useState(false);
   const [isHoveredEstrangeiro, setIsHoveredEstrangeiro] = useState(false);
   const [isHoveredEidasCreate, setIsHoveredEidasCreate] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isHoveredEidas, setIsHoveredEidas] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loginEmail, setLoginEmail] = useState("");
@@ -371,8 +369,6 @@ function LoginContent() {
                           hasIcon={true}
                           trailingIcon={"agora-line-arrow-right-circle"}
                           trailingIconHover="agora-solid-arrow-right-circle"
-                          onMouseEnter={() => setIsHovered(true)}
-                          onMouseLeave={() => setIsHovered(false)}
                           onClick={handleSamlLogin}
                           disabled={!samlEnabled || !citizenType || !termsCmdAccepted}
                         >
@@ -459,8 +455,6 @@ function LoginContent() {
                           hasIcon={true}
                           trailingIcon={"agora-line-arrow-right-circle"}
                           trailingIconHover="agora-solid-arrow-right-circle"
-                          onMouseEnter={() => setIsHoveredEidas(true)}
-                          onMouseLeave={() => setIsHoveredEidas(false)}
                           onClick={handleEidasLogin}
                           disabled={!samlEnabled || !termsEidasAccepted}
                         >
