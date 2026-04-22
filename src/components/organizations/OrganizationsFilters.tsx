@@ -13,7 +13,6 @@ import {
   Checkbox,
 } from "@ama-pt/agora-design-system";
 import { OrgBadges, Organization, OrganizationFilters, SiteMetrics } from "@/types/api";
-import { CategoryToggles } from "@/components/CategoryToggles";
 
 const ORG_TYPE_OPTIONS = [
   { id: "all", label: "Todos", badge: "" },
@@ -116,8 +115,6 @@ export const OrganizationsFilters = ({
 
   return (
     <div className="h-full organizations-filters">
-      <CategoryToggles siteMetrics={siteMetrics} searchQuery={initialFilters.q} exclude={["organizacoes"]} />
-
       <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
         <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
         <div className="pr-32 max-w-[592px] flex flex-col gap-8">
