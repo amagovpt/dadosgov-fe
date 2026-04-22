@@ -1,45 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { fetchUserProfile } from "@/services/api";
 import { Organization } from "@/types/api";
 
 export function useActiveOrganization() {
-  const { user } = useAuth();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [activeOrg, setActiveOrg] = useState<Organization | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadOrganizations() {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const profile = await fetchUserProfile(user.id);
-        const orgs = profile?.organizations ?? [];
-        setOrganizations(orgs);
-        if (orgs.length > 0) {
-          setActiveOrg(orgs[0]);
-        }
-      } catch (error) {
-        console.error("Error loading user organizations:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadOrganizations();
-  }, [user]);
-
-  const selectOrganization = useCallback(
-    (orgId: string) => {
-      const org = organizations.find((o) => o.id === orgId);
-      if (org) setActiveOrg(org);
-    },
-    [organizations],
+  const { user, isLoading } = useAuth();
+  const organizations = useMemo<Organization[]>(
+    () => user?.organizations ?? [],
+    [user],
   );
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+
+  const activeOrg = useMemo<Organization | null>(() => {
+    if (organizations.length === 0) return null;
+    if (selectedOrgId) {
+      return (
+        organizations.find((o) => o.id === selectedOrgId) ?? organizations[0]
+      );
+    }
+    return organizations[0];
+  }, [organizations, selectedOrgId]);
+
+  const selectOrganization = useCallback((orgId: string) => {
+    setSelectedOrgId(orgId);
+  }, []);
 
   return {
     organizations,
