@@ -43,7 +43,16 @@ interface ReuseDetailClientProps {
 
 export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const canEdit = Boolean(
+    user &&
+      (isAdmin ||
+        (reuse?.owner && reuse.owner.id === user.id) ||
+        (reuse?.organization &&
+          user.organizations?.some(
+            (org) => org.id === reuse.organization?.id,
+          ))),
+  );
   const { show, hide } = usePopupContext();
   const [reuse, setReuse] = useState<Reuse | null>(null);
   const [isLoadingReuse, setIsLoadingReuse] = useState(true);
@@ -280,6 +289,18 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 >
                   Veja reutilização
                 </Button>
+                {canEdit && (
+                  <Link href={`/pages/admin/me/reuses/edit?id=${reuse.id}`}>
+                    <Button
+                      variant="primary"
+                      hasIcon={true}
+                      leadingIcon="agora-line-edit"
+                      leadingIconHover="agora-solid-edit"
+                    >
+                      Editar
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
