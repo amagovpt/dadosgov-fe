@@ -1,14 +1,20 @@
 "use client";
 
 import React from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
 import ReusesFormClient from "@/components/admin/reuses/ReusesFormClient";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 
 export default function OrgReusesNewClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const params = useParams();
+  const orgId = params?.orgId as string | undefined;
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
   const totalSegments = 12;
@@ -26,8 +32,8 @@ export default function OrgReusesNewClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Reutilizações", url: "/pages/admin/org/reuses" },
+            { label: orgName || "Organização", url: "#" },
+            { label: "Reutilizações", url: orgId ? `/pages/admin/org/${orgId}/reuses` : "#" },
           ]}
         />
       </div>

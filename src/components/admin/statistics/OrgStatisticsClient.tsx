@@ -45,8 +45,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
     loadData();
   }, [orgId]);
 
-  if (isLoading) return <p>A carregar...</p>;
-  if (!org) {
+  if (!isLoading && !org) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -69,7 +68,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: org.name, url: "#" },
+            { label: org?.name || "Organização", url: "#" },
             { label: "Estatísticas", url: "/pages/admin/org/statistics" },
           ]}
         />

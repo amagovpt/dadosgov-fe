@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import {
   Breadcrumb,
   CardNoResults,
@@ -21,6 +22,8 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 const formatDate = (dateStr: string) => {
@@ -29,20 +32,25 @@ const formatDate = (dateStr: string) => {
 };
 
 export default function OrgDataservicesClient() {
+  const params = useParams();
+  const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+  const resolvedOrgId = routeOrgId || activeOrg?.id;
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!activeOrg) {
+    if (!resolvedOrgId) {
       setIsLoading(false);
       return;
     }
     async function loadDataservices() {
       setIsLoading(true);
       try {
-        const response = await fetchOrgDataservices(activeOrg!.id, 1, 9999);
+        const response = await fetchOrgDataservices(resolvedOrgId!, 1, 9999);
         setApis(response.data || []);
       } catch (error) {
         console.error("Error loading org dataservices:", error);
@@ -51,10 +59,9 @@ export default function OrgDataservicesClient() {
       }
     }
     loadDataservices();
-  }, [activeOrg]);
+  }, [resolvedOrgId]);
 
-  if (isOrgLoading) return <p>A carregar...</p>;
-  if (!activeOrg) {
+  if (!isOrgLoading && !resolvedOrgId) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -77,8 +84,8 @@ export default function OrgDataservicesClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "API", url: "/pages/admin/org/dataservices" },
+            { label: orgName || "Organização", url: "#" },
+            { label: "API", url: "#" },
           ]}
         />
       </div>

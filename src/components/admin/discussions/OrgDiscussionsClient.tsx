@@ -16,6 +16,8 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDiscussions } from "@/services/api";
 import { Discussion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -31,6 +33,8 @@ interface OrgDiscussionsClientProps {
 }
 
 export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProps) {
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,18 +62,14 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
     return discussions.slice(start, start + itemsPerPage);
   }, [discussions, currentPage, itemsPerPage]);
 
-  if (isLoading) {
-    return <div className="admin-page">A carregar...</div>;
-  }
-
   return (
     <div className="admin-page">
       <div className="admin-page__breadcrumb">
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Discussões", url: `/pages/admin/org/${orgId}/discussions` },
+            { label: orgName || "Organização", url: "#" },
+            { label: "Discussões", url: "#" },
           ]}
         />
       </div>
@@ -79,7 +79,9 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
         <PublishDropdown />
       </div>
 
-      {discussions.length === 0 ? (
+      {isLoading ? (
+        <p>A carregar...</p>
+      ) : discussions.length === 0 ? (
         <div className="datasets-page__body">
           <div className="datasets-page__content">
             <CardNoResults

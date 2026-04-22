@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useParams } from "next/navigation";
 import {
   Breadcrumb,
   CardNoResults,
@@ -17,6 +18,8 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 type SortOrder = "none" | "ascending" | "descending";
@@ -28,7 +31,12 @@ const formatDate = (dateStr: string) => {
 };
 
 export default function OrgCommunityResourcesClient() {
+  const params = useParams();
+  const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+  const resolvedOrgId = routeOrgId || activeOrg?.id;
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [resources, setResources] = useState<CommunityResource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,14 +56,14 @@ export default function OrgCommunityResourcesClient() {
   };
 
   useEffect(() => {
-    if (!activeOrg) {
+    if (!resolvedOrgId) {
       setIsLoading(false);
       return;
     }
     async function loadResources() {
       setIsLoading(true);
       try {
-        const response = await fetchOrgCommunityResources(activeOrg!.id, 1, 9999);
+        const response = await fetchOrgCommunityResources(resolvedOrgId!, 1, 9999);
         setResources(response.data || []);
       } catch (error) {
         console.error("Error loading org community resources:", error);
@@ -64,7 +72,7 @@ export default function OrgCommunityResourcesClient() {
       }
     }
     loadResources();
-  }, [activeOrg]);
+  }, [resolvedOrgId]);
 
   const sortedResources = useMemo(() => {
     if (sortOrder === "none") return resources;
@@ -90,8 +98,7 @@ export default function OrgCommunityResourcesClient() {
     return sortedResources.slice(start, start + itemsPerPage);
   }, [sortedResources, currentPage, itemsPerPage]);
 
-  if (isOrgLoading) return <p>A carregar...</p>;
-  if (!activeOrg) {
+  if (!isOrgLoading && !resolvedOrgId) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -114,10 +121,10 @@ export default function OrgCommunityResourcesClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
+            { label: orgName || "Organização", url: "#" },
             {
               label: "Recursos comunitários",
-              url: "/pages/admin/org/community-resources",
+              url: "#",
             },
           ]}
         />

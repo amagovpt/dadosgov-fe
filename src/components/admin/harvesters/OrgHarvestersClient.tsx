@@ -21,6 +21,8 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgHarvesters } from "@/services/api";
 import { HarvestSource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 const formatDate = (dateStr: string) => {
@@ -51,6 +53,8 @@ export default function OrgHarvestersClient() {
   const { activeOrg, isLoading: isOrgLoading, selectOrganization } = useActiveOrganization();
 
   const orgId = orgIdFromUrl || activeOrg?.id;
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(orgId, user?.organizations);
 
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,8 +91,7 @@ export default function OrgHarvestersClient() {
     return harvesters.slice(start, start + itemsPerPage);
   }, [harvesters, currentPage, itemsPerPage]);
 
-  if (isOrgLoading) return <p>A carregar...</p>;
-  if (!orgId) {
+  if (!isOrgLoading && !orgId) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -111,7 +114,7 @@ export default function OrgHarvestersClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
+            { label: orgName || "Organização", url: "#" },
             { label: "Harvesters", url: "/pages/admin/org/harvesters" },
           ]}
         />
