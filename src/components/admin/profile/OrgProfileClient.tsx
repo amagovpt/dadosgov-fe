@@ -17,6 +17,8 @@ import {
 import { fetchOrganization, updateOrganization, uploadOrgLogo, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useAuth } from "@/context/AuthContext";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -52,8 +54,10 @@ export default function OrgProfileClient() {
   const { show, hide } = usePopupContext();
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+  const { user } = useAuth();
 
   const orgId = routeOrgId || activeOrg?.id;
+  const cachedOrgName = useOrganizationName(orgId, user?.organizations);
 
   const [org, setOrg] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,8 +169,7 @@ export default function OrgProfileClient() {
     }
   };
 
-  if (isOrgLoading || isLoading) return <p>A carregar...</p>;
-  if (!orgId) {
+  if (!isOrgLoading && !orgId) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -189,7 +192,7 @@ export default function OrgProfileClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: org?.name || "Organização", url: "#" },
+            { label: org?.name || cachedOrgName || activeOrg?.name || "Organização", url: "#" },
             { label: "Perfil", url: "#" },
           ]}
         />

@@ -69,8 +69,7 @@ export default function OrgReusesClient() {
     return reuses.slice(start, start + itemsPerPage);
   }, [reuses, currentPage, itemsPerPage]);
 
-  if (isOrgLoading) return <p>A carregar...</p>;
-  if (!resolvedOrgId) {
+  if (!isOrgLoading && !resolvedOrgId) {
     return (
       <div className="admin-page">
         <CardNoResults

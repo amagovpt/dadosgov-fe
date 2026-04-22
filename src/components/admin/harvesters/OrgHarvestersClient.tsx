@@ -91,8 +91,7 @@ export default function OrgHarvestersClient() {
     return harvesters.slice(start, start + itemsPerPage);
   }, [harvesters, currentPage, itemsPerPage]);
 
-  if (isOrgLoading) return <p>A carregar...</p>;
-  if (!orgId) {
+  if (!isOrgLoading && !orgId) {
     return (
       <div className="admin-page">
         <CardNoResults

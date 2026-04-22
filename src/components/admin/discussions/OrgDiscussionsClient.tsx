@@ -62,10 +62,6 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
     return discussions.slice(start, start + itemsPerPage);
   }, [discussions, currentPage, itemsPerPage]);
 
-  if (isLoading) {
-    return <div className="admin-page">A carregar...</div>;
-  }
-
   return (
     <div className="admin-page">
       <div className="admin-page__breadcrumb">
@@ -83,7 +79,9 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
         <PublishDropdown />
       </div>
 
-      {discussions.length === 0 ? (
+      {isLoading ? (
+        <p>A carregar...</p>
+      ) : discussions.length === 0 ? (
         <div className="datasets-page__body">
           <div className="datasets-page__content">
             <CardNoResults

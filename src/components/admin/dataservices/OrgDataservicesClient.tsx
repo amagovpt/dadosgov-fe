@@ -61,8 +61,7 @@ export default function OrgDataservicesClient() {
     loadDataservices();
   }, [resolvedOrgId]);
 
-  if (isOrgLoading) return <p>A carregar...</p>;
-  if (!resolvedOrgId) {
+  if (!isOrgLoading && !resolvedOrgId) {
     return (
       <div className="admin-page">
         <CardNoResults

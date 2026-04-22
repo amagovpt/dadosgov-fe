@@ -98,8 +98,7 @@ export default function OrgCommunityResourcesClient() {
     return sortedResources.slice(start, start + itemsPerPage);
   }, [sortedResources, currentPage, itemsPerPage]);
 
-  if (isOrgLoading) return <p>A carregar...</p>;
-  if (!resolvedOrgId) {
+  if (!isOrgLoading && !resolvedOrgId) {
     return (
       <div className="admin-page">
         <CardNoResults
