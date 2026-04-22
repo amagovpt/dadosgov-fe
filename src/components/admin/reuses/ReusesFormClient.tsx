@@ -37,6 +37,7 @@ import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
+import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
 
 interface ReusesFormClientProps {
   currentStep: number;
@@ -461,7 +462,7 @@ export default function ReusesFormClient({
     <DropdownSection name="types">
       {reuseTypes.map((t) => (
         <DropdownOption key={t.id} value={t.id}>
-          {t.label}
+          {localizeReuseType(t)}
         </DropdownOption>
       ))}
     </DropdownSection>
@@ -499,7 +500,7 @@ export default function ReusesFormClient({
     <DropdownSection name="themes">
       {reuseTopics.map((t) => (
         <DropdownOption key={t.id} value={t.id}>
-          {t.label}
+          {localizeReuseTopic(t)}
         </DropdownOption>
       ))}
     </DropdownSection>

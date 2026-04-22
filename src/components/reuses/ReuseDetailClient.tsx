@@ -32,19 +32,10 @@ import { useAuth } from '@/context/AuthContext';
 import IsolatedSelect from '@/components/admin/IsolatedSelect';
 import EditDiscussionPopup from '@/components/discussions/EditDiscussionPopup';
 import DeleteDiscussionPopup from '@/components/discussions/DeleteDiscussionPopup';
+import { localizeReuseTypeId } from '@/lib/reuse-labels';
 
 import { format, formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
-
-const REUSE_TYPE_LABELS: Record<string, string> = {
-  visualization: "Visualização",
-  application: "Aplicação",
-  blog_post: "Publicação no blog",
-  press_article: "Artigo de imprensa",
-  api: "API",
-  idea: "Ideia",
-  hardware: "Hardware conectado",
-};
 
 interface ReuseDetailClientProps {
   slug: string;
@@ -363,7 +354,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 <div className="flex flex-col gap-24 h-full">
                   <div className="flex items-center flex-wrap gap-16 text-[15px]">
                     <span className="font-semibold text-neutral-900">
-                      {REUSE_TYPE_LABELS[reuse.type] || reuse.type || 'Aplicação'}
+                      {localizeReuseTypeId(reuse.type) || 'Aplicação'}
                     </span>
                     <div className="flex items-center gap-8">
                       <Icon

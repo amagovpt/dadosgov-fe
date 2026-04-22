@@ -47,6 +47,7 @@ import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion } from "@/t
 import { formatDistanceToNow } from "date-fns";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
 
 function TransferReusePopupContent({
   reuseTitle,
@@ -629,7 +630,7 @@ export default function ReusesEditClient() {
                       <DropdownSection name="types">
                         {reuseTypes.map((t) => (
                           <DropdownOption key={t.id} value={t.id}>
-                            {t.label}
+                            {localizeReuseType(t)}
                           </DropdownOption>
                         ))}
                       </DropdownSection>
@@ -648,7 +649,7 @@ export default function ReusesEditClient() {
                       <DropdownSection name="topics">
                         {reuseTopics.map((t) => (
                           <DropdownOption key={t.id} value={t.id}>
-                            {t.label}
+                            {localizeReuseTopic(t)}
                           </DropdownOption>
                         ))}
                       </DropdownSection>
