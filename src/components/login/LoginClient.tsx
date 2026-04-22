@@ -274,383 +274,377 @@ function LoginContent() {
             </div>
           </div>
         ) : (
-        <>
-        <div>
-          <h1 className="text-2xl-medium text-brand-blue-dark mt-64 mb-16">Autenticação</h1>
-          <p className="text-lg text-neutral-700 max-w-2xl mb-32">
-            Escolha um meio de autenticação para se autenticar no portal e ter acesso aos vários{" "}
-            <br />
-            serviços e funcionalidades online.
-          </p>
-        </div>
-        <Tabs vertically className="mt-24">
-          <Tab>
-            <TabHeader>Chave Móvel Digital (CMD)</TabHeader>
-            <TabBody>
-              <div className="rounded-8">
-                <div className="flex flex-col gap-40">
-                  <div className="flex items-center justify-between gap-32">
-                    <div className="flex flex-col gap-8">
-                      <h2 className="text-base font-bold text-brand-blue-dark">
-                        Antes de começar...
-                      </h2>
-                      <p className="text-[#2B363C]">
-                        Precisa do código PIN da sua Chave Móvel Digital - CMD e do telemóvel
-                        que lhe está associado.
-                      </p>
-                    </div>
-                    <div className="shrink-0">
-                      <NextImage
-                        src="/Logos/autenticacao_gov.svg"
-                        alt="Autenticação.gov"
-                        width={240}
-                        height={48}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-8 my-32">
-                    <p className="text-sm text-neutral-900">
-                      <strong>Não tem Chave Móvel Digital?</strong>
-                    </p>
-                    <button
-                      className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
-                      onClick={() => { setCmdModalOpen(true); window.scrollTo(0, 0); }}
-                    >
-                      Descubra como criar conta
-                    </button>
-                  </div>
-                  <div className="w-full h-[2px] bg-neutral-400"></div>
-                  <div className="flex flex-col gap-24">
-                    <div className="flex flex-col gap-8">
-                      <h3 className="text-l-bold text-brand-blue-dark mt-32">Entrar como</h3>
-                      <div className="flex flex-col gap-16 mt-8">
-                        <RadioButton
-                          label="Pessoa com nacionalidade portuguesa"
-                          id="nacional"
-                          name="citizen-type"
-                          className="text-lg text-neutral-900"
-                          onChange={() => setCitizenType("nacional")}
-                        />
-                        <RadioButton
-                          label="Pessoa com nacionalidade estrangeira"
-                          id="estrangeiro"
-                          name="citizen-type"
-                          className="text-lg text-neutral-900"
-                          onChange={() => setCitizenType("estrangeiro")}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-8 mt-8">
-                      <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
-                      <p className="text-sm">
-                        Deve ler atentamente os{" "}
-                        <a
-                          href="/pages/faqs/terms"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
-                        >
-                          Termos e condições para o tratamento dos seus dados
-                        </a>
-                      </p>
-                      <Checkbox
-                        id="terms-cmd"
-                        className="text-sm text-neutral-700 leading-relaxed"
-                        onChange={(e) => setTermsCmdAccepted(e.target.checked)}
-                      >
-                        Declaro que li e aceito os termos e condições para o tratamento dos
-                        meus dados pessoais no acesso e utilização da Área Reservada do
-                        dados.gov.pt.
-                      </Checkbox>
-                    </div>
-                  </div>
-                  <div className="mt-16">
-                    <Button
-                      variant="primary"
-                      className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                      hasIcon={true}
-                      trailingIcon={
-                        isHovered
-                          ? "agora-solid-arrow-right-circle"
-                          : "agora-line-arrow-right-circle"
-                      }
-                      onMouseEnter={() => setIsHovered(true)}
-                      onMouseLeave={() => setIsHovered(false)}
-                      onClick={handleSamlLogin}
-                      disabled={!samlEnabled || !citizenType || !termsCmdAccepted}
-                    >
-                      Entrar com Chave Móvel Digital
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </TabBody>
-          </Tab>
-          <Tab>
-            <TabHeader>Autenticação europeia (eIDAS)</TabHeader>
-            <TabBody>
-              <div className="rounded-8">
-                <div className="flex flex-col gap-40">
-                  <div className="flex items-center justify-between gap-32">
-                    <div className="flex flex-col gap-8">
-                      <h2 className="text-base font-bold text-brand-blue-dark">
-                        Antes de começar...
-                      </h2>
-                      <p className="text-[#2B363C]">
-                        Precisa de ter um meio de autenticação digital disponibilizado pelo seu
-                        país de origem na União Europeia (UE). Este meio de autenticação está
-                        disponível para a qualquer cidadã/o da UE.
-                      </p>
-                    </div>
-                    <div className="shrink-0 flex items-center gap-[32px]">
-                      <NextImage
-                        src="/eidas.svg"
-                        alt="eIDAS"
-                        width={64}
-                        height={64}
-                      />
-                      <NextImage
-                        src="/Logos/your_europe.svg"
-                        alt="Your Europe"
-                        width={120}
-                        height={48}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-8 mt-32">
-                    <p className="text-sm text-neutral-900">
-                      <strong>Não tem Autenticação Europeia?</strong>
-                    </p>
-                    <button
-                      className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
-                      onClick={() => { setEidasModalOpen(true); window.scrollTo(0, 0); }}
-                    >
-                      Descubra como criar conta
-                    </button>
-                  </div>
-                  <div className="w-full h-[2px] bg-neutral-400 my-[32px]"></div>
-                  <p className="text-sm text-neutral-900">
-                    Precisa <strong>fornecer documentos</strong> que foram emitidos por uma entidade
-                    pública de <strong>outro Estado-Membro</strong> da UE? Agora já é possível
-                    recupera-los diretamente do portal emissor entrando com a sua autenticação Europeia.
-                  </p>
-                  <div className="flex flex-col gap-24">
-                    <div className="mt-8">
-                      <Checkbox
-                        id="terms-eidas"
-                        className="text-sm text-neutral-700 leading-relaxed"
-                        onChange={(e) => setTermsEidasAccepted(e.target.checked)}
-                      >
-                        Declaro que li e aceito os{" "}
-                        <a
-                          href="/pages/faqs/terms"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
-                        >
-                          termos e condições relativos ao tratamento de dados
-                          pessoais
-                        </a>{" "}
-                        para a criação de conta e acesso ao portal dados.gov.pt
-                      </Checkbox>
-                    </div>
-                  </div>
-                  <div className="mt-16">
-                    <Button
-                      variant="primary"
-                      className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                      hasIcon={true}
-                      trailingIcon={
-                        isHoveredEidas
-                          ? "agora-solid-arrow-right-circle"
-                          : "agora-line-arrow-right-circle"
-                      }
-                      onMouseEnter={() => setIsHoveredEidas(true)}
-                      onMouseLeave={() => setIsHoveredEidas(false)}
-                      onClick={handleEidasLogin}
-                      disabled={!samlEnabled || !termsEidasAccepted}
-                    >
-                      Autenticar com eIDAS
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </TabBody>
-          </Tab>
-          <Tab>
-            <TabHeader>E-mail e palavra-passe</TabHeader>
-            <TabBody>
-              <div className="rounded-8">
-                <div className="flex flex-col gap-40">
-                  <div className="flex items-center justify-between gap-32">
-                    <div className="flex flex-col gap-8">
-                      <h2 className="text-base font-bold text-brand-blue-dark">
-                        Antes de começar...
-                      </h2>
-                      <p className="text-[#2B363C]">
-                        Apenas utilizadores antigos, que tenham criado conta com email e
-                        palavra-passe, conseguem autenticar-se desta forma.
-                      </p>
-                    </div>
-                    <div className="shrink-0 bg-primary-600 rounded-8 p-16 icon-white">
-                      <Icon name="agora-solid-social-security" className="w-24 h-24" />
-                    </div>
-                  </div>
-                  <div className="w-full h-[2px] bg-neutral-400 my-[32px]"></div>
-                  <div className="flex flex-col gap-32 max-w-[560px]">
-                  {migrationRequired ? (
-                    <>
-                      <div>
-                        <h2 className="text-xl-bold text-brand-blue-dark mb-8">
-                          Migração obrigatória
-                        </h2>
-                        <p className="text-neutral-900">
-                          O login por email e palavra-passe vai ser descontinuado. Para continuar a
-                          aceder ao portal, é necessário migrar a sua conta para a Chave Móvel
-                          Digital (CMD) ou autenticação europeia (eIDAS).
-                        </p>
-                      </div>
-                      <div className="p-24 rounded-8 bg-amber-50 border border-amber-200">
-                        <div className="flex gap-12 items-start">
-                          <Icon
-                            name="agora-line-info-mark"
-                            className="w-24 h-24 text-amber-600 shrink-0 mt-2"
+          <>
+            <div>
+              <h1 className="text-2xl-medium text-brand-blue-dark mt-64 mb-16">Autenticação</h1>
+              <p className="text-lg text-neutral-700 max-w-2xl mb-32">
+                Escolha um meio de autenticação para se autenticar no portal e ter acesso aos vários{" "}
+                <br />
+                serviços e funcionalidades online.
+              </p>
+            </div>
+            <Tabs vertically className="mt-24">
+              <Tab>
+                <TabHeader>Chave Móvel Digital (CMD)</TabHeader>
+                <TabBody>
+                  <div className="rounded-8">
+                    <div className="flex flex-col gap-40">
+                      <div className="flex items-center justify-between gap-32">
+                        <div className="flex flex-col gap-8">
+                          <h2 className="text-base font-bold text-brand-blue-dark">
+                            Antes de começar...
+                          </h2>
+                          <p className="text-[#2B363C]">
+                            Precisa do código PIN da sua Chave Móvel Digital - CMD e do telemóvel
+                            que lhe está associado.
+                          </p>
+                        </div>
+                        <div className="shrink-0">
+                          <NextImage
+                            src="/Logos/autenticacao_gov.svg"
+                            alt="Autenticação.gov"
+                            width={240}
+                            height={48}
                           />
-                          <div>
-                            <p className="text-sm-bold text-amber-800 mb-4">Como migrar?</p>
-                            <p className="text-sm text-amber-700">
-                              Autentique-se com a Chave Móvel Digital (separador
-                              &quot;CMD&quot;) ou com a autenticação europeia (separador
-                              &quot;eIDAS&quot;). O sistema detetará a sua conta existente e
-                              guiá-lo-á pelo processo de migração. Os seus dados (conjuntos de
-                              dados, organizações, reutilizações) serão mantidos.
-                            </p>
-                          </div>
                         </div>
                       </div>
-                      <div className="flex gap-16">
+                      <div className="flex items-center gap-8 my-32">
+                        <p className="text-sm text-neutral-900">
+                          <strong>Não tem Chave Móvel Digital?</strong>
+                        </p>
+                        <button
+                          className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
+                          onClick={() => { setCmdModalOpen(true); window.scrollTo(0, 0); }}
+                        >
+                          Descubra como criar conta
+                        </button>
+                      </div>
+                      <div className="w-full h-[2px] bg-neutral-400"></div>
+                      <div className="flex flex-col gap-24">
+                        <div className="flex flex-col gap-8">
+                          <h3 className="text-l-bold text-brand-blue-dark mt-32">Entrar como</h3>
+                          <div className="flex flex-col gap-16 mt-8">
+                            <RadioButton
+                              label="Pessoa com nacionalidade portuguesa"
+                              id="nacional"
+                              name="citizen-type"
+                              className="text-lg text-neutral-900"
+                              onChange={() => setCitizenType("nacional")}
+                            />
+                            <RadioButton
+                              label="Pessoa com nacionalidade estrangeira"
+                              id="estrangeiro"
+                              name="citizen-type"
+                              className="text-lg text-neutral-900"
+                              onChange={() => setCitizenType("estrangeiro")}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-8 mt-8">
+                          <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
+                          <p className="text-sm">
+                            Deve ler atentamente os{" "}
+                            <a
+                              href="/pages/faqs/terms"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
+                            >
+                              Termos e condições para o tratamento dos seus dados
+                            </a>
+                          </p>
+                          <Checkbox
+                            id="terms-cmd"
+                            className="text-sm text-neutral-700 leading-relaxed"
+                            onChange={(e) => setTermsCmdAccepted(e.target.checked)}
+                          >
+                            Declaro que li e aceito os termos e condições para o tratamento dos
+                            meus dados pessoais no acesso e utilização da Área Reservada do
+                            dados.gov.pt.
+                          </Checkbox>
+                        </div>
+                      </div>
+                      <div className="mt-16">
                         <Button
                           variant="primary"
                           className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                          hasIcon={true}
+                          trailingIcon={"agora-line-arrow-right-circle"}
+                          trailingIconHover="agora-solid-arrow-right-circle"
+                          onMouseEnter={() => setIsHovered(true)}
+                          onMouseLeave={() => setIsHovered(false)}
                           onClick={handleSamlLogin}
+                          disabled={!samlEnabled || !citizenType || !termsCmdAccepted}
                         >
-                          Migrar com CMD
-                        </Button>
-                        <Button
-                          variant="neutral"
-                          className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                          onClick={handleEidasLogin}
-                        >
-                          Migrar com eIDAS
+                          Entrar com Chave Móvel Digital
                         </Button>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      <div>
-                        <p className="text-neutral-900">
-                          Os campos marcados com um asterisco ( * ) são obrigatórios.
-                        </p>
-                      </div>
-
-                      {error && (
-                        <StatusCard type="danger" description={error} />
-                      )}
-
-                      <form
-                        className="flex flex-col gap-24"
-                        onSubmit={handleSubmit}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            e.currentTarget.requestSubmit();
-                          }
-                        }}
-                      >
-                        <InputText
-                          label="Endereço de e-mail *"
-                          placeholder="Introduza aqui o texto"
-                          id="login-email"
-                          name="email"
-                          type="email"
-                          className="w-full"
-                          disabled={isLoading}
-                          onChange={(e) => setLoginEmail(e.target.value)}
-                        />
-
-                        <div className="flex flex-col gap-8">
-                          <InputPassword
-                            label="Palavra-passe *"
-                            placeholder="Introduza aqui a palavra-passe"
-                            id="login-password"
-                            name="password"
-                            className="w-full"
-                            disabled={isLoading}
-                            onChange={(e) => setLoginPassword(e.target.value)}
-                          />
-                        </div>
-
-                        <div className="flex items-center text-neutral-900">
-                          <Checkbox
-                            label="Lembrar palavra-passe"
-                            id="remember-me"
-                            name="remember-me"
-                          />
-                        </div>
-
-                        <div className="flex items-center mt-24 gap-8">
-                          <span className="text-sm text-neutral-900">
-                            Esqueceu-se da palavra-passe?
-                          </span>
-                          <button className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer">
-                            Recuperar palavra-passe
-                          </button>
-                        </div>
-                        <div className="mt-8">
-                          <Button
-                            variant="primary"
-                            type="submit"
-                            className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                            disabled={isLoading || !loginEmail || !loginPassword}
-                          >
-                            {isLoading ? "A autenticar..." : "Autenticar"}
-                          </Button>
-                        </div>
-                      </form>
-                    </>
-                  )}
+                    </div>
                   </div>
-                </div>
-              </div>
-            </TabBody>
-          </Tab>
-        </Tabs>
+                </TabBody>
+              </Tab>
+              <Tab>
+                <TabHeader>Autenticação europeia (eIDAS)</TabHeader>
+                <TabBody>
+                  <div className="rounded-8">
+                    <div className="flex flex-col gap-40">
+                      <div className="flex items-center justify-between gap-32">
+                        <div className="flex flex-col gap-8">
+                          <h2 className="text-base font-bold text-brand-blue-dark">
+                            Antes de começar...
+                          </h2>
+                          <p className="text-[#2B363C]">
+                            Precisa de ter um meio de autenticação digital disponibilizado pelo seu
+                            país de origem na União Europeia (UE). Este meio de autenticação está
+                            disponível para a qualquer cidadã/o da UE.
+                          </p>
+                        </div>
+                        <div className="shrink-0 flex items-center gap-[32px]">
+                          <NextImage
+                            src="/eidas.svg"
+                            alt="eIDAS"
+                            width={64}
+                            height={64}
+                          />
+                          <NextImage
+                            src="/Logos/your_europe.svg"
+                            alt="Your Europe"
+                            width={120}
+                            height={48}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-8 mt-32">
+                        <p className="text-sm text-neutral-900">
+                          <strong>Não tem Autenticação Europeia?</strong>
+                        </p>
+                        <button
+                          className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
+                          onClick={() => { setEidasModalOpen(true); window.scrollTo(0, 0); }}
+                        >
+                          Descubra como criar conta
+                        </button>
+                      </div>
+                      <div className="w-full h-[2px] bg-neutral-400 my-[32px]"></div>
+                      <p className="text-sm text-neutral-900">
+                        Precisa <strong>fornecer documentos</strong> que foram emitidos por uma entidade
+                        pública de <strong>outro Estado-Membro</strong> da UE? Agora já é possível
+                        recupera-los diretamente do portal emissor entrando com a sua autenticação Europeia.
+                      </p>
+                      <div className="flex flex-col gap-24">
+                        <div className="mt-8">
+                          <Checkbox
+                            id="terms-eidas"
+                            className="text-sm text-neutral-700 leading-relaxed"
+                            onChange={(e) => setTermsEidasAccepted(e.target.checked)}
+                          >
+                            Declaro que li e aceito os{" "}
+                            <a
+                              href="/pages/faqs/terms"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
+                            >
+                              termos e condições relativos ao tratamento de dados
+                              pessoais
+                            </a>{" "}
+                            para a criação de conta e acesso ao portal dados.gov.pt
+                          </Checkbox>
+                        </div>
+                      </div>
+                      <div className="mt-16">
+                        <Button
+                          variant="primary"
+                          className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                          hasIcon={true}
+                          trailingIcon={"agora-line-arrow-right-circle"}
+                          trailingIconHover="agora-solid-arrow-right-circle"
+                          onMouseEnter={() => setIsHoveredEidas(true)}
+                          onMouseLeave={() => setIsHoveredEidas(false)}
+                          onClick={handleEidasLogin}
+                          disabled={!samlEnabled || !termsEidasAccepted}
+                        >
+                          Autenticar com eIDAS
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </TabBody>
+              </Tab>
+              <Tab>
+                <TabHeader>E-mail e palavra-passe</TabHeader>
+                <TabBody>
+                  <div className="rounded-8">
+                    <div className="flex flex-col gap-40">
+                      <div className="flex items-center justify-between gap-32">
+                        <div className="flex flex-col gap-8">
+                          <h2 className="text-base font-bold text-brand-blue-dark">
+                            Antes de começar...
+                          </h2>
+                          <p className="text-[#2B363C]">
+                            Apenas utilizadores antigos, que tenham criado conta com email e
+                            palavra-passe, conseguem autenticar-se desta forma.
+                          </p>
+                        </div>
+                        <div className="shrink-0 bg-primary-600 rounded-8 p-16 icon-white">
+                          <Icon name="agora-solid-social-security" className="w-24 h-24" />
+                        </div>
+                      </div>
+                      <div className="w-full h-[2px] bg-neutral-400 my-[32px]"></div>
+                      <div className="flex flex-col gap-32 max-w-[560px]">
+                        {migrationRequired ? (
+                          <>
+                            <div>
+                              <h2 className="text-xl-bold text-brand-blue-dark mb-8">
+                                Migração obrigatória
+                              </h2>
+                              <p className="text-neutral-900">
+                                O login por email e palavra-passe vai ser descontinuado. Para continuar a
+                                aceder ao portal, é necessário migrar a sua conta para a Chave Móvel
+                                Digital (CMD) ou autenticação europeia (eIDAS).
+                              </p>
+                            </div>
+                            <div className="p-24 rounded-8 bg-amber-50 border border-amber-200">
+                              <div className="flex gap-12 items-start">
+                                <Icon
+                                  name="agora-line-info-mark"
+                                  className="w-24 h-24 text-amber-600 shrink-0 mt-2"
+                                />
+                                <div>
+                                  <p className="text-sm-bold text-amber-800 mb-4">Como migrar?</p>
+                                  <p className="text-sm text-amber-700">
+                                    Autentique-se com a Chave Móvel Digital (separador
+                                    &quot;CMD&quot;) ou com a autenticação europeia (separador
+                                    &quot;eIDAS&quot;). O sistema detetará a sua conta existente e
+                                    guiá-lo-á pelo processo de migração. Os seus dados (conjuntos de
+                                    dados, organizações, reutilizações) serão mantidos.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-16">
+                              <Button
+                                variant="primary"
+                                className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                                onClick={handleSamlLogin}
+                              >
+                                Migrar com CMD
+                              </Button>
+                              <Button
+                                variant="neutral"
+                                className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                                onClick={handleEidasLogin}
+                              >
+                                Migrar com eIDAS
+                              </Button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              <p className="text-neutral-900">
+                                Os campos marcados com um asterisco ( * ) são obrigatórios.
+                              </p>
+                            </div>
 
-        {/* Status card aligned with tab content */}
-        <div className="grid xl:grid-cols-12 gap-[32px] mt-32">
-          <div className="xl:col-span-3" />
-          <div className="xl:col-span-9 xl:col-start-4">
-            <StatusCard
-              type="info"
-              description={
-                <div className="flex flex-col gap-8">
-                  <p className="text-sm font-bold">Tem dúvidas?</p>
-                  <p className="text-sm">
-                    Se precisar de ajuda, fale connosco através do nosso formulário.
-                  </p>
-                  <a
-                    href="/pages/support"
-                    className="text-sm text-informative-600 flex items-center gap-8"
-                  >
-                    Formulário de contacto
-                    <Icon name="agora-line-arrow-right-circle" className="w-16 h-16 text-informative-600" />
-                  </a>
-                </div>
-              }
-            />
-          </div>
-        </div>
-        </>
+                            {error && (
+                              <StatusCard type="danger" description={error} />
+                            )}
+
+                            <form
+                              className="flex flex-col gap-24"
+                              onSubmit={handleSubmit}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  e.currentTarget.requestSubmit();
+                                }
+                              }}
+                            >
+                              <InputText
+                                label="Endereço de e-mail *"
+                                placeholder="Introduza aqui o texto"
+                                id="login-email"
+                                name="email"
+                                type="email"
+                                className="w-full"
+                                disabled={isLoading}
+                                onChange={(e) => setLoginEmail(e.target.value)}
+                              />
+
+                              <div className="flex flex-col gap-8">
+                                <InputPassword
+                                  label="Palavra-passe *"
+                                  placeholder="Introduza aqui a palavra-passe"
+                                  id="login-password"
+                                  name="password"
+                                  className="w-full"
+                                  disabled={isLoading}
+                                  onChange={(e) => setLoginPassword(e.target.value)}
+                                />
+                              </div>
+
+                              <div className="flex items-center text-neutral-900">
+                                <Checkbox
+                                  label="Lembrar palavra-passe"
+                                  id="remember-me"
+                                  name="remember-me"
+                                />
+                              </div>
+
+                              <div className="flex items-center mt-24 gap-8">
+                                <span className="text-sm text-neutral-900">
+                                  Esqueceu-se da palavra-passe?
+                                </span>
+                                <button className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer">
+                                  Recuperar palavra-passe
+                                </button>
+                              </div>
+                              <div className="mt-8">
+                                <Button
+                                  variant="primary"
+                                  type="submit"
+                                  className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                                  disabled={isLoading || !loginEmail || !loginPassword}
+                                >
+                                  {isLoading ? "A autenticar..." : "Autenticar"}
+                                </Button>
+                              </div>
+                            </form>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </TabBody>
+              </Tab>
+            </Tabs>
+
+            {/* Status card aligned with tab content */}
+            <div className="grid xl:grid-cols-12 gap-[32px] mt-32">
+              <div className="xl:col-span-3" />
+              <div className="xl:col-span-9 xl:col-start-4">
+                <StatusCard
+                  type="info"
+                  description={
+                    <div className="flex flex-col gap-8">
+                      <p className="text-sm font-bold">Tem dúvidas?</p>
+                      <p className="text-sm">
+                        Se precisar de ajuda, fale connosco através do nosso formulário.
+                      </p>
+                      <a
+                        href="/pages/support"
+                        className="text-sm text-informative-600 flex items-center gap-8"
+                      >
+                        Formulário de contacto
+                        <Icon name="agora-line-arrow-right-circle" className="w-16 h-16 text-informative-600" />
+                      </a>
+                    </div>
+                  }
+                />
+              </div>
+            </div>
+          </>
         )}
       </div>
     </main>
