@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   description: "Estatísticas da organização no portal dados.gov.pt.",
 };
 
-export default function OrgStatisticsPage() {
-  return <OrgStatisticsClient />;
+export default async function OrgStatisticsPage({
+  params,
+}: {
+  params: Promise<{ orgId: string }>;
+}) {
+  const { orgId } = await params;
+  return <OrgStatisticsClient orgId={orgId} />;
 }

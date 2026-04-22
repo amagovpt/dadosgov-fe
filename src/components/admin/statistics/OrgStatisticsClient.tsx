@@ -13,45 +13,39 @@ import {
   TabHeader,
   TabBody,
 } from "@ama-pt/agora-design-system";
-import { useParams } from "next/navigation";
-import { fetchOrgMetrics } from "@/services/api";
-import { OrganizationMetrics } from "@/types/api";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
-import { useAuth } from "@/context/AuthContext";
+import { fetchOrgMetrics, fetchOrganization } from "@/services/api";
+import { Organization, OrganizationMetrics } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
-export default function OrgStatisticsClient() {
-  const params = useParams();
-  const routeOrgId = params?.orgId as string | undefined;
-  const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
-  const resolvedOrgId = routeOrgId || activeOrg?.id;
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
+interface OrgStatisticsClientProps {
+  orgId: string;
+}
 
+export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps) {
+  const [org, setOrg] = useState<Organization | null>(null);
   const [metrics, setMetrics] = useState<OrganizationMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!resolvedOrgId) {
-      setIsLoading(false);
-      return;
-    }
-    async function loadMetrics() {
+    async function loadData() {
       setIsLoading(true);
       try {
-        const data = await fetchOrgMetrics(resolvedOrgId!);
-        setMetrics(data);
+        const [orgData, metricsData] = await Promise.all([
+          fetchOrganization(orgId),
+          fetchOrgMetrics(orgId),
+        ]);
+        setOrg(orgData);
+        setMetrics(metricsData);
       } catch (error) {
-        console.error("Error loading org metrics:", error);
+        console.error("Error loading org statistics:", error);
       } finally {
         setIsLoading(false);
       }
     }
-    loadMetrics();
-  }, [resolvedOrgId]);
+    loadData();
+  }, [orgId]);
 
-  if (!isOrgLoading && !resolvedOrgId) {
+  if (!isLoading && !org) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -74,7 +68,7 @@ export default function OrgStatisticsClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
+            { label: org?.name || "Organização", url: "#" },
             { label: "Estatísticas", url: "/pages/admin/org/statistics" },
           ]}
         />
