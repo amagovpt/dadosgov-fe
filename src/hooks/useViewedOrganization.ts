@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Organization } from "@/types/api";
 import { fetchOrganization } from "@/services/api";
 
@@ -12,14 +12,14 @@ import { fetchOrganization } from "@/services/api";
  * not in that list — e.g. an admin viewing an organization they don't
  * belong to — a one-shot fetch is issued to resolve the real name.
  *
- * The fallback only runs when necessary and caches results in module-local
- * state so repeated renders don't refetch.
+ * Results are cached in module-local state so repeated renders and other
+ * pages viewing the same org don't refetch.
  */
 const cache = new Map<string, string>();
 
 export function useViewedOrganizationName(
   orgId: string | undefined | null,
-  organizations: Organization[] = [],
+  organizations: Organization[] | undefined = [],
 ): string | null {
   const cachedName =
     orgId
@@ -27,23 +27,18 @@ export function useViewedOrganizationName(
         null
       : null;
 
-  const [fetchedName, setFetchedName] = useState<string | null>(
+  const [fetchedName, setFetchedName] = useState<string | null>(() =>
     orgId ? cache.get(orgId) ?? null : null,
   );
-  const lastFetchedId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!orgId || cachedName) {
-      lastFetchedId.current = null;
-      return;
-    }
+    if (!orgId) return;
+    if (cachedName) return;
     const cached = cache.get(orgId);
     if (cached) {
       setFetchedName(cached);
       return;
     }
-    if (lastFetchedId.current === orgId) return;
-    lastFetchedId.current = orgId;
     let cancelled = false;
     fetchOrganization(orgId)
       .then((org) => {
