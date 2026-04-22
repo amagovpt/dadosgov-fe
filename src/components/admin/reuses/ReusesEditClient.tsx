@@ -524,50 +524,48 @@ export default function ReusesEditClient() {
           <TabBody>
             <div className="admin-page__body">
               <div className="admin-page__form-area">
-                <div className="dataset-edit-visibility-banner">
-                  <StatusCard
-                    type="info"
-                    description={
-                      <>
-                        Modificar a visibilidade da reutilização
-                        <br />
-                        <span className="text-neutral-900 uppercase">
-                          {reuse.private ? "rascunho" : "público"}
-                        </span>
-                      </>
-                    }
-                  />
-                  <div>
-                    <Button
-                      variant="primary"
-                      appearance="outline"
-                      onClick={async () => {
-                        setApiError(null);
-                        setApiSuccess(null);
-                        setIsSubmitting(true);
-                        try {
-                          const updated = await updateReuse(reuse.id, {
-                            private: !reuse.private,
-                          });
-                          setReuse(updated);
-                          setApiSuccess(
-                            updated.private
-                              ? "Reutilização guardada como rascunho."
-                              : "Reutilização publicada com sucesso.",
-                          );
-                          setTimeout(() => setApiSuccess(null), 10000);
-                        } catch {
-                          setApiError("Erro ao alterar a visibilidade.");
-                        } finally {
-                          setIsSubmitting(false);
-                        }
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      {reuse.private ? "Publicar reutilização" : "Guardar como rascunho"}
-                    </Button>
+                {reuse.private && (
+                  <div className="dataset-edit-visibility-banner">
+                    <StatusCard
+                      type="info"
+                      description={
+                        <>
+                          <strong>Modifique a visibilidade da reutilização.</strong>
+                          <br />
+                          Esta reutilização encontra-se atualmente em{" "}
+                          <strong>modo rascunho</strong>. Apenas o produtor e os membros
+                          da organização a podem visualizar e editar.
+                        </>
+                      }
+                    />
+                    <div>
+                      <Button
+                        variant="primary"
+                        appearance="outline"
+                        onClick={async () => {
+                          setApiError(null);
+                          setApiSuccess(null);
+                          setIsSubmitting(true);
+                          try {
+                            const updated = await updateReuse(reuse.id, {
+                              private: false,
+                            });
+                            setReuse(updated);
+                            setApiSuccess("Reutilização publicada com sucesso.");
+                            setTimeout(() => setApiSuccess(null), 10000);
+                          } catch {
+                            setApiError("Erro ao publicar a reutilização.");
+                          } finally {
+                            setIsSubmitting(false);
+                          }
+                        }}
+                        disabled={isSubmitting}
+                      >
+                        Publicar reutilização
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <form
                   className="admin-page__form"
