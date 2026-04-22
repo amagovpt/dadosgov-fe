@@ -500,7 +500,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: cachedOrgName || viewedOrg?.name || activeOrg?.name || "Organização", url: "#" },
+            { label: cachedOrgName || viewedOrg?.name || "Organização", url: "#" },
             { label: "Membros", url: "#" },
           ]}
         />

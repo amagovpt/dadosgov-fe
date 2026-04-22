@@ -16,7 +16,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDiscussions } from "@/services/api";
 import { Discussion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 
 const formatDate = (dateStr: string) => {
@@ -34,7 +34,7 @@ interface OrgDiscussionsClientProps {
 
 export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProps) {
   const { user } = useAuth();
-  const orgName = useOrganizationName(orgId, user?.organizations);
+  const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);

@@ -22,7 +22,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
@@ -37,7 +37,7 @@ export default function OrgDataservicesClient() {
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const resolvedOrgId = routeOrgId || activeOrg?.id;
   const { user } = useAuth();
-  const orgName = useOrganizationName(resolvedOrgId, user?.organizations);
+  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -84,7 +84,7 @@ export default function OrgDataservicesClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: orgName || activeOrg?.name || "Organização", url: "#" },
+            { label: orgName || "Organização", url: "#" },
             { label: "API", url: "#" },
           ]}
         />

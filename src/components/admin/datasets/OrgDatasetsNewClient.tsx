@@ -11,7 +11,7 @@ import {
 import DatasetsAdminClient from "@/components/admin/datasetsadmin/DatasetsAdminClient";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 
 export default function OrgDatasetsNewClient() {
@@ -22,7 +22,7 @@ export default function OrgDatasetsNewClient() {
   const { activeOrg } = useActiveOrganization();
   const resolvedOrgId = routeOrgId || activeOrg?.id;
   const { user } = useAuth();
-  const orgName = useOrganizationName(resolvedOrgId, user?.organizations);
+  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function OrgDatasetsNewClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: orgName || activeOrg?.name || "Organização", url: "#" },
+            { label: orgName || "Organização", url: "#" },
             { label: "Conjuntos de dados", url: resolvedOrgId ? `/pages/admin/org/${resolvedOrgId}/datasets` : "#" },
           ]}
         />

@@ -21,7 +21,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgHarvesters } from "@/services/api";
 import { HarvestSource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { useOrganizationName } from "@/hooks/useOrganizationName";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
@@ -54,7 +54,7 @@ export default function OrgHarvestersClient() {
 
   const orgId = orgIdFromUrl || activeOrg?.id;
   const { user } = useAuth();
-  const orgName = useOrganizationName(orgId, user?.organizations);
+  const orgName = useViewedOrganizationName(orgId, user?.organizations);
 
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -114,7 +114,7 @@ export default function OrgHarvestersClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: orgName || activeOrg?.name || "Organização", url: "#" },
+            { label: orgName || "Organização", url: "#" },
             { label: "Harvesters", url: "/pages/admin/org/harvesters" },
           ]}
         />

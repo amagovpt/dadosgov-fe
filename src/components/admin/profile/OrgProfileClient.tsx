@@ -192,7 +192,7 @@ export default function OrgProfileClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: org?.name || cachedOrgName || activeOrg?.name || "Organização", url: "#" },
+            { label: org?.name || cachedOrgName || "Organização", url: "#" },
             { label: "Perfil", url: "#" },
           ]}
         />
