@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import type { Organization } from "@/types/api";
 import { fetchOrganization } from "@/services/api";
 
@@ -21,30 +21,24 @@ export function useViewedOrganizationName(
   orgId: string | undefined | null,
   organizations: Organization[] | undefined = [],
 ): string | null {
-  const cachedName =
-    orgId
-      ? organizations.find((o) => o.id === orgId || o.slug === orgId)?.name ??
-        null
-      : null;
+  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
-  const [fetchedName, setFetchedName] = useState<string | null>(() =>
-    orgId ? cache.get(orgId) ?? null : null,
-  );
+  const nameFromList = orgId
+    ? organizations.find((o) => o.id === orgId || o.slug === orgId)?.name ??
+      null
+    : null;
+  const nameFromCache = orgId ? cache.get(orgId) ?? null : null;
 
   useEffect(() => {
     if (!orgId) return;
-    if (cachedName) return;
-    const cached = cache.get(orgId);
-    if (cached) {
-      setFetchedName(cached);
-      return;
-    }
+    if (nameFromList) return;
+    if (cache.has(orgId)) return;
     let cancelled = false;
     fetchOrganization(orgId)
       .then((org) => {
         if (cancelled || !org?.name) return;
         cache.set(orgId, org.name);
-        setFetchedName(org.name);
+        forceUpdate();
       })
       .catch((error) => {
         console.error("Error fetching viewed organization name:", error);
@@ -52,7 +46,7 @@ export function useViewedOrganizationName(
     return () => {
       cancelled = true;
     };
-  }, [orgId, cachedName]);
+  }, [orgId, nameFromList]);
 
-  return cachedName || fetchedName;
+  return nameFromList || nameFromCache;
 }
