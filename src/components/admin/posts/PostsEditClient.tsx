@@ -208,6 +208,7 @@ export default function PostsEditClient() {
   };
 
   const handleDelete = async () => {
+    hide();
     setIsSaving(true);
     setApiError(null);
     setApiSuccess(null);
