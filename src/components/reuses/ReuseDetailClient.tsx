@@ -293,6 +293,15 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             </div>
           </div>
 
+          {/* Draft indicator (visible to the producer / org members) */}
+          {reuse.private && (
+            <div className="mt-16">
+              <Pill variant="warning" appearance="solid">
+                RASCUNHO
+              </Pill>
+            </div>
+          )}
+
           {/* Owner line */}
           {reuse.owner && (
             <p className="admin-edit-info__activity">
