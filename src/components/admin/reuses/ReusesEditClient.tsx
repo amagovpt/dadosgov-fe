@@ -978,7 +978,10 @@ export default function ReusesEditClient() {
                   </div>
                 )}
 
-                <form className="admin-page__form">
+                <form
+                  className="admin-page__form"
+                  onSubmit={(e) => e.preventDefault()}
+                >
                   <div className="mb-[24px]">
                     <StatusCard
                       type="warning"
@@ -1237,7 +1240,10 @@ export default function ReusesEditClient() {
                   </div>
                 )}
 
-                <form className="admin-page__form">
+                <form
+                  className="admin-page__form"
+                  onSubmit={(e) => e.preventDefault()}
+                >
                   <InputSelect
                     label="Pesquisar uma API"
                     placeholder="Pesquise uma API..."

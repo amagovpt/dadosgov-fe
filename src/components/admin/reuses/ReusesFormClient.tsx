@@ -534,7 +534,10 @@ export default function ReusesFormClient({
                 </div>
               )}
 
-              <form className="admin-page__form">
+              <form
+                className="admin-page__form"
+                onSubmit={(e) => e.preventDefault()}
+              >
                 <p className="text-neutral-900 text-base leading-7 pt-32">
                   Os campos marcados com um asterisco ( * ) são obrigatórios.
                 </p>
@@ -772,7 +775,10 @@ export default function ReusesFormClient({
                 </div>
               )}
 
-              <form className="admin-page__form">
+              <form
+                className="admin-page__form"
+                onSubmit={(e) => e.preventDefault()}
+              >
                 <InputSelect
                   key={`dataset-select-${producerId}`}
                   label="Pesquisar um conjunto de dados"

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useSearchParams, useRouter, useParams } from "next/navigation";
+import { useSearchParams, useRouter, useParams, usePathname } from "next/navigation";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
 import ReusesFormClient from "@/components/admin/reuses/ReusesFormClient";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 export default function OrgReusesNewClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const orgId = params?.orgId as string | undefined;
   const { user } = useAuth();
@@ -74,12 +75,8 @@ export default function OrgReusesNewClient() {
 
       <ReusesFormClient
         currentStep={currentStep}
-        onNextStep={() =>
-          router.push(`/pages/admin/org/reuses/new?step=${currentStep + 1}`)
-        }
-        onPreviousStep={() =>
-          router.push(`/pages/admin/org/reuses/new?step=${currentStep - 1}`)
-        }
+        onNextStep={() => router.push(`${pathname}?step=${currentStep + 1}`)}
+        onPreviousStep={() => router.push(`${pathname}?step=${currentStep - 1}`)}
       />
     </div>
   );
