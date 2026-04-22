@@ -189,7 +189,7 @@ export default function ProfileClient() {
       setNewTokenName("");
     } catch (error) {
       console.error("Error generating API key:", error);
-      setSaveError("Erro ao gerar a chave de API. Tente novamente.");
+      setSaveError("Erro ao gerar a chave da API. Tente novamente.");
     } finally {
       setIsGeneratingKey(false);
     }
@@ -213,7 +213,7 @@ export default function ProfileClient() {
       setApiTokens((prev) => prev.filter((t) => t.id !== tokenId));
     } catch (error) {
       console.error("Error revoking API token:", error);
-      setSaveError("Erro ao revogar a chave de API. Tente novamente.");
+      setSaveError("Erro ao revogar a chave da API. Tente novamente.");
     } finally {
       setRevokingTokenId(null);
     }
@@ -291,10 +291,7 @@ export default function ProfileClient() {
       <div className="profile-card">
         <Avatar
           avatarType={profile?.avatar_thumbnail ? "image" : "initials"}
-          srcPath={
-            (profile?.avatar_thumbnail ||
-              `${(profile?.first_name || "")[0] || ""}${(profile?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
-          }
+          srcPath={profile?.avatar_thumbnail || undefined}
           alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
           className="profile-card__avatar"
         />
@@ -862,7 +859,7 @@ export default function ProfileClient() {
                     />
                   }
                   title="Sem acompanhamentos"
-                  description="Não tem seguidores."
+                  description="Não tem seguidores"
                   hasAnchor={false}
                 />
               </div>

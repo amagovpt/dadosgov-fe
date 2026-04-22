@@ -278,20 +278,20 @@ export default function ReusesClient({
     searchable: boolean;
     suggest?: boolean;
   }[] = [
-    {
-      name: "Organizações",
-      param: "organization",
-      data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
-      searchable: true,
-    },
-    {
-      name: "Palavras-chave",
-      param: "tag",
-      data: filterTagOptions,
-      searchable: true,
-      suggest: true,
-    },
-  ];
+      {
+        name: "Organizações",
+        param: "organization",
+        data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
+        searchable: true,
+      },
+      {
+        name: "Palavras-chave",
+        param: "tag",
+        data: filterTagOptions,
+        searchable: true,
+        suggest: true,
+      },
+    ];
 
   const buildUrl = useCallback(
     (overrides: Partial<ReuseFilters> & { page?: number } = {}) => {
@@ -301,27 +301,32 @@ export default function ReusesClient({
       const tag = overrides.tag ?? initialFilters?.tag;
       const organization = overrides.organization ?? initialFilters?.organization;
       const sort = "sort" in overrides ? overrides.sort : initialFilters?.sort;
-      //const page = overrides.page ?? currentPage;
+      const page = overrides.page ?? currentPage;
 
       if (q) params.set("q", q);
       if (type) params.set("type", type);
       if (tag) params.set("tag", tag);
       if (organization) params.set("organization", organization);
       if (sort) params.set("sort", sort);
-      //if (page > 1) params.set("page", String(page));
+      if (page > 1) params.set("page", String(page));
 
       const qs = params.toString();
       return `/pages/reuses${qs ? `?${qs}` : ""}`;
     },
-    [initialFilters /*, currentPage*/]
+    [initialFilters, currentPage]
   );
+
+
+  useEffect(() => {
+    setSearchQuery(initialFilters?.q || "");
+  }, [initialFilters?.q]);
 
   useEffect(() => {
     if (searchQuery === currentQuery) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
-    }, 200);
+    }, 400);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
@@ -422,13 +427,13 @@ export default function ReusesClient({
                 hasIcon
                 {...(filtersOpen
                   ? {
-                      leadingIcon: "agora-line-chevron-left",
-                      leadingIconHover: "agora-solid-chevron-left",
-                    }
+                    leadingIcon: "agora-line-chevron-left",
+                    leadingIconHover: "agora-solid-chevron-left",
+                  }
                   : {
-                      trailingIcon: "agora-line-chevron-right",
-                      trailingIconHover: "agora-solid-chevron-right",
-                    })}
+                    trailingIcon: "agora-line-chevron-right",
+                    trailingIconHover: "agora-solid-chevron-right",
+                  })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
@@ -530,8 +535,8 @@ export default function ReusesClient({
 
                     const selectedItems: { id: string; name: string }[] = group.suggest
                       ? activeValues
-                          .filter((v) => !group.data.some((d) => d.id === v))
-                          .map((v) => ({ id: v, name: v }))
+                        .filter((v) => !group.data.some((d) => d.id === v))
+                        .map((v) => ({ id: v, name: v }))
                       : [];
 
                     const allData = [...selectedItems, ...group.data];
@@ -539,8 +544,8 @@ export default function ReusesClient({
                     const filteredData = group.suggest
                       ? allData
                       : allData.filter((item) =>
-                          item.name.toLowerCase().includes(sq.toLowerCase())
-                        );
+                        item.name.toLowerCase().includes(sq.toLowerCase())
+                      );
 
                     const showScroll = filteredData.length > 5;
 
@@ -589,9 +594,8 @@ export default function ReusesClient({
                             </div>
                           )}
                           <div
-                            className={`flex flex-col gap-2 ${
-                              showScroll ? "max-h-[225px] overflow-y-auto" : ""
-                            }`}
+                            className={`flex flex-col gap-2 ${showScroll ? "max-h-[225px] overflow-y-auto" : ""
+                              }`}
                           >
                             {isFiltersLoading && !group.suggest ? null : filteredData.length > 0 ? (
                               filteredData.map((item) => (
@@ -654,12 +658,12 @@ export default function ReusesClient({
                       const timeAgo =
                         reuse.last_modified || reuse.created_at
                           ? formatDistanceToNow(new Date(reuse.last_modified || reuse.created_at), {
-                              locale: pt,
-                            })
-                              .replace("aproximadamente ", "")
-                              .replace("quase ", "")
-                              .replace("menos de ", "")
-                              .replace("cerca de ", "")
+                            locale: pt,
+                          })
+                            .replace("aproximadamente ", "")
+                            .replace("quase ", "")
+                            .replace("menos de ", "")
+                            .replace("cerca de ", "")
                           : "Desconhecido";
 
                       return (

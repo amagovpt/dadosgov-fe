@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { SearchPagination } from '@ama-pt/agora-design-system';
 
@@ -19,21 +19,31 @@ export const Pagination = ({
 }: PaginationProps) => {
   const router = useRouter();
   const totalPages = Math.ceil(totalItems / pageSize);
+  const initialIgnored = useRef(true);
 
-  const handlePageChange = (page: number) => {
-    // SearchPagination component uses 0-based indexing for pages
-    const targetPage = page + 1;
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const targetPage = page + 1; // SearchPagination usa 0-based
+      // Ignora o primeiro onChange que o SearchPagination dispara no mount
+      if (initialIgnored.current) {
+        initialIgnored.current = false;
+        return;
+      }
+      if (targetPage === currentPage) return;
 
-    // Only navigate if the page is different from current to avoid infinite loops
-    // since SearchPagination might trigger onChange(0) on mount
-    if (targetPage !== currentPage) {
-      const params = new URLSearchParams(
-        typeof window !== 'undefined' ? window.location.search : ''
-      );
+      const [path, baseQuery] = baseUrl.split('?');
+      const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+      if (baseQuery) {
+        const baseParams = new URLSearchParams(baseQuery);
+        baseParams.forEach((value, key) => params.set(key, value));
+      }
       params.set('page', String(targetPage));
-      router.push(`${baseUrl}?${params.toString()}`);
-    }
-  };
+      const qs = params.toString();
+      const finalUrl = `${path}${qs ? `?${qs}` : ''}`;
+      router.push(finalUrl);
+    },
+    [currentPage, router, baseUrl]
+  );
 
   if (totalPages <= 1) return null;
 
