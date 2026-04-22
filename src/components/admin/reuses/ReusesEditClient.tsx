@@ -22,6 +22,7 @@ import {
   Tab,
   TabHeader,
   TabBody,
+  Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
@@ -34,11 +35,14 @@ import {
   fetchReuseTypes,
   fetchReuseTopics,
   fetchMyDatasets,
+  fetchOrgDatasets,
+  searchDatasets,
   linkDatasetToReuse,
   linkDataserviceToReuse,
   fetchActivity,
   fetchDiscussions,
 } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import AuxiliarList from "@/components/admin/AuxiliarList";
@@ -188,20 +192,22 @@ export default function ReusesEditClient() {
   // Datasets tab state
   const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
   const [associatedDatasets, setAssociatedDatasets] = useState<Dataset[]>([]);
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
+  const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([]);
+  const [datasetSearch, setDatasetSearch] = useState("");
+  const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
   const [apiLinks, setApiLinks] = useState([{ url: "" }]);
   const [apiLinkErrors, setApiLinkErrors] = useState<Record<number, string>>({});
+  const { user } = useAuth();
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [r, types, topics, datasetsRes] = await Promise.all([
+        const [r, types, topics] = await Promise.all([
           fetchReuse(reuseId),
           fetchReuseTypes(),
           fetchReuseTopics(),
-          fetchMyDatasets(1, 50),
         ]);
         setReuse(r);
         setTitle(r.title);
@@ -214,7 +220,6 @@ export default function ReusesEditClient() {
         setFeatured(r.featured || false);
         setReuseTypes(types);
         setReuseTopics(topics);
-        setMyDatasets(datasetsRes.data || []);
       } catch (error) {
         console.error("Error loading reuse:", error);
         setApiError("Erro ao carregar a reutilização.");
@@ -224,6 +229,44 @@ export default function ReusesEditClient() {
     }
     if (reuseId) loadData();
   }, [reuseId]);
+
+  // Load an initial pool of datasets (user's own + from each org the user
+  // belongs to). The search dropdown still queries the whole portal via
+  // searchDatasets() when the user types a query.
+  useEffect(() => {
+    const dedupe = (items: Dataset[]) =>
+      Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const personal = fetchMyDatasets(1, 100);
+    const orgs = (user?.organizations || []).map((org) =>
+      fetchOrgDatasets(org.id, 1, 100),
+    );
+    Promise.all([personal, ...orgs])
+      .then((results) => {
+        const all = results.flatMap((r) => r.data || []);
+        setMyDatasets(dedupe(all));
+      })
+      .catch(() => {
+        /* graceful fallback: dropdown stays empty, search still works */
+      });
+  }, [user?.organizations]);
+
+  // Debounced portal-wide dataset search when the user types in the dropdown.
+  useEffect(() => {
+    const q = datasetSearch.trim();
+    if (q.length < 2) {
+      setDatasetSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchDatasets(q, 1, 20);
+        setDatasetSearchResults(res.data || []);
+      } catch {
+        setDatasetSearchResults([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [datasetSearch]);
 
   useEffect(() => {
     if (!reuse || !reuse.datasets || reuse.datasets.length === 0) return;
@@ -929,87 +972,88 @@ export default function ReusesEditClient() {
                 )}
 
                 <form className="admin-page__form">
-                  {selectedDataset && (
-                    <div className="agora-card-links-datasets-px0 mt-[16px]">
-                      <CardLinks
-                        onClick={() => { }}
-                        className="cursor-pointer text-neutral-900"
-                        variant="transparent"
-                        image={{
-                          src: selectedDataset.organization?.logo || "/images/placeholders/organization.png",
-                          alt: selectedDataset.organization?.name || "Organização sem logo",
-                        }}
-                        category={selectedDataset.organization?.name}
-                        title={selectedDataset.title}
-                        description={
-                          <div className="flex flex-col gap-12">
-                            <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
-                              {selectedDataset.description}
-                            </p>
-                            <div className="flex flex-wrap gap-8 items-center mt-[8px]">
-                              <span className="text-sm font-medium text-neutral-900">
-                                Metadados: {selectedDataset.quality?.score != null ? Math.round(selectedDataset.quality.score * 100) : 0}%
-                              </span>
-                            </div>
-                            <div className="flex items-center flex-wrap gap-[32px] text-xs mt-[32px] text-[#034AD8] mb-[32px]">
-                              <div className="flex items-center gap-8" title="Visualizações">
-                                <Icon name="agora-line-eye" className="" aria-hidden="true" />
-                                <span>{selectedDataset.metrics?.views || 0}</span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Downloads">
-                                <Icon name="agora-line-download" className="" aria-hidden="true" />
-                                <span>{selectedDataset.metrics?.resources_downloads || 0}</span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Reutilizações">
-                                <img src="/Icons/bar_chart_primary.svg" className="" alt="" aria-hidden="true" />
-                                <span>{selectedDataset.metrics?.reuses || 0}</span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Favoritos">
-                                <img src="/Icons/favorite.svg" className="" alt="" aria-hidden="true" />
-                                <span>{selectedDataset.metrics?.followers || 0}</span>
-                              </div>
-                            </div>
-                          </div>
-                        }
-                        date={
-                          <span className="font-[300]">
-                            {`Atualizado há ${formatDistanceToNow(new Date(selectedDataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
-                          </span>
-                        }
-                        mainLink={
-                          <Link href={`/pages/datasets/${selectedDataset.slug}`}>
-                            <span className="underline">{selectedDataset.title}</span>
-                          </Link>
-                        }
-                        blockedLink={true}
-                      />
-                    </div>
-                  )}
+                  <div className="mb-[24px]">
+                    <StatusCard
+                      type="warning"
+                      description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
+                    />
+                  </div>
 
                   <InputSelect
                     label="Pesquisar um conjunto de dados"
-                    placeholder="Procurando um conjunto de dados..."
+                    placeholder="Selecione conjuntos de dados..."
                     id="edit-dataset-search"
+                    type="checkbox"
                     searchable
-                    searchInputPlaceholder="Escreva para pesquisar..."
+                    searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
                     searchNoResultsText="Nenhum resultado encontrado"
+                    onSearchInputChange={setDatasetSearch}
                     onChange={(options) => {
-                      if (options.length > 0) {
-                        const found = myDatasets.find((d) => d.id === options[0].value);
-                        setSelectedDataset(found || null);
-                      } else {
-                        setSelectedDataset(null);
+                      const selectedIds = new Set(options.map((o) => o.value as string));
+                      const pool: Dataset[] = [
+                        ...selectedDatasets,
+                        ...datasetSearchResults,
+                        ...myDatasets,
+                      ];
+                      const seen = new Set<string>();
+                      const next: Dataset[] = [];
+                      for (const d of pool) {
+                        if (selectedIds.has(d.id) && !seen.has(d.id)) {
+                          seen.add(d.id);
+                          next.push(d);
+                        }
                       }
+                      setSelectedDatasets(next);
                     }}
                   >
                     <DropdownSection name="datasets">
-                      {myDatasets.map((d) => (
-                        <DropdownOption key={d.id} value={d.id}>
-                          {d.title}
-                        </DropdownOption>
-                      ))}
+                      {(() => {
+                        const combined: Dataset[] = [
+                          ...selectedDatasets,
+                          ...datasetSearchResults,
+                          ...myDatasets,
+                        ];
+                        const associatedIds = new Set(
+                          associatedDatasets.map((d) => d.id),
+                        );
+                        const seen = new Set<string>();
+                        return combined
+                          .filter((d) => {
+                            if (seen.has(d.id)) return false;
+                            if (associatedIds.has(d.id)) return false;
+                            seen.add(d.id);
+                            return true;
+                          })
+                          .map((d) => (
+                            <DropdownOption
+                              key={d.id}
+                              value={d.id}
+                              selected={selectedDatasets.some((s) => s.id === d.id)}
+                            >
+                              {d.title}
+                            </DropdownOption>
+                          ));
+                      })()}
                     </DropdownSection>
                   </InputSelect>
+
+                  {selectedDatasets.length > 0 && (
+                    <div className="flex flex-wrap gap-8 mt-[16px]">
+                      {selectedDatasets.map((d) => (
+                        <Tag
+                          key={d.id}
+                          aria-label={`Remover ${d.title}`}
+                          onClick={() => {
+                            setSelectedDatasets((prev) =>
+                              prev.filter((x) => x.id !== d.id),
+                            );
+                          }}
+                        >
+                          {d.title}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="admin-page__divider-or">
                     <span className="admin-page__divider-or-text">ou</span>
@@ -1090,38 +1134,66 @@ export default function ReusesEditClient() {
                       trailingIconHover="agora-solid-check-circle"
                       onClick={async () => {
                         if (!reuse) return;
-                        const errors: Record<number, string> = {};
-                        datasetLinks.forEach((link, index) => {
-                          if (!link.url.trim() && datasetLinks.length > 1) {
-                            errors[index] = "Campo obrigatório";
-                          }
-                        });
-                        if (Object.keys(errors).length > 0) {
-                          setDatasetLinkErrors(errors);
+                        const remoteUrls = datasetLinks
+                          .map((l) => l.url.trim())
+                          .filter(Boolean);
+                        const hasLocal = selectedDatasets.length > 0;
+                        const hasRemote = remoteUrls.length > 0;
+
+                        // Mutual exclusion: portal datasets OR remote URLs.
+                        if (hasLocal && hasRemote) {
+                          setApiError(
+                            "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
+                          );
                           return;
                         }
+                        if (!hasLocal && !hasRemote) return;
+
                         setDatasetLinkErrors({});
                         setIsSubmitting(true);
                         setApiError(null);
                         try {
-                          for (const link of datasetLinks) {
-                            if (link.url.trim()) {
-                              await linkDatasetToReuse(reuse.id, link.url.trim());
-                            }
+                          for (const dataset of selectedDatasets) {
+                            await linkDatasetToReuse(reuse.id, dataset.id);
+                          }
+                          if (hasRemote) {
+                            const existing =
+                              (reuse.extras?.remote_datasets as string[]) || [];
+                            const mergedRemote = Array.from(
+                              new Set([...existing, ...remoteUrls]),
+                            );
+                            await updateReuse(reuse.id, {
+                              extras: {
+                                ...(reuse.extras || {}),
+                                remote_datasets: mergedRemote,
+                              },
+                            });
                           }
                           const updated = await fetchReuse(reuseId);
                           setReuse(updated);
                           setDatasetLinks([{ url: "" }]);
-                          setSelectedDataset(null);
+                          setSelectedDatasets([]);
                           setApiSuccess("Conjuntos de dados associados com sucesso.");
                           setTimeout(() => setApiSuccess(null), 10000);
-                        } catch {
-                          setApiError("Erro ao associar conjuntos de dados.");
+                        } catch (error: unknown) {
+                          const err = error as { data?: Record<string, unknown> };
+                          if (err.data && typeof err.data === "object") {
+                            const messages = Object.entries(err.data)
+                              .map(([key, val]) => `${key}: ${val}`)
+                              .join(", ");
+                            setApiError(messages);
+                          } else {
+                            setApiError("Erro ao associar conjuntos de dados.");
+                          }
                         } finally {
                           setIsSubmitting(false);
                         }
                       }}
-                      disabled={isSubmitting || (!selectedDataset && !datasetLinks.some((l) => l.url.trim()))}
+                      disabled={
+                        isSubmitting ||
+                        (selectedDatasets.length === 0 &&
+                          !datasetLinks.some((l) => l.url.trim()))
+                      }
                     >
                       {isSubmitting ? "A guardar..." : "Guardar"}
                     </Button>
