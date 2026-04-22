@@ -627,7 +627,11 @@ export default function ReusesEditClient() {
                     >
                       <DropdownSection name="types">
                         {reuseTypes.map((t) => (
-                          <DropdownOption key={t.id} value={t.id}>
+                          <DropdownOption
+                            key={t.id}
+                            value={t.id}
+                            selected={t.id === selectedType}
+                          >
                             {localizeReuseType(t)}
                           </DropdownOption>
                         ))}
@@ -646,7 +650,11 @@ export default function ReusesEditClient() {
                     >
                       <DropdownSection name="topics">
                         {reuseTopics.map((t) => (
-                          <DropdownOption key={t.id} value={t.id}>
+                          <DropdownOption
+                            key={t.id}
+                            value={t.id}
+                            selected={t.id === selectedTopic}
+                          >
                             {localizeReuseTopic(t)}
                           </DropdownOption>
                         ))}
