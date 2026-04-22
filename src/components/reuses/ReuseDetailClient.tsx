@@ -27,7 +27,7 @@ import {
   usePopupContext,
 } from '@ama-pt/agora-design-system';
 import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from '@/types/api';
-import { fetchDataset, fetchReuse, fetchDiscussions, createDiscussion, replyToDiscussion } from '@/services/api';
+import { fetchDataset, fetchReuse, fetchDiscussions, createDiscussion, replyToDiscussion, followEntity, unfollowEntity, isFollowing } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import IsolatedSelect from '@/components/admin/IsolatedSelect';
 import EditDiscussionPopup from '@/components/discussions/EditDiscussionPopup';
@@ -69,6 +69,9 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const [replyMessage, setReplyMessage] = useState('');
   const replyIdentityRef = useRef('');
   const [isReplying, setIsReplying] = useState(false);
+
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   const [descExpanded, setDescExpanded] = useState(false);
   const [descOverflowing, setDescOverflowing] = useState(false);
@@ -143,6 +146,10 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
       try {
         const data = await fetchReuse(slug);
         setReuse(data);
+        if (user && data) {
+          const following = await isFollowing("reuses", data.id, user.id);
+          setIsFavorite(following);
+        }
       } catch (error) {
         console.error("Error loading reuse:", error);
       } finally {
@@ -150,7 +157,29 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
       }
     }
     loadReuse();
-  }, [slug]);
+  }, [slug, user]);
+
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      router.push("/pages/login");
+      return;
+    }
+    if (!reuse || isTogglingFavorite) return;
+    setIsTogglingFavorite(true);
+    try {
+      if (isFavorite) {
+        await unfollowEntity("reuses", reuse.id);
+        setIsFavorite(false);
+      } else {
+        await followEntity("reuses", reuse.id);
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
   const [datasetsPage, setDatasetsPage] = useState(1);
   const datasetsPageSize = 6;
 
@@ -272,13 +301,15 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               <div className="flex flex-wrap items-center gap-16">
                 <Button
                   variant="primary"
-                  appearance="outline"
+                  appearance={isFavorite ? "solid" : "outline"}
                   darkMode={false}
                   hasIcon={true}
-                  leadingIcon="agora-line-star"
+                  leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
                   leadingIconHover="agora-solid-star"
+                  onClick={handleToggleFavorite}
+                  disabled={isTogglingFavorite}
                 >
-                  Adicionar aos favoritos
+                  {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                 </Button>
                 <Button
                   variant="primary"
