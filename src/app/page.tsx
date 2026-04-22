@@ -6,12 +6,10 @@ export default async function Home() {
 
   return (
     <HomeClient
-
       siteMetrics={data.site_metrics}
       latestDatasets={data.latest_datasets}
       latestReuses={data.latest_reuses}
       posts={data.latest_posts}
-
     />
   );
 }
