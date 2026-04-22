@@ -494,10 +494,13 @@ export default function ReusesEditClient() {
                     }
                   />
                   <div>
-                    {/* <Button
+                    <Button
                       variant="primary"
                       appearance="outline"
                       onClick={async () => {
+                        setApiError(null);
+                        setApiSuccess(null);
+                        setIsSubmitting(true);
                         try {
                           const updated = await updateReuse(reuse.id, {
                             private: !reuse.private,
@@ -506,17 +509,19 @@ export default function ReusesEditClient() {
                           setApiSuccess(
                             updated.private
                               ? "Reutilização guardada como rascunho."
-                              : "Reutilização publicada com sucesso."
+                              : "Reutilização publicada com sucesso.",
                           );
                           setTimeout(() => setApiSuccess(null), 10000);
                         } catch {
                           setApiError("Erro ao alterar a visibilidade.");
+                        } finally {
+                          setIsSubmitting(false);
                         }
                       }}
                       disabled={isSubmitting}
                     >
-                      {reuse.private ? "Publicar reutilização" : "Salvar como rascunho"}
-                    </Button> */}
+                      {reuse.private ? "Publicar reutilização" : "Guardar como rascunho"}
+                    </Button>
                   </div>
                 </div>
 
