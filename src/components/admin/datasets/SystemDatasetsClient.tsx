@@ -77,7 +77,7 @@ export default function SystemDatasetsClient() {
       const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
       if (statusFilter === "public")   { statusFilters.private = false; statusFilters.archived = false; statusFilters.deleted = false; }
       if (statusFilter === "draft")    { statusFilters.private = true; statusFilters.archived = false; statusFilters.deleted = false; }
-      if (statusFilter === "archived") { statusFilters.archived = true; }
+      if (statusFilter === "archived") { statusFilters.archived = true; statusFilters.deleted = false; }
       if (statusFilter === "deleted")  { statusFilters.deleted = true; }
 
       const filters = {
