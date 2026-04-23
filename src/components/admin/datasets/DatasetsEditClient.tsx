@@ -812,16 +812,9 @@ export default function DatasetsEditClient() {
     });
   }, [selectedSpatialZonesValue, loadedSpatialZones, allSpatialZones]);
 
-  // Ref kept in sync each render so the options memo can read current selection
-  // without taking it as a reactive dep (prevents children from changing on every
-  // selection toggle, which would cause the Agora DS to steal focus).
-  const spatialSelectionRef = useRef(new Set<string>());
-  spatialSelectionRef.current = new Set(
-    (selectedSpatialZonesValue || loadedSpatialZones.join(",")).split(",").filter(Boolean),
-  );
-
   const spatialCoverageOptions = useMemo(() => {
-    const selectedIds = spatialSelectionRef.current;
+    const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
+    const selectedIds = new Set(effective.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
       <DropdownOption key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
         {z.code ? `${z.name} (${z.code})` : z.name}
@@ -835,7 +828,7 @@ export default function DatasetsEditClient() {
       );
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
-  }, [allSpatialZones]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [allSpatialZones, selectedSpatialZonesValue, loadedSpatialZones]);
 
   const spatialGranularityOptions = useMemo(() => {
     const options = [

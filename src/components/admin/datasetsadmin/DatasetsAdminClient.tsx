@@ -292,14 +292,8 @@ export default function DatasetsAdminClient({
     return merged.sort((a, b) => a.name.localeCompare(b.name, "pt"));
   }, [spatialZones, spatialZoneSearch]);
 
-  // Ref kept in sync each render so the options memo can read current selection
-  // without taking it as a reactive dep (prevents children from changing on every
-  // selection toggle, which would cause the Agora DS to steal focus).
-  const spatialSelectionRef = useRef(new Set<string>());
-  spatialSelectionRef.current = new Set(selectedSpatialZonesValue.split(",").filter(Boolean));
-
   const spatialCoverageOptions = useMemo(() => {
-    const selectedIds = spatialSelectionRef.current;
+    const selectedIds = new Set(selectedSpatialZonesValue.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
       <DropdownOption key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
         {z.code ? `${z.name} (${z.code})` : z.name}
@@ -309,7 +303,7 @@ export default function DatasetsAdminClient({
       options.push(<DropdownOption key="empty" value="">—</DropdownOption>);
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
-  }, [allSpatialZones]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [allSpatialZones, selectedSpatialZonesValue]);
 
   const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
   useEffect(() => {
