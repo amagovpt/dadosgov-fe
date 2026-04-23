@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, startTransition, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -178,9 +178,6 @@ export default function DatasetsAdminClient({
   const spatialCoverageDefaultValue = spatialCoverageRef.current;
   const spatialGranularityDefaultValue = spatialGranularityRef.current;
   const selectedSpatialZoneIds = selectedSpatialZonesValue.split(",").filter(Boolean);
-  const selectedSpatialZoneObjects = selectedSpatialZoneIds
-    .map((id) => allSpatialZones.find((z) => z.id === id))
-    .filter(Boolean) as SpatialZone[];
   const handleSpatialCoverageChange = useCallback((value: string) => {
     setSelectedSpatialZonesValue(value);
   }, []);
@@ -296,6 +293,22 @@ export default function DatasetsAdminClient({
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
   }, [allSpatialZones]);
+
+  const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
+  useEffect(() => {
+    const ids = selectedSpatialZonesValue.split(",").filter(Boolean);
+    if (ids.length === 0) {
+      setSelectedZoneObjects([]);
+      return;
+    }
+    setSelectedZoneObjects((prev) => {
+      const map = new Map(prev.map((z) => [z.id, z]));
+      allSpatialZones.forEach((z) => {
+        if (!map.has(z.id)) map.set(z.id, z);
+      });
+      return ids.map((id) => map.get(id)).filter(Boolean) as SpatialZone[];
+    });
+  }, [selectedSpatialZonesValue, allSpatialZones]);
 
   const granularityOptions = useMemo(() => {
     const options = granularities.map((g) => (
@@ -436,12 +449,11 @@ export default function DatasetsAdminClient({
   useEffect(() => {
     async function loadDropdownData() {
       try {
-        const [licensesData, frequenciesData, granularitiesData, zonesData, myDatasetsData, tagsData, resTypes] =
+        const [licensesData, frequenciesData, granularitiesData, myDatasetsData, tagsData, resTypes] =
           await Promise.all([
             fetchLicenses(),
             fetchFrequencies(),
             fetchGranularities(),
-            suggestSpatialZones("", 1000),
             fetchMyDatasets(1, 1),
             suggestTags("", 50),
             fetchResourceTypes(),
@@ -449,7 +461,6 @@ export default function DatasetsAdminClient({
         setLicenses(licensesData);
         setFrequencies(frequenciesData);
         setGranularities(granularitiesData);
-        startTransition(() => setSpatialZones(zonesData));
         setHasDatasets(myDatasetsData.data.length > 0);
         setTags(tagsData);
         setResourceTypes(resTypes);
@@ -1392,13 +1403,17 @@ export default function DatasetsAdminClient({
                     searchNoResultsText="Nenhum resultado encontrado"
                     onChangeRef={spatialCoverageRef}
                     onChangeCallback={handleSpatialCoverageChange}
+                    onSearchCallback={(q) => {
+                      if (q.length < 2) return;
+                      suggestSpatialZones(q, 50).then(setSpatialZoneSearch);
+                    }}
                   >
                     {spatialCoverageOptions}
                   </IsolatedSelect>
 
-                  {selectedSpatialZoneObjects.length > 0 && (
+                  {selectedZoneObjects.length > 0 && (
                     <div className="flex flex-wrap gap-8 -mt-8">
-                      {selectedSpatialZoneObjects.map((zone) => (
+                      {selectedZoneObjects.map((zone) => (
                         <Tag
                           key={zone.id}
                           aria-label={`Remover ${zone.name}`}

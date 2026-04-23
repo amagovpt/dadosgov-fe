@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useCallback, useEffect, useMemo, useRef, startTransition, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Avatar,
@@ -642,22 +642,15 @@ export default function DatasetsEditClient() {
 
         suggestTags("", 50).then(setTagSuggestions);
 
-        // Load initial Portuguese zone suggestions; merge with any already-selected zones
-        suggestSpatialZones("", 1000).then((suggestions) => {
-          if (ds.spatial?.zones?.length) {
-            fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
-              const currentIds = currentZones.map((z) => z.id);
-              const seen = new Set(currentIds);
-              const merged = [...currentZones, ...suggestions.filter((z) => !seen.has(z.id))];
-              startTransition(() => setSpatialZones(merged));
-              setLoadedSpatialZones(currentIds);
-              setSelectedSpatialZonesValue(currentIds.join(","));
-              spatialCoverageRef.current = currentIds.join(",");
-            });
-          } else {
-            startTransition(() => setSpatialZones(suggestions));
-          }
-        });
+        if (ds.spatial?.zones?.length) {
+          fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
+            const currentIds = currentZones.map((z) => z.id);
+            setSpatialZones(currentZones);
+            setLoadedSpatialZones(currentIds);
+            setSelectedSpatialZonesValue(currentIds.join(","));
+            spatialCoverageRef.current = currentIds.join(",");
+          });
+        }
 
         fetchActivity(ds.id, 1, 1)
           .then((res) => {
@@ -789,12 +782,25 @@ export default function DatasetsEditClient() {
   const effectiveSpatialIds = (selectedSpatialZonesValue || loadedSpatialZones.join(","))
     .split(",")
     .filter(Boolean);
-  const selectedSpatialZoneObjects = effectiveSpatialIds
-    .map((id) => allSpatialZones.find((z) => z.id === id))
-    .filter(Boolean) as SpatialZone[];
   const handleSpatialCoverageChange = useCallback((value: string) => {
     setSelectedSpatialZonesValue(value);
   }, []);
+  const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
+  useEffect(() => {
+    const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
+    const ids = effective.split(",").filter(Boolean);
+    if (ids.length === 0) {
+      setSelectedZoneObjects([]);
+      return;
+    }
+    setSelectedZoneObjects((prev) => {
+      const map = new Map(prev.map((z) => [z.id, z]));
+      allSpatialZones.forEach((z) => {
+        if (!map.has(z.id)) map.set(z.id, z);
+      });
+      return ids.map((id) => map.get(id)).filter(Boolean) as SpatialZone[];
+    });
+  }, [selectedSpatialZonesValue, loadedSpatialZones, allSpatialZones]);
 
   const spatialCoverageOptions = useMemo(() => {
     const options = allSpatialZones.map((z) => (
@@ -1565,13 +1571,17 @@ export default function DatasetsEditClient() {
                       defaultValue={loadedSpatialZones.join(",")}
                       onChangeRef={spatialCoverageRef}
                       onChangeCallback={handleSpatialCoverageChange}
+                      onSearchCallback={(q) => {
+                        if (q.length < 2) return;
+                        suggestSpatialZones(q, 50).then(setSpatialZoneSearch);
+                      }}
                     >
                       {spatialCoverageOptions}
                     </IsolatedSelect>
 
-                    {selectedSpatialZoneObjects.length > 0 && (
+                    {selectedZoneObjects.length > 0 && (
                       <div className="flex flex-wrap gap-8 -mt-8">
-                        {selectedSpatialZoneObjects.map((zone) => (
+                        {selectedZoneObjects.map((zone) => (
                           <Tag
                             key={zone.id}
                             aria-label={`Remover ${zone.name}`}
