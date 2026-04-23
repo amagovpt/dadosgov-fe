@@ -1397,6 +1397,7 @@ export default function DatasetsAdminClient({
                     label="Cobertura espacial"
                     placeholder="Selecione uma cobertura espacial..."
                     id="dataset-spatial-coverage"
+                    type="checkbox"
                     defaultValue={spatialCoverageDefaultValue}
                     searchable
                     searchInputPlaceholder="Escreva para pesquisar..."
