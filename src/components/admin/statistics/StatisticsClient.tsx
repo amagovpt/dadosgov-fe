@@ -216,8 +216,9 @@ export default function StatisticsClient() {
                   id="filter-reuse-status"
                 >
                   <DropdownSection name="status">
+                    <DropdownOption value="" selected>Todos</DropdownOption>
                     <DropdownOption value="public">Público</DropdownOption>
-                    <DropdownOption value="archived">Arquivo</DropdownOption>
+                    <DropdownOption value="archived">Arquivado</DropdownOption>
                     <DropdownOption value="draft">Rascunho</DropdownOption>
                     <DropdownOption value="deleted">Excluído</DropdownOption>
                   </DropdownSection>

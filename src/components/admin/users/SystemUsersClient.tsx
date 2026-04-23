@@ -148,8 +148,9 @@ export default function SystemUsersClient() {
           }}
         >
           <DropdownSection name="profile">
-            <DropdownOption value="admin">Admin</DropdownOption>
-            <DropdownOption value="editor">Editor</DropdownOption>
+            <DropdownOption value="" selected={profileFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="admin" selected={profileFilter === "admin"}>Admin</DropdownOption>
+            <DropdownOption value="editor" selected={profileFilter === "editor"}>Editor</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
