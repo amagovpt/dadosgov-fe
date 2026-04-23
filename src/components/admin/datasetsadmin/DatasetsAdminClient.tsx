@@ -1447,6 +1447,9 @@ export default function DatasetsAdminClient({
                               .join(",");
                             setSelectedSpatialZonesValue(next);
                             spatialCoverageRef.current = next;
+                            requestAnimationFrame(() => {
+                              document.getElementById("dataset-spatial-coverage")?.focus();
+                            });
                           }}
                         >
                           {zone.code ? `${zone.name} (${zone.code})` : zone.name}

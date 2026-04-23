@@ -1606,6 +1606,9 @@ export default function DatasetsEditClient() {
                                 .join(",");
                               setSelectedSpatialZonesValue(next);
                               spatialCoverageRef.current = next;
+                              requestAnimationFrame(() => {
+                                document.getElementById("edit-spatial-coverage")?.focus();
+                              });
                             }}
                           >
                             {zone.code ? `${zone.name} (${zone.code})` : zone.name}
