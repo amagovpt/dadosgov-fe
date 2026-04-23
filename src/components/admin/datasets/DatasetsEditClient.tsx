@@ -642,7 +642,7 @@ export default function DatasetsEditClient() {
         suggestTags("", 50).then(setTagSuggestions);
 
         // Load initial Portuguese zone suggestions; merge with any already-selected zones
-        suggestSpatialZones("pt", 50).then((suggestions) => {
+        suggestSpatialZones("", 1000).then((suggestions) => {
           if (ds.spatial?.zones?.length) {
             fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
               const currentIds = currentZones.map((z) => z.id);
@@ -781,13 +781,13 @@ export default function DatasetsEditClient() {
         merged.push(z);
       }
     }
-    return merged;
+    return merged.sort((a, b) => a.name.localeCompare(b.name, "pt"));
   }, [spatialZones, spatialZoneSearch]);
 
   const spatialCoverageOptions = useMemo(() => {
     const options = allSpatialZones.map((z) => (
       <DropdownOption key={z.id} value={z.id} selected={loadedSpatialZones.includes(z.id)}>
-        {z.name}
+        {z.code ? `${z.name} (${z.code})` : z.name}
       </DropdownOption>
     ));
     if (options.length === 0) {
@@ -1552,10 +1552,6 @@ export default function DatasetsEditClient() {
                       searchNoResultsText="Nenhum resultado encontrado"
                       defaultValue={loadedSpatialZones.join(",")}
                       onChangeRef={spatialCoverageRef}
-                      onSearchCallback={(q) => {
-                        if (!q) return;
-                        suggestSpatialZones(q, 10).then(setSpatialZoneSearch);
-                      }}
                     >
                       {spatialCoverageOptions}
                     </IsolatedSelect>

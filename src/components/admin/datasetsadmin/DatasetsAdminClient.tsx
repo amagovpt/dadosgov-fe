@@ -274,13 +274,13 @@ export default function DatasetsAdminClient({
         merged.push(z);
       }
     }
-    return merged;
+    return merged.sort((a, b) => a.name.localeCompare(b.name, "pt"));
   }, [spatialZones, spatialZoneSearch]);
 
   const spatialCoverageOptions = useMemo(() => {
     const options = allSpatialZones.map((z) => (
       <DropdownOption key={z.id} value={z.id} selected={false}>
-        {z.name}
+        {z.code ? `${z.name} (${z.code})` : z.name}
       </DropdownOption>
     ));
     if (options.length === 0) {
@@ -433,7 +433,7 @@ export default function DatasetsAdminClient({
             fetchLicenses(),
             fetchFrequencies(),
             fetchGranularities(),
-            suggestSpatialZones("pt", 50),
+            suggestSpatialZones("", 1000),
             fetchMyDatasets(1, 1),
             suggestTags("", 50),
             fetchResourceTypes(),
@@ -1383,10 +1383,6 @@ export default function DatasetsAdminClient({
                     searchInputPlaceholder="Escreva para pesquisar..."
                     searchNoResultsText="Nenhum resultado encontrado"
                     onChangeRef={spatialCoverageRef}
-                    onSearchCallback={(q) => {
-                      if (!q) return;
-                      suggestSpatialZones(q, 10).then(setSpatialZoneSearch);
-                    }}
                   >
                     {spatialCoverageOptions}
                   </IsolatedSelect>
