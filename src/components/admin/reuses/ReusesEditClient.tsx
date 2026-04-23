@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
@@ -41,9 +41,10 @@ import {
   linkDataserviceToReuse,
   fetchActivity,
   fetchDiscussions,
+  suggestTags,
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
-import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion } from "@/types/api";
+import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
@@ -178,6 +179,13 @@ export default function ReusesEditClient() {
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
   const [reuseTopics, setReuseTopics] = useState<ReuseTopic[]>([]);
 
+  // Keywords state (IsolatedSelect pattern)
+  const selectedKeywordsRef = useRef("");
+  const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
+  const [keywordSearch, setKeywordSearch] = useState("");
+  const [tagSuggestions, setTagSuggestions] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
+
   // Discussions tab state
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [discussionsLoading, setDiscussionsLoading] = useState(false);
@@ -221,6 +229,9 @@ export default function ReusesEditClient() {
         setFeatured(r.featured || false);
         setReuseTypes(types);
         setReuseTopics(topics);
+        const initialKeywords = (r.tags || []).join(",");
+        setSelectedKeywordsValue(initialKeywords);
+        selectedKeywordsRef.current = initialKeywords;
       } catch (error) {
         console.error("Error loading reuse:", error);
         setApiError("Erro ao carregar a reutilização.");
@@ -268,6 +279,79 @@ export default function ReusesEditClient() {
     }, 300);
     return () => clearTimeout(timer);
   }, [datasetSearch]);
+
+  // Initial pool of tag suggestions for the keywords dropdown.
+  useEffect(() => {
+    suggestTags("", 50).then(setTagSuggestions).catch(() => setTagSuggestions([]));
+  }, []);
+
+  // Debounced tag search while user types in the keywords dropdown.
+  useEffect(() => {
+    const q = keywordSearch.trim();
+    if (q.length < 2) {
+      setTagSearch([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestTags(q, 20);
+        setTagSearch(res);
+      } catch {
+        setTagSearch([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keywordSearch]);
+
+  const selectedKeywords = useMemo(
+    () => selectedKeywordsValue.split(",").map((v) => v.trim()).filter(Boolean),
+    [selectedKeywordsValue],
+  );
+
+  const keywordOptions = useMemo(() => {
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    const seen = new Set<string>();
+    const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
+    const selectedNotInSuggestions = selectedKeywords.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const options = [
+      ...(showCreate
+        ? [
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
+            </DropdownOption>,
+          ]
+        : []),
+      ...selectedNotInSuggestions.map((keyword) => (
+        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
+          {keyword}
+        </DropdownOption>
+      )),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedLowerSet.has(tag.text.toLowerCase())}
+        >
+          {tag.text}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="keywords">{options}</DropdownSection>;
+  }, [tagSuggestions, tagSearch, selectedKeywords, keywordSearch]);
 
   useEffect(() => {
     if (!reuse || !reuse.datasets || reuse.datasets.length === 0) return;
@@ -382,12 +466,17 @@ export default function ReusesEditClient() {
     setIsSubmitting(true);
 
     try {
+      const tagsValue = selectedKeywordsRef.current
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
       const updated = await updateReuse(reuse.id, {
         title: title.trim(),
         url: url.trim(),
         description: description.trim(),
         type: selectedTypeRef.current || undefined,
         topic: selectedTopicRef.current || undefined,
+        tags: tagsValue,
       });
       setReuse(updated);
       setApiSuccess("Reutilização atualizada com sucesso.");
@@ -716,23 +805,66 @@ export default function ReusesEditClient() {
                       feedbackText="Campo obrigatório"
                       errorFeedbackText="Campo obrigatório"
                     />
-                    <InputSelect
+                    <IsolatedSelect
                       label="Palavras-chave"
                       placeholder="Pesquise ou insira palavras-chave..."
                       id="edit-keywords"
                       type="checkbox"
                       searchable
-                      searchInputPlaceholder="Escreva para pesquisar..."
+                      searchInputPlaceholder="Escreva para pesquisar ou criar..."
                       searchNoResultsText="Nenhum resultado encontrado"
+                      defaultValue={selectedKeywordsValue}
+                      onChangeRef={selectedKeywordsRef}
+                      onSearchCallback={setKeywordSearch}
+                      onChangeCallback={(value) => {
+                        setSelectedKeywordsValue(value);
+                        const selected = value.split(",").filter(Boolean);
+                        let addedNew = false;
+                        selected.forEach((v) => {
+                          const lower = v.toLowerCase();
+                          const existsInSuggestions = tagSuggestions.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          const existsInSearch = tagSearch.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          if (!existsInSuggestions && !existsInSearch) {
+                            addedNew = true;
+                            setTagSuggestions((prev) => {
+                              if (prev.some((t) => t.text.toLowerCase() === lower)) {
+                                return prev;
+                              }
+                              return [...prev, { text: v }];
+                            });
+                          }
+                        });
+                        if (addedNew) {
+                          setKeywordSearch("");
+                        }
+                      }}
                     >
-                      <DropdownSection name="keywords">
-                        {(reuse.tags || []).map((tag) => (
-                          <DropdownOption key={tag} value={tag}>
-                            {tag}
-                          </DropdownOption>
+                      {keywordOptions}
+                    </IsolatedSelect>
+
+                    {selectedKeywords.length > 0 && (
+                      <div className="flex flex-wrap gap-8 -mt-8">
+                        {selectedKeywords.map((keyword) => (
+                          <Tag
+                            key={keyword}
+                            aria-label={`Remover ${keyword}`}
+                            onClick={() => {
+                              const next = selectedKeywords
+                                .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                                .join(",");
+                              setSelectedKeywordsValue(next);
+                              selectedKeywordsRef.current = next;
+                            }}
+                          >
+                            {keyword}
+                          </Tag>
                         ))}
-                      </DropdownSection>
-                    </InputSelect>
+                      </div>
+                    )}
                     <div>
                       <span className="text-primary-900 text-base font-medium leading-7">
                         Imagem de capa *

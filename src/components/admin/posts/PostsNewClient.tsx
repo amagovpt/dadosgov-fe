@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Breadcrumb,
@@ -9,15 +9,15 @@ import {
   DropdownOption,
   InputText,
   InputTextArea,
-  InputSelect,
   DragAndDropUploader,
   RadioButton,
+  Tag,
 } from "@ama-pt/agora-design-system";
 import { suggestTags, createPost, uploadPostImage } from "@/services/api";
 import type { TagSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import type { PostCreatePayload } from "@/types/api";
-import { tr } from "date-fns/locale";
 
 export default function PostsNewClient() {
   const searchParams = useSearchParams();
@@ -33,8 +33,11 @@ export default function PostsNewClient() {
   const [articleHeader, setArticleHeader] = useState("");
   const [articleContent, setArticleContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const selectedKeywordsRef = useRef("");
+  const [keywordSearch, setKeywordSearch] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [tags, setTags] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -43,6 +46,68 @@ export default function PostsNewClient() {
   useEffect(() => {
     suggestTags("", 50).then(setTags);
   }, []);
+
+  useEffect(() => {
+    const q = keywordSearch.trim();
+    if (q.length < 2) {
+      setTagSearch([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestTags(q, 20);
+        setTagSearch(res);
+      } catch {
+        setTagSearch([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keywordSearch]);
+
+  const keywordOptions = useMemo(() => {
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    const seen = new Set<string>();
+    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedLowerSet = new Set(selectedTags.map((k) => k.toLowerCase()));
+    const selectedNotInSuggestions = selectedTags.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const options = [
+      ...(showCreate
+        ? [
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
+            </DropdownOption>,
+          ]
+        : []),
+      ...selectedNotInSuggestions.map((keyword) => (
+        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
+          {keyword}
+        </DropdownOption>
+      )),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedLowerSet.has(tag.text.toLowerCase())}
+        >
+          {tag.text}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="keywords">{options}</DropdownSection>;
+  }, [tags, tagSearch, selectedTags, keywordSearch]);
 
   const clearError = (field: string) => {
     if (formErrors[field]) {
@@ -255,33 +320,66 @@ export default function PostsNewClient() {
                   </div>
                 </div>
 
-                <InputSelect
+                <IsolatedSelect
                   label="Palavras-chave"
-                  placeholder="Pesquise uma palavra-chave..."
+                  placeholder="Pesquise ou insira palavras-chave..."
                   id="article-keywords"
                   type="checkbox"
                   searchable
-                  searchInputPlaceholder="Escreva para pesquisar..."
+                  searchInputPlaceholder="Escreva para pesquisar ou criar..."
                   searchNoResultsText="Nenhum resultado encontrado"
-                  pluralSelectedPlaceholder="selecionadas"
-                  hideSectionNames={true}
-                  multiple={true}
-                  onChange={(options) => {
-                    setSelectedTags(options.map((o) => o.value as string));
+                  defaultValue={selectedTags.join(",")}
+                  onChangeRef={selectedKeywordsRef}
+                  onSearchCallback={setKeywordSearch}
+                  onChangeCallback={(value) => {
+                    const selected = value.split(",").filter(Boolean);
+                    setSelectedTags(selected);
+                    let addedNew = false;
+                    selected.forEach((v) => {
+                      const lower = v.toLowerCase();
+                      const existsInTags = tags.some(
+                        (t) => t.text.toLowerCase() === lower,
+                      );
+                      const existsInSearch = tagSearch.some(
+                        (t) => t.text.toLowerCase() === lower,
+                      );
+                      if (!existsInTags && !existsInSearch) {
+                        addedNew = true;
+                        setTags((prev) => {
+                          if (prev.some((t) => t.text.toLowerCase() === lower)) {
+                            return prev;
+                          }
+                          return [...prev, { text: v }];
+                        });
+                      }
+                    });
+                    if (addedNew) {
+                      setKeywordSearch("");
+                    }
                   }}
                 >
-                  <DropdownSection name="keywords">
-                    {tags.map((tag) => (
-                      <DropdownOption
-                        key={tag.text}
-                        value={tag.text}
-                        selected={selectedTags.some((s) => s === tag.text)}
+                  {keywordOptions}
+                </IsolatedSelect>
+
+                {selectedTags.length > 0 && (
+                  <div className="flex flex-wrap gap-8 -mt-8">
+                    {selectedTags.map((keyword) => (
+                      <Tag
+                        key={keyword}
+                        aria-label={`Remover ${keyword}`}
+                        onClick={() => {
+                          const next = selectedTags.filter(
+                            (v) => v.toLowerCase() !== keyword.toLowerCase(),
+                          );
+                          setSelectedTags(next);
+                          selectedKeywordsRef.current = next.join(",");
+                        }}
                       >
-                        {tag.text}
-                      </DropdownOption>
+                        {keyword}
+                      </Tag>
                     ))}
-                  </DropdownSection>
-                </InputSelect>
+                  </div>
+                )}
 
                 <div>
                   <span className="text-primary-900 text-base font-medium leading-7">

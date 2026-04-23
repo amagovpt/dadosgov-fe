@@ -28,6 +28,7 @@ import {
   Tab,
   TabHeader,
   TabBody,
+  Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
@@ -568,6 +569,7 @@ export default function DatasetsEditClient() {
   const [granularities, setGranularities] = useState<Granularity[]>([]);
   const [tagSuggestions, setTagSuggestions] = useState<TagSuggestion[]>([]);
   const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
+  const [keywordSearch, setKeywordSearch] = useState("");
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
 
@@ -718,36 +720,57 @@ export default function DatasetsEditClient() {
     return <DropdownSection name="frequencies">{options}</DropdownSection>;
   }, [frequencies, loadedFrequency]);
 
-  const selectedKeywordsSet = useMemo(
-    () => new Set(loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
+  const selectedKeywords = useMemo(
+    () => (loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
     [loadedKeywords]
   );
 
   const keywordOptions = useMemo(() => {
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    // Case-insensitive dedupe across suggestions + search results.
     const seen = new Set<string>();
-    const options: React.ReactElement[] = [];
-    // Current tags first (marked as selected)
-    for (const tag of selectedKeywordsSet) {
-      seen.add(tag);
-      options.push(
-        <DropdownOption key={tag} value={tag} selected>
-          {tag}
+    const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
+    // Keep selected keywords that aren't in suggestions visible and checked.
+    const selectedNotInSuggestions = selectedKeywords.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const options = [
+      ...(showCreate
+        ? [
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
+            </DropdownOption>,
+          ]
+        : []),
+      ...selectedNotInSuggestions.map((keyword) => (
+        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
+          {keyword}
         </DropdownOption>
-      );
-    }
-    // Then suggestions and search results (not already selected)
-    for (const t of [...tagSuggestions, ...tagSearch]) {
-      if (!seen.has(t.text)) {
-        seen.add(t.text);
-        options.push(
-          <DropdownOption key={t.text} value={t.text}>
-            {t.text}
-          </DropdownOption>
-        );
-      }
-    }
+      )),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedLowerSet.has(tag.text.toLowerCase())}
+        >
+          {tag.text}
+        </DropdownOption>
+      )),
+    ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [selectedKeywordsSet, tagSuggestions, tagSearch]);
+  }, [tagSuggestions, tagSearch, selectedKeywords, keywordSearch]);
 
   const allSpatialZones = useMemo(() => {
     const seen = new Set<string>();
@@ -1380,21 +1403,68 @@ export default function DatasetsEditClient() {
                     />*/}
                     <IsolatedSelect
                       label="Palavras-chave"
-                      placeholder="Pesquise ou insira uma palavra-chave..."
+                      placeholder="Pesquise ou insira palavras-chave..."
                       id="edit-keywords"
                       type="checkbox"
                       searchable
-                      searchInputPlaceholder="Escreva para pesquisar..."
+                      searchInputPlaceholder="Escreva para pesquisar ou criar..."
                       searchNoResultsText="Nenhum resultado encontrado"
                       defaultValue={loadedKeywords}
                       onChangeRef={keywordsRef}
                       onSearchCallback={(q) => {
+                        setKeywordSearch(q);
                         if (!q) return;
                         suggestTags(q, 20).then(setTagSearch);
+                      }}
+                      onChangeCallback={(value) => {
+                        setLoadedKeywords(value);
+                        const selected = value.split(",").filter(Boolean);
+                        let addedNew = false;
+                        selected.forEach((v) => {
+                          const lower = v.toLowerCase();
+                          const existsInSuggestions = tagSuggestions.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          const existsInSearch = tagSearch.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          if (!existsInSuggestions && !existsInSearch) {
+                            addedNew = true;
+                            setTagSuggestions((prev) => {
+                              if (prev.some((t) => t.text.toLowerCase() === lower)) {
+                                return prev;
+                              }
+                              return [...prev, { text: v }];
+                            });
+                          }
+                        });
+                        if (addedNew) {
+                          setKeywordSearch("");
+                        }
                       }}
                     >
                       {keywordOptions}
                     </IsolatedSelect>
+
+                    {selectedKeywords.length > 0 && (
+                      <div className="flex flex-wrap gap-8 -mt-8">
+                        {selectedKeywords.map((keyword) => (
+                          <Tag
+                            key={keyword}
+                            aria-label={`Remover ${keyword}`}
+                            onClick={() => {
+                              const next = selectedKeywords
+                                .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                                .join(",");
+                              setLoadedKeywords(next);
+                              keywordsRef.current = next;
+                            }}
+                          >
+                            {keyword}
+                          </Tag>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <h2 className="admin-page__section-title">Acesso</h2>
