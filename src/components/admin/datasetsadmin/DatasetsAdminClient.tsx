@@ -293,8 +293,9 @@ export default function DatasetsAdminClient({
   }, [spatialZones, spatialZoneSearch]);
 
   const spatialCoverageOptions = useMemo(() => {
+    const selectedIds = new Set(selectedSpatialZonesValue.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
-      <DropdownOption key={z.id} value={z.id} selected={false}>
+      <DropdownOption key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
         {z.code ? `${z.name} (${z.code})` : z.name}
       </DropdownOption>
     ));
@@ -302,7 +303,7 @@ export default function DatasetsAdminClient({
       options.push(<DropdownOption key="empty" value="">—</DropdownOption>);
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
-  }, [allSpatialZones]);
+  }, [allSpatialZones, selectedSpatialZonesValue]);
 
   const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
   useEffect(() => {

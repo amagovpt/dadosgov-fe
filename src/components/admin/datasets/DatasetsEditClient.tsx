@@ -813,8 +813,10 @@ export default function DatasetsEditClient() {
   }, [selectedSpatialZonesValue, loadedSpatialZones, allSpatialZones]);
 
   const spatialCoverageOptions = useMemo(() => {
+    const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
+    const selectedIds = new Set(effective.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
-      <DropdownOption key={z.id} value={z.id} selected={loadedSpatialZones.includes(z.id)}>
+      <DropdownOption key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
         {z.code ? `${z.name} (${z.code})` : z.name}
       </DropdownOption>
     ));
@@ -826,7 +828,7 @@ export default function DatasetsEditClient() {
       );
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
-  }, [allSpatialZones, loadedSpatialZones]);
+  }, [allSpatialZones, selectedSpatialZonesValue, loadedSpatialZones]);
 
   const spatialGranularityOptions = useMemo(() => {
     const options = [
