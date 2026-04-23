@@ -10,6 +10,7 @@ import {
   InputSearchBar,
   DropdownSection,
   DropdownOption,
+  StatusCard,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -175,6 +176,15 @@ export default function SystemHarvestersClient() {
           </DropdownSection>
         </InputSelect>
       </div>
+
+      {statusFilter === "accepted" && (
+        <div className="mb-[24px]">
+          <StatusCard
+            type="info"
+            description="O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução — a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <p className="text-neutral-700 text-sm">A carregar...</p>
