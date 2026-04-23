@@ -89,7 +89,7 @@ export default function EditDiscussionPopup({
       )}
       <div>
         <InputTextArea
-          label="A sua mensagem *"
+          label="Mensagem *"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
