@@ -532,7 +532,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   <div className="mb-24">
                     <StatusCard
                       type="info"
-                      description="A sua questão não é sobre a reutilização?"
+                      description={
+                        <span>
+                          A sua questão não é sobre a reutilização? <Link href="https://forum.dados.gov.pt" className="underline text-primary-600" target="_blank">Visite o nosso fórum.</Link>
+                        </span>
+                      }
                     />
                   </div>
                   <div className="flex items-center justify-between mb-24">
