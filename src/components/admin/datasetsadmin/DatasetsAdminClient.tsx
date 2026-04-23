@@ -154,6 +154,7 @@ export default function DatasetsAdminClient({
   const [granularities, setGranularities] = useState<Granularity[]>([]);
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
+  const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
   const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
   const [tags, setTags] = useState<TagSuggestion[]>([]);
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
@@ -180,6 +181,15 @@ export default function DatasetsAdminClient({
   const selectedSpatialZoneIds = selectedSpatialZonesValue.split(",").filter(Boolean);
   const handleSpatialCoverageChange = useCallback((value: string) => {
     setSelectedSpatialZonesValue(value);
+    // Pin any newly selected zones into spatialZones so they survive search changes
+    const ids = value.split(",").filter(Boolean);
+    setSpatialZones((prev) => {
+      const seen = new Set(prev.map((z) => z.id));
+      const additions = spatialZoneSearchRef.current.filter(
+        (z) => ids.includes(z.id) && !seen.has(z.id),
+      );
+      return additions.length === 0 ? prev : [...prev, ...additions];
+    });
   }, []);
 
   const producerOptions = useMemo(() => {
@@ -1406,7 +1416,10 @@ export default function DatasetsAdminClient({
                     onChangeCallback={handleSpatialCoverageChange}
                     onSearchCallback={(q) => {
                       if (q.length < 2) return;
-                      suggestSpatialZones(q, 50).then(setSpatialZoneSearch);
+                      suggestSpatialZones(q, 50).then((results) => {
+                        spatialZoneSearchRef.current = results;
+                        setSpatialZoneSearch(results);
+                      });
                     }}
                   >
                     {spatialCoverageOptions}

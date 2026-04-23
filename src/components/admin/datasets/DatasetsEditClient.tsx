@@ -572,6 +572,7 @@ export default function DatasetsEditClient() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
+  const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
   const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
 
   // Loaded default values for IsolatedSelect (needed because data arrives async after mount)
@@ -784,6 +785,15 @@ export default function DatasetsEditClient() {
     .filter(Boolean);
   const handleSpatialCoverageChange = useCallback((value: string) => {
     setSelectedSpatialZonesValue(value);
+    // Pin any newly selected zones into spatialZones so they survive search changes
+    const ids = value.split(",").filter(Boolean);
+    setSpatialZones((prev) => {
+      const seen = new Set(prev.map((z) => z.id));
+      const additions = spatialZoneSearchRef.current.filter(
+        (z) => ids.includes(z.id) && !seen.has(z.id),
+      );
+      return additions.length === 0 ? prev : [...prev, ...additions];
+    });
   }, []);
   const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
   useEffect(() => {
@@ -1573,7 +1583,10 @@ export default function DatasetsEditClient() {
                       onChangeCallback={handleSpatialCoverageChange}
                       onSearchCallback={(q) => {
                         if (q.length < 2) return;
-                        suggestSpatialZones(q, 50).then(setSpatialZoneSearch);
+                        suggestSpatialZones(q, 50).then((results) => {
+                          spatialZoneSearchRef.current = results;
+                          setSpatialZoneSearch(results);
+                        });
                       }}
                     >
                       {spatialCoverageOptions}
