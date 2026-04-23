@@ -24,8 +24,8 @@ const linkColumns = [
     title: 'Desenvolvimento',
     links: [
       { href: '/pages/docapi', label: 'API dos dados.gov.pt' },
-      { href: 'https://github.com/opendatateam/udata', label: `Mecanismo de código aberto : udata (${process.env.NEXT_PUBLIC_UDATA_VERSION && process.env.NEXT_PUBLIC_UDATA_VERSION !== "unknown" ? process.env.NEXT_PUBLIC_UDATA_VERSION : "10.4.3"})` },
-      { href: 'https://github.com/amagovpt/udata-front-pt/', label: `Extensão do tema udata : udata-front (${process.env.NEXT_PUBLIC_UDATA_FRONT_VERSION && process.env.NEXT_PUBLIC_UDATA_FRONT_VERSION !== "unknown" ? process.env.NEXT_PUBLIC_UDATA_FRONT_VERSION : "6.2.4"})` },
+      { href: 'https://github.com/amagovpt/udata-pt', label: `Mecanismo de código aberto : udata (${process.env.NEXT_PUBLIC_UDATA_VERSION && process.env.NEXT_PUBLIC_UDATA_VERSION !== "unknown" ? process.env.NEXT_PUBLIC_UDATA_VERSION : "10.4.3"})` },
+      { href: 'https://github.com/amagovpt/dadosgov-fe', label: `Extensão do tema udata : udata-front${process.env.NEXT_PUBLIC_UDATA_FRONT_VERSION && process.env.NEXT_PUBLIC_UDATA_FRONT_VERSION !== "unknown" ? ` (${process.env.NEXT_PUBLIC_UDATA_FRONT_VERSION})` : ""}` },
     ],
   },
 ];
