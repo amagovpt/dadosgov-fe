@@ -1604,6 +1604,7 @@ export default function DatasetsEditClient() {
                             aria-label={`Remover ${zone.name}`}
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => {
+                              const savedScroll = window.scrollY;
                               const next = effectiveSpatialIds
                                 .filter((id) => id !== zone.id)
                                 .join(",");
@@ -1616,6 +1617,7 @@ export default function DatasetsEditClient() {
                                     "agora-input-select-edit-spatial-coverage-control",
                                   )
                                   ?.focus({ preventScroll: true });
+                                window.scrollTo({ top: savedScroll, behavior: "instant" });
                               }, 50);
                             }}
                           >

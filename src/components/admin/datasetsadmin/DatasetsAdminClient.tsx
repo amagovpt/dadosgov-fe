@@ -1445,6 +1445,7 @@ export default function DatasetsAdminClient({
                           aria-label={`Remover ${zone.name}`}
                           onMouseDown={(e) => e.preventDefault()}
                           onClick={() => {
+                            const savedScroll = window.scrollY;
                             const next = selectedSpatialZoneIds
                               .filter((id) => id !== zone.id)
                               .join(",");
@@ -1457,6 +1458,7 @@ export default function DatasetsAdminClient({
                                   "agora-input-select-dataset-spatial-coverage-control",
                                 )
                                 ?.focus({ preventScroll: true });
+                              window.scrollTo({ top: savedScroll, behavior: "instant" });
                             }, 50);
                           }}
                         >
