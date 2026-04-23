@@ -60,6 +60,7 @@ export default function OrgHarvestersClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     if (orgIdFromUrl && activeOrg?.id !== orgIdFromUrl) {
@@ -86,10 +87,18 @@ export default function OrgHarvestersClient() {
     loadHarvesters();
   }, [orgId]);
 
+  const filteredHarvesters = useMemo(() => {
+    if (!statusFilter) return harvesters;
+    return harvesters.filter((h) => {
+      const state = h.validation?.state ?? "pending";
+      return state === statusFilter;
+    });
+  }, [harvesters, statusFilter]);
+
   const paginatedHarvesters = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return harvesters.slice(start, start + itemsPerPage);
-  }, [harvesters, currentPage, itemsPerPage]);
+    return filteredHarvesters.slice(start, start + itemsPerPage);
+  }, [filteredHarvesters, currentPage, itemsPerPage]);
 
   if (!isOrgLoading && !orgId) {
     return (
@@ -142,12 +151,16 @@ export default function OrgHarvestersClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          onChange={(options) => {
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+            setCurrentPage(1);
+          }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="pending" selected={statusFilter === "pending"}>Pendente</DropdownOption>
+            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>Validado</DropdownOption>
+            <DropdownOption value="refused" selected={statusFilter === "refused"}>Recusado</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
