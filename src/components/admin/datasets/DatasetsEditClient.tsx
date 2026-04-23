@@ -1615,7 +1615,7 @@ export default function DatasetsEditClient() {
                                   .getElementById(
                                     "agora-input-select-edit-spatial-coverage-control",
                                   )
-                                  ?.focus();
+                                  ?.focus({ preventScroll: true });
                               }, 50);
                             }}
                           >

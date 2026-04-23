@@ -1456,7 +1456,7 @@ export default function DatasetsAdminClient({
                                 .getElementById(
                                   "agora-input-select-dataset-spatial-coverage-control",
                                 )
-                                ?.focus();
+                                ?.focus({ preventScroll: true });
                             }, 50);
                           }}
                         >
