@@ -534,7 +534,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       type="info"
                       description={
                         <span>
-                          A sua questão não é sobre a reutilização? <Link href="https://forum.dados.gov.pt" className="underline text-primary-600" target="_blank">Visite o nosso fórum.</Link>
+                          A sua questão não é sobre a reutilização? <Link href="https://dados.gov.pt/pt/" className="underline text-primary-600" target="_blank">Visite o nosso fórum.</Link>
                         </span>
                       }
                     />
