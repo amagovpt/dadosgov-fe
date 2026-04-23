@@ -71,6 +71,7 @@ export default function OrgProfileClient() {
   const [descriptionError, setDescriptionError] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null);
   const [logoError, setLogoError] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!orgId) {
@@ -160,12 +161,18 @@ export default function OrgProfileClient() {
       return;
     }
     setLogoError(null);
+    if (logoPreview) URL.revokeObjectURL(logoPreview);
+    const localPreview = URL.createObjectURL(file);
+    setLogoPreview(localPreview);
     try {
       await uploadOrgLogo(org.id, file);
-      const updated = await fetchOrganization(org.id);
-      if (updated) setOrg(updated);
+      // Upload succeeded — keep localPreview as the displayed avatar.
+      // The API returns { success, image } with a server-generated URL that
+      // may not be browser-accessible in dev (SERVER_NAME = "local.test").
     } catch (error) {
       console.error("Error uploading org logo:", error);
+      URL.revokeObjectURL(localPreview);
+      setLogoPreview(null);
     }
   };
 
@@ -205,9 +212,9 @@ export default function OrgProfileClient() {
       {org && (
         <div className="profile-card">
           <Avatar
-            avatarType={org.logo_thumbnail ? "image" : "initials"}
+            avatarType={(logoPreview || org.logo_thumbnail) ? "image" : "initials"}
             srcPath={
-              (org.logo_thumbnail ||
+              (logoPreview || org.logo_thumbnail ||
                 org.name?.charAt(0).toUpperCase() ||
                 "O") as unknown as undefined
             }
@@ -319,6 +326,7 @@ export default function OrgProfileClient() {
                     label="Ficheiro"
                     dragAndDropLabel="Arraste e largue o ficheiro aqui"
                     inputLabel="Selecione ou arraste o ficheiro"
+                    selectedFilesLabel="ficheiro selecionado"
                     removeFileButtonLabel="Remover ficheiro"
                     replaceFileButtonLabel="Substituir ficheiro"
                     extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."

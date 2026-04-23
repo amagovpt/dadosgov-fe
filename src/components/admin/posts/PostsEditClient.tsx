@@ -436,6 +436,7 @@ export default function PostsEditClient() {
                           label="Ficheiros"
                           dragAndDropLabel="Arraste e largue o ficheiro aqui"
                           inputLabel="Selecione ou arraste o ficheiro"
+                          selectedFilesLabel="ficheiro selecionado"
                           removeFileButtonLabel="Remover ficheiro"
                           replaceFileButtonLabel="Substituir ficheiro"
                           extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."

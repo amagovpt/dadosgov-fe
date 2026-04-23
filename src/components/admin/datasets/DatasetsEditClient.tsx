@@ -555,6 +555,8 @@ export default function DatasetsEditClient() {
 
   // API state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isUploadingRef = useRef(false);
+  const [uploaderKey, setUploaderKey] = useState(0);
   const [apiError, setApiError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
@@ -928,6 +930,8 @@ export default function DatasetsEditClient() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = (e.target as HTMLInputElement).files;
     if (!files || files.length === 0 || !dataset) return;
+    if (isUploadingRef.current) return;
+    isUploadingRef.current = true;
     setIsSubmitting(true);
     setApiError(null);
     setFileUploadError(null);
@@ -937,6 +941,7 @@ export default function DatasetsEditClient() {
       }
       const updated = await fetchDataset(slug);
       setDataset(updated);
+      setUploaderKey((k) => k + 1);
       setApiSuccess("Ficheiro(s) carregado(s) com sucesso.");
       setTimeout(() => setApiSuccess(null), 10000);
     } catch (error) {
@@ -964,6 +969,7 @@ export default function DatasetsEditClient() {
         setFileUploadError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
       }
     } finally {
+      isUploadingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -1679,6 +1685,7 @@ export default function DatasetsEditClient() {
             <div className="mt-[24px]">
               <div className="flex items-end gap-[16px] mb-[16px]">
                 <DragAndDropUploader
+                  key={uploaderKey}
                   label="Ficheiros"
                   dragAndDropLabel="Arraste e largue os ficheiros aqui"
                   inputLabel="Selecione ou arraste os ficheiros"

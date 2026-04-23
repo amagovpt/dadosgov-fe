@@ -335,6 +335,7 @@ export default function CommunityResourceFormClient({
                       label="Ficheiros"
                       dragAndDropLabel="Arraste e largue o ficheiro aqui"
                       inputLabel="Selecione ou arraste o ficheiro"
+                      selectedFilesLabel="ficheiro selecionado"
                       removeFileButtonLabel="Remover ficheiro"
                       replaceFileButtonLabel="Substituir ficheiro"
                       extensionsInstructions="Tamanho máximo: 420 MB."
