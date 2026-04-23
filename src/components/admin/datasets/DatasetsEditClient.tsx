@@ -572,6 +572,7 @@ export default function DatasetsEditClient() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
+  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
 
   // Loaded default values for IsolatedSelect (needed because data arrives async after mount)
   const [loadedLicense, setLoadedLicense] = useState("");
@@ -650,6 +651,7 @@ export default function DatasetsEditClient() {
               const merged = [...currentZones, ...suggestions.filter((z) => !seen.has(z.id))];
               setSpatialZones(merged);
               setLoadedSpatialZones(currentIds);
+              setSelectedSpatialZonesValue(currentIds.join(","));
               spatialCoverageRef.current = currentIds.join(",");
             });
           } else {
@@ -783,6 +785,13 @@ export default function DatasetsEditClient() {
     }
     return merged.sort((a, b) => a.name.localeCompare(b.name, "pt"));
   }, [spatialZones, spatialZoneSearch]);
+
+  const effectiveSpatialIds = (selectedSpatialZonesValue || loadedSpatialZones.join(","))
+    .split(",")
+    .filter(Boolean);
+  const selectedSpatialZoneObjects = effectiveSpatialIds
+    .map((id) => allSpatialZones.find((z) => z.id === id))
+    .filter(Boolean) as SpatialZone[];
 
   const spatialCoverageOptions = useMemo(() => {
     const options = allSpatialZones.map((z) => (
@@ -1552,9 +1561,33 @@ export default function DatasetsEditClient() {
                       searchNoResultsText="Nenhum resultado encontrado"
                       defaultValue={loadedSpatialZones.join(",")}
                       onChangeRef={spatialCoverageRef}
+                      onChangeCallback={(value) => {
+                        setSelectedSpatialZonesValue(value);
+                      }}
                     >
                       {spatialCoverageOptions}
                     </IsolatedSelect>
+
+                    {selectedSpatialZoneObjects.length > 0 && (
+                      <div className="flex flex-wrap gap-8 -mt-8">
+                        {selectedSpatialZoneObjects.map((zone) => (
+                          <Tag
+                            key={zone.id}
+                            aria-label={`Remover ${zone.name}`}
+                            onClick={() => {
+                              const next = effectiveSpatialIds
+                                .filter((id) => id !== zone.id)
+                                .join(",");
+                              setSelectedSpatialZonesValue(next);
+                              spatialCoverageRef.current = next;
+                            }}
+                          >
+                            {zone.code ? `${zone.name} (${zone.code})` : zone.name}
+                          </Tag>
+                        ))}
+                      </div>
+                    )}
+
                     <IsolatedSelect
                       label="Granularidade espacial"
                       placeholder="Selecione uma granularidade..."

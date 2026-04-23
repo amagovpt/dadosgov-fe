@@ -154,6 +154,7 @@ export default function DatasetsAdminClient({
   const [granularities, setGranularities] = useState<Granularity[]>([]);
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
+  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
   const [tags, setTags] = useState<TagSuggestion[]>([]);
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
   const [keywordSearch, setKeywordSearch] = useState("");
@@ -176,6 +177,10 @@ export default function DatasetsAdminClient({
     .filter(Boolean);
   const spatialCoverageDefaultValue = spatialCoverageRef.current;
   const spatialGranularityDefaultValue = spatialGranularityRef.current;
+  const selectedSpatialZoneIds = selectedSpatialZonesValue.split(",").filter(Boolean);
+  const selectedSpatialZoneObjects = selectedSpatialZoneIds
+    .map((id) => allSpatialZones.find((z) => z.id === id))
+    .filter(Boolean) as SpatialZone[];
 
   const producerOptions = useMemo(() => {
     const options = [
@@ -1383,9 +1388,32 @@ export default function DatasetsAdminClient({
                     searchInputPlaceholder="Escreva para pesquisar..."
                     searchNoResultsText="Nenhum resultado encontrado"
                     onChangeRef={spatialCoverageRef}
+                    onChangeCallback={(value) => {
+                      setSelectedSpatialZonesValue(value);
+                    }}
                   >
                     {spatialCoverageOptions}
                   </IsolatedSelect>
+
+                  {selectedSpatialZoneObjects.length > 0 && (
+                    <div className="flex flex-wrap gap-8 -mt-8">
+                      {selectedSpatialZoneObjects.map((zone) => (
+                        <Tag
+                          key={zone.id}
+                          aria-label={`Remover ${zone.name}`}
+                          onClick={() => {
+                            const next = selectedSpatialZoneIds
+                              .filter((id) => id !== zone.id)
+                              .join(",");
+                            setSelectedSpatialZonesValue(next);
+                            spatialCoverageRef.current = next;
+                          }}
+                        >
+                          {zone.code ? `${zone.name} (${zone.code})` : zone.name}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
 
                   <IsolatedSelect
                     label="Granularidade espacial"
