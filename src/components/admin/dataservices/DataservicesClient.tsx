@@ -70,11 +70,15 @@ export default function DataservicesClient() {
   }, []);
 
   const getStatusLabel = (api: Dataservice) => {
+    if (api.deleted) return "Excluído";
+    if (api.archived) return "Arquivado";
     if (api.private) return "Rascunho";
     return "Público";
   };
 
   const getStatusVariant = (api: Dataservice) => {
+    if (api.deleted) return "danger" as const;
+    if (api.archived) return "neutral" as const;
     if (api.private) return "warning" as const;
     return "success" as const;
   };

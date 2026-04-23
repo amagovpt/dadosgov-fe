@@ -177,9 +177,15 @@ export default function SystemDataservicesClient() {
                   </a>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot variant={api.private ? "warning" : "success"}>
-                    {api.private ? "Rascunho" : "Público"}
-                  </StatusDot>
+                  {api.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : api.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : api.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
                   {formatDate(api.created_at)}

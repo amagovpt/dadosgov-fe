@@ -250,11 +250,15 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   </a>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot
-                    variant={dataset.private ? "warning" : "success"}
-                  >
-                    {dataset.private ? "Rascunho" : "Público"}
-                  </StatusDot>
+                  {dataset.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : dataset.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : dataset.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
                   {formatDate(dataset.created_at)}
