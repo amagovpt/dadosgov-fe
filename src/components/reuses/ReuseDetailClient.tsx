@@ -661,7 +661,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                                 </div>
                               )}
                               <div className="mb-16">
-                                <InputTextArea label="Sua mensagem" value={replyMessage} onChange={(e) => setReplyMessage(e.target.value)} rows={3} placeholder="Por favor, mantenha a cordialidade e a postura construtiva. Evite compartilhar informações pessoais." />
+                                <InputTextArea label="Sua mensagem" value={replyMessage} onChange={(e) => setReplyMessage(e.target.value)} rows={3} placeholder="Mantenha a cordialidade e postura construtiva. Não partilhe informações pessoais." />
                               </div>
                               <div className="flex justify-end gap-16">
                                 <Button variant="primary" appearance="outline" disabled={isReplying || !replyMessage.trim()} onClick={async () => { setIsReplying(true); const org = replyIdentityRef.current && replyIdentityRef.current !== 'user' ? replyIdentityRef.current : undefined; const updated = await replyToDiscussion(disc.id, replyMessage.trim(), { organization: org, close: true }); if (updated) { setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d))); setReplyingTo(null); setReplyMessage(''); } setIsReplying(false); }}>Responder e fechar</Button>
