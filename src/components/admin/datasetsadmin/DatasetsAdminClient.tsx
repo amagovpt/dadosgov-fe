@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -181,6 +181,9 @@ export default function DatasetsAdminClient({
   const selectedSpatialZoneObjects = selectedSpatialZoneIds
     .map((id) => allSpatialZones.find((z) => z.id === id))
     .filter(Boolean) as SpatialZone[];
+  const handleSpatialCoverageChange = useCallback((value: string) => {
+    setSelectedSpatialZonesValue(value);
+  }, []);
 
   const producerOptions = useMemo(() => {
     const options = [
@@ -1388,9 +1391,7 @@ export default function DatasetsAdminClient({
                     searchInputPlaceholder="Escreva para pesquisar..."
                     searchNoResultsText="Nenhum resultado encontrado"
                     onChangeRef={spatialCoverageRef}
-                    onChangeCallback={(value) => {
-                      setSelectedSpatialZonesValue(value);
-                    }}
+                    onChangeCallback={handleSpatialCoverageChange}
                   >
                     {spatialCoverageOptions}
                   </IsolatedSelect>

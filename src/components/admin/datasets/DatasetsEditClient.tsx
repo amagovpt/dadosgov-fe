@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Avatar,
@@ -792,6 +792,9 @@ export default function DatasetsEditClient() {
   const selectedSpatialZoneObjects = effectiveSpatialIds
     .map((id) => allSpatialZones.find((z) => z.id === id))
     .filter(Boolean) as SpatialZone[];
+  const handleSpatialCoverageChange = useCallback((value: string) => {
+    setSelectedSpatialZonesValue(value);
+  }, []);
 
   const spatialCoverageOptions = useMemo(() => {
     const options = allSpatialZones.map((z) => (
@@ -1561,9 +1564,7 @@ export default function DatasetsEditClient() {
                       searchNoResultsText="Nenhum resultado encontrado"
                       defaultValue={loadedSpatialZones.join(",")}
                       onChangeRef={spatialCoverageRef}
-                      onChangeCallback={(value) => {
-                        setSelectedSpatialZonesValue(value);
-                      }}
+                      onChangeCallback={handleSpatialCoverageChange}
                     >
                       {spatialCoverageOptions}
                     </IsolatedSelect>
