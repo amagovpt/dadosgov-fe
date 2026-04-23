@@ -112,6 +112,9 @@ export default function OrgHarvestersClient() {
       if (statusFilter === "failed") {
         return h.last_job?.status === "failed";
       }
+      if (statusFilter === "done") {
+        return h.last_job?.status === "done";
+      }
       const state = h.validation?.state ?? "pending";
       return state === statusFilter;
     });
@@ -183,6 +186,7 @@ export default function OrgHarvestersClient() {
             <DropdownOption value="pending" selected={statusFilter === "pending"}>Em espera de validação</DropdownOption>
             <DropdownOption value="accepted" selected={statusFilter === "accepted"}>Validado</DropdownOption>
             <DropdownOption value="refused" selected={statusFilter === "refused"}>Recusado</DropdownOption>
+            <DropdownOption value="done" selected={statusFilter === "done"}>Terminado</DropdownOption>
             <DropdownOption value="failed" selected={statusFilter === "failed"}>Falhado</DropdownOption>
           </DropdownSection>
         </InputSelect>
