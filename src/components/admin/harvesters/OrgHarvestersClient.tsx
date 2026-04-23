@@ -109,6 +109,9 @@ export default function OrgHarvestersClient() {
   const filteredHarvesters = useMemo(() => {
     if (!statusFilter) return harvesters;
     return harvesters.filter((h) => {
+      if (statusFilter === "failed") {
+        return h.last_job?.status === "failed";
+      }
       const state = h.validation?.state ?? "pending";
       return state === statusFilter;
     });
@@ -177,9 +180,10 @@ export default function OrgHarvestersClient() {
         >
           <DropdownSection name="status">
             <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="pending" selected={statusFilter === "pending"}>Pendente</DropdownOption>
+            <DropdownOption value="pending" selected={statusFilter === "pending"}>Em espera de validação</DropdownOption>
             <DropdownOption value="accepted" selected={statusFilter === "accepted"}>Validado</DropdownOption>
             <DropdownOption value="refused" selected={statusFilter === "refused"}>Recusado</DropdownOption>
+            <DropdownOption value="failed" selected={statusFilter === "failed"}>Falhado</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>

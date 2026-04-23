@@ -106,6 +106,9 @@ export default function SystemHarvestersClient() {
     }
     if (statusFilter) {
       result = result.filter((h) => {
+        if (statusFilter === "failed") {
+          return h.last_job?.status === "failed";
+        }
         const valState = h.validation?.state;
         return valState === statusFilter;
       });
@@ -164,6 +167,7 @@ export default function SystemHarvestersClient() {
             </DropdownOption>
             <DropdownOption value="accepted" selected={statusFilter === "accepted"}>Validado</DropdownOption>
             <DropdownOption value="refused" selected={statusFilter === "refused"}>Recusado</DropdownOption>
+            <DropdownOption value="failed" selected={statusFilter === "failed"}>Falhado</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
