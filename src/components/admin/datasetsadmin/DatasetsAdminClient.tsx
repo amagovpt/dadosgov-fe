@@ -478,7 +478,7 @@ export default function DatasetsAdminClient({
         setHasDatasets(myDatasetsData.data.length > 0);
         setTags(tagsData);
         setResourceTypes(resTypes);
-        setSpatialZones(initialZones);
+        setSpatialZones([...initialZones].sort((a, b) => a.name.localeCompare(b.name, "pt")));
       } catch (error) {
         console.error("Error loading dropdown data:", error);
       }

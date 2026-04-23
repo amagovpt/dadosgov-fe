@@ -649,13 +649,13 @@ export default function DatasetsEditClient() {
               const currentIds = currentZones.map((z) => z.id);
               const seen = new Set(currentIds);
               const merged = [...currentZones, ...initialZones.filter((z) => !seen.has(z.id))];
-              setSpatialZones(merged);
+              setSpatialZones([...merged].sort((a, b) => a.name.localeCompare(b.name, "pt")));
               setLoadedSpatialZones(currentIds);
               setSelectedSpatialZonesValue(currentIds.join(","));
               spatialCoverageRef.current = currentIds.join(",");
             });
           } else {
-            setSpatialZones(initialZones);
+            setSpatialZones([...initialZones].sort((a, b) => a.name.localeCompare(b.name, "pt")));
           }
         });
 
