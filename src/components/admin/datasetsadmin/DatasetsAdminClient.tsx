@@ -1447,12 +1447,20 @@ export default function DatasetsAdminClient({
                         <Tag
                           key={zone.id}
                           aria-label={`Remover ${zone.name}`}
+                          onMouseDown={(e) => e.preventDefault()}
                           onClick={() => {
                             const next = selectedSpatialZoneIds
                               .filter((id) => id !== zone.id)
                               .join(",");
                             setSelectedSpatialZonesValue(next);
                             spatialCoverageRef.current = next;
+                            setTimeout(() => {
+                              document
+                                .getElementById(
+                                  "agora-input-select-dataset-spatial-coverage-control",
+                                )
+                                ?.focus();
+                            }, 50);
                           }}
                         >
                           {zone.code ? `${zone.name} (${zone.code})` : zone.name}
