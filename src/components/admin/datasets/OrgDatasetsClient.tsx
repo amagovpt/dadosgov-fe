@@ -75,10 +75,20 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
       } = { sort };
 
       if (q.trim()) filters.q = q.trim();
-      if (status === "draft") filters.private = true;
-      if (status === "public") filters.private = false;
-      if (status === "archived") filters.archived = true;
-      if (status === "deleted") filters.deleted = true;
+      if (status === "public") {
+        filters.private = false;
+        filters.archived = false;
+        filters.deleted = false;
+      } else if (status === "draft") {
+        filters.private = true;
+        filters.archived = false;
+        filters.deleted = false;
+      } else if (status === "archived") {
+        filters.archived = true;
+        filters.deleted = false;
+      } else if (status === "deleted") {
+        filters.deleted = true;
+      }
 
       const response = await fetchOrgDatasets(orgId, page, pageSize, filters);
       setDatasets(response.data || []);

@@ -82,7 +82,8 @@ export default function SystemReusesClient() {
   }, [reuses, statusFilter]);
 
   const getStatus = (reuse: Reuse) => {
-    if (reuse.archived) return { label: "Arquivo", variant: "warning" as const };
+    if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
+    if (reuse.archived) return { label: "Arquivado", variant: "neutral" as const };
     if (reuse.private) return { label: "Rascunho", variant: "warning" as const };
     return { label: "Público", variant: "success" as const };
   };
