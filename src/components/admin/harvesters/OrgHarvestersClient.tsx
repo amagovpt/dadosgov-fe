@@ -30,21 +30,40 @@ const formatDate = (dateStr: string) => {
   return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
 };
 
-const getStatusLabel = (source: HarvestSource) => {
-  const job = source.last_job;
-  if (!job) return "Sem execução";
-  if (job.status === "done") return "Terminado";
-  if (job.status === "failed") return "Falhado";
-  if (job.status === "started") return "Em execução";
-  return job.status;
+type StatusInfo = {
+  label: string;
+  variant: "informative" | "success" | "danger" | "warning";
 };
 
-const getStatusVariant = (source: HarvestSource) => {
-  const job = source.last_job;
-  if (!job) return "informative" as const;
-  if (job.status === "done") return "success" as const;
-  if (job.status === "failed") return "danger" as const;
-  return "warning" as const;
+const VALIDATION_STATUS: Record<string, StatusInfo> = {
+  pending: { label: "Em espera de validação", variant: "warning" },
+  refused: { label: "Recusado", variant: "danger" },
+};
+
+const JOB_STATUS: Record<string, StatusInfo> = {
+  done: { label: "Terminado", variant: "success" },
+  failed: { label: "Falhado", variant: "danger" },
+  started: { label: "Em execução", variant: "warning" },
+};
+
+const getStatus = (source: HarvestSource): StatusInfo => {
+  // Show validation state when it isn't "accepted" — matches the
+  // dropdown filter options (Pendente / Validado / Recusado).
+  if (source.validation?.state && source.validation.state !== "accepted") {
+    return (
+      VALIDATION_STATUS[source.validation.state] || VALIDATION_STATUS.pending
+    );
+  }
+  // Otherwise show the latest job execution status.
+  if (source.last_job?.status) {
+    return (
+      JOB_STATUS[source.last_job.status] || {
+        label: "Sem tarefa de momento",
+        variant: "informative",
+      }
+    );
+  }
+  return { label: "Sem execução", variant: "informative" };
 };
 
 export default function OrgHarvestersClient() {
@@ -217,9 +236,14 @@ export default function OrgHarvestersClient() {
                     </a>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant={getStatusVariant(harvester)}>
-                      {getStatusLabel(harvester)}
-                    </StatusDot>
+                    {(() => {
+                      const status = getStatus(harvester);
+                      return (
+                        <StatusDot variant={status.variant}>
+                          {status.label}
+                        </StatusDot>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell headerLabel="Implementação">
                     {harvester.backend}

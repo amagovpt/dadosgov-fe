@@ -219,7 +219,13 @@ export default function CommunityResourcesClient() {
                   )}
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot variant="success">Público</StatusDot>
+                  {resource.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : resource.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Formato">
                   {resource.format || "—"}

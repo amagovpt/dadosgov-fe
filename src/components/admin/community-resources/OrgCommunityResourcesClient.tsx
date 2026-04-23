@@ -205,7 +205,13 @@ export default function OrgCommunityResourcesClient() {
                     <span className="text-primary-600">{resource.title}</span>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant="success">Público</StatusDot>
+                    {resource.deleted ? (
+                      <StatusDot variant="danger">Excluído</StatusDot>
+                    ) : resource.archived ? (
+                      <StatusDot variant="neutral">Arquivado</StatusDot>
+                    ) : (
+                      <StatusDot variant="success">Público</StatusDot>
+                    )}
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDate(resource.created_at)}

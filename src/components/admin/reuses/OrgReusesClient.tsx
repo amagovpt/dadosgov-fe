@@ -203,7 +203,15 @@ export default function OrgReusesClient() {
                     </a>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant="success">Público</StatusDot>
+                    {reuse.deleted ? (
+                      <StatusDot variant="danger">Excluído</StatusDot>
+                    ) : reuse.archived ? (
+                      <StatusDot variant="neutral">Arquivado</StatusDot>
+                    ) : reuse.private ? (
+                      <StatusDot variant="warning">Rascunho</StatusDot>
+                    ) : (
+                      <StatusDot variant="success">Público</StatusDot>
+                    )}
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDate(reuse.created_at)}
