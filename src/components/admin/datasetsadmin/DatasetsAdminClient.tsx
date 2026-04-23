@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, startTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -449,7 +449,7 @@ export default function DatasetsAdminClient({
         setLicenses(licensesData);
         setFrequencies(frequenciesData);
         setGranularities(granularitiesData);
-        setSpatialZones(zonesData);
+        startTransition(() => setSpatialZones(zonesData));
         setHasDatasets(myDatasetsData.data.length > 0);
         setTags(tagsData);
         setResourceTypes(resTypes);

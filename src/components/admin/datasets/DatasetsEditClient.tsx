@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, startTransition, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Avatar,
@@ -649,13 +649,13 @@ export default function DatasetsEditClient() {
               const currentIds = currentZones.map((z) => z.id);
               const seen = new Set(currentIds);
               const merged = [...currentZones, ...suggestions.filter((z) => !seen.has(z.id))];
-              setSpatialZones(merged);
+              startTransition(() => setSpatialZones(merged));
               setLoadedSpatialZones(currentIds);
               setSelectedSpatialZonesValue(currentIds.join(","));
               spatialCoverageRef.current = currentIds.join(",");
             });
           } else {
-            setSpatialZones(suggestions);
+            startTransition(() => setSpatialZones(suggestions));
           }
         });
 
