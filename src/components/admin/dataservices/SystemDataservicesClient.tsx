@@ -68,9 +68,13 @@ export default function SystemDataservicesClient() {
     return apis.filter((a) => {
       switch (statusFilter) {
         case "public":
-          return !a.private;
+          return !a.private && !a.archived && !a.deleted;
         case "draft":
-          return !!a.private;
+          return a.private && !a.archived && !a.deleted;
+        case "archived":
+          return !!a.archived && !a.deleted;
+        case "deleted":
+          return !!a.deleted;
         default:
           return true;
       }
@@ -122,8 +126,11 @@ export default function SystemDataservicesClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>

@@ -177,8 +177,9 @@ export default function SystemPostsClient() {
           }}
         >
           <DropdownSection name="type">
-            <DropdownOption value="news">Notícias</DropdownOption>
-            <DropdownOption value="page">Página</DropdownOption>
+            <DropdownOption value="" selected={typeFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="news" selected={typeFilter === "news"}>Notícias</DropdownOption>
+            <DropdownOption value="page" selected={typeFilter === "page"}>Página</DropdownOption>
           </DropdownSection>
         </InputSelect>
         <InputSelect
@@ -194,8 +195,9 @@ export default function SystemPostsClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="published">Publicado</DropdownOption>
-            <DropdownOption value="draft">Despublicado</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="published" selected={statusFilter === "published"}>Publicado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Despublicado</DropdownOption>
           </DropdownSection>
         </InputSelect>
         <Button

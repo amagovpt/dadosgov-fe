@@ -158,11 +158,12 @@ export default function SystemHarvestersClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="pending">
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="pending" selected={statusFilter === "pending"}>
               Em espera de validação
             </DropdownOption>
-            <DropdownOption value="accepted">Validado</DropdownOption>
-            <DropdownOption value="refused">Recusado</DropdownOption>
+            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>Validado</DropdownOption>
+            <DropdownOption value="refused" selected={statusFilter === "refused"}>Recusado</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
