@@ -181,14 +181,16 @@ export default function DatasetsAdminClient({
   const selectedSpatialZoneIds = selectedSpatialZonesValue.split(",").filter(Boolean);
   const handleSpatialCoverageChange = useCallback((value: string) => {
     setSelectedSpatialZonesValue(value);
-    // Pin any newly selected zones into spatialZones so they survive search changes
-    const ids = value.split(",").filter(Boolean);
+    const ids = new Set(value.split(",").filter(Boolean));
     setSpatialZones((prev) => {
+      // Pin newly selected zones; unpin deselected ones
       const seen = new Set(prev.map((z) => z.id));
       const additions = spatialZoneSearchRef.current.filter(
-        (z) => ids.includes(z.id) && !seen.has(z.id),
+        (z) => ids.has(z.id) && !seen.has(z.id),
       );
-      return additions.length === 0 ? prev : [...prev, ...additions];
+      const kept = prev.filter((z) => ids.has(z.id));
+      if (additions.length === 0 && kept.length === prev.length) return prev;
+      return [...kept, ...additions];
     });
   }, []);
 
@@ -1448,6 +1450,7 @@ export default function DatasetsAdminClient({
                               .join(",");
                             setSelectedSpatialZonesValue(next);
                             spatialCoverageRef.current = next;
+                            setSpatialZones((prev) => prev.filter((z) => z.id !== zone.id));
                             setTimeout(() => {
                               document
                                 .getElementById(
