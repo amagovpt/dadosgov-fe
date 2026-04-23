@@ -644,6 +644,15 @@ export default function DatasetsAdminClient({
           ...(endRaw ? { end: endRaw } : {}),
         };
       }
+      const spatialZoneIds = spatialCoverageRef.current.split(",").filter(Boolean);
+      const spatialGranularity = spatialGranularityRef.current || null;
+      if (spatialZoneIds.length > 0 || spatialGranularity) {
+        payload.spatial = {
+          geom: null,
+          zones: spatialZoneIds,
+          granularity: spatialGranularity,
+        };
+      }
 
       const dataset = await createDataset(payload);
       setCreatedDataset(dataset);
