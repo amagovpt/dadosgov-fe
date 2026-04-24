@@ -1,5 +1,5 @@
 import React from 'react';
-import MiniCourseObjectivesClient from '@/components/mini-courses/MiniCourseObjectivesClient';
+import MiniCourseObjectivesClient from '@/components/Courses/mini-courses/MiniCourseObjectivesClient';
 
 export default async function Page({
   params,

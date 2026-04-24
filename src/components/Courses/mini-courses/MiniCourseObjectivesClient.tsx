@@ -29,10 +29,10 @@ export default function MiniCourseObjectivesClient({ slug }: Props) {
             <Breadcrumb
               items={[
                 { label: 'Início', url: '/' },
-                { label: 'Mini Cursos', url: '/pages/mini-courses' },
+                { label: 'Mini Cursos', url: '/pages/courses/mini-courses' },
                 {
                   label: course.title,
-                  url: `/pages/mini-courses/${slug}`,
+                  url: `/pages/courses/mini-courses/${slug}`,
                 },
                 { label: 'Objetivos', url: '#' },
               ]}
@@ -60,7 +60,7 @@ export default function MiniCourseObjectivesClient({ slug }: Props) {
                     trailingIcon="agora-line-arrow-right-circle"
                     trailingIconHover="agora-solid-arrow-right-circle"
                     onClick={() =>
-                      router.push(`/pages/mini-courses/${slug}/steps/1`)
+                      router.push(`/pages/courses/mini-courses/${slug}/steps/1`)
                     }
                     className="px-24 h-48"
                   >

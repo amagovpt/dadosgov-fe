@@ -1,5 +1,5 @@
 import React from 'react';
-import MiniCourseDetailClient from '@/components/mini-courses/MiniCourseDetailClient';
+import MiniCourseDetailClient from '@/components/Courses/mini-courses/MiniCourseDetailClient';
 
 export default async function Page({
     params,

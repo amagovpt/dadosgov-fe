@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, CardGeneral } from '@ama-pt/agora-design-system';
+import { Button } from '@ama-pt/agora-design-system';
 import { getMiniCourseBySlug } from '@/data/miniCoursesData';
 
 interface Props {
@@ -39,14 +39,14 @@ export default function MiniCourseStepClient({ slug, step }: Props) {
 
   const handleNext = () => {
     if (isLastStep) {
-      router.push(`/pages/mini-courses/${slug}/conclusion`);
+      router.push(`/pages/courses/mini-courses/${slug}/conclusion`);
     } else {
-      router.push(`/pages/mini-courses/${slug}/steps/${step + 1}`);
+      router.push(`/pages/courses/mini-courses/${slug}/steps/${step + 1}`);
     }
   };
 
   const handlePrevious = () => {
-    router.push(`/pages/mini-courses/${slug}/steps/${step - 1}`);
+    router.push(`/pages/courses/mini-courses/${slug}/steps/${step - 1}`);
   };
 
   return (
@@ -112,7 +112,7 @@ export default function MiniCourseStepClient({ slug, step }: Props) {
         {/* Navigation buttons */}
         <div className="container mx-auto px-4 lg:px-64 mt-[32px] pb-[64px]">
           <div className="flex justify-end items-center gap-[32px]">
-            <Button
+            {/* <Button
               variant="primary"
               appearance="outline"
               hasIcon={true}
@@ -121,7 +121,7 @@ export default function MiniCourseStepClient({ slug, step }: Props) {
               onClick={() => setIsFavorite(!isFavorite)}
             >
               Adicionar aos favoritos
-            </Button>
+            </Button> */}
 
             <div className="flex gap-[16px]">
               {!isFirstStep && (

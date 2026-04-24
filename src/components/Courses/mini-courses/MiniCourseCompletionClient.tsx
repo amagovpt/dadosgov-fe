@@ -61,10 +61,11 @@ export default function MiniCourseCompletionClient({ slug }: Props) {
                 darkMode={false}
                 items={[
                   { label: 'Home', url: '/' },
-                  { label: 'Minicursos', url: '/pages/mini-courses' },
+                  { label: 'Cursos', url: '/pages/courses/' },
+                  { label: 'Minicursos', url: '/pages/courses/mini-courses/' },
                   {
                     label: 'Minicurso sobre a introdução aos dados abertos',
-                    url: '/pages/mini-courses/introducao-dados-abertos',
+                    url: '/pages/courses/mini-courses/introducao-dados-abertos',
                   },
                   { label: 'Conclusão', url: '#' },
                 ]}
@@ -92,7 +93,7 @@ export default function MiniCourseCompletionClient({ slug }: Props) {
 
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-16">
-                    <Button
+                    {/* <Button
                       variant="primary"
                       appearance="outline"
                       hasIcon={true}
@@ -102,7 +103,7 @@ export default function MiniCourseCompletionClient({ slug }: Props) {
                       className="px-24 h-48"
                     >
                       Adicionar aos favoritos
-                    </Button>
+                    </Button> */}
                     <Button
                       variant="primary"
                       appearance="solid"

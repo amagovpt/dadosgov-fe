@@ -1,5 +1,5 @@
 import React from 'react';
-import MiniCourseCompletionClient from '@/components/mini-courses/MiniCourseCompletionClient';
+import MiniCourseCompletionClient from '@/components/Courses/mini-courses/MiniCourseCompletionClient';
 
 export default async function ConclusionPage({
     params,

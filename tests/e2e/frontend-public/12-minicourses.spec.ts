@@ -4,7 +4,7 @@ const BASE_URL = "http://localhost:3000";
 
 test.describe("Mini-Courses Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/pages/mini-courses`);
+    await page.goto(`${BASE_URL}/pages/courses/mini-courses/`);
     await page.waitForLoadState("networkidle");
   });
 
@@ -16,7 +16,7 @@ test.describe("Mini-Courses Page", () => {
 
     // Course cards or links
     const cards = page.locator(
-      'a[href*="/pages/mini-courses/"], .card, [class*="card"], article, [class*="course"]'
+      'a[href*="/pages/courses/mini-courses/"], .card, [class*="card"], article, [class*="course"]'
     );
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
   });
@@ -57,7 +57,7 @@ test.describe("Mini-Courses Page", () => {
     page,
   }) => {
     const firstCard = page
-      .locator('a[href*="/pages/mini-courses/"], .card, [class*="card"], article, [class*="course"]')
+      .locator('a[href*="/pages/courses/mini-courses/"], .card, [class*="card"], article, [class*="course"]')
       .first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
@@ -69,7 +69,7 @@ test.describe("Mini-Courses Page", () => {
     page,
   }) => {
     const firstLink = page
-      .locator('a[href*="/pages/mini-courses/"]')
+      .locator('a[href*="/pages/courses/mini-courses/"]')
       .first();
     if ((await firstLink.count()) > 0) {
       await firstLink.click();
@@ -87,7 +87,7 @@ test.describe("Mini-Courses Page", () => {
     page,
   }) => {
     const firstLink = page
-      .locator('a[href*="/pages/mini-courses/"]')
+      .locator('a[href*="/pages/courses/mini-courses/"]')
       .first();
     if ((await firstLink.count()) > 0) {
       await firstLink.click();
@@ -104,7 +104,7 @@ test.describe("Mini-Courses Page", () => {
 
   test("MC-07: Navigate between steps/lessons", async ({ page }) => {
     const firstLink = page
-      .locator('a[href*="/pages/mini-courses/"]')
+      .locator('a[href*="/pages/courses/mini-courses/"]')
       .first();
     if ((await firstLink.count()) > 0) {
       await firstLink.click();
@@ -122,7 +122,7 @@ test.describe("Mini-Courses Page", () => {
 
   test("MC-08: Conclusion page accessible", async ({ page }) => {
     const firstLink = page
-      .locator('a[href*="/pages/mini-courses/"]')
+      .locator('a[href*="/pages/courses/mini-courses/"]')
       .first();
     if ((await firstLink.count()) > 0) {
       await firstLink.click();
@@ -139,7 +139,7 @@ test.describe("Mini-Courses Page", () => {
 
   test("MC-09: Pagination shows 4 items per page", async ({ page }) => {
     const cards = page.locator(
-      'a[href*="/pages/mini-courses/"], .card, [class*="card"], article, [class*="course"]'
+      'a[href*="/pages/courses/mini-courses/"], .card, [class*="card"], article, [class*="course"]'
     );
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
@@ -165,7 +165,7 @@ test.describe("Mini-Courses Page", () => {
     } else {
       // Check in course detail page
       const firstLink = page
-        .locator('a[href*="/pages/mini-courses/"]')
+        .locator('a[href*="/pages/courses/mini-courses/"]')
         .first();
       if ((await firstLink.count()) > 0) {
         await firstLink.click();

@@ -5,44 +5,14 @@ import { Breadcrumb, InputSearch, CardIllustrative, Feedback, Icon } from '@ama-
 import { MiniCoursesFilters } from './MiniCoursesFilters';
 import { Pagination } from '@/components/Pagination';
 import { miniCoursesData } from '@/data/miniCoursesData';
+import Image from 'next/image';
+import HeroCourses from '../Hero';
 
 export default function MiniCoursesClient() {
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 ">
       <main className="flex-grow">
-        <div className="bg-primary-100">
-          <div className="container mx-auto px-4 my-64 lg:px-64">
-            <Breadcrumb
-              items={[
-                { label: 'Início', url: '/' },
-                { label: 'Minicursos', url: '/pages/mini-cursos' }
-              ]}
-              className="mb-64"
-            />
-            <div className="flex">
-              <div className="w-1/2 pr-32">
-                <h1 className="text-[32px] leading-[40px] font-bold text-primary-600 mb-32">
-                  Minicursos
-                </h1>
-
-                <div className="text-[18px] leading-[28px] space-y-16 w-[94%]">
-                  <p>
-                    As formações do Mosaico destinam-se a diferentes perfis da Administração Pública e visam apoiar o desenvolvimento de competências essenciais para a transformação digital do Estado. Através de uma abordagem prática, permitem desenvolver conhecimentos técnicos e estratégicos para modernizar serviços públicos e melhorar a eficiência e a qualidade do atendimento.
-                  </p>
-                </div>
-
-                <div className="mt-64">
-                  Atualizado em 30.09.2025
-                </div>
-              </div>
-              <div className="img-container">
-                <img src="/minicourses/mini_cursos.svg" alt="Minicursos" className="w-[597px] h-[390px]" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-
+        <HeroCourses />
         <div className="bg-white py-64 border-t border-neutral-100">
           <div className="container mx-auto px-4 lg:px-64">
             <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-[36px]">
@@ -85,7 +55,7 @@ export default function MiniCoursesClient() {
                       title={course.title}
                       description={course.description}
                       mainLink={
-                        <Link href={`/pages/mini-courses/${course.slug}`} className="flex items-center h-full">
+                        <Link href={`/pages/courses/mini-courses/${course.slug}`} className="flex items-center h-full">
                           <Icon name="agora-line-arrow-right-circle" className="w-[24px] h-[24px]" />
                         </Link>
                       }
@@ -99,7 +69,7 @@ export default function MiniCoursesClient() {
                     currentPage={1}
                     totalItems={8}
                     pageSize={4}
-                    baseUrl="/pages/mini-cursos"
+                    baseUrl="/pages/courses/mini-courses"
                   />
                 </div>
               </div>

@@ -360,7 +360,7 @@ export const Header = () => {
           //   iconHover: "agora-solid-folder",
           //   title: "Minicursos",
           //   description: "Formação online",
-          //   href: "/pages/mini-courses",
+          //   href: "/pages/courses/mini-courses/",
           // },
         ];
 
