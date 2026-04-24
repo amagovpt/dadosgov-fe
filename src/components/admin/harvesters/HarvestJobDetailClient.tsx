@@ -269,11 +269,12 @@ export default function HarvestJobDetailClient({
             }}
           >
             <DropdownSection name="status">
-              <DropdownOption value="done">Concluído</DropdownOption>
-              <DropdownOption value="failed">Falhado</DropdownOption>
-              <DropdownOption value="skipped">Ignorado</DropdownOption>
-              <DropdownOption value="archived">Arquivado</DropdownOption>
-              <DropdownOption value="pending">Pendente</DropdownOption>
+              <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+              <DropdownOption value="done" selected={statusFilter === "done"}>Concluído</DropdownOption>
+              <DropdownOption value="failed" selected={statusFilter === "failed"}>Falhado</DropdownOption>
+              <DropdownOption value="skipped" selected={statusFilter === "skipped"}>Ignorado</DropdownOption>
+              <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+              <DropdownOption value="pending" selected={statusFilter === "pending"}>Pendente</DropdownOption>
             </DropdownSection>
           </InputSelect>
         </div>

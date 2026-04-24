@@ -380,6 +380,7 @@ export interface Reuse {
   private: boolean;
   featured: boolean;
   archived: string | null;
+  deleted?: string | null;
   topic: string | null;
   created_at: string;
   last_modified: string;

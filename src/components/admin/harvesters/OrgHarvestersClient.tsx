@@ -10,6 +10,7 @@ import {
   InputSearchBar,
   DropdownSection,
   DropdownOption,
+  StatusCard,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -30,21 +31,40 @@ const formatDate = (dateStr: string) => {
   return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
 };
 
-const getStatusLabel = (source: HarvestSource) => {
-  const job = source.last_job;
-  if (!job) return "Sem execução";
-  if (job.status === "done") return "Terminado";
-  if (job.status === "failed") return "Falhado";
-  if (job.status === "started") return "Em execução";
-  return job.status;
+type StatusInfo = {
+  label: string;
+  variant: "informative" | "success" | "danger" | "warning";
 };
 
-const getStatusVariant = (source: HarvestSource) => {
-  const job = source.last_job;
-  if (!job) return "informative" as const;
-  if (job.status === "done") return "success" as const;
-  if (job.status === "failed") return "danger" as const;
-  return "warning" as const;
+const VALIDATION_STATUS: Record<string, StatusInfo> = {
+  pending: { label: "Em espera de validação", variant: "warning" },
+  refused: { label: "Recusado", variant: "danger" },
+};
+
+const JOB_STATUS: Record<string, StatusInfo> = {
+  done: { label: "Terminado", variant: "success" },
+  failed: { label: "Falhado", variant: "danger" },
+  started: { label: "Em execução", variant: "warning" },
+};
+
+const getStatus = (source: HarvestSource): StatusInfo => {
+  // Show validation state when it isn't "accepted" — matches the
+  // dropdown filter options (Pendente / Validado / Recusado).
+  if (source.validation?.state && source.validation.state !== "accepted") {
+    return (
+      VALIDATION_STATUS[source.validation.state] || VALIDATION_STATUS.pending
+    );
+  }
+  // Otherwise show the latest job execution status.
+  if (source.last_job?.status) {
+    return (
+      JOB_STATUS[source.last_job.status] || {
+        label: "Sem tarefa de momento",
+        variant: "informative",
+      }
+    );
+  }
+  return { label: "Sem execução", variant: "informative" };
 };
 
 export default function OrgHarvestersClient() {
@@ -60,6 +80,7 @@ export default function OrgHarvestersClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     if (orgIdFromUrl && activeOrg?.id !== orgIdFromUrl) {
@@ -86,10 +107,24 @@ export default function OrgHarvestersClient() {
     loadHarvesters();
   }, [orgId]);
 
+  const filteredHarvesters = useMemo(() => {
+    if (!statusFilter) return harvesters;
+    return harvesters.filter((h) => {
+      if (statusFilter === "failed") {
+        return h.last_job?.status === "failed";
+      }
+      if (statusFilter === "done") {
+        return h.last_job?.status === "done";
+      }
+      const state = h.validation?.state ?? "pending";
+      return state === statusFilter;
+    });
+  }, [harvesters, statusFilter]);
+
   const paginatedHarvesters = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return harvesters.slice(start, start + itemsPerPage);
-  }, [harvesters, currentPage, itemsPerPage]);
+    return filteredHarvesters.slice(start, start + itemsPerPage);
+  }, [filteredHarvesters, currentPage, itemsPerPage]);
 
   if (!isOrgLoading && !orgId) {
     return (
@@ -142,15 +177,30 @@ export default function OrgHarvestersClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          onChange={(options) => {
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+            setCurrentPage(1);
+          }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="pending" selected={statusFilter === "pending"}>Em espera de validação</DropdownOption>
+            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>Validado</DropdownOption>
+            <DropdownOption value="refused" selected={statusFilter === "refused"}>Recusado</DropdownOption>
+            <DropdownOption value="done" selected={statusFilter === "done"}>Terminado</DropdownOption>
+            <DropdownOption value="failed" selected={statusFilter === "failed"}>Falhado</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
+
+      {statusFilter === "accepted" && (
+        <div className="mb-[24px]">
+          <StatusCard
+            type="info"
+            description="O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução — a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <p>A carregar...</p>
@@ -204,9 +254,14 @@ export default function OrgHarvestersClient() {
                     </a>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant={getStatusVariant(harvester)}>
-                      {getStatusLabel(harvester)}
-                    </StatusDot>
+                    {(() => {
+                      const status = getStatus(harvester);
+                      return (
+                        <StatusDot variant={status.variant}>
+                          {status.label}
+                        </StatusDot>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell headerLabel="Implementação">
                     {harvester.backend}

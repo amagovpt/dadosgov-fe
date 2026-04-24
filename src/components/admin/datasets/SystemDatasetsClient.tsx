@@ -77,7 +77,7 @@ export default function SystemDatasetsClient() {
       const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
       if (statusFilter === "public")   { statusFilters.private = false; statusFilters.archived = false; statusFilters.deleted = false; }
       if (statusFilter === "draft")    { statusFilters.private = true; statusFilters.archived = false; statusFilters.deleted = false; }
-      if (statusFilter === "archived") { statusFilters.archived = true; }
+      if (statusFilter === "archived") { statusFilters.archived = true; statusFilters.deleted = false; }
       if (statusFilter === "deleted")  { statusFilters.deleted = true; }
 
       const filters = {
@@ -175,10 +175,11 @@ export default function SystemDatasetsClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>

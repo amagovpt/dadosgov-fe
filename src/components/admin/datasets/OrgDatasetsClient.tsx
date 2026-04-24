@@ -75,10 +75,20 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
       } = { sort };
 
       if (q.trim()) filters.q = q.trim();
-      if (status === "draft") filters.private = true;
-      if (status === "public") filters.private = false;
-      if (status === "archived") filters.archived = true;
-      if (status === "deleted") filters.deleted = true;
+      if (status === "public") {
+        filters.private = false;
+        filters.archived = false;
+        filters.deleted = false;
+      } else if (status === "draft") {
+        filters.private = true;
+        filters.archived = false;
+        filters.deleted = false;
+      } else if (status === "archived") {
+        filters.archived = true;
+        filters.deleted = false;
+      } else if (status === "deleted") {
+        filters.deleted = true;
+      }
 
       const response = await fetchOrgDatasets(orgId, page, pageSize, filters);
       setDatasets(response.data || []);
@@ -160,11 +170,11 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
           onChange={handleStatusChange}
         >
           <DropdownSection name="status">
-            <DropdownOption value="">Todos</DropdownOption>
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
         <a href={`/api/1/organizations/${orgId}/catalog`} download>
@@ -240,11 +250,15 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   </a>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot
-                    variant={dataset.private ? "warning" : "success"}
-                  >
-                    {dataset.private ? "Rascunho" : "Público"}
-                  </StatusDot>
+                  {dataset.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : dataset.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : dataset.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
                   {formatDate(dataset.created_at)}

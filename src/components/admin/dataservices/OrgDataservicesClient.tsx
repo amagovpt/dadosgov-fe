@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Breadcrumb,
@@ -41,6 +41,25 @@ export default function OrgDataservicesClient() {
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const filteredApis = useMemo(() => {
+    if (!statusFilter) return apis;
+    return apis.filter((a) => {
+      switch (statusFilter) {
+        case "public":
+          return !a.private && !a.archived && !a.deleted;
+        case "draft":
+          return a.private && !a.archived && !a.deleted;
+        case "archived":
+          return !!a.archived && !a.deleted;
+        case "deleted":
+          return !!a.deleted;
+        default:
+          return true;
+      }
+    });
+  }, [apis, statusFilter]);
 
   useEffect(() => {
     if (!resolvedOrgId) {
@@ -96,7 +115,7 @@ export default function OrgDataservicesClient() {
       </div>
 
       <p className="text-neutral-700 text-sm mb-[16px]">
-        {apis.length} resultados
+        {filteredApis.length} resultados
       </p>
 
       <div className="flex items-end gap-[16px] mb-[24px]">
@@ -112,24 +131,28 @@ export default function OrgDataservicesClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          onChange={(options) => {
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+          }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
 
       {isLoading ? (
         <p>A carregar...</p>
-      ) : apis.length > 0 ? (
+      ) : filteredApis.length > 0 ? (
         <Table
           paginationProps={{
             itemsPerPageLabel: "Linhas por página",
             itemsPerPage: 5,
-            totalItems: apis.length,
+            totalItems: filteredApis.length,
             availablePageSizes: [5, 10, 20],
             currentPage: 0,
             buttonDropdownAriaLabel: "Selecionar linhas por página",
@@ -154,7 +177,7 @@ export default function OrgDataservicesClient() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {apis.map((api, index) => (
+            {filteredApis.map((api, index) => (
               <TableRow key={index}>
                 <TableCell headerLabel="Título">
                   <a
@@ -165,9 +188,15 @@ export default function OrgDataservicesClient() {
                   </a>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot variant={api.private ? "warning" : "success"}>
-                    {api.private ? "Rascunho" : "Público"}
-                  </StatusDot>
+                  {api.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : api.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : api.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
                   {formatDate(api.created_at)}

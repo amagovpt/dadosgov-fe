@@ -43,6 +43,7 @@ export default function OrgReusesClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     if (!resolvedOrgId) {
@@ -63,11 +64,28 @@ export default function OrgReusesClient() {
     loadReuses();
   }, [resolvedOrgId]);
 
-  const totalPages = Math.ceil(reuses.length / itemsPerPage);
+  const filteredReuses = useMemo(() => {
+    if (!statusFilter) return reuses;
+    return reuses.filter((r) => {
+      switch (statusFilter) {
+        case "public":
+          return !r.private && !r.archived && !r.deleted;
+        case "draft":
+          return r.private && !r.archived && !r.deleted;
+        case "archived":
+          return !!r.archived && !r.deleted;
+        case "deleted":
+          return !!r.deleted;
+        default:
+          return true;
+      }
+    });
+  }, [reuses, statusFilter]);
+
   const paginatedReuses = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return reuses.slice(start, start + itemsPerPage);
-  }, [reuses, currentPage, itemsPerPage]);
+    return filteredReuses.slice(start, start + itemsPerPage);
+  }, [filteredReuses, currentPage, itemsPerPage]);
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
@@ -120,12 +138,17 @@ export default function OrgReusesClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          onChange={(options) => {
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+            setCurrentPage(1);
+          }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
@@ -180,7 +203,15 @@ export default function OrgReusesClient() {
                     </a>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant="success">Público</StatusDot>
+                    {reuse.deleted ? (
+                      <StatusDot variant="danger">Excluído</StatusDot>
+                    ) : reuse.archived ? (
+                      <StatusDot variant="neutral">Arquivado</StatusDot>
+                    ) : reuse.private ? (
+                      <StatusDot variant="warning">Rascunho</StatusDot>
+                    ) : (
+                      <StatusDot variant="success">Público</StatusDot>
+                    )}
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDate(reuse.created_at)}

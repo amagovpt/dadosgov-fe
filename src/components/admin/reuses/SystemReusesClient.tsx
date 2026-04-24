@@ -68,11 +68,13 @@ export default function SystemReusesClient() {
     return reuses.filter((r) => {
       switch (statusFilter) {
         case "public":
-          return !r.private && !r.archived;
+          return !r.private && !r.archived && !r.deleted;
         case "draft":
-          return !!r.private;
+          return r.private && !r.archived && !r.deleted;
         case "archived":
-          return !!r.archived;
+          return !!r.archived && !r.deleted;
+        case "deleted":
+          return !!r.deleted;
         default:
           return true;
       }
@@ -80,7 +82,8 @@ export default function SystemReusesClient() {
   }, [reuses, statusFilter]);
 
   const getStatus = (reuse: Reuse) => {
-    if (reuse.archived) return { label: "Arquivo", variant: "warning" as const };
+    if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
+    if (reuse.archived) return { label: "Arquivado", variant: "neutral" as const };
     if (reuse.private) return { label: "Rascunho", variant: "warning" as const };
     return { label: "Público", variant: "success" as const };
   };
@@ -130,10 +133,11 @@ export default function SystemReusesClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>

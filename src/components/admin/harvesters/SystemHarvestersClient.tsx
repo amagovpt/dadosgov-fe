@@ -10,6 +10,7 @@ import {
   InputSearchBar,
   DropdownSection,
   DropdownOption,
+  StatusCard,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -106,6 +107,12 @@ export default function SystemHarvestersClient() {
     }
     if (statusFilter) {
       result = result.filter((h) => {
+        if (statusFilter === "failed") {
+          return h.last_job?.status === "failed";
+        }
+        if (statusFilter === "done") {
+          return h.last_job?.status === "done";
+        }
         const valState = h.validation?.state;
         return valState === statusFilter;
       });
@@ -158,14 +165,26 @@ export default function SystemHarvestersClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="pending">
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="pending" selected={statusFilter === "pending"}>
               Em espera de validação
             </DropdownOption>
-            <DropdownOption value="accepted">Validado</DropdownOption>
-            <DropdownOption value="refused">Recusado</DropdownOption>
+            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>Validado</DropdownOption>
+            <DropdownOption value="refused" selected={statusFilter === "refused"}>Recusado</DropdownOption>
+            <DropdownOption value="done" selected={statusFilter === "done"}>Terminado</DropdownOption>
+            <DropdownOption value="failed" selected={statusFilter === "failed"}>Falhado</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
+
+      {statusFilter === "accepted" && (
+        <div className="mb-[24px]">
+          <StatusCard
+            type="info"
+            description="O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução — a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <p className="text-neutral-700 text-sm">A carregar...</p>
