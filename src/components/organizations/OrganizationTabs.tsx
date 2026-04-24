@@ -505,8 +505,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
           )}
         </Tab>
 
-        {/* Tab 5: Discussões */}
-        <Tab>
+        {/* Tab 5: Discussões — hidden until implemented */}
+        {false && <Tab>
           <TabHeader>Discussões ({discussionCount})</TabHeader>
           {renderTabBody(
             <div>
@@ -594,7 +594,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                       >
                         <DropdownSection name="identity">
                           <DropdownOption value="user">
-                            {user.first_name} {user.last_name} (utilizador)
+                            {`${user.first_name} ${user.last_name} (utilizador)`}
                           </DropdownOption>
                           {user.organizations.map((org) => (
                             <DropdownOption key={org.id} value={org.id}>
@@ -811,8 +811,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                                 >
                                   <DropdownSection name="identity">
                                     <DropdownOption value="user">
-                                      {user.first_name} {user.last_name}{" "}
-                                      (utilizador)
+                                      {`${user.first_name} ${user.last_name} (utilizador)`}
                                     </DropdownOption>
                                     {user.organizations.map((org) => (
                                       <DropdownOption
@@ -921,7 +920,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               )}
             </div>
           )}
-        </Tab>
+        </Tab>}
 
         {/* Tab 6: Informações (Statistics, Members, Technical Info) */}
         <Tab>
