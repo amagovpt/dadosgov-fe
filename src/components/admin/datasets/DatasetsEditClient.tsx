@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Avatar,
@@ -557,6 +557,7 @@ export default function DatasetsEditClient() {
   // API state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isUploadingRef = useRef(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
   const [uploaderKey, setUploaderKey] = useState(0);
   const [apiError, setApiError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
@@ -572,6 +573,8 @@ export default function DatasetsEditClient() {
   const [keywordSearch, setKeywordSearch] = useState("");
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
+  const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
+  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
 
   // Loaded default values for IsolatedSelect (needed because data arrives async after mount)
   const [loadedLicense, setLoadedLicense] = useState("");
@@ -641,21 +644,15 @@ export default function DatasetsEditClient() {
 
         suggestTags("", 50).then(setTagSuggestions);
 
-        // Load initial Portuguese zone suggestions; merge with any already-selected zones
-        suggestSpatialZones("pt", 50).then((suggestions) => {
-          if (ds.spatial?.zones?.length) {
-            fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
-              const currentIds = currentZones.map((z) => z.id);
-              const seen = new Set(currentIds);
-              const merged = [...currentZones, ...suggestions.filter((z) => !seen.has(z.id))];
-              setSpatialZones(merged);
-              setLoadedSpatialZones(currentIds);
-              spatialCoverageRef.current = currentIds.join(",");
-            });
-          } else {
-            setSpatialZones(suggestions);
-          }
-        });
+        if (ds.spatial?.zones?.length) {
+          fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
+            const currentIds = currentZones.map((z) => z.id);
+            setSpatialZones(currentZones);
+            setLoadedSpatialZones(currentIds);
+            setSelectedSpatialZonesValue(currentIds.join(","));
+            spatialCoverageRef.current = currentIds.join(",");
+          });
+        }
 
         fetchActivity(ds.id, 1, 1)
           .then((res) => {
@@ -781,13 +778,49 @@ export default function DatasetsEditClient() {
         merged.push(z);
       }
     }
-    return merged;
+    return merged.sort((a, b) => a.name.localeCompare(b.name, "pt"));
   }, [spatialZones, spatialZoneSearch]);
 
+  const effectiveSpatialIds = (selectedSpatialZonesValue || loadedSpatialZones.join(","))
+    .split(",")
+    .filter(Boolean);
+  const handleSpatialCoverageChange = useCallback((value: string) => {
+    setSelectedSpatialZonesValue(value);
+    const ids = new Set(value.split(",").filter(Boolean));
+    setSpatialZones((prev) => {
+      // Pin newly selected zones; unpin deselected ones
+      const seen = new Set(prev.map((z) => z.id));
+      const additions = spatialZoneSearchRef.current.filter(
+        (z) => ids.has(z.id) && !seen.has(z.id),
+      );
+      const kept = prev.filter((z) => ids.has(z.id));
+      if (additions.length === 0 && kept.length === prev.length) return prev;
+      return [...kept, ...additions];
+    });
+  }, []);
+  const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
+  useEffect(() => {
+    const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
+    const ids = effective.split(",").filter(Boolean);
+    if (ids.length === 0) {
+      setSelectedZoneObjects([]);
+      return;
+    }
+    setSelectedZoneObjects((prev) => {
+      const map = new Map(prev.map((z) => [z.id, z]));
+      allSpatialZones.forEach((z) => {
+        if (!map.has(z.id)) map.set(z.id, z);
+      });
+      return ids.map((id) => map.get(id)).filter(Boolean) as SpatialZone[];
+    });
+  }, [selectedSpatialZonesValue, loadedSpatialZones, allSpatialZones]);
+
   const spatialCoverageOptions = useMemo(() => {
+    const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
+    const selectedIds = new Set(effective.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
-      <DropdownOption key={z.id} value={z.id} selected={loadedSpatialZones.includes(z.id)}>
-        {z.name}
+      <DropdownOption key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
+        {z.code ? `${z.name} (${z.code})` : z.name}
       </DropdownOption>
     ));
     if (options.length === 0) {
@@ -798,7 +831,7 @@ export default function DatasetsEditClient() {
       );
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
-  }, [allSpatialZones, loadedSpatialZones]);
+  }, [allSpatialZones, selectedSpatialZonesValue, loadedSpatialZones]);
 
   const spatialGranularityOptions = useMemo(() => {
     const options = [
@@ -842,7 +875,6 @@ export default function DatasetsEditClient() {
       });
       return;
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
     setFormErrors({});
     setApiError(null);
     setApiSuccess(null);
@@ -883,6 +915,10 @@ export default function DatasetsEditClient() {
       setDataset(updated);
       setApiSuccess("Conjunto de dados atualizado com sucesso.");
       setTimeout(() => setApiSuccess(null), 10000);
+      requestAnimationFrame(() => {
+        tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        tabsRef.current?.focus({ preventScroll: true });
+      });
     } catch (error: unknown) {
       const err = error as { status?: number; data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
@@ -1275,6 +1311,7 @@ export default function DatasetsEditClient() {
         </p>
       </div>
 
+      <div ref={tabsRef} tabIndex={-1} className="outline-none">
       <Tabs
         onTabActivation={(index: number) => {
           setApiError(null);
@@ -1552,13 +1589,49 @@ export default function DatasetsEditClient() {
                       searchNoResultsText="Nenhum resultado encontrado"
                       defaultValue={loadedSpatialZones.join(",")}
                       onChangeRef={spatialCoverageRef}
+                      onChangeCallback={handleSpatialCoverageChange}
                       onSearchCallback={(q) => {
-                        if (!q) return;
-                        suggestSpatialZones(q, 10).then(setSpatialZoneSearch);
+                        if (q.length < 2) return;
+                        suggestSpatialZones(q, 50).then((results) => {
+                          spatialZoneSearchRef.current = results;
+                          setSpatialZoneSearch(results);
+                        });
                       }}
                     >
                       {spatialCoverageOptions}
                     </IsolatedSelect>
+
+                    {selectedZoneObjects.length > 0 && (
+                      <div className="flex flex-wrap gap-8 -mt-8">
+                        {selectedZoneObjects.map((zone) => (
+                          <Tag
+                            key={zone.id}
+                            aria-label={`Remover ${zone.name}`}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              const savedScroll = window.scrollY;
+                              const next = effectiveSpatialIds
+                                .filter((id) => id !== zone.id)
+                                .join(",");
+                              setSelectedSpatialZonesValue(next);
+                              spatialCoverageRef.current = next;
+                              setSpatialZones((prev) => prev.filter((z) => z.id !== zone.id));
+                              setTimeout(() => {
+                                document
+                                  .getElementById(
+                                    "agora-input-select-edit-spatial-coverage-control",
+                                  )
+                                  ?.focus({ preventScroll: true });
+                                window.scrollTo({ top: savedScroll, behavior: "instant" });
+                              }, 50);
+                            }}
+                          >
+                            {zone.code ? `${zone.name} (${zone.code})` : zone.name}
+                          </Tag>
+                        ))}
+                      </div>
+                    )}
+
                     <IsolatedSelect
                       label="Granularidade espacial"
                       placeholder="Selecione uma granularidade..."
@@ -2016,6 +2089,7 @@ export default function DatasetsEditClient() {
           </TabBody>
         </Tab>
       </Tabs>
+      </div>
     </div>
   );
 }

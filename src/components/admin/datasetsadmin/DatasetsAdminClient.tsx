@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -154,6 +154,8 @@ export default function DatasetsAdminClient({
   const [granularities, setGranularities] = useState<Granularity[]>([]);
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
+  const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
+  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
   const [tags, setTags] = useState<TagSuggestion[]>([]);
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
   const [keywordSearch, setKeywordSearch] = useState("");
@@ -176,6 +178,21 @@ export default function DatasetsAdminClient({
     .filter(Boolean);
   const spatialCoverageDefaultValue = spatialCoverageRef.current;
   const spatialGranularityDefaultValue = spatialGranularityRef.current;
+  const selectedSpatialZoneIds = selectedSpatialZonesValue.split(",").filter(Boolean);
+  const handleSpatialCoverageChange = useCallback((value: string) => {
+    setSelectedSpatialZonesValue(value);
+    const ids = new Set(value.split(",").filter(Boolean));
+    setSpatialZones((prev) => {
+      // Pin newly selected zones; unpin deselected ones
+      const seen = new Set(prev.map((z) => z.id));
+      const additions = spatialZoneSearchRef.current.filter(
+        (z) => ids.has(z.id) && !seen.has(z.id),
+      );
+      const kept = prev.filter((z) => ids.has(z.id));
+      if (additions.length === 0 && kept.length === prev.length) return prev;
+      return [...kept, ...additions];
+    });
+  }, []);
 
   const producerOptions = useMemo(() => {
     const options = [
@@ -274,20 +291,37 @@ export default function DatasetsAdminClient({
         merged.push(z);
       }
     }
-    return merged;
+    return merged.sort((a, b) => a.name.localeCompare(b.name, "pt"));
   }, [spatialZones, spatialZoneSearch]);
 
   const spatialCoverageOptions = useMemo(() => {
+    const selectedIds = new Set(selectedSpatialZonesValue.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
-      <DropdownOption key={z.id} value={z.id} selected={false}>
-        {z.name}
+      <DropdownOption key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
+        {z.code ? `${z.name} (${z.code})` : z.name}
       </DropdownOption>
     ));
     if (options.length === 0) {
       options.push(<DropdownOption key="empty" value="">—</DropdownOption>);
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
-  }, [allSpatialZones]);
+  }, [allSpatialZones, selectedSpatialZonesValue]);
+
+  const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
+  useEffect(() => {
+    const ids = selectedSpatialZonesValue.split(",").filter(Boolean);
+    if (ids.length === 0) {
+      setSelectedZoneObjects([]);
+      return;
+    }
+    setSelectedZoneObjects((prev) => {
+      const map = new Map(prev.map((z) => [z.id, z]));
+      allSpatialZones.forEach((z) => {
+        if (!map.has(z.id)) map.set(z.id, z);
+      });
+      return ids.map((id) => map.get(id)).filter(Boolean) as SpatialZone[];
+    });
+  }, [selectedSpatialZonesValue, allSpatialZones]);
 
   const granularityOptions = useMemo(() => {
     const options = granularities.map((g) => (
@@ -428,12 +462,11 @@ export default function DatasetsAdminClient({
   useEffect(() => {
     async function loadDropdownData() {
       try {
-        const [licensesData, frequenciesData, granularitiesData, zonesData, myDatasetsData, tagsData, resTypes] =
+        const [licensesData, frequenciesData, granularitiesData, myDatasetsData, tagsData, resTypes] =
           await Promise.all([
             fetchLicenses(),
             fetchFrequencies(),
             fetchGranularities(),
-            suggestSpatialZones("pt", 50),
             fetchMyDatasets(1, 1),
             suggestTags("", 50),
             fetchResourceTypes(),
@@ -441,7 +474,6 @@ export default function DatasetsAdminClient({
         setLicenses(licensesData);
         setFrequencies(frequenciesData);
         setGranularities(granularitiesData);
-        setSpatialZones(zonesData);
         setHasDatasets(myDatasetsData.data.length > 0);
         setTags(tagsData);
         setResourceTypes(resTypes);
@@ -612,6 +644,15 @@ export default function DatasetsAdminClient({
         payload.temporal_coverage = {
           ...(startRaw ? { start: startRaw } : {}),
           ...(endRaw ? { end: endRaw } : {}),
+        };
+      }
+      const spatialZoneIds = spatialCoverageRef.current.split(",").filter(Boolean);
+      const spatialGranularity = spatialGranularityRef.current || null;
+      if (spatialZoneIds.length > 0 || spatialGranularity) {
+        payload.spatial = {
+          geom: null,
+          zones: spatialZoneIds,
+          granularity: spatialGranularity,
         };
       }
 
@@ -1378,18 +1419,54 @@ export default function DatasetsAdminClient({
                     label="Cobertura espacial"
                     placeholder="Selecione uma cobertura espacial..."
                     id="dataset-spatial-coverage"
+                    type="checkbox"
                     defaultValue={spatialCoverageDefaultValue}
                     searchable
                     searchInputPlaceholder="Escreva para pesquisar..."
                     searchNoResultsText="Nenhum resultado encontrado"
                     onChangeRef={spatialCoverageRef}
+                    onChangeCallback={handleSpatialCoverageChange}
                     onSearchCallback={(q) => {
-                      if (!q) return;
-                      suggestSpatialZones(q, 10).then(setSpatialZoneSearch);
+                      if (q.length < 2) return;
+                      suggestSpatialZones(q, 50).then((results) => {
+                        spatialZoneSearchRef.current = results;
+                        setSpatialZoneSearch(results);
+                      });
                     }}
                   >
                     {spatialCoverageOptions}
                   </IsolatedSelect>
+
+                  {selectedZoneObjects.length > 0 && (
+                    <div className="flex flex-wrap gap-8 -mt-8">
+                      {selectedZoneObjects.map((zone) => (
+                        <Tag
+                          key={zone.id}
+                          aria-label={`Remover ${zone.name}`}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => {
+                            const savedScroll = window.scrollY;
+                            const next = selectedSpatialZoneIds
+                              .filter((id) => id !== zone.id)
+                              .join(",");
+                            setSelectedSpatialZonesValue(next);
+                            spatialCoverageRef.current = next;
+                            setSpatialZones((prev) => prev.filter((z) => z.id !== zone.id));
+                            setTimeout(() => {
+                              document
+                                .getElementById(
+                                  "agora-input-select-dataset-spatial-coverage-control",
+                                )
+                                ?.focus({ preventScroll: true });
+                              window.scrollTo({ top: savedScroll, behavior: "instant" });
+                            }, 50);
+                          }}
+                        >
+                          {zone.code ? `${zone.name} (${zone.code})` : zone.name}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
 
                   <IsolatedSelect
                     label="Granularidade espacial"
