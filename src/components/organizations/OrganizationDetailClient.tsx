@@ -12,17 +12,45 @@ import {
   Pill,
   ProgressBar,
   CardArticle,
+  InputTextArea,
+  StatusCard,
 } from "@ama-pt/agora-design-system";
 import { Organization } from "@/types/api";
 import { OrganizationTabs } from "./OrganizationTabs";
+import { useAuth } from "@/context/AuthContext";
+import { requestMembership } from "@/services/api";
 
 interface OrganizationDetailClientProps {
   organization: Organization;
 }
 
 export default function OrganizationDetailClient({ organization }: OrganizationDetailClientProps) {
+  const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [requestComment, setRequestComment] = useState("");
+  const [isRequesting, setIsRequesting] = useState(false);
+  const [requestSuccess, setRequestSuccess] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
+
+  const isMember = user?.organizations?.some((org) => org.id === organization.id) ?? false;
+
+  const handleRequestMembership = async () => {
+    setIsRequesting(true);
+    setRequestError(null);
+    try {
+      await requestMembership(organization.id, requestComment);
+      setRequestSuccess(true);
+      setShowRequestForm(false);
+      setRequestComment("");
+    } catch (error) {
+      console.error("Error requesting membership:", error);
+      setRequestError("Erro ao enviar o pedido de adesão.");
+    } finally {
+      setIsRequesting(false);
+    }
+  };
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [availableHeight, setAvailableHeight] = useState<number | undefined>(undefined);
   const measureRef = useRef<HTMLDivElement>(null);
@@ -78,7 +106,19 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           />
         </div>
 
-        <div className="flex justify-end mb-[24px]">
+        <div className="flex justify-end gap-[12px] mb-[24px]">
+          {user && !isMember && !requestSuccess && (
+            <Button
+              variant="primary"
+              appearance="outline"
+              hasIcon={true}
+              leadingIcon="agora-line-plus-circle"
+              leadingIconHover="agora-solid-plus-circle"
+              onClick={() => setShowRequestForm(!showRequestForm)}
+            >
+              Pedir adesão
+            </Button>
+          )}
           <Button
             variant="primary"
             appearance={isFavorite ? "solid" : "outline"}
@@ -91,6 +131,54 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
           </Button>
         </div>
+
+        {requestSuccess && (
+          <StatusCard
+            type="success"
+            description="Pedido de adesão enviado com sucesso. O administrador da organização irá analisar o seu pedido."
+          />
+        )}
+        {requestError && (
+          <StatusCard type="danger" description={requestError} />
+        )}
+
+        {showRequestForm && (
+          <div className="bg-neutral-50 rounded-lg p-[24px] mb-[24px] flex flex-col gap-[16px]">
+            <h3 className="text-primary-900 text-base font-semibold">
+              Pedir adesão a {organization.name}
+            </h3>
+            <InputTextArea
+              label="Comentário (opcional)"
+              placeholder="Explique por que pretende aderir a esta organização..."
+              id="membership-comment"
+              rows={3}
+              value={requestComment}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setRequestComment(e.target.value)
+              }
+            />
+            <div className="flex gap-[12px]">
+              <Button
+                appearance="outline"
+                variant="neutral"
+                onClick={() => {
+                  setShowRequestForm(false);
+                  setRequestComment("");
+                  setRequestError(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleRequestMembership}
+                disabled={isRequesting}
+              >
+                {isRequesting ? "A enviar..." : "Enviar pedido"}
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32 mb-[24px]">
           {/* Main Content Column */}

@@ -3,7 +3,7 @@ import { test, expect } from "playwright/test";
 const BASE_URL = "http://localhost:3000";
 
 test.describe("Informative Pages", () => {
-  test("PI-01: About dados.gov page loads with content", async ({ page }) => {
+  test("PI-01: About dados.gov.pt page loads with content", async ({ page }) => {
     await page.goto(`${BASE_URL}/pages/faqs/about_dadosgov`);
     await page.waitForLoadState("networkidle");
 

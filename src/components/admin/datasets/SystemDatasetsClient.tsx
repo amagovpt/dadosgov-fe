@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Breadcrumb,
   CardNoResults,
@@ -15,7 +15,6 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Button,
   ProgressBar,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
@@ -75,15 +74,22 @@ export default function SystemDatasetsClient() {
           ? undefined
           : `${sortOrder === "descending" ? "-" : ""}${apiSort}`;
 
+      const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
+      if (statusFilter === "public")   { statusFilters.private = false; statusFilters.archived = false; statusFilters.deleted = false; }
+      if (statusFilter === "draft")    { statusFilters.private = true; statusFilters.archived = false; statusFilters.deleted = false; }
+      if (statusFilter === "archived") { statusFilters.archived = true; statusFilters.deleted = false; }
+      if (statusFilter === "deleted")  { statusFilters.deleted = true; }
+
       const filters = {
         q: searchQuery.trim() || undefined,
         sort: sortParam,
+        ...statusFilters,
       };
 
       // Try authenticated request first (returns all datasets for sysadmin),
       // fall back to public request if auth fails
       let response = await fetchAdminDatasets(currentPage, pageSize, filters);
-      if (response.total === 0 && !searchQuery.trim()) {
+      if (response.total === 0 && !searchQuery.trim() && !statusFilter) {
         response = await fetchDatasets(currentPage, pageSize, filters);
       }
       setDatasets(response.data || []);
@@ -93,7 +99,7 @@ export default function SystemDatasetsClient() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, searchQuery, sortField, sortOrder]);
+  }, [currentPage, pageSize, searchQuery, sortField, sortOrder, statusFilter]);
 
   useEffect(() => {
     loadDatasets();
@@ -116,24 +122,6 @@ export default function SystemDatasetsClient() {
   const getSortOrder = (field: SortField): SortOrder => {
     return sortField === field ? sortOrder : "none";
   };
-
-  const filteredDatasets = useMemo(() => {
-    if (!statusFilter) return datasets;
-    return datasets.filter((d) => {
-      switch (statusFilter) {
-        case "public":
-          return !d.private && !d.archived && !d.deleted;
-        case "draft":
-          return !!d.private;
-        case "archived":
-          return !!d.archived;
-        case "deleted":
-          return !!d.deleted;
-        default:
-          return true;
-      }
-    });
-  }, [datasets, statusFilter]);
 
   const formatDate = (dateStr: string) => {
     try {
@@ -183,30 +171,34 @@ export default function SystemDatasetsClient() {
           id="filter-status"
           onChange={(options) => {
             setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+            setCurrentPage(1);
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
 
-      {!isLoading && filteredDatasets.length > 0 ? (
+      {isLoading ? (
+        <p className="text-neutral-700 text-sm">A carregar...</p>
+      ) : datasets.length > 0 ? (
         <Table
           paginationProps={{
             itemsPerPageLabel: "Itens por página",
             itemsPerPage: pageSize,
             totalItems: totalItems,
             availablePageSizes: [5, 10, 20],
-            currentPage: currentPage,
+            currentPage: currentPage - 1,
             buttonDropdownAriaLabel: "Selecionar itens por página",
             dropdownListAriaLabel: "Opções de itens por página",
             prevButtonAriaLabel: "Página anterior",
             nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page),
+            onPageChange: (page: number) => setCurrentPage(page + 1),
             onPageSizeChange: (size: number) => {
               setPageSize(size);
               setCurrentPage(1);
@@ -237,19 +229,13 @@ export default function SystemDatasetsClient() {
               >
                 Última modificação
               </TableHeaderCell>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("resources")}
-                onSortChange={handleSort("resources")}
-              >
-                Ficheiros
-              </TableHeaderCell>
+              <TableHeaderCell>Ficheiros</TableHeaderCell>
               <TableHeaderCell>Pontuação</TableHeaderCell>
               <TableHeaderCell>Ações</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredDatasets.map((dataset) => (
+            {datasets.map((dataset) => (
               <TableRow key={dataset.id}>
                 <TableCell headerLabel="Título">
                   <a
@@ -260,9 +246,15 @@ export default function SystemDatasetsClient() {
                   </a>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot variant={dataset.private ? "warning" : "success"}>
-                    {dataset.private ? "Rascunho" : "Público"}
-                  </StatusDot>
+                  {dataset.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : dataset.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : dataset.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
                   {formatDate(dataset.created_at)}

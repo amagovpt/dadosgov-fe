@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   InputSearchBar,
   InputSelect,
@@ -18,22 +18,19 @@ import {
   SidebarItem,
   Checkbox,
   InputSearch,
-} from '@ama-pt/agora-design-system';
-import { Pagination } from '@/components/Pagination';
-import { CategoryToggles } from '@/components/CategoryToggles';
-import {
-  fetchOrganizations,
-  suggestTags,
-} from '@/services/api';
-import { APIResponse, Dataservice, Organization, SiteMetrics } from '@/types/api';
-import { formatDistanceToNow } from 'date-fns';
-import { pt } from 'date-fns/locale';
+} from "@ama-pt/agora-design-system";
+import { Pagination } from "@/components/Pagination";
+import { CategoryToggles } from "@/components/CategoryToggles";
+import { fetchOrganizations, suggestTags } from "@/services/api";
+import { APIResponse, Dataservice, Organization, SiteMetrics } from "@/types/api";
+import { formatDistanceToNow } from "date-fns";
+import { pt } from "date-fns/locale";
 
-import PageBanner from '@/components/PageBanner';
+import PageBanner from "@/components/PageBanner";
 
 const SORT_OPTIONS: Record<string, string> = {
-  relevancia: '',
-  recentes: '-created_at',
+  relevancia: "",
+  recentes: "-created_at",
 };
 
 function SortSelect({
@@ -67,11 +64,9 @@ function SortSelect({
   if (!mounted) {
     return (
       <div className="selectDataservice">
-        <label className="text-s-regular text-neutral-700 mb-4 block">
-          Ordenar por :
-        </label>
+        <label className="text-s-regular text-neutral-700 mb-4 block">Ordenar por :</label>
         <div className="w-full border border-neutral-300 rounded-8 px-16 py-12 text-m-regular text-neutral-900 bg-white">
-          {currentSortKey === 'recentes' ? 'Mais recentes' : 'Relevância'}
+          {currentSortKey === "recentes" ? "Mais recentes" : "Relevância"}
         </div>
       </div>
     );
@@ -85,10 +80,10 @@ function SortSelect({
       ref={selectRef}
     >
       <DropdownSection name="order">
-        <DropdownOption value="relevancia" selected={currentSortKey === 'relevancia'}>
+        <DropdownOption value="relevancia" selected={currentSortKey === "relevancia"}>
           Relevância
         </DropdownOption>
-        <DropdownOption value="recentes" selected={currentSortKey === 'recentes'}>
+        <DropdownOption value="recentes" selected={currentSortKey === "recentes"}>
           Mais recentes
         </DropdownOption>
       </DropdownSection>
@@ -145,7 +140,7 @@ export default function DataservicesClient({
 }: DataservicesClientProps) {
   const router = useRouter();
   const { data: dataservices, total, page_size } = initialData;
-  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || '');
+  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || "");
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<ApiFilterKey, string>>({
     metodo: "all",
     atualizacao: "all",
@@ -177,15 +172,20 @@ export default function DataservicesClient({
   }, []);
 
   const handleTagSearch = useCallback(async (q: string) => {
-    if (q.length < 2) { setFilterTagOptions([]); return; }
+    if (q.length < 2) {
+      setFilterTagOptions([]);
+      return;
+    }
     try {
       const results = await suggestTags(q);
       setFilterTagOptions(results.map((t) => ({ id: t.text, name: t.text })));
-    } catch { setFilterTagOptions([]); }
+    } catch {
+      setFilterTagOptions([]);
+    }
   }, []);
 
   const handleAdvancedFilterChange = (paramName: string, value: string) => {
-    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
     const currentValues = params.getAll(paramName);
     if (currentValues.includes(value)) {
       params.delete(paramName);
@@ -198,7 +198,7 @@ export default function DataservicesClient({
   };
 
   const handleClearAdvancedFilter = (paramName: string) => {
-    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
     params.delete(paramName);
     params.set("page", "1");
     router.push(`/pages/dataservices?${params.toString()}`);
@@ -210,7 +210,7 @@ export default function DataservicesClient({
   };
 
   const getActiveValues = (paramName: string) => {
-    if (typeof window === 'undefined') return [];
+    if (typeof window === "undefined") return [];
     return new URLSearchParams(window.location.search).getAll(paramName);
   };
 
@@ -235,7 +235,7 @@ export default function DataservicesClient({
       suggest: true,
     },
   ];
-  const currentQuery = initialFilters?.q || '';
+  const currentQuery = initialFilters?.q || "";
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const buildUrl = useCallback(
@@ -245,12 +245,12 @@ export default function DataservicesClient({
       const sort = overrides.sort !== undefined ? overrides.sort : initialFilters?.sort;
       const page = overrides.page ?? currentPage;
 
-      if (q) params.set('q', q);
-      if (sort) params.set('sort', sort);
-      if (page > 1) params.set('page', String(page));
+      if (q) params.set("q", q);
+      if (sort) params.set("sort", sort);
+      if (page > 1) params.set("page", String(page));
 
       const qs = params.toString();
-      return `/pages/dataservices${qs ? `?${qs}` : ''}`;
+      return `/pages/dataservices${qs ? `?${qs}` : ""}`;
     },
     [initialFilters, currentPage]
   );
@@ -279,17 +279,17 @@ export default function DataservicesClient({
   );
 
   const handleClearFilters = useCallback(() => {
-    router.push('/pages/dataservices');
+    router.push("/pages/dataservices");
   }, [router]);
 
   const sortDefault = (() => {
     const reverseMap: Record<string, string> = {
-      '-created_at': 'recentes',
+      "-created_at": "recentes",
     };
-    return reverseMap[initialFilters?.sort || ''] || 'relevancia';
+    return reverseMap[initialFilters?.sort || ""] || "relevancia";
   })();
 
-  const hasActiveFilters = !!(initialFilters?.q);
+  const hasActiveFilters = !!initialFilters?.q;
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters dataservice">
@@ -299,12 +299,14 @@ export default function DataservicesClient({
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
           breadcrumbItems={[
-            { label: 'Home', url: '/' },
-            { label: 'APIs', url: '/pages/dataservices' },
+            { label: "Home", url: "/" },
+            { label: "APIs", url: "/pages/dataservices" },
           ]}
           subtitle={
             <p className="text-primary-100 max-w-[592px]">
-              Pesquise através de {total.toLocaleString('pt-PT')} APIs em dados.gov
+              {total === 0
+                ? "Não existem resultados disponíveis para a sua pesquisa"
+                : `Pesquise através de ${total.toLocaleString("pt-PT")} APIs em dados.gov.pt`}
             </p>
           }
         >
@@ -319,7 +321,7 @@ export default function DataservicesClient({
             value={searchQuery}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent) => {
-              if (e.key === 'Enter') handleSearch();
+              if (e.key === "Enter") handleSearch();
             }}
             onSearchActivate={() => handleSearch()}
           />
@@ -345,9 +347,7 @@ export default function DataservicesClient({
                   const section = API_TOGGLE_FILTERS[filterKey];
                   return (
                     <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
-                      <h3 className="font-bold text-base text-neutral-900 mb-8">
-                        {section.title}
-                      </h3>
+                      <h3 className="font-bold text-base text-neutral-900 mb-8">{section.title}</h3>
                       {section.options.map((option) => {
                         const isSelected = selectedToggleFilters[filterKey] === option.id;
                         return (
@@ -391,7 +391,9 @@ export default function DataservicesClient({
                 })}
               </div>
 
-              <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">Filtros avançados</h2>
+              <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">
+                Filtros avançados
+              </h2>
 
               <Sidebar variant="filter" className="font-bold">
                 {advancedFilterGroups.map((group, index) => {
@@ -448,9 +450,7 @@ export default function DataservicesClient({
                                 group.suggest ? "Escreva para pesquisar..." : "Pesquisar"
                               }
                               value={searchQuery}
-                              onChange={(e) =>
-                                handleFilterSearchChange(group.name, e.target.value)
-                              }
+                              onChange={(e) => handleFilterSearchChange(group.name, e.target.value)}
                             />
                             <Icon
                               name="agora-solid-search"
@@ -473,9 +473,7 @@ export default function DataservicesClient({
                                 value={item.id}
                                 name={group.param}
                                 checked={activeValues.includes(item.id)}
-                                onChange={() =>
-                                  handleAdvancedFilterChange(group.param, item.id)
-                                }
+                                onChange={() => handleAdvancedFilterChange(group.param, item.id)}
                               />
                             ))
                           ) : group.suggest && searchQuery.length < 2 ? (
@@ -495,11 +493,7 @@ export default function DataservicesClient({
               </Sidebar>
 
               <div className="mt-32">
-                <Button
-                  variant="primary"
-                  appearance="outline"
-                  onClick={handleClearFilters}
-                >
+                <Button variant="primary" appearance="outline" onClick={handleClearFilters}>
                   Limpar filtros
                 </Button>
               </div>
@@ -510,7 +504,7 @@ export default function DataservicesClient({
               <div>
                 <div className="grid md:grid-cols-2 xl:grid-cols-12 gap-32 mb-16 items-center mt-[12px]">
                   <span className="text-neutral-900 font-medium text-base xl:col-span-6 mt-[32px]">
-                    {total.toLocaleString('pt-PT')} Resultados
+                    {total.toLocaleString("pt-PT")} Resultados
                   </span>
                   <div className="w-full md:w-auto xl:col-span-6 flex items-end gap-16 justify-end">
                     {hasActiveFilters && (
@@ -526,10 +520,7 @@ export default function DataservicesClient({
                       </Button>
                     )}
                     <div className="flex-grow max-w-[240px]">
-                      <SortSelect
-                        currentSortKey={sortDefault}
-                        onSortChange={handleSortChange}
-                      />
+                      <SortSelect currentSortKey={sortDefault} onSortChange={handleSortChange} />
                     </div>
                   </div>
                 </div>
@@ -541,7 +532,8 @@ export default function DataservicesClient({
                     dataservices.map((ds) => {
                       const formatMetric = (value: number | undefined) => {
                         if (!value) return "0";
-                        if (value >= 1_000_000) return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
+                        if (value >= 1_000_000)
+                          return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
                         if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
                         return String(value);
                       };
@@ -552,7 +544,7 @@ export default function DataservicesClient({
                             .replace("menos de ", "")
                             .replace("cerca de ", "")
                         : "Desconhecido";
-                      const dsUrl = `/pages/dataservices/preview?title=${encodeURIComponent(ds.title)}&description=${encodeURIComponent(ds.description || '')}`;
+                      const dsUrl = `/pages/dataservices/preview?title=${encodeURIComponent(ds.title)}&description=${encodeURIComponent(ds.description || "")}`;
 
                       return (
                         <Link
@@ -571,8 +563,13 @@ export default function DataservicesClient({
                             subtitleText={
                               (
                                 <div className="flex flex-col">
-                                  <span style={{ fontSize: "16px" }} className="text-neutral-900">{timeAgo}</span>
-                                  <span style={{ fontSize: "16px", fontWeight: 300 }} className="text-neutral-900 mt-4">
+                                  <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                                    {timeAgo}
+                                  </span>
+                                  <span
+                                    style={{ fontSize: "16px", fontWeight: 300 }}
+                                    className="text-neutral-900 mt-4"
+                                  >
                                     {ds.organization?.name || "Sem Organização"}
                                   </span>
                                 </div>
@@ -589,9 +586,14 @@ export default function DataservicesClient({
                                   )}
                                   <div className="mt-auto">
                                     <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
-                                      <div className="flex items-center gap-8" title="Visualizações">
+                                      <div
+                                        className="flex items-center gap-8"
+                                        title="Visualizações"
+                                      >
                                         <Icon
-                                          name={ds.metrics?.views ? "agora-solid-eye" : "agora-line-eye"}
+                                          name={
+                                            ds.metrics?.views ? "agora-solid-eye" : "agora-line-eye"
+                                          }
                                           dimensions="xs"
                                           className="fill-neutral-700"
                                           aria-hidden="true"
@@ -600,7 +602,11 @@ export default function DataservicesClient({
                                       </div>
                                       <div className="flex items-center gap-8" title="Favoritos">
                                         <Icon
-                                          name={ds.metrics?.followers ? "agora-solid-star" : "agora-line-star"}
+                                          name={
+                                            ds.metrics?.followers
+                                              ? "agora-solid-star"
+                                              : "agora-line-star"
+                                          }
                                           dimensions="xs"
                                           className="fill-neutral-700"
                                           aria-hidden="true"
@@ -628,10 +634,23 @@ export default function DataservicesClient({
                   ) : (
                     <div className="col-span-full">
                       <CardNoResults
-                        icon={<Icon name="agora-line-search" className="w-12 h-12 text-primary-500 icon-xl" />}
+                        icon={
+                          <Icon
+                            name="agora-line-search"
+                            className="w-12 h-12 text-primary-500 icon-xl"
+                          />
+                        }
                         title="Não encontrou o que procurava?"
-                        subtitle={<span className="font-bold">Tente redefinir os filtros para ampliar a sua pesquisa.</span>}
-                        description={<div className="max-w-[592px] mx-auto">Explore a nossa lista completa de APIs de dados abertos.</div>}
+                        subtitle={
+                          <span className="font-bold">
+                            Tente redefinir os filtros para ampliar a sua pesquisa.
+                          </span>
+                        }
+                        description={
+                          <div className="max-w-[592px] mx-auto">
+                            Explore a nossa lista completa de APIs de dados abertos.
+                          </div>
+                        }
                         position="center"
                         hasAnchor={false}
                       />

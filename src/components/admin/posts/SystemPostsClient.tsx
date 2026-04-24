@@ -20,8 +20,11 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { fetchPosts } from "@/services/api";
+import { fetchAdminPosts } from "@/services/api";
 import { Post } from "@/types/api";
+
+type SortOrder = "none" | "ascending" | "descending";
+type SortField = "name" | "created_at" | "last_modified";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -33,6 +36,7 @@ const formatDate = (dateStr: string) => {
 };
 
 export default function SystemPostsClient() {
+  const FETCH_PAGE_SIZE = 100;
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -41,13 +45,28 @@ export default function SystemPostsClient() {
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetchPosts(currentPage, pageSize);
-      let data = response.data || [];
+      const firstResponse = await fetchAdminPosts(1, FETCH_PAGE_SIZE);
+      let data = firstResponse.data || [];
+      const totalAvailable = firstResponse.total || data.length;
+      const totalPages = Math.ceil(totalAvailable / FETCH_PAGE_SIZE);
+
+      if (totalPages > 1) {
+        const remainingResponses = await Promise.all(
+          Array.from({ length: totalPages - 1 }, (_, index) =>
+            fetchAdminPosts(index + 2, FETCH_PAGE_SIZE)
+          )
+        );
+        data = data.concat(remainingResponses.flatMap((res) => res.data || []));
+      }
+
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
         data = data.filter((p) => p.name.toLowerCase().includes(q));
@@ -59,14 +78,36 @@ export default function SystemPostsClient() {
           return true;
         });
       }
-      setPosts(data);
-      setTotalItems(searchQuery.trim() || typeFilter ? data.length : response.total || 0);
+      if (statusFilter) {
+        data = data.filter((p) => {
+          if (statusFilter === "published") return !!p.published;
+          if (statusFilter === "draft") return !p.published;
+          return true;
+        });
+      }
+      if (sortField && sortOrder !== "none") {
+        data = [...data].sort((a, b) => {
+          if (sortField === "name") {
+            const cmp = (a.name || "").localeCompare(b.name || "", "pt", { sensitivity: "base" });
+            return sortOrder === "descending" ? -cmp : cmp;
+          }
+          const aTime = new Date(a[sortField] || "").getTime();
+          const bTime = new Date(b[sortField] || "").getTime();
+          const cmp = aTime - bTime;
+          return sortOrder === "descending" ? -cmp : cmp;
+        });
+      }
+      const start = (currentPage - 1) * pageSize;
+      const pagedData = data.slice(start, start + pageSize);
+
+      setPosts(pagedData);
+      setTotalItems(data.length);
     } catch (error) {
       console.error("Error loading posts:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, searchQuery, typeFilter]);
+  }, [currentPage, pageSize, searchQuery, typeFilter, statusFilter, sortField, sortOrder]);
 
   useEffect(() => {
     loadData();
@@ -78,6 +119,16 @@ export default function SystemPostsClient() {
       setSearchQuery(value);
       setCurrentPage(1);
     }, 400);
+  };
+
+  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
+    setSortField(newOrder === "none" ? null : field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: SortField): SortOrder => {
+    return sortField === field ? sortOrder : "none";
   };
 
   return (
@@ -116,7 +167,7 @@ export default function SystemPostsClient() {
         <InputSelect
           label=""
           hideLabel
-          placeholder="Todos"
+          placeholder="Filtrar por tipo"
           id="filter-type"
           onChange={(options) => {
             setTypeFilter(
@@ -126,9 +177,27 @@ export default function SystemPostsClient() {
           }}
         >
           <DropdownSection name="type">
-            <DropdownOption value="">Todos</DropdownOption>
-            <DropdownOption value="news">Notícias</DropdownOption>
-            <DropdownOption value="page">Página</DropdownOption>
+            <DropdownOption value="" selected={typeFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="news" selected={typeFilter === "news"}>Notícias</DropdownOption>
+            <DropdownOption value="page" selected={typeFilter === "page"}>Página</DropdownOption>
+          </DropdownSection>
+        </InputSelect>
+        <InputSelect
+          label=""
+          hideLabel
+          placeholder="Filtrar por estado"
+          id="filter-status"
+          onChange={(options) => {
+            setStatusFilter(
+              options.length > 0 ? (options[0].value as string) : ""
+            );
+            setCurrentPage(1);
+          }}
+        >
+          <DropdownSection name="status">
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="published" selected={statusFilter === "published"}>Publicado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Despublicado</DropdownOption>
           </DropdownSection>
         </InputSelect>
         <Button
@@ -152,12 +221,12 @@ export default function SystemPostsClient() {
             itemsPerPage: pageSize,
             totalItems: totalItems,
             availablePageSizes: [5, 10, 20],
-            currentPage: currentPage,
+            currentPage: currentPage - 1,
             buttonDropdownAriaLabel: "Selecionar linhas por página",
             dropdownListAriaLabel: "Opções de linhas por página",
             prevButtonAriaLabel: "Página anterior",
             nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page),
+            onPageChange: (page: number) => setCurrentPage(page + 1),
             onPageSizeChange: (size: number) => {
               setPageSize(size);
               setCurrentPage(1);
@@ -166,11 +235,29 @@ export default function SystemPostsClient() {
         >
           <TableHeader>
             <TableRow>
-              <TableHeaderCell>Título</TableHeaderCell>
+              <TableHeaderCell
+                sortType="string"
+                sortOrder={getSortOrder("name")}
+                onSortChange={handleSort("name")}
+              >
+                Título
+              </TableHeaderCell>
               <TableHeaderCell>Tipo</TableHeaderCell>
               <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell>Criado em</TableHeaderCell>
-              <TableHeaderCell>Atualizado em</TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("created_at")}
+                onSortChange={handleSort("created_at")}
+              >
+                Criado em
+              </TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("last_modified")}
+                onSortChange={handleSort("last_modified")}
+              >
+                Atualizado em
+              </TableHeaderCell>
               <TableHeaderCell>Ação</TableHeaderCell>
             </TableRow>
           </TableHeader>
@@ -190,7 +277,7 @@ export default function SystemPostsClient() {
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   <StatusDot variant={post.published ? "success" : "warning"}>
-                    {post.published ? "Publicado" : "Rascunho"}
+                    {post.published ? "Publicado" : "Despublicado"}
                   </StatusDot>
                 </TableCell>
                 <TableCell headerLabel="Criado em">
@@ -230,3 +317,4 @@ export default function SystemPostsClient() {
     </div>
   );
 }
+

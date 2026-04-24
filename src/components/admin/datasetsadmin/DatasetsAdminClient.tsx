@@ -2,45 +2,57 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+import { pt } from "date-fns/locale";
 import {
   Button,
   CardGeneral,
   InputText,
   InputTextArea,
-  RadioButton,
   Icon,
   StatusCard,
-  Accordion,
-  AccordionGroup,
   InputDate,
   DropdownSection,
   DropdownOption,
+  ProgressBar,
+  Checkbox,
+  Tag,
 } from "@ama-pt/agora-design-system";
 import {
   createDataset,
   updateDataset,
   uploadResource,
+  updateResource,
   createResource,
   fetchLicenses,
   fetchFrequencies,
+  fetchGranularities,
+  suggestSpatialZones,
   fetchDataset,
   fetchMyDatasets,
   suggestTags,
   fetchOrgContactPoints,
   createContactPoint,
+  fetchResourceTypes,
 } from "@/services/api";
 import {
   License,
   Frequency,
+  Granularity,
+  SpatialZone,
   Dataset,
   TagSuggestion,
   ContactPoint,
+  ResourceType,
 } from "@/types/api";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import FileUploadModal from "@/components/admin/FileUploadModal";
+import FileUploadModal, { PendingResourceMeta } from "@/components/admin/FileUploadModal";
+import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
+import { getGranularityLabel } from "@/utils/granularityLabels";
 
 interface DatasetsAdminClientProps {
   currentStep: number;
@@ -59,13 +71,43 @@ export default function DatasetsAdminClient({
   onDatasetCreated,
   onComplete,
 }: DatasetsAdminClientProps) {
+  const isValidHttpsUrl = (value: string): boolean => {
+    try {
+      const parsed = new URL(value);
+      if (parsed.protocol !== "https:") return false;
+      if (!parsed.hostname) return false;
+
+      const hostname = parsed.hostname.toLowerCase();
+      const isIpv4 =
+        /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(
+          hostname,
+        );
+
+      const labels = hostname.split(".");
+      const hasValidDomainShape = labels.length >= 2;
+      const hasValidLabels = labels.every(
+        (label) =>
+          label.length > 0 &&
+          !label.startsWith("-") &&
+          !label.endsWith("-") &&
+          /^[a-z0-9-]+$/i.test(label),
+      );
+      const tld = labels[labels.length - 1] || "";
+      const hasValidTld = /^([a-z]{2,}|xn--[a-z0-9-]{2,})$/i.test(tld);
+
+      return isIpv4 || (hasValidDomainShape && hasValidLabels && hasValidTld);
+    } catch {
+      return false;
+    }
+  };
+
   const router = useRouter();
   const { user } = useAuth();
 
   // Form state
-  const [accessType, setAccessType] = useState("open");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [showFileError, setShowFileError] = useState(false);
+  const [showInvalidUrlError, setShowInvalidUrlError] = useState(false);
   const [datasetTitle, setDatasetTitle] = useState("");
   const [datasetAcronym, setDatasetAcronym] = useState("");
   const [datasetDescription, setDatasetDescription] = useState("");
@@ -73,7 +115,9 @@ export default function DatasetsAdminClient({
   const selectedProducerRef = useRef("");
   const selectedLicenseRef = useRef("");
   const selectedFrequencyRef = useRef("");
-  const dummyRef = useRef("");
+  const selectedKeywordsRef = useRef("");
+  const spatialCoverageRef = useRef("");
+  const spatialGranularityRef = useRef("");
   const [temporalStart, setTemporalStart] = useState("");
   const [temporalEnd, setTemporalEnd] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
@@ -95,7 +139,9 @@ export default function DatasetsAdminClient({
   ]);
 
   // Step 3 state
-  const [resourceUrl, setResourceUrl] = useState("");
+  const [resourceUrls, setResourceUrls] = useState<string[]>([]);
+  const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [resourceMetadata, setResourceMetadata] = useState<Record<string, PendingResourceMeta>>({});
 
   // API state
   const [createdDataset, setCreatedDataset] = useState<Dataset | null>(null);
@@ -105,64 +151,166 @@ export default function DatasetsAdminClient({
   // Dropdown data
   const [licenses, setLicenses] = useState<License[]>([]);
   const [frequencies, setFrequencies] = useState<Frequency[]>([]);
+  const [granularities, setGranularities] = useState<Granularity[]>([]);
+  const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
+  const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
   const [tags, setTags] = useState<TagSuggestion[]>([]);
+  const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
+  const [keywordSearch, setKeywordSearch] = useState("");
+  const producerDefaultValue =
+    selectedProducer ||
+    selectedProducerRef.current ||
+    createdDataset?.organization?.id ||
+    (createdDataset ? "user" : "");
+  const licenseDefaultValue =
+    selectedLicenseRef.current || createdDataset?.license || "";
+  const frequencyDefaultValue =
+    selectedFrequencyRef.current || createdDataset?.frequency || "";
+  const keywordsDefaultValue =
+    selectedKeywordsValue ||
+    selectedKeywordsRef.current ||
+    (createdDataset?.tags?.join(",") ?? "");
+  const selectedKeywords = keywordsDefaultValue
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+  const spatialCoverageDefaultValue = spatialCoverageRef.current;
+  const spatialGranularityDefaultValue = spatialGranularityRef.current;
 
-  const producerOptions = useMemo(
-    () => (
-      <DropdownSection name="identity">
-        {[
-          <DropdownOption key="user" value="user">
-            {user ? `${user.first_name} ${user.last_name}` : "Eu próprio"}
-          </DropdownOption>,
-          ...(user?.organizations || []).map((org) => (
-            <DropdownOption key={org.id} value={org.id}>
-              {org.name}
-            </DropdownOption>
-          )),
-        ]}
-      </DropdownSection>
-    ),
-    [user],
-  );
+  const producerOptions = useMemo(() => {
+    const options = [
+      <DropdownOption key="user" value="user" selected={producerDefaultValue === "user"}>
+        {user ? `${user.first_name} ${user.last_name}` : "Eu próprio"}
+      </DropdownOption>,
+      ...(user?.organizations || []).map((org) => (
+        <DropdownOption key={org.id} value={org.id} selected={producerDefaultValue === org.id}>
+          {org.name}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="identity">{options}</DropdownSection>;
+  }, [user, producerDefaultValue]);
 
-  const licenseOptions = useMemo(
-    () => (
-      <DropdownSection name="licenses">
-        {licenses.map((license) => (
-          <DropdownOption key={license.id} value={license.id}>
-            {license.title}
-          </DropdownOption>
-        ))}
-      </DropdownSection>
-    ),
-    [licenses],
-  );
+  const licenseOptions = useMemo(() => {
+    const options = licenses.map((license) => (
+      <DropdownOption
+        key={license.id}
+        value={license.id}
+        selected={licenseDefaultValue === license.id}
+      >
+        {license.title}
+      </DropdownOption>
+    ));
+    return <DropdownSection name="licenses">{options}</DropdownSection>;
+  }, [licenses, licenseDefaultValue]);
 
-  const frequencyOptions = useMemo(
-    () => (
-      <DropdownSection name="frequencies">
-        {frequencies.map((freq) => (
-          <DropdownOption key={freq.id} value={freq.id}>
-            {getFrequencyLabel(freq.id, freq.label)}
-          </DropdownOption>
-        ))}
-      </DropdownSection>
-    ),
-    [frequencies],
-  );
+  const frequencyOptions = useMemo(() => {
+    const options = frequencies.map((freq) => (
+      <DropdownOption
+        key={freq.id}
+        value={freq.id}
+        selected={frequencyDefaultValue === freq.id}
+      >
+        {getFrequencyLabel(freq.id, freq.label)}
+      </DropdownOption>
+    ));
+    return <DropdownSection name="frequencies">{options}</DropdownSection>;
+  }, [frequencies, frequencyDefaultValue]);
 
-  const tagOptions = useMemo(
-    () => (
-      <DropdownSection name="keywords">
-        {tags.map((tag) => (
-          <DropdownOption key={tag.text} value={tag.text}>
-            {tag.text}
-          </DropdownOption>
-        ))}
-      </DropdownSection>
-    ),
-    [tags],
-  );
+  const tagOptions = useMemo(() => {
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    // Deduplicate tags by lowercased text (keeps the first occurrence).
+    const seen = new Set<string>();
+    const uniqueTags = tags.filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedLowerSet = new Set(
+      selectedKeywords.map((k) => k.toLowerCase()),
+    );
+    const selectedNotInSuggestions = selectedKeywords.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const options = [
+      ...(showCreate
+        ? [
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
+            </DropdownOption>,
+          ]
+        : []),
+      ...selectedNotInSuggestions.map((keyword) => (
+        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
+          {keyword}
+        </DropdownOption>
+      )),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedLowerSet.has(tag.text.toLowerCase())}
+        >
+          {tag.text}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="keywords">{options}</DropdownSection>;
+  }, [tags, selectedKeywords, keywordSearch]);
+
+  const allSpatialZones = useMemo(() => {
+    const seen = new Set<string>();
+    const merged: SpatialZone[] = [];
+    for (const z of [...spatialZones, ...spatialZoneSearch]) {
+      if (!seen.has(z.id)) {
+        seen.add(z.id);
+        merged.push(z);
+      }
+    }
+    return merged;
+  }, [spatialZones, spatialZoneSearch]);
+
+  const spatialCoverageOptions = useMemo(() => {
+    const options = allSpatialZones.map((z) => (
+      <DropdownOption key={z.id} value={z.id} selected={false}>
+        {z.name}
+      </DropdownOption>
+    ));
+    if (options.length === 0) {
+      options.push(<DropdownOption key="empty" value="">—</DropdownOption>);
+    }
+    return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
+  }, [allSpatialZones]);
+
+  const granularityOptions = useMemo(() => {
+    const options = granularities.map((g) => (
+      <DropdownOption
+        key={g.id}
+        value={g.id}
+        selected={spatialGranularityDefaultValue === g.id}
+      >
+        {getGranularityLabel(g.id, g.name)}
+      </DropdownOption>
+    ));
+    return <DropdownSection name="spatial-granularity">{options}</DropdownSection>;
+  }, [granularities, spatialGranularityDefaultValue]);
+
+
+  useEffect(() => {
+    if (selectedKeywordsValue) return;
+    const restored =
+      selectedKeywordsRef.current || (createdDataset?.tags?.join(",") ?? "");
+    if (!restored) return;
+    setSelectedKeywordsValue(restored);
+    selectedKeywordsRef.current = restored;
+  }, [createdDataset, selectedKeywordsValue]);
 
   // Fetch contact points when an organization is selected as producer
   useEffect(() => {
@@ -171,6 +319,9 @@ export default function DatasetsAdminClient({
         try {
           const response = await fetchOrgContactPoints(selectedProducer);
           setOrgContactPoints(response.data);
+          if (response.data.length > 0) {
+            setDraftContacts([]);
+          }
         } catch (error) {
           console.error("Error loading contact points:", error);
           setOrgContactPoints([]);
@@ -180,8 +331,15 @@ export default function DatasetsAdminClient({
     } else {
       setOrgContactPoints([]);
       setSelectedContactPointIds([]);
+      setDraftContacts([{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]);
     }
   }, [selectedProducer]);
+
+  const toggleExistingContact = (id: string) => {
+    setSelectedContactPointIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
 
   const updateDraft = (draftId: number, field: string, value: string) => {
     setDraftContacts((prev) =>
@@ -207,8 +365,12 @@ export default function DatasetsAdminClient({
       setDraftContacts((prev) =>
         prev.map((d) => (d.id === draftId ? { ...d, errors } : d)),
       );
+      requestAnimationFrame(() => {
+        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
       return;
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
       const payload: Parameters<typeof createContactPoint>[0] = {
@@ -221,11 +383,7 @@ export default function DatasetsAdminClient({
       const newContact = await createContactPoint(payload);
       setOrgContactPoints((prev) => [...prev, newContact]);
       setSelectedContactPointIds((prev) => [...prev, newContact.id]);
-      setDraftContacts((prev) =>
-        prev.map((d) =>
-          d.id === draftId ? { ...d, saved: true, errors: {} } : d,
-        ),
-      );
+      setDraftContacts((prev) => prev.filter((d) => d.id !== draftId));
     } catch (error) {
       console.error("Error creating contact point:", error);
     }
@@ -270,17 +428,23 @@ export default function DatasetsAdminClient({
   useEffect(() => {
     async function loadDropdownData() {
       try {
-        const [licensesData, frequenciesData, myDatasetsData, tagsData] =
+        const [licensesData, frequenciesData, granularitiesData, zonesData, myDatasetsData, tagsData, resTypes] =
           await Promise.all([
             fetchLicenses(),
             fetchFrequencies(),
+            fetchGranularities(),
+            suggestSpatialZones("pt", 50),
             fetchMyDatasets(1, 1),
             suggestTags("", 50),
+            fetchResourceTypes(),
           ]);
         setLicenses(licensesData);
         setFrequencies(frequenciesData);
+        setGranularities(granularitiesData);
+        setSpatialZones(zonesData);
         setHasDatasets(myDatasetsData.data.length > 0);
         setTags(tagsData);
+        setResourceTypes(resTypes);
       } catch (error) {
         console.error("Error loading dropdown data:", error);
       }
@@ -314,11 +478,103 @@ export default function DatasetsAdminClient({
     }
   };
 
-  const handleStep2Next = async () => {
+  const clearTemporalCoverageErrors = () => {
+    setFormErrors((prev) => {
+      const next = { ...prev };
+      delete next.temporalCoverage;
+      delete next.temporalCoverageInvalidFormat;
+      return next;
+    });
+  };
+
+  const parseInputDateToTime = (value: string): number | null => {
+    const raw = (value || "").trim();
+    if (!raw) return null;
+
+    // Supports "dd/mm/yyyy" and "dd-mm-yyyy"
+    const ptMatch = raw.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+    if (ptMatch) {
+      const day = Number(ptMatch[1]);
+      const month = Number(ptMatch[2]);
+      const year = Number(ptMatch[3]);
+      const d = new Date(year, month - 1, day);
+      if (
+        d.getFullYear() === year &&
+        d.getMonth() === month - 1 &&
+        d.getDate() === day
+      ) {
+        return d.getTime();
+      }
+      return null;
+    }
+
+    // Supports ISO-like formats (e.g. yyyy-mm-dd)
+    const iso = new Date(raw);
+    const isoTime = iso.getTime();
+    return Number.isNaN(isoTime) ? null : isoTime;
+  };
+
+  const handleStep2Next = async (
+    e?: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     const errors: Record<string, boolean> = {};
+    if (!selectedProducerRef.current) errors.datasetProducer = true;
     if (!datasetTitle.trim()) errors.datasetTitle = true;
     if (!datasetDescription.trim()) errors.datasetDescription = true;
     if (!selectedFrequencyRef.current) errors.datasetFrequency = true;
+    const startRaw = (temporalStart || "").trim();
+    const endRaw = (temporalEnd || "").trim();
+    const startTime = startRaw ? parseInputDateToTime(startRaw) : null;
+    const endTime = endRaw ? parseInputDateToTime(endRaw) : null;
+
+    if ((startRaw && startTime === null) || (endRaw && endTime === null)) {
+      errors.temporalCoverageInvalidFormat = true;
+    }
+    if (
+      !errors.temporalCoverageInvalidFormat &&
+      startTime !== null &&
+      endTime !== null &&
+      startTime > endTime
+    ) {
+      errors.temporalCoverage = true;
+    }
+
+    // Validate contact point fields.
+    // At least one valid contact (saved or draft with name + email/link) is required.
+    const hasSavedContact = selectedContactPointIds.length > 0;
+    const draftErrorsMap: Record<number, Record<string, boolean>> = {};
+    let hasValidDraft = false;
+
+    draftContacts.forEach((draft) => {
+      const draftErrors: Record<string, boolean> = {};
+      if (!draft.name.trim()) draftErrors.name = true;
+      if (!draft.email.trim() && !draft.link.trim()) {
+        draftErrors.email = true;
+        draftErrors.link = true;
+      }
+      if (Object.keys(draftErrors).length === 0) {
+        hasValidDraft = true;
+      } else {
+        draftErrorsMap[draft.id] = draftErrors;
+      }
+    });
+
+    if (!hasSavedContact && !hasValidDraft) {
+      setDraftContacts((prev) =>
+        prev.map((d) =>
+          draftErrorsMap[d.id] ? { ...d, errors: draftErrorsMap[d.id] } : d,
+        ),
+      );
+      errors.contactDrafts = true;
+    }
+
+    if (
+      (errors.temporalCoverage ||
+        errors.temporalCoverageInvalidFormat) &&
+      Object.keys(errors).length === 1
+    ) {
+      e?.preventDefault();
+    }
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
@@ -337,18 +593,25 @@ export default function DatasetsAdminClient({
       if (datasetAcronym.trim()) payload.acronym = datasetAcronym.trim();
       if (datasetShortDescription.trim()) {
         payload.description_short = datasetShortDescription.trim();
+      } else {
+        const desc = datasetDescription.trim();
+        payload.description_short =
+          desc.length > 197 ? desc.slice(0, 197) + "..." : desc;
       }
       if (selectedProducerRef.current && selectedProducerRef.current !== "user") {
         payload.organization = selectedProducerRef.current;
       }
       if (selectedLicenseRef.current) payload.license = selectedLicenseRef.current;
+      if (selectedKeywordsRef.current) {
+        payload.tags = selectedKeywordsRef.current.split(",").filter(Boolean);
+      }
       if (selectedContactPointIds.length > 0) {
         payload.contact_points = selectedContactPointIds;
       }
-      if (temporalStart) {
+      if (startRaw || endRaw) {
         payload.temporal_coverage = {
-          start: temporalStart,
-          ...(temporalEnd ? { end: temporalEnd } : {}),
+          ...(startRaw ? { start: startRaw } : {}),
+          ...(endRaw ? { end: endRaw } : {}),
         };
       }
 
@@ -364,8 +627,13 @@ export default function DatasetsAdminClient({
     } catch (error: unknown) {
       const err = error as { status?: number; data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
+        const flattenValue = (val: unknown): string => {
+          if (Array.isArray(val)) return val.map(flattenValue).join("; ");
+          if (val && typeof val === "object") return Object.values(val as Record<string, unknown>).map(flattenValue).join("; ");
+          return String(val);
+        };
         const messages = Object.entries(err.data)
-          .map(([key, val]) => `${key}: ${val}`)
+          .map(([key, val]) => `${key}: ${flattenValue(val)}`)
           .join(", ");
         setApiError(messages);
       } else {
@@ -376,12 +644,37 @@ export default function DatasetsAdminClient({
     }
   };
 
-  const handleStep3Next = async () => {
-    const hasFiles = uploadedFiles.length > 0;
-    const hasUrl = resourceUrl.trim().startsWith("https://");
+  const handleEditMeta = (key: string, meta: PendingResourceMeta, newUrl?: string) => {
+    if (newUrl !== undefined && key.startsWith("url-")) {
+      const oldUrl = key.slice(4);
+      if (oldUrl !== newUrl) {
+        setResourceUrls((prev) => prev.map((u) => (u === oldUrl ? newUrl : u)));
+        setResourceMetadata((prev) => {
+          const updated = { ...prev, [`url-${newUrl}`]: meta };
+          delete updated[key];
+          return updated;
+        });
+        return;
+      }
+    }
+    setResourceMetadata((prev) => ({ ...prev, [key]: meta }));
+  };
 
-    if (!hasFiles && !hasUrl) {
+  const handleStep3Next = async () => {
+    const trimmedUrls = resourceUrls.map((u) => u.trim()).filter(Boolean);
+    const hasFiles = uploadedFiles.length > 0;
+    const hasUrls = trimmedUrls.length > 0;
+    const invalidUrl = trimmedUrls.find((u) => !isValidHttpsUrl(u));
+
+    if (!hasFiles && !hasUrls) {
       setShowFileError(true);
+      setShowInvalidUrlError(false);
+      return;
+    }
+
+    if (invalidUrl) {
+      setShowInvalidUrlError(true);
+      setShowFileError(false);
       return;
     }
     if (!createdDataset) {
@@ -394,14 +687,24 @@ export default function DatasetsAdminClient({
     try {
       if (hasFiles) {
         for (const file of uploadedFiles) {
-          await uploadResource(createdDataset.id, file);
+          const meta = resourceMetadata[`file-${file.name}`];
+          const resource = await uploadResource(createdDataset.id, file);
+          if (meta) {
+            await updateResource(createdDataset.id, resource.id, {
+              title: meta.title || file.name,
+              type: meta.resourceType || "main",
+              description: meta.description || undefined,
+            });
+          }
         }
       }
-      if (hasUrl) {
+      for (const url of trimmedUrls) {
+        const meta = resourceMetadata[`url-${url}`];
         await createResource(createdDataset.id, {
-          title: resourceUrl.trim(),
-          type: "main",
-          url: resourceUrl.trim(),
+          title: meta?.title || url,
+          type: meta?.resourceType || "main",
+          description: meta?.description || undefined,
+          url,
           filetype: "remote",
           format: "",
         });
@@ -454,7 +757,7 @@ export default function DatasetsAdminClient({
 
   const auxiliarItemsStep2 = [
     {
-      title: "Nomeando seu conjunto de dados",
+      title: "Dar um título",
       content: (
         <>
           <p>
@@ -469,12 +772,16 @@ export default function DatasetsAdminClient({
       hasError: !!formErrors.datasetTitle,
     },
     {
-      title: "Adicione uma sigla ao conjunto de dados.",
-      content:
-        "Tem a opção de adicionar uma sigla ao seu conjunto de dados. As letras que compõem essa sigla não precisam ser separadas por pontos.",
+      title: "Adicionar uma sigla",
+      content: (
+        <p>
+          Tem a opção de adicionar uma sigla ao seu conjunto de dados. As letras que compõem a
+          sigla não precisam de ser separadas por pontos.
+        </p>
+      ),
     },
     {
-      title: "Escreva uma boa descrição",
+      title: "Descrever os dados",
       content: (
         <>
           <p>
@@ -501,12 +808,12 @@ export default function DatasetsAdminClient({
       hasError: !!formErrors.datasetDescription,
     },
     {
-      title: "Escreva uma breve descrição.",
+      title: "Incluir uma descrição breve",
       content: (
         <>
           <p>
-            A descrição resumida apresenta seu conjunto de dados em uma ou duas frases. Isso ajuda
-            os utilizadores a entenderem rapidamente o conteúdo e melhora sua visibilidade nos
+            A descrição resumida apresenta o seu conjunto de dados numa ou duas frases. Facilita a
+            compreensão imediata do conteúdo pelos utilizadores e aumenta a sua visibilidade nos
             resultados de pesquisa.
           </p>
           <p className="font-bold mt-3">Sugestões automáticas</p>
@@ -529,9 +836,8 @@ export default function DatasetsAdminClient({
       content: (
         <>
           <p>
-            As palavras-chave descrevem seu conjunto de dados e facilitam sua descoberta. Elas
-            melhoram seu posicionamento nos mecanismos de pesquisa e ajudam os utilizadores a encontrar
-            com mais facilidade os dados que procuram.
+            As palavras-chave ajudam a caracterizar o conjunto de dados, tornam-no mais fácil de
+            encontrar e contribuem para um melhor posicionamento nos motores de busca.
           </p>
           <p className="font-bold mt-3">Sugestões automáticas</p>
           <p className="mt-2">
@@ -548,18 +854,27 @@ export default function DatasetsAdminClient({
       ),
     },
     {
-      title: "Selecione uma licença",
-      content:
-        "As licenças definem as regras para a reutilização. Ao escolher uma licença de reutilização, garante que o conjunto de dados publicado será reutilizado de acordo com os termos de uso que definiu.",
+      title: "Selecionar uma licença",
+      content: (
+        <p>
+          As licenças definem as regras para a reutilização. Ao escolher uma licença de
+          reutilização, garante que o conjunto de dados publicado será reutilizado de acordo com os
+          termos de uso que definiu.
+        </p>
+      ),
     },
     {
-      title: "Escolha a frequência de atualização.",
-      content:
-        "A frequência de atualização refere-se à frequência com que planeja atualizar os dados publicados. Essa frequência de atualização é apenas indicativa.",
+      title: "Escolher a frequência de atualização",
+      content: (
+        <p>
+          A frequência de atualização refere-se à frequência com que pretende atualizar os dados
+          publicados.
+        </p>
+      ),
       hasError: !!formErrors.datasetFrequency,
     },
     {
-      title: "Forneça a cobertura de tempo.",
+      title: "Fornecer a cobertura temporal",
       content: (
         <>
           <p>A abrangência temporal indica o período de tempo dos dados publicados.</p>
@@ -568,14 +883,13 @@ export default function DatasetsAdminClient({
       ),
     },
     {
-      title: "Complete as informações espaciais",
+      title: "Indicar a granularidade espacial",
       content: (
         <>
           <p>
-            A granularidade espacial indica o nível mais detalhado de informações geográficas que
-            seus dados podem abranger.
+            A granularidade espacial representa o grau de detalhe geográfico presente nos seus
+            dados, como, por exemplo, freguesia ou município.
           </p>
-          <p>Por exemplo: em nível departamental ou municipal.</p>
         </>
       ),
     },
@@ -586,21 +900,20 @@ export default function DatasetsAdminClient({
       title: "Escolher o formato certo",
       content: (
         <>
-          <p>Os formatos devem ser:</p>
+          <p>O formato deve ser:</p>
           <ul className="list-disc pl-5 mt-2 flex flex-col gap-2">
             <li>
               <strong>Aberto:</strong> um formato aberto não adiciona especificações técnicas que
               restrinjam o uso dos dados (por exemplo, o uso de software pago);
             </li>
             <li>
-              <strong>facilmente reutilizável:</strong> um formato facilmente reutilizável implica
+              <strong>Facilmente reutilizável:</strong> um formato facilmente reutilizável implica
               que qualquer pessoa ou servidor pode reutilizar facilmente o conjunto de dados;
             </li>
             <li>
-              <strong>Utilizável em um sistema de processamento automatizado:</strong> um sistema de
-              processamento automatizado permite operações automáticas relacionadas ao processamento
-              de dados (por exemplo, um ficheiro CSV é facilmente utilizável por um sistema
-              automatizado, ao contrário de um ficheiro PDF).
+              <strong>Utilizável num sistema de processamento automatizado:</strong> permite
+              operações automáticas de processamento de dados (por exemplo, um ficheiro CSV é
+              facilmente utilizável por um sistema automatizado, ao contrário de um ficheiro PDF).
             </li>
           </ul>
         </>
@@ -611,19 +924,19 @@ export default function DatasetsAdminClient({
       content: (
         <>
           <p>
-            A descrição de um ficheiro facilita a reutilização de dados. Ela inclui, entre outras
+            A descrição de um ficheiro facilita a reutilização de dados. Inclui, entre outras
             coisas:
           </p>
           <ul className="list-disc pl-5 mt-2 flex flex-col gap-2">
-            <li>uma descrição geral do conjunto de dados;</li>
-            <li>uma descrição do método de produção de dados;</li>
-            <li>uma descrição do modelo de dados;</li>
-            <li>uma descrição do esquema de dados;</li>
-            <li>uma descrição dos metadados;</li>
+            <li>Uma descrição geral do conjunto de dados;</li>
+            <li>Uma descrição do método de produção de dados;</li>
+            <li>Uma descrição do modelo de dados;</li>
+            <li>Uma descrição do esquema de dados;</li>
+            <li>Uma descrição dos metadados;</li>
             <li>Uma descrição das principais mudanças.</li>
           </ul>
           <p className="text-red-500 mt-3 font-medium">
-            Não adicionou nenhum ficheiro de documentação nem descreveu seus ficheiros.
+            Não adicionou nenhum ficheiro de documentação nem descreveu os seus ficheiros.
           </p>
         </>
       ),
@@ -632,6 +945,12 @@ export default function DatasetsAdminClient({
 
   const auxiliarItems =
     currentStep === 3 || currentStep === 4 ? auxiliarItemsStep3 : auxiliarItemsStep2;
+  const hasTemporalCoverageError =
+    !!formErrors.temporalCoverage ||
+    !!formErrors.temporalCoverageInvalidFormat;
+  const temporalCoverageErrorText = formErrors.temporalCoverageInvalidFormat
+    ? "Formato de data inválido. Utilize o formato dd/mm/aaaa."
+    : "A data de início não pode ser posterior à data de fim.";
 
   return (
     <>
@@ -652,23 +971,36 @@ export default function DatasetsAdminClient({
                   <>
                     <strong>O que é um conjunto de dados?</strong>
                     <br />
-                    Em dados.gov, um conjunto de dados é um conjunto de ficheiros.
+                    Em dados.gov.pt, um conjunto de dados é um conjunto de ficheiros.
                   </>
                 }
               />
+              <p className="text-neutral-900 text-base leading-7 pt-32">
+                Os campos marcados com um asterisco ( * ) são obrigatórios.
+              </p>
               <h2 className="admin-page__section-title">Produtor</h2>
 
               <div className="admin-page__fields-group">
                 <span className="text-primary-900 text-base font-medium leading-7">
-                  Verifique a identidade que deseja usar na publicação.
+                  Confirme a identidade que pretende utilizar na publicação.
                 </span>
                 <IsolatedSelect
-                  label=""
-                  hideLabel
+                  label="Produtor*"
                   placeholder="Selecione o produtor..."
                   id="dataset-producer"
                   onChangeRef={selectedProducerRef}
-                  onChangeCallback={(value) => setSelectedProducer(value)}
+                  onChangeCallback={(value) => {
+                    setSelectedProducer(value);
+                    if (value) {
+                      setFormErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.datasetProducer;
+                        return next;
+                      });
+                    }
+                  }}
+                  hasError={!!formErrors.datasetProducer}
+                  errorFeedbackText="Campo obrigatório"
                 >
                   {producerOptions}
                 </IsolatedSelect>
@@ -677,17 +1009,16 @@ export default function DatasetsAdminClient({
               {(!user?.organizations || user.organizations.length === 0) && (
                 <div className="admin-page__org-card flex flex-col items-center gap-[16px] bg-neutral-50 rounded-lg p-8 text-center mt-[24px]">
                   <h3 className="text-primary-900 text-lg font-bold leading-7">
-                    Você não pertence a nenhuma organização.
+                    Não pertence a uma organização.
                   </h3>
                   <p className="text-neutral-700 text-base leading-7">
-                    Recomendamos que publique em nome de uma organização se se tratar de uma
-                    atividade profissional.
+                    Quando o conjunto de dados for produzido no contexto de atividade profissional, é recomendável que seja publicado em nome da organização responsável.
                   </p>
                   <Button
                     variant="primary"
                     onClick={() => router.push("/pages/admin/organizations/new")}
                   >
-                    Crie ou participe de uma organização
+                    Crie ou integre uma organização em dados.gov.pt
                   </Button>
                 </div>
               )}
@@ -699,10 +1030,6 @@ export default function DatasetsAdminClient({
                 className="admin-page__form"
                 onSubmit={(e) => e.preventDefault()}
               >
-                <p className="text-neutral-900 text-base leading-7 pt-32">
-                  Os campos marcados com um asterisco ( * ) são obrigatórios.
-                </p>
-
                 <h2 className="admin-page__section-title">Descrição</h2>
 
                 <div className="admin-page__fields-group">
@@ -730,11 +1057,11 @@ export default function DatasetsAdminClient({
                     }}
                   />
                   <InputTextArea
-                    label="Descrição*"
+                    label="Descrição *"
                     placeholder="Insira a descrição aqui"
                     id="dataset-description"
                     rows={4}
-                    maxLength={246}
+                    maxLength={10000}
                     showCharCounter={true}
                     value={datasetDescription}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -742,16 +1069,18 @@ export default function DatasetsAdminClient({
                       if (e.target.value.trim()) clearError("datasetDescription");
                     }}
                     hasError={!!formErrors.datasetDescription}
-                    hasFeedback={!!formErrors.datasetDescription || datasetDescription.length < 200}
+                    hasFeedback={!!formErrors.datasetDescription || datasetDescription.length < 1000}
                     feedbackState={formErrors.datasetDescription ? "danger" : "warning"}
-                    feedbackText="Recomenda-se que a descrição tenha pelo menos 200 caracteres."
+                    feedbackText="Recomenda-se que a descrição tenha pelo menos 1000 caracteres."
                     errorFeedbackText="Campo obrigatório"
                   />
-                  <InputTextArea
+                  {/*<InputTextArea
                     label="Descrição resumida"
                     placeholder="Insira a descrição aqui"
                     id="dataset-short-description"
                     rows={3}
+                    maxLength={200}
+                    showCharCounter={true}
                     value={datasetShortDescription}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                       setDatasetShortDescription(e.target.value);
@@ -759,47 +1088,61 @@ export default function DatasetsAdminClient({
                     }}
                     hasFeedback
                     feedbackState="info"
-                    feedbackText="Se este campo for deixado em branco, serão utilizados os primeiros 200 caracteres da sua descrição."
-                  />
-                  <div className="flex items-center justify-between">
-                    <Button appearance="outline" variant="primary" hasIcon leadingIcon="agora-line-edit" leadingIconHover="agora-solid-edit">
-                      Sugira uma breve descrição.
-                    </Button>
-                    <a
-                      href="https://dados.gov.pt"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-600 text-sm underline inline-flex items-center gap-[8px] hover:text-primary-800"
-                    >
-                      O que achou desta sugestão? <Icon name="agora-line-external-link" className="w-4 h-4" />
-                    </a>
-                  </div>
-
+                    feedbackText="Se este campo for deixado em branco, serão utilizados os primeiros 197 caracteres da sua descrição, seguidos de '...' (máximo de 200 caracteres)."
+                  />*/}
                   <IsolatedSelect
                     label="Palavras-chave"
-                    placeholder="Pesquise por uma palavra-chave..."
+                    placeholder="Pesquise ou insira palavras-chave..."
                     id="dataset-keywords"
                     type="checkbox"
                     searchable
-                    searchInputPlaceholder="Escreva para pesquisar..."
+                    searchInputPlaceholder="Escreva para pesquisar ou criar..."
                     searchNoResultsText="Nenhum resultado encontrado"
-                    onChangeRef={dummyRef}
+                    defaultValue={keywordsDefaultValue}
+                    onChangeRef={selectedKeywordsRef}
+                    onSearchCallback={setKeywordSearch}
+                    onChangeCallback={(value) => {
+                      setSelectedKeywordsValue(value);
+                      const selected = value.split(",").filter(Boolean);
+                      let addedNew = false;
+                      selected.forEach((v) => {
+                        if (!tags.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+                          addedNew = true;
+                          setTags((prev) => {
+                            if (prev.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+                              return prev;
+                            }
+                            return [...prev, { text: v }];
+                          });
+                        }
+                      });
+                      if (addedNew) {
+                        setKeywordSearch("");
+                      }
+                    }}
                   >
                     {tagOptions}
                   </IsolatedSelect>
-                  <div className="flex items-center justify-between">
-                    <Button appearance="outline" variant="primary" hasIcon leadingIcon="agora-line-edit" leadingIconHover="agora-solid-edit">
-                      Sugira palavras-chave
-                    </Button>
-                    <a
-                      href="https://dados.gov.pt"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-600 text-sm underline inline-flex items-center gap-[8px] hover:text-primary-800"
-                    >
-                      O que achou desta sugestão? <Icon name="agora-line-external-link" className="w-4 h-4" />
-                    </a>
-                  </div>
+
+                  {selectedKeywords.length > 0 && (
+                    <div className="flex flex-wrap gap-8 -mt-8">
+                      {selectedKeywords.map((keyword) => (
+                        <Tag
+                          key={keyword}
+                          aria-label={`Remover ${keyword}`}
+                          onClick={() => {
+                            const next = selectedKeywords
+                              .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                              .join(",");
+                            setSelectedKeywordsValue(next);
+                            selectedKeywordsRef.current = next;
+                          }}
+                        >
+                          {keyword}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
 
@@ -807,93 +1150,11 @@ export default function DatasetsAdminClient({
                 <h2 className="admin-page__section-title">Acesso</h2>
 
                 <div className="admin-page__fields-group">
-                  <div className="flex flex-col gap-[8px]">
-                    <span className="text-primary-900 text-base font-medium leading-7">
-                      Tipo de acesso
-                    </span>
-                    <div className="flex flex-col gap-4">
-                      <RadioButton
-                        label="Aberto"
-                        id="access-open"
-                        name="access-type"
-                        checked={accessType === "open"}
-                        onChange={() => setAccessType("open")}
-                      />
-                      <RadioButton
-                        label="Restrito"
-                        id="access-restricted"
-                        name="access-type"
-                        checked={accessType === "restricted"}
-                        onChange={() => setAccessType("restricted")}
-                      />
-                    </div>
-                  </div>
-
-                  {accessType === "restricted" && (
-                    <>
-                      <div className="grid grid-cols-3 gap-8 mt-4 items-end">
-                        <IsolatedSelect
-                          label="Comunidade e Administração"
-                          placeholder=""
-                          id="dataset-restriction-community"
-                          onChangeRef={dummyRef}
-                        >
-                          <DropdownSection name="community">
-                            <DropdownOption value="sim">Sim</DropdownOption>
-                            <DropdownOption value="nao">Não</DropdownOption>
-                            <DropdownOption value="condicional">Condicional</DropdownOption>
-                          </DropdownSection>
-                        </IsolatedSelect>
-                        <IsolatedSelect
-                          label="Empresa e Associação"
-                          placeholder=""
-                          id="dataset-restriction-enterprise"
-                          onChangeRef={dummyRef}
-                        >
-                          <DropdownSection name="enterprise">
-                            <DropdownOption value="sim">Sim</DropdownOption>
-                            <DropdownOption value="nao">Não</DropdownOption>
-                            <DropdownOption value="condicional">Condicional</DropdownOption>
-                          </DropdownSection>
-                        </IsolatedSelect>
-                        <IsolatedSelect
-                          label="Privado"
-                          placeholder=""
-                          id="dataset-restriction-private"
-                          onChangeRef={dummyRef}
-                        >
-                          <DropdownSection name="private">
-                            <DropdownOption value="sim">Sim</DropdownOption>
-                            <DropdownOption value="nao">Não</DropdownOption>
-                            <DropdownOption value="condicional">Condicional</DropdownOption>
-                          </DropdownSection>
-                        </IsolatedSelect>
-                      </div>
-                      <IsolatedSelect
-                        label="Motivo da restrição"
-                        placeholder=""
-                        id="dataset-restriction-reason"
-                        onChangeRef={dummyRef}
-                      >
-                        <DropdownSection name="restriction-reason">
-                          <DropdownOption value="confidencialidade-procedimentos">Confidencialidade dos procedimentos das autoridades públicas</DropdownOption>
-                          <DropdownOption value="relacoes-internacionais">Relações internacionais, segurança pública ou defesa nacional</DropdownOption>
-                          <DropdownOption value="curso-justica">Curso da justiça</DropdownOption>
-                          <DropdownOption value="confidencialidade-comercial">Confidencialidade comercial ou industrial</DropdownOption>
-                          <DropdownOption value="propriedade-intelectual">Direitos de propriedade intelectual</DropdownOption>
-                          <DropdownOption value="dados-pessoais">Confidencialidade dos dados pessoais</DropdownOption>
-                          <DropdownOption value="protecao-fornecedores">Proteção dos fornecedores voluntários de informações</DropdownOption>
-                          <DropdownOption value="protecao-ambiental">Proteção ambiental</DropdownOption>
-                          <DropdownOption value="outros">Outros</DropdownOption>
-                        </DropdownSection>
-                      </IsolatedSelect>
-                    </>
-                  )}
-
                   <IsolatedSelect
                     label="Licença"
-                    placeholder="Selecione uma licença"
+                    placeholder="Selecione uma licença..."
                     id="dataset-license"
+                    defaultValue={licenseDefaultValue}
                     onChangeRef={selectedLicenseRef}
                   >
                     {licenseOptions}
@@ -903,66 +1164,33 @@ export default function DatasetsAdminClient({
                 {selectedProducer && selectedProducer !== "user" && (
                   <>
                     <h2 className="admin-page__section-title">
-                      Pontos de contato
+                      Pontos de contacto
                     </h2>
 
                     <div className="admin-page__fields-group">
-                      <span className="text-primary-900 text-base font-medium leading-7">
-                        Escolha um ponto de contato.
-                      </span>
+                      {orgContactPoints.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                          {orgContactPoints.map((cp) => (
+                            <Checkbox
+                              key={cp.id}
+                              label={cp.name}
+                              value={cp.id}
+                              name="contact-points"
+                              checked={selectedContactPointIds.includes(cp.id)}
+                              onChange={() => toggleExistingContact(cp.id)}
+                            />
+                          ))}
+                        </div>
+                      )}
 
-                      {draftContacts.map((draft) =>
-                        draft.saved ? (
-                          <div
-                            key={draft.id}
-                            className="border border-neutral-300 rounded"
-                          >
-                            <div
-                              className="flex items-center justify-between
-                                px-4 py-3 border-b border-neutral-200"
-                            >
-                              <span className="text-primary-900 text-sm">
-                                {draft.name}
-                              </span>
-                              <div className="flex items-center gap-3">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setDraftContacts((prev) =>
-                                      prev.filter((d) => d.id !== draft.id),
-                                    )
-                                  }
-                                  className="text-neutral-500 hover:text-neutral-700"
-                                  aria-label="Remover contato"
-                                >
-                                  <Icon
-                                    name="agora-line-trash"
-                                    className="w-4 h-4"
-                                  />
-                                </button>
-                              </div>
-                            </div>
-                            <div className="px-4 py-3 flex flex-col gap-1">
-                              {draft.email && (
-                                <span className="text-neutral-700 text-sm">
-                                  E-mail de contato : {draft.email}
-                                </span>
-                              )}
-                              {draft.link && (
-                                <span className="text-neutral-700 text-sm">
-                                  URL de contato: {draft.link}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
+                      {draftContacts.map((draft) => (
                           <div key={draft.id}>
                             <div
                               className="text-primary-900 text-base
                                 font-medium leading-7"
                               style={{ paddingBottom: "16px" }}
                             >
-                              Escolha um ponto de contato.
+                              Novo ponto de contacto
                             </div>
                             <div style={{ paddingBottom: "24px" }}>
                               <InputText
@@ -1006,10 +1234,10 @@ export default function DatasetsAdminClient({
                                 hasError={!!draft.errors.email}
                                 hasFeedback={!!draft.errors.email}
                                 feedbackState="danger"
-                                errorFeedbackText="Preencha o e-mail ou a reutilização"
+                                errorFeedbackText="É necessário um endereço de e-mail caso não seja fornecido um link."
                               />
                               <InputText
-                                label="Reutilização"
+                                label="Website"
                                 placeholder="https://..."
                                 id={`contact-link-${draft.id}`}
                                 value={draft.link}
@@ -1025,7 +1253,7 @@ export default function DatasetsAdminClient({
                                 hasError={!!draft.errors.link}
                                 hasFeedback={!!draft.errors.link}
                                 feedbackState="danger"
-                                errorFeedbackText="Preencha o e-mail ou a reutilização"
+                                errorFeedbackText="É necessário um link caso não seja fornecido um endereço de e‑mail."
                               />
                             </div>
                             <div style={{ paddingBottom: "24px" }}>
@@ -1039,7 +1267,7 @@ export default function DatasetsAdminClient({
                                   handleSaveContactDraft(draft.id)
                                 }
                               >
-                                Guardar contato
+                                Guardar contacto
                               </Button>
                             </div>
                           </div>
@@ -1068,7 +1296,7 @@ export default function DatasetsAdminClient({
                             ]);
                           }}
                         >
-                          Novo contato
+                          Novo contacto
                         </Button>
                       </div>
                     </div>
@@ -1080,8 +1308,9 @@ export default function DatasetsAdminClient({
                 <div className="admin-page__fields-group">
                   <IsolatedSelect
                     label="Frequência de atualização *"
-                    placeholder="Procure uma frequência..."
+                    placeholder="Selecione uma frequência..."
                     id="dataset-frequency"
+                    defaultValue={frequencyDefaultValue}
                     onChangeRef={selectedFrequencyRef}
                     hasError={!!formErrors.datasetFrequency}
                     errorFeedbackText="Campo obrigatório"
@@ -1093,6 +1322,7 @@ export default function DatasetsAdminClient({
                     <InputDate
                       label="Cobertura temporal (Data de início)"
                       id="dataset-date-start"
+                      defaultValue={temporalStart}
                       dayInputPlaceholder="dd"
                       monthInputPlaceholder="mm"
                       yearInputPlaceholder="aaaa"
@@ -1106,11 +1336,19 @@ export default function DatasetsAdminClient({
                       todayLabel="Hoje"
                       cancelLabel="Cancelar"
                       okLabel="OK"
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTemporalStart(e.target.value)}
+                      hasError={hasTemporalCoverageError}
+                      hasFeedback={hasTemporalCoverageError}
+                      feedbackState="danger"
+                      errorFeedbackText={temporalCoverageErrorText}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setTemporalStart(e.target.value);
+                        clearTemporalCoverageErrors();
+                      }}
                     />
                     <InputDate
                       label="Data de fim"
                       id="dataset-date-end"
+                      defaultValue={temporalEnd}
                       dayInputPlaceholder="dd"
                       monthInputPlaceholder="mm"
                       yearInputPlaceholder="aaaa"
@@ -1124,7 +1362,11 @@ export default function DatasetsAdminClient({
                       todayLabel="Hoje"
                       cancelLabel="Cancelar"
                       okLabel="OK"
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTemporalEnd(e.target.value)}
+                      hasError={hasTemporalCoverageError}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setTemporalEnd(e.target.value);
+                        clearTemporalCoverageErrors();
+                      }}
                     />
                   </div>
                 </div>
@@ -1134,35 +1376,32 @@ export default function DatasetsAdminClient({
                 <div className="admin-page__fields-group">
                   <IsolatedSelect
                     label="Cobertura espacial"
-                    placeholder="Procurando cobertura espacial..."
+                    placeholder="Selecione uma cobertura espacial..."
                     id="dataset-spatial-coverage"
+                    defaultValue={spatialCoverageDefaultValue}
                     searchable
                     searchInputPlaceholder="Escreva para pesquisar..."
                     searchNoResultsText="Nenhum resultado encontrado"
-                    onChangeRef={dummyRef}
+                    onChangeRef={spatialCoverageRef}
+                    onSearchCallback={(q) => {
+                      if (!q) return;
+                      suggestSpatialZones(q, 10).then(setSpatialZoneSearch);
+                    }}
                   >
-                    <DropdownSection name="spatial-coverage">
-                      <DropdownOption value="national">Nacional</DropdownOption>
-                      <DropdownOption value="regional">Regional</DropdownOption>
-                      <DropdownOption value="local">Local</DropdownOption>
-                    </DropdownSection>
+                    {spatialCoverageOptions}
                   </IsolatedSelect>
 
                   <IsolatedSelect
                     label="Granularidade espacial"
-                    placeholder="Procurando granularidade..."
+                    placeholder="Selecione uma granularidade espacial..."
                     id="dataset-spatial-granularity"
+                    defaultValue={spatialGranularityDefaultValue}
                     searchable
                     searchInputPlaceholder="Escreva para pesquisar..."
                     searchNoResultsText="Nenhum resultado encontrado"
-                    onChangeRef={dummyRef}
+                    onChangeRef={spatialGranularityRef}
                   >
-                    <DropdownSection name="spatial-granularity">
-                      <DropdownOption value="country">País</DropdownOption>
-                      <DropdownOption value="district">Distrito</DropdownOption>
-                      <DropdownOption value="municipality">Município</DropdownOption>
-                      <DropdownOption value="parish">Freguesia</DropdownOption>
-                    </DropdownSection>
+                    {granularityOptions}
                   </IsolatedSelect>
                 </div>
 
@@ -1210,17 +1449,42 @@ export default function DatasetsAdminClient({
               <div className="admin-page__form">
                 <FileUploadModal
                   uploadedFiles={uploadedFiles}
-                  resourceUrl={resourceUrl}
+                  resourceUrls={resourceUrls}
                   hasError={showFileError}
                   onFilesChange={(files) => {
                     setUploadedFiles(files);
-                    if (files.length > 0) setShowFileError(false);
+                    if (files.length > 0) {
+                      setShowFileError(false);
+                      setShowInvalidUrlError(false);
+                    }
                   }}
-                  onUrlChange={(url) => {
-                    setResourceUrl(url);
-                    if (url.trim().startsWith("https://")) setShowFileError(false);
+                  onUrlAdd={(url) => {
+                    setResourceUrls((prev) => {
+                      if (prev.includes(url)) return prev;
+                      return [...prev, url];
+                    });
+                    if (isValidHttpsUrl(url.trim())) {
+                      setShowFileError(false);
+                      setShowInvalidUrlError(false);
+                    }
                   }}
+                  onUrlRemove={(url) => {
+                    setResourceUrls((prev) => prev.filter((u) => u !== url));
+                  }}
+                  onFileReplace={(index, file) => {
+                    const updated = [...uploadedFiles];
+                    updated[index] = file;
+                    setUploadedFiles(updated);
+                  }}
+                  resourceTypes={resourceTypes}
+                  resourceMetadata={resourceMetadata}
+                  onEditMeta={handleEditMeta}
                 />
+                {showInvalidUrlError && (
+                  <span className="text-danger-500 text-sm">
+                    Formato de URL inválido. Insira um URL https:// com domínio válido.
+                  </span>
+                )}
 
                 <div className="admin-page__actions">
                   <Button
@@ -1256,38 +1520,125 @@ export default function DatasetsAdminClient({
                 type="success"
                 description={
                   <>
-                    <strong>Seu conjunto de dados foi criado!</strong>
+                    <strong>O seu conjunto de dados foi criado!</strong>
                     <br />
                     Agora pode publicar ou guardar como rascunho.
                   </>
                 }
               />
 
-              <CardGeneral
-                variant="white-outline"
-                isCardHorizontal
-                isBlockedLink
-                iconDefault="agora-line-layers-menu"
-                iconHover="agora-solid-layers-menu"
-                titleText={createdDataset?.title || datasetTitle || "Sem título"}
-                descriptionText={createdDataset?.description || datasetDescription || "Sem descrição"}
-                anchor={{
-                  href: createdDataset
-                    ? `/pages/datasets/${createdDataset.slug}`
-                    : `/pages/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`,
-                  children: "",
-                }}
-              />
+              {(() => {
+                const qualityScore = createdDataset?.quality?.score != null
+                  ? Math.round(createdDataset.quality.score * 100)
+                  : 0;
+                const formatMetric = (value: number | undefined) => {
+                  if (!value) return "0";
+                  if (value >= 1_000_000) return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
+                  if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
+                  return String(value);
+                };
+                const timeAgo = createdDataset?.last_modified
+                  ? formatDistanceToNow(new Date(createdDataset.last_modified), { locale: pt })
+                      .replace("aproximadamente ", "")
+                      .replace("quase ", "")
+                      .replace("menos de ", "")
+                      .replace("cerca de ", "")
+                  : "agora";
+                const href = createdDataset
+                  ? `/pages/datasets/${createdDataset.slug}`
+                  : `/pages/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`;
+                return (
+                  <Link
+                    href={href}
+                    className="card-general-listing rounded-[4px] overflow-hidden flex flex-col"
+                  >
+                    <CardGeneral
+                      variant="neutral-100"
+                      image={{
+                        src: createdDataset?.organization?.logo || "/images/placeholders/organization.png",
+                        alt: createdDataset?.organization?.name || "Organização",
+                        height: "56px",
+                        className: "bg-primary-100 !object-contain !h-[56px]",
+                      }}
+                      subtitleText={
+                        (
+                          <div className="flex flex-col">
+                            <span style={{ fontSize: "16px" }} className="text-neutral-900">{timeAgo}</span>
+                            <span style={{ fontSize: "16px", fontWeight: 300 }} className="text-neutral-900 mt-4">
+                              {createdDataset?.organization?.name || "Sem Organização"}
+                            </span>
+                          </div>
+                        ) as unknown as string
+                      }
+                      titleText={createdDataset?.title || datasetTitle || "Sem título"}
+                      descriptionText={
+                        (
+                          <div className="flex flex-col grow">
+                            <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
+                              {createdDataset?.description || datasetDescription || "Sem descrição"}
+                            </p>
+                            <div className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}>
+                              <ProgressBar
+                                value={qualityScore}
+                                max={100}
+                                hideLabel={true}
+                                hidePercentageValue={true}
+                              />
+                              <span className="text-[14px] text-neutral-900 mt-4 block">
+                                {qualityScore}% Qualidade dos metadados
+                              </span>
+                              <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
+                                <div className="flex items-center gap-8" title="Visualizações">
+                                  <Icon
+                                    name={createdDataset?.metrics?.views ? "agora-solid-eye" : "agora-line-eye"}
+                                    dimensions="xs"
+                                    className="fill-neutral-700"
+                                    aria-hidden="true"
+                                  />
+                                  <span>{formatMetric(createdDataset?.metrics?.views)}</span>
+                                </div>
+                                <div className="flex items-center gap-8" title="Downloads">
+                                  <Icon
+                                    name={createdDataset?.metrics?.resources_downloads ? "agora-solid-download" : "agora-line-download"}
+                                    dimensions="xs"
+                                    className="fill-neutral-700"
+                                    aria-hidden="true"
+                                  />
+                                  <span>{formatMetric(createdDataset?.metrics?.resources_downloads)}</span>
+                                </div>
+                                <div className="flex items-center gap-8" title="Reutilizações">
+                                  <img src="/Icons/bar_chart.svg" className="w-16 h-16" alt="" aria-hidden="true" />
+                                  <span>{createdDataset?.metrics?.reuses || 0}</span>
+                                </div>
+                                <div className="flex items-center gap-8" title="Favoritos">
+                                  <Icon
+                                    name={createdDataset?.metrics?.followers ? "agora-solid-star" : "agora-line-star"}
+                                    dimensions="xs"
+                                    className="fill-neutral-700"
+                                    aria-hidden="true"
+                                  />
+                                  <span>{formatMetric(createdDataset?.metrics?.followers)}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-8 text-primary-600 mt-16">
+                                <Icon
+                                  name="agora-line-arrow-right-circle"
+                                  className="w-32 h-32"
+                                  aria-hidden="true"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ) as unknown as string
+                      }
+                      isBlockedLink={true}
+                      anchor={{ href }}
+                    />
+                  </Link>
+                );
+              })()}
 
-              <Button
-                appearance="link"
-                variant="primary"
-                hasIcon
-                trailingIcon="agora-line-external-link"
-                trailingIconHover="agora-solid-external-link"
-              >
-                Dê-nos o seu feedback sobre o processo de publicação.
-              </Button>
+              <PublicationFeedbackButton />
 
               <div className="admin-page__actions flex justify-end gap-[18px]">
                 <Button
@@ -1296,14 +1647,14 @@ export default function DatasetsAdminClient({
                   onClick={handleSaveDraft}
                   disabled={isSubmitting}
                 >
-                  Salvar rascunho
+                  Guardar o rascunho
                 </Button>
                 <Button
                   variant="primary"
                   onClick={handlePublish}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "A publicar..." : "Publique o conjunto de dados"}
+                  {isSubmitting ? "A publicar..." : "Publicar o conjunto de dados"}
                 </Button>
               </div>
             </>

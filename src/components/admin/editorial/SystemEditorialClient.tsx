@@ -1,20 +1,28 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   Breadcrumb,
   Button,
+  CardGeneral,
   Icon,
+  ProgressBar,
   Tabs,
   Tab,
   TabHeader,
   TabBody,
+  usePopupContext,
 } from "@ama-pt/agora-design-system";
+import { formatDistanceToNow } from "date-fns";
+import { pt } from "date-fns/locale";
 import {
   fetchHomeFeaturedDatasets,
   updateHomeFeaturedDatasets,
   fetchHomeFeaturedReuses,
   updateHomeFeaturedReuses,
+  searchDatasets,
+  searchReuses,
 } from "@/services/api";
 import type { Dataset, Reuse } from "@/types/api";
 
@@ -33,6 +41,7 @@ interface BlockDefinition {
   label: string;
   description: string;
   icon: string;
+  iconImg?: string;
   category: string;
 }
 
@@ -48,14 +57,14 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
     type: "accordion",
     label: "Acordeão",
     description: "Sumário expansível (FAQ, etc.)",
-    icon: "agora-line-layers-menu",
+    icon: "agora-line-folder",
     category: "LAYOUT",
   },
   {
     type: "featured-datasets",
     label: "Dados em destaque",
     description: "Destaque até 4 conjuntos de dados",
-    icon: "agora-line-folder",
+    icon: "agora-line-layers-menu",
     category: "CONTEÚDO EM DESTAQUE",
   },
   {
@@ -63,6 +72,7 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
     label: "Reutilização em destaque",
     description: "Destaque até 4 reutilizações",
     icon: "agora-line-bar-chart",
+    iconImg: "/Icons/bar_chart_primary.svg",
     category: "CONTEÚDO EM DESTAQUE",
   },
   {
@@ -225,7 +235,7 @@ function BlockPicker({ onSelect }: { onSelect: (type: BlockType) => void }) {
           <ul role="menu">
             {Object.entries(categories).map(([category, blocks]) => (
               <li key={category}>
-                <p className="px-[16px] pt-[12px] pb-[4px] text-xs font-bold text-neutral-500 uppercase tracking-wide">
+                <p className="px-[16px] pt-[12px] pb-[4px] text-xs font-bold text-neutral-900 uppercase tracking-wide">
                   {category}
                 </p>
                 <ul>
@@ -241,15 +251,19 @@ function BlockPicker({ onSelect }: { onSelect: (type: BlockType) => void }) {
                         }}
                       >
                         <span className="flex items-center gap-[8px]">
-                          <Icon
-                            name={block.icon}
-                            className="w-[18px] h-[18px] text-neutral-700"
-                          />
-                          <span className="text-sm font-semibold text-neutral-800">
+                          {block.iconImg ? (
+                            <img src={block.iconImg} alt="" className="w-[18px] h-[18px]" />
+                          ) : (
+                            <Icon
+                              name={block.icon}
+                              className="w-[18px] h-[18px] text-neutral-700"
+                            />
+                          )}
+                          <span className="text-sm font-semibold text-neutral-900">
                             {block.label}
                           </span>
                         </span>
-                        <p className="text-xs text-neutral-500 mt-[2px] ml-[26px]">
+                        <p className="text-xs text-neutral-900 mt-[2px] ml-[26px]">
                           {block.description}
                         </p>
                       </button>
@@ -356,15 +370,15 @@ function AccordionEditor({
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
-        placeholder="Meu acordeão"
-        className="w-full text-xl font-bold text-neutral-900 placeholder-neutral-900 outline-none border-none mb-[4px]"
+        placeholder="Os meus acordeões"
+        className="w-full text-xl font-bold text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none mb-[4px]"
       />
       <input
         type="text"
         value={data.description}
         onChange={(e) => onChange({ ...data, description: e.target.value })}
         placeholder="Adicione uma descrição"
-        className="w-full text-sm text-neutral-400 placeholder-neutral-400 outline-none border-none mb-[20px]"
+        className="w-full text-sm text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none mb-[20px]"
       />
 
       <div className="flex flex-col">
@@ -377,7 +391,7 @@ function AccordionEditor({
                   value={item.title}
                   onChange={(e) => updateItem(index, "title", e.target.value)}
                   placeholder="Título do item"
-                  className="flex-1 text-sm text-neutral-700 placeholder-neutral-400 outline-none border-none"
+                  className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none"
                 />
               </div>
               <div className="flex items-center gap-[4px]">
@@ -407,7 +421,7 @@ function AccordionEditor({
                   onChange={(e) => updateItem(index, "content", e.target.value)}
                   placeholder="Conteúdo do item..."
                   rows={3}
-                  className="w-full px-[12px] py-[8px] text-sm border border-neutral-200 rounded-[6px] outline-none resize-y"
+                  className="w-full px-[12px] py-[8px] text-sm text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 border border-neutral-200 rounded-[6px] outline-none resize-y"
                 />
               </div>
             )}
@@ -430,57 +444,303 @@ function AccordionEditor({
 function FeaturedDatasetsEditor({
   data,
   onChange,
+  nameMap,
+  onNameMapUpdate,
 }: {
   data: FeaturedDatasetsData;
   onChange: (d: FeaturedDatasetsData) => void;
+  nameMap?: Record<string, Dataset>;
+  onNameMapUpdate?: (dataset: Dataset) => void;
 }) {
+  const { show, hide } = usePopupContext();
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Dataset[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleRemoveDataset = (index: number) => {
+    show(
+      <DeleteBlockPopupContent
+        onClose={hide}
+        onConfirm={() => {
+          hide();
+          onChange({ ...data, datasetIds: data.datasetIds.filter((_, i) => i !== index) });
+        }}
+        message="Essa ação é irreversível. Tem a certeza que quer remover este conjunto de dados?"
+      />,
+      { title: "Remover conjunto de dados", closeAriaLabel: "Fechar", dimensions: "m" }
+    );
+  };
+
+  useEffect(() => {
+    if (!showSearch) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target as Node)
+      ) {
+        setShowSearch(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showSearch]);
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await searchDatasets(searchQuery, 1, 8);
+        setSearchResults(
+          response.data.filter((d) => !data.datasetIds.includes(d.id))
+        );
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [searchQuery, data.datasetIds]);
+
+  const handleSelectDataset = (dataset: Dataset) => {
+    onChange({ ...data, datasetIds: [...data.datasetIds, dataset.id] });
+    onNameMapUpdate?.(dataset);
+    setShowSearch(false);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
   return (
     <div className="bg-white rounded-[8px] py-[24px]">
       <input
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
-        placeholder="Meus conjuntos de dados"
-        className="w-full text-xl font-bold text-neutral-900 placeholder-neutral-900 outline-none border-none mb-[4px]"
+        placeholder="Os meus conjuntos de dados"
+        className="w-full text-xl font-bold text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none mb-[4px]"
       />
       <input
         type="text"
         value={data.legend}
         onChange={(e) => onChange({ ...data, legend: e.target.value })}
         placeholder="Adicionar legenda"
-        className="w-full text-sm text-orange-500 placeholder-orange-400 outline-none border-none mb-[20px]"
+        className="w-full text-sm text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none mb-[20px]"
       />
 
-      <div className="flex flex-wrap gap-[12px]">
-        {data.datasetIds.map((id, index) => (
-          <div
-            key={id}
-            className="flex items-center gap-[8px] px-[12px] py-[8px] border border-neutral-200 rounded-[8px] bg-neutral-50 text-sm"
-          >
-            <span className="text-neutral-600 truncate max-w-[200px]">{id}</span>
-            <button
-              type="button"
-              onClick={() =>
-                onChange({
-                  ...data,
-                  datasetIds: data.datasetIds.filter((_, i) => i !== index),
-                })
-              }
-              className="text-red-500 hover:text-red-700"
-            >
-              <Icon name="agora-line-close" className="w-[14px] h-[14px]" />
-            </button>
-          </div>
-        ))}
+      <div className="grid grid-cols-3 gap-[16px]">
+        {data.datasetIds.map((id, index) => {
+          const dataset = nameMap?.[id];
+          const qualityScore =
+            dataset?.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0;
+          const formatMetric = (value: number | undefined) => {
+            if (!value) return "0";
+            if (value >= 1_000_000)
+              return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
+            if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
+            return String(value);
+          };
+          const timeAgo = dataset?.last_modified
+            ? formatDistanceToNow(new Date(dataset.last_modified), {
+                locale: pt,
+                addSuffix: false,
+              })
+                .replace("menos de ", "")
+                .replace("cerca de ", "")
+            : "Desconhecido";
 
-        {data.datasetIds.length < 4 && (
+          return (
+            <div key={id} className="relative">
+              <div className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col">
+                <CardGeneral
+                  variant="white"
+                  image={{
+                    src:
+                      dataset?.organization?.logo ||
+                      "/images/placeholders/organization.png",
+                    alt: dataset?.organization?.name || "Organização",
+                    height: "56px",
+                    className: "bg-primary-100 !object-contain !h-[56px]",
+                  }}
+                  subtitleText={
+                    (
+                      <div className="flex flex-col">
+                        <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                          {timeAgo}
+                        </span>
+                        <span
+                          style={{ fontSize: "16px", fontWeight: 300 }}
+                          className="text-neutral-900 mt-4"
+                        >
+                          {dataset?.organization?.name || "Sem Organização"}
+                        </span>
+                      </div>
+                    ) as unknown as string
+                  }
+                  titleText={dataset?.title || id}
+                  descriptionText={
+                    (
+                      <div className="flex flex-col grow">
+                        <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
+                          {dataset?.description}
+                        </p>
+                        <div
+                          className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
+                        >
+                          <ProgressBar
+                            value={qualityScore}
+                            max={100}
+                            hideLabel={true}
+                            hidePercentageValue={true}
+                          />
+                          <span className="text-[14px] text-neutral-900 mt-4 block">
+                            {qualityScore}% Qualidade dos metadados
+                          </span>
+                          <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
+                            <div className="flex items-center gap-8" title="Visualizações">
+                              <Icon
+                                name="agora-solid-eye"
+                                dimensions="xs"
+                                className="fill-neutral-700"
+                                aria-hidden="true"
+                              />
+                              <span>{formatMetric(dataset?.metrics?.views)}</span>
+                            </div>
+                            <div className="flex items-center gap-8" title="Downloads">
+                              <Icon
+                                name="agora-solid-download"
+                                dimensions="xs"
+                                className="fill-neutral-700"
+                                aria-hidden="true"
+                              />
+                              <span>{formatMetric(dataset?.metrics?.resources_downloads)}</span>
+                            </div>
+                            <div className="flex items-center gap-8" title="Reutilizações">
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                className="w-16 h-16 fill-neutral-700"
+                                aria-hidden="true"
+                              >
+                                <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" />
+                              </svg>
+                              <span>{dataset?.metrics?.reuses || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-8" title="Favoritos">
+                              <Icon
+                                name="agora-solid-star"
+                                dimensions="xs"
+                                className="fill-neutral-700"
+                                aria-hidden="true"
+                              />
+                              <span>{formatMetric(dataset?.metrics?.followers)}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-8 text-primary-600 mt-16">
+                            <Icon
+                              name="agora-line-arrow-right-circle"
+                              className="w-32 h-32"
+                              aria-hidden="true"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ) as unknown as string
+                  }
+                  isBlockedLink={true}
+                  anchor={{ href: dataset?.slug ? `/pages/datasets/${dataset.slug}` : "#" }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemoveDataset(index)}
+                className="absolute top-[8px] right-[8px] p-[4px] rounded z-10 group"
+                title="Remover"
+              >
+                <Icon name="agora-line-trash" className="w-[18px] h-[18px] !fill-[var(--color-danger-600)] block group-hover:hidden" />
+                <Icon name="agora-solid-trash" className="w-[18px] h-[18px] !fill-[var(--color-danger-600)] hidden group-hover:block" />
+              </button>
+            </div>
+          );
+        })}
+
+        {data.datasetIds.length < 6 && !showSearch && (
           <button
             type="button"
-            className="flex flex-col items-center justify-center w-[200px] h-[100px] border-2 border-dashed border-neutral-300 rounded-[8px] text-neutral-400 hover:border-neutral-400 hover:text-neutral-500 transition-colors"
+            onClick={() => setShowSearch(true)}
+            className="flex flex-col items-center justify-center min-h-[200px] border-2 border-dashed border-neutral-300 rounded-[8px] text-neutral-900 hover:border-neutral-400 transition-colors"
           >
             <Icon name="agora-line-plus-circle" className="w-[20px] h-[20px] mb-[4px]" />
             <span className="text-xs">Adicionar um conjunto de dados</span>
           </button>
+        )}
+
+        {showSearch && (
+          <div ref={searchContainerRef} className="w-full mt-[8px] relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Pesquisar conjunto de dados..."
+              className="w-full px-[12px] py-[10px] border border-neutral-300 rounded-[8px] text-sm outline-none focus:border-primary-500"
+              autoFocus
+            />
+            {isSearching && (
+              <p className="text-xs text-neutral-400 mt-[4px]">A pesquisar...</p>
+            )}
+            {searchResults.length > 0 && (
+              <ul className="absolute z-10 w-full mt-[4px] bg-white border border-neutral-200 rounded-[8px] shadow-lg max-h-[240px] overflow-y-auto">
+                {searchResults.map((d) => (
+                  <li key={d.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectDataset(d)}
+                      className="w-full text-left px-[12px] py-[8px] text-sm hover:bg-neutral-50 transition-colors"
+                    >
+                      <span className="font-medium text-neutral-800">
+                        {d.title}
+                      </span>
+                      {d.organization?.name && (
+                        <span className="text-neutral-400 ml-[8px]">
+                          — {d.organization.name}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {searchQuery.length >= 2 &&
+              !isSearching &&
+              searchResults.length === 0 && (
+                <p className="text-xs text-neutral-400 mt-[4px]">
+                  Nenhum resultado encontrado
+                </p>
+              )}
+            <button
+              type="button"
+              onClick={() => {
+                setShowSearch(false);
+                setSearchQuery("");
+                setSearchResults([]);
+              }}
+              className="mt-[4px] text-xs text-neutral-400 hover:text-neutral-600"
+            >
+              Cancelar
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -490,57 +750,265 @@ function FeaturedDatasetsEditor({
 function FeaturedReusesEditor({
   data,
   onChange,
+  nameMap,
+  onNameMapUpdate,
 }: {
   data: FeaturedReusesData;
   onChange: (d: FeaturedReusesData) => void;
+  nameMap?: Record<string, Reuse>;
+  onNameMapUpdate?: (reuse: Reuse) => void;
 }) {
+  const { show, hide } = usePopupContext();
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Reuse[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleRemoveReuse = (index: number) => {
+    show(
+      <DeleteBlockPopupContent
+        onClose={hide}
+        onConfirm={() => {
+          hide();
+          onChange({ ...data, reuseIds: data.reuseIds.filter((_, i) => i !== index) });
+        }}
+        message="Essa ação é irreversível. Tem a certeza que quer remover esta reutilização?"
+      />,
+      { title: "Remover reutilização", closeAriaLabel: "Fechar", dimensions: "m" }
+    );
+  };
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showSearch) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target as Node)
+      ) {
+        setShowSearch(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showSearch]);
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await searchReuses(searchQuery, 1, 8);
+        setSearchResults(
+          response.data.filter((r) => !data.reuseIds.includes(r.id))
+        );
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [searchQuery, data.reuseIds]);
+
+  const handleSelectReuse = (reuse: Reuse) => {
+    onChange({ ...data, reuseIds: [...data.reuseIds, reuse.id] });
+    onNameMapUpdate?.(reuse);
+    setShowSearch(false);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
   return (
     <div className="bg-white rounded-[8px] py-[24px]">
       <input
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
-        placeholder="Minhas reutilizações"
-        className="w-full text-xl font-bold text-neutral-900 placeholder-neutral-900 outline-none border-none mb-[4px]"
+        placeholder="As minhas reutilizações"
+        className="w-full text-xl font-bold text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none mb-[4px]"
       />
       <input
         type="text"
         value={data.legend}
         onChange={(e) => onChange({ ...data, legend: e.target.value })}
         placeholder="Adicionar legenda"
-        className="w-full text-sm text-orange-500 placeholder-orange-400 outline-none border-none mb-[20px]"
+        className="w-full text-sm text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none mb-[20px]"
       />
 
-      <div className="flex flex-wrap gap-[12px]">
-        {data.reuseIds.map((id, index) => (
-          <div
-            key={id}
-            className="flex items-center gap-[8px] px-[12px] py-[8px] border border-neutral-200 rounded-[8px] bg-neutral-50 text-sm"
-          >
-            <span className="text-neutral-600 truncate max-w-[200px]">{id}</span>
-            <button
-              type="button"
-              onClick={() =>
-                onChange({
-                  ...data,
-                  reuseIds: data.reuseIds.filter((_, i) => i !== index),
-                })
-              }
-              className="text-red-500 hover:text-red-700"
-            >
-              <Icon name="agora-line-close" className="w-[14px] h-[14px]" />
-            </button>
-          </div>
-        ))}
+      <div className="grid grid-cols-3 gap-[16px]">
+        {data.reuseIds.map((id, index) => {
+          const reuse = nameMap?.[id];
+          const formatMetric = (value: number | undefined) => {
+            if (!value) return "0";
+            if (value >= 1_000_000)
+              return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
+            if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
+            return String(value);
+          };
+          const timeAgo = reuse?.last_modified
+            ? formatDistanceToNow(new Date(reuse.last_modified), {
+                locale: pt,
+                addSuffix: false,
+              })
+                .replace("menos de ", "")
+                .replace("cerca de ", "")
+            : "Desconhecido";
 
-        {data.reuseIds.length < 4 && (
+          return (
+            <div key={id} className="relative">
+              <div className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col">
+                <CardGeneral
+                  variant="white"
+                  image={{
+                    src:
+                      reuse?.image_thumbnail ||
+                      reuse?.organization?.logo ||
+                      "/images/placeholders/organization.png",
+                    alt: reuse?.title || "Reutilização",
+                    height: "56px",
+                    className: "bg-primary-100 !object-contain !h-[56px]",
+                  }}
+                  subtitleText={
+                    (
+                      <div className="flex flex-col">
+                        <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                          {timeAgo}
+                        </span>
+                        <span
+                          style={{ fontSize: "16px", fontWeight: 300 }}
+                          className="text-neutral-900 mt-4"
+                        >
+                          {reuse?.organization?.name || "Sem Organização"}
+                        </span>
+                      </div>
+                    ) as unknown as string
+                  }
+                  titleText={reuse?.title || id}
+                  descriptionText={
+                    (
+                      <div className="flex flex-col grow">
+                        <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
+                          {reuse?.description}
+                        </p>
+                        <div className="mt-auto">
+                          <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
+                            <div className="flex items-center gap-8" title="Visualizações">
+                              <Icon
+                                name="agora-solid-eye"
+                                dimensions="xs"
+                                className="fill-neutral-700"
+                                aria-hidden="true"
+                              />
+                              <span>{formatMetric(reuse?.metrics?.views)}</span>
+                            </div>
+                            <div className="flex items-center gap-8" title="Favoritos">
+                              <Icon
+                                name="agora-solid-star"
+                                dimensions="xs"
+                                className="fill-neutral-700"
+                                aria-hidden="true"
+                              />
+                              <span>{formatMetric(reuse?.metrics?.followers)}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-8 text-primary-600 mt-16">
+                            <Icon
+                              name="agora-line-arrow-right-circle"
+                              className="w-32 h-32"
+                              aria-hidden="true"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ) as unknown as string
+                  }
+                  isBlockedLink={true}
+                  anchor={{ href: reuse?.slug ? `/pages/reuses/${reuse.slug}` : "#" }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemoveReuse(index)}
+                className="absolute top-[8px] right-[8px] p-[4px] rounded z-10 group"
+                title="Remover"
+              >
+                <Icon name="agora-line-trash" className="w-[18px] h-[18px] !fill-[var(--color-danger-600)] block group-hover:hidden" />
+                <Icon name="agora-solid-trash" className="w-[18px] h-[18px] !fill-[var(--color-danger-600)] hidden group-hover:block" />
+              </button>
+            </div>
+          );
+        })}
+
+        {data.reuseIds.length < 6 && !showSearch && (
           <button
             type="button"
-            className="flex flex-col items-center justify-center w-[200px] h-[100px] border-2 border-dashed border-neutral-300 rounded-[8px] text-neutral-400 hover:border-neutral-400 hover:text-neutral-500 transition-colors"
+            onClick={() => setShowSearch(true)}
+            className="flex flex-col items-center justify-center min-h-[200px] border-2 border-dashed border-neutral-300 rounded-[8px] text-neutral-900 hover:border-neutral-400 transition-colors"
           >
             <Icon name="agora-line-plus-circle" className="w-[20px] h-[20px] mb-[4px]" />
             <span className="text-xs">Adicione uma reutilização</span>
           </button>
+        )}
+
+        {showSearch && (
+          <div ref={searchContainerRef} className="w-full mt-[8px] relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Pesquisar reutilização..."
+              className="w-full px-[12px] py-[10px] border border-neutral-300 rounded-[8px] text-sm outline-none focus:border-primary-500"
+              autoFocus
+            />
+            {isSearching && (
+              <p className="text-xs text-neutral-400 mt-[4px]">A pesquisar...</p>
+            )}
+            {searchResults.length > 0 && (
+              <ul className="absolute z-10 w-full mt-[4px] bg-white border border-neutral-200 rounded-[8px] shadow-lg max-h-[240px] overflow-y-auto">
+                {searchResults.map((r) => (
+                  <li key={r.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectReuse(r)}
+                      className="w-full text-left px-[12px] py-[8px] text-sm hover:bg-neutral-50 transition-colors"
+                    >
+                      <span className="font-medium text-neutral-800">
+                        {r.title}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {searchQuery.length >= 2 &&
+              !isSearching &&
+              searchResults.length === 0 && (
+                <p className="text-xs text-neutral-400 mt-[4px]">
+                  Nenhum resultado encontrado
+                </p>
+              )}
+            <button
+              type="button"
+              onClick={() => {
+                setShowSearch(false);
+                setSearchQuery("");
+                setSearchResults([]);
+              }}
+              className="mt-[4px] text-xs text-neutral-400 hover:text-neutral-600"
+            >
+              Cancelar
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -569,15 +1037,15 @@ function FeaturedLinksEditor({
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
-        placeholder="Meus links"
-        className="w-full text-xl font-bold text-neutral-900 placeholder-neutral-900 outline-none border-none mb-[4px]"
+        placeholder="Os meus links"
+        className="w-full text-xl font-bold text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none mb-[4px]"
       />
       <input
         type="text"
         value={data.legend}
         onChange={(e) => onChange({ ...data, legend: e.target.value })}
         placeholder="Adicionar legenda"
-        className="w-full text-sm text-orange-500 placeholder-orange-400 outline-none border-none mb-[20px]"
+        className="w-full text-sm text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none mb-[20px]"
       />
 
       <div className="flex gap-[32px]">
@@ -606,7 +1074,7 @@ function FeaturedLinksEditor({
                   onChange({ ...data, paragraphs });
                 }}
                 placeholder="Texto do parágrafo"
-                className="flex-1 text-sm text-neutral-700 placeholder-neutral-400 outline-none border-none"
+                className="flex-1 text-sm text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none"
               />
             </div>
           ))}
@@ -668,7 +1136,7 @@ function FeaturedLinksEditor({
                         onChange({ ...data, links });
                       }}
                       placeholder="Título do link"
-                      className="text-lg font-bold text-primary-900 placeholder-primary-900/40 outline-none border-none"
+                      className="text-lg font-bold text-primary-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border-none"
                     />
                     <Icon
                       name="agora-line-external-link"
@@ -697,7 +1165,7 @@ function FeaturedLinksEditor({
                         onChange({ ...data, links });
                       }}
                       placeholder="URL"
-                      className="text-sm text-neutral-600 placeholder-neutral-400 outline-none border border-neutral-300 rounded-[4px] px-[8px] py-[4px]"
+                      className="text-sm text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none border border-neutral-300 rounded-[4px] px-[8px] py-[4px]"
                     />
                   </div>
                 </div>
@@ -804,7 +1272,7 @@ function MarkdownEditor({
           onChange={(e) => onChange({ content: e.target.value })}
           placeholder="Escreva aqui o conteúdo..."
           rows={8}
-          className="w-full px-[16px] py-[12px] text-sm outline-none resize-y border-none"
+          className="w-full px-[16px] py-[12px] text-sm text-neutral-900 placeholder:text-neutral-900 placeholder:opacity-100 outline-none resize-y border-none"
         />
 
         <div className="h-[3px] bg-primary-500" />
@@ -818,9 +1286,17 @@ function MarkdownEditor({
 function BlockEditor({
   block,
   onUpdate,
+  datasetNameMap,
+  reuseNameMap,
+  onDatasetNameMapUpdate,
+  onReuseNameMapUpdate,
 }: {
   block: ContentBlock;
   onUpdate: (data: BlockData) => void;
+  datasetNameMap?: Record<string, Dataset>;
+  reuseNameMap?: Record<string, Reuse>;
+  onDatasetNameMapUpdate?: (dataset: Dataset) => void;
+  onReuseNameMapUpdate?: (reuse: Reuse) => void;
 }) {
   switch (block.type) {
     case "hero":
@@ -832,6 +1308,8 @@ function BlockEditor({
         <FeaturedDatasetsEditor
           data={block.data as FeaturedDatasetsData}
           onChange={onUpdate}
+          nameMap={datasetNameMap}
+          onNameMapUpdate={onDatasetNameMapUpdate}
         />
       );
     case "featured-reuses":
@@ -839,6 +1317,8 @@ function BlockEditor({
         <FeaturedReusesEditor
           data={block.data as FeaturedReusesData}
           onChange={onUpdate}
+          nameMap={reuseNameMap}
+          onNameMapUpdate={onReuseNameMapUpdate}
         />
       );
     case "featured-links":
@@ -852,6 +1332,38 @@ function BlockEditor({
   }
 }
 
+// ─── Delete block confirmation popup ─────────────────────────────────────────
+
+function DeleteBlockPopupContent({
+  onClose,
+  onConfirm,
+  message = "Essa ação é irreversível. Tem a certeza que quer eliminar este bloco?",
+}: {
+  onClose: () => void;
+  onConfirm: () => void;
+  message?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-[16px]">
+      <p>{message}</p>
+      <div className="flex justify-end gap-16 pt-16">
+        <Button appearance="outline" variant="neutral" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button
+          variant="danger"
+          onClick={onConfirm}
+          hasIcon
+          leadingIcon="agora-line-trash"
+          leadingIconHover="agora-solid-trash"
+        >
+          Eliminar
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Block wrapper with side controls ────────────────────────────────────────
 
 function BlockWrapper({
@@ -862,6 +1374,10 @@ function BlockWrapper({
   onMoveUp,
   onMoveDown,
   onUpdate,
+  datasetNameMap,
+  reuseNameMap,
+  onDatasetNameMapUpdate,
+  onReuseNameMapUpdate,
 }: {
   block: ContentBlock;
   index: number;
@@ -870,7 +1386,30 @@ function BlockWrapper({
   onMoveUp: () => void;
   onMoveDown: () => void;
   onUpdate: (data: BlockData) => void;
+  datasetNameMap?: Record<string, Dataset>;
+  reuseNameMap?: Record<string, Reuse>;
+  onDatasetNameMapUpdate?: (dataset: Dataset) => void;
+  onReuseNameMapUpdate?: (reuse: Reuse) => void;
 }) {
+  const { show, hide } = usePopupContext();
+
+  const handleRemove = () => {
+    show(
+      <DeleteBlockPopupContent
+        onClose={hide}
+        onConfirm={() => {
+          hide();
+          onRemove();
+        }}
+      />,
+      {
+        title: "Elimine o bloco",
+        closeAriaLabel: "Fechar",
+        dimensions: "m",
+      }
+    );
+  };
+
   return (
     <div className="flex gap-[8px]">
       <div className="flex flex-col items-center gap-[8px] pt-[24px]">
@@ -894,16 +1433,24 @@ function BlockWrapper({
         </button>
         <button
           type="button"
-          onClick={onRemove}
-          className="p-[4px] rounded hover:bg-red-100 text-neutral-400 hover:text-red-600"
+          onClick={handleRemove}
+          className="p-[4px] rounded group"
           title="Remover bloco"
         >
-          <Icon name="agora-line-trash" className="w-[16px] h-[16px]" />
+          <Icon name="agora-line-trash" className="w-[16px] h-[16px] !fill-[var(--color-danger-600)] block group-hover:hidden" />
+          <Icon name="agora-solid-trash" className="w-[16px] h-[16px] !fill-[var(--color-danger-600)] hidden group-hover:block" />
         </button>
       </div>
 
       <div className="flex-1">
-        <BlockEditor block={block} onUpdate={onUpdate} />
+        <BlockEditor
+          block={block}
+          onUpdate={onUpdate}
+          datasetNameMap={datasetNameMap}
+          reuseNameMap={reuseNameMap}
+          onDatasetNameMapUpdate={onDatasetNameMapUpdate}
+          onReuseNameMapUpdate={onReuseNameMapUpdate}
+        />
       </div>
     </div>
   );
@@ -915,10 +1462,18 @@ function BlockList({
   blocks,
   setBlocks,
   setHasChanges,
+  datasetNameMap,
+  reuseNameMap,
+  onDatasetNameMapUpdate,
+  onReuseNameMapUpdate,
 }: {
   blocks: ContentBlock[];
   setBlocks: React.Dispatch<React.SetStateAction<ContentBlock[]>>;
   setHasChanges: (v: boolean) => void;
+  datasetNameMap?: Record<string, Dataset>;
+  reuseNameMap?: Record<string, Reuse>;
+  onDatasetNameMapUpdate?: (dataset: Dataset) => void;
+  onReuseNameMapUpdate?: (reuse: Reuse) => void;
 }) {
   const addBlock = (type: BlockType, atIndex?: number) => {
     const newBlock: ContentBlock = {
@@ -982,6 +1537,10 @@ function BlockList({
             onMoveUp={() => moveBlock(index, "up")}
             onMoveDown={() => moveBlock(index, "down")}
             onUpdate={(data) => updateBlock(block.id, data)}
+            datasetNameMap={datasetNameMap}
+            reuseNameMap={reuseNameMap}
+            onDatasetNameMapUpdate={onDatasetNameMapUpdate}
+            onReuseNameMapUpdate={onReuseNameMapUpdate}
           />
 
           {index === blocks.length - 1 && (
@@ -998,8 +1557,6 @@ function BlockList({
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export default function SystemEditorialClient() {
-  const [featuredDatasets, setFeaturedDatasets] = useState<Dataset[]>([]);
-  const [featuredReuses, setFeaturedReuses] = useState<Reuse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [datasetBlocks, setDatasetBlocks] = useState<ContentBlock[]>([]);
   const [reuseBlocks, setReuseBlocks] = useState<ContentBlock[]>([]);
@@ -1009,6 +1566,10 @@ export default function SystemEditorialClient() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [datasetNameMap, setDatasetNameMap] = useState<Record<string, Dataset>>({});
+  const [reuseNameMap, setReuseNameMap] = useState<Record<string, Reuse>>({});
+  const initialDatasetsRef = useRef<Dataset[]>([]);
+  const initialReusesRef = useRef<Reuse[]>([]);
 
   useEffect(() => {
     async function loadFeatured() {
@@ -1018,8 +1579,39 @@ export default function SystemEditorialClient() {
           fetchHomeFeaturedDatasets(),
           fetchHomeFeaturedReuses(),
         ]);
-        setFeaturedDatasets(datasets);
-        setFeaturedReuses(reuses);
+        initialDatasetsRef.current = datasets;
+        initialReusesRef.current = reuses;
+
+        const dsMap: Record<string, Dataset> = {};
+        datasets.forEach((d) => { dsMap[d.id] = d; });
+        setDatasetNameMap(dsMap);
+
+        const rMap: Record<string, Reuse> = {};
+        reuses.forEach((r) => { rMap[r.id] = r; });
+        setReuseNameMap(rMap);
+
+        if (datasets.length > 0) {
+          setDatasetBlocks([{
+            id: crypto.randomUUID(),
+            type: "featured-datasets",
+            data: {
+              title: "",
+              legend: "",
+              datasetIds: datasets.map((d) => d.id),
+            } as FeaturedDatasetsData,
+          }]);
+        }
+        if (reuses.length > 0) {
+          setReuseBlocks([{
+            id: crypto.randomUUID(),
+            type: "featured-reuses",
+            data: {
+              title: "",
+              legend: "",
+              reuseIds: reuses.map((r) => r.id),
+            } as FeaturedReusesData,
+          }]);
+        }
       } catch (error) {
         console.error("Error loading featured content:", error);
       } finally {
@@ -1037,10 +1629,15 @@ export default function SystemEditorialClient() {
   }, [saveMessage]);
 
   const handleSave = async () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setIsSaving(true);
     try {
-      const datasetIds = featuredDatasets.map((d) => d.id);
-      const reuseIds = featuredReuses.map((r) => r.id);
+      const datasetIds = datasetBlocks
+        .filter((b) => b.type === "featured-datasets")
+        .flatMap((b) => (b.data as FeaturedDatasetsData).datasetIds);
+      const reuseIds = reuseBlocks
+        .filter((b) => b.type === "featured-reuses")
+        .flatMap((b) => (b.data as FeaturedReusesData).reuseIds);
       await Promise.all([
         updateHomeFeaturedDatasets(datasetIds),
         updateHomeFeaturedReuses(reuseIds),
@@ -1056,8 +1653,34 @@ export default function SystemEditorialClient() {
   };
 
   const handleCancel = () => {
-    setDatasetBlocks([]);
-    setReuseBlocks([]);
+    const datasets = initialDatasetsRef.current;
+    const reuses = initialReusesRef.current;
+    setDatasetBlocks(
+      datasets.length > 0
+        ? [{
+            id: crypto.randomUUID(),
+            type: "featured-datasets" as const,
+            data: {
+              title: "",
+              legend: "",
+              datasetIds: datasets.map((d) => d.id),
+            } as FeaturedDatasetsData,
+          }]
+        : []
+    );
+    setReuseBlocks(
+      reuses.length > 0
+        ? [{
+            id: crypto.randomUUID(),
+            type: "featured-reuses" as const,
+            data: {
+              title: "",
+              legend: "",
+              reuseIds: reuses.map((r) => r.id),
+            } as FeaturedReusesData,
+          }]
+        : []
+    );
     setHasChanges(false);
   };
 
@@ -1160,6 +1783,10 @@ export default function SystemEditorialClient() {
                 blocks={datasetBlocks}
                 setBlocks={setDatasetBlocks}
                 setHasChanges={setHasChanges}
+                datasetNameMap={datasetNameMap}
+                onDatasetNameMapUpdate={(dataset) =>
+                  setDatasetNameMap((prev) => ({ ...prev, [dataset.id]: dataset }))
+                }
               />
               {datasetBlocks.length > 0 && (
                 <div className="flex justify-end gap-[8px] pt-[16px] mt-[16px]">
@@ -1193,6 +1820,10 @@ export default function SystemEditorialClient() {
                 blocks={reuseBlocks}
                 setBlocks={setReuseBlocks}
                 setHasChanges={setHasChanges}
+                reuseNameMap={reuseNameMap}
+                onReuseNameMapUpdate={(reuse) =>
+                  setReuseNameMap((prev) => ({ ...prev, [reuse.id]: reuse }))
+                }
               />
               {reuseBlocks.length > 0 && (
                 <div className="flex justify-end gap-[8px] pt-[16px] mt-[16px]">

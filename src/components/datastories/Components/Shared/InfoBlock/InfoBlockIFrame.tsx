@@ -1,5 +1,5 @@
 "use client"
-import React, { useMemo, useRef, useEffect } from 'react'
+import { useMemo, useRef } from 'react'
 import { twJoin } from 'tailwind-merge';
 
 export type IInfoBlockIFrame = {
@@ -20,8 +20,8 @@ export default function InfoBlockIFrame({
             url.searchParams.set('chromeless', '1');
             url.searchParams.set('navContentPaneEnabled', 'false');
             url.searchParams.set('filterPaneEnabled', 'false');
-            url.searchParams.set('actionBarEnabled', 'false');   
-            url.searchParams.set('pagesVisibility', 'false');     
+            url.searchParams.set('actionBarEnabled', 'false');
+            url.searchParams.set('pagesVisibility', 'false');
             url.searchParams.set('noSignInButton', 'true');
             url.searchParams.set('hints', 'false');
             url.searchParams.set('showcaseSampleData', 'false');
@@ -34,13 +34,15 @@ export default function InfoBlockIFrame({
 
 
     return (
-        <div
-            className={twJoin("relative overflow-hidden pb-[56%] flex item-center justify-center", className)}
-        >
+        <div className={twJoin("relative overflow-hidden flex item-center justify-center h-full", className)}>
             <iframe
                 ref={iframeRef}
                 src={embedUrl}
                 className='absolute top-0 left-0 w-full h-full'
+                style={{
+                    clipPath: 'inset(0 0 118px 0)',
+                    top: 0,
+                }}
                 allow="fullscreen"
             />
         </div>

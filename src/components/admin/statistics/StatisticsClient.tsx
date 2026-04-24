@@ -90,7 +90,7 @@ export default function StatisticsClient() {
                   itemsPerPage: 10,
                   totalItems: 1,
                   availablePageSizes: [5, 10, 20],
-                  currentPage: 1,
+                  currentPage: 0,
                   buttonDropdownAriaLabel: "Selecionar itens por página",
                   dropdownListAriaLabel: "Opções de itens por página",
                   prevButtonAriaLabel: "Página anterior",
@@ -216,8 +216,9 @@ export default function StatisticsClient() {
                   id="filter-reuse-status"
                 >
                   <DropdownSection name="status">
+                    <DropdownOption value="" selected>Todos</DropdownOption>
                     <DropdownOption value="public">Público</DropdownOption>
-                    <DropdownOption value="archived">Arquivo</DropdownOption>
+                    <DropdownOption value="archived">Arquivado</DropdownOption>
                     <DropdownOption value="draft">Rascunho</DropdownOption>
                     <DropdownOption value="deleted">Excluído</DropdownOption>
                   </DropdownSection>

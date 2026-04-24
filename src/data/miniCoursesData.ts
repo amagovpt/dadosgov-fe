@@ -583,7 +583,7 @@ export const miniCoursesData: MiniCourse[] = [
       },
       {
         id: 6,
-        title: "O que é a pontuação de qualidade no dados.gov?",
+        title: "O que é a pontuação de qualidade no dados.gov.pt?",
         content:
           "O portal dados.gov.pt atribui uma pontuação de qualidade a cada dataset com base em critérios como a completude dos metadados, o formato dos ficheiros e a frequência de atualização.",
       },
@@ -604,11 +604,11 @@ export const miniCoursesData: MiniCourse[] = [
   {
     id: "8",
     slug: "minicurso-sobre-como-partilhar-dados-no-dados-gov",
-    title: "Minicurso sobre como partilhar dados no dados.gov",
+    title: "Minicurso sobre como partilhar dados no dados.gov.pt",
     description:
       "Este minicurso explica como publicar datasets no portal dados.gov.pt, desde a preparação dos dados e metadados de acordo com boas práticas, até à submissão no backoffice e à garantia de atualização contínua.",
     objectives: [
-      "Compreender o processo de publicação no dados.gov",
+      "Compreender o processo de publicação no dados.gov.pt",
       "Saber preparar dados e metadados de acordo com boas práticas",
       "Conhecer os campos obrigatórios do backoffice",
       "Aprender a submeter um dataset no portal",
@@ -645,7 +645,7 @@ export const miniCoursesData: MiniCourse[] = [
         id: 5,
         title: "Como submeter um dataset no backoffice?",
         content:
-          "Após iniciar sessão no portal, aceda à área de administração, selecione 'Publicar dados.gov', preencha os campos obrigatórios do formulário, carregue os ficheiros e publique o dataset.",
+          "Após iniciar sessão no portal, aceda à área de administração, selecione 'Publicar dados.gov.pt', preencha os campos obrigatórios do formulário, carregue os ficheiros e publique o dataset.",
       },
       {
         id: 6,

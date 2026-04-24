@@ -5,7 +5,7 @@ import Section from '@/components/datastories/Components/Shared/Section';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Data Story - dados.gov',
+    title: 'Data Story - dados.gov.pt',
 };
 
 export default function DataStoryDetailPage() {
@@ -13,11 +13,9 @@ export default function DataStoryDetailPage() {
     const data = {
         hero: {
             title: 'Serviços Públicos: o canal presencial',
-            description: `Quando um cidadão precisa de tratar de um assunto com a Administração Pública, tem hoje várias opções ao seu dispor. Pode fazê-lo online, através do telefone ou presencialmente. Cada uma destas formas de contacto responde a necessidades diferentes — e permite que os serviços públicos estejam acessíveis a todos.
-                            \nPara garantir a proximidade à população, a Agência para a Reforma Tecnológica do Estado organiza o seu atendimento público através de três canais complementares: presencial, telefónico e digital. Juntos, formam uma rede que assegura cobertura em todo o território e permite aos cidadãos escolher a forma mais conveniente de interagir com o Estado.
-                            \nO canal presencial continua a ser uma das portas de entrada mais visíveis desta rede. Nas Lojas e Espaços Cidadão, várias entidades públicas concentram os seus serviços no mesmo local, permitindo tratar diferentes assuntos numa única deslocação — desde renovar documentos de identificação a desempenhar serviços da segurança social, entre outros.
-                            \nNesta história assente em dados, exploramos como funciona o canal presencial: onde se encontram os locais de atendimento, onde se concentram os atendimentos, que serviços são mais procurados e quanto tempo demora.
-                            \nCompreender o funcionamento do canal presencial ajuda a perceber melhor como os serviços públicos chegam às pessoas e que mudanças podem ser feitas para o tornar mais eficaz.`,
+            description: `Para garantir a proximidade com a população e garantir que os cidadãos podem escolher a forma mais conveniente de interagir com o Estado, a Agência para a Reforma Tecnológica do Estado (ARTE) organiza o seu atendimento público em 3 canais: presencial, online e telefone.
+                        \nO canal presencial continua a ser um dos mais utilizados. Várias entidades públicas concentram os seus serviços nas Lojas e Espaços Cidadão, permitindo à população resolver diferentes assuntos numa única deslocação – seja renovar documentos de identificação, tratar de temas relacionados com a Segurança Social, entre outros.
+                        \nNesta história assente em dados, exploramos como funciona o canal presencial: onde se localizam os locais de atendimento, quais os locais de atendimento e os serviços mais procurados, e quanto tempo demora a realização de um serviço. Compreender o funcionamento do canal presencial ajuda a perceber como os serviços públicos chegam às pessoas e que mudanças podem ser feitas para o tornar mais eficaz.`,
             bigCards: [
                 {
                     icon: 'agora-line-ticket',
@@ -46,31 +44,31 @@ export default function DataStoryDetailPage() {
         },
         sections: [{
             title: 'Onde estão as Lojas e Espaços Cidadão?',
-            description: "Saiba por onde se distribuem as Lojas e Espaços Cidadão, e como cobrem o território para satisfazer as necessidades da população.",
+            description: "Veja como é que os locais de atendimento presenciais se distribuem pelo território para satisfazer as necessidades da população.",
             className: 'bg-primary-100',
             extraPy: 'py-[64px]',
             iFrame: {
-                className: 'w-full h-[1200px] bg-white',
-                src: '',
+                className: 'min-[1440px]:!h-[1130px] min-[1024px]:!h-[860px] min-[768px]:!h-[645px] min-[425px]:!h-[410px] min-[375px]:!h-[390px] min-[320px]:!h-[390px]',
+                src: 'https://app.powerbi.com/view?r=eyJrIjoiYzJkYTIyZTAtMzU4Yy00YWFiLWEzMDgtZThhOTBlYjkyYmM5IiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
         }, {
             title: 'A eficiência do canal presencial',
-            description: "O atendimento corresponde às interações entre o cidadão e as instituições públicas e privadas presentes nas Lojas e Espaços Cidadão. Compreenda a evolução da eficiência dos serviços públicos presenciais analisando a relação entre o número de senhas tiradas e o atendimento realizado ao longo do tempo.",
+            description: "O atendimento mede as interações entre o cidadão e as instituições públicas e privadas presentes nas Lojas e Espaços Cidadão. Compreenda a evolução da eficiência dos serviços públicos presenciais, analisando a relação entre o número de senhas tiradas e o número de atendimentos realizados.",
             className: 'bg-primary-100',
             extraPy: 'pt-[64px]',
             iFrame: {
-                className: 'w-full h-[1200px] bg-white',
-                src: '',
+                className: 'min-[1440px]:!h-[1080px] min-[1024px]:!h-[825px] min-[768px]:!h-[620px] min-[425px]:!h-[396px] min-[375px]:!h-[355px] min-[320px]:!h-[350px]',
+                src: 'https://app.powerbi.com/view?r=eyJrIjoiZmZiZjM4YjYtOWRmMS00OWQ4LWEyNGMtZGJhYzkwNDY1MmI5IiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
         },
         {
             title: 'Para onde se dirigem os cidadãos?',
-            description: "Conheça os locais de atendimento presencial com maior e menor afluência.",
+            description: "Descubra quais as Lojas e Espaços de Cidadão com maior e menor afluência.",
             className: 'bg-primary-100',
             extraPy: 'pt-[64px]',
             iFrame: {
-                className: 'w-full h-[820px] bg-white',
-                src: '',
+                className: 'min-[1440px]:!h-[1250px] min-[1024px]:!h-[950px] min-[768px]:!h-[710px] min-[425px]:!h-[446px] min-[375px]:!h-[400px] min-[320px]:!h-[400px]',
+                src: 'https://app.powerbi.com/view?r=eyJrIjoiYzhiNGNmNmUtOGIzZi00OGU2LWI0ZGYtNGNhM2FkZGYzYWMzIiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
         },
         {
@@ -79,18 +77,18 @@ export default function DataStoryDetailPage() {
             className: 'bg-primary-100',
             extraPy: 'pt-[64px]',
             iFrame: {
-                className: 'w-full h-[1530px] bg-white',
-                src: '',
+                className: 'min-[1440px]:!h-[1250px] min-[1024px]:!h-[950px] min-[768px]:!h-[710px] min-[425px]:!h-[446px] min-[375px]:!h-[400px] min-[320px]:!h-[400px]',
+                src: 'https://app.powerbi.com/view?r=eyJrIjoiYzBjYzFlY2QtYTdkZC00OWVjLThkODgtOTcyMzE1MjgxMWQ4IiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
         },
         {
             title: 'Quanto tempo espera o cidadão?',
-            description: "Os tempos de espera variam entre locais de atendimento, mas também de acordo com o serviço a realizar e a entidade que o presta. Saiba mais sobre os tempos de espera e de atendimento nas Lojas de Cidadão geridas pela ARTE.",
+            description: "Os tempos de espera e de atendimento variam entre locais de atendimento e dependem do serviço realizado e da entidade que presta o serviço.",
             className: 'bg-primary-100',
             extraPy: 'py-[64px]',
             iFrame: {
-                className: 'w-full h-[1530px] bg-white',
-                src: '',
+                className: 'min-[1440px]:!h-[860px] min-[1024px]:!h-[662px] min-[768px]:!h-[505px] min-[425px]:!h-[332px] min-[375px]:!h-[300px] min-[320px]:!h-[380px]',
+                src: 'https://app.powerbi.com/view?r=eyJrIjoiZWZmM2NiODItYTU0OC00YmU1LWI0M2QtMTUzNmRjODc0YmY2IiwidCI6IjVmM2I0YTBjLTBiMWUtNDc3Ni05ZTk1LTY5MzNlNDQwOGU5NyIsImMiOjl9',
             },
         }],
         dataSourcesSection: {
@@ -112,19 +110,21 @@ export default function DataStoryDetailPage() {
                     </InfoBlock.Header>
                     <InfoBlock.Content className='flex min-[1280px]:flex-row flex-col justify-between min-[1280px]:gap-[136px] gap-32 '>
                         <InfoBlock.Description className='whitespace-pre-wrap text-m-regular text-white' description={data.hero.description} />
-                        <div className='w-full h-full flex flex-col gap-[128px] py-[36px] justify-center'>
+                        <div className='w-full h-full flex flex-col gap-[128px] justify-center'>
                             <div className='flex flex-col gap-64'>
                                 {data.hero.bigCards.map((card, index) => (
-                                    <CardCompound.Root key={index}>
+                                    <CardCompound.Root className='gap-8' key={index}>
                                         <CardCompound.Icon icon={card.icon} />
-                                        <CardCompound.Title>
-                                            {card.title}
-                                        </CardCompound.Title>
-                                        <CardCompound.Description>
-                                            {card.description}
-                                        </CardCompound.Description>
+                                        <div className='flex flex-col'>
+                                            <CardCompound.Title>
+                                                {card.title}
+                                            </CardCompound.Title>
+                                            <CardCompound.Description>
+                                                {card.description}
+                                            </CardCompound.Description>
+                                        </div>
                                         {card.anchor && (
-                                            <CardCompound.Anchor href={card.anchor.href} className='hover:!text-white !text-white ' hasIcon>
+                                            <CardCompound.Anchor variant='primary' appearance='link' href={card.anchor.href} className='hover:!text-white ' hasIcon>
                                                 {card.anchor.children}
                                             </CardCompound.Anchor>
                                         )}
@@ -142,7 +142,11 @@ export default function DataStoryDetailPage() {
                             <InfoBlock.Title titleLevel="h2" title={section.title} className='text-2xl font-bold text-primary-900' />
                             <InfoBlock.Description className=' whitespace-pre-wrap text-m-light text-black max-w-[500px] ' description={section.description} />
                         </InfoBlock.Header>
-                        <iframe src={section.iFrame.src} className={section.iFrame.className} />
+                        <InfoBlock.IFrame
+                            src={section.iFrame.src}
+                            className={section.iFrame.className}
+
+                        />
                     </InfoBlock.Root>
                 </Section>
             ))}

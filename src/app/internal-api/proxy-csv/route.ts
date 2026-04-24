@@ -1,22 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_ORIGIN = "https://dados.gov.pt";
+const DEFAULT_ALLOWED_HOSTS = ["dados.gov.pt", "preprod.dados.gov.pt"];
 const MAX_BYTES = 1_000_000; // 1MB limit for preview
+const FETCH_TIMEOUT_MS = 10_000;
+
+function parseAllowedHosts(): Set<string> {
+  const raw = process.env.CSV_PROXY_ALLOWED_HOSTS;
+  const hosts = raw
+    ? raw.split(",").map((h) => h.trim().toLowerCase()).filter(Boolean)
+    : DEFAULT_ALLOWED_HOSTS;
+  return new Set(hosts);
+}
+
+function allowedProtocols(): Set<string> {
+  const allowHttp = process.env.CSV_PROXY_ALLOW_HTTP === "true";
+  return allowHttp ? new Set(["https:", "http:"]) : new Set(["https:"]);
+}
 
 export async function GET(request: NextRequest) {
-  const url = request.nextUrl.searchParams.get("url");
+  const rawUrl = request.nextUrl.searchParams.get("url");
 
-  if (!url) {
+  if (!rawUrl) {
     return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
   }
 
-  if (!url.startsWith(ALLOWED_ORIGIN)) {
+  let target: URL;
+  try {
+    target = new URL(rawUrl);
+  } catch {
+    return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+  }
+
+  const allowedHosts = parseAllowedHosts();
+  const protocols = allowedProtocols();
+  const host = target.host.toLowerCase();
+  const hostname = target.hostname.toLowerCase();
+
+  const hostMatches = allowedHosts.has(host) || allowedHosts.has(hostname);
+  if (!protocols.has(target.protocol) || !hostMatches) {
     return NextResponse.json({ error: "URL not allowed" }, { status: 403 });
   }
 
   try {
-    const res = await fetch(url, {
+    const res = await fetch(target, {
       headers: { Accept: "text/csv, text/plain, */*" },
+      redirect: "error",
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!res.ok) {

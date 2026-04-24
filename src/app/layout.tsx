@@ -1,16 +1,18 @@
-import type { Metadata } from 'next';
-import { Noto_Sans } from 'next/font/google';
-import '@ama-pt/agora-design-system/artifacts/dist/tailwind.css';
-import './globals.css';
-import { HeaderWrapper } from '@/components/HeaderWrapper';
-import { Footer } from '@/components/Footer';
-import { PopupProviderWrapper } from '@/components/PopupProviderWrapper';
-import { AuthProvider } from '@/context/AuthContext';
-import { siteConfig } from '@/config/site';
+import type { Metadata } from "next";
+import { Noto_Sans } from "next/font/google";
+import "@ama-pt/agora-design-system/artifacts/dist/tailwind.css";
+import "./globals.css";
+import { HeaderWrapper } from "@/components/HeaderWrapper";
+import { Footer } from "@/components/Footer";
+import { PopupProviderWrapper } from "@/components/PopupProviderWrapper";
+import { AuthProvider } from "@/context/AuthContext";
+import { siteConfig } from "@/config/site";
+import ScrollTop from "@/components/ScrollTop";
+import { ApolloWrapper } from "@/providers/ApolloProvider";
 
 const notoSans = Noto_Sans({
-  variable: '--font-noto-sans',
-  subsets: ['latin'],
+  variable: "--font-noto-sans",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -20,7 +22,7 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   icons: {
-    icon: '/favicon.svg',
+    icon: "/favicon.png",
   },
   openGraph: {
     title: siteConfig.title,
@@ -28,7 +30,7 @@ export const metadata: Metadata = {
     url: siteConfig.url,
     siteName: siteConfig.name,
     locale: siteConfig.locale,
-    type: 'website',
+    type: "website",
   },
 };
 
@@ -41,13 +43,16 @@ export default function RootLayout({
     <html lang="pt">
       <body className={`${notoSans.variable} antialiased font-sans`}>
         <AuthProvider>
-          <PopupProviderWrapper>
-            <div className="min-h-screen w-full mx-auto flex flex-col">
-              <HeaderWrapper />
-              <div className="grow">{children}</div>
-              <Footer />
-            </div>
-          </PopupProviderWrapper>
+          <ApolloWrapper>
+            <PopupProviderWrapper>
+              <ScrollTop />
+              <div className="min-h-screen w-full mx-auto flex flex-col">
+                <HeaderWrapper />
+                <div className="grow">{children}</div>
+                <Footer />
+              </div>
+            </PopupProviderWrapper>
+          </ApolloWrapper>
         </AuthProvider>
       </body>
     </html>

@@ -19,6 +19,7 @@ export default function DatasetsNewClient() {
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
+  const [sessionKey, setSessionKey] = useState(0);
 
   const buildStepUrl = (step: number) => {
     return `/pages/admin/datasets/new?step=${step}`;
@@ -40,9 +41,7 @@ export default function DatasetsNewClient() {
       </div>
 
       <div className="admin-page__header">
-        <h1 className="admin-page__title">
-          {currentStep === 1 ? "Publique em dados.gov" : "Formulário de inscrição"}
-        </h1>
+        <h1 className="admin-page__title">Formulário de publicação de um conjunto de dados</h1>
         <PublishDropdown />
       </div>
 
@@ -51,10 +50,10 @@ export default function DatasetsNewClient() {
         <p className="admin-page__step-text">
           <span className="text-primary-600 font-bold">Passo {currentStep} - </span>
           <span className="text-primary-900 font-bold">
-            {currentStep === 1 && "Descreva o seu conjunto de dados"}
+            {currentStep === 1 && "Inicie a publicação do seu conjunto de dados"}
             {currentStep === 2 && "Descreva o seu conjunto de dados"}
-            {currentStep === 3 && "Adicionar ficheiros"}
-            {currentStep === 4 && "Finalizar a publicação"}
+            {currentStep === 3 && "Adicione os ficheiros"}
+            {currentStep === 4 && "Finalize a publicação do seu conjunto de dados"}
           </span>
         </p>
       </div>
@@ -80,24 +79,21 @@ export default function DatasetsNewClient() {
 
       {currentStep === 1 && (
         <>
-          <h2 className="admin-page__section-title mb-[16px]">Tipo de publicação</h2>
-
-          <StatusCard
-            type="info"
-            description="Se desejar realizar testes, utilize demo.dados.gov"
-          />
-
           <div className="datasets-new-page__cards mb-[32px]" style={{ maxWidth: "50%" }}>
             <CardAction
               variant="neutral-100"
               titleText="Publique um conjunto de dados"
-              descriptionText="Seja uma administração pública ou uma empresa pública, todos podem publicar em dados.gov!"
+              descriptionText="Seja uma entidade da administração pública ou uma empresa pública, todos podem publicar em dados.gov.pt!"
               icon={{ name: "agora-line-edit" }}
               button={{
-                children: "Comece a publicar",
+                children: "Comece a publicação",
                 variant: "primary",
                 appearance: "outline",
-                onClick: () => router.push("/pages/admin/datasets/new?step=2"),
+                onClick: () => {
+                setSessionKey((k) => k + 1);
+                setCreatedDatasetId(null);
+                router.push("/pages/admin/datasets/new?step=2");
+              },
               }}
             />
           </div>
@@ -109,8 +105,8 @@ export default function DatasetsNewClient() {
                 É administrador e deseja automatizar a publicação dos seus dados?
               </p>
               <p className="text-neutral-700 text-sm leading-relaxed">
-                Pode publicar automaticamente via API ou vinculando seu portal de dados
-                abertos ao dados.gov com um coletor de dados.
+                Pode automatizar a publicação através da API ou ligando o seu portal ao dados.gov.pt
+                através de um harvester de dados.
               </p>
               <div className="flex gap-4 flex-wrap">
                 <Button
@@ -121,19 +117,9 @@ export default function DatasetsNewClient() {
                   trailingIconHover="agora-solid-external-link"
                   onClick={() => router.push("/pages/faqs/api-documentation")}
                 >
-                  Consulte a documentação da API.
+                  Consulte a documentação da API
                 </Button>
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/pages/faqs/reuse")}
-                >
-                  Saiba mais sobre o harvester.
-                </Button>
-                <Button
+<Button
                   appearance="link"
                   variant="primary"
                   hasIcon
@@ -151,19 +137,11 @@ export default function DatasetsNewClient() {
                 É administrador e deseja catalogar os seus dados?
               </p>
               <p className="text-neutral-700 text-sm leading-relaxed">
-                Pode usar o serviço para que os departamentos do governo central giram
-                e disponibilizem o seu catálogo de dados.
+                Pode utilizar o serviço de catalogação e publicação do dados.gov.pt, que permite aos
+                organismos da Administração Pública Central organizarem e disponibilizarem o seu
+                catálogo de dados abertos.
               </p>
               <div className="flex gap-4 flex-wrap">
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                >
-                  Aceda à área de catálogo.
-                </Button>
               </div>
             </div>
           </div>
@@ -172,6 +150,7 @@ export default function DatasetsNewClient() {
 
       {currentStep >= 2 && (
         <DatasetsAdminClient
+          key={sessionKey}
           currentStep={currentStep}
           datasetId={createdDatasetId}
           onNextStep={() => router.push(buildStepUrl(currentStep + 1))}

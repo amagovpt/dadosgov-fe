@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
 import { githubPagesConfig } from "@/config/site";
@@ -36,8 +37,28 @@ const markdownComponents = {
     <p className="text-[16px] leading-[28px] mb-[16px]">{children}</p>
   ),
   a: ({ href, children }: any) => {
-    const resolvedHref =
-      href === "/docapi/" ? "https://10.55.37.38/docapi/" : href;
+    const linkOverrides: Record<string, { href: string; text?: string }> = {
+      "/docapi/": { href: "/pages/faqs/api-documentation" },
+      "http://www.mejoratuescuela.org": {
+        href: "https://www.redalyc.org/journal/5475/547567705004/",
+      },
+      "https://play.google.com/store/apps/details?id=be.tragewegen.brussels": {
+        href: "https://data.europa.eu/sites/default/files/use-cases/use_case_belgium_-_be_walking_be.brussels.pdf",
+      },
+      "https://ogp.eportugal.gov.pt/": {
+        href: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
+      },
+      "https://online-learning.iscte-iul.pt/bo/courses/plano-nacional-de-acao-de-administracao-aberta-pt": {
+        href: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
+        text: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
+      },
+      "/pt/pages/faqs/about_opendata/": { href: "/pages/about-open-data" },
+      "/pages/faqs/licenses/": { href: "https://dados.gov.pt/pt/" },
+    };
+    const normalizedHref = href?.trim().replace(/^\/pt/, "");
+    const override = linkOverrides[href] ?? linkOverrides[normalizedHref];
+    const resolvedHref = override?.href ?? href;
+    const resolvedChildren = override?.text ?? children;
     const isExternal = resolvedHref?.startsWith("http");
     return (
       <Link
@@ -46,7 +67,7 @@ const markdownComponents = {
         rel={isExternal ? "noopener noreferrer" : undefined}
         className="text-[#034AD8] underline font-medium hover:text-primary-700"
       >
-        {children}
+        {resolvedChildren}
       </Link>
     );
   },
@@ -80,7 +101,15 @@ const markdownComponents = {
   ),
   strong: ({ children }: any) => <strong>{children}</strong>,
   em: ({ children }: any) => <em>{children}</em>,
+  br: () => null,
 };
+
+function sanitizeMarkdown(content: string): string {
+  return content
+    .replace(/<br\s*\/?>/gi, "")
+    .replace(/^\s*\n/gm, "\n")
+    .replace(/\bdados gov\b/g, "dados.gov.pt");
+}
 
 export function GitHubArticlePage({
   slug,
@@ -88,6 +117,7 @@ export function GitHubArticlePage({
   initialContent = "",
 }: GitHubArticlePageProps) {
   const editUrl = `${githubPagesConfig.repoBaseUrl}/${slug}.md`;
+  const cleanContent = sanitizeMarkdown(initialContent);
 
   return (
     <div className="flex flex-col bg-white min-h-screen font-sans">
@@ -105,13 +135,14 @@ export function GitHubArticlePage({
             {/* Main Content */}
             <div>
               <div className="text-[#2b363c] flex flex-col gap-[32px]">
-                {initialContent ? (
+                {cleanContent ? (
                   <div className="max-w-[592px]">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
                       components={markdownComponents}
                     >
-                      {initialContent}
+                      {cleanContent}
                     </ReactMarkdown>
                   </div>
                 ) : (

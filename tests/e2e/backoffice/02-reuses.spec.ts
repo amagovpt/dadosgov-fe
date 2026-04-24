@@ -15,7 +15,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
       await page.waitForTimeout(2000);
 
       // Click publish dropdown and select "Uma reutilizacao"
-      const publishBtn = page.getByText("Publicar dados.gov").first();
+      const publishBtn = page.getByText("Publicar dados.gov.pt").first();
       if (await publishBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
         await publishBtn.click();
         await page.waitForTimeout(500);

@@ -1,6 +1,8 @@
 import {
   Activity,
   APIResponse,
+  ApiToken,
+  ApiTokenCreated,
   ContactPoint,
   ContactPointCreatePayload,
   Dataservice,
@@ -73,6 +75,7 @@ import {
   CommunityResource,
   CommunityResourceCreatePayload,
   CommunityResourceUpdatePayload,
+  HarvestBackend,
   HarvestJob,
   HarvestPreviewJob,
   HarvestSource,
@@ -131,7 +134,7 @@ export async function login(formData: FormData): Promise<{ message: string; redi
  * Perform logout
  */
 export async function logout(): Promise<void> {
-  const res = await fetch("/logout/", { method: "GET" });
+  const res = await fetch("/logout", { method: "GET" });
   if (!res.ok) throw new Error("Logout failed");
 }
 
@@ -321,6 +324,7 @@ export async function fetchDatasets(
       if (filters.sort) params.set("sort", filters.sort);
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
       if (filters.owner) params.set("owner", filters.owner);
+      if (filters.modified_since) params.set("modified_since", filters.modified_since);
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],
@@ -382,6 +386,9 @@ export async function fetchAdminDatasets(
       if (filters.granularity) params.set("granularity", filters.granularity);
       if (filters.sort) params.set("sort", filters.sort);
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
+      if (filters.private !== undefined) params.set("private", String(filters.private));
+      if (filters.archived !== undefined) params.set("archived", String(filters.archived));
+      if (filters.deleted !== undefined) params.set("deleted", String(filters.deleted));
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],
@@ -452,8 +459,20 @@ export async function fetchOrganizations(
 
     if (filters) {
       if (filters.q) params.set("q", filters.q);
-      if (filters.badge) params.set("badge", filters.badge);
       if (filters.sort) params.set("sort", filters.sort);
+
+      const arrayParams: [string, string | string[] | undefined][] = [
+        ["badge", filters.badge],
+        ["organization", filters.organization],
+      ];
+      for (const [key, value] of arrayParams) {
+        if (!value) continue;
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.set(key, value);
+        }
+      }
     }
 
     const url = `${API_BASE_URL}/organizations/?${params.toString()}`;
@@ -570,10 +589,13 @@ export async function deleteOrganization(org: string): Promise<void> {
   if (!res.ok) throw new Error(`Failed to delete organization: ${res.statusText}`);
 }
 
-export async function uploadOrgLogo(org: string, file: File): Promise<Organization> {
+export async function uploadOrgLogo(
+  org: string,
+  file: File,
+): Promise<{ success: boolean; image: string }> {
   const formData = new FormData();
   formData.append("file", file);
-  const res = await fetch(`${API_AUTH_URL}/organizations/${org}/logo`, {
+  const res = await fetch(`${API_AUTH_URL}/organizations/${org}/logo/`, {
     method: "POST",
     credentials: "include",
     body: formData,
@@ -588,12 +610,29 @@ export async function uploadOrgLogo(org: string, file: File): Promise<Organizati
 export async function fetchOrgDatasets(
   org: string,
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  filters?: {
+    q?: string;
+    sort?: string;
+    private?: boolean;
+    archived?: boolean;
+    deleted?: boolean;
+  }
 ): Promise<APIResponse<Dataset>> {
   try {
+    const params = new URLSearchParams({
+      page: String(page),
+      page_size: String(pageSize),
+      sort: filters?.sort || "-created",
+    });
+    if (filters?.q) params.set("q", filters.q);
+    if (filters?.private !== undefined) params.set("private", String(filters.private));
+    if (filters?.archived !== undefined) params.set("archived", String(filters.archived));
+    if (filters?.deleted !== undefined) params.set("deleted", String(filters.deleted));
+
     const res = await fetch(
-      `${API_BASE_URL}/organizations/${org}/datasets/?page=${page}&page_size=${pageSize}&sort=-created`,
-      { cache: "no-store" }
+      `${API_AUTH_URL}/organizations/${org}/datasets/?${params.toString()}`,
+      { cache: "no-store", credentials: "include" }
     );
 
     if (!res.ok) {
@@ -893,6 +932,7 @@ export async function fetchReuses(
       if (filters.owner) params.set("owner", filters.owner);
       if (filters.dataset) params.set("dataset", filters.dataset);
       if (filters.sort) params.set("sort", filters.sort);
+      if (filters.modified_since) params.set("modified_since", filters.modified_since);
     }
 
     const url = `${API_BASE_URL}/reuses/?${params.toString()}`;
@@ -1205,11 +1245,14 @@ export async function fetchLatestReuses(pageSize: number = 3): Promise<APIRespon
 export async function fetchPosts(
   page: number = 1,
   pageSize: number = 3,
-  sort: string = "-published"
+  sort: string = "-published",
+  q?: string
 ): Promise<APIResponse<Post>> {
   try {
+    const params = new URLSearchParams({ page: String(page), page_size: String(pageSize), sort });
+    if (q) params.set("q", q);
     const res = await fetch(
-      `${API_BASE_URL}/posts/?page=${page}&page_size=${pageSize}&sort=${sort}`,
+      `${API_BASE_URL}/posts/?${params.toString()}`,
       {
         next: { revalidate: 120 },
       }
@@ -1236,7 +1279,7 @@ export async function fetchPosts(
 export async function fetchHomepageData(): Promise<HomepageData> {
   try {
     const res = await fetch(`${API_BASE_URL}/site/home/`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
 
     if (!res.ok) {
@@ -1325,6 +1368,78 @@ export async function updatePost(
     return await res.json();
   } catch (error) {
     console.error("Error updating post:", error);
+    return null;
+  }
+}
+
+export async function fetchAdminPosts(
+  page: number = 1,
+  pageSize: number = 100,
+  sort: string = "-published"
+): Promise<APIResponse<Post>> {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      page_size: String(pageSize),
+      sort,
+      with_drafts: "true",
+    });
+    const res = await fetch(`${API_AUTH_URL}/posts/?${params.toString()}`, {
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch admin posts: ${res.statusText}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching admin posts:", error);
+    return { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null };
+  }
+}
+
+export async function publishPost(id: string): Promise<Post | null> {
+  try {
+    const res = await fetch(`${API_AUTH_URL}/posts/${id}/publish/`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (res.status === 401) {
+      throw new Error("Authentication required to publish a post");
+    }
+
+    if (!res.ok) {
+      throw new Error(`Failed to publish post: ${res.statusText}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error publishing post:", error);
+    return null;
+  }
+}
+
+export async function unpublishPost(id: string): Promise<Post | null> {
+  try {
+    const res = await fetch(`${API_AUTH_URL}/posts/${id}/publish/`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (res.status === 401) {
+      throw new Error("Authentication required to unpublish a post");
+    }
+
+    if (!res.ok) {
+      throw new Error(`Failed to unpublish post: ${res.statusText}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error unpublishing post:", error);
     return null;
   }
 }
@@ -1648,6 +1763,38 @@ export async function updateResource(
   return await res.json();
 }
 
+export async function replaceResourceFile(
+  datasetId: string,
+  resourceId: string,
+  file: File
+): Promise<Resource> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(
+    `${API_AUTH_URL}/datasets/${datasetId}/resources/${resourceId}/upload/`,
+    {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    }
+  );
+  const text = await res.text();
+  if (!res.ok) {
+    let data: Record<string, unknown> = {};
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (text) data = { message: text };
+    }
+    throw { status: res.status, data };
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {} as Resource;
+  }
+}
+
 export async function deleteResource(datasetId: string, resourceId: string): Promise<void> {
   const res = await fetch(
     `${API_AUTH_URL}/datasets/${datasetId}/resources/${resourceId}/`,
@@ -1940,7 +2087,8 @@ export async function fetchTopic(slugOrId: string): Promise<Topic | null> {
 
 export async function replyToDiscussion(
   discussionId: string,
-  comment: string
+  comment: string,
+  options?: { organization?: string }
 ): Promise<Discussion | null> {
   try {
     const res = await fetch(
@@ -1949,7 +2097,7 @@ export async function replyToDiscussion(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ comment }),
+        body: JSON.stringify({ comment, organization: options?.organization }),
       }
     );
 
@@ -2324,6 +2472,29 @@ export async function fetchSpatialZones(ids: string[]): Promise<object> {
   }
 }
 
+export async function fetchSpatialZonesByIds(ids: string[]): Promise<SpatialZone[]> {
+  if (!ids.length) return [];
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/spatial/zones/${ids.join(",")}/`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error(`Failed to fetch spatial zones: ${res.statusText}`);
+    const geojson = await res.json() as {
+      features?: Array<{ id: string; properties: { name: string; code: string; uri?: string } }>;
+    };
+    return (geojson.features ?? []).map((f) => ({
+      id: f.id,
+      name: f.properties.name,
+      code: f.properties.code,
+      uri: f.properties.uri ?? "",
+    }));
+  } catch (error) {
+    console.error("Error fetching spatial zones by ids:", error);
+    return [];
+  }
+}
+
 export async function fetchGranularities(): Promise<Granularity[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/spatial/granularities/`, { cache: "no-store" });
@@ -2471,13 +2642,24 @@ export async function addMember(
   userId: string,
   role: string
 ): Promise<OrganizationMember> {
-  const res = await fetch(`${API_AUTH_URL}/organizations/${org}/member/${userId}/`, {
+  const res = await fetch(`${API_AUTH_URL}/organizations/${org}/member/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ role }),
+    body: JSON.stringify({ user: userId, role }),
   });
-  if (!res.ok) throw new Error(`Failed to add member: ${res.statusText}`);
+  if (!res.ok) {
+    let message = res.statusText;
+    try {
+      const body = await res.json();
+      const userError = body?.errors?.user;
+      message = (Array.isArray(userError) ? userError[0] : userError)
+        || body?.message
+        || (typeof body?.errors === "string" ? body.errors : null)
+        || message;
+    } catch {}
+    throw new Error(typeof message === "string" ? message : JSON.stringify(message));
+  }
   return await res.json();
 }
 
@@ -2652,6 +2834,31 @@ export async function fetchMyFollowing(
   }
 }
 
+export async function fetchUserFollowing(
+  userId: string,
+  page: number = 1,
+  pageSize: number = 100
+): Promise<APIResponse<UserFollowing>> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/users/${userId}/following/?page=${page}&page_size=${pageSize}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error(`Failed to fetch user following: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching user following:", error);
+    return {
+      data: [],
+      page: 1,
+      page_size: pageSize,
+      total: 0,
+      next_page: null,
+      previous_page: null,
+    };
+  }
+}
+
 export async function followEntity(
   entityType: FollowableEntityType,
   id: string
@@ -2741,6 +2948,21 @@ export async function uploadAvatar(file: File): Promise<{ image: string }> {
   return await res.json();
 }
 
+export async function uploadUserAvatar(userId: string, file: File): Promise<{ image: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_AUTH_URL}/users/${userId}/avatar/`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+  return await res.json();
+}
+
 export async function fetchFullProfile(): Promise<UserPublic> {
   const res = await fetch(`${API_AUTH_URL}/me/`, {
     cache: "no-store",
@@ -2750,22 +2972,32 @@ export async function fetchFullProfile(): Promise<UserPublic> {
   return await res.json();
 }
 
-export async function generateApiKey(): Promise<string> {
-  const res = await fetch(`${API_AUTH_URL}/me/apikey`, {
-    method: "POST",
+export async function fetchApiTokens(): Promise<ApiToken[]> {
+  const res = await fetch(`${API_AUTH_URL}/me/api_tokens/`, {
+    method: "GET",
     credentials: "include",
   });
-  if (!res.ok) throw new Error(`Failed to generate API key: ${res.statusText}`);
-  const data = await res.json();
-  return data.apikey;
+  if (!res.ok) throw new Error(`Failed to fetch API tokens: ${res.statusText}`);
+  return await res.json();
 }
 
-export async function clearApiKey(): Promise<void> {
-  const res = await fetch(`${API_AUTH_URL}/me/apikey`, {
+export async function generateApiKey(name?: string): Promise<ApiTokenCreated> {
+  const res = await fetch(`${API_AUTH_URL}/me/api_tokens/`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(name ? { name } : {}),
+  });
+  if (!res.ok) throw new Error(`Failed to generate API key: ${res.statusText}`);
+  return await res.json();
+}
+
+export async function revokeApiToken(tokenId: string): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/me/api_tokens/${tokenId}/`, {
     method: "DELETE",
     credentials: "include",
   });
-  if (!res.ok) throw new Error(`Failed to clear API key: ${res.statusText}`);
+  if (!res.ok) throw new Error(`Failed to revoke API token: ${res.statusText}`);
 }
 
 export async function requestEmailChange(
@@ -2887,7 +3119,8 @@ export async function fetchUsers(
   page: number = 1,
   q?: string,
   sort?: string,
-  pageSize: number = 20
+  pageSize: number = 20,
+  role?: string
 ): Promise<APIResponse<UserAdmin>> {
   try {
     const params = new URLSearchParams();
@@ -2895,6 +3128,7 @@ export async function fetchUsers(
     params.set("page_size", String(pageSize));
     if (q) params.set("q", q);
     if (sort) params.set("sort", sort);
+    if (role) params.set("role", role);
 
     const res = await fetch(`${API_AUTH_URL}/users/?${params.toString()}`, {
       cache: "no-store",
@@ -3255,7 +3489,7 @@ export async function updateHarvester(
   id: string,
   payload: HarvestSourceUpdatePayload
 ): Promise<HarvestSource> {
-  const res = await fetch(`${API_AUTH_URL}/harvest/sources/${id}/`, {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -3269,11 +3503,36 @@ export async function updateHarvester(
 }
 
 export async function deleteHarvester(id: string): Promise<void> {
-  const res = await fetch(`${API_AUTH_URL}/harvest/sources/${id}/`, {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/`, {
     method: "DELETE",
     credentials: "include",
   });
   if (!res.ok) throw new Error(`Failed to delete harvester: ${res.statusText}`);
+}
+
+export async function scheduleHarvester(id: string, cron: string): Promise<HarvestSource> {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/schedule/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(cron),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+  return await res.json();
+}
+
+export async function unscheduleHarvester(id: string): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/schedule/`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
 }
 
 export async function triggerHarvest(id: string): Promise<HarvestJob> {
@@ -3313,6 +3572,22 @@ export async function fetchHarvestJobs(
   }
 }
 
+export async function fetchHarvestJob(
+  jobId: string
+): Promise<HarvestJob | null> {
+  try {
+    const res = await fetch(`${API_AUTH_URL}/harvest/job/${jobId}/`, {
+      cache: "no-store",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error(`Failed to fetch harvest job: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching harvest job:", error);
+    return null;
+  }
+}
+
 export async function validateHarvestSource(
   id: string
 ): Promise<Record<string, unknown>> {
@@ -3338,6 +3613,20 @@ export async function previewHarvestSource(
     throw { status: res.status, data: error };
   }
   return await res.json();
+}
+
+export async function fetchHarvestBackends(): Promise<HarvestBackend[]> {
+  try {
+    const res = await fetch(`${API_AUTH_URL}/harvest/backends/`, {
+      cache: "no-store",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error(`Failed to fetch harvest backends: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching harvest backends:", error);
+    return [];
+  }
 }
 
 export async function fetchOrgHarvesters(
@@ -3412,6 +3701,9 @@ export async function fetchOrgMetrics(
       members: 0,
       reuses: 0,
       views: 0,
+      resource_downloads: 0,
+      reuse_views: 0,
+      dataservice_views: 0,
     };
   }
 }

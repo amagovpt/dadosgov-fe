@@ -17,6 +17,7 @@ import {
   updateCommunityResource,
   deleteCommunityResource,
   fetchResourceTypes,
+  fetchSchemas,
 } from "@/services/api";
 import type { CommunityResource, ResourceType } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -27,7 +28,7 @@ export default function CommunityResourceEditClient() {
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
-  const { displayName } = useCurrentUser();
+  useCurrentUser();
   const resourceId = (params?.resourceId as string) || searchParams.get("resource_id") || searchParams.get("id") || "";
 
   const [resource, setResource] = useState<CommunityResource | null>(null);
@@ -42,13 +43,19 @@ export default function CommunityResourceEditClient() {
   const [checksumType, setChecksumType] = useState("");
   const [checksumValue, setChecksumValue] = useState("");
   const [showChecksum, setShowChecksum] = useState(false);
+  const [saveCount, setSaveCount] = useState(0);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [format, setFormat] = useState("");
+  const [selectedType, setSelectedType] = useState("");
   const [mimeType, setMimeType] = useState("");
   const [schemaUrl, setSchemaUrl] = useState("");
+  const [schemas, setSchemas] = useState<string[]>([]);
+  const [loadedSchema, setLoadedSchema] = useState("");
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
   const selectedTypeRef = useRef("");
+  const selectedFormatRef = useRef("");
+  const selectedChecksumTypeRef = useRef("");
   const selectedSchemaRef = useRef("");
 
   useEffect(() => {
@@ -56,25 +63,44 @@ export default function CommunityResourceEditClient() {
     async function loadData() {
       setIsLoading(true);
       try {
-        const [res, types] = await Promise.all([
+        const [res, types, availableSchemas] = await Promise.all([
           fetchCommunityResource(resourceId),
           fetchResourceTypes(),
+          fetchSchemas(),
         ]);
         setResource(res);
         setResourceUrl(res.url || "");
         setTitle(res.title);
         setDescription(res.description || "");
-        setFormat(res.format || "");
+        const normFormat = res.format?.toLowerCase() || "";
+        setFormat(normFormat);
         setMimeType(res.mime || "");
+        setSelectedType(res.type || "");
+        selectedTypeRef.current = res.type || "";
+        selectedFormatRef.current = normFormat;
         if (res.checksum) {
           setChecksumType(res.checksum.type || "");
           setChecksumValue(res.checksum.value || "");
+          selectedChecksumTypeRef.current = res.checksum.type || "";
           setShowChecksum(true);
         }
         setResourceTypes(types);
+        setSchemas(availableSchemas);
+
+        if (res.schema) {
+          const name = res.schema.name || "";
+          const url = res.schema.url || "";
+          if (url && url.startsWith("http")) {
+            setSchemaUrl(url);
+          } else {
+            const schemaVal = name || url;
+            setLoadedSchema(schemaVal);
+            selectedSchemaRef.current = schemaVal;
+          }
+        }
       } catch (error) {
         console.error("Error loading community resource:", error);
-        setApiError("Erro ao carregar recurso comunitario.");
+        setApiError("Erro ao carregar recurso comunitário.");
       } finally {
         setIsLoading(false);
       }
@@ -90,35 +116,91 @@ export default function CommunityResourceEditClient() {
     });
   };
 
+  const clearTypeError = React.useCallback(() => {
+    setFormErrors((prev) => { const next = { ...prev }; delete next.type; return next; });
+  }, []);
+
+  const clearFormatError = React.useCallback(() => {
+    setFormErrors((prev) => { const next = { ...prev }; delete next.format; return next; });
+  }, []);
+
+  const clearSchemaUrl = React.useCallback(() => {
+    setSchemaUrl("");
+  }, []);
+
   const handleSave = async () => {
     const errors: Record<string, boolean> = {};
     if (!title.trim()) errors.title = true;
+    if (!resourceUrl.trim()) errors.url = true;
+    if (!selectedTypeRef.current) errors.type = true;
+    if (!selectedFormatRef.current) errors.format = true;
+    if (showChecksum && !checksumValue.trim()) errors.checksumValue = true;
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      requestAnimationFrame(() => {
+        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
       return;
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setFormErrors({});
     setApiError(null);
     setSuccessMessage(null);
     setIsSubmitting(true);
 
     try {
+      const schemaUrlVal = schemaUrl.trim();
+      const schemaNameVal = selectedSchemaRef.current;
+      console.log("[debug] schemaUrl:", schemaUrlVal, "schemaRef:", schemaNameVal, "loadedSchema:", loadedSchema);
+      const schemaPayload = schemaUrlVal
+        ? { url: schemaUrlVal }
+        : schemaNameVal
+          ? { name: schemaNameVal }
+          : null;
+
       const updated = await updateCommunityResource(resourceId, {
         title: title.trim(),
         description: description.trim() || undefined,
         url: resourceUrl.trim() || undefined,
-        format: format.trim() || undefined,
+        type: selectedTypeRef.current || undefined,
+        format: selectedFormatRef.current.trim() || undefined,
+        mime: mimeType.trim() || undefined,
+        schema: schemaPayload,
+        ...(showChecksum
+          ? checksumValue
+            ? { checksum: { type: selectedChecksumTypeRef.current || checksumType, value: checksumValue } }
+            : {}
+          : { checksum: null }),
       });
-
       setResource(updated);
-      setSuccessMessage("Recurso comunitario atualizado com sucesso.");
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setSaveCount((c) => c + 1);
+      setSelectedType(updated.type || "");
+      const normFormat = updated.format?.toLowerCase() || "";
+      setFormat(normFormat);
+      setMimeType(updated.mime || "");
+      if (updated.schema) {
+        if (updated.schema.url && updated.schema.url.startsWith("http")) {
+          setSchemaUrl(updated.schema.url);
+          selectedSchemaRef.current = "";
+        } else {
+          selectedSchemaRef.current = updated.schema.name || updated.schema.url || "";
+          setSchemaUrl("");
+        }
+      } else {
+        selectedSchemaRef.current = "";
+      }
+      if (updated.checksum) {
+        setChecksumType(updated.checksum.type || "");
+        setChecksumValue(updated.checksum.value || "");
+      }
+      setSuccessMessage("Recurso comunitário atualizado com sucesso.");
+      setTimeout(() => setSuccessMessage(null), 10000);
     } catch (err: unknown) {
       const error = err as { status?: number; data?: Record<string, unknown> };
       if (error?.status === 401) {
         setApiError("Sessao expirada. Faca login novamente.");
       } else {
-        setApiError("Erro ao atualizar recurso comunitario.");
+        setApiError("Erro ao atualizar recurso comunitário.");
       }
     } finally {
       setIsSubmitting(false);
@@ -130,7 +212,7 @@ export default function CommunityResourceEditClient() {
       await deleteCommunityResource(resourceId);
       router.push("/pages/admin/system/community-resources");
     } catch {
-      setApiError("Erro ao eliminar recurso comunitario.");
+      setApiError("Erro ao eliminar recurso comunitário.");
     }
   };
 
@@ -138,84 +220,118 @@ export default function CommunityResourceEditClient() {
     () => (
       <DropdownSection name="types">
         {resourceTypes.map((t) => (
-          <DropdownOption key={t.id} value={t.id}>
+          <DropdownOption key={t.id} value={t.id} selected={t.id === selectedType}>
             {t.label}
           </DropdownOption>
         ))}
       </DropdownSection>
     ),
-    [resourceTypes],
+    [resourceTypes, selectedType],
   );
 
-  const schemaOptions = useMemo(
-    () => (
-      <DropdownSection name="schemas">
-        <DropdownOption value="">Nenhum</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
+  const formatOptions = useMemo(
+    () => {
+      const standardFormats = ["csv", "json", "xml", "pdf", "xls", "xlsx", "ods", "doc", "docx", "zip", "gz", "tar", "shp", "geojson", "kml", "rdf", "ttl", "txt", "html"];
+      const currentFormat = format.toLowerCase();
+      const allFormats = (currentFormat && !standardFormats.includes(currentFormat))
+        ? [...standardFormats, currentFormat]
+        : standardFormats;
+
+      return (
+        <DropdownSection name="formats">
+          {allFormats.map((f) => (
+            <DropdownOption key={f} value={f} selected={f === currentFormat}>{f}</DropdownOption>
+          ))}
+        </DropdownSection>
+      );
+    },
+    [format],
   );
+
+  const schemaOptions = useMemo(() => {
+    // Depend on loadedSchema (set only at initial load) instead of resource?.schema,
+    // so setResource(updated) after save does not recompute children and re-render
+    // the IsolatedSelect, which would trigger Agora's React 19 setState-in-render bug.
+    const list =
+      loadedSchema && !schemas.includes(loadedSchema)
+        ? [loadedSchema, ...schemas]
+        : schemas;
+
+    const options = [
+      <DropdownOption key="none" value="" selected={loadedSchema === ""}>
+        Nenhum
+      </DropdownOption>,
+      ...list.map((s) => (
+        <DropdownOption key={s} value={s} selected={s === loadedSchema}>
+          {s}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="schemas">{options}</DropdownSection>;
+  }, [schemas, loadedSchema]);
 
   const auxiliarItems = [
     {
-      title: "Escolha o link correto",
+      title: "Escolher o link correto",
+      hasError: !!formErrors.url,
       content:
-        "E recomendavel criar um link para o proprio arquivo em vez de uma pagina da web para permitir que o {site} o analise.",
+        "É recomendável criar um link para o próprio arquivo em vez de uma página da web para permitir que o site o analise.",
     },
     {
-      title: "Soma de verificacao",
+      title: "Soma de verificação",
       content:
-        "O checksum permite ao usuario verificar se os dados baixados nao foram corrompidos ou alterados.",
+        "O checksum permite ao utilizador verificar se os dados descarregados não foram corrompidos ou alterados.",
     },
     {
-      title: "De um nome ao link",
+      title: "Dar um nome ao link",
+      hasError: !!formErrors.title,
       content: (
         <>
-          Recomenda-se escolher um titulo que informe claramente qualquer usuario sobre o conteudo
-          do arquivo. Algumas praticas a serem evitadas:
+          Recomenda-se a escolha de um título que informe claramente qualquer utilizador sobre o conteúdo
+          do arquivo. Algumas práticas a evitar:
           <ul className="list-disc pl-16 mt-8">
-            <li>atribuir um titulo muito generico (por exemplo, &quot;list.csv&quot;);</li>
-            <li>Dar um titulo muito longo dificultaria a manipulacao do arquivo;</li>
+            <li>atribuir um título muito genérico (por exemplo, &quot;list.csv&quot;);</li>
+            <li>dar um título muito longo dificultaria a manipulação do arquivo;</li>
             <li>
-              fornecer um titulo que contenha acentos ou caracteres especiais (problemas de
+              fornecer um título que contenha acentos ou caracteres especiais (problemas de
               interoperabilidade de arquivos);
             </li>
             <li>
-              Dar um titulo que seja demasiado tecnico e derivado de nomenclaturas da industria.
+              dar um título que seja demasiado técnico e derivado de nomenclaturas da indústria.
             </li>
           </ul>
         </>
       ),
     },
     {
-      title: "Publique os tipos de arquivos corretos.",
+      title: "Publicar os tipos de ficheiros corretos",
+      hasError: !!formErrors.type,
       content: (
         <>
-          Voce pode escolher entre os seguintes tipos:
+          Pode escolher entre os seguintes tipos:
           <ul className="list-disc pl-16 mt-8">
-            <li>Arquivos principais</li>
-            <li>Documentacao</li>
-            <li>Atualizar</li>
+            <li>Ficheiros principais</li>
+            <li>Documentação</li>
+            <li>Atualização</li>
             <li>API</li>
-            <li>Codigo-fonte</li>
+            <li>Código-fonte</li>
             <li>Outro</li>
           </ul>
         </>
       ),
     },
     {
-      title: "Adicionar documentacao",
+      title: "Adicionar documentação",
       content: (
         <>
-          A descricao de um arquivo facilita a reutilizacao de dados. Ela inclui, entre outras
-          coisas:
+          A descrição de um ficheiro facilita a reutilização de dados. Inclui, entre outras coisas:
           <ul className="list-disc pl-16 mt-8">
-            <li>uma descricao geral do conjunto de dados;</li>
-            <li>uma descricao do metodo de producao de dados;</li>
-            <li>uma descricao do modelo de dados;</li>
-            <li>uma descricao do esquema de dados;</li>
-            <li>uma descricao dos metadados;</li>
-            <li>Uma descricao das principais mudancas.</li>
+            <li>uma descrição geral do conjunto de dados;</li>
+            <li>uma descrição do método de produção de dados;</li>
+            <li>uma descrição do modelo de dados;</li>
+            <li>uma descrição do esquema de dados;</li>
+            <li>uma descrição dos metadados;</li>
+            <li>uma descrição das principais alterações.</li>
           </ul>
         </>
       ),
@@ -227,32 +343,32 @@ export default function CommunityResourceEditClient() {
           Os formatos devem ser:
           <ul className="list-disc pl-16 mt-8">
             <li>
-              Aberto: um formato aberto nao adiciona especificacoes tecnicas que restrinjam o uso
+              aberto: um formato aberto não adiciona especificações técnicas que restrinjam o uso
               dos dados (por exemplo, o uso de software pago);
             </li>
             <li>
-              facilmente reutilizavel: um formato facilmente reutilizavel implica que qualquer
+              facilmente reutilizável: um formato facilmente reutilizável implica que qualquer
               pessoa ou servidor pode reutilizar facilmente o conjunto de dados;
             </li>
             <li>
-              Utilizavel em um sistema de processamento automatizado: um sistema de processamento
-              automatizado permite operacoes automaticas relacionadas ao processamento de dados (por
-              exemplo, um arquivo CSV e facilmente utilizavel por um sistema automatizado, ao
-              contrario de um arquivo PDF).
+              utilizável num sistema de processamento automatizado: um sistema de processamento
+              automatizado permite operações automáticas relacionadas ao processamento de dados (por
+              exemplo, um ficheiro CSV é facilmente utilizável por um sistema automatizado, ao
+              contrário de um ficheiro PDF).
             </li>
           </ul>
         </>
       ),
     },
     {
-      title: "Escolha um tipo MIME",
+      title: "Escolher um tipo de recurso",
       content:
-        "Especifique o tipo MIME correspondente ao formato do recurso remoto (por exemplo, application/pdf, text/csv). Se necessario, utilize uma ferramenta online para deteta-lo.",
+        "Especifique o tipo de recurso correspondente ao formato do recurso remoto (por exemplo, application/pdf, text/csv). Se necessário, utilize uma ferramenta online para detetá-lo.",
     },
     {
-      title: "Selecione um esquema",
+      title: "Selecionar um esquema",
       content:
-        "E possivel identificar um esquema de dados existente visitando o site schema.data.gouv.fr, que contem uma lista de esquemas de dados existentes.esquema.dados.gouv.fr",
+        "É possível identificar um esquema de dados existente ao visitar o site schema.data.gouv.fr, que contém uma lista de esquemas de dados existentes.",
     },
   ];
 
@@ -267,7 +383,7 @@ export default function CommunityResourceEditClient() {
   if (!resource) {
     return (
       <div className="admin-page">
-        <StatusCard type="danger" description="Recurso comunitario nao encontrado." />
+        <StatusCard type="danger" description="Recurso comunitário nao encontrado." />
       </div>
     );
   }
@@ -280,7 +396,7 @@ export default function CommunityResourceEditClient() {
             { label: "Administracao", url: "/pages/admin" },
             { label: "Sistema", url: "#" },
             {
-              label: "Recursos comunitarios",
+              label: "Recursos comunitários",
               url: "/pages/admin/system/community-resources",
             },
             { label: "Editar", url: "#" },
@@ -308,7 +424,7 @@ export default function CommunityResourceEditClient() {
 
           <form className="admin-page__form">
             <p className="text-neutral-900 text-base leading-7">
-              Os campos marcados com um asterisco ( * ) sao obrigatorios.
+              Os campos marcados com um asterisco ( * ) sao obrigatórios.
             </p>
 
             {/* PENHORA */}
@@ -317,69 +433,91 @@ export default function CommunityResourceEditClient() {
             <div className="admin-page__fields-group">
               <InputText
                 label="Link exato para o ficheiro *"
-                placeholder="https://..."
+                placeholder="Insira o link para o ficheiro"
                 id="resource-url"
                 value={resourceUrl}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setResourceUrl(e.target.value);
+                  if (e.target.value.trim()) clearError("url");
                 }}
+                hasError={!!formErrors.url}
+                hasFeedback={!!formErrors.url}
+                feedbackState="danger"
+                errorFeedbackText="Campo obrigatório"
               />
             </div>
 
             {/* SOMA DE VERIFICACAO */}
             <div className="flex flex-col items-start gap-[12px]">
-              <h2 className="admin-page__section-title mb-0">Soma de verificação</h2>
-            {showChecksum ? (
-              <Button
-                variant="danger"
-                appearance="outline"
-                hasIcon
-                leadingIcon="agora-line-trash"
-                leadingIconHover="agora-solid-trash"
-                onClick={() => {
-                  setShowChecksum(false);
-                  setChecksumType("");
-                  setChecksumValue("");
-                }}
-              >
-                Eliminar
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                appearance="outline"
-                onClick={() => setShowChecksum(true)}
-              >
-                Adicionar
-              </Button>
-            )}
+              <h2 className="admin-page__section-title mb-0">Selo de verificação</h2>
+              {showChecksum ? (
+                <Button
+                  variant="danger"
+                  appearance="outline"
+                  hasIcon
+                  leadingIcon="agora-line-trash"
+                  leadingIconHover="agora-solid-trash"
+                  onClick={() => {
+                    setShowChecksum(false);
+                    setChecksumType("");
+                    setChecksumValue("");
+                  }}
+                >
+                  Eliminar
+                </Button>
+              ) : (
+                <Button
+                  variant="primary"
+                  appearance="outline"
+                  hasIcon
+                  leadingIcon="agora-line-plus"
+                  leadingIconHover="agora-solid-plus"
+                  onClick={() => setShowChecksum(true)}
+                >
+                  Adicionar
+                </Button>
+              )}
             </div>
 
             {showChecksum && (
               <div className="admin-page__fields-group">
                 <IsolatedSelect
+                  key={`checksum-${resource?.id || "loading"}-${saveCount}`}
                   label="Tipo de soma de verificação"
                   placeholder="SHA1"
                   id="checksum-type"
-                  onChangeRef={{ current: checksumType }}
+                  defaultValue={checksumType}
+                  onChangeRef={selectedChecksumTypeRef}
+                  onChangeCallback={(newType) => {
+                    if (newType !== checksumType) {
+                      setChecksumType(newType);
+                      setChecksumValue("");
+                    }
+                  }}
                 >
                   <DropdownSection name="checksum-types">
-                    <DropdownOption value="sha1">SHA1</DropdownOption>
-                    <DropdownOption value="sha256">SHA256</DropdownOption>
-                    <DropdownOption value="md5">MD5</DropdownOption>
-                    <DropdownOption value="crc">CRC</DropdownOption>
+                    <DropdownOption value="sha1" selected={checksumType === "sha1"}>SHA1</DropdownOption>
+                    <DropdownOption value="sha256" selected={checksumType === "sha256"}>SHA256</DropdownOption>
+                    <DropdownOption value="md5" selected={checksumType === "md5"}>MD5</DropdownOption>
+                    <DropdownOption value="crc" selected={checksumType === "crc"}>CRC</DropdownOption>
                   </DropdownSection>
                 </IsolatedSelect>
 
                 <InputText
-                  label="Valor de checksum"
-                  placeholder=""
+                  label="Valor de checksum *"
+                  placeholder="Introduza o valor do hash"
                   id="checksum-value"
                   value={checksumValue}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setChecksumValue(e.target.value)
-                  }
-                  readOnly
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    if (e.nativeEvent.isTrusted) {
+                      setChecksumValue(e.target.value);
+                      if (e.target.value.trim()) setFormErrors((prev) => { const next = { ...prev }; delete next.checksumValue; return next; });
+                    }
+                  }}
+                  hasError={!!formErrors.checksumValue}
+                  hasFeedback={!!formErrors.checksumValue}
+                  feedbackState="danger"
+                  errorFeedbackText="Campo obrigatório"
                 />
               </div>
             )}
@@ -400,17 +538,30 @@ export default function CommunityResourceEditClient() {
                 hasError={!!formErrors.title}
                 hasFeedback={!!formErrors.title}
                 feedbackState="danger"
-                errorFeedbackText="Campo obrigatorio"
+                errorFeedbackText="Campo obrigatório"
               />
 
-              <IsolatedSelect
-                label="Tipo *"
-                placeholder="Arquivos principais"
-                id="resource-type"
-                onChangeRef={selectedTypeRef}
-              >
-                {typeOptions}
-              </IsolatedSelect>
+              <div>
+                <IsolatedSelect
+                  key={`type-${resource?.id || "loading"}-${resourceTypes.length}`}
+                  label="Tipo *"
+                  placeholder="Ficheiros principais"
+                  id="resource-type"
+                  defaultValue={selectedType}
+                  onChangeRef={selectedTypeRef}
+                  onChangeCallback={clearTypeError}
+                >
+                  {typeOptions}
+                </IsolatedSelect>
+                {formErrors.type && (
+                  <div className="feedback">
+                    <span className="feedback-icon-wrapper feedback-icon-wrapper-danger">
+                      <Icon name="agora-solid-alert-triangle" dimensions="s" aria-hidden={true} />
+                    </span>
+                    <p className="feedback-text feedback-text-light">Campo obrigatório</p>
+                  </div>
+                )}
+              </div>
 
               <InputTextArea
                 label="Descrição"
@@ -423,23 +574,30 @@ export default function CommunityResourceEditClient() {
                 }
               />
 
-              <IsolatedSelect
-                label="Formato *"
-                placeholder="Selecione o formato"
-                id="resource-format"
-                onChangeRef={{ current: format }}
-              >
-                <DropdownSection name="formats">
-                  {["csv", "json", "xml", "pdf", "xls", "xlsx", "ods", "doc", "docx", "zip", "gz", "tar", "shp", "geojson", "kml", "rdf", "ttl", "txt", "html"].map((f) => (
-                    <DropdownOption key={f} value={f}>
-                      {f}
-                    </DropdownOption>
-                  ))}
-                </DropdownSection>
-              </IsolatedSelect>
+              <div>
+                <IsolatedSelect
+                  key={`format-${resource?.id || "loading"}`}
+                  label="Formato *"
+                  placeholder="Selecione o formato"
+                  id="resource-format"
+                  defaultValue={format}
+                  onChangeRef={selectedFormatRef}
+                  onChangeCallback={clearFormatError}
+                >
+                  {formatOptions}
+                </IsolatedSelect>
+                {formErrors.format && (
+                  <div className="feedback">
+                    <span className="feedback-icon-wrapper feedback-icon-wrapper-danger">
+                      <Icon name="agora-solid-alert-triangle" dimensions="s" aria-hidden={true} />
+                    </span>
+                    <p className="feedback-text feedback-text-light">Campo obrigatório</p>
+                  </div>
+                )}
+              </div>
 
               <InputText
-                label="Tipo mime"
+                label="Tipo de recurso"
                 placeholder="application/pdf"
                 id="resource-mime"
                 value={mimeType}
@@ -454,10 +612,15 @@ export default function CommunityResourceEditClient() {
 
             <div className="admin-page__fields-group">
               <IsolatedSelect
+                key={`schema-${resource?.id || "loading"}-${schemas.length}`}
                 label="Plano"
-                placeholder="Procure um esquema referenciado em schema.data.gouv.fr..."
+                placeholder="Procure um esquema referenciado em dados.gov.pt..."
                 id="resource-schema"
+                searchable
+                searchInputPlaceholder="Escreva para pesquisar..."
+                defaultValue={loadedSchema}
                 onChangeRef={selectedSchemaRef}
+                onChangeCallback={clearSchemaUrl}
               >
                 {schemaOptions}
               </IsolatedSelect>
@@ -467,60 +630,21 @@ export default function CommunityResourceEditClient() {
               </div>
 
               <InputText
-                label="Adicione um link para o diagrama."
-                placeholder="https://..."
+                label="Adicione um link para o diagrama"
+                placeholder="Insira o link para o diagrama"
                 id="resource-schema-url"
                 value={schemaUrl}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSchemaUrl(e.target.value)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setSchemaUrl(e.target.value);
+                  if (e.target.value) {
+                    selectedSchemaRef.current = "";
+                  }
+                }}
               />
             </div>
 
-            {/* Actions: Para validar + Cancelar */}
+            {/* Actions: Anterior + Guardar */}
             <div className="admin-page__actions flex gap-[18px]">
-              <Button
-                variant="primary"
-                onClick={handleSave}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "A guardar..." : "Para validar"}
-              </Button>
-              <Button
-                variant="primary"
-                appearance="outline"
-                onClick={() => router.push("/pages/admin/system/community-resources")}
-              >
-                Cancelar
-              </Button>
-            </div>
-
-            {/* Excluir o recurso */}
-            <div className="dataset-edit-danger-actions">
-              <StatusCard
-                type="danger"
-                description={
-                  <>
-                    <strong>Atenção, esta ação não pode ser corrigida.</strong>
-                    <br />
-                    <Button
-                      appearance="link"
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-arrow-right-circle"
-                      trailingIconHover="agora-solid-arrow-right-circle"
-                      onClick={handleDelete}
-                      disabled={isSubmitting}
-                    >
-                      Elimine o recurso comunitário
-                    </Button>
-                  </>
-                }
-              />
-            </div>
-
-            {/* Anterior */}
-            <div className="flex justify-end mt-[24px]">
               <Button
                 variant="primary"
                 appearance="outline"
@@ -531,7 +655,42 @@ export default function CommunityResourceEditClient() {
               >
                 Anterior
               </Button>
+              <Button
+                variant="primary"
+                hasIcon
+                trailingIcon="agora-line-check-circle"
+                trailingIconHover="agora-solid-check-circle"
+                onClick={handleSave}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "A guardar..." : "Guardar"}
+              </Button>
             </div>
+
+            {/* Excluir o recurso */}
+            <div className="dataset-edit-danger-actions">
+              <StatusCard
+                type="danger"
+                description={
+                  <>
+                    <strong>Atenção esta ação é irreversível.</strong>
+                    <br />
+                    <Button
+                      appearance="link"
+                      variant="primary"
+                      hasIcon
+                      trailingIcon="agora-line-arrow-right-circle"
+                      trailingIconHover="agora-solid-arrow-right-circle"
+                      onClick={handleDelete}
+                      disabled={isSubmitting}
+                    >
+                      Eliminar o recurso comunitário
+                    </Button>
+                  </>
+                }
+              />
+            </div>
+
           </form>
         </div>
 

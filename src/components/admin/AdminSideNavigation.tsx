@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sidebar, SidebarItem, Icon } from "@ama-pt/agora-design-system";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { fetchOrganization } from "@/services/api";
+import { Organization } from "@/types/api";
 
 interface NavChild {
   label: string;
@@ -121,6 +123,29 @@ export function AdminSideNavigation() {
   const pathname = usePathname();
   const { isAdmin, hasOrganization } = useAuth();
   const { organizations } = useActiveOrganization();
+  const [urlOrg, setUrlOrg] = useState<Organization | null>(null);
+
+  // Extract orgId from URL like /pages/admin/org/{orgId}/...
+  const urlOrgId = useMemo(() => {
+    const match = pathname?.match(/^\/pages\/admin\/org\/([^/]+)/);
+    return match ? match[1] : null;
+  }, [pathname]);
+
+  // Fetch org from URL if not already in user's org list
+  useEffect(() => {
+    if (!urlOrgId) {
+      setUrlOrg(null);
+      return;
+    }
+    const alreadyLoaded = organizations.some((o) => o.id === urlOrgId || o.slug === urlOrgId);
+    if (alreadyLoaded) {
+      setUrlOrg(null);
+      return;
+    }
+    fetchOrganization(urlOrgId)
+      .then((org) => setUrlOrg(org))
+      .catch(() => setUrlOrg(null));
+  }, [urlOrgId, organizations]);
 
   const orgChildren = (orgBase: string): NavChild[] => [
     {
@@ -168,12 +193,21 @@ export function AdminSideNavigation() {
       children: orgChildren(`/pages/admin/org/${org.id}`),
     }));
 
+    // Inject the org from the URL if it's not already in the user's org list
+    if (urlOrg && !organizations.some((o) => o.id === urlOrg.id)) {
+      orgGroups.push({
+        key: "organization" as const,
+        label: urlOrg.name,
+        children: orgChildren(`/pages/admin/org/${urlOrg.id}`),
+      });
+    }
+
     const systemGroups = isAdmin
       ? navGroups.filter((group) => group.key === "system")
       : [];
 
     return [...profileGroups, ...orgGroups, ...systemGroups];
-  }, [isAdmin, hasOrganization, organizations]);
+  }, [isAdmin, hasOrganization, organizations, urlOrg]);
 
   return (
     <nav className="admin-side-nav">
@@ -191,7 +225,7 @@ export function AdminSideNavigation() {
                     name="agora-line-home"
                     className="admin-sidebar-nav__group-icon"
                   />
-                  Ir para dados.gov
+                  Ir para dados.gov.pt
                 </Link>
               ),
             }}

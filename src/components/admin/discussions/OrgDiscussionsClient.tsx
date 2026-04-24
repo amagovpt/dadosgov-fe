@@ -16,6 +16,8 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDiscussions } from "@/services/api";
 import { Discussion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -31,6 +33,8 @@ interface OrgDiscussionsClientProps {
 }
 
 export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProps) {
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,7 +45,7 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
       setIsLoading(true);
       try {
         const data = await fetchOrgDiscussions(orgId);
-        setDiscussions(data);
+        setDiscussions(data.data ?? []);
       } catch (error) {
         console.error("Error loading discussions:", error);
       } finally {
@@ -58,18 +62,14 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
     return discussions.slice(start, start + itemsPerPage);
   }, [discussions, currentPage, itemsPerPage]);
 
-  if (isLoading) {
-    return <div className="admin-page">A carregar...</div>;
-  }
-
   return (
     <div className="admin-page">
       <div className="admin-page__breadcrumb">
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Discussões", url: `/pages/admin/org/${orgId}/discussions` },
+            { label: orgName || "Organização", url: "#" },
+            { label: "Discussões", url: "#" },
           ]}
         />
       </div>
@@ -79,7 +79,9 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
         <PublishDropdown />
       </div>
 
-      {discussions.length === 0 ? (
+      {isLoading ? (
+        <p>A carregar...</p>
+      ) : discussions.length === 0 ? (
         <div className="datasets-page__body">
           <div className="datasets-page__content">
             <CardNoResults
@@ -103,7 +105,24 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
             {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
           </p>
 
-          <Table>
+          <Table
+            paginationProps={{
+              itemsPerPageLabel: "Linhas por página",
+              itemsPerPage: itemsPerPage,
+              totalItems: discussions.length,
+              availablePageSizes: [5, 10, 20],
+              currentPage: currentPage - 1,
+              buttonDropdownAriaLabel: "Selecionar linhas por página",
+              dropdownListAriaLabel: "Opções de linhas por página",
+              prevButtonAriaLabel: "Página anterior",
+              nextButtonAriaLabel: "Próxima página",
+              onPageChange: (page: number) => setCurrentPage(page + 1),
+              onPageSizeChange: (size: number) => {
+                setItemsPerPage(size);
+                setCurrentPage(1);
+              },
+            }}
+          >
             <TableHeader>
               <TableRow>
                 <TableHeaderCell sortType="date" sortOrder="none">
@@ -144,9 +163,9 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     {discussion.closed ? (
-                      <StatusDot variant="success">FECHADA</StatusDot>
+                      <StatusDot variant="success">Fechada</StatusDot>
                     ) : (
-                      <StatusDot variant="informative">ABERTA</StatusDot>
+                      <StatusDot variant="informative">Aberta</StatusDot>
                     )}
                   </TableCell>
                   <TableCell headerLabel="Data">
@@ -160,31 +179,6 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
             </TableBody>
           </Table>
 
-          <div className="flex items-center justify-between mt-[16px] py-[12px] border-t border-neutral-200">
-            <div className="flex items-center gap-[8px]">
-              <span className="text-sm text-neutral-600">Linhas por página</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                className="border border-neutral-300 rounded px-[8px] py-[4px] text-sm"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-[8px]">
-              <span className="text-sm text-neutral-600">
-                {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, discussions.length)} de {discussions.length}
-              </span>
-              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-[4px] text-primary-600 disabled:text-neutral-300" aria-label="Página anterior">
-                <Icon name="agora-line-arrow-left" className="w-[20px] h-[20px]" />
-              </button>
-              <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-[4px] text-primary-600 disabled:text-neutral-300" aria-label="Próxima página">
-                <Icon name="agora-line-arrow-right" className="w-[20px] h-[20px]" />
-              </button>
-            </div>
-          </div>
         </>
       )}
     </div>

@@ -10,7 +10,7 @@ import {
   InputText,
   InputTextArea,
   InputSelect,
-  ButtonUploader,
+  DragAndDropUploader,
   Icon,
   StatusCard,
   Accordion,
@@ -34,13 +34,23 @@ export default function OrganizationsNewClient() {
   const [orgDescription, setOrgDescription] = useState("");
   const [orgWebsite, setOrgWebsite] = useState("");
   const [orgLogo, setOrgLogo] = useState<File | null>(null);
+  const [orgLogoPreview, setOrgLogoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
+  const [orgLogoError, setOrgLogoError] = useState<string | null>(null);
   const [orgSuggestions, setOrgSuggestions] = useState<OrganizationSuggestion[]>([]);
+  const [orgSearchQuery, setOrgSearchQuery] = useState("");
 
   useEffect(() => {
     suggestOrganizations("", 20).then(setOrgSuggestions);
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      suggestOrganizations(orgSearchQuery, 20).then(setOrgSuggestions);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [orgSearchQuery]);
 
   const clearError = (field: string) => {
     if (formErrors[field]) {
@@ -82,22 +92,22 @@ export default function OrganizationsNewClient() {
   };
 
   const stepTitles: Record<number, string> = {
-    1: "Crie ou participe de uma organização em dados.gov",
-    2: "Descreva sua organização",
+    1: "Crie ou integre uma organização em dados.gov.pt",
+    2: "Descreva a sua organização",
     3: "Finalize sua organização",
   };
 
   const auxiliarItems = [
     {
-      title: "Dê um nome à sua organização.",
+      title: "Dar um nome à sua organização",
       content: "Nome público da sua organização.",
       hasError: !!formErrors.orgName,
     },
     {
-      title: "Escolha uma sigla",
+      title: "Adicionar uma sigla",
       content: "A sigla da sua organização, se houver.",
     },
-    {
+    /* {
       title: "Por que fornecer um número SIRET?",
       content: (
         <>
@@ -117,24 +127,29 @@ export default function OrganizationsNewClient() {
           </p>
         </>
       ),
-    },
+    }, */
     {
-      title: "Escreva uma boa descrição",
+      title: "Descrever a organização",
       content:
-        "Por favor, descreva aqui o que sua organização faz e qual é a sua missão. Inclua todas as informações que permitam aos utilizadores entrar em contacto consigo: endereço de e-mail, endereço postal, conta do Twitter, etc.",
+        "Descreva de forma clara a atividade e missão da sua organização. Inclua também informações de contacto essenciais, como e‑mail, morada ou redes sociais. Estas informações ajudam os utilizadores a compreender o papel da sua organização e a contactá‑la facilmente, sempre que necessário.",
       hasError: !!formErrors.orgDescription,
     },
     {
-      title: "Digite um site",
-      content:
-        "Se a sua organização possui um site, por favor, forneça o endereço URL.",
+      title: "Adicionar o site",
+      content: "Se a sua organização possui um site, inclua o endereço URL.",
     },
     {
-      title: "Escolher o logotipo certo",
+      title: "Escolher o logotipo",
       content:
-        'Se a sua organização tiver um logotipo ou foto de perfil, faça o upload aqui. Para fazer o upload de um logotipo, clique no botão "Escolher um ficheiro do seu computador". Os seguintes formatos de imagem são aceitos: PNG, JPG/JPEG.',
+        'Se a sua organização tiver um logótipo ou imagem de perfil, adicione-o. Para carregar o ficheiro, clique em "Selecione ou arraste o ficheiro" São aceites os seguintes formatos de imagem: JPG, JPEG e PNG.',
     },
   ];
+
+  const orgOptions = orgSuggestions.map((org) => (
+    <DropdownOption key={org.id} value={org.id}>
+      {org.name}
+    </DropdownOption>
+  ));
 
   return (
     <div className="admin-page">
@@ -144,7 +159,7 @@ export default function OrganizationsNewClient() {
             { label: "Administração", url: "/pages/admin" },
             { label: "Organizações", url: "/pages/admin/system/organizations" },
             {
-              label: "Formulário de inscrição",
+              label: "Formulário de registo de uma organização",
               url: "/pages/admin/organizations/new",
             },
           ]}
@@ -152,7 +167,7 @@ export default function OrganizationsNewClient() {
       </div>
 
       <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de inscrição</h1>
+        <h1 className="admin-page__title">Formulário de registo de uma organização</h1>
         <PublishDropdown />
       </div>
 
@@ -160,9 +175,7 @@ export default function OrganizationsNewClient() {
       <div className="admin-page__step-header">
         <p className="admin-page__step-text">
           <span className="text-primary-600 font-bold">Passo {currentStep} - </span>
-          <span className="text-primary-900 font-bold">
-            {stepTitles[currentStep]}
-          </span>
+          <span className="text-primary-900 font-bold">{stepTitles[currentStep]}</span>
         </p>
       </div>
 
@@ -174,9 +187,7 @@ export default function OrganizationsNewClient() {
             <div
               key={i}
               className={`admin-page__stepper-segment ${
-                i < filledSegments
-                  ? "admin-page__stepper-segment--filled"
-                  : ""
+                i < filledSegments ? "admin-page__stepper-segment--filled" : ""
               }`}
             />
           ))}
@@ -199,21 +210,22 @@ export default function OrganizationsNewClient() {
                   <>
                     <strong>Inscreva-se numa organização</strong>
                     <br />
-                    Uma organização é uma entidade na qual os utilizadores podem
-                    colaborar. Conjuntos de dados publicados dentro de uma
-                    organização podem ser editados pelos seus membros.
+                    Uma organização é uma entidade na qual os utilizadores podem colaborar.
+                    Conjuntos de dados publicados dentro de uma organização podem ser editados pelos
+                    seus membros.
                   </>
                 }
               />
 
               <div>
                 <InputSelect
-                  label="Pesquisar organização"
-                  placeholder="Pesquise uma organização em dados.gov"
+                  label="Organização"
+                  placeholder="Pesquisar uma organização em dados.gov.pt..."
                   id="search-organization"
                   searchable
                   searchInputPlaceholder="Escreva para pesquisar..."
                   searchNoResultsText="Nenhum resultado encontrado"
+                  onSearchInputChange={(value: string) => setOrgSearchQuery(value)}
                   onChange={(options: { value?: string }[]) => {
                     const selectedId = options?.[0]?.value;
                     if (selectedId) {
@@ -224,15 +236,7 @@ export default function OrganizationsNewClient() {
                     }
                   }}
                 >
-                  <DropdownSection name="organizations">
-                    <>
-                      {orgSuggestions.map((org) => (
-                        <DropdownOption key={org.id} value={org.id}>
-                          {org.name}
-                        </DropdownOption>
-                      ))}
-                    </>
-                  </DropdownSection>
+                  <DropdownSection name="organizations">{orgOptions}</DropdownSection>
                 </InputSelect>
 
                 <div className="admin-page__divider-or">
@@ -242,9 +246,7 @@ export default function OrganizationsNewClient() {
                 <div className="flex justify-center mt-[16px]">
                   <Button
                     variant="primary"
-                    onClick={() =>
-                      router.push("/pages/admin/organizations/new?step=2")
-                    }
+                    onClick={() => router.push("/pages/admin/organizations/new?step=2")}
                   >
                     Criar uma organização
                   </Button>
@@ -253,7 +255,7 @@ export default function OrganizationsNewClient() {
             </div>
           )}
 
-          {/* Step 2: Descreva sua organização */}
+          {/* Step 2: Descreva a sua organização */}
           {currentStep === 2 && (
             <>
               <StatusCard
@@ -262,9 +264,9 @@ export default function OrganizationsNewClient() {
                   <>
                     <strong>O que é uma organização?</strong>
                     <br />
-                    Uma organização é uma entidade na qual muitos utilizadores podem
-                    colaborar. Conjuntos de dados publicados sob a égide da
-                    organização podem ser editados pelos seus membros.
+                    Uma organização é uma entidade na qual muitos utilizadores podem colaborar.
+                    Conjuntos de dados publicados sob a égide da organização podem ser editados
+                    pelos seus membros.
                   </>
                 }
               />
@@ -319,7 +321,7 @@ export default function OrganizationsNewClient() {
                   />
 
                   <InputText
-                    label="Site da Internet"
+                    label="Website"
                     placeholder="Insira o URL aqui"
                     id="org-website"
                     value={orgWebsite}
@@ -332,37 +334,62 @@ export default function OrganizationsNewClient() {
                 <h2 className="admin-page__section-title">Logotipo</h2>
 
                 <div className="admin-page__fields-group">
-                  <ButtonUploader
-                    label="Ficheiros"
+                  <DragAndDropUploader
+                    label="Ficheiro"
+                    dragAndDropLabel="Arraste e largue o ficheiro aqui"
                     inputLabel="Selecione ou arraste o ficheiro"
+                    selectedFilesLabel="ficheiro selecionado"
                     removeFileButtonLabel="Remover ficheiro"
                     replaceFileButtonLabel="Substituir ficheiro"
-                    extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceitos: JPG, JPEG, PNG."
+                    extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
                     accept=".jpg,.jpeg,.png"
                     maxSize={4194304}
                     maxCount={1}
+                    maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                    forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                    hasError={!!orgLogoError}
+                    hasFeedback={!!orgLogoError}
+                    feedbackState="danger"
+                    feedbackText={orgLogoError ?? undefined}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const file = e.target.files?.[0] || null;
+                      if (file && file.size > 4194304) {
+                        setOrgLogoError("O ficheiro excede o tamanho máximo de 4 MB.");
+                        setOrgLogo(null);
+                        setOrgLogoPreview(null);
+                        return;
+                      }
+                      setOrgLogoError(null);
                       setOrgLogo(file);
+                      if (file) {
+                        const url = URL.createObjectURL(file);
+                        setOrgLogoPreview(url);
+                      } else {
+                        setOrgLogoPreview(null);
+                      }
                     }}
                   />
+                  {orgLogoPreview && (
+                    <div className="mt-[12px]">
+                      <p className="text-sm text-neutral-600 mb-[8px]">Pré-visualização:</p>
+                      <img
+                        src={orgLogoPreview}
+                        alt="Pré-visualização do logotipo"
+                        className="max-h-[120px] max-w-[240px] object-contain border border-neutral-200 rounded-[8px] p-[8px]"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="admin-page__actions">
                   <Button
                     appearance="outline"
                     variant="neutral"
-                    onClick={() =>
-                      router.push("/pages/admin/organizations/new?step=1")
-                    }
+                    onClick={() => router.push("/pages/admin/organizations/new?step=1")}
                   >
                     Anterior
                   </Button>
-                  <Button
-                    variant="primary"
-                    onClick={handleCreateOrg}
-                    disabled={isSubmitting}
-                  >
+                  <Button variant="primary" onClick={handleCreateOrg} disabled={isSubmitting}>
                     Criar a organização
                   </Button>
                 </div>
@@ -388,14 +415,15 @@ export default function OrganizationsNewClient() {
                 <Button
                   appearance="outline"
                   variant="neutral"
-                  onClick={() =>
-                    router.push("/pages/admin/organizations/new?step=2")
-                  }
+                  onClick={() => router.push("/pages/admin/organizations/new?step=2")}
                 >
                   Anterior
                 </Button>
                 <Button
                   variant="primary"
+                  hasIcon
+                  trailingIcon="agora-line-check-circle"
+                  trailingIconHover="agora-solid-check-circle"
                   onClick={() =>
                     router.push("/pages/admin/system/organizations")
                   }
@@ -412,10 +440,7 @@ export default function OrganizationsNewClient() {
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon
-                  name="agora-line-question-mark"
-                  className="w-[24px] h-[24px]"
-                />
+                <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />

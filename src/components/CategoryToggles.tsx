@@ -27,6 +27,7 @@ interface CategoryToggleItem {
 interface CategoryTogglesProps {
   siteMetrics: SiteMetrics;
   searchQuery?: string;
+  exclude?: string[];
 }
 
 const buildItems = (siteMetrics: SiteMetrics): CategoryToggleItem[] => [
@@ -92,10 +93,10 @@ interface SearchTotals {
   organizations: number;
 }
 
-export const CategoryToggles = ({ siteMetrics, searchQuery }: CategoryTogglesProps) => {
+export const CategoryToggles = ({ siteMetrics, searchQuery, exclude = [] }: CategoryTogglesProps) => {
   const router = useRouter();
   const pathname = usePathname();
-  const items = buildItems(siteMetrics);
+  const items = buildItems(siteMetrics).filter((item) => !exclude.includes(item.id));
   const activeId = HREF_TO_ID[pathname] || '';
 
   const [realTotals, setRealTotals] = useState<SearchTotals | null>(null);

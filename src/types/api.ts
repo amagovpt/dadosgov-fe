@@ -1,3 +1,20 @@
+export interface ApiToken {
+  id: string;
+  token_prefix: string;
+  name: string | null;
+  scopes: string[];
+  kind: string;
+  created_at: string;
+  last_used_at: string | null;
+  user_agents: string[];
+  revoked_at: string | null;
+  expires_at: string | null;
+}
+
+export interface ApiTokenCreated extends ApiToken {
+  token: string;
+}
+
 export interface UserRef {
   id: string;
   slug: string;
@@ -68,6 +85,8 @@ export interface MembershipRequest {
   created: string;
   status: "pending" | "accepted" | "refused";
   comment: string;
+  kind: "request" | "invitation";
+  role: string;
 }
 
 export interface OrgRole {
@@ -86,6 +105,9 @@ export interface OrganizationMetrics {
   members: number;
   reuses: number;
   views: number;
+  resource_downloads: number;
+  reuse_views: number;
+  dataservice_views: number;
 }
 
 export interface Organization {
@@ -117,9 +139,9 @@ export interface OrganizationCreatePayload {
 
 export interface OrganizationUpdatePayload {
   name?: string;
-  acronym?: string;
+  acronym?: string | null;
   description?: string;
-  url?: string;
+  url?: string | null;
   business_number_id?: string;
 }
 
@@ -137,8 +159,9 @@ export interface OrgBadges {
 
 export interface OrganizationFilters {
   q?: string;
-  badge?: string;
+  badge?: string | string[];
   sort?: string;
+  organization?: string | string[];
 }
 
 export interface Metric {
@@ -210,6 +233,8 @@ export interface ResourceUpdatePayload {
   url?: string;
   filetype?: string;
   format?: string;
+  mime?: string;
+  filesize?: number;
 }
 
 export interface DatasetPermissions {
@@ -242,6 +267,7 @@ export interface Dataset {
   organization: Organization | null;
   owner: UserRef | null;
   license: string | null;
+  license_title: string | null;
   license_url: string | null;
   frequency: string;
   frequency_date?: string | null;
@@ -298,7 +324,8 @@ export interface DatasetUpdatePayload {
   temporal_coverage?: TemporalCoverage;
   spatial?: SpatialCoverage;
   private?: boolean;
-  archived?: string;
+  featured?: boolean;
+  archived?: string | null;
   organization?: string;
   extras?: Record<string, unknown>;
 }
@@ -331,6 +358,7 @@ export interface ReuseFilters {
   owner?: string;
   dataset?: string;
   sort?: string;
+  modified_since?: string;
 }
 
 export interface ReuseTopic {
@@ -352,6 +380,7 @@ export interface Reuse {
   private: boolean;
   featured: boolean;
   archived: string | null;
+  deleted?: string | null;
   topic: string | null;
   created_at: string;
   last_modified: string;
@@ -360,6 +389,7 @@ export interface Reuse {
   badges: Badge[];
   datasets: DatasetRef[];
   dataservices: Dataservice[];
+  extras?: Record<string, unknown>;
 }
 
 export interface ReuseCreatePayload {
@@ -382,6 +412,8 @@ export interface ReuseUpdatePayload {
   tags?: string[];
   organization?: string;
   private?: boolean;
+  archived?: string | null;
+  extras?: Record<string, unknown>;
 }
 
 export interface Dataservice {
@@ -698,6 +730,10 @@ export interface DatasetFilters {
   badge?: string | string[];
   featured?: boolean;
   sort?: string;
+  private?: boolean;
+  archived?: boolean;
+  deleted?: boolean;
+  modified_since?: string;
 }
 
 
@@ -858,6 +894,7 @@ export interface CommunityResource {
   description: string | null;
   url: string;
   filetype: string | null;
+  type: string | null;
   format: string | null;
   filesize: number | null;
   mime: string | null;
@@ -869,6 +906,7 @@ export interface CommunityResource {
   last_modified: string;
   archived: boolean;
   deleted: boolean;
+  schema: SchemaRef | null;
 }
 
 export interface CommunityResourceCreatePayload {
@@ -880,6 +918,7 @@ export interface CommunityResourceCreatePayload {
   format?: string;
   dataset: string;
   organization?: string;
+  schema?: { name?: string; url?: string; version?: string } | null;
 }
 
 export interface CommunityResourceUpdatePayload {
@@ -887,8 +926,13 @@ export interface CommunityResourceUpdatePayload {
   description?: string;
   url?: string;
   filetype?: string;
+  type?: string;
   format?: string;
+  mime?: string;
+  filesize?: number;
   dataset?: string;
+  schema?: { name?: string; url?: string; version?: string } | null;
+  checksum?: { type: string; value: string } | null;
 }
 
 export interface HarvestError {
@@ -898,6 +942,8 @@ export interface HarvestError {
 
 export interface HarvestItem {
   remote_id: string;
+  remote_url: string | null;
+  dataset: { id: string; title: string; page: string } | null;
   status: "pending" | "started" | "done" | "failed" | "skipped" | "archived";
   errors: HarvestError[];
 }
@@ -909,7 +955,7 @@ export interface HarvestJob {
   started: string | null;
   ended: string | null;
   errors: Record<string, unknown>[];
-  items: Record<string, unknown>[];
+  items: HarvestItem[];
   source: string;
 }
 
@@ -923,13 +969,13 @@ export interface HarvestSourceValidation {
 export interface HarvestPreviewJob {
   id: string;
   status:
-    | "pending"
-    | "initializing"
-    | "initialized"
-    | "processing"
-    | "done"
-    | "done-errors"
-    | "failed";
+  | "pending"
+  | "initializing"
+  | "initialized"
+  | "processing"
+  | "done"
+  | "done-errors"
+  | "failed";
   created: string;
   started: string | null;
   ended: string | null;
@@ -955,6 +1001,7 @@ export interface HarvestSource {
   created_at: string;
   last_modified: string;
   last_job: HarvestJob | null;
+  datasets_count: number;
 }
 
 export interface HarvestSourceCreatePayload {
@@ -983,6 +1030,14 @@ export interface HarvestSourceUpdatePayload {
   features?: Record<string, boolean>;
   active?: boolean;
   autoarchive?: boolean;
+}
+
+export interface HarvestBackend {
+  id: string;
+  label: string;
+  filters: { label: string; key: string; type: string; description: string }[];
+  features: { label: string; key: string; description: string; default: boolean }[];
+  extra_configs: { label: string; key: string; description: string; default: string }[];
 }
 
 export type UserRole = string;

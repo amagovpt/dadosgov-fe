@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Breadcrumb,
   CardNoResults,
@@ -34,6 +34,25 @@ export default function DataservicesClient() {
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const filteredApis = useMemo(() => {
+    if (!statusFilter) return apis;
+    return apis.filter((a) => {
+      switch (statusFilter) {
+        case "public":
+          return !a.private && !a.archived && !a.deleted;
+        case "draft":
+          return a.private && !a.archived && !a.deleted;
+        case "archived":
+          return !!a.archived && !a.deleted;
+        case "deleted":
+          return !!a.deleted;
+        default:
+          return true;
+      }
+    });
+  }, [apis, statusFilter]);
 
   useEffect(() => {
     async function loadDataservices() {
@@ -51,11 +70,15 @@ export default function DataservicesClient() {
   }, []);
 
   const getStatusLabel = (api: Dataservice) => {
+    if (api.deleted) return "Excluído";
+    if (api.archived) return "Arquivado";
     if (api.private) return "Rascunho";
     return "Público";
   };
 
   const getStatusVariant = (api: Dataservice) => {
+    if (api.deleted) return "danger" as const;
+    if (api.archived) return "neutral" as const;
     if (api.private) return "warning" as const;
     return "success" as const;
   };
@@ -78,7 +101,7 @@ export default function DataservicesClient() {
       </div>
 
       <p className="text-neutral-700 text-sm mb-[16px]">
-        {apis.length} resultados
+        {filteredApis.length} resultados
       </p>
 
       <div className="flex items-end gap-[16px] mb-[24px]">
@@ -94,24 +117,28 @@ export default function DataservicesClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          onChange={(options) => {
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+          }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
 
-      {!isLoading && apis.length > 0 ? (
+      {!isLoading && filteredApis.length > 0 ? (
         <Table
           paginationProps={{
             itemsPerPageLabel: "Linhas por página",
             itemsPerPage: 5,
-            totalItems: apis.length,
+            totalItems: filteredApis.length,
             availablePageSizes: [5, 10, 20],
-            currentPage: 1,
+            currentPage: 0,
             buttonDropdownAriaLabel: "Selecionar linhas por página",
             dropdownListAriaLabel: "Opções de linhas por página",
             prevButtonAriaLabel: "Página anterior",
@@ -134,7 +161,7 @@ export default function DataservicesClient() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {apis.map((api, index) => (
+            {filteredApis.map((api, index) => (
               <TableRow key={index}>
                 <TableCell headerLabel="Título">
                   <a

@@ -36,7 +36,7 @@ test.describe("Backoffice - Integration (Backoffice to Public Portal)", () => {
       }
     }
 
-    const publishBtn = page.getByRole("button", { name: "Publique o conjunto de dados" }).first();
+    const publishBtn = page.getByRole("button", { name: "Publicar o conjunto de dados" }).first();
     if (await publishBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
       await publishBtn.click();
       await page.waitForTimeout(3000);

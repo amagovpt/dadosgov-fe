@@ -14,8 +14,8 @@ test.describe("Backoffice - Datasets CRUD", () => {
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
-      // The datasets list page has a "Publicar dados.gov" dropdown or a "Publique no portal" button
-      const publishBtn = page.getByText("Publicar dados.gov").first();
+      // The datasets list page has a "Publicar dados.gov.pt" dropdown or a "Publique no portal" button
+      const publishBtn = page.getByText("Publicar dados.gov.pt").first();
       const emptyStateBtn = page.getByText("Publique no portal").first();
       if (await emptyStateBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
         await emptyStateBtn.click();
@@ -32,7 +32,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
-      // Step 1: H1="Publique em dados.gov", H2="Tipo de publicação", STEP="Passo 1/4"
+      // Step 1: H1="Formulário de publicação de um conjunto de dados", H2="Tipo de publicação", STEP="Passo 1/4"
       const stepIndicator = page.getByText("Passo 1/4").first();
       await expect(stepIndicator).toBeVisible({ timeout: 10000 }).catch(() => {
         // Wizard step text may differ
@@ -44,11 +44,11 @@ test.describe("Backoffice - Datasets CRUD", () => {
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
-      // Step 1 shows H1="Publique em dados.gov", H2="Tipo de publicação" and BTN "Comece a publicar"
+      // Step 1 shows H1="Formulário de publicação de um conjunto de dados", H2="Tipo de publicação" and BTN "Comece a publicação"
       const heading = page.getByText("Tipo de publicação").first();
       await expect(heading).toBeVisible({ timeout: 5000 }).catch(() => {});
 
-      const startBtn = page.getByRole("button", { name: "Comece a publicar" }).first();
+      const startBtn = page.getByRole("button", { name: "Comece a publicação" }).first();
       if (await startBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
         await startBtn.click();
         await page.waitForLoadState("networkidle");
@@ -136,13 +136,13 @@ test.describe("Backoffice - Datasets CRUD", () => {
       const stepIndicator = page.getByText("Passo 4/4").first();
       await expect(stepIndicator).toBeVisible({ timeout: 5000 }).catch(() => {});
 
-      const publishBtn = page.getByRole("button", { name: "Publique o conjunto de dados" }).first();
+      const publishBtn = page.getByRole("button", { name: "Publicar o conjunto de dados" }).first();
       if (await publishBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
         await publishBtn.click();
         await page.waitForTimeout(2000);
       }
 
-      const draftBtn = page.getByRole("button", { name: "Salvar rascunho" }).first();
+      const draftBtn = page.getByRole("button", { name: "Guardar o rascunho" }).first();
       await expect(draftBtn).toBeVisible({ timeout: 5000 }).catch(() => {
         // Draft button may not be visible after publish
       });
@@ -533,8 +533,8 @@ test.describe("Backoffice - Datasets CRUD", () => {
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
-      // Start the wizard - Step 1 BTN "Comece a publicar"
-      const startBtn = page.getByRole("button", { name: "Comece a publicar" }).first();
+      // Start the wizard - Step 1 BTN "Comece a publicação"
+      const startBtn = page.getByRole("button", { name: "Comece a publicação" }).first();
       if (await startBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
         await startBtn.click();
         await page.waitForLoadState("networkidle");
@@ -550,8 +550,8 @@ test.describe("Backoffice - Datasets CRUD", () => {
         }
       }
 
-      // Publish - "Publique o conjunto de dados"
-      const publishBtn = page.getByRole("button", { name: "Publique o conjunto de dados" }).first();
+      // Publish - "Publicar o conjunto de dados"
+      const publishBtn = page.getByRole("button", { name: "Publicar o conjunto de dados" }).first();
       if (await publishBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
         await publishBtn.click();
         await page.waitForTimeout(3000);

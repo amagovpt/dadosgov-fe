@@ -78,36 +78,24 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
   const [descExpanded, setDescExpanded] = useState(false);
   const [descOverflowing, setDescOverflowing] = useState(false);
   const [descAvailableHeight, setDescAvailableHeight] = useState<number | undefined>(undefined);
-  const descMeasureRef = useRef<HTMLDivElement>(null);
-  const descTitleRef = useRef<HTMLDivElement>(null);
-  const descSidebarRef = useRef<HTMLDivElement>(null);
-  const DESC_READMORE_HEIGHT = 48;
+  const descContentRef = useRef<HTMLDivElement>(null);
+  const MAX_DESC_HEIGHT = 400;
 
   const checkDescOverflow = useCallback(() => {
-    if (descMeasureRef.current && descSidebarRef.current && descTitleRef.current) {
-      const sidebarHeight = descSidebarRef.current.offsetHeight;
-      const titleHeight = descTitleRef.current.offsetHeight;
-      const fullHeight = descMeasureRef.current.offsetHeight;
-      const maxDescHeight = sidebarHeight - titleHeight;
-      const overflows = fullHeight > maxDescHeight;
-      if (overflows) {
-        const lineHeight = parseFloat(getComputedStyle(descMeasureRef.current).lineHeight) || 24;
-        const usable = maxDescHeight - DESC_READMORE_HEIGHT;
-        const snapped = Math.floor(usable / lineHeight) * lineHeight;
-        setDescAvailableHeight(snapped);
-      } else {
-        setDescAvailableHeight(maxDescHeight);
+    if (descContentRef.current) {
+      const fullHeight = descContentRef.current.scrollHeight;
+      setDescOverflowing(fullHeight > MAX_DESC_HEIGHT);
+      if (!descExpanded) {
+        setDescAvailableHeight(MAX_DESC_HEIGHT);
       }
-      setDescOverflowing(overflows);
     }
-  }, []);
+  }, [descExpanded]);
 
   useEffect(() => {
     checkDescOverflow();
     window.addEventListener("resize", checkDescOverflow);
     const observer = new ResizeObserver(checkDescOverflow);
-    if (descSidebarRef.current) observer.observe(descSidebarRef.current);
-    if (descMeasureRef.current) observer.observe(descMeasureRef.current);
+    if (descContentRef.current) observer.observe(descContentRef.current);
     return () => {
       window.removeEventListener("resize", checkDescOverflow);
       observer.disconnect();
@@ -240,19 +228,11 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               {/* Main Content */}
               <div className="xl:col-span-8 max-w-ch">
                 <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed relative">
-                  <div ref={descTitleRef}>
-                    <h2 className="font-medium text-base text-neutral-900 uppercase mb-32">Descrição</h2>
-                  </div>
+                  <h2 className="font-medium text-base text-neutral-900 uppercase mb-32">Descrição</h2>
                   {organization.description ? (
                     <>
-                      {/* Hidden measure element */}
-                      <div ref={descMeasureRef} className="absolute invisible pointer-events-none" style={{ top: 0, left: 0, right: 0 }} aria-hidden="true">
-                        <div
-                          className="mb-32 text-neutral-900 [&_a]:underline [&_a]:text-primary-600"
-                          dangerouslySetInnerHTML={{ __html: organization.description }}
-                        />
-                      </div>
                       <div
+                        ref={descContentRef}
                         className="overflow-hidden"
                         style={!descExpanded && descOverflowing && descAvailableHeight ? { maxHeight: descAvailableHeight } : undefined}
                       >
@@ -284,23 +264,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               </div>
 
               {/* Sidebar Metadata */}
-              <aside className="xl:col-span-4 xl:block md:pt-64 flex flex-col gap-16" ref={descSidebarRef}>
-                <div className="bg-white p-32 rounded-4">
-                  <h3 className="text-sm font-bold tracking-wider mb-8">Tipo</h3>
-                  <p className="font-medium text-neutral-900">Publicador Oficial</p>
-                </div>
-
-                <div className="bg-white p-32 rounded-4">
-                  <h3 className="text-sm font-bold tracking-wider mb-8">
-                    Última atualização
-                  </h3>
-                  <p className="font-medium text-neutral-900">
-                    {organization.last_modified
-                      ? format(new Date(organization.last_modified), "d 'de' MMMM 'de' yyyy", { locale: pt })
-                      : "—"}
-                  </p>
-                </div>
-
+              <aside className="xl:col-span-4 xl:block md:pt-64 flex flex-col gap-16">
                 <div className="bg-white p-32 rounded-4">
                   <h3 className="text-sm font-bold tracking-wider mb-8">
                     Data de criação
@@ -310,17 +274,6 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                       ? format(new Date(organization.created_at), "d 'de' MMMM 'de' yyyy", { locale: pt })
                       : "—"}
                   </p>
-                </div>
-
-                <div className="bg-white p-32 rounded-4">
-                  <h3 className="text-sm font-bold tracking-wider mb-8">Vistas</h3>
-                  <div className="text-2xl text-neutral-900 mb-8">
-                    {organization.metrics?.views
-                      ? organization.metrics.views >= 1000
-                        ? (organization.metrics.views / 1000).toLocaleString("pt-PT") + " mil"
-                        : organization.metrics.views.toLocaleString("pt-PT")
-                      : "0"}
-                  </div>
                 </div>
               </aside>
             </div>

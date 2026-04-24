@@ -12,19 +12,20 @@ const linkColumns = [
     ],
   },
   {
-    title: 'Plataforma',
+    title: 'Portal',
     links: [
+      { href: '/pages/posts', label: 'Notícias' },
       { href: '/pages/faqs/about_dadosgov', label: 'Sobre nós' },
-      { href: '/pages/support', label: 'Contactar-nos' },
+      { href: '/pages/support', label: 'Ajuda e contactos' },
       { href: '/pages/faqs/terms', label: 'Termos de utilização' },
     ],
   },
   {
     title: 'Desenvolvimento',
     links: [
-      { href: '/pages/docapi', label: 'API dos dados.gov' },
-      { href: 'https://github.com/opendatateam/udata', label: `Motor de código aberto: udata (${process.env.NEXT_PUBLIC_UDATA_VERSION})` },
-      { href: '#', label: 'Interface de utilizador de dados.gov: frontend' },
+      { href: '/pages/docapi', label: 'API dos dados.gov.pt' },
+      { href: 'https://github.com/amagovpt/udata-pt', label: `Mecanismo de código aberto : udata (${process.env.NEXT_PUBLIC_UDATA_VERSION && process.env.NEXT_PUBLIC_UDATA_VERSION !== "unknown" ? process.env.NEXT_PUBLIC_UDATA_VERSION : "10.4.3"})` },
+      { href: 'https://github.com/amagovpt/dadosgov-fe', label: `Extensão do tema udata : udata-front${process.env.NEXT_PUBLIC_UDATA_FRONT_VERSION && process.env.NEXT_PUBLIC_UDATA_FRONT_VERSION !== "unknown" ? ` (${process.env.NEXT_PUBLIC_UDATA_FRONT_VERSION})` : ""}` },
     ],
   },
 ];
@@ -99,11 +100,11 @@ export const Footer = () => {
         brandImage={{
           image: {
             src: '/Logos/logo.svg',
-            alt: 'dados.gov',
+            alt: 'dados.gov.pt',
             style: { height: '43px', width: 'auto' }
           }
         }}
-        caption="Plataforma aberta de dados públicos portugueses"
+        caption="Portal aberto de dados públicos portugueses"
         partnersLogos={[
           { image: { src: '/Logos/NextGenerationEU.svg', alt: 'NextGenerationEU', style: { height: '24px', width: 'auto', opacity: 0.5 } } },
           { image: { src: '/Logos/republica-portuguesa.svg', alt: 'República Portuguesa', style: { height: '24px', width: 'auto', opacity: 0.5 } } },

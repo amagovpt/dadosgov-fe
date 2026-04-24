@@ -18,11 +18,9 @@ import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { createHarvester, previewHarvestSource } from "@/services/api";
-import {
-  HarvestSourceCreatePayload,
-  HarvestPreviewJob,
-} from "@/types/api";
+import { HarvestSourceCreatePayload, HarvestPreviewJob } from "@/types/api";
 
 export default function HarvestersNewClient() {
   const { user } = useAuth();
@@ -39,9 +37,7 @@ export default function HarvestersNewClient() {
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [isEnabled, setIsEnabled] = useState(true);
   const [isAutoArchive, setIsAutoArchive] = useState(true);
-  const [filters, setFilters] = useState<
-    { mode: string; type: string; value: string }[]
-  >([]);
+  const [filters, setFilters] = useState<{ mode: string; type: string; value: string }[]>([]);
   const [selectedType, setSelectedType] = useState("");
   const [isGeoDcat, setIsGeoDcat] = useState(false);
   const [showRemoteUrlPrefix, setShowRemoteUrlPrefix] = useState(false);
@@ -54,9 +50,7 @@ export default function HarvestersNewClient() {
   const [createError, setCreateError] = useState<string | null>(null);
   const createdHarvesterId =
     searchParams.get("id") ||
-    (typeof window !== "undefined"
-      ? sessionStorage.getItem("createdHarvesterId")
-      : null);
+    (typeof window !== "undefined" ? sessionStorage.getItem("createdHarvesterId") : null);
 
   const selectedProducerRef = useRef("");
   const selectedTypeRef = useRef("");
@@ -77,20 +71,14 @@ export default function HarvestersNewClient() {
     return filterTypeRefs.current[index];
   };
 
-  const producerOptions = useMemo(
-    () => (
-      <DropdownSection name="identity">
-        <>
-          {(user?.organizations || []).map((org) => (
-            <DropdownOption key={org.id} value={org.id}>
-              {org.name}
-            </DropdownOption>
-          ))}
-        </>
-      </DropdownSection>
-    ),
-    [user],
-  );
+  const producerOptions = useMemo(() => {
+    const options = (user?.organizations || []).map((org) => (
+      <DropdownOption key={org.id} value={org.id}>
+        {org.name}
+      </DropdownOption>
+    ));
+    return <DropdownSection name="identity">{options}</DropdownSection>;
+  }, [user]);
 
   const typeOptions = useMemo(
     () => (
@@ -107,7 +95,7 @@ export default function HarvestersNewClient() {
         <DropdownOption value="ogc">OGC</DropdownOption>
       </DropdownSection>
     ),
-    [],
+    []
   );
 
   const filterModeOptions = useMemo(
@@ -117,7 +105,7 @@ export default function HarvestersNewClient() {
         <DropdownOption value="exclude">Excluir</DropdownOption>
       </DropdownSection>
     ),
-    [],
+    []
   );
 
   const filterTypeSelectOptions = useMemo(
@@ -127,7 +115,7 @@ export default function HarvestersNewClient() {
         <DropdownOption value="tag">Marcação</DropdownOption>
       </DropdownSection>
     ),
-    [],
+    []
   );
 
   const addFilter = () => {
@@ -139,9 +127,7 @@ export default function HarvestersNewClient() {
   };
 
   const updateFilter = (index: number, field: string, value: string) => {
-    setFilters((prev) =>
-      prev.map((f, i) => (i === index ? { ...f, [field]: value } : f))
-    );
+    setFilters((prev) => prev.map((f, i) => (i === index ? { ...f, [field]: value } : f)));
   };
 
   const clearError = (field: string) => {
@@ -157,7 +143,13 @@ export default function HarvestersNewClient() {
   const buildPayload = (): HarvestSourceCreatePayload => {
     const producer = selectedProducerRef.current;
     const backend = selectedTypeRef.current || "dcat";
-    console.log("[harvester] buildPayload:", { name: harvesterName, url: harvesterUrl, backend, producer, typeRef: selectedTypeRef.current });
+    console.log("[harvester] buildPayload:", {
+      name: harvesterName,
+      url: harvesterUrl,
+      backend,
+      producer,
+      typeRef: selectedTypeRef.current,
+    });
     return {
       name: harvesterName,
       url: harvesterUrl,
@@ -190,9 +182,7 @@ export default function HarvestersNewClient() {
       router.push(`/pages/admin/harvesters/new?step=3&id=${created.id}`);
     } catch (err: unknown) {
       const error = err as { data?: { message?: string }; message?: string };
-      setCreateError(
-        error?.data?.message || error?.message || "Erro ao criar o harvester."
-      );
+      setCreateError(error?.data?.message || error?.message || "Erro ao criar o harvester.");
     } finally {
       setIsCreating(false);
     }
@@ -233,28 +223,27 @@ export default function HarvestersNewClient() {
   const stepTitles: Record<number, string> = {
     1: "Descreva o seu harvester",
     2: "Visualize o seu harvester",
-    3: "Finalizar",
+    3: "Finalize a publicação do seu harvester",
   };
 
   const auxiliarItems = [
     {
-      title: "Escolha a organização para a qual deseja implementar um coletor de lixo.",
+      title: "Escolher a organização",
       content: (
         <>
-          <p>
-            A criação de um coletor de dados deve ser feita em nome de uma
-            organização e requer direitos de administrador. Selecione uma
-            organização da qual você seja administrador.
+          <p className="auxiliar-list__content !p-0">
+            A criação de um harvester de dados deve ser feita em nome de uma organização e requer permissões de administrador.
           </p>
-          <p className="mt-[8px]">
-            Se a sua organização ainda não existe, primeiro você precisa{" "}
+          <p className="auxiliar-list__content !p-0 mt-[8px]">
+            Selecione uma organização da qual seja administrador. Se a sua organização ainda não
+            existir, terá de a criar primeiro através deste{" "}
             <a
               href="/pages/admin/organizations/new"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary-600 underline"
+              className="text-primary-600 underline auxiliar-list__content !p-0"
             >
-              criá-la aqui ↗
+              link ↗
             </a>
             .
           </p>
@@ -262,26 +251,26 @@ export default function HarvestersNewClient() {
       ),
     },
     {
-      title: "Escolha um nome",
+      title: "Dar um nome",
       content:
         "Dê um nome ao seu harvester. Esta é uma referência interna que o ajudará a identificá-lo caso crie vários harvesters. O nome do seu harvester não será público.",
       hasError: !!formErrors.harvesterName,
     },
     {
-      title: "Descreva o seu harvester",
+      title: "Descrever o seu harvester",
       content:
-        "Adicione detalhes no campo de descrição para seu uso interno. A descrição é opcional.",
+        "Adicione informações no campo de descrição para uso interno. Este campo é opcional.",
     },
     {
-      title: "Selecione o URL correto",
+      title: "Adicionar o URL",
       content:
-        "Insira aqui o URL do portal que deseja recolher. Normalmente, trata-se do URL da página inicial do seu portal de dados abertos. O URL permite que o harvester navegue e recupere todos os seus conjuntos de dados.",
+        "Insira o URL do portal que pretende ligar. Normalmente corresponde ao URL da página inicial do seu portal de dados abertos. Este URL permite ao harvester percorrer o portal e recolher todos os seus conjuntos de dados.",
       hasError: !!formErrors.harvesterUrl,
     },
     {
-      title: "Selecione o tipo de implementação",
+      title: "Identificar o tipo de implementação",
       content:
-        "Escolha o formato dos metadados (por exemplo, DCAT, CKAN, etc.). Esse formato permite que o harvester saiba como ler e interpretar seus metadados, para que possam ser transcritos corretamente em dados.gov.",
+        "Escolha o formato dos metadados (ex.:, DCAT, CKAN, etc.). Esse formato permite que o harvester saiba como ler e interpretar os metadados, para que possam ser transcritos corretamente em dados.gov.pt",
     },
   ];
 
@@ -293,7 +282,7 @@ export default function HarvestersNewClient() {
             { label: "Administração", url: "/pages/admin" },
             { label: "Harvesters", url: "/pages/admin/system/harvesters" },
             {
-              label: "Formulário de inscrição",
+              label: "Formulário de publicação de um harvester",
               url: "/pages/admin/harvesters/new",
             },
           ]}
@@ -301,7 +290,7 @@ export default function HarvestersNewClient() {
       </div>
 
       <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de inscrição</h1>
+        <h1 className="admin-page__title">Formulário de publicação de um harvester</h1>
         <PublishDropdown />
       </div>
 
@@ -309,9 +298,7 @@ export default function HarvestersNewClient() {
       <div className="admin-page__step-header">
         <p className="admin-page__step-text">
           <span className="text-primary-600 font-bold">Passo {currentStep} - </span>
-          <span className="text-primary-900 font-bold">
-            {stepTitles[currentStep]}
-          </span>
+          <span className="text-primary-900 font-bold">{stepTitles[currentStep]}</span>
         </p>
       </div>
 
@@ -323,9 +310,7 @@ export default function HarvestersNewClient() {
             <div
               key={i}
               className={`admin-page__stepper-segment ${
-                i < filledSegments
-                  ? "admin-page__stepper-segment--filled"
-                  : ""
+                i < filledSegments ? "admin-page__stepper-segment--filled" : ""
               }`}
             />
           ))}
@@ -348,9 +333,8 @@ export default function HarvestersNewClient() {
                   <>
                     <strong>O que é um harvester?</strong>
                     <br />
-                    Um harvester é um mecanismo para reunir metadados de um catálogo
-                    remoto e armazená-los em outra plataforma, fornecendo um
-                    segundo ponto de acesso aos dados.
+                    Um harvester é um mecanismo para recolher metadados a partir de um catálogo e
+                    armazená-los noutra plataforma, garantindo o acesso aos dados.
                   </>
                 }
               />
@@ -365,13 +349,14 @@ export default function HarvestersNewClient() {
                 <div className="admin-page__fields-group">
                   <IsolatedSelect
                     key={`producer-${user?.organizations?.length ?? 0}`}
-                    label="Selecione a sua organização *"
-                    placeholder="Para pesquisar..."
+                    label="Confirme a identidade que pretende utilizar na publicação. *"
+                    placeholder="Selecione o produtor..."
                     id="harvester-producer"
                     onChangeRef={selectedProducerRef}
                     onChangeCallback={() => clearError("harvesterProducer")}
                     hasError={!!formErrors.harvesterProducer}
                     errorFeedbackText="Selecione uma organização"
+                    required
                   >
                     {producerOptions}
                   </IsolatedSelect>
@@ -382,7 +367,7 @@ export default function HarvestersNewClient() {
                 <div className="admin-page__fields-group">
                   <InputText
                     label="Nome *"
-                    placeholder=""
+                    placeholder="Insira o nome aqui"
                     id="harvester-name"
                     value={harvesterName}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -393,11 +378,12 @@ export default function HarvestersNewClient() {
                     hasFeedback={!!formErrors.harvesterName}
                     feedbackState="danger"
                     errorFeedbackText="Campo obrigatório"
+                    required
                   />
 
                   <InputTextArea
                     label="Descrição"
-                    placeholder=""
+                    placeholder="Insira a descrição aqui"
                     id="harvester-description"
                     rows={6}
                     value={harvesterDescription}
@@ -408,7 +394,7 @@ export default function HarvestersNewClient() {
 
                   <InputText
                     label="URL *"
-                    placeholder=""
+                    placeholder="Insira o url aqui"
                     id="harvester-url"
                     value={harvesterUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -419,17 +405,16 @@ export default function HarvestersNewClient() {
                     hasFeedback={!!formErrors.harvesterUrl}
                     feedbackState="danger"
                     errorFeedbackText="Campo obrigatório"
+                    required
                   />
                 </div>
 
-                <h2 className="admin-page__section-title">
-                  Implementação
-                </h2>
+                <h2 className="admin-page__section-title">Implementação</h2>
 
                 <div className="admin-page__fields-group">
                   <IsolatedSelect
-                    label="Tipo *"
-                    placeholder=""
+                    label="Tipo"
+                    placeholder="Selecione um tipo..."
                     id="harvester-type"
                     searchable
                     searchInputPlaceholder="Escreva para pesquisar..."
@@ -449,12 +434,13 @@ export default function HarvestersNewClient() {
                   {/* CKAN / CKANPT: Filtros */}
                   {(selectedType === "ckan" || selectedType === "ckanpt") && (
                     <div>
-                      <p className="text-primary-900 text-base font-medium leading-7">
-                        Filtros
-                      </p>
+                      <p className="text-primary-900 text-base font-medium leading-7">Filtros</p>
 
                       {filters.map((filter, index) => (
-                        <div key={index} className={`mt-[8px] pb-[16px] mb-[8px] ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}>
+                        <div
+                          key={index}
+                          className={`mt-[8px] pb-[16px] mb-[8px] ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
+                        >
                           <div className="flex items-center gap-[8px]">
                             <IsolatedSelect
                               label=""
@@ -637,7 +623,7 @@ export default function HarvestersNewClient() {
                         onChange={() => setIsEnabled((v) => !v)}
                       />
                       <Switch
-                        label="Arquivamento automático"
+                        label="Arquivo automático"
                         checked={isAutoArchive}
                         onChange={() => setIsAutoArchive((v) => !v)}
                       />
@@ -714,8 +700,7 @@ export default function HarvestersNewClient() {
                       previewJob
                         ? previewJob.status === "done"
                           ? "success"
-                          : previewJob.status === "failed" ||
-                              previewJob.status === "done-errors"
+                          : previewJob.status === "failed" || previewJob.status === "done-errors"
                             ? "danger"
                             : "neutral"
                         : "neutral"
@@ -784,9 +769,7 @@ export default function HarvestersNewClient() {
                   }
                 />
               ) : !isPreviewing ? (
-                <p className="text-neutral-700 text-sm">
-                  Nenhum erro encontrado.
-                </p>
+                <p className="text-neutral-700 text-sm">Nenhum erro encontrado.</p>
               ) : null}
 
               <p className="text-neutral-700 text-sm font-semibold uppercase mt-[24px]">
@@ -800,9 +783,7 @@ export default function HarvestersNewClient() {
                   hasIcon
                   leadingIcon="agora-line-arrow-left-circle"
                   leadingIconHover="agora-solid-arrow-left-circle"
-                  onClick={() =>
-                    router.push("/pages/admin/harvesters/new?step=1")
-                  }
+                  onClick={() => router.push("/pages/admin/harvesters/new?step=1")}
                 >
                   Anterior
                 </Button>
@@ -842,31 +823,19 @@ export default function HarvestersNewClient() {
                   description={
                     <>
                       <strong>
-                        Seu harvester foi criado e está a aguardar validação pela
-                        equipa de administração.
+                        O seu harvester foi criado e está a aguardar validação pela equipa de
+                        administração.
                       </strong>
                       <br />
-                      Informe-nos através do formulário de contato abaixo se
-                      deseja que validemos seu harvester. Você será notificado da
-                      aprovação (ou rejeição).
+                      Informe-nos através do formulário de contacto abaixo se deseja que validemos
+                      o seu harvester. Será notificado da aprovação (ou rejeição).
                     </>
                   }
                 />
               )}
 
               <div className="flex justify-start mt-[16px]">
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                  onClick={() =>
-                    window.open("https://dados.gov.pt/pt/contact", "_blank")
-                  }
-                >
-                  Dê-nos o seu feedback sobre o processo de publicação.
-                </Button>
+                <PublicationFeedbackButton />
               </div>
 
               <div className="admin-page__actions">
@@ -881,7 +850,7 @@ export default function HarvestersNewClient() {
                     )
                   }
                 >
-                  Vá até a administração
+                  Ver na administração
                 </Button>
                 <Button
                   appearance="outline"
@@ -891,7 +860,7 @@ export default function HarvestersNewClient() {
                   trailingIconHover="agora-solid-external-link"
                   onClick={() => router.push("/pages/support")}
                 >
-                  Validação da solicitação
+                  Solicitar validação do harvester
                 </Button>
               </div>
             </div>
@@ -903,10 +872,7 @@ export default function HarvestersNewClient() {
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon
-                  name="agora-line-question-mark"
-                  className="w-[24px] h-[24px]"
-                />
+                <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />

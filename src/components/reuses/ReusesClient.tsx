@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   CardLinks,
   InputSearch,
@@ -18,32 +18,36 @@ import {
   Sidebar,
   SidebarItem,
   Checkbox,
-} from '@ama-pt/agora-design-system';
-import { Pagination } from '@/components/Pagination';
-import { CategoryToggles } from '@/components/CategoryToggles';
+} from "@ama-pt/agora-design-system";
+import { Pagination } from "@/components/Pagination";
+import { fetchOrganizations, suggestTags } from "@/services/api";
 import {
-  fetchOrganizations,
-  suggestTags,
-} from '@/services/api';
-import { APIResponse, Organization, Reuse, ReuseFilters, ReuseType, SiteMetrics } from '@/types/api';
-import { formatDistanceToNow } from 'date-fns';
-import { pt } from 'date-fns/locale';
+  APIResponse,
+  Organization,
+  Reuse,
+  ReuseFilters,
+  ReuseType,
+  SiteMetrics,
+} from "@/types/api";
+import { formatDistanceToNow } from "date-fns";
+import { pt } from "date-fns/locale";
 
-import PageBanner from '@/components/PageBanner';
+import PageBanner from "@/components/PageBanner";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { localizeReuseType } from "@/lib/reuse-labels";
 
 const SORT_OPTIONS: Record<string, string> = {
-  relevancia: '',
-  recentes: '-last_modified',
-  antigos: 'last_modified',
-  subscritores: '-followers',
+  relevancia: "",
+  recentes: "-last_modified",
+  antigos: "last_modified",
+  subscritores: "-followers",
 };
 
 const SORT_LABELS: Record<string, string> = {
-  relevancia: 'Relevância',
-  recentes: 'Mais recente',
-  antigos: 'Mais antigo',
-  subscritores: 'Seguidores',
+  relevancia: "Relevância",
+  recentes: "Mais recente",
+  antigos: "Mais antigo",
+  subscritores: "Subscritores",
 };
 
 function TypeSelect({
@@ -77,7 +81,8 @@ function TypeSelect({
   }, [mounted, onTypeChange]);
 
   if (!mounted) {
-    const label = reuseTypes.find((rt) => rt.id === currentType)?.label || 'Todos os tipos';
+    const match = reuseTypes.find((rt) => rt.id === currentType);
+    const label = match ? localizeReuseType(match) : "Todos os tipos";
     return (
       <div>
         <label className="text-s-regular text-neutral-700 mb-4 block">Tipo:</label>
@@ -89,7 +94,9 @@ function TypeSelect({
   }
 
   // Cast to accept mixed children (static + mapped elements)
-  const FlexDropdownSection = DropdownSection as React.FC<Omit<React.ComponentProps<typeof DropdownSection>, "children"> & { children: React.ReactNode }>;
+  const FlexDropdownSection = DropdownSection as React.FC<
+    Omit<React.ComponentProps<typeof DropdownSection>, "children"> & { children: React.ReactNode }
+  >;
 
   return (
     <InputSelect label="Tipo:" id="filter-type" ref={selectRef}>
@@ -99,7 +106,7 @@ function TypeSelect({
         </DropdownOption>
         {reuseTypes.map((rt) => (
           <DropdownOption key={rt.id} value={rt.id} selected={currentType === rt.id}>
-            {rt.label}
+            {localizeReuseType(rt)}
           </DropdownOption>
         ))}
       </FlexDropdownSection>
@@ -108,41 +115,49 @@ function TypeSelect({
 }
 
 const REUSE_TOGGLE_FILTERS = {
-  tipo_reutilizacao: {
-    title: "Tipo de reutilização",
-    options: [
-      { id: "all", label: "Todos", count: "2,8 mil" },
-      { id: "visualization", label: "Visualização", count: "1,1 mil" },
-      { id: "application", label: "Aplicativo", count: "1 mil" },
-      { id: "blog_post", label: "Postagem no blog", count: "238" },
-      { id: "press_article", label: "Artigo de imprensa", count: "184" },
-      { id: "api", label: "API", count: "129" },
-      { id: "scientific", label: "Publicação científica", count: "68" },
-      { id: "idea", label: "Ideia", count: "32" },
-      { id: "hardware", label: "Hardware conectado", count: "3" },
-    ],
-  },
   atualizacao: {
     title: "Data da atualização",
     options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "30_days", label: "Os últimos 30 dias", count: "96" },
-      { id: "12_months", label: "Os últimos 12 meses", count: "279" },
-      { id: "3_years", label: "Os últimos 3 anos", count: "352" },
-    ],
-  },
-  organizacao: {
-    title: "Tipo de organização",
-    options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "public_service", label: "Serviço público", count: "259" },
-      { id: "local_authority", label: "Autoridade local", count: "54" },
-      { id: "business", label: "Negócios", count: "8" },
-      { id: "association", label: "Associação", count: "6" },
-      { id: "user", label: "Utilizador", count: "7" },
+      { id: "all", label: "Todos" },
+      { id: "30_days", label: "Os últimos 30 dias" },
+      { id: "12_months", label: "Os últimos 12 meses" },
+      { id: "3_years", label: "Os últimos 3 anos" },
     ],
   },
 };
+
+const DATE_RANGE_MAP: Record<string, () => string> = {
+  "30_days": () => {
+    const d = new Date(); d.setDate(d.getDate() - 30);
+    return d.toISOString().slice(0, 10);
+  },
+  "12_months": () => {
+    const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+    return d.toISOString().slice(0, 10);
+  },
+  "3_years": () => {
+    const d = new Date(); d.setFullYear(d.getFullYear() - 3);
+    return d.toISOString().slice(0, 10);
+  },
+};
+
+function detectAtualizacaoFromParams(filters?: ReuseFilters): string {
+  const since = filters?.modified_since;
+  if (!since) return "all";
+  const diffDays = Math.round((Date.now() - new Date(since).getTime()) / 86400000);
+  if (diffDays <= 31) return "30_days";
+  if (diffDays <= 366) return "12_months";
+  if (diffDays <= 1096) return "3_years";
+  return "all";
+}
+
+function formatCount(n: number): string {
+  if (n >= 1000) {
+    const k = n / 1000;
+    return k % 1 === 0 ? `${k} mil` : `${k.toFixed(1).replace(".", ",")} mil`;
+  }
+  return n.toLocaleString("pt-PT");
+}
 
 type ReuseFilterKey = keyof typeof REUSE_TOGGLE_FILTERS;
 
@@ -152,6 +167,7 @@ interface ReusesClientProps {
   initialFilters?: ReuseFilters;
   reuseTypes?: ReuseType[];
   siteMetrics?: SiteMetrics;
+  filterCounts?: Record<string, number>;
 }
 
 export default function ReusesClient({
@@ -160,23 +176,36 @@ export default function ReusesClient({
   initialFilters,
   reuseTypes = [],
   siteMetrics,
+  filterCounts = {},
 }: ReusesClientProps) {
   const router = useRouter();
   const { data: reuses, total, page_size } = initialData;
-  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || '');
+  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || "");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const currentQuery = initialFilters?.q || '';
+  const currentQuery = initialFilters?.q || "";
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Toggle filters state
-  const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<ReuseFilterKey, string>>({
-    tipo_reutilizacao: "all",
-    atualizacao: "all",
-    organizacao: "all",
+  const [selectedToggleFilters, setSelectedToggleFilters] = useState<
+    Record<ReuseFilterKey, string>
+  >({
+    atualizacao: detectAtualizacaoFromParams(initialFilters),
   });
 
   const handleToggleFilterChange = (filterKey: ReuseFilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
+
+    if (filterKey === "atualizacao") {
+      const params = new URLSearchParams(
+        typeof window !== "undefined" ? window.location.search : ""
+      );
+      params.delete("modified_since");
+      if (optionId !== "all" && DATE_RANGE_MAP[optionId]) {
+        params.set("modified_since", DATE_RANGE_MAP[optionId]());
+      }
+      params.set("page", "1");
+      router.push(`/pages/reuses?${params.toString()}`);
+    }
   };
 
   // Advanced filters state
@@ -200,15 +229,20 @@ export default function ReusesClient({
   }, []);
 
   const handleTagSearch = useCallback(async (q: string) => {
-    if (q.length < 2) { setFilterTagOptions([]); return; }
+    if (q.length < 2) {
+      setFilterTagOptions([]);
+      return;
+    }
     try {
       const results = await suggestTags(q);
       setFilterTagOptions(results.map((t) => ({ id: t.text, name: t.text })));
-    } catch { setFilterTagOptions([]); }
+    } catch {
+      setFilterTagOptions([]);
+    }
   }, []);
 
   const handleAdvancedFilterChange = (paramName: string, value: string) => {
-    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
     const currentValues = params.getAll(paramName);
     if (currentValues.includes(value)) {
       params.delete(paramName);
@@ -221,7 +255,7 @@ export default function ReusesClient({
   };
 
   const handleClearAdvancedFilter = (paramName: string) => {
-    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
     params.delete(paramName);
     params.set("page", "1");
     router.push(`/pages/reuses?${params.toString()}`);
@@ -233,7 +267,7 @@ export default function ReusesClient({
   };
 
   const getActiveValues = (paramName: string) => {
-    if (typeof window === 'undefined') return [];
+    if (typeof window === "undefined") return [];
     return new URLSearchParams(window.location.search).getAll(paramName);
   };
 
@@ -244,32 +278,20 @@ export default function ReusesClient({
     searchable: boolean;
     suggest?: boolean;
   }[] = [
-    {
-      name: "Organizações",
-      param: "organization",
-      data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
-      searchable: true,
-    },
-    {
-      name: "Tipo de organização",
-      param: "org_type",
-      data: [
-        { id: "public_service", name: "Serviço público" },
-        { id: "local_authority", name: "Autoridade local" },
-        { id: "business", name: "Negócios" },
-        { id: "association", name: "Associação" },
-        { id: "user", name: "Utilizador" },
-      ],
-      searchable: false,
-    },
-    {
-      name: "Palavras-chave",
-      param: "tag",
-      data: filterTagOptions,
-      searchable: true,
-      suggest: true,
-    },
-  ];
+      {
+        name: "Organizações",
+        param: "organization",
+        data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
+        searchable: true,
+      },
+      {
+        name: "Palavras-chave",
+        param: "tag",
+        data: filterTagOptions,
+        searchable: true,
+        suggest: true,
+      },
+    ];
 
   const buildUrl = useCallback(
     (overrides: Partial<ReuseFilters> & { page?: number } = {}) => {
@@ -278,28 +300,33 @@ export default function ReusesClient({
       const type = overrides.type ?? initialFilters?.type;
       const tag = overrides.tag ?? initialFilters?.tag;
       const organization = overrides.organization ?? initialFilters?.organization;
-      const sort = 'sort' in overrides ? overrides.sort : initialFilters?.sort;
+      const sort = "sort" in overrides ? overrides.sort : initialFilters?.sort;
       const page = overrides.page ?? currentPage;
 
-      if (q) params.set('q', q);
-      if (type) params.set('type', type);
-      if (tag) params.set('tag', tag);
-      if (organization) params.set('organization', organization);
-      if (sort) params.set('sort', sort);
-      if (page > 1) params.set('page', String(page));
+      if (q) params.set("q", q);
+      if (type) params.set("type", type);
+      if (tag) params.set("tag", tag);
+      if (organization) params.set("organization", organization);
+      if (sort) params.set("sort", sort);
+      if (page > 1) params.set("page", String(page));
 
       const qs = params.toString();
-      return `/pages/reuses${qs ? `?${qs}` : ''}`;
+      return `/pages/reuses${qs ? `?${qs}` : ""}`;
     },
     [initialFilters, currentPage]
   );
+
+
+  useEffect(() => {
+    setSearchQuery(initialFilters?.q || "");
+  }, [initialFilters?.q]);
 
   useEffect(() => {
     if (searchQuery === currentQuery) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
-    }, 200);
+    }, 400);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
@@ -330,16 +357,16 @@ export default function ReusesClient({
   );
 
   const handleClearFilters = useCallback(() => {
-    router.push('/pages/reuses');
+    router.push("/pages/reuses");
   }, [router]);
 
   const sortDefault = (() => {
     const reverseMap: Record<string, string> = {
-      '-last_modified': 'recentes',
-      'last_modified': 'antigos',
-      '-followers': 'subscritores',
+      "-last_modified": "recentes",
+      last_modified: "antigos",
+      "-followers": "subscritores",
     };
-    return reverseMap[initialFilters?.sort || ''] || 'relevancia';
+    return reverseMap[initialFilters?.sort || ""] || "relevancia";
   })();
 
   const hasActiveFilters = !!(
@@ -357,13 +384,14 @@ export default function ReusesClient({
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
           breadcrumbItems={[
-            { label: 'Home', url: '/' },
-            { label: 'Reutilizações', url: '/pages/reuses' },
+            { label: "Home", url: "/" },
+            { label: "Reutilizações", url: "/pages/reuses" },
           ]}
           subtitle={
             <p className="text-primary-100 max-w-[592px]">
-              Pesquise através de {total.toLocaleString('pt-PT')} reutilizações
-              em dados.gov
+              {total === 0
+                ? "Não existem resultados disponíveis para a sua pesquisa"
+                : `Pesquise através de ${total.toLocaleString("pt-PT")} reutilizações em dados.gov.pt`}
             </p>
           }
         >
@@ -377,10 +405,10 @@ export default function ReusesClient({
               label="Pesquisar"
               placeholder="Pesquisar reutilizações..."
               id="reuses-search"
-              defaultValue={initialFilters?.q || ''}
+              defaultValue={initialFilters?.q || ""}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === 'Enter') handleSearch();
+                if (e.key === "Enter") handleSearch();
               }}
             />
             <div className="mt-8 text-s-regular text-neutral-900">
@@ -389,7 +417,7 @@ export default function ReusesClient({
           </div>
         </div>
 
-        <div className="container mx-auto md:gap-32 xl:gap-64 bg-white">
+        <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
           {/* Results count + Sort toggles */}
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">
             <div className="xl:col-span-5 flex flex-row items-end gap-24 pl-0 py-16">
@@ -398,33 +426,35 @@ export default function ReusesClient({
                 variant="neutral"
                 hasIcon
                 {...(filtersOpen
-                  ? { leadingIcon: "agora-line-chevron-left", leadingIconHover: "agora-solid-chevron-left" }
-                  : { trailingIcon: "agora-line-chevron-right", trailingIconHover: "agora-solid-chevron-right" }
-                )}
+                  ? {
+                    leadingIcon: "agora-line-chevron-left",
+                    leadingIconHover: "agora-solid-chevron-left",
+                  }
+                  : {
+                    trailingIcon: "agora-line-chevron-right",
+                    trailingIconHover: "agora-solid-chevron-right",
+                  })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
               </Button>
               <span className="text-neutral-900 text-l-regular whitespace-nowrap">
-                {total.toLocaleString('pt-PT')} Resultados
+                {total.toLocaleString("pt-PT")} Resultados
               </span>
             </div>
             <div className="xl:col-span-7 flex items-center justify-end py-16">
               <ToggleGroup
                 multiple={false}
+                value={sortDefault}
                 onChange={(val) => {
-                  const selected = val.length > 0 ? val[0] : 'relevancia';
+                  const selected = val.length > 0 ? val[0] : "relevancia";
                   if (selected !== sortDefault) {
                     handleSortChange(selected);
                   }
                 }}
               >
                 {Object.entries(SORT_LABELS).map(([key, label]) => (
-                  <Toggle
-                    key={key}
-                    value={key}
-                    selected={sortDefault === key}
-                  >
+                  <Toggle key={key} value={key} selected={sortDefault === key}>
                     {label}
                   </Toggle>
                 ))}
@@ -433,328 +463,313 @@ export default function ReusesClient({
           </div>
           <div className="divider-neutral-200 mb-24" />
 
-          <div className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}>
+          <div
+            className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
+          >
             {/* Sidebar */}
             {filtersOpen && (
-            <div className="xl:col-span-5 xl:block">
-              {siteMetrics && (
-                <div>
-                  <CategoryToggles siteMetrics={siteMetrics} searchQuery={initialFilters?.q} />
+              <div className="xl:col-span-5 xl:block">
+                <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
+                  <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
+                  {(Object.keys(REUSE_TOGGLE_FILTERS) as ReuseFilterKey[]).map((filterKey) => {
+                    const section = REUSE_TOGGLE_FILTERS[filterKey];
+                    return (
+                      <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
+                        <h3 className="font-bold text-base text-neutral-900 mb-8">
+                          {section.title}
+                        </h3>
+                        {section.options.map((option) => {
+                          const isSelected = selectedToggleFilters[filterKey] === option.id;
+                          return (
+                            <Toggle
+                              key={option.id}
+                              id={`reuse-filter-${filterKey}-${option.id}`}
+                              name={`reuse-filter-${filterKey}`}
+                              value={option.id}
+                              appearance="icon"
+                              variant="primary"
+                              checked={isSelected}
+                              onChange={() => handleToggleFilterChange(filterKey, option.id)}
+                              iconOnly={false}
+                              fullWidth={true}
+                              className="w-full"
+                            >
+                              <div className="flex items-center gap-12 font-bold text-sm">
+                                <span
+                                  className={
+                                    isSelected
+                                      ? "text-primary-600 font-bold"
+                                      : "text-neutral-900 font-bold"
+                                  }
+                                >
+                                  {option.label}
+                                </span>
+                                {filterCounts[`${filterKey}_${option.id}`] !== undefined && (
+                                  <Pill
+                                    variant="neutral"
+                                    appearance="outline"
+                                    circular={false}
+                                    className="text-xs font-medium text-neutral-500 ml-16"
+                                  >
+                                    {formatCount(filterCounts[`${filterKey}_${option.id}`])}
+                                  </Pill>
+                                )}
+                              </div>
+                            </Toggle>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
 
-              <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
-                <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
-                {(Object.keys(REUSE_TOGGLE_FILTERS) as ReuseFilterKey[]).map((filterKey) => {
-                  const section = REUSE_TOGGLE_FILTERS[filterKey];
-                  return (
-                    <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
-                      <h3 className="font-bold text-base text-neutral-900 mb-8">
-                        {section.title}
-                      </h3>
-                      {section.options.map((option) => {
-                        const isSelected = selectedToggleFilters[filterKey] === option.id;
-                        return (
-                          <Toggle
-                            key={option.id}
-                            id={`reuse-filter-${filterKey}-${option.id}`}
-                            name={`reuse-filter-${filterKey}`}
-                            value={option.id}
-                            appearance="icon"
-                            variant="primary"
-                            checked={isSelected}
-                            onChange={() => handleToggleFilterChange(filterKey, option.id)}
-                            iconOnly={false}
-                            fullWidth={true}
-                            className="w-full"
-                          >
-                            <div className="flex items-center gap-12 font-bold text-sm">
-                              <span
-                                className={
-                                  isSelected
-                                    ? "text-primary-600 font-bold"
-                                    : "text-neutral-900 font-bold"
-                                }
-                              >
-                                {option.label}
-                              </span>
-                              <Pill
-                                variant="neutral"
-                                appearance="outline"
-                                circular={false}
-                                className="text-xs font-medium text-neutral-500 ml-16"
-                              >
-                                {option.count}
-                              </Pill>
-                            </div>
-                          </Toggle>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </div>
+                <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">
+                  Filtros avançados
+                </h2>
 
-              <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">Filtros avançados</h2>
+                <Sidebar variant="filter" className="font-bold">
+                  {advancedFilterGroups.map((group, index) => {
+                    const sq = filterSearchQueries[group.name] || "";
+                    const activeValues = getActiveValues(group.param);
+                    const activeCount = activeValues.length;
 
-              <Sidebar variant="filter" className="font-bold">
-                {advancedFilterGroups.map((group, index) => {
-                  const sq = filterSearchQueries[group.name] || "";
-                  const activeValues = getActiveValues(group.param);
-                  const activeCount = activeValues.length;
-
-                  const selectedItems: { id: string; name: string }[] = group.suggest
-                    ? activeValues
+                    const selectedItems: { id: string; name: string }[] = group.suggest
+                      ? activeValues
                         .filter((v) => !group.data.some((d) => d.id === v))
                         .map((v) => ({ id: v, name: v }))
-                    : [];
+                      : [];
 
-                  const allData = [...selectedItems, ...group.data];
+                    const allData = [...selectedItems, ...group.data];
 
-                  const filteredData = group.suggest
-                    ? allData
-                    : allData.filter((item) =>
+                    const filteredData = group.suggest
+                      ? allData
+                      : allData.filter((item) =>
                         item.name.toLowerCase().includes(sq.toLowerCase())
                       );
 
-                  const showScroll = filteredData.length > 5;
+                    const showScroll = filteredData.length > 5;
 
-                  return (
-                    <SidebarItem
-                      key={index}
-                      variant="filter"
-                      item={{
-                        children: <span className="font-bold">{group.name}</span>,
-                        hasIcon: true,
-                        collapsedIconTrailing: "agora-line-minus-circle",
-                        collapsedIconHoverTrailing: "agora-solid-minus-circle",
-                        expandedIconTrailing: "agora-line-plus-circle",
-                        expandedIconHoverTrailing: "agora-solid-plus-circle",
-                      }}
-                      hasPill={activeCount > 0}
-                      pillValue={activeCount}
-                    >
-                      <div>
-                        {activeCount > 0 && (
-                          <button
-                            onClick={() => handleClearAdvancedFilter(group.param)}
-                            className="text-xs text-primary-500 hover:text-primary-700 underline mb-4 mt-4 cursor-pointer"
-                          >
-                            Limpar {group.name.toLowerCase()}
-                          </button>
-                        )}
-                        {group.searchable && (
-                          <div className="mb-4 mt-8 relative">
-                            <InputSearch
-                              label="Pesquisar"
-                              hideLabel
-                              placeholder={
-                                group.suggest ? "Escreva para pesquisar..." : "Pesquisar"
-                              }
-                              value={sq}
-                              onChange={(e) =>
-                                handleFilterSearchChange(group.name, e.target.value)
-                              }
-                            />
-                            <Icon
-                              name="agora-solid-search"
-                              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5 pointer-events-none"
-                              aria-hidden="true"
-                            />
-                          </div>
-                        )}
-                        <div
-                          className={`flex flex-col gap-2 ${
-                            showScroll ? "max-h-[225px] overflow-y-auto" : ""
-                          }`}
-                        >
-                          {isFiltersLoading && !group.suggest ? null : filteredData.length > 0 ? (
-                            filteredData.map((item) => (
-                              <Checkbox
-                                key={item.id}
-                                label={item.name}
-                                className="font-bold"
-                                value={item.id}
-                                name={group.param}
-                                checked={activeValues.includes(item.id)}
-                                onChange={() =>
-                                  handleAdvancedFilterChange(group.param, item.id)
+                    return (
+                      <SidebarItem
+                        key={index}
+                        variant="filter"
+                        item={{
+                          children: <span className="font-bold">{group.name}</span>,
+                          hasIcon: true,
+                          collapsedIconTrailing: "agora-line-minus-circle",
+                          collapsedIconHoverTrailing: "agora-solid-minus-circle",
+                          expandedIconTrailing: "agora-line-plus-circle",
+                          expandedIconHoverTrailing: "agora-solid-plus-circle",
+                        }}
+                        hasPill={activeCount > 0}
+                        pillValue={activeCount}
+                      >
+                        <div>
+                          {activeCount > 0 && (
+                            <button
+                              onClick={() => handleClearAdvancedFilter(group.param)}
+                              className="text-xs text-primary-500 hover:text-primary-700 underline mb-4 mt-4 cursor-pointer"
+                            >
+                              Limpar {group.name.toLowerCase()}
+                            </button>
+                          )}
+                          {group.searchable && (
+                            <div className="mb-4 mt-8 relative">
+                              <InputSearch
+                                label="Pesquisar"
+                                hideLabel
+                                placeholder={
+                                  group.suggest ? "Escreva para pesquisar..." : "Pesquisar"
+                                }
+                                value={sq}
+                                onChange={(e) =>
+                                  handleFilterSearchChange(group.name, e.target.value)
                                 }
                               />
-                            ))
-                          ) : group.suggest && sq.length < 2 ? (
-                            activeCount > 0 ? null : (
-                              <p className="text-sm text-neutral-900">
-                                Escreva pelo menos 2 caracteres...
-                              </p>
-                            )
-                          ) : (
-                            <p className="text-sm text-neutral-500">Sem resultados</p>
+                              <Icon
+                                name="agora-solid-search"
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5 pointer-events-none"
+                                aria-hidden="true"
+                              />
+                            </div>
                           )}
+                          <div
+                            className={`flex flex-col gap-2 ${showScroll ? "max-h-[225px] overflow-y-auto" : ""
+                              }`}
+                          >
+                            {isFiltersLoading && !group.suggest ? null : filteredData.length > 0 ? (
+                              filteredData.map((item) => (
+                                <Checkbox
+                                  key={item.id}
+                                  label={item.name}
+                                  className="font-bold"
+                                  value={item.id}
+                                  name={group.param}
+                                  checked={activeValues.includes(item.id)}
+                                  onChange={() => handleAdvancedFilterChange(group.param, item.id)}
+                                />
+                              ))
+                            ) : group.suggest && sq.length < 2 ? (
+                              activeCount > 0 ? null : (
+                                <p className="text-sm text-neutral-900">
+                                  Escreva pelo menos 2 caracteres...
+                                </p>
+                              )
+                            ) : (
+                              <p className="text-sm text-neutral-500">Sem resultados</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </SidebarItem>
-                  );
-                })}
-              </Sidebar>
+                      </SidebarItem>
+                    );
+                  })}
+                </Sidebar>
 
-              <div className="mt-32">
-                <Button
-                  variant="primary"
-                  appearance="outline"
-                  onClick={() => {
-                    setSelectedToggleFilters({
-                      tipo_reutilizacao: "all",
-                      atualizacao: "all",
-                      organizacao: "all",
-                    });
-                    router.push("/pages/reuses");
-                  }}
-                >
-                  Limpar filtros
-                </Button>
+                <div className="mt-32">
+                  <Button
+                    variant="primary"
+                    appearance="outline"
+                    onClick={() => {
+                      setSelectedToggleFilters({
+                        atualizacao: "all",
+                      });
+                      router.push("/pages/reuses");
+                    }}
+                  >
+                    Limpar filtros
+                  </Button>
+                </div>
               </div>
-            </div>
             )}
 
             {/* Results Area */}
             <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>
               <div>
-            <div
-              className="grid agora-card-links-datasets-px0 gap-32"
-              style={{
-                gridTemplateColumns: filtersOpen
-                  ? "repeat(1, minmax(0, 1fr))"
-                  : "repeat(2, minmax(0, 1fr))",
-              }}
-            >
-              {reuses.length > 0 ? (
-                reuses.map((reuse) => {
-                  const timeAgo = reuse.last_modified || reuse.created_at
-                    ? formatDistanceToNow(new Date(reuse.last_modified || reuse.created_at), { locale: pt })
-                        .replace("aproximadamente ", "")
-                        .replace("quase ", "")
-                        .replace("menos de ", "")
-                        .replace("cerca de ", "")
-                    : "Desconhecido";
+                <div
+                  className="grid agora-card-links-datasets-px0 gap-32"
+                  style={{
+                    gridTemplateColumns: filtersOpen
+                      ? "repeat(1, minmax(0, 1fr))"
+                      : "repeat(2, minmax(0, 1fr))",
+                  }}
+                >
+                  {reuses.length > 0 ? (
+                    reuses.map((reuse) => {
+                      const timeAgo =
+                        reuse.last_modified || reuse.created_at
+                          ? formatDistanceToNow(new Date(reuse.last_modified || reuse.created_at), {
+                            locale: pt,
+                          })
+                            .replace("aproximadamente ", "")
+                            .replace("quase ", "")
+                            .replace("menos de ", "")
+                            .replace("cerca de ", "")
+                          : "Desconhecido";
 
-                  return (
-                    <div key={reuse.id} className="h-full">
-                      <CardLinks
-                        onClick={() => router.push(`/pages/reuses/${reuse.slug}`)}
-                        className="cursor-pointer text-neutral-900 h-full"
-                        variant="transparent"
-                        image={{
-                          src: reuse.image_thumbnail || reuse.image || '/laptop.png',
-                          alt: reuse.title,
-                        }}
-                        category={reuse.organization?.name || 'Reutilização'}
-                        title={<div className="underline text-xl-bold">{reuse.title}</div>}
-                        description={
-                          reuse.description ? (
-                            <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
-                              {reuse.description}
-                            </p>
-                          ) : undefined
+                      return (
+                        <div key={reuse.id} className="h-full">
+                          <CardLinks
+                            onClick={() => router.push(`/pages/reuses/${reuse.slug}`)}
+                            className="cursor-pointer text-neutral-900 h-full"
+                            variant="transparent"
+                            image={{
+                              src: reuse.image_thumbnail || reuse.image || "/laptop.png",
+                              alt: reuse.title,
+                            }}
+                            category={reuse.organization?.name || "Reutilização"}
+                            title={<div className="underline text-xl-bold">{reuse.title}</div>}
+                            description={
+                              reuse.description ? (
+                                <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                                  {reuse.description}
+                                </p>
+                              ) : undefined
+                            }
+                            date={<span className="font-[300]">Atualizado há {timeAgo}</span>}
+                            links={[
+                              {
+                                href: "#",
+                                hasIcon: true,
+                                leadingIcon: "agora-line-eye",
+                                leadingIconHover: "agora-solid-eye",
+                                trailingIcon: "",
+                                trailingIconHover: "",
+                                trailingIconActive: "",
+                                children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
+                                title: "Visualizações",
+                                onClick: (e: React.MouseEvent) => e.preventDefault(),
+                                className: "text-[#034AD8]",
+                              },
+                              {
+                                href: "#",
+                                hasIcon: true,
+                                leadingIcon: "agora-line-layers-menu",
+                                leadingIconHover: "agora-solid-layers-menu",
+                                trailingIcon: "",
+                                trailingIconHover: "",
+                                trailingIconActive: "",
+                                children: `${reuse.datasets?.length || 0} datasets`,
+                                title: "Datasets",
+                                onClick: (e: React.MouseEvent) => e.preventDefault(),
+                                className: "text-[#034AD8]",
+                              },
+                              {
+                                href: "#",
+                                hasIcon: true,
+                                leadingIcon: "agora-line-star",
+                                leadingIconHover: "agora-solid-star",
+                                trailingIcon: "",
+                                trailingIconHover: "",
+                                trailingIconActive: "",
+                                children: reuse.metrics?.followers || 0,
+                                title: "Favoritos",
+                                onClick: (e: React.MouseEvent) => e.preventDefault(),
+                                className: "text-[#034AD8]",
+                              },
+                            ]}
+                            mainLink={
+                              <Link href={`/pages/reuses/${reuse.slug}`}>
+                                <span className="underline">{reuse.title}</span>
+                              </Link>
+                            }
+                            blockedLink={true}
+                          />
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="col-span-full">
+                      <CardNoResults
+                        icon={
+                          <Icon name="agora-line-search" className="w-12 h-12 text-primary-500" />
                         }
-                        date={
-                          <span className="font-[300]">
-                            Atualizado há {timeAgo}
+                        title="Não encontrou nenhuma reutilização?"
+                        subtitle={
+                          <span className="font-bold">
+                            Tente redefinir os filtros para ampliar sua busca.
                           </span>
                         }
-                        links={[
-                          {
-                            href: '#',
-                            hasIcon: true,
-                            leadingIcon: 'agora-line-eye',
-                            leadingIconHover: 'agora-solid-eye',
-                            trailingIcon: '',
-                            trailingIconHover: '',
-                            trailingIconActive: '',
-                            children: reuse.metrics?.views?.toLocaleString('pt-PT') || '0',
-                            title: 'Visualizações',
-                            onClick: (e: React.MouseEvent) => e.preventDefault(),
-                            className: 'text-[#034AD8]',
-                          },
-                          {
-                            href: '#',
-                            hasIcon: true,
-                            leadingIcon: 'agora-line-calendar',
-                            leadingIconHover: 'agora-solid-calendar',
-                            trailingIcon: '',
-                            trailingIconHover: '',
-                            trailingIconActive: '',
-                            children: `${reuse.datasets?.length || 0} datasets`,
-                            title: 'Datasets',
-                            onClick: (e: React.MouseEvent) => e.preventDefault(),
-                            className: 'text-[#034AD8]',
-                          },
-                          {
-                            href: '#',
-                            hasIcon: false,
-                            children: (
-                              <span className="flex items-center gap-8">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                  <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" fill="currentColor"/>
-                                </svg>
-                                <span>{reuse.metrics?.reuses || 0}</span>
-                              </span>
-                            ),
-                            title: 'Métricas',
-                            onClick: (e: React.MouseEvent) => e.preventDefault(),
-                            className: 'text-[#034AD8]',
-                          },
-                          {
-                            href: '#',
-                            hasIcon: true,
-                            leadingIcon: 'agora-line-star',
-                            leadingIconHover: 'agora-solid-star',
-                            trailingIcon: '',
-                            trailingIconHover: '',
-                            trailingIconActive: '',
-                            children: reuse.metrics?.followers || 0,
-                            title: 'Favoritos',
-                            onClick: (e: React.MouseEvent) => e.preventDefault(),
-                            className: 'text-[#034AD8]',
-                          },
-                        ]}
-                        mainLink={
-                          <Link href={`/pages/reuses/${reuse.slug}`}>
-                            <span className="underline">{reuse.title}</span>
-                          </Link>
-                        }
-                        blockedLink={true}
+                        description="Explore a nossa lista completa de reutilizações de dados abertos."
+                        position="center"
+                        hasAnchor={true}
+                        valueAnchor="Redefinir filtros"
+                        anchorHref="/pages/reuses"
+                        anchorTrailingIcon="agora-line-arrow-right-circle"
+                        anchorTrailingIconHover="agora-solid-arrow-right-circle"
                       />
                     </div>
-                  );
-                })
-              ) : (
-                <div className="col-span-full">
-                  <CardNoResults
-                    icon={<Icon name="agora-line-search" className="w-12 h-12 text-primary-500" />}
-                    title="Não encontrou nenhuma reutilização?"
-                    subtitle={<span className="font-bold">Tente redefinir os filtros para ampliar sua busca.</span>}
-                    description="Explore a nossa lista completa de reutilizações de dados abertos."
-                    position="center"
-                    hasAnchor={true}
-                    valueAnchor="Redefinir filtros"
-                    anchorHref="/pages/reuses"
-                    anchorTrailingIcon="agora-line-arrow-right-circle"
-                    anchorTrailingIconHover="agora-solid-arrow-right-circle"
+                  )}
+                </div>
+
+                {/* Pagination */}
+                <div className="pb-64 mt-8 flex justify-center">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalItems={total}
+                    pageSize={page_size}
+                    baseUrl={buildUrl()}
                   />
                 </div>
-              )}
-            </div>
-
-            {/* Pagination */}
-            <div className="pb-64 mt-8 flex justify-center">
-              <Pagination
-                currentPage={currentPage}
-                totalItems={total}
-                pageSize={page_size}
-                baseUrl={buildUrl()}
-              />
-            </div>
               </div>
             </div>
           </div>

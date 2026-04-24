@@ -7,14 +7,12 @@ import {
   fetchOrganizations,
   fetchLicenses,
   fetchFrequencies,
-  fetchDatasetBadges,
   fetchGranularities,
   suggestFormats,
   suggestTags,
   suggestSpatialZones,
 } from "@/services/api";
-import { Organization, License, Frequency, Granularity, SiteMetrics } from "@/types/api";
-import { CategoryToggles } from "@/components/CategoryToggles";
+import { Organization, License, Frequency, Granularity } from "@/types/api";
 
 interface FilterOption {
   id: string;
@@ -23,107 +21,166 @@ interface FilterOption {
 
 const DATASET_TOGGLE_FILTERS = {
   formato: {
-    title: "Formato dos dados",
+    title: "Formato dos recursos",
     options: [
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet...", count: "14 mil" },
-      { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL...", count: "9,3 mil" },
-      { id: "geographic", label: "Geográfico", description: "geojson, shp, kml...", count: "4,6 mil" },
-      { id: "documents", label: "Documentos", description: "pdf, doc, docx, md, txt, ...", count: "2,8 mil" },
-      { id: "other", label: "Outro", count: "29 mil" },
-    ],
-  },
-  metodo: {
-    title: "Métodos de acesso",
-    options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "free_download", label: "Download gratuito", count: "230" },
-      { id: "open_conditions", label: "Aberto sob certas condições", count: "16" },
-      { id: "auth_access", label: "Acesso mediante autorização", count: "106" },
+      { id: "all", label: "Todos", description: undefined as string | undefined },
+      { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet..." },
+      { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL..." },
+      { id: "geographic", label: "Geográfico", description: "geojson, shp, kml..." },
+      { id: "documents", label: "Documentos", description: "pdf, doc, docx, md, txt, ..." },
+      { id: "other", label: "Outro", description: undefined as string | undefined },
     ],
   },
   atualizacao: {
     title: "Data da atualização",
     options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "30_days", label: "Os últimos 30 dias", count: "96" },
-      { id: "12_months", label: "Os últimos 12 meses", count: "279" },
-      { id: "3_years", label: "Os últimos 3 anos", count: "352" },
-    ],
-  },
-  organizacao: {
-    title: "Tipo de organização",
-    options: [
-      { id: "all", label: "Todos", count: "352" },
-      { id: "public_service", label: "Serviço público", count: "259" },
-      { id: "local_authority", label: "Autoridade local", count: "54" },
-      { id: "business", label: "Negócios", count: "8" },
-      { id: "association", label: "Associação", count: "6" },
-      { id: "user", label: "Utilizador", count: "7" },
+      { id: "all", label: "Todos", description: undefined as string | undefined },
+      { id: "30_days", label: "Os últimos 30 dias", description: undefined as string | undefined },
+      { id: "12_months", label: "Os últimos 12 meses", description: undefined as string | undefined },
+      { id: "3_years", label: "Os últimos 3 anos", description: undefined as string | undefined },
     ],
   },
   rotulo: {
-    title: "Rótulo de dados",
+    title: "Tipo de dados",
     options: [
-      { id: "all", label: "Todos", count: "45 mil" },
-      { id: "high_value", label: "Conjuntos de dados de alto valor", count: "591" },
-      { id: "inspire", label: "Inspirar", count: "16 mil" },
-      { id: "public_reference", label: "Serviço público de dados de referência", count: "9" },
-      { id: "statistics", label: "Séries estatísticas de interesse geral", count: "11" },
+      { id: "all", label: "Todos", description: undefined as string | undefined },
+      { id: "high_value", label: "Conjuntos de dados de Elevado Valor", description: undefined as string | undefined },
     ],
   },
 };
 
-type ToggleFilterKey = keyof typeof DATASET_TOGGLE_FILTERS;
-
-interface DatasetsFiltersProps {
-  siteMetrics?: SiteMetrics;
-  searchQuery?: string;
+function formatCount(n: number): string {
+  if (n >= 1000) {
+    const k = n / 1000;
+    return k % 1 === 0 ? `${k} mil` : `${k.toFixed(1).replace(".", ",")} mil`;
+  }
+  return n.toLocaleString("pt-PT");
 }
 
-export const DatasetsFilters = ({ siteMetrics, searchQuery }: DatasetsFiltersProps) => {
+type ToggleFilterKey = keyof typeof DATASET_TOGGLE_FILTERS;
+
+const FORMAT_GROUP_MAP: Record<string, string[]> = {
+  tabular: ["csv", "xls", "xlsx", "ods", "parquet", "tsv"],
+  structured: ["json", "rdf", "xml", "sql", "ndjson", "jsonl"],
+  geographic: ["geojson", "shp", "kml", "kmz", "gpx", "wfs", "wms"],
+  documents: ["pdf", "doc", "docx", "md", "txt", "odt", "rtf"],
+};
+
+const DATE_RANGE_MAP: Record<string, () => string> = {
+  "30_days": () => {
+    const d = new Date(); d.setDate(d.getDate() - 30);
+    return d.toISOString().slice(0, 10);
+  },
+  "12_months": () => {
+    const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+    return d.toISOString().slice(0, 10);
+  },
+  "3_years": () => {
+    const d = new Date(); d.setFullYear(d.getFullYear() - 3);
+    return d.toISOString().slice(0, 10);
+  },
+};
+
+function detectAtualizacaoFromParams(params: URLSearchParams): string {
+  const since = params.get("modified_since");
+  if (!since) return "all";
+  const now = new Date();
+  const sinceDate = new Date(since);
+  const diffDays = Math.round((now.getTime() - sinceDate.getTime()) / (86400000));
+  if (diffDays <= 31) return "30_days";
+  if (diffDays <= 366) return "12_months";
+  if (diffDays <= 1096) return "3_years";
+  return "all";
+}
+
+function detectFormatoFromParams(params: URLSearchParams): string {
+  const formats = params.getAll("format");
+  if (formats.length === 0) return "all";
+  for (const [groupId, groupFormats] of Object.entries(FORMAT_GROUP_MAP)) {
+    if (formats.length > 0 && formats.every((f) => groupFormats.includes(f.toLowerCase()))) {
+      return groupId;
+    }
+  }
+  return "other";
+}
+
+function detectRotuloFromParams(params: URLSearchParams): string {
+  const tags = params.getAll("tag");
+  if (tags.includes("hvd")) return "high_value";
+  return "all";
+}
+
+interface DatasetsFiltersProps {
+  filterCounts?: Record<string, number>;
+}
+
+export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>({
-    formato: "all",
-    metodo: "all",
-    atualizacao: "all",
-    organizacao: "all",
-    rotulo: "all",
-  });
+  const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>(() => ({
+    formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
+    atualizacao: detectAtualizacaoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
+    rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
+  }));
 
   const handleToggleFilterChange = (filterKey: ToggleFilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
+
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+
+    if (filterKey === "formato") {
+      current.delete("format");
+      if (optionId !== "all" && optionId !== "other") {
+        const formats = FORMAT_GROUP_MAP[optionId];
+        if (formats) {
+          formats.forEach((f) => current.append("format", f));
+        }
+      }
+    } else if (filterKey === "atualizacao") {
+      current.delete("modified_since");
+      if (optionId !== "all" && DATE_RANGE_MAP[optionId]) {
+        current.set("modified_since", DATE_RANGE_MAP[optionId]());
+      }
+    } else if (filterKey === "rotulo") {
+      const tags = current.getAll("tag").filter((t) => t !== "hvd");
+      current.delete("tag");
+      tags.forEach((t) => current.append("tag", t));
+      if (optionId === "high_value") {
+        current.append("tag", "hvd");
+      }
+    }
+
+    current.set("page", "1");
+    const search = current.toString();
+    router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
   };
 
   const [organizations, setOrganizations] = React.useState<Organization[]>([]);
   const [licenses, setLicenses] = React.useState<License[]>([]);
   const [frequencies, setFrequencies] = React.useState<Frequency[]>([]);
-  const [badges, setBadges] = React.useState<FilterOption[]>([]);
   const [granularities, setGranularities] = React.useState<Granularity[]>([]);
   const [tagOptions, setTagOptions] = React.useState<FilterOption[]>([]);
   const [formatOptions, setFormatOptions] = React.useState<FilterOption[]>([]);
   const [zoneOptions, setZoneOptions] = React.useState<FilterOption[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchQueries, setSearchQueries] = React.useState<Record<string, string>>({});
+  const filterCounts = serverCounts || {};
 
   React.useEffect(() => {
     async function loadFilterData() {
       try {
-        const [orgsRes, licensesRes, frequenciesRes, badgesRes, granularitiesRes] =
+        const [orgsRes, licensesRes, frequenciesRes, granularitiesRes] =
           await Promise.all([
             fetchOrganizations(1, 100, { sort: "-datasets" }),
             fetchLicenses(),
             fetchFrequencies(),
-            fetchDatasetBadges(),
             fetchGranularities(),
           ]);
         setOrganizations(orgsRes.data);
         setLicenses(licensesRes);
         setFrequencies(frequenciesRes);
-        setBadges(Object.entries(badgesRes).map(([key, label]) => ({ id: key, name: label })));
         setGranularities(granularitiesRes);
       } catch (error) {
         console.error("Failed to load filter data", error);
@@ -200,7 +257,7 @@ export const DatasetsFilters = ({ siteMetrics, searchQuery }: DatasetsFiltersPro
   const handleSearchChange = (groupName: string, value: string) => {
     setSearchQueries((prev) => ({ ...prev, [groupName]: value }));
 
-    if (groupName === "Etiquetas") handleTagSearch(value);
+    if (groupName === "Palavras-chave") handleTagSearch(value);
     if (groupName === "Formatos") handleFormatSearch(value);
     if (groupName === "Cobertura Espacial") handleZoneSearch(value);
   };
@@ -219,18 +276,6 @@ export const DatasetsFilters = ({ siteMetrics, searchQuery }: DatasetsFiltersPro
       param: "organization",
       data: organizations.map((o) => ({ id: o.id, name: o.name })),
       searchable: true,
-    },
-    {
-      name: "Tipo de Organização",
-      param: "organization_type",
-      data: [
-        { id: "public_service", name: "Serviço público" },
-        { id: "local_authority", name: "Autoridade local" },
-        { id: "business", name: "Negócios" },
-        { id: "association", name: "Associação" },
-        { id: "user", name: "Utilizador" },
-      ],
-      searchable: false,
     },
     {
       name: "Palavras-chave",
@@ -259,12 +304,6 @@ export const DatasetsFilters = ({ siteMetrics, searchQuery }: DatasetsFiltersPro
       searchable: true,
     },
     {
-      name: "Plano",
-      param: "badge",
-      data: badges,
-      searchable: true,
-    },
-    {
       name: "Cobertura Espacial",
       param: "geozone",
       data: zoneOptions,
@@ -281,12 +320,6 @@ export const DatasetsFilters = ({ siteMetrics, searchQuery }: DatasetsFiltersPro
 
   return (
     <div className="h-full">
-      {siteMetrics && (
-        <div>
-          <CategoryToggles siteMetrics={siteMetrics} searchQuery={searchQuery} />
-        </div>
-      )}
-
       <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
         <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
         {(Object.keys(DATASET_TOGGLE_FILTERS) as ToggleFilterKey[]).map((filterKey) => {
@@ -327,14 +360,16 @@ export const DatasetsFilters = ({ siteMetrics, searchQuery }: DatasetsFiltersPro
                           {option.description}
                         </span>
                       )}
-                      <Pill
-                        variant="neutral"
-                        appearance="outline"
-                        circular={false}
-                        className="text-xs font-medium text-neutral-500 ml-16"
-                      >
-                        {option.count}
-                      </Pill>
+                      {filterCounts[`${filterKey}_${option.id}`] !== undefined && (
+                        <Pill
+                          variant="neutral"
+                          appearance="outline"
+                          circular={false}
+                          className="text-xs font-medium text-neutral-500 ml-16"
+                        >
+                          {formatCount(filterCounts[`${filterKey}_${option.id}`])}
+                        </Pill>
+                      )}
                     </div>
                   </Toggle>
                 );
@@ -437,9 +472,7 @@ export const DatasetsFilters = ({ siteMetrics, searchQuery }: DatasetsFiltersPro
           onClick={() => {
             setSelectedToggleFilters({
               formato: "all",
-              metodo: "all",
               atualizacao: "all",
-              organizacao: "all",
               rotulo: "all",
             });
             router.replace("/pages/datasets", { scroll: false });

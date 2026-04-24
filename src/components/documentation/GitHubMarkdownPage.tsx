@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
 import { githubPagesConfig } from "@/config/site";
@@ -19,6 +20,13 @@ interface GitHubMarkdownPageProps {
   initialContent?: string;
 }
 
+function sanitizeMarkdown(content: string): string {
+  return content
+    .replace(/<br\s*\/?>/gi, "")
+    .replace(/^\s*\n/gm, "\n")
+    .replace(/\bdados gov\b/g, "dados.gov.pt");
+}
+
 export function GitHubMarkdownPage({
   slug,
   title,
@@ -26,6 +34,7 @@ export function GitHubMarkdownPage({
   initialContent = "",
 }: GitHubMarkdownPageProps) {
   const editUrl = `${githubPagesConfig.repoBaseUrl}/${slug}.md`;
+  const cleanContent = sanitizeMarkdown(initialContent);
 
   return (
     <div className="flex flex-col bg-white min-h-screen font-sans">
@@ -39,10 +48,11 @@ export function GitHubMarkdownPage({
         <div className="bg-[#F7F8FA] pt-[64px] pb-[38px] pl-[112px] pr-[112px]">
           <div className="container mx-auto px-4">
             <div className="max-w-[592px]">
-              {initialContent ? (
+              {cleanContent ? (
                 <div className="text-[#2b363c] flex flex-col gap-[16px]">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw]}
                     components={{
                       h1: ({ children }) => (
                         <h1 className="text-2xl-medium text-[#021C51] mb-16 leading-tight">
@@ -64,11 +74,15 @@ export function GitHubMarkdownPage({
                       ),
                       a: ({ href, children }) => {
                         const isExternal = href?.startsWith("http");
+                        const resolvedHref =
+                          href && !isExternal
+                            ? `https://dados.gov.pt/pt${href}`
+                            : (href ?? "#");
                         return (
                           <Link
-                            href={href ?? "#"}
-                            target={isExternal ? "_blank" : undefined}
-                            rel={isExternal ? "noopener noreferrer" : undefined}
+                            href={resolvedHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-[#034AD8] underline font-medium hover:text-primary-700"
                           >
                             {children}
@@ -111,9 +125,10 @@ export function GitHubMarkdownPage({
                       ),
                       strong: ({ children }) => <strong>{children}</strong>,
                       em: ({ children }) => <em>{children}</em>,
+                      br: () => null,
                     }}
                   >
-                    {initialContent}
+                    {cleanContent}
                   </ReactMarkdown>
 
                   <div className="pt-[32px]">

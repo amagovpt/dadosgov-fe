@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Breadcrumb,
   Button,
@@ -11,11 +11,18 @@ import {
 import DatasetsAdminClient from "@/components/admin/datasetsadmin/DatasetsAdminClient";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 
 export default function OrgDatasetsNewClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const routeParams = useParams();
+  const routeOrgId = routeParams?.orgId as string | undefined;
   const { activeOrg } = useActiveOrganization();
+  const resolvedOrgId = routeOrgId || activeOrg?.id;
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
@@ -36,16 +43,14 @@ export default function OrgDatasetsNewClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Conjuntos de dados", url: `${orgBase}/datasets` },
+            { label: orgName || "Organização", url: "#" },
+            { label: "Conjuntos de dados", url: resolvedOrgId ? `/pages/admin/org/${resolvedOrgId}/datasets` : "#" },
           ]}
         />
       </div>
 
       <div className="admin-page__header">
-        <h1 className="admin-page__title">
-          {currentStep === 1 ? "Publique em dados.gov" : "Formulário de inscrição"}
-        </h1>
+        <h1 className="admin-page__title">Formulário de publicação de um conjunto de dados</h1>
         <PublishDropdown />
       </div>
 
@@ -54,10 +59,10 @@ export default function OrgDatasetsNewClient() {
         <p className="admin-page__step-text">
           <span className="text-primary-600 font-bold">Passo {currentStep} - </span>
           <span className="text-primary-900 font-bold">
-            {currentStep === 1 && "Descreva o seu conjunto de dados"}
+            {currentStep === 1 && "Inicie a publicação do seu conjunto de dados"}
             {currentStep === 2 && "Descreva o seu conjunto de dados"}
-            {currentStep === 3 && "Adicionar ficheiros"}
-            {currentStep === 4 && "Finalizar a publicação"}
+            {currentStep === 3 && "Adicione os ficheiros"}
+            {currentStep === 4 && "Finalize a publicação do seu conjunto de dados"}
           </span>
         </p>
       </div>
@@ -87,17 +92,17 @@ export default function OrgDatasetsNewClient() {
 
           <StatusCard
             type="info"
-            description="Se desejar realizar testes, utilize demo.dados.gov"
+            description="Se desejar realizar testes, utilize demo.dados.gov.pt"
           />
 
           <div className="datasets-new-page__cards mb-[32px]" style={{ maxWidth: "50%" }}>
             <CardAction
               variant="neutral-100"
               titleText="Publique um conjunto de dados"
-              descriptionText="Seja uma administração pública ou uma empresa pública, todos podem publicar em dados.gov!"
+              descriptionText="Seja uma entidade da administração pública ou uma empresa pública, todos podem publicar em dados.gov.pt!"
               icon={{ name: "agora-line-edit" }}
               button={{
-                children: "Comece a publicar",
+                children: "Comece a publicação",
                 variant: "primary",
                 appearance: "outline",
                 onClick: () => router.push(buildStepUrl(2)),
@@ -112,8 +117,8 @@ export default function OrgDatasetsNewClient() {
                 É administrador e deseja automatizar a publicação dos seus dados?
               </p>
               <p className="text-neutral-700 text-sm leading-relaxed">
-                Pode publicar automaticamente via API ou vinculando seu portal de dados
-                abertos ao dados.gov com um coletor de dados.
+                Pode automatizar a publicação através da API ou ligando o seu portal ao dados.gov.pt
+                através de um harvester de dados.
               </p>
               <div className="flex gap-4 flex-wrap">
                 <Button
@@ -124,7 +129,7 @@ export default function OrgDatasetsNewClient() {
                   trailingIconHover="agora-solid-external-link"
                   onClick={() => router.push("/pages/faqs/api-documentation")}
                 >
-                  Consulte a documentação da API.
+                  Consulte a documentação da API
                 </Button>
                 <Button
                   appearance="link"
@@ -154,8 +159,9 @@ export default function OrgDatasetsNewClient() {
                 É administrador e deseja catalogar os seus dados?
               </p>
               <p className="text-neutral-700 text-sm leading-relaxed">
-                Pode usar o serviço para que os departamentos do governo central giram
-                e disponibilizem o seu catálogo de dados.
+                Pode utilizar o serviço de catalogação e publicação do dados.gov.pt, que permite aos
+                organismos da Administração Pública Central organizarem e disponibilizarem o seu
+                catálogo de dados abertos.
               </p>
               <div className="flex gap-4 flex-wrap">
                 <Button

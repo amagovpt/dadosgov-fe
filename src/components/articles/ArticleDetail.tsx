@@ -78,7 +78,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
   return (
     <main className="flex-grow bg-white min-h-screen">
-      <div className="container mx-auto px-16 pt-32 max-w-7xl">
+      <div className="container mx-auto pt-32">
         {/* Breadcrumb */}
         <div>
           <Breadcrumb
@@ -102,8 +102,8 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
         </div>
       </div>
 
-      <div className="bg-[#F7F8FA] pt-[64px] pb-[38px] pl-[112px] pr-[112px]">
-        <div className="container mx-auto px-4">
+      <div className="bg-[#F7F8FA] pt-[64px] pb-[38px]">
+        <div className="container mx-auto">
           <div className="text-[#2b363c] flex flex-col gap-[32px]">
             <div className="max-w-[592px]">
                 {/* Content */}

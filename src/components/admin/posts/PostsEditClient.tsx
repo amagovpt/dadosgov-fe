@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   Breadcrumb,
   Button,
@@ -9,8 +9,7 @@ import {
   DropdownOption,
   InputText,
   InputTextArea,
-  InputSelect,
-  ButtonUploader,
+  DragAndDropUploader,
   RadioButton,
   Icon,
   StatusCard,
@@ -18,14 +17,12 @@ import {
   Tab,
   TabHeader,
   TabBody,
+  Tag,
+  usePopupContext,
 } from "@ama-pt/agora-design-system";
-import {
-  fetchPost,
-  updatePost,
-  uploadPostImage,
-  suggestTags,
-} from "@/services/api";
+import { fetchPost, updatePost, uploadPostImage, suggestTags, deletePost, unpublishPost, publishPost } from "@/services/api";
 import type { Post, PostUpdatePayload, TagSuggestion } from "@/types/api";
+import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import dynamic from "next/dynamic";
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), {
@@ -33,8 +30,38 @@ const RichTextEditor = dynamic(() => import("./RichTextEditor"), {
   loading: () => <p>A carregar editor...</p>,
 });
 
+function DeletePostPopupContent({
+  onClose,
+  onConfirm,
+}: {
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-[16px]">
+      <p>Essa ação não pode ser desfeita.</p>
+      <div className="flex justify-end gap-16 pt-16">
+        <Button appearance="outline" variant="neutral" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button
+          variant="danger"
+          onClick={onConfirm}
+          hasIcon
+          leadingIcon="agora-line-trash"
+          leadingIconHover="agora-solid-trash"
+        >
+          Eliminar
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function PostsEditClient() {
   const params = useParams();
+  const router = useRouter();
+  const { show, hide } = usePopupContext();
   const postId = params.postId as string;
 
   const [post, setPost] = useState<Post | null>(null);
@@ -46,19 +73,20 @@ export default function PostsEditClient() {
   const [articleHeader, setArticleHeader] = useState("");
   const [articleContent, setArticleContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const selectedKeywordsRef = useRef("");
+  const [keywordSearch, setKeywordSearch] = useState("");
   const [tags, setTags] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [postData, tagsData] = await Promise.all([
-          fetchPost(postId),
-          suggestTags("", 50),
-        ]);
+        const [postData, tagsData] = await Promise.all([fetchPost(postId), suggestTags("", 50)]);
 
         if (postData) {
           setPost(postData);
@@ -67,7 +95,9 @@ export default function PostsEditClient() {
           setArticleContent(postData.content || "");
           setContentType(postData.body_type || "markdown");
           setArticleType(postData.kind || "news");
-          setSelectedTags(postData.tags || []);
+          const initial = postData.tags || [];
+          setSelectedTags(initial);
+          selectedKeywordsRef.current = initial.join(",");
         }
 
         setTags(tagsData);
@@ -81,7 +111,70 @@ export default function PostsEditClient() {
     loadData();
   }, [postId]);
 
+  useEffect(() => {
+    const q = keywordSearch.trim();
+    if (q.length < 2) {
+      setTagSearch([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestTags(q, 20);
+        setTagSearch(res);
+      } catch {
+        setTagSearch([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keywordSearch]);
+
+  const keywordOptions = useMemo(() => {
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    const seen = new Set<string>();
+    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedLowerSet = new Set(selectedTags.map((k) => k.toLowerCase()));
+    const selectedNotInSuggestions = selectedTags.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const options = [
+      ...(showCreate
+        ? [
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
+            </DropdownOption>,
+          ]
+        : []),
+      ...selectedNotInSuggestions.map((keyword) => (
+        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
+          {keyword}
+        </DropdownOption>
+      )),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedLowerSet.has(tag.text.toLowerCase())}
+        >
+          {tag.text}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="keywords">{options}</DropdownSection>;
+  }, [tags, tagSearch, selectedTags, keywordSearch]);
+
   const handleSaveMetadata = async () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (!articleTitle.trim()) return;
 
     setIsSaving(true);
@@ -101,6 +194,7 @@ export default function PostsEditClient() {
       if (result) {
         setPost(result);
         setApiSuccess("Metadados guardados com sucesso.");
+        setTimeout(() => setApiSuccess(null), 10000);
       } else {
         setApiError("Erro ao guardar. Verifique a autenticação.");
       }
@@ -112,6 +206,7 @@ export default function PostsEditClient() {
   };
 
   const handleSaveContent = async () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (!articleContent.trim()) return;
 
     setIsSaving(true);
@@ -127,6 +222,7 @@ export default function PostsEditClient() {
       if (result) {
         setPost(result);
         setApiSuccess("Conteúdo guardado com sucesso.");
+        setTimeout(() => setApiSuccess(null), 10000);
       } else {
         setApiError("Erro ao guardar. Verifique a autenticação.");
       }
@@ -143,39 +239,81 @@ export default function PostsEditClient() {
     setApiSuccess(null);
 
     try {
-      const payload: PostUpdatePayload = {
-        published: "",
-      };
-
-      const result = await updatePost(postId, payload);
+      const result = await unpublishPost(postId);
       if (result) {
         setPost(result);
         setApiSuccess("Artigo despublicado com sucesso.");
+        setTimeout(() => setApiSuccess(null), 10000);
       } else {
-        setApiError("Erro ao despublicar. Verifique a autenticação.");
+        setApiError("Erro ao retirar. Verifique a autenticação.");
       }
     } catch {
-      setApiError("Erro ao despublicar o artigo.");
+      setApiError("Erro ao retirar o artigo.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleImageUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = e.target.files;
-    if (!files || !files.length) return;
-
+  const handleRepublish = async () => {
     setIsSaving(true);
     setApiError(null);
     setApiSuccess(null);
 
     try {
-      const result = await uploadPostImage(postId, files[0]);
+      const result = await publishPost(postId);
+      if (result) {
+        setPost(result);
+        setApiSuccess("Artigo publicado com sucesso.");
+        setTimeout(() => setApiSuccess(null), 10000);
+      } else {
+        setApiError("Erro ao publicar. Verifique a autenticação.");
+      }
+    } catch {
+      setApiError("Erro ao publicar o artigo.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    hide();
+    setIsSaving(true);
+    setApiError(null);
+    setApiSuccess(null);
+
+    try {
+      const success = await deletePost(postId);
+      if (success) {
+        router.push("/pages/admin/system/posts");
+      } else {
+        setApiError("Erro ao eliminar. Verifique a autenticação.");
+      }
+    } catch {
+      setApiError("Erro ao eliminar o artigo.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || !files.length) return;
+    const file = files[0];
+    if (file.size > 4194304) {
+      setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
+      return;
+    }
+    setImageError(null);
+    setIsSaving(true);
+    setApiError(null);
+    setApiSuccess(null);
+
+    try {
+      const result = await uploadPostImage(postId, file);
       if (result) {
         setPost(result);
         setApiSuccess("Imagem carregada com sucesso.");
+        setTimeout(() => setApiSuccess(null), 10000);
       } else {
         setApiError("Erro ao carregar a imagem.");
       }
@@ -222,9 +360,7 @@ export default function PostsEditClient() {
           <Button
             variant="primary"
             appearance="outline"
-            onClick={() =>
-              window.open(`/pages/posts/${post.slug}`, "_blank")
-            }
+            onClick={() => window.open(`/pages/posts/${post.slug}`, "_blank")}
           >
             <span className="admin-edit-info__btn-content">
               <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
@@ -331,43 +467,89 @@ export default function PostsEditClient() {
                       </div>
                     </div>
 
-                    <InputSelect
-                      label="Tags"
-                      placeholder="Procure uma palavra-chave..."
+                    <IsolatedSelect
+                      label="Palavras-chave"
+                      placeholder="Pesquise ou insira palavras-chave..."
                       id="article-keywords"
                       type="checkbox"
                       searchable
-                      searchInputPlaceholder="Escreva para pesquisar..."
+                      searchInputPlaceholder="Escreva para pesquisar ou criar..."
                       searchNoResultsText="Nenhum resultado encontrado"
-                      onChange={(options) => {
-                        setSelectedTags(
-                          options.map((o) => o.value as string)
-                        );
+                      defaultValue={selectedTags.join(",")}
+                      onChangeRef={selectedKeywordsRef}
+                      onSearchCallback={setKeywordSearch}
+                      onChangeCallback={(value) => {
+                        const selected = value.split(",").filter(Boolean);
+                        setSelectedTags(selected);
+                        let addedNew = false;
+                        selected.forEach((v) => {
+                          const lower = v.toLowerCase();
+                          const existsInTags = tags.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          const existsInSearch = tagSearch.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          if (!existsInTags && !existsInSearch) {
+                            addedNew = true;
+                            setTags((prev) => {
+                              if (prev.some((t) => t.text.toLowerCase() === lower)) {
+                                return prev;
+                              }
+                              return [...prev, { text: v }];
+                            });
+                          }
+                        });
+                        if (addedNew) {
+                          setKeywordSearch("");
+                        }
                       }}
                     >
-                      <DropdownSection name="keywords">
-                        {tags.map((tag) => (
-                          <DropdownOption key={tag.text} value={tag.text}>
-                            {tag.text}
-                          </DropdownOption>
+                      {keywordOptions}
+                    </IsolatedSelect>
+
+                    {selectedTags.length > 0 && (
+                      <div className="flex flex-wrap gap-8 -mt-8">
+                        {selectedTags.map((keyword) => (
+                          <Tag
+                            key={keyword}
+                            aria-label={`Remover ${keyword}`}
+                            onClick={() => {
+                              const next = selectedTags.filter(
+                                (v) => v.toLowerCase() !== keyword.toLowerCase(),
+                              );
+                              setSelectedTags(next);
+                              selectedKeywordsRef.current = next.join(",");
+                            }}
+                          >
+                            {keyword}
+                          </Tag>
                         ))}
-                      </DropdownSection>
-                    </InputSelect>
+                      </div>
+                    )}
 
                     <div>
                       <span className="text-primary-900 text-base font-medium leading-7">
                         Cobertura *
                       </span>
                       <div className="mt-2">
-                        <ButtonUploader
+                        <DragAndDropUploader
                           label="Ficheiros"
+                          dragAndDropLabel="Arraste e largue o ficheiro aqui"
                           inputLabel="Selecione ou arraste o ficheiro"
+                          selectedFilesLabel="ficheiro selecionado"
                           removeFileButtonLabel="Remover ficheiro"
                           replaceFileButtonLabel="Substituir ficheiro"
-                          extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceitos: JPG, JPEG, PNG."
+                          extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
                           accept=".jpg,.jpeg,.png"
                           maxSize={4194304}
                           maxCount={1}
+                          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                          hasError={!!imageError}
+                          hasFeedback={!!imageError}
+                          feedbackState="danger"
+                          feedbackText={imageError ?? undefined}
                           onChange={handleImageUpload}
                         />
                       </div>
@@ -386,6 +568,9 @@ export default function PostsEditClient() {
                   <div className="admin-page__actions">
                     <Button
                       variant="primary"
+                      hasIcon
+                      trailingIcon="agora-line-check-circle"
+                      trailingIconHover="agora-solid-check-circle"
                       onClick={handleSaveMetadata}
                       disabled={isSaving}
                     >
@@ -393,29 +578,87 @@ export default function PostsEditClient() {
                     </Button>
                   </div>
                 </form>
+
+                <div className="dataset-edit-danger-actions">
+                  {post.published ? (
+                    <StatusCard
+                      type="warning"
+                      description={
+                        <>
+                          <strong>Retirar o artigo</strong>
+                          <br />
+                          Por favor, note que o item não será mais visível.
+                          <br />
+                          <Button
+                            appearance="link"
+                            variant="primary"
+                            hasIcon
+                            trailingIcon="agora-line-arrow-right-circle"
+                            trailingIconHover="agora-solid-arrow-right-circle"
+                            onClick={handleUnpublish}
+                            disabled={isSaving}
+                          >
+                            {isSaving ? "A retirar..." : "Retirar"}
+                          </Button>
+                        </>
+                      }
+                    />
+                  ) : (
+                    <StatusCard
+                      type="info"
+                      description={
+                        <>
+                          <strong>Artigo despublicado</strong>
+                          <br />
+                          Este artigo não está visível para o público.
+                          <br />
+                          <Button
+                            appearance="link"
+                            variant="primary"
+                            hasIcon
+                            trailingIcon="agora-line-arrow-right-circle"
+                            trailingIconHover="agora-solid-arrow-right-circle"
+                            onClick={handleRepublish}
+                            disabled={isSaving}
+                          >
+                            {isSaving ? "A publicar..." : "Publicar novamente"}
+                          </Button>
+                        </>
+                      }
+                    />
+                  )}
+                  <StatusCard
+                    type="danger"
+                    description={
+                      <>
+                        <strong>Atenção, esta ação não pode ser corrigida.</strong>
+                        <br />
+                        <Button
+                          appearance="link"
+                          variant="primary"
+                          hasIcon
+                          trailingIcon="agora-line-arrow-right-circle"
+                          trailingIconHover="agora-solid-arrow-right-circle"
+                          onClick={() => {
+                            show(
+                              <DeletePostPopupContent onClose={hide} onConfirm={handleDelete} />,
+                              {
+                                title: "Tem a certeza que quer eliminar este artigo?",
+                                closeAriaLabel: "Fechar",
+                                dimensions: "m",
+                              }
+                            );
+                          }}
+                          disabled={isSaving}
+                        >
+                          Eliminar o artigo
+                        </Button>
+                      </>
+                    }
+                  />
+                </div>
               </div>
             </div>
-
-            {post.published && (
-              <div className="mt-8 p-6 bg-danger-50 border border-danger-200 rounded-lg flex items-center justify-between">
-                <div>
-                  <p className="text-primary-900 font-bold">
-                    Despublicar o artigo
-                  </p>
-                  <p className="text-warning-700 text-sm">
-                    Por favor, note que o item não será mais visível.
-                  </p>
-                </div>
-                <Button
-                  variant="danger"
-                  appearance="outline"
-                  onClick={handleUnpublish}
-                  disabled={isSaving}
-                >
-                  Despublicar
-                </Button>
-              </div>
-            )}
           </TabBody>
         </Tab>
 
@@ -441,6 +684,9 @@ export default function PostsEditClient() {
                   <div className="admin-page__actions">
                     <Button
                       variant="primary"
+                      hasIcon
+                      trailingIcon="agora-line-check-circle"
+                      trailingIconHover="agora-solid-check-circle"
                       onClick={handleSaveContent}
                       disabled={isSaving}
                     >

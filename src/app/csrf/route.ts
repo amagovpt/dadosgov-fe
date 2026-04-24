@@ -3,13 +3,17 @@ import { backendFetch } from "../backend-fetch";
 
 export async function GET(_request: NextRequest) {
     try {
-        const backendResponse = await backendFetch("/login/", {
+        // Use the dedicated /get-csrf endpoint (no rate limit, unlike GET /login/)
+        const backendResponse = await backendFetch("/get-csrf", {
             cache: "no-store",
         });
 
-        const html = await backendResponse.text();
-        const csrfMatch = html.match(/name="csrf_token"[^>]*value="([^"]+)"/);
-        const csrfToken = csrfMatch ? csrfMatch[1] : null;
+        if (!backendResponse.ok) {
+            return NextResponse.json({ error: "Failed to fetch CSRF token" }, { status: 500 });
+        }
+
+        const data = await backendResponse.json();
+        const csrfToken = data?.response?.csrf_token;
 
         if (!csrfToken) {
             return NextResponse.json({ error: "Could not find CSRF token" }, { status: 500 });

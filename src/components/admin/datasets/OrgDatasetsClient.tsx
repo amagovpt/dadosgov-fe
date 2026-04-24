@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   Breadcrumb,
   CardNoResults,
@@ -21,53 +21,112 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
   return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
 };
 
+type SortOrder = "none" | "ascending" | "descending";
+type SortField = "title" | "created" | "last_update";
+
 interface OrgDatasetsClientProps {
   orgId: string;
 }
 
 export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
 
-  useEffect(() => {
-    async function loadDatasets() {
-      setIsLoading(true);
-      try {
-        const response = await fetchOrgDatasets(orgId, 1, 9999);
-        setDatasets(response.data || []);
-      } catch (error) {
-        console.error("Error loading org datasets:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadDatasets();
-  }, [orgId]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortField, setSortField] = useState<SortField>("created");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("descending");
 
-  const totalPages = Math.ceil(datasets.length / itemsPerPage);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const paginatedDatasets = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return datasets.slice(start, start + itemsPerPage);
-  }, [datasets, currentPage, itemsPerPage]);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+  const buildSortParam = (field: SortField, order: SortOrder): string => {
+    if (order === "none") return "-created";
+    return order === "ascending" ? field : `-${field}`;
   };
 
-  const handleItemsPerPageChange = (value: string) => {
-    setItemsPerPage(Number(value));
+  const loadDatasets = useCallback(async (
+    page: number,
+    pageSize: number,
+    q: string,
+    status: string,
+    sort: string,
+  ) => {
+    setIsLoading(true);
+    try {
+      const filters: {
+        q?: string;
+        sort: string;
+        private?: boolean;
+        archived?: boolean;
+        deleted?: boolean;
+      } = { sort };
+
+      if (q.trim()) filters.q = q.trim();
+      if (status === "public") {
+        filters.private = false;
+        filters.archived = false;
+        filters.deleted = false;
+      } else if (status === "draft") {
+        filters.private = true;
+        filters.archived = false;
+        filters.deleted = false;
+      } else if (status === "archived") {
+        filters.archived = true;
+        filters.deleted = false;
+      } else if (status === "deleted") {
+        filters.deleted = true;
+      }
+
+      const response = await fetchOrgDatasets(orgId, page, pageSize, filters);
+      setDatasets(response.data || []);
+      setTotal(response.total || 0);
+    } catch (error) {
+      console.error("Error loading org datasets:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [orgId]);
+
+  useEffect(() => {
+    const sort = buildSortParam(sortField, sortOrder);
+    loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
+  }, [currentPage, itemsPerPage, searchQuery, statusFilter, sortField, sortOrder, loadDatasets]);
+
+  const handleSearch = (value: string) => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchQuery(value);
+      setCurrentPage(1);
+    }, 400);
+  };
+
+  const handleStatusChange = (options: { value?: string }[]) => {
+    const value = options?.[0]?.value || "";
+    setStatusFilter(value);
     setCurrentPage(1);
+  };
+
+  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
+    setSortField(field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: SortField): SortOrder => {
+    return sortField === field ? sortOrder : "none";
   };
 
   return (
@@ -76,8 +135,8 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Conjuntos de dados", url: "/pages/admin/org/datasets" },
+            { label: orgName || "Organização", url: "#" },
+            { label: "Conjuntos de dados", url: "#" },
           ]}
         />
       </div>
@@ -88,15 +147,19 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
       </div>
 
       <p className="text-neutral-700 text-sm mb-[16px]">
-        {datasets.length} resultados
+        {total} resultados
       </p>
 
       <div className="flex items-end gap-[16px] mb-[24px]">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquise o nome, código ou sigla da entidade"
             aria-label="Pesquisar conjuntos de dados"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleSearch(e.target.value)
+            }
           />
         </div>
         <InputSelect
@@ -104,12 +167,14 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          onChange={handleStatusChange}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
         <a href={`/api/1/organizations/${orgId}/catalog`} download>
@@ -128,93 +193,118 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
       {isLoading ? (
         <p>A carregar...</p>
       ) : datasets.length > 0 ? (
-        <>
-          <Table
-            paginationProps={{
-              itemsPerPageLabel: "Itens por página",
-              itemsPerPage: itemsPerPage,
-              totalItems: datasets.length,
-              availablePageSizes: [10, 20, 50],
-              currentPage: currentPage,
-              buttonDropdownAriaLabel: "Selecionar itens por página",
-              dropdownListAriaLabel: "Opções de itens por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => handlePageChange(page),
-              onPageSizeChange: (size: number) => handleItemsPerPageChange(String(size)),
-            }}
-          >
-            <TableHeader>
-              <TableRow>
-                <TableHeaderCell sortType="date" sortOrder="none">
-                  Título do conjunto de dados
-                </TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
-                  Estado
-                </TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
-                  Criado em
-                </TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
-                  Última modificação
-                </TableHeaderCell>
-                <TableHeaderCell>Ações</TableHeaderCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedDatasets.map((dataset, index) => (
-                <TableRow key={index}>
-                  <TableCell headerLabel="Título">
-                    <a
-                      href={`/pages/datasets/${dataset.slug}`}
-                      className="text-primary-600 underline"
-                    >
-                      {dataset.title}
+        <Table
+          paginationProps={{
+            itemsPerPageLabel: "Itens por página",
+            itemsPerPage: itemsPerPage,
+            totalItems: total,
+            availablePageSizes: [10, 20, 50],
+            currentPage: currentPage - 1,
+            buttonDropdownAriaLabel: "Selecionar itens por página",
+            dropdownListAriaLabel: "Opções de itens por página",
+            prevButtonAriaLabel: "Página anterior",
+            nextButtonAriaLabel: "Próxima página",
+            onPageChange: (page: number) => setCurrentPage(page + 1),
+            onPageSizeChange: (size: number) => {
+              setItemsPerPage(size);
+              setCurrentPage(1);
+            },
+          }}
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("title")}
+                onSortChange={handleSort("title")}
+              >
+                Título do conjunto de dados
+              </TableHeaderCell>
+              <TableHeaderCell>Estado</TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("created")}
+                onSortChange={handleSort("created")}
+              >
+                Criado em
+              </TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("last_update")}
+                onSortChange={handleSort("last_update")}
+              >
+                Última modificação
+              </TableHeaderCell>
+              <TableHeaderCell>Ações</TableHeaderCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {datasets.map((dataset) => (
+              <TableRow key={dataset.id}>
+                <TableCell headerLabel="Título">
+                  <a
+                    href={`/pages/datasets/${dataset.slug}`}
+                    className="text-primary-600 underline"
+                  >
+                    {dataset.title}
+                  </a>
+                </TableCell>
+                <TableCell headerLabel="Estado">
+                  {dataset.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : dataset.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : dataset.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
+                </TableCell>
+                <TableCell headerLabel="Criado em">
+                  {formatDate(dataset.created_at)}
+                </TableCell>
+                <TableCell headerLabel="Última modificação">
+                  <div>
+                    <div>{formatDate(dataset.last_modified)}</div>
+                    {dataset.owner ? (
+                      <a
+                        href={`/pages/users/${dataset.owner.slug}`}
+                        className="text-primary-600 text-xs underline"
+                      >
+                        {dataset.owner.first_name} {dataset.owner.last_name}
+                      </a>
+                    ) : dataset.organization ? (
+                      <a
+                        href={`/pages/organizations/${dataset.organization.slug}`}
+                        className="text-primary-600 text-xs underline"
+                      >
+                        {dataset.organization.name}
+                      </a>
+                    ) : null}
+                  </div>
+                </TableCell>
+                <TableCell headerLabel="Ações">
+                  <div className="flex gap-[8px]">
+                    <a href={`/pages/datasets/${dataset.slug}`}>
+                      <Icon
+                        name="agora-line-eye"
+                        className="w-[20px] h-[20px]"
+                      />
                     </a>
-                  </TableCell>
-                  <TableCell headerLabel="Estado">
-                    <StatusDot variant={dataset.private ? "warning" : "success"}>
-                      {dataset.private ? "Rascunho" : "Público"}
-                    </StatusDot>
-                  </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDate(dataset.created_at)}
-                  </TableCell>
-                  <TableCell headerLabel="Última modificação">
-                    <div>
-                      <div>{formatDate(dataset.last_modified)}</div>
-                      {dataset.owner ? (
-                        <a
-                          href={`/pages/users/${dataset.owner.slug}`}
-                          className="text-primary-600 text-xs underline"
-                        >
-                          {dataset.owner.first_name} {dataset.owner.last_name}
-                        </a>
-                      ) : dataset.organization ? (
-                        <a
-                          href={`/pages/organizations/${dataset.organization.slug}`}
-                          className="text-primary-600 text-xs underline"
-                        >
-                          {dataset.organization.name}
-                        </a>
-                      ) : null}
-                    </div>
-                  </TableCell>
-                  <TableCell headerLabel="Ações">
-                    <div className="flex gap-[8px]">
-                      <a href={`/pages/datasets/${dataset.slug}`}>
-                        <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                      </a>
-                      <a href={`/pages/admin/org/datasets/edit?slug=${dataset.slug}`}>
-                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                      </a>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
+                    <a
+                      href={`/pages/admin/org/datasets/edit?slug=${dataset.slug}`}
+                    >
+                      <Icon
+                        name="agora-line-edit"
+                        className="w-[20px] h-[20px]"
+                      />
+                    </a>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">
@@ -222,7 +312,10 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
               className="datasets-page__empty"
               position="center"
               icon={
-                <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
+                <Icon
+                  name="agora-line-edit"
+                  className="w-12 h-12 text-primary-500 icon-xl"
+                />
               }
               title="Sem publicações"
               description="A organização ainda não publicou conjuntos de dados."
@@ -232,7 +325,9 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   <Button
                     variant="primary"
                     appearance="outline"
-                    onClick={() => window.location.href = '/pages/admin/datasets/new'}
+                    onClick={() =>
+                      (window.location.href = "/pages/admin/datasets/new")
+                    }
                   >
                     Publique no portal
                   </Button>

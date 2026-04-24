@@ -60,7 +60,7 @@ export default function PublishDropdown({ darkMode = false }: PublishDropdownPro
         onClick={() => setShowDropdown((v) => !v)}
       >
         <span className="text-lg font-medium">
-          Publicar <span className="font-bold">dados.gov</span>
+          Publicar <span className="font-bold">dados.gov.pt</span>
         </span>
       </Button>
       {showDropdown && (
@@ -81,6 +81,7 @@ export default function PublishDropdown({ darkMode = false }: PublishDropdownPro
                   src={item.customIcon!}
                   alt=""
                   className="w-[24px] h-[24px]"
+                  style={{ filter: "invert(22%) sepia(93%) saturate(2500%) hue-rotate(215deg) brightness(95%) contrast(105%)" }}
                   aria-hidden="true"
                 />
               )}

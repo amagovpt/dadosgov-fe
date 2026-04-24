@@ -29,7 +29,7 @@ function formatStatNumber(value: number): { number: string; suffix: string } {
     }
     parts.unshift(String(remaining));
     const formatted = parts.join("\u2009");
-    return { number: formatted, suffix: "mil" };
+    return { number: formatted, suffix: "" };
   }
   return { number: String(value), suffix: "" };
 }
@@ -79,7 +79,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
               <div className="title">
                 <h1 className="container mx-auto text-white flex flex-col items-start leading-tight">
                   <span className="xs:text-xl-bold md:text-2xl-bold xl:text-2xl-bold">
-                    Plataforma aberta
+                    Portal aberto
                   </span>
                   <span className="xs:text-xl-light md:text-2xl-light xl:text-2xl-light">
                     de dados públicos portugueses
@@ -122,14 +122,14 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                         }}
                       >
                         <span className="text-lg font-medium">
-                          Publicar <span className="font-bold">dados.gov</span>
+                          Publicar <span className="font-bold">dados.gov.pt</span>
                         </span>
                       </Button>
                       {showPublishDropdown && (
                         <div className="publish-custom-dropdown">
                           {[
                             { icon: "agora-line-layers-menu", label: "Um conjunto de dados", href: "/pages/admin/datasets/new" },
-                            { icon: null, customIcon: "/Icons/bar_chart.svg", label: "Uma reutilização", href: "/pages/admin/reuses/new" },
+                            { icon: null, customIcon: "/Icons/bar_chart_primary.svg", label: "Uma reutilização", href: "/pages/admin/reuses/new" },
                             { icon: "agora-line-award", label: "Um harvester", href: "/pages/admin/harvesters/new" },
                             { icon: "agora-line-buildings", label: "Uma organização", href: "/pages/admin/organizations/new" },
                           ].map((item, index) => (
@@ -289,10 +289,10 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                   };
                   const timeAgo = dataset.last_modified
                     ? formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
-                        .replace("aproximadamente ", "")
-                        .replace("quase ", "")
-                        .replace("menos de ", "")
-                        .replace("cerca de ", "")
+                      .replace("aproximadamente ", "")
+                      .replace("quase ", "")
+                      .replace("menos de ", "")
+                      .replace("cerca de ", "")
                     : "Desconhecido";
 
                   return (
@@ -495,7 +495,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                       }}
                       subtitle={
                         post.created_at
-                          ? `Publicado em ${format(new Date(post.created_at), "dd 'de' MMMM 'de' yyyy", { locale: pt })}`
+                          ? `Publicado a ${format(new Date(post.created_at), "d MMM yyyy", { locale: pt })}`
                           : ""
                       }
                       title={post.name}
@@ -544,17 +544,44 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
         {/* Utilizado diariamente por */}
         <div className="xl:pb-64 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="mb-8 text-gray-medium text-m-bold">Utilizado diariamente por:</h2>
-            <div className="flex flex-wrap items-center justify-between gap-x-32 gap-y-32">
-              {["arte_black.svg", "ADC.svg", "IMPIC.svg", "DSPA.svg", "apa.svg"].map((logo, i) => (
-                <div key={i} className="flex items-center justify-center">
-                  <img
-                    src={`/Logos/${logo}`}
-                    alt={`Logo ${logo.replace(".svg", "")}`}
-                    className={`${logo === "arte_black.svg" ? "h-[36px]" : "h-[48px]"} w-auto object-contain`}
-                  />
-                </div>
-              ))}
+            <h2 className="text-xl-bold mb-32 text-primary-900">Utilizado diariamente por:</h2>
+            <div className="flex flex-col mt-32">
+              <div className="flex flex-wrap items-center justify-between gap-x-32">
+                {Array(5).fill("arte_black.svg").map((logo, i) => (
+                  <div key={`row1-${i}`} className="flex items-center justify-center">
+                    <img
+                      src={`/Logos/${logo}`}
+                      alt={`Logo ${logo.replace(".svg", "")}`}
+                      className="h-[32px] w-auto object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-x-32 mt-32">
+                {Array(5).fill("arte_black.svg").map((logo, i) => (
+                  <div key={`row2-${i}`} className="flex items-center justify-center">
+                    <img
+                      src={`/Logos/${logo}`}
+                      alt={`Logo ${logo.replace(".svg", "")}`}
+                      className="h-[32px] w-auto object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-32">
+              <Link href="/pages/organizations">
+                <Button
+                  variant="primary"
+                  appearance="link"
+                  hasIcon={true}
+                  trailingIcon="agora-line-arrow-right-circle"
+                  trailingIconHover="agora-solid-arrow-right-circle"
+                  className="p-0! h-auto"
+                >
+                  <span>Ver todas as organizações</span>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

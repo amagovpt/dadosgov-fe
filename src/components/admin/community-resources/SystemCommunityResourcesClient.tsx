@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
@@ -19,6 +19,9 @@ import { fetchAllCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 
+type SortOrder = "none" | "ascending" | "descending";
+type SortField = "title" | "format" | "created_at" | "last_modified";
+
 const formatDate = (dateStr: string) => {
   try {
     const d = new Date(dateStr);
@@ -33,24 +36,61 @@ export default function SystemCommunityResourcesClient() {
   const resourceId = searchParams.get("resource_id");
 
   const [resources, setResources] = useState<CommunityResource[]>([]);
-  const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
   const loadData = useCallback(async () => {
     if (resourceId) return;
     setIsLoading(true);
     try {
-      const response = await fetchAllCommunityResources(currentPage, pageSize);
+      const response = await fetchAllCommunityResources(1, 9999);
       setResources(response.data || []);
-      setTotalItems(response.total || 0);
     } catch (error) {
       console.error("Error loading community resources:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, resourceId]);
+  }, [resourceId]);
+
+  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
+    setSortField(field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: SortField): SortOrder => {
+    return sortField === field ? sortOrder : "none";
+  };
+
+  const sortedResources = useMemo(() => {
+    if (sortOrder === "none") return resources;
+    return [...resources].sort((a, b) => {
+      let cmp = 0;
+      switch (sortField) {
+        case "title":
+          cmp = (a.title || "").localeCompare(b.title || "");
+          break;
+        case "format":
+          cmp = (a.format || "").localeCompare(b.format || "");
+          break;
+        case "created_at":
+          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        case "last_modified":
+          cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
+          break;
+      }
+      return sortOrder === "descending" ? -cmp : cmp;
+    });
+  }, [resources, sortField, sortOrder]);
+
+  const paginatedResources = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return sortedResources.slice(start, start + pageSize);
+  }, [sortedResources, currentPage, pageSize]);
 
   useEffect(() => {
     loadData();
@@ -81,7 +121,7 @@ export default function SystemCommunityResourcesClient() {
       </div>
 
       <p className="text-neutral-700 text-sm mb-[16px]">
-        {totalItems} resultados
+        {resources.length} resultados
       </p>
 
       {isLoading ? (
@@ -91,14 +131,14 @@ export default function SystemCommunityResourcesClient() {
           paginationProps={{
             itemsPerPageLabel: "Linhas por página",
             itemsPerPage: pageSize,
-            totalItems: totalItems,
+            totalItems: resources.length,
             availablePageSizes: [5, 10, 20],
-            currentPage: currentPage,
+            currentPage: currentPage - 1,
             buttonDropdownAriaLabel: "Selecionar linhas por página",
             dropdownListAriaLabel: "Opções de linhas por página",
             prevButtonAriaLabel: "Página anterior",
             nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page),
+            onPageChange: (page: number) => setCurrentPage(page + 1),
             onPageSizeChange: (size: number) => {
               setPageSize(size);
               setCurrentPage(1);
@@ -107,16 +147,40 @@ export default function SystemCommunityResourcesClient() {
         >
           <TableHeader>
             <TableRow>
-              <TableHeaderCell>Título do recurso</TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("title")}
+                onSortChange={handleSort("title")}
+              >
+                Título do recurso
+              </TableHeaderCell>
               <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell>Formato</TableHeaderCell>
-              <TableHeaderCell>Criado em</TableHeaderCell>
-              <TableHeaderCell>Modificado em</TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("format")}
+                onSortChange={handleSort("format")}
+              >
+                Formato
+              </TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("created_at")}
+                onSortChange={handleSort("created_at")}
+              >
+                Criado em
+              </TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("last_modified")}
+                onSortChange={handleSort("last_modified")}
+              >
+                Modificado em
+              </TableHeaderCell>
               <TableHeaderCell>Ação</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {resources.map((resource) => {
+            {paginatedResources.map((resource) => {
               const authorName = resource.organization
                 ? resource.organization.name
                 : resource.owner

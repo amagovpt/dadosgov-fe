@@ -3,7 +3,7 @@ import { fetchGitHubMarkdown } from "@/services/github";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sobre dados abertos - dados.gov",
+  title: "Sobre dados abertos - dados.gov.pt",
   description: "Saiba o que são dados abertos e qual a sua importância.",
 };
 

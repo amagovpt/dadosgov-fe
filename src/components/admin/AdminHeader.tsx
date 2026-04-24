@@ -20,20 +20,26 @@ import { logout } from "@/services/api";
 function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col gap-[16px]">
-      <p className="font-bold">Essa ação é irreversível.</p>
+      <p className="font-bold">Esta ação é irreversível.</p>
       <p>
-        Todo o conteúdo publicado em seu nome permanecerá online, nas mesmas URLs, mas em forma
-        anónima, ou seja, sem ser vinculado a um produtor de dados.
+        Todo o conteúdo publicado em seu nome permanecerá online, nos mesmos URLs, mas de forma
+        anónima, ou seja, sem estar associado a um produtor de dados.
       </p>
       <p>
-        Se você também quiser deletar o conteúdo publicado que você postou, primeiro apague o
-        conteúdo antes de excluir sua conta.
+        Se também pretender eliminar o conteúdo que publicou, apague-o antes de eliminar a conta.
       </p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
           Cancelar
         </Button>
-        <Button appearance="solid" variant="danger" onClick={onClose}>
+        <Button
+          appearance="solid"
+          variant="danger"
+          hasIcon
+          leadingIcon="agora-line-trash"
+          leadingIconHover="agora-solid-trash"
+          onClick={onClose}
+        >
           Eliminar
         </Button>
       </div>

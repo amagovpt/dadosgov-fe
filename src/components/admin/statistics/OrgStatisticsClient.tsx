@@ -13,38 +13,39 @@ import {
   TabHeader,
   TabBody,
 } from "@ama-pt/agora-design-system";
-import { fetchOrgMetrics } from "@/services/api";
-import { OrganizationMetrics } from "@/types/api";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { fetchOrgMetrics, fetchOrganization } from "@/services/api";
+import { Organization, OrganizationMetrics } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
-export default function OrgStatisticsClient() {
-  const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+interface OrgStatisticsClientProps {
+  orgId: string;
+}
 
+export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps) {
+  const [org, setOrg] = useState<Organization | null>(null);
   const [metrics, setMetrics] = useState<OrganizationMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!activeOrg) {
-      setIsLoading(false);
-      return;
-    }
-    async function loadMetrics() {
+    async function loadData() {
       setIsLoading(true);
       try {
-        const data = await fetchOrgMetrics(activeOrg!.id);
-        setMetrics(data);
+        const [orgData, metricsData] = await Promise.all([
+          fetchOrganization(orgId),
+          fetchOrgMetrics(orgId),
+        ]);
+        setOrg(orgData);
+        setMetrics(metricsData);
       } catch (error) {
-        console.error("Error loading org metrics:", error);
+        console.error("Error loading org statistics:", error);
       } finally {
         setIsLoading(false);
       }
     }
-    loadMetrics();
-  }, [activeOrg]);
+    loadData();
+  }, [orgId]);
 
-  if (isOrgLoading || isLoading) return <p>A carregar...</p>;
-  if (!activeOrg) {
+  if (!isLoading && !org) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -67,7 +68,7 @@ export default function OrgStatisticsClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: activeOrg.name, url: "#" },
+            { label: org?.name || "Organização", url: "#" },
             { label: "Estatísticas", url: "/pages/admin/org/statistics" },
           ]}
         />
@@ -124,17 +125,17 @@ export default function OrgStatisticsClient() {
                   </CardFrame>
                 </div>
                 <div className="flex-1">
-                  <CardFrame label={String(metrics?.followers ?? 0)}>
+                  <CardFrame label={String(metrics?.resource_downloads ?? 0)}>
                     <p className="text-neutral-700 text-base">Downloads de dados</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
-                  <CardFrame label="0">
+                  <CardFrame label={String(metrics?.dataservice_views ?? 0)}>
                     <p className="text-neutral-700 text-base">Passeios pela API</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
-                  <CardFrame label="0">
+                  <CardFrame label={String(metrics?.reuse_views ?? 0)}>
                     <p className="text-neutral-700 text-base">Visitas a locais de reutilização</p>
                   </CardFrame>
                 </div>

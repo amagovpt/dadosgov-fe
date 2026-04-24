@@ -1,40 +1,77 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
 
-const SWAGGER_JSON_URL = "https://dados.gov.pt/api/1/swagger.json";
+const SWAGGER_JSON_URL = "/api/1/swagger.json";
+const SWAGGER_CSS_ID = "swagger-ui-css";
+const SWAGGER_SCRIPT_ID = "swagger-ui-script";
 
 export default function ApiTutorialClient() {
   const swaggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const swaggerUiCss = document.createElement("link");
-    swaggerUiCss.rel = "stylesheet";
-    swaggerUiCss.href =
-      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css";
-    document.head.appendChild(swaggerUiCss);
+    let cancelled = false;
 
-    const script = document.createElement("script");
-    script.src =
-      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js";
-    script.onload = () => {
-      if (swaggerRef.current && (window as any).SwaggerUIBundle) {
-        (window as any).SwaggerUIBundle({
-          url: SWAGGER_JSON_URL,
-          domNode: swaggerRef.current,
-          docExpansion: "none",
-          deepLinking: false,
-          layout: "BaseLayout",
-        });
+    // Add CSS if not already present
+    if (!document.getElementById(SWAGGER_CSS_ID)) {
+      const swaggerUiCss = document.createElement("link");
+      swaggerUiCss.id = SWAGGER_CSS_ID;
+      swaggerUiCss.rel = "stylesheet";
+      swaggerUiCss.href =
+        "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css";
+      document.head.appendChild(swaggerUiCss);
+    }
+
+    async function initSwagger() {
+      if (cancelled || !swaggerRef.current) return;
+      if (!(window as any).SwaggerUIBundle) return;
+
+      // Fetch the spec and strip the absolute `host` so that requests go to
+      // the current origin (via the Next.js /api proxy in dev, same-origin in
+      // prod). Avoids CORS errors when the portal and backend run on
+      // different ports in development.
+      let spec: Record<string, unknown> | undefined;
+      try {
+        const res = await fetch(SWAGGER_JSON_URL);
+        if (res.ok) {
+          spec = await res.json();
+          if (spec) {
+            delete spec.host;
+            spec.basePath = "/api/1";
+            spec.schemes = [window.location.protocol.replace(":", "")];
+          }
+        }
+      } catch {
+        // Fall back to url-based loading below
       }
-    };
-    document.body.appendChild(script);
+
+      if (cancelled || !swaggerRef.current) return;
+
+      (window as any).SwaggerUIBundle({
+        ...(spec ? { spec } : { url: SWAGGER_JSON_URL }),
+        domNode: swaggerRef.current,
+        docExpansion: "none",
+        deepLinking: false,
+        layout: "BaseLayout",
+      });
+    }
+
+    // Load script if not already present
+    const existingScript = document.getElementById(SWAGGER_SCRIPT_ID);
+    if (existingScript) {
+      initSwagger();
+    } else {
+      const script = document.createElement("script");
+      script.id = SWAGGER_SCRIPT_ID;
+      script.src =
+        "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js";
+      script.onload = initSwagger;
+      document.body.appendChild(script);
+    }
 
     return () => {
-      document.head.removeChild(swaggerUiCss);
-      document.body.removeChild(script);
+      cancelled = true;
     };
   }, []);
 
@@ -67,13 +104,7 @@ export default function ApiTutorialClient() {
               <section className="mb-[48px]">
                 <h2 className="text-[20px] font-bold text-[#021C51] mb-[16px]">Autenticação</h2>
                 <p className="text-[16px] leading-[28px] text-[#2b363c] mb-[16px]">
-                  Para poder executar operações de escrita, é necessário obter uma{" "}
-                  <Link
-                    href="/pages/admin/me"
-                    className="text-[#034AD8] underline font-medium hover:text-primary-700"
-                  >
-                    Chave de API
-                  </Link>{" "}
+                  Para poder executar operações de escrita, é necessário obter uma Chave de API
                   nas definições do seu perfil.
                 </p>
                 <p className="text-[16px] leading-[28px] text-[#2b363c]">

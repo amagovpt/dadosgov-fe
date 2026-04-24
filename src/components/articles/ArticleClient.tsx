@@ -98,17 +98,19 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [sortKey, setSortKey] = useState("recentes");
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     async function loadPosts() {
       setIsLoading(true);
       try {
         const sort = SORT_OPTIONS[sortKey] || "-published";
-        const response = await fetchPosts(currentPage, PAGE_SIZE, sort);
+        const response = await fetchPosts(currentPage, PAGE_SIZE, sort, searchQuery || undefined);
         setPosts(response.data);
         setTotal(response.total);
       } catch (error) {
@@ -118,7 +120,11 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
       }
     }
     loadPosts();
-  }, [currentPage, sortKey]);
+  }, [currentPage, sortKey, searchQuery]);
+
+  const handleSearch = () => {
+    setSearchQuery(searchInput.trim());
+  };
 
   const formatPostDate = (post: Post): string => {
     const dateStr = post.published || post.created_at;
@@ -150,6 +156,11 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
             voiceActionAltText="Pesquisar por voz"
             searchActionAltText="Pesquisar"
             darkMode={true}
+            minLength={1}
+            value={searchInput}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
+            onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter") handleSearch(); }}
+            onSearchActivate={() => handleSearch()}
           />
           <div className="mt-8 text-s-regular text-neutral-200">
             Exemplos: &quot;webinar&quot;, &quot;estudos&quot;, &quot;eventos&quot;
@@ -178,10 +189,6 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
             ) : (
               <div className="grid xs:grid-cols-1 sm:grid-cols-2 gap-32">
                 {posts.map((post) => {
-                  const authorName = post.owner
-                    ? `${post.owner.first_name} ${post.owner.last_name}`.trim()
-                    : "";
-
                   return (
                     <Link
                       key={post.id}
@@ -198,16 +205,9 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
                         }}
                         subtitleText={
                           (
-                            <div className="flex flex-col">
-                              <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                                {formatPostDate(post)}
-                              </span>
-                              {authorName && (
-                                <span style={{ fontSize: "16px", fontWeight: 300 }} className="text-neutral-900 mt-4">
-                                  {authorName}
-                                </span>
-                              )}
-                            </div>
+                            <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                              {formatPostDate(post)}
+                            </span>
                           ) as unknown as string
                         }
                         titleText={post.name}

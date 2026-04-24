@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
@@ -17,11 +17,12 @@ import {
   Switch,
   CardNoResults,
   CardLinks,
-  ButtonUploader,
+  DragAndDropUploader,
   Tabs,
   Tab,
   TabHeader,
   TabBody,
+  Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
@@ -34,14 +35,20 @@ import {
   fetchReuseTypes,
   fetchReuseTopics,
   fetchMyDatasets,
+  fetchOrgDatasets,
+  searchDatasets,
   linkDatasetToReuse,
   linkDataserviceToReuse,
   fetchActivity,
   fetchDiscussions,
+  suggestTags,
 } from "@/services/api";
-import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion } from "@/types/api";
+import { useAuth } from "@/context/AuthContext";
+import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
 
 function TransferReusePopupContent({
   reuseTitle,
@@ -59,16 +66,16 @@ function TransferReusePopupContent({
         </a>
       </p>
       <p>
-        <strong>Essa ação é irreversível.</strong>
-        Você não terá mais acesso para gerenciar esse conjunto de dados.
+        <strong>Esta ação é irreversível.</strong>&nbsp;
+        Poderá deixar de conseguir gerir esta reutilização.
       </p>
 
       <div className="flex flex-col gap-[8px]">
         <label className="text-primary-900 text-base font-medium leading-7">
-          Encontre uma organização ou usuário
+          Organização ou utilizador
         </label>
         <InputText
-          placeholder="Procurar..."
+          placeholder="Selecione a identidade para a qual pretende transferir a reutilização..."
           id="transfer-reuse-search"
           label=""
         />
@@ -76,17 +83,17 @@ function TransferReusePopupContent({
 
       <div className="admin-page__org-card flex flex-col items-center gap-[16px] bg-neutral-50 rounded-lg p-8 text-center">
         <h3 className="text-primary-900 text-lg font-bold leading-7">
-          Você não pertence a nenhuma organização
+          Não pertence a uma organização.
         </h3>
         <p className="text-neutral-700 text-base leading-7">
-          Recomendamos que você poste sob o nome de uma organização se for uma
-          atividade profissional.
+          Quando a reutilização for produzida no contexto de atividade profissional, é
+          recomendável que seja publicada em nome da organização responsável.
         </p>
         <Link
           href="/pages/admin/organizations"
           className="inline-flex items-center text-primary-500 text-base hover:underline"
         >
-          <span className="mr-[5px]">Crie ou participe de uma organização</span>
+          <span className="mr-[5px]">Crie ou integre uma organização em dados.gov.pt</span>
           <Icon name="agora-line-arrow-right-circle" className="w-5 h-5" />
         </Link>
       </div>
@@ -112,7 +119,7 @@ function TransferReusePopupContent({
           leadingIconHover="agora-solid-plane"
           onClick={onClose}
         >
-          Transferir essa reutilização
+          Transferir a reutilização
         </Button>
       </div>
     </div>
@@ -128,7 +135,7 @@ function DeleteReusePopupContent({
 }) {
   return (
     <div className="flex flex-col gap-[16px]">
-      <p>Essa ação não pode ser desfeita.</p>
+      <p>Esta ação é irreversível. Tem a certeza que quer eliminar esta reutilização?</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
           Cancelar
@@ -157,17 +164,27 @@ export default function ReusesEditClient() {
   const [description, setDescription] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("");
+  const selectedTypeRef = useRef("");
+  const selectedTopicRef = useRef("");
 
   // API state
   const [featured, setFeatured] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
 
   // Dropdown data
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
   const [reuseTopics, setReuseTopics] = useState<ReuseTopic[]>([]);
+
+  // Keywords state (IsolatedSelect pattern)
+  const selectedKeywordsRef = useRef("");
+  const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
+  const [keywordSearch, setKeywordSearch] = useState("");
+  const [tagSuggestions, setTagSuggestions] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
 
   // Discussions tab state
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
@@ -184,20 +201,22 @@ export default function ReusesEditClient() {
   // Datasets tab state
   const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
   const [associatedDatasets, setAssociatedDatasets] = useState<Dataset[]>([]);
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
+  const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([]);
+  const [datasetSearch, setDatasetSearch] = useState("");
+  const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
   const [apiLinks, setApiLinks] = useState([{ url: "" }]);
   const [apiLinkErrors, setApiLinkErrors] = useState<Record<number, string>>({});
+  const { user } = useAuth();
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [r, types, topics, datasetsRes] = await Promise.all([
+        const [r, types, topics] = await Promise.all([
           fetchReuse(reuseId),
           fetchReuseTypes(),
           fetchReuseTopics(),
-          fetchMyDatasets(1, 50),
         ]);
         setReuse(r);
         setTitle(r.title);
@@ -205,10 +224,14 @@ export default function ReusesEditClient() {
         setDescription(r.description);
         setSelectedType(r.type || "");
         setSelectedTopic(r.topic || "");
+        selectedTypeRef.current = r.type || "";
+        selectedTopicRef.current = r.topic || "";
         setFeatured(r.featured || false);
         setReuseTypes(types);
         setReuseTopics(topics);
-        setMyDatasets(datasetsRes.data || []);
+        const initialKeywords = (r.tags || []).join(",");
+        setSelectedKeywordsValue(initialKeywords);
+        selectedKeywordsRef.current = initialKeywords;
       } catch (error) {
         console.error("Error loading reuse:", error);
         setApiError("Erro ao carregar a reutilização.");
@@ -218,6 +241,117 @@ export default function ReusesEditClient() {
     }
     if (reuseId) loadData();
   }, [reuseId]);
+
+  // Load an initial pool of datasets (user's own + from each org the user
+  // belongs to). The search dropdown still queries the whole portal via
+  // searchDatasets() when the user types a query.
+  useEffect(() => {
+    const dedupe = (items: Dataset[]) =>
+      Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const personal = fetchMyDatasets(1, 100);
+    const orgs = (user?.organizations || []).map((org) =>
+      fetchOrgDatasets(org.id, 1, 100),
+    );
+    Promise.all([personal, ...orgs])
+      .then((results) => {
+        const all = results.flatMap((r) => r.data || []);
+        setMyDatasets(dedupe(all));
+      })
+      .catch(() => {
+        /* graceful fallback: dropdown stays empty, search still works */
+      });
+  }, [user?.organizations]);
+
+  // Debounced portal-wide dataset search when the user types in the dropdown.
+  useEffect(() => {
+    const q = datasetSearch.trim();
+    if (q.length < 2) {
+      setDatasetSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchDatasets(q, 1, 20);
+        setDatasetSearchResults(res.data || []);
+      } catch {
+        setDatasetSearchResults([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [datasetSearch]);
+
+  // Initial pool of tag suggestions for the keywords dropdown.
+  useEffect(() => {
+    suggestTags("", 50).then(setTagSuggestions).catch(() => setTagSuggestions([]));
+  }, []);
+
+  // Debounced tag search while user types in the keywords dropdown.
+  useEffect(() => {
+    const q = keywordSearch.trim();
+    if (q.length < 2) {
+      setTagSearch([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestTags(q, 20);
+        setTagSearch(res);
+      } catch {
+        setTagSearch([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keywordSearch]);
+
+  const selectedKeywords = useMemo(
+    () => selectedKeywordsValue.split(",").map((v) => v.trim()).filter(Boolean),
+    [selectedKeywordsValue],
+  );
+
+  const keywordOptions = useMemo(() => {
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    const seen = new Set<string>();
+    const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
+    const selectedNotInSuggestions = selectedKeywords.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const options = [
+      ...(showCreate
+        ? [
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
+            </DropdownOption>,
+          ]
+        : []),
+      ...selectedNotInSuggestions.map((keyword) => (
+        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
+          {keyword}
+        </DropdownOption>
+      )),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedLowerSet.has(tag.text.toLowerCase())}
+        >
+          {tag.text}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="keywords">{options}</DropdownSection>;
+  }, [tagSuggestions, tagSearch, selectedKeywords, keywordSearch]);
 
   useEffect(() => {
     if (!reuse || !reuse.datasets || reuse.datasets.length === 0) return;
@@ -288,6 +422,30 @@ export default function ReusesEditClient() {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !reuse) return;
+    const file = files[0];
+    if (file.size > 4194304) {
+      setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
+      return;
+    }
+    setImageError(null);
+    setIsSubmitting(true);
+    try {
+      const { uploadReuseImage } = await import("@/services/api");
+      await uploadReuseImage(reuse.id, file);
+      const updated = await fetchReuse(reuse.id);
+      setReuse(updated);
+      setApiSuccess("Imagem de capa atualizada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch {
+      setApiError("Erro ao carregar imagem de capa.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSaveMetadata = async () => {
     if (!reuse) return;
     const errors: Record<string, boolean> = {};
@@ -296,23 +454,33 @@ export default function ReusesEditClient() {
     if (!description.trim()) errors.description = true;
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      requestAnimationFrame(() => {
+        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
       return;
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setFormErrors({});
     setApiError(null);
     setApiSuccess(null);
     setIsSubmitting(true);
 
     try {
+      const tagsValue = selectedKeywordsRef.current
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
       const updated = await updateReuse(reuse.id, {
         title: title.trim(),
         url: url.trim(),
         description: description.trim(),
-        type: selectedType || undefined,
-        topic: selectedTopic || undefined,
+        type: selectedTypeRef.current || undefined,
+        topic: selectedTopicRef.current || undefined,
+        tags: tagsValue,
       });
       setReuse(updated);
       setApiSuccess("Reutilização atualizada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
     } catch (error: unknown) {
       const err = error as { status?: number; data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
@@ -338,6 +506,44 @@ export default function ReusesEditClient() {
     } catch (error) {
       console.error("Error deleting reuse:", error);
       setApiError("Erro ao eliminar a reutilização.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleArchiveReuse = async () => {
+    if (!reuse) return;
+    setApiError(null);
+    setApiSuccess(null);
+    setIsSubmitting(true);
+    try {
+      const updated = await updateReuse(reuse.id, {
+        archived: new Date().toISOString(),
+      });
+      setReuse(updated);
+      setApiSuccess("Reutilização arquivada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch (error) {
+      console.error("Error archiving reuse:", error);
+      setApiError("Erro ao arquivar a reutilização.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUnarchiveReuse = async () => {
+    if (!reuse) return;
+    setApiError(null);
+    setApiSuccess(null);
+    setIsSubmitting(true);
+    try {
+      const updated = await updateReuse(reuse.id, { archived: null });
+      setReuse(updated);
+      setApiSuccess("Reutilização desarquivada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch (error) {
+      console.error("Error unarchiving reuse:", error);
+      setApiError("Erro ao desarquivar a reutilização.");
     } finally {
       setIsSubmitting(false);
     }
@@ -425,9 +631,9 @@ export default function ReusesEditClient() {
           )}
           {" — editou a reutilização — "}
           <span>
-            {format(new Date(reuse.last_modified), "d 'de' MMMM 'de' yyyy", {
-              locale: pt,
-            })}
+            {reuse.last_modified && !isNaN(new Date(reuse.last_modified).getTime())
+              ? format(new Date(reuse.last_modified), "d 'de' MMMM 'de' yyyy", { locale: pt })
+              : "—"}
           </span>
         </p>
       </div>
@@ -445,44 +651,48 @@ export default function ReusesEditClient() {
           <TabBody>
             <div className="admin-page__body">
               <div className="admin-page__form-area">
-                <div className="dataset-edit-visibility-banner">
-                  <StatusCard
-                    type="warning"
-                    description={
-                      <>
-                        Modificar a visibilidade da reutilização
-                        <br />
-                        <span className="text-primary-600">
-                          {reuse.private ? "rascunho" : "público"}
-                        </span>
-                      </>
-                    }
-                  />
-                  <div>
-                    {/* <Button
-                      variant="primary"
-                      appearance="outline"
-                      onClick={async () => {
-                        try {
-                          const updated = await updateReuse(reuse.id, {
-                            private: !reuse.private,
-                          });
-                          setReuse(updated);
-                          setApiSuccess(
-                            updated.private
-                              ? "Reutilização guardada como rascunho."
-                              : "Reutilização publicada com sucesso."
-                          );
-                        } catch {
-                          setApiError("Erro ao alterar a visibilidade.");
-                        }
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      {reuse.private ? "Publicar reutilização" : "Salvar como rascunho"}
-                    </Button> */}
+                {reuse.private && (
+                  <div className="dataset-edit-visibility-banner">
+                    <StatusCard
+                      type="info"
+                      description={
+                        <>
+                          <strong>Modifique a visibilidade da reutilização.</strong>
+                          <br />
+                          Esta reutilização encontra-se atualmente em{" "}
+                          <strong>modo rascunho</strong>. Apenas o produtor e os membros
+                          da organização a podem visualizar e editar.
+                        </>
+                      }
+                    />
+                    <div>
+                      <Button
+                        variant="primary"
+                        appearance="outline"
+                        onClick={async () => {
+                          setApiError(null);
+                          setApiSuccess(null);
+                          setIsSubmitting(true);
+                          try {
+                            const updated = await updateReuse(reuse.id, {
+                              private: false,
+                            });
+                            setReuse(updated);
+                            setApiSuccess("Reutilização publicada com sucesso.");
+                            setTimeout(() => setApiSuccess(null), 10000);
+                          } catch {
+                            setApiError("Erro ao publicar a reutilização.");
+                          } finally {
+                            setIsSubmitting(false);
+                          }
+                        }}
+                        disabled={isSubmitting}
+                      >
+                        Publicar reutilização
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <form
                   className="admin-page__form"
@@ -531,26 +741,52 @@ export default function ReusesEditClient() {
                       feedbackState="danger"
                       errorFeedbackText="Campo obrigatório"
                     />
-                    <InputSelect
+                    <IsolatedSelect
                       label="Tipo *"
-                      placeholder="Procure por um tipo..."
+                      placeholder="Selecione um tipo..."
                       id="edit-type"
                       searchable
                       searchInputPlaceholder="Escreva para pesquisar..."
                       searchNoResultsText="Nenhum resultado encontrado"
+                      onChangeRef={selectedTypeRef}
                       defaultValue={selectedType}
-                      onChange={(options) => {
-                        if (options.length > 0) setSelectedType(options[0].value as string);
-                      }}
+                      onChangeCallback={(v) => setSelectedType(v || "")}
                     >
                       <DropdownSection name="types">
                         {reuseTypes.map((t) => (
-                          <DropdownOption key={t.id} value={t.id}>
-                            {t.label}
+                          <DropdownOption
+                            key={t.id}
+                            value={t.id}
+                            selected={t.id === selectedType}
+                          >
+                            {localizeReuseType(t)}
                           </DropdownOption>
                         ))}
                       </DropdownSection>
-                    </InputSelect>
+                    </IsolatedSelect>
+                    <IsolatedSelect
+                      label="Tema *"
+                      placeholder="Selecione um tema..."
+                      id="edit-topic"
+                      searchable
+                      searchInputPlaceholder="Escreva para pesquisar..."
+                      searchNoResultsText="Nenhum resultado encontrado"
+                      onChangeRef={selectedTopicRef}
+                      defaultValue={selectedTopic}
+                      onChangeCallback={(v) => setSelectedTopic(v || "")}
+                    >
+                      <DropdownSection name="topics">
+                        {reuseTopics.map((t) => (
+                          <DropdownOption
+                            key={t.id}
+                            value={t.id}
+                            selected={t.id === selectedTopic}
+                          >
+                            {localizeReuseTopic(t)}
+                          </DropdownOption>
+                        ))}
+                      </DropdownSection>
+                    </IsolatedSelect>
                     <InputTextArea
                       label="Descrição *"
                       placeholder="Insira a descrição aqui"
@@ -569,72 +805,99 @@ export default function ReusesEditClient() {
                       feedbackText="Campo obrigatório"
                       errorFeedbackText="Campo obrigatório"
                     />
-                    <InputSelect
+                    <IsolatedSelect
                       label="Palavras-chave"
-                      placeholder="Pesquise por uma palavra-chave..."
+                      placeholder="Pesquise ou insira palavras-chave..."
                       id="edit-keywords"
                       type="checkbox"
                       searchable
-                      searchInputPlaceholder="Escreva para pesquisar..."
+                      searchInputPlaceholder="Escreva para pesquisar ou criar..."
                       searchNoResultsText="Nenhum resultado encontrado"
+                      defaultValue={selectedKeywordsValue}
+                      onChangeRef={selectedKeywordsRef}
+                      onSearchCallback={setKeywordSearch}
+                      onChangeCallback={(value) => {
+                        setSelectedKeywordsValue(value);
+                        const selected = value.split(",").filter(Boolean);
+                        let addedNew = false;
+                        selected.forEach((v) => {
+                          const lower = v.toLowerCase();
+                          const existsInSuggestions = tagSuggestions.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          const existsInSearch = tagSearch.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          if (!existsInSuggestions && !existsInSearch) {
+                            addedNew = true;
+                            setTagSuggestions((prev) => {
+                              if (prev.some((t) => t.text.toLowerCase() === lower)) {
+                                return prev;
+                              }
+                              return [...prev, { text: v }];
+                            });
+                          }
+                        });
+                        if (addedNew) {
+                          setKeywordSearch("");
+                        }
+                      }}
                     >
-                      <DropdownSection name="keywords">
-                        {(reuse.tags || []).map((tag) => (
-                          <DropdownOption key={tag} value={tag}>
-                            {tag}
-                          </DropdownOption>
-                        ))}
-                      </DropdownSection>
-                    </InputSelect>
-                    <div className="flex items-center justify-between">
-                      <Button
-                        appearance="outline"
-                        variant="primary"
-                        hasIcon
-                        leadingIcon="agora-line-edit"
-                        leadingIconHover="agora-solid-edit"
-                      >
-                        Sugira palavras-chave
-                      </Button>
-                      <a
-                        href="https://dados.gov.pt"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 text-sm underline inline-flex items-center gap-[8px] hover:text-primary-800"
-                      >
-                        O que achou desta sugestão? <Icon name="agora-line-external-link" className="w-4 h-4" />
-                      </a>
-                    </div>
+                      {keywordOptions}
+                    </IsolatedSelect>
 
+                    {selectedKeywords.length > 0 && (
+                      <div className="flex flex-wrap gap-8 -mt-8">
+                        {selectedKeywords.map((keyword) => (
+                          <Tag
+                            key={keyword}
+                            aria-label={`Remover ${keyword}`}
+                            onClick={() => {
+                              const next = selectedKeywords
+                                .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                                .join(",");
+                              setSelectedKeywordsValue(next);
+                              selectedKeywordsRef.current = next;
+                            }}
+                          >
+                            {keyword}
+                          </Tag>
+                        ))}
+                      </div>
+                    )}
                     <div>
                       <span className="text-primary-900 text-base font-medium leading-7">
                         Imagem de capa *
                       </span>
+                      {(reuse.image_thumbnail || reuse.image) && (
+                        <div className="mt-2 mb-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={reuse.image_thumbnail || reuse.image || ""}
+                            alt="Imagem de capa atual"
+                            className="rounded border border-neutral-200 max-h-[180px] object-cover"
+                          />
+                        </div>
+                      )}
                       <div className="mt-2">
-                        <ButtonUploader
+                        <DragAndDropUploader
                           label="Ficheiros"
+                          dragAndDropLabel="Arraste e largue o ficheiro aqui"
                           inputLabel="Selecione ou arraste o ficheiro"
+                          selectedFilesLabel="ficheiro selecionado"
                           removeFileButtonLabel="Remover ficheiro"
                           replaceFileButtonLabel="Substituir ficheiro"
-                          extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceitos: JPG, JPEG, PNG."
+                          extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
                           accept=".jpg,.jpeg,.png"
                           maxSize={4194304}
                           maxCount={1}
-                          onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                            const files = e.target.files;
-                            if (!files || files.length === 0 || !reuse) return;
-                            setIsSubmitting(true);
-                            try {
-                              const { uploadReuseImage } = await import("@/services/api");
-                              const updated = await uploadReuseImage(reuse.id, files[0]);
-                              setReuse(updated);
-                              setApiSuccess("Imagem de capa atualizada com sucesso.");
-                            } catch {
-                              setApiError("Erro ao carregar imagem de capa.");
-                            } finally {
-                              setIsSubmitting(false);
-                            }
-                          }}
+                          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                          hasError={!!imageError}
+                          hasFeedback={!!imageError}
+                          feedbackState="danger"
+                          feedbackText={imageError ?? undefined}
+                          onChange={handleImageUpload}
                         />
                       </div>
                     </div>
@@ -643,6 +906,9 @@ export default function ReusesEditClient() {
                   <div className="admin-page__actions flex justify-end mt-[24px]">
                     <Button
                       variant="primary"
+                      hasIcon
+                      trailingIcon="agora-line-check-circle"
+                      trailingIconHover="agora-solid-check-circle"
                       onClick={handleSaveMetadata}
                       disabled={isSubmitting}
                     >
@@ -655,9 +921,7 @@ export default function ReusesEditClient() {
                       type="info"
                       description={
                         <>
-                          <strong>Transfira esta reutilização.</strong>
-                          <br />
-                          Atenção, esta ação não pode ser cancelada.
+                          <strong>Atenção esta ação é irreversível.</strong>
                           <br />
                           <Button
                             appearance="link"
@@ -672,14 +936,14 @@ export default function ReusesEditClient() {
                                   onClose={hide}
                                 />,
                                 {
-                                  title: "Transferir essa reutilização",
+                                  title: "Transfira a reutilização",
                                   closeAriaLabel: "Fechar",
                                   dimensions: "m",
                                 },
                               );
                             }}
                           >
-                            Transferir
+                            Transferir a reutilização
                           </Button>
                         </>
                       }
@@ -688,9 +952,11 @@ export default function ReusesEditClient() {
                       type="warning"
                       description={
                         <>
-                          <strong>Reutilização de ficheiros</strong>
-                          <br />
-                          Um arquivo reutilizado não é mais indexado, mas permanece acessível aos utilizadores por meio de um link direto.
+                          <strong>
+                            {reuse.archived
+                              ? "Esta reutilização está arquivada. Pode desarquivar para voltar a indexá-la no portal."
+                              : "Uma reutilização arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto."}
+                          </strong>
                           <br />
                           <Button
                             appearance="link"
@@ -698,8 +964,16 @@ export default function ReusesEditClient() {
                             hasIcon
                             trailingIcon="agora-line-arrow-right-circle"
                             trailingIconHover="agora-solid-arrow-right-circle"
+                            onClick={
+                              reuse.archived
+                                ? handleUnarchiveReuse
+                                : handleArchiveReuse
+                            }
+                            disabled={isSubmitting}
                           >
-                            Arquivar
+                            {reuse.archived
+                              ? "Desarquivar a reutilização"
+                              : "Arquivar a reutilização"}
                           </Button>
                         </>
                       }
@@ -708,9 +982,7 @@ export default function ReusesEditClient() {
                       type="danger"
                       description={
                         <>
-                          <strong>Remova esta reutilização.</strong>
-                          <br />
-                          Atenção, esta ação não pode ser cancelada.
+                          <strong>Atenção esta ação é irreversível.</strong>
                           <br />
                           <Button
                             appearance="link"
@@ -725,8 +997,7 @@ export default function ReusesEditClient() {
                                   onConfirm={handleDeleteReuse}
                                 />,
                                 {
-                                  title:
-                                    "Tem a certeza que quer eliminar esta reutilização?",
+                                  title: "Elimine a reutilização",
                                   closeAriaLabel: "Fechar",
                                   dimensions: "m",
                                 },
@@ -734,7 +1005,7 @@ export default function ReusesEditClient() {
                             }}
                             disabled={isSubmitting}
                           >
-                            Eliminar
+                            Eliminar a reutilização
                           </Button>
                         </>
                       }
@@ -755,26 +1026,26 @@ export default function ReusesEditClient() {
                   <AuxiliarList
                     items={[
                       {
-                        title: "Dê um nome à sua reutilização.",
+                        title: "Dar um nome à reutilização",
                         content:
-                          'Prefira um título que permita entender como os dados são usados, em vez do nome do site ou aplicativo ("Mecanismo de Busca de Acordos Comerciais" em vez de "Acordos-Comerciais.fr", por exemplo).',
+                          'Prefira um título que permita entender como os dados são usados, em vez do nome do site ou aplicação  ("Mecanismo de Busca de Acordos Comerciais" em vez de "Acordos-Comerciais.fr", por exemplo).',
                         hasError: !!formErrors.title,
                       },
                       {
-                        title: "Qual link preencher?",
+                        title: "Escolher o link",
                         content:
                           "Insira o link para a página onde a reutilização é visível. Aponte para a reutilização em si, e não para uma página inicial. Certifique-se de que a ligação esteja estável ao longo do tempo.",
                         hasError: !!formErrors.url,
                       },
                       {
-                        title: "Escolha um tipo",
+                        title: "Escolher um tipo",
                         content:
                           "Indique o tipo em que deve ser classificada a reutilização (API, aplicação, artigo de imprensa, visualização, etc.).",
                       },
                       {
-                        title: "Descreva sua reutilização",
+                        title: "Descrever a reutilização",
                         content:
-                          "Você pode preencher o método de criação da reutilização, o que a reutilização permite que você faça, mostre ou diga mais sobre si mesmo e o contexto dessa reutilização. É melhor manter um tom neutro: se a reutilização parecer muito uma mensagem promocional, podemos removê-la.",
+                          "Pode preencher o método de criação da reutilização, o que a reutilização permite que faça, mostre ou diga mais sobre si mesmo e o contexto dessa reutilização. É aconselhado que mantenha um tom neutro: se a reutilização parecer uma mensagem promocional, podemos removê-la.",
                         hasError: !!formErrors.description,
                       },
                       {
@@ -797,7 +1068,7 @@ export default function ReusesEditClient() {
                         ),
                       },
                       {
-                        title: "Escolha uma imagem",
+                        title: "Escolher uma imagem",
                         content:
                           'Se a sua reutilização assumir a forma de uma representação gráfica, pode fornecer uma pré-visualização usando uma imagem ou captura de ecrã. Esta imagem aparecerá na secção "Reutilizações" da página do conjunto de dados associado.',
                       },
@@ -861,7 +1132,7 @@ export default function ReusesEditClient() {
                                 </span>
                               </div>
                               <div className="flex items-center gap-8" title="Reutilizações">
-                                <img src="/Icons/bar_chart.svg" className="" alt="" aria-hidden="true" />
+                                <img src="/Icons/bar_chart_primary.svg" className="" alt="" aria-hidden="true" />
                                 <span>{dataset.metrics?.reuses || 0}</span>
                               </div>
                               <div className="flex items-center gap-8" title="Favoritos">
@@ -887,88 +1158,92 @@ export default function ReusesEditClient() {
                   </div>
                 )}
 
-                <form className="admin-page__form">
-                  {selectedDataset && (
-                    <div className="agora-card-links-datasets-px0 mt-[16px]">
-                      <CardLinks
-                        onClick={() => { }}
-                        className="cursor-pointer text-neutral-900"
-                        variant="transparent"
-                        image={{
-                          src: selectedDataset.organization?.logo || "/images/placeholders/organization.png",
-                          alt: selectedDataset.organization?.name || "Organização sem logo",
-                        }}
-                        category={selectedDataset.organization?.name}
-                        title={selectedDataset.title}
-                        description={
-                          <div className="flex flex-col gap-12">
-                            <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
-                              {selectedDataset.description}
-                            </p>
-                            <div className="flex flex-wrap gap-8 items-center mt-[8px]">
-                              <span className="text-sm font-medium text-neutral-900">
-                                Metadados: {selectedDataset.quality?.score != null ? Math.round(selectedDataset.quality.score * 100) : 0}%
-                              </span>
-                            </div>
-                            <div className="flex items-center flex-wrap gap-[32px] text-xs mt-[32px] text-[#034AD8] mb-[32px]">
-                              <div className="flex items-center gap-8" title="Visualizações">
-                                <Icon name="agora-line-eye" className="" aria-hidden="true" />
-                                <span>{selectedDataset.metrics?.views || 0}</span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Downloads">
-                                <Icon name="agora-line-download" className="" aria-hidden="true" />
-                                <span>{selectedDataset.metrics?.resources_downloads || 0}</span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Reutilizações">
-                                <img src="/Icons/bar_chart.svg" className="" alt="" aria-hidden="true" />
-                                <span>{selectedDataset.metrics?.reuses || 0}</span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Favoritos">
-                                <img src="/Icons/favorite.svg" className="" alt="" aria-hidden="true" />
-                                <span>{selectedDataset.metrics?.followers || 0}</span>
-                              </div>
-                            </div>
-                          </div>
-                        }
-                        date={
-                          <span className="font-[300]">
-                            {`Atualizado há ${formatDistanceToNow(new Date(selectedDataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
-                          </span>
-                        }
-                        mainLink={
-                          <Link href={`/pages/datasets/${selectedDataset.slug}`}>
-                            <span className="underline">{selectedDataset.title}</span>
-                          </Link>
-                        }
-                        blockedLink={true}
-                      />
-                    </div>
-                  )}
+                <form
+                  className="admin-page__form"
+                  onSubmit={(e) => e.preventDefault()}
+                >
+                  <div className="mb-[24px]">
+                    <StatusCard
+                      type="warning"
+                      description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
+                    />
+                  </div>
 
                   <InputSelect
                     label="Pesquisar um conjunto de dados"
-                    placeholder="Procurando um conjunto de dados..."
+                    placeholder="Selecione conjuntos de dados..."
                     id="edit-dataset-search"
+                    type="checkbox"
                     searchable
-                    searchInputPlaceholder="Escreva para pesquisar..."
+                    searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
                     searchNoResultsText="Nenhum resultado encontrado"
+                    onSearchInputChange={setDatasetSearch}
                     onChange={(options) => {
-                      if (options.length > 0) {
-                        const found = myDatasets.find((d) => d.id === options[0].value);
-                        setSelectedDataset(found || null);
-                      } else {
-                        setSelectedDataset(null);
+                      const selectedIds = new Set(options.map((o) => o.value as string));
+                      const pool: Dataset[] = [
+                        ...selectedDatasets,
+                        ...datasetSearchResults,
+                        ...myDatasets,
+                      ];
+                      const seen = new Set<string>();
+                      const next: Dataset[] = [];
+                      for (const d of pool) {
+                        if (selectedIds.has(d.id) && !seen.has(d.id)) {
+                          seen.add(d.id);
+                          next.push(d);
+                        }
                       }
+                      setSelectedDatasets(next);
                     }}
                   >
                     <DropdownSection name="datasets">
-                      {myDatasets.map((d) => (
-                        <DropdownOption key={d.id} value={d.id}>
-                          {d.title}
-                        </DropdownOption>
-                      ))}
+                      {(() => {
+                        const combined: Dataset[] = [
+                          ...selectedDatasets,
+                          ...datasetSearchResults,
+                          ...myDatasets,
+                        ];
+                        const associatedIds = new Set(
+                          associatedDatasets.map((d) => d.id),
+                        );
+                        const seen = new Set<string>();
+                        return combined
+                          .filter((d) => {
+                            if (seen.has(d.id)) return false;
+                            if (associatedIds.has(d.id)) return false;
+                            seen.add(d.id);
+                            return true;
+                          })
+                          .map((d) => (
+                            <DropdownOption
+                              key={d.id}
+                              value={d.id}
+                              selected={selectedDatasets.some((s) => s.id === d.id)}
+                            >
+                              {d.title}
+                            </DropdownOption>
+                          ));
+                      })()}
                     </DropdownSection>
                   </InputSelect>
+
+                  {selectedDatasets.length > 0 && (
+                    <div className="flex flex-wrap gap-8 mt-[16px]">
+                      {selectedDatasets.map((d) => (
+                        <Tag
+                          key={d.id}
+                          aria-label={`Remover ${d.title}`}
+                          onClick={() => {
+                            setSelectedDatasets((prev) =>
+                              prev.filter((x) => x.id !== d.id),
+                            );
+                          }}
+                        >
+                          {d.title}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="admin-page__divider-or">
                     <span className="admin-page__divider-or-text">ou</span>
@@ -1044,39 +1319,71 @@ export default function ReusesEditClient() {
                   <div className="admin-page__actions flex justify-end gap-[18px]">
                     <Button
                       variant="primary"
+                      hasIcon
+                      trailingIcon="agora-line-check-circle"
+                      trailingIconHover="agora-solid-check-circle"
                       onClick={async () => {
                         if (!reuse) return;
-                        const errors: Record<number, string> = {};
-                        datasetLinks.forEach((link, index) => {
-                          if (!link.url.trim() && datasetLinks.length > 1) {
-                            errors[index] = "Campo obrigatório";
-                          }
-                        });
-                        if (Object.keys(errors).length > 0) {
-                          setDatasetLinkErrors(errors);
+                        const remoteUrls = datasetLinks
+                          .map((l) => l.url.trim())
+                          .filter(Boolean);
+                        const hasLocal = selectedDatasets.length > 0;
+                        const hasRemote = remoteUrls.length > 0;
+
+                        // Mutual exclusion: portal datasets OR remote URLs.
+                        if (hasLocal && hasRemote) {
+                          setApiError(
+                            "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
+                          );
                           return;
                         }
+                        if (!hasLocal && !hasRemote) return;
+
                         setDatasetLinkErrors({});
                         setIsSubmitting(true);
                         setApiError(null);
                         try {
-                          for (const link of datasetLinks) {
-                            if (link.url.trim()) {
-                              await linkDatasetToReuse(reuse.id, link.url.trim());
-                            }
+                          for (const dataset of selectedDatasets) {
+                            await linkDatasetToReuse(reuse.id, dataset.id);
+                          }
+                          if (hasRemote) {
+                            const existing =
+                              (reuse.extras?.remote_datasets as string[]) || [];
+                            const mergedRemote = Array.from(
+                              new Set([...existing, ...remoteUrls]),
+                            );
+                            await updateReuse(reuse.id, {
+                              extras: {
+                                ...(reuse.extras || {}),
+                                remote_datasets: mergedRemote,
+                              },
+                            });
                           }
                           const updated = await fetchReuse(reuseId);
                           setReuse(updated);
                           setDatasetLinks([{ url: "" }]);
-                          setSelectedDataset(null);
+                          setSelectedDatasets([]);
                           setApiSuccess("Conjuntos de dados associados com sucesso.");
-                        } catch {
-                          setApiError("Erro ao associar conjuntos de dados.");
+                          setTimeout(() => setApiSuccess(null), 10000);
+                        } catch (error: unknown) {
+                          const err = error as { data?: Record<string, unknown> };
+                          if (err.data && typeof err.data === "object") {
+                            const messages = Object.entries(err.data)
+                              .map(([key, val]) => `${key}: ${val}`)
+                              .join(", ");
+                            setApiError(messages);
+                          } else {
+                            setApiError("Erro ao associar conjuntos de dados.");
+                          }
                         } finally {
                           setIsSubmitting(false);
                         }
                       }}
-                      disabled={isSubmitting || (!selectedDataset && !datasetLinks.some((l) => l.url.trim()))}
+                      disabled={
+                        isSubmitting ||
+                        (selectedDatasets.length === 0 &&
+                          !datasetLinks.some((l) => l.url.trim()))
+                      }
                     >
                       {isSubmitting ? "A guardar..." : "Guardar"}
                     </Button>
@@ -1113,7 +1420,10 @@ export default function ReusesEditClient() {
                   </div>
                 )}
 
-                <form className="admin-page__form">
+                <form
+                  className="admin-page__form"
+                  onSubmit={(e) => e.preventDefault()}
+                >
                   <InputSelect
                     label="Pesquisar uma API"
                     placeholder="Pesquise uma API..."
@@ -1201,6 +1511,9 @@ export default function ReusesEditClient() {
                   <div className="admin-page__actions flex justify-end gap-[18px]">
                     <Button
                       variant="primary"
+                      hasIcon
+                      trailingIcon="agora-line-check-circle"
+                      trailingIconHover="agora-solid-check-circle"
                       onClick={async () => {
                         if (!reuse) return;
                         const errors: Record<number, string> = {};
@@ -1226,6 +1539,7 @@ export default function ReusesEditClient() {
                           setReuse(updated);
                           setApiLinks([{ url: "" }]);
                           setApiSuccess("APIs associadas com sucesso.");
+                          setTimeout(() => setApiSuccess(null), 10000);
                         } catch {
                           setApiError("Erro ao associar APIs.");
                         } finally {

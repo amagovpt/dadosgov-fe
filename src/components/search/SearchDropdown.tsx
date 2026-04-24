@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { InputSearchBar } from "@ama-pt/agora-design-system";
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";
@@ -31,11 +31,30 @@ export default function SearchDropdown({
   excludeTypes = [],
 }: SearchDropdownProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const fullPath = `${pathname}?${searchParams.toString()}`;
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const queryRef = useRef("");
+  const isOpenRef = useRef(false);
+  const activeIndexRef = useRef(-1);
   const options = SEARCH_OPTIONS.filter((o) => !excludeTypes.includes(o.type));
+
+  // Keep refs in sync with state so stale-closure callbacks always read current values
+  useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
+  useEffect(() => { activeIndexRef.current = activeIndex; }, [activeIndex]);
+
+  // Close and reset on every navigation (pathname OR query string change)
+  useEffect(() => {
+    setIsOpen(false);
+    setQuery("");
+    queryRef.current = "";
+    const input = wrapperRef.current?.querySelector("input");
+    if (input) input.value = "";
+  }, [fullPath]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -59,6 +78,7 @@ export default function SearchDropdown({
       const target = e.target as HTMLInputElement;
       if (target.tagName === "INPUT") {
         const val = target.value;
+        queryRef.current = val;
         setQuery(val);
         setIsOpen(val.trim().length > 0);
         setActiveIndex(-1);
@@ -70,21 +90,22 @@ export default function SearchDropdown({
   }, []);
 
   const navigateToSearch = (type: SearchType) => {
-    const q = query.trim();
+    const domInput = wrapperRef.current?.querySelector("input");
+    const q = (domInput?.value || queryRef.current).trim();
     if (q) {
       const option = options.find((o) => o.type === type);
       const path = option?.path || "/pages/datasets";
       router.push(`${path}?q=${encodeURIComponent(q)}`);
       setIsOpen(false);
+      queryRef.current = "";
       setQuery("");
-      const input = wrapperRef.current?.querySelector("input");
-      if (input) input.value = "";
+      if (domInput) domInput.value = "";
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isOpen) {
-      if (e.key === "Enter" && query.trim()) {
+    if (!isOpenRef.current) {
+      if (e.key === "Enter" && queryRef.current.trim()) {
         setIsOpen(true);
       }
       return;
@@ -105,8 +126,8 @@ export default function SearchDropdown({
         break;
       case "Enter":
         e.preventDefault();
-        if (activeIndex >= 0) {
-          navigateToSearch(options[activeIndex].type);
+        if (activeIndexRef.current >= 0) {
+          navigateToSearch(options[activeIndexRef.current].type);
         } else {
           navigateToSearch("datasets");
         }
@@ -119,7 +140,9 @@ export default function SearchDropdown({
   };
 
   const handleSearchActivate = () => {
-    if (query.trim()) {
+    const domInput = wrapperRef.current?.querySelector("input");
+    const q = (domInput?.value || queryRef.current).trim();
+    if (q) {
       navigateToSearch("datasets");
     }
   };
@@ -132,10 +155,6 @@ export default function SearchDropdown({
         id={id}
         onKeyDown={handleKeyDown}
         onSearchActivate={handleSearchActivate}
-        onFocus={() => {
-          const input = wrapperRef.current?.querySelector("input");
-          if (input && input.value.trim()) setIsOpen(true);
-        }}
         darkMode={darkMode}
         hasVoiceActionButton={hasVoiceActionButton}
         voiceActionAltText="Pesquisar por voz"

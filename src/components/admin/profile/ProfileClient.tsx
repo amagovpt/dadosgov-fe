@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -11,10 +12,13 @@ import {
   updateProfile,
   uploadAvatar,
   generateApiKey,
-  clearApiKey,
+  fetchApiTokens,
+  revokeApiToken,
   requestEmailChange,
+  fetchMyFollowing,
 } from "@/services/api";
-import { Activity, UserPublic } from "@/types/api";
+import { Activity, ApiToken, UserFollowing, UserPublic } from "@/types/api";
+import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
@@ -25,7 +29,7 @@ import {
   Icon,
   InputText,
   InputTextArea,
-  ButtonUploader,
+  DragAndDropUploader,
   StatusCard,
   Tabs,
   Tab,
@@ -48,7 +52,11 @@ export default function ProfileClient() {
   const [lastName, setLastName] = useState("");
   const [about, setAbout] = useState("");
   const [website, setWebsite] = useState("");
-  const [apiKey, setApiKey] = useState("");
+  const [apiTokens, setApiTokens] = useState<ApiToken[]>([]);
+  const [newToken, setNewToken] = useState<string | null>(null);
+  const [newTokenName, setNewTokenName] = useState("");
+  const [revokingTokenId, setRevokingTokenId] = useState<string | null>(null);
+  const [tokenCopied, setTokenCopied] = useState(false);
   const [email, setEmail] = useState("");
 
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -60,12 +68,16 @@ export default function ProfileClient() {
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [avatarError, setAvatarError] = useState<string | null>(null);
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
   const [activityPage, setActivityPage] = useState(1);
   const [activityTotal, setActivityTotal] = useState(0);
   const activityPageSize = 20;
+
+  const [subscriptions, setSubscriptions] = useState<UserFollowing[]>([]);
+  const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(true);
 
   useEffect(() => {
     async function loadProfile() {
@@ -76,7 +88,6 @@ export default function ProfileClient() {
         setLastName(data.last_name || "");
         setAbout(data.about || "");
         setWebsite(data.website || "");
-        setApiKey(data.apikey || "");
         setEmail(data.email || "");
       } catch (error) {
         console.error("Error loading profile:", error);
@@ -84,7 +95,16 @@ export default function ProfileClient() {
         setIsLoadingProfile(false);
       }
     }
+    async function loadApiTokens() {
+      try {
+        const tokens = await fetchApiTokens();
+        setApiTokens(tokens);
+      } catch (error) {
+        console.error("Error loading API tokens:", error);
+      }
+    }
     loadProfile();
+    loadApiTokens();
   }, []);
 
   useEffect(() => {
@@ -104,9 +124,25 @@ export default function ProfileClient() {
     loadActivities();
   }, [user?.id, activityPage]);
 
+  useEffect(() => {
+    async function loadSubscriptions() {
+      setIsLoadingSubscriptions(true);
+      try {
+        const response = await fetchMyFollowing(1, 100);
+        setSubscriptions(response.data || []);
+      } catch (error) {
+        console.error("Error loading subscriptions:", error);
+      } finally {
+        setIsLoadingSubscriptions(false);
+      }
+    }
+    loadSubscriptions();
+  }, []);
+
   const totalActivityPages = Math.ceil(activityTotal / activityPageSize);
 
   const handleSave = async () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setIsSaving(true);
     setSaveSuccess(false);
     setSaveError("");
@@ -120,7 +156,7 @@ export default function ProfileClient() {
       setProfile(updated);
       setSaveSuccess(true);
       await refresh();
-      setTimeout(() => setSaveSuccess(false), 3000);
+      setTimeout(() => setSaveSuccess(false), 10000);
     } catch (error) {
       console.error("Error saving profile:", error);
       setSaveError("Erro ao guardar o perfil. Tente novamente.");
@@ -131,22 +167,69 @@ export default function ProfileClient() {
 
   const handleGenerateApiKey = async () => {
     setIsGeneratingKey(true);
+    setTokenCopied(false);
     try {
-      const newKey = await generateApiKey();
-      setApiKey(newKey);
+      const created = await generateApiKey(newTokenName.trim() || undefined);
+      setNewToken(created.token);
+      setApiTokens((prev) => [
+        {
+          id: created.id,
+          token_prefix: created.token_prefix,
+          name: created.name,
+          scopes: created.scopes,
+          kind: created.kind,
+          created_at: created.created_at,
+          last_used_at: created.last_used_at,
+          user_agents: created.user_agents,
+          revoked_at: created.revoked_at,
+          expires_at: created.expires_at,
+        },
+        ...prev,
+      ]);
+      setNewTokenName("");
     } catch (error) {
       console.error("Error generating API key:", error);
-      setSaveError("Erro ao gerar a chave de API. Tente novamente.");
+      setSaveError("Erro ao gerar a chave da API. Tente novamente.");
     } finally {
       setIsGeneratingKey(false);
+    }
+  };
+
+  const handleCopyToken = async () => {
+    if (!newToken) return;
+    try {
+      await navigator.clipboard.writeText(newToken);
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 3000);
+    } catch (error) {
+      console.error("Error copying token:", error);
+    }
+  };
+
+  const handleRevokeToken = async (tokenId: string) => {
+    setRevokingTokenId(tokenId);
+    try {
+      await revokeApiToken(tokenId);
+      setApiTokens((prev) => prev.filter((t) => t.id !== tokenId));
+    } catch (error) {
+      console.error("Error revoking API token:", error);
+      setSaveError("Erro ao revogar a chave da API. Tente novamente.");
+    } finally {
+      setRevokingTokenId(null);
     }
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    const file = files[0];
+    if (file.size > 4194304) {
+      setAvatarError("O ficheiro excede o tamanho máximo de 4 MB.");
+      return;
+    }
+    setAvatarError(null);
     try {
-      await uploadAvatar(files[0]);
+      await uploadAvatar(file);
       const updated = await fetchFullProfile();
       setProfile(updated);
       await refresh();
@@ -208,10 +291,7 @@ export default function ProfileClient() {
       <div className="profile-card">
         <Avatar
           avatarType={profile?.avatar_thumbnail ? "image" : "initials"}
-          srcPath={
-            (profile?.avatar_thumbnail ||
-              `${(profile?.first_name || "")[0] || ""}${(profile?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
-          }
+          srcPath={profile?.avatar_thumbnail || undefined}
           alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
           className="profile-card__avatar"
         />
@@ -326,41 +406,151 @@ export default function ProfileClient() {
                       Foto de perfil
                     </span>
                     <div className="mt-2">
-                      <ButtonUploader
+                      <DragAndDropUploader
                         label="Ficheiros"
+                        dragAndDropLabel="Arraste e largue o ficheiro aqui"
                         inputLabel="Selecione ou arraste o ficheiro"
+                        selectedFilesLabel="ficheiro selecionado"
                         removeFileButtonLabel="Remover ficheiro"
                         replaceFileButtonLabel="Substituir ficheiro"
-                        extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceitos: JPG, JPEG, PNG."
+                        extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
                         accept=".jpg,.jpeg,.png"
                         maxSize={4194304}
                         maxCount={1}
+                        maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                        forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                        hasError={!!avatarError}
+                        hasFeedback={!!avatarError}
+                        feedbackState="danger"
+                        feedbackText={avatarError ?? undefined}
                         onChange={handleAvatarChange}
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-end gap-[16px]">
-                    <div className="flex-1">
-                      <InputText
-                        label="Chave de API"
-                        placeholder="Nenhuma chave gerada"
-                        id="api-key"
-                        value={apiKey}
-                        readOnly
-                      />
+                  <div className="flex flex-col gap-[16px]">
+                    <div>
+                      <p className="text-base font-medium text-neutral-900 mb-[8px]">
+                        Chaves da API
+                      </p>
+                      <p className="text-sm text-neutral-700 mb-[16px]">
+                        Gere uma chave para autenticar pedidos à API. Por motivos de segurança,
+                        a chave completa só é apresentada uma vez no momento da criação —
+                        guarde-a num local seguro.
+                      </p>
                     </div>
-                    <Button
-                      appearance="outline"
-                      variant="primary"
-                      hasIcon
-                      leadingIcon="agora-line-edit"
-                      leadingIconHover="agora-solid-edit"
-                      onClick={handleGenerateApiKey}
-                      disabled={isGeneratingKey}
-                    >
-                      {isGeneratingKey ? "A gerar..." : "Gerar"}
-                    </Button>
+
+                    <div className="flex items-end gap-[16px]">
+                      <div className="flex-1">
+                        <InputText
+                          label="Nome da nova chave (opcional)"
+                          placeholder="Ex.: Script backup, Integração X..."
+                          id="new-token-name"
+                          value={newTokenName}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setNewTokenName(e.target.value)
+                          }
+                        />
+                      </div>
+                      <Button
+                        appearance="outline"
+                        variant="primary"
+                        hasIcon
+                        leadingIcon="agora-line-edit"
+                        leadingIconHover="agora-solid-edit"
+                        onClick={handleGenerateApiKey}
+                        disabled={isGeneratingKey}
+                      >
+                        {isGeneratingKey ? "A gerar..." : "Gerar nova chave"}
+                      </Button>
+                    </div>
+
+                    {newToken && (
+                      <StatusCard
+                        type="warning"
+                        description={
+                          <div className="flex flex-col gap-[8px]">
+                            <p>
+                              <strong>Copie esta chave agora.</strong> Não voltará a ser
+                              apresentada.
+                            </p>
+                            <div className="flex items-center gap-[8px]">
+                              <code className="flex-1 bg-neutral-50 border border-neutral-300 rounded-[4px] px-[12px] py-[8px] text-xs break-all">
+                                {newToken}
+                              </code>
+                              <Button
+                                appearance="outline"
+                                variant="primary"
+                                hasIcon
+                                leadingIcon={tokenCopied ? "agora-line-check" : "agora-line-copy"}
+                                leadingIconHover={
+                                  tokenCopied ? "agora-solid-check" : "agora-solid-copy"
+                                }
+                                onClick={handleCopyToken}
+                              >
+                                {tokenCopied ? "Copiado" : "Copiar"}
+                              </Button>
+                            </div>
+                          </div>
+                        }
+                      />
+                    )}
+
+                    {apiTokens.length > 0 ? (
+                      <div className="flex flex-col gap-[8px]">
+                        <p className="text-sm font-medium text-neutral-900">
+                          Chaves activas ({apiTokens.length})
+                        </p>
+                        <div className="flex flex-col divide-y divide-neutral-200 border border-neutral-200 rounded-[4px]">
+                          {apiTokens.map((token) => (
+                            <div
+                              key={token.id}
+                              className="flex items-center justify-between gap-[16px] px-[16px] py-[12px]"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-[8px]">
+                                  <code className="text-sm font-mono text-neutral-900">
+                                    {token.token_prefix}…
+                                  </code>
+                                  {token.name && (
+                                    <span className="text-sm text-neutral-700">
+                                      — {token.name}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-neutral-700 mt-[4px]">
+                                  Criada em{" "}
+                                  {format(new Date(token.created_at), "dd/MM/yyyy", {
+                                    locale: pt,
+                                  })}
+                                  {token.last_used_at
+                                    ? ` · último uso ${formatDistanceToNow(
+                                        new Date(token.last_used_at),
+                                        { locale: pt, addSuffix: true }
+                                      )}`
+                                    : " · nunca utilizada"}
+                                </p>
+                              </div>
+                              <Button
+                                appearance="outline"
+                                variant="danger"
+                                hasIcon
+                                leadingIcon="agora-line-trash"
+                                leadingIconHover="agora-solid-trash"
+                                onClick={() => handleRevokeToken(token.id)}
+                                disabled={revokingTokenId === token.id}
+                              >
+                                {revokingTokenId === token.id ? "A revogar..." : "Revogar"}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-neutral-700 italic">
+                        Ainda não tem chaves de API geradas.
+                      </p>
+                    )}
                   </div>
 
                   {emailChangeSuccess && (
@@ -596,19 +786,63 @@ export default function ProfileClient() {
             <TabHeader>Subscrições</TabHeader>
             <TabBody>
               <div className="mt-[24px]">
-                <CardNoResults
-                  className="datasets-page__empty"
-                  position="center"
-                  icon={
-                    <Icon
-                      name="agora-line-bell"
-                      className="w-12 h-12 text-primary-500 icon-xl"
-                    />
-                  }
-                  title="Sem subscrições"
-                  description="Ainda não subscreveu nenhum conteúdo."
-                  hasAnchor={false}
-                />
+                {isLoadingSubscriptions ? (
+                  <p className="text-neutral-900 text-base">A carregar subscrições...</p>
+                ) : subscriptions.length === 0 ? (
+                  <CardNoResults
+                    className="datasets-page__empty"
+                    position="center"
+                    icon={
+                      <Icon
+                        name="agora-line-bell"
+                        className="w-12 h-12 text-primary-500 icon-xl"
+                      />
+                    }
+                    title="Sem subscrições"
+                    description="Não segue conteúdos"
+                    hasAnchor={false}
+                  />
+                ) : (
+                  <div className="flex flex-col gap-16">
+                    {subscriptions.map((sub) => {
+                      const subName = sub.following.name || sub.following.title || "";
+                      const subAvatar = sub.following.avatar_thumbnail || sub.following.image_thumbnail;
+                      const initials = subName
+                        .split(" ")
+                        .map((w) => w.charAt(0).toUpperCase())
+                        .slice(0, 2)
+                        .join("");
+                      const classToPath: Record<string, string> = {
+                        Dataset: "/pages/datasets",
+                        Organization: "/pages/organizations",
+                        Reuse: "/pages/reuses",
+                        User: "/pages/users",
+                      };
+                      const basePath = classToPath[sub.following.class];
+                      const href = basePath && sub.following.slug
+                        ? `${basePath}/${sub.following.slug}`
+                        : null;
+                      const content = (
+                        <div className="flex items-center gap-16">
+                          <Avatar
+                            avatarType={subAvatar ? "image" : "initials"}
+                            srcPath={(subAvatar || initials) as unknown as undefined}
+                            alt={subName}
+                            className="w-[48px] h-[48px]"
+                          />
+                          <span className="text-neutral-900 text-base font-medium">{subName}</span>
+                        </div>
+                      );
+                      return href ? (
+                        <Link key={sub.id} href={href} className="hover:opacity-80 transition-opacity">
+                          {content}
+                        </Link>
+                      ) : (
+                        <div key={sub.id}>{content}</div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </TabBody>
           </Tab>
@@ -626,7 +860,7 @@ export default function ProfileClient() {
                     />
                   }
                   title="Sem acompanhamentos"
-                  description="Ainda não acompanha nenhum conteúdo."
+                  description="Não tem seguidores"
                   hasAnchor={false}
                 />
               </div>

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import DatasetsClient from "@/components/admin/datasets/DatasetsClient";
 
 export const metadata: Metadata = {
-  title: "Conjunto de dados - Admin - dados.gov",
-  description: "Gestão de conjuntos de dados no portal dados.gov.",
+  title: "Conjunto de dados - Admin - dados.gov.pt",
+  description: "Gestão de conjuntos de dados no portal dados.gov.pt.",
 };
 
 export default function DatasetsPage() {

@@ -3,7 +3,7 @@ import DataservicesClient from '@/components/dataservices/DataservicesClient';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'APIs - dados.gov',
+  title: 'APIs - dados.gov.pt',
   description: 'Explore as APIs de dados abertos disponíveis em Portugal.',
 };
 

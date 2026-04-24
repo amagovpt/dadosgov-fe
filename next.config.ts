@@ -60,7 +60,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://localhost:7000 https://dados.gov.pt https://raw.githubusercontent.com; frame-src 'self' https://app.powerbi.com; font-src 'self' data:; connect-src 'self' http://localhost:7000 https://dados.gov.pt; frame-ancestors 'none';",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com; frame-src 'self' https://app.powerbi.com; font-src 'self' data:; connect-src 'self' http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt; frame-ancestors 'none';",
           },
         ],
       },
@@ -82,10 +82,6 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [
-        {
-          source: "/logout/",
-          destination: `${BACKEND_URL}/logout/`,
-        },
         {
           source: "/get-csrf",
           destination: `${BACKEND_URL}/get-csrf`,
@@ -128,6 +124,11 @@ const nextConfig: NextConfig = {
         {
           source: "/saml/eidas/sso_logout",
           destination: `${BACKEND_URL}/saml/eidas/sso_logout`,
+        },
+        // Static file storage served by flask_storage at /s/<bucket>/<path>
+        {
+          source: "/s/:path*",
+          destination: `${BACKEND_URL}/s/:path*`,
         },
         // API routes — must be in beforeFiles to avoid redirect loops
         // when Flask returns 308 trailing-slash redirects

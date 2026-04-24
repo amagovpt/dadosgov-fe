@@ -153,12 +153,51 @@ header.sticky .languages-panel-menu {
   flex-direction: column !important;
 }
 
+
+
 .agora-header .icon-container {
   border-width: 0;
   border-radius: 0%;
   padding: 0px;
   display: flex;
   align-items: baseline;
+}
+
+/* Ecossistema: layout with arte logo */
+li.ecosystem-panel-menu {
+  gap: 8px;
+}
+
+/* Ecosystem panel container: fixed below the panels-menu bar, above the nav bar */
+.ecosystem-panel-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+.ecosystem-custom-panel {
+  background-color: rgb(241, 243, 248);
+  box-shadow: 0px 16px 16px 0px #00000029;
+  border-top: 4px solid var(--Neutral-200, #E1E4EA);
+}
+
+
+/* Blue bottom bar scoped to the button span (icon + "Ecossistema" text only) */
+li.ecosystem-panel-menu .panel-menu-link-wrapper {
+  position: relative;
+  align-self: stretch;
+}
+
+li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  height: 4px;
+  width: 100%;
+  background-color: var(--color-primary-600);
 }
 
 /* Target icons that should be white */
@@ -387,6 +426,28 @@ header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-lin
   background-color: var(--color-primary-600);
 }
 
+/* Hide "Autenticar" active state (bar + text + icon) when any other panel is open */
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper::after,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper::after {
+  display: none;
+}
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper {
+  color: inherit;
+}
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .solid,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .solid {
+  display: none;
+}
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .line,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .line {
+  display: block;
+}
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper svg,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper svg {
+  fill: currentColor;
+}
+
 header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper {
   color: var(--color-primary-600);
 }
@@ -612,6 +673,7 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
 /* 5.6 Cards (Article) */
 .agora-card-article img.card-image.w-full {
   border-radius: 4px;
+  width: 352px !important;
   height: 208px;
   object-fit: cover;
   display: flex;
@@ -666,6 +728,21 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
 
 .reuse .agora-card-links-datasets-px0 .agora-card-links .card-links-container .top-container {
   flex: 1;
+}
+
+.datastories .agora-card-links-datasets-px0 .agora-card-links,
+.datastories .agora-card-links-datasets-px0 .agora-card-links .card-links-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.datastories .agora-card-links-datasets-px0 .agora-card-links .card-links-container .top-container {
+  flex: 1;
+}
+
+.datastories .agora-card-links-datasets-px0 .agora-card-links .card-links-container .bottom-container {
+  margin-top: auto;
 }
 
 
@@ -871,6 +948,13 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   background-color: var(--color-primary-50);
 }
 
+.agora-card-no-results .main-content {
+  background: white;
+  padding: 80px;
+  margin: 0 !important;
+}
+
+
 .pagination-filters {
   position: relative;
   z-index: 0;
@@ -1050,29 +1134,24 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
 /* 6.2 Login */
 .login-page .agora-tabs.desktop .tab-panel.current-neutral,
 .login-page .agora-tabs.desktop.vertically .tab-list.desktop .tab-list-item.active.current-neutral {
-  background-color: var(--color-secondary-50);
+  background-color: var(--color-primary-100);
 }
 
-.login-page .agora-tabs.desktop.vertically .tab-panel-content:before {
+.login-page .agora-tabs.desktop.vertically .tab-panel-content::before,
+.login-page .agora-tabs.desktop.vertically .tab-panel-content::after {
   display: none;
 }
 
-.login-page .agora-tabs.desktop .tab-panel-content::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 100%;
-  width: calc(38vw - 50%);
-  background: var(--color-secondary-50);
+
+.login-page .agora-tabs.desktop .tab-panel .tab-panel-content {
+  padding-left: 64px;
+  padding-right: 64px;
+  max-width: 100%;
+  width: 100%;
 }
 
-@media (min-width: 1280px) {
-  .login-page .agora-tabs.desktop .tab-panel .tab-panel-content {
-    max-width: 1280px;
-    padding-left: 6rem;
-    padding-right: 6rem;
-  }
+.login-page .icon-white svg {
+  fill: white;
 }
 
 /* 6.3 Page Detail & Links */
@@ -1286,7 +1365,7 @@ body:has(.admin-wrapper)>div>header.sticky {
 }
 
 .admin-page__breadcrumb {
-  margin-bottom: 64px;
+  margin-bottom: 24px;
 }
 
 .admin-page__header {
@@ -1484,7 +1563,6 @@ body:has(.admin-wrapper)>div>header.sticky {
   font-weight: 600;
   line-height: 32px;
   color: var(--color-primary-900);
-  margin-top: 32px !important;
 }
 
 .admin-page__section-title--no-top {
@@ -1653,11 +1731,15 @@ body:has(.admin-wrapper)>div>header.sticky {
   text-align: left;
 }
 
+.auxiliar-list__content,
+.auxiliar-list__content * {
+  font-size: 14px !important;
+  line-height: 22px !important;
+  color: var(--color-neutral-900);
+}
+
 .auxiliar-list__content {
   padding: 0 16px 16px 56px;
-  font-size: 14px;
-  line-height: 22px;
-  color: var(--color-neutral-900);
 }
 
 .auxiliar-list__icon {
@@ -2172,4 +2254,29 @@ div.max-w-ch,
 .rte-content .tiptap th {
   background: var(--color-neutral-100, #f3f4f6);
   font-weight: 600;
+}
+
+/* ==========================================================================
+   [10] MARKDOWN CONTENT OVERRIDES
+   ========================================================================== */
+
+.markdown-container ul {
+  list-style: disc !important;
+  padding-left: 2em !important;
+}
+
+.markdown-container a {
+  text-decoration: underline !important;
+}
+
+.markdown-container p {
+  margin-bottom: 1em !important;
+}
+
+/* Fix: agora-file-list overrides block the outline button hover fill */
+.agora-file-list .delete-action.error .agora-btn-outline-danger:hover:not(:disabled) .icon,
+.agora-file-list .delete-action.error .agora-btn-outline-danger:hover:not(:disabled) svg,
+.agora-file-list .replace-action .agora-btn-outline-primary:hover:not(:disabled) .icon,
+.agora-file-list .replace-action .agora-btn-outline-primary:hover:not(:disabled) svg {
+  fill: #fff !important;
 }

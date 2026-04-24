@@ -7,7 +7,7 @@ export const siteConfig = {
   name: "dados.gov.pt",
   title: "dados.gov.pt",
   description:
-    "Plataforma aberta de dados públicos portugueses: descarregue, partilhe e reutilize os dados abertos do Estado e das autarquias",
+    "Portal aberto de dados públicos portugueses: descarregue, partilhe e reutilize os dados abertos do Estado e das autarquias",
   locale: "pt",
   url: "https://dados.gov.pt",
 } as const;

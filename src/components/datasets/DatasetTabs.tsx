@@ -14,6 +14,96 @@ import { DatasetResourcesTable } from './DatasetResourcesTable';
 import { DatasetInfo } from './DatasetInfo';
 import { useAuth } from '@/context/AuthContext';
 
+interface ReplyFormProps {
+    discId: string;
+    user: NonNullable<ReturnType<typeof useAuth>['user']>;
+    onClose: () => void;
+    onSubmitted: (updated: Discussion) => void;
+}
+
+const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitted }) => {
+    const [replyMessage, setReplyMessage] = useState('');
+    const [isReplying, setIsReplying] = useState(false);
+    const identityRef = useRef('');
+
+    const identityOptions = React.useMemo(() => (
+        <DropdownSection name="identity">
+            <DropdownOption value="user">
+                {user.first_name} {user.last_name} (utilizador)
+            </DropdownOption>
+            {user.organizations.map((org) => (
+                <DropdownOption key={org.id} value={org.id}>
+                    {org.name}
+                </DropdownOption>
+            ))}
+        </DropdownSection>
+    ), [user]);
+
+    return (
+        <div className="mt-48 pt-32">
+            <div className="flex justify-between items-center mb-24">
+                <h4 className="font-bold text-neutral-900 text-sm uppercase">Responder</h4>
+                <Button
+                    variant="primary"
+                    appearance="outline"
+                    hasIcon
+                    leadingIcon="agora-line-x"
+                    leadingIconHover="agora-solid-x"
+                    onClick={onClose}
+                >
+                    Fechar
+                </Button>
+            </div>
+            {user.organizations && user.organizations.length > 0 && (
+                <div className="mb-32">
+                    <span className="block text-sm font-medium text-neutral-900 mb-8">
+                        Escolha a identidade com a qual deseja publicar esta mensagem
+                    </span>
+                    <IsolatedSelect
+                        label=""
+                        hideLabel
+                        placeholder="Para pesquisar..."
+                        id={`reply-identity-${discId}`}
+                        onChangeRef={identityRef}
+                        searchable
+                        searchInputPlaceholder="Para pesquisar..."
+                        searchNoResultsText="Sem resultados"
+                    >
+                        {identityOptions}
+                    </IsolatedSelect>
+                </div>
+            )}
+            <div className="mb-32">
+                <InputTextArea
+                    label="A sua mensagem"
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    rows={3}
+                    placeholder="Por favor, mantenha a cordialidade e a postura construtiva. Evite compartilhar informações pessoais."
+                />
+            </div>
+            <div className="flex justify-end gap-16">
+                <Button
+                    variant="primary"
+                    appearance="solid"
+                    disabled={isReplying || !replyMessage.trim()}
+                    onClick={async () => {
+                        setIsReplying(true);
+                        const org = identityRef.current && identityRef.current !== 'user' ? identityRef.current : undefined;
+                        const updated = await replyToDiscussion(discId, replyMessage.trim(), { organization: org });
+                        if (updated) {
+                            onSubmitted(updated);
+                        }
+                        setIsReplying(false);
+                    }}
+                >
+                    Responder
+                </Button>
+            </div>
+        </div>
+    );
+};
+
 interface DatasetTabsProps {
     dataset: Dataset;
 }
@@ -31,9 +121,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     const selectedIdentityRef = useRef('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
-    const [replyMessage, setReplyMessage] = useState('');
-    const replyIdentityRef = useRef('');
-    const [isReplying, setIsReplying] = useState(false);
+    const [discussionSearch, setDiscussionSearch] = useState('');
     const [communityResources, setCommunityResources] = useState<CommunityResource[]>([]);
     const [communityCount, setCommunityCount] = useState(0);
 
@@ -190,8 +278,8 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                     {
                                                         href: '#',
                                                         hasIcon: true,
-                                                        leadingIcon: 'agora-line-calendar',
-                                                        leadingIconHover: 'agora-solid-calendar',
+                                                        leadingIcon: 'agora-line-layers-menu',
+                                                        leadingIconHover: 'agora-solid-layers-menu',
                                                         trailingIcon: '',
                                                         trailingIconHover: '',
                                                         trailingIconActive: '',
@@ -232,24 +320,6 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                     <TabHeader>Discussões ({discussionCount})</TabHeader>
                     {renderTabBody(
                         <div>
-                            <div className="mb-24">
-                                <StatusCard
-                                    type="info"
-                                    description={
-                                        <>
-                                            A sua questão é sobre outro tema que não este conjunto de dados?{" "}
-                                            <a
-                                                href="https://dados.gov.pt"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-primary-600 underline font-semibold"
-                                            >
-                                                Visite o nosso fórum <Icon name="agora-line-external-link" className="w-4 h-4 inline" />
-                                            </a>
-                                        </>
-                                    }
-                                />
-                            </div>
                             <div className="flex items-center justify-between mb-24">
                                 <h3 className="font-medium text-neutral-900 text-base">
                                     {discussionCount} {discussionCount === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
@@ -259,6 +329,9 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                         hasVoiceActionButton={false}
                                         placeholder="Pesquisar"
                                         aria-label="Pesquisar discussões"
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                            setDiscussionSearch(e.target.value)
+                                        }
                                     />
                                     <Button
                                         variant="primary"
@@ -266,7 +339,14 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                         hasIcon={true}
                                         leadingIcon="agora-line-plus-circle"
                                         leadingIconHover="agora-solid-plus-circle"
-                                        onClick={() => setShowNewDiscussion(!showNewDiscussion)}
+                                        className="self-stretch"
+                                        onClick={() => {
+                                            if (!user) {
+                                                window.location.href = "/pages/login";
+                                            } else {
+                                                setShowNewDiscussion(!showNewDiscussion);
+                                            }
+                                        }}
                                     >
                                         Iniciar nova discussão
                                     </Button>
@@ -296,7 +376,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                     {user?.organizations && user.organizations.length > 0 && (
                                         <div className="mb-24">
                                             <span className="block text-sm font-medium text-neutral-900 mb-8">
-                                                Escolha a identidade com a qual deseja publicar esta mensagem.
+                                                Escolha a identidade com a qual deseja publicar esta mensagem
                                             </span>
                                             <IsolatedSelect
                                                 label=""
@@ -362,14 +442,16 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                     hasAnchor={false}
                                 />
                             ) : (
-                                <div className="flex flex-col gap-32">
-                                    {discussions.map((disc) => (
+                                <div className="flex flex-col gap-32 mt-24">
+                                    {discussions.filter((disc) =>
+                                        disc.title.toLowerCase().includes(discussionSearch.toLowerCase())
+                                    ).map((disc) => (
                                         <div key={disc.id} className="bg-white rounded-8 p-32">
                                             {/* First message / topic */}
                                             <div className="flex justify-between items-start">
                                                 <div className="flex-1">
-                                                    <h4 className="font-bold text-neutral-900 text-base">{disc.title}</h4>
-                                                    <div className="flex items-center gap-8 mt-4">
+                                                    <h4 className="font-bold text-neutral-900 text-base mb-16">{disc.title}</h4>
+                                                    <div className="flex items-center gap-8">
                                                         <Avatar
                                                             avatarType={disc.user.avatar_thumbnail ? "image" : "initials"}
                                                             srcPath={
@@ -388,48 +470,52 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-[18px]">
-                                                    <Button
-                                                        variant="primary"
-                                                        appearance="outline"
-                                                        hasIcon
-                                                        iconOnly
-                                                        leadingIcon="agora-line-edit"
-                                                        leadingIconHover="agora-solid-edit"
-                                                        aria-label="Editar discussão"
-                                                        onClick={() => show(
-                                                            <EditDiscussionPopup discussion={disc} commentIndex={0} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />,
-                                                            { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" }
-                                                        )}
-                                                    >
-                                                        {" "}
-                                                    </Button>
-                                                    <Button
-                                                        variant="danger"
-                                                        appearance="outline"
-                                                        hasIcon
-                                                        iconOnly
-                                                        leadingIcon="agora-line-trash"
-                                                        leadingIconHover="agora-solid-trash"
-                                                        aria-label="Eliminar discussão"
-                                                        onClick={() => show(
-                                                            <DeleteDiscussionPopup discussion={disc} commentIndex={0} onDeleted={() => { setDiscussions((prev) => prev.filter((d) => d.id !== disc.id)); setDiscussionCount((prev) => prev - 1); }} />,
-                                                            { title: "Tem certeza de que deseja eliminar esta discussão?", closeAriaLabel: "Fechar", dimensions: "l" }
-                                                        )}
-                                                    >
-                                                        {" "}
-                                                    </Button>
+                                                    {disc.permissions.edit && (
+                                                        <Button
+                                                            variant="primary"
+                                                            appearance="outline"
+                                                            hasIcon
+                                                            iconOnly
+                                                            leadingIcon="agora-line-edit"
+                                                            leadingIconHover="agora-solid-edit"
+                                                            aria-label="Editar discussão"
+                                                            onClick={() => show(
+                                                                <EditDiscussionPopup discussion={disc} commentIndex={0} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />,
+                                                                { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" }
+                                                            )}
+                                                        >
+                                                            {" "}
+                                                        </Button>
+                                                    )}
+                                                    {disc.permissions.delete && (
+                                                        <Button
+                                                            variant="danger"
+                                                            appearance="outline"
+                                                            hasIcon
+                                                            iconOnly
+                                                            leadingIcon="agora-line-trash"
+                                                            leadingIconHover="agora-solid-trash"
+                                                            aria-label="Eliminar discussão"
+                                                            onClick={() => show(
+                                                                <DeleteDiscussionPopup discussion={disc} commentIndex={0} onDeleted={() => { setDiscussions((prev) => prev.filter((d) => d.id !== disc.id)); setDiscussionCount((prev) => prev - 1); }} />,
+                                                                { title: "Tem certeza de que deseja eliminar esta discussão?", closeAriaLabel: "Fechar", dimensions: "l" }
+                                                            )}
+                                                        >
+                                                            {" "}
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </div>
                                             {disc.discussion.length > 0 && (
-                                                <p className="text-neutral-900 text-sm mt-16 mb-16">
+                                                <p className="text-neutral-900 text-sm mt-16 mb-16 max-w-[100ch]">
                                                     {disc.discussion[0].content}
                                                 </p>
                                             )}
                                             {/* Replies */}
                                             {disc.discussion.length > 1 && (
-                                                <div className="mt-16 space-y-16 pt-16">
+                                                <div className="mt-16 pt-16 border-l-2 border-primary-600 pl-32 flex flex-col gap-24">
                                                     {disc.discussion.slice(1).map((msg, idx) => (
-                                                        <div key={idx} className="border-l-2 border-primary-600" style={{ paddingLeft: "24px" }}>
+                                                        <div key={idx}>
                                                             <div className="flex justify-between items-start">
                                                                 <div className="flex items-center gap-8">
                                                                     <Avatar
@@ -449,129 +535,70 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                                     </p>
                                                                 </div>
                                                                 <div className="flex gap-[18px]">
-                                                                    <Button
-                                                                        variant="primary"
-                                                                        appearance="outline"
-                                                                        hasIcon
-                                                                        iconOnly
-                                                                        leadingIcon="agora-line-edit"
-                                                                        leadingIconHover="agora-solid-edit"
-                                                                        aria-label="Editar comentário"
-                                                                        onClick={() => show(
-                                                                            <EditDiscussionPopup discussion={disc} commentIndex={idx + 1} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />,
-                                                                            { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" }
-                                                                        )}
-                                                                    >
-                                                                        {" "}
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="danger"
-                                                                        appearance="outline"
-                                                                        hasIcon
-                                                                        iconOnly
-                                                                        leadingIcon="agora-line-trash"
-                                                                        leadingIconHover="agora-solid-trash"
-                                                                        aria-label="Eliminar comentário"
-                                                                        onClick={() => show(
-                                                                            <DeleteDiscussionPopup discussion={disc} commentIndex={idx + 1} onDeleted={() => setDiscussions((prev) => prev.map((d) => d.id === disc.id ? { ...d, discussion: d.discussion.filter((_, i) => i !== idx + 1) } : d))} />,
-                                                                            { title: "Tem certeza de que deseja apagar esta mensagem?", closeAriaLabel: "Fechar", dimensions: "l" }
-                                                                        )}
-                                                                    >
-                                                                        {" "}
-                                                                    </Button>
+                                                                    {msg.permissions.edit && (
+                                                                        <Button
+                                                                            variant="primary"
+                                                                            appearance="outline"
+                                                                            hasIcon
+                                                                            iconOnly
+                                                                            leadingIcon="agora-line-edit"
+                                                                            leadingIconHover="agora-solid-edit"
+                                                                            aria-label="Editar comentário"
+                                                                            onClick={() => show(
+                                                                                <EditDiscussionPopup discussion={disc} commentIndex={idx + 1} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />,
+                                                                                { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" }
+                                                                            )}
+                                                                        >
+                                                                            {" "}
+                                                                        </Button>
+                                                                    )}
+                                                                    {msg.permissions.delete && (
+                                                                        <Button
+                                                                            variant="danger"
+                                                                            appearance="outline"
+                                                                            hasIcon
+                                                                            iconOnly
+                                                                            leadingIcon="agora-line-trash"
+                                                                            leadingIconHover="agora-solid-trash"
+                                                                            aria-label="Eliminar comentário"
+                                                                            onClick={() => show(
+                                                                                <DeleteDiscussionPopup discussion={disc} commentIndex={idx + 1} onDeleted={() => setDiscussions((prev) => prev.map((d) => d.id === disc.id ? { ...d, discussion: d.discussion.filter((_, i) => i !== idx + 1) } : d))} />,
+                                                                                { title: "Tem certeza de que deseja apagar esta mensagem?", closeAriaLabel: "Fechar", dimensions: "l" }
+                                                                            )}
+                                                                        >
+                                                                            {" "}
+                                                                        </Button>
+                                                                    )}
                                                                 </div>
                                                             </div>
-                                                            <p className="text-neutral-900 text-sm mt-4">
+                                                            <p className="text-neutral-900 text-sm mt-4 max-w-[100ch]">
                                                                 {msg.content}
                                                             </p>
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
-                                            {replyingTo === disc.id ? (
-                                                <div className="mt-48 pt-32">
-                                                    <div className="flex justify-between items-center mb-24">
-                                                        <h4 className="font-bold text-neutral-900 text-sm uppercase">Responder</h4>
-                                                        <Button
-                                                            variant="primary"
-                                                            appearance="outline"
-                                                            hasIcon
-                                                            leadingIcon="agora-line-x"
-                                                            leadingIconHover="agora-solid-x"
-                                                            onClick={() => { setReplyingTo(null); setReplyMessage(''); }}
-                                                        >
-                                                            Fechar
-                                                        </Button>
-                                                    </div>
-                                                    {user?.organizations && user.organizations.length > 0 && (
-                                                        <div className="mb-32 w-1/2">
-                                                            <span className="block text-sm font-medium text-neutral-900 mb-8">
-                                                                Escolha a identidade com a qual deseja publicar esta mensagem.
-                                                            </span>
-                                                            <IsolatedSelect
-                                                                label=""
-                                                                hideLabel
-                                                                placeholder="Para pesquisar..."
-                                                                id={`reply-identity-${disc.id}`}
-                                                                onChangeRef={replyIdentityRef}
-                                                                searchable
-                                                                searchInputPlaceholder="Para pesquisar..."
-                                                                searchNoResultsText="Sem resultados"
-                                                            >
-                                                                <DropdownSection name="identity">
-                                                                    <DropdownOption value="user">
-                                                                        {user.first_name} {user.last_name} (utilizador)
-                                                                    </DropdownOption>
-                                                                    {user.organizations.map((org) => (
-                                                                        <DropdownOption key={org.id} value={org.id}>
-                                                                            {org.name}
-                                                                        </DropdownOption>
-                                                                    ))}
-                                                                </DropdownSection>
-                                                            </IsolatedSelect>
-                                                        </div>
-                                                    )}
-                                                    <div className="mb-32 w-1/2">
-                                                        <InputTextArea
-                                                            label="A sua mensagem"
-                                                            value={replyMessage}
-                                                            onChange={(e) => setReplyMessage(e.target.value)}
-                                                            rows={3}
-                                                            placeholder="Por favor, mantenha a cordialidade e a postura construtiva. Evite compartilhar informações pessoais."
-                                                        />
-                                                    </div>
-                                                    <div className="flex justify-end gap-16">
-                                                        <Button
-                                                            variant="primary"
-                                                            appearance="solid"
-                                                            disabled={isReplying || !replyMessage.trim()}
-                                                            onClick={async () => {
-                                                                setIsReplying(true);
-                                                                const org = replyIdentityRef.current && replyIdentityRef.current !== 'user' ? replyIdentityRef.current : undefined;
-                                                                const updated = await replyToDiscussion(disc.id, replyMessage.trim(), { organization: org });
-                                                                if (updated) {
-                                                                    setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
-                                                                    setReplyingTo(null);
-                                                                    setReplyMessage('');
-                                                                }
-                                                                setIsReplying(false);
-                                                            }}
-                                                        >
-                                                            Responder
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ) : (
+                                            {replyingTo === disc.id && user ? (
+                                                <ReplyForm
+                                                    discId={disc.id}
+                                                    user={user}
+                                                    onClose={() => setReplyingTo(null)}
+                                                    onSubmitted={(updated) => {
+                                                        setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+                                                        setReplyingTo(null);
+                                                    }}
+                                                />
+                                            ) : user ? (
                                                 <div className="flex justify-end" style={{ marginTop: "32px" }}>
                                                     <Button
                                                         variant="primary"
                                                         appearance="outline"
-                                                        onClick={() => { setReplyingTo(disc.id); setReplyMessage(''); }}
+                                                        onClick={() => setReplyingTo(disc.id)}
                                                     >
                                                         Responder
                                                     </Button>
                                                 </div>
-                                            )}
+                                            ) : null}
                                         </div>
                                     ))}
                                 </div>

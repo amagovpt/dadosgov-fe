@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
   Button,
@@ -48,6 +49,7 @@ type SortField = "title" | "created_at" | "last_modified" | "resources";
 
 export default function DatasetsClient() {
   const { displayName } = useCurrentUser();
+  const searchParams = useSearchParams();
 
   const [allDatasets, setAllDatasets] = useState<Dataset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +58,7 @@ export default function DatasetsClient() {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
 
   useEffect(() => {
     async function loadDatasets() {
@@ -92,15 +94,18 @@ export default function DatasetsClient() {
           case "public":
             return !d.private && !d.archived && !d.deleted;
           case "draft":
-            return !!d.private;
+            return !!d.private && !d.archived && !d.deleted;
           case "archived":
-            return !!d.archived;
+            return !!d.archived && !d.deleted;
           case "deleted":
             return !!d.deleted;
           default:
             return true;
         }
       });
+    } else {
+      // By default, hide deleted datasets
+      result = result.filter((d) => !d.deleted);
     }
 
     return result;
@@ -190,33 +195,35 @@ export default function DatasetsClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          defaultValue={statusFilter || undefined}
           onChange={(options) => {
             setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
             setCurrentPage(1);
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
 
-      {!isLoading && datasets.length > 0 ? (
+      {!isLoading && totalItems > 0 ? (
         <Table
           paginationProps={{
             itemsPerPageLabel: "Itens por página",
             itemsPerPage: pageSize,
             totalItems: totalItems,
             availablePageSizes: [5, 10, 20],
-            currentPage: currentPage,
+            currentPage: currentPage - 1,
             buttonDropdownAriaLabel: "Selecionar itens por página",
             dropdownListAriaLabel: "Opções de itens por página",
             prevButtonAriaLabel: "Página anterior",
             nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page),
+            onPageChange: (page: number) => setCurrentPage(page + 1),
             onPageSizeChange: (size: number) => {
               setPageSize(size);
               setCurrentPage(1);
@@ -270,9 +277,15 @@ export default function DatasetsClient() {
                   </a>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot variant={dataset.private ? "warning" : "success"}>
-                    {dataset.private ? "Rascunho" : "Público"}
-                  </StatusDot>
+                  {dataset.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : dataset.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : dataset.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
                   {formatDate(dataset.created_at)}
@@ -336,8 +349,8 @@ export default function DatasetsClient() {
               icon={
                 <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
               }
-              title="Sem publicações"
-              description="Ainda não publicou um conjunto de dados."
+              title="Sem conjuntos de dados"
+              description="Não publicou conjuntos de dados."
               hasAnchor={false}
               extraDescription={
                 <div className="mt-24">

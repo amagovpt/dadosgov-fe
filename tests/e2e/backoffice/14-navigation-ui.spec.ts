@@ -68,8 +68,8 @@ test.describe("Backoffice - Navigation and UI", () => {
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
-      // BTN "Publicar dados.gov"
-      const publishBtn = page.getByText("Publicar dados.gov").first();
+      // BTN "Publicar dados.gov.pt"
+      const publishBtn = page.getByText("Publicar dados.gov.pt").first();
       if (await publishBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
         await publishBtn.click();
         await page.waitForTimeout(500);

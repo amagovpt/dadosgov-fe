@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import HarvesterDetailClient from "@/components/admin/harvesters/HarvesterDetailClient";
 
 export const metadata: Metadata = {
-  title: "Detalhe do harvester - Admin - dados.gov",
-  description: "Detalhe de um harvester no portal dados.gov.",
+  title: "Detalhe do harvester - Admin - dados.gov.pt",
+  description: "Detalhe de um harvester no portal dados.gov.pt.",
 };
 
 export default async function HarvesterDetailPage({
@@ -12,5 +13,9 @@ export default async function HarvesterDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  return <HarvesterDetailClient slug={slug} />;
+  return (
+    <Suspense>
+      <HarvesterDetailClient slug={slug} />
+    </Suspense>
+  );
 }

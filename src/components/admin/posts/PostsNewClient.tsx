@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Breadcrumb,
@@ -9,13 +9,14 @@ import {
   DropdownOption,
   InputText,
   InputTextArea,
-  InputSelect,
-  ButtonUploader,
+  DragAndDropUploader,
   RadioButton,
+  Tag,
 } from "@ama-pt/agora-design-system";
-import { suggestTags, createPost } from "@/services/api";
+import { suggestTags, createPost, uploadPostImage } from "@/services/api";
 import type { TagSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import type { PostCreatePayload } from "@/types/api";
 
 export default function PostsNewClient() {
@@ -32,14 +33,81 @@ export default function PostsNewClient() {
   const [articleHeader, setArticleHeader] = useState("");
   const [articleContent, setArticleContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const selectedKeywordsRef = useRef("");
+  const [keywordSearch, setKeywordSearch] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [tags, setTags] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   useEffect(() => {
     suggestTags("", 50).then(setTags);
   }, []);
+
+  useEffect(() => {
+    const q = keywordSearch.trim();
+    if (q.length < 2) {
+      setTagSearch([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestTags(q, 20);
+        setTagSearch(res);
+      } catch {
+        setTagSearch([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keywordSearch]);
+
+  const keywordOptions = useMemo(() => {
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    const seen = new Set<string>();
+    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedLowerSet = new Set(selectedTags.map((k) => k.toLowerCase()));
+    const selectedNotInSuggestions = selectedTags.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const options = [
+      ...(showCreate
+        ? [
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
+            </DropdownOption>,
+          ]
+        : []),
+      ...selectedNotInSuggestions.map((keyword) => (
+        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
+          {keyword}
+        </DropdownOption>
+      )),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedLowerSet.has(tag.text.toLowerCase())}
+        >
+          {tag.text}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="keywords">{options}</DropdownSection>;
+  }, [tags, tagSearch, selectedTags, keywordSearch]);
 
   const clearError = (field: string) => {
     if (formErrors[field]) {
@@ -49,6 +117,17 @@ export default function PostsNewClient() {
         return next;
       });
     }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (file && file.size > 4194304) {
+      setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
+      setImageFile(null);
+      return;
+    }
+    setImageError(null);
+    setImageFile(file);
   };
 
   const handleStep1Next = () => {
@@ -66,8 +145,14 @@ export default function PostsNewClient() {
   const handleSave = async () => {
     if (!articleContent.trim()) {
       setFormErrors({ articleContent: true });
+      requestAnimationFrame(() => {
+        document
+          .querySelector('[aria-invalid="true"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setIsSaving(true);
     setSaveError(null);
     try {
@@ -80,6 +165,9 @@ export default function PostsNewClient() {
       };
       const result = await createPost(payload);
       if (result) {
+        if (imageFile) {
+          await uploadPostImage(result.id, imageFile);
+        }
         router.push("/pages/admin/system/posts");
       } else {
         setSaveError("Erro ao guardar o artigo. Verifique a autenticação.");
@@ -92,7 +180,7 @@ export default function PostsNewClient() {
   };
 
   const stepTitles: Record<number, string> = {
-    1: "Descreva seu item",
+    1: "Crie o seu artigo",
     2: "Conteúdo",
   };
 
@@ -104,7 +192,7 @@ export default function PostsNewClient() {
             { label: "Bem-vindo", url: "/pages/admin" },
             { label: "Artigos", url: "/pages/admin/system/posts" },
             {
-              label: "Formulário de inscrição",
+              label: "Formulário de publicação de um artigo",
               url: "/pages/admin/system/posts/new",
             },
           ]}
@@ -112,7 +200,7 @@ export default function PostsNewClient() {
       </div>
 
       <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de inscrição</h1>
+        <h1 className="admin-page__title">Formulário de publicação de um artigo</h1>
         <PublishDropdown />
       </div>
 
@@ -120,9 +208,7 @@ export default function PostsNewClient() {
       <div className="admin-page__step-header">
         <p className="admin-page__step-text">
           <span className="text-primary-600 font-bold">Passo {currentStep} - </span>
-          <span className="text-primary-900 font-bold">
-            {stepTitles[currentStep]}
-          </span>
+          <span className="text-primary-900 font-bold">{stepTitles[currentStep]}</span>
         </p>
       </div>
 
@@ -134,9 +220,7 @@ export default function PostsNewClient() {
             <div
               key={i}
               className={`admin-page__stepper-segment ${
-                i < filledSegments
-                  ? "admin-page__stepper-segment--filled"
-                  : ""
+                i < filledSegments ? "admin-page__stepper-segment--filled" : ""
               }`}
             />
           ))}
@@ -153,7 +237,7 @@ export default function PostsNewClient() {
         <div className="admin-page__form-area">
           {/* Step 1: Descrição */}
           {currentStep === 1 && (
-            <form className="admin-page__form">
+            <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
               <p className="text-neutral-900 text-base leading-7 pt-32">
                 Os campos marcados com um asterisco ( * ) são obrigatórios.
               </p>
@@ -178,7 +262,7 @@ export default function PostsNewClient() {
 
                 <InputTextArea
                   label="Cabeçalho *"
-                  placeholder="Insira aqui"
+                  placeholder="Insira o cabeçalho aqui"
                   id="article-header"
                   rows={3}
                   value={articleHeader}
@@ -236,41 +320,90 @@ export default function PostsNewClient() {
                   </div>
                 </div>
 
-                <InputSelect
+                <IsolatedSelect
                   label="Palavras-chave"
-                  placeholder="Pesquise por uma palavra-chave..."
+                  placeholder="Pesquise ou insira palavras-chave..."
                   id="article-keywords"
                   type="checkbox"
                   searchable
-                  searchInputPlaceholder="Escreva para pesquisar..."
+                  searchInputPlaceholder="Escreva para pesquisar ou criar..."
                   searchNoResultsText="Nenhum resultado encontrado"
-                  onChange={(options) => {
-                    setSelectedTags(options.map((o) => o.value as string));
+                  defaultValue={selectedTags.join(",")}
+                  onChangeRef={selectedKeywordsRef}
+                  onSearchCallback={setKeywordSearch}
+                  onChangeCallback={(value) => {
+                    const selected = value.split(",").filter(Boolean);
+                    setSelectedTags(selected);
+                    let addedNew = false;
+                    selected.forEach((v) => {
+                      const lower = v.toLowerCase();
+                      const existsInTags = tags.some(
+                        (t) => t.text.toLowerCase() === lower,
+                      );
+                      const existsInSearch = tagSearch.some(
+                        (t) => t.text.toLowerCase() === lower,
+                      );
+                      if (!existsInTags && !existsInSearch) {
+                        addedNew = true;
+                        setTags((prev) => {
+                          if (prev.some((t) => t.text.toLowerCase() === lower)) {
+                            return prev;
+                          }
+                          return [...prev, { text: v }];
+                        });
+                      }
+                    });
+                    if (addedNew) {
+                      setKeywordSearch("");
+                    }
                   }}
                 >
-                  <DropdownSection name="keywords">
-                    {tags.map((tag) => (
-                      <DropdownOption key={tag.text} value={tag.text}>
-                        {tag.text}
-                      </DropdownOption>
+                  {keywordOptions}
+                </IsolatedSelect>
+
+                {selectedTags.length > 0 && (
+                  <div className="flex flex-wrap gap-8 -mt-8">
+                    {selectedTags.map((keyword) => (
+                      <Tag
+                        key={keyword}
+                        aria-label={`Remover ${keyword}`}
+                        onClick={() => {
+                          const next = selectedTags.filter(
+                            (v) => v.toLowerCase() !== keyword.toLowerCase(),
+                          );
+                          setSelectedTags(next);
+                          selectedKeywordsRef.current = next.join(",");
+                        }}
+                      >
+                        {keyword}
+                      </Tag>
                     ))}
-                  </DropdownSection>
-                </InputSelect>
+                  </div>
+                )}
 
                 <div>
                   <span className="text-primary-900 text-base font-medium leading-7">
                     Cobertura *
                   </span>
                   <div className="mt-2">
-                    <ButtonUploader
+                    <DragAndDropUploader
                       label="Ficheiros"
+                      dragAndDropLabel="Arraste e largue o ficheiro aqui"
                       inputLabel="Selecione ou arraste o ficheiro"
+                      selectedFilesLabel="ficheiro selecionado"
                       removeFileButtonLabel="Remover ficheiro"
                       replaceFileButtonLabel="Substituir ficheiro"
-                      extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceitos: JPG, JPEG, PNG."
+                      extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
                       accept=".jpg,.jpeg,.png"
                       maxSize={4194304}
                       maxCount={1}
+                      maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                      forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                      hasError={!!imageError}
+                      hasFeedback={!!imageError}
+                      feedbackState="danger"
+                      feedbackText={imageError ?? undefined}
+                      onChange={handleImageChange}
                     />
                   </div>
                 </div>
@@ -292,7 +425,7 @@ export default function PostsNewClient() {
 
           {/* Step 2: Conteúdo */}
           {currentStep === 2 && (
-            <form className="admin-page__form">
+            <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
               <div className="admin-page__fields-group">
                 <InputTextArea
                   label="Conteúdo *"
@@ -311,22 +444,24 @@ export default function PostsNewClient() {
                 />
               </div>
 
-              {saveError && (
-                <p className="text-danger-600 text-sm mb-16">{saveError}</p>
-              )}
+              {saveError && <p className="text-danger-600 text-sm mb-16">{saveError}</p>}
 
               <div className="admin-page__actions">
                 <Button
                   appearance="outline"
-                  variant="neutral"
-                  onClick={() =>
-                    router.push("/pages/admin/system/posts/new?step=1")
-                  }
+                  variant="primary"
+                  hasIcon
+                  leadingIcon="agora-line-arrow-left-circle"
+                  leadingIconHover="agora-solid-arrow-left-circle"
+                  onClick={() => router.push("/pages/admin/system/posts/new?step=1")}
                 >
                   Anterior
                 </Button>
                 <Button
                   variant="primary"
+                  hasIcon
+                  trailingIcon="agora-line-check-circle"
+                  trailingIconHover="agora-solid-check-circle"
                   onClick={handleSave}
                   disabled={isSaving}
                 >
@@ -336,7 +471,6 @@ export default function PostsNewClient() {
             </form>
           )}
         </div>
-
       </div>
     </div>
   );

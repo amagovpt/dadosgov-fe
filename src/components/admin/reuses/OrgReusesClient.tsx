@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useParams } from "next/navigation";
 import {
   Breadcrumb,
   CardNoResults,
@@ -21,6 +22,8 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 const formatDate = (dateStr: string) => {
@@ -29,22 +32,28 @@ const formatDate = (dateStr: string) => {
 };
 
 export default function OrgReusesClient() {
+  const params = useParams();
+  const routeOrgId = (params?.orgId as string | undefined) ?? undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+  const resolvedOrgId = routeOrgId ?? activeOrg?.id;
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
-    if (!activeOrg) {
+    if (!resolvedOrgId) {
       setIsLoading(false);
       return;
     }
     async function loadReuses() {
       setIsLoading(true);
       try {
-        const data = await fetchOrgReuses(activeOrg!.id);
+        const data = await fetchOrgReuses(resolvedOrgId!);
         setReuses(data || []);
       } catch (error) {
         console.error("Error loading org reuses:", error);
@@ -53,16 +62,32 @@ export default function OrgReusesClient() {
       }
     }
     loadReuses();
-  }, [activeOrg]);
+  }, [resolvedOrgId]);
 
-  const totalPages = Math.ceil(reuses.length / itemsPerPage);
+  const filteredReuses = useMemo(() => {
+    if (!statusFilter) return reuses;
+    return reuses.filter((r) => {
+      switch (statusFilter) {
+        case "public":
+          return !r.private && !r.archived && !r.deleted;
+        case "draft":
+          return r.private && !r.archived && !r.deleted;
+        case "archived":
+          return !!r.archived && !r.deleted;
+        case "deleted":
+          return !!r.deleted;
+        default:
+          return true;
+      }
+    });
+  }, [reuses, statusFilter]);
+
   const paginatedReuses = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return reuses.slice(start, start + itemsPerPage);
-  }, [reuses, currentPage, itemsPerPage]);
+    return filteredReuses.slice(start, start + itemsPerPage);
+  }, [filteredReuses, currentPage, itemsPerPage]);
 
-  if (isOrgLoading) return <p>A carregar...</p>;
-  if (!activeOrg) {
+  if (!isOrgLoading && !resolvedOrgId) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -85,8 +110,8 @@ export default function OrgReusesClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "Reutilizações", url: "/pages/admin/org/reuses" },
+            { label: orgName || "Organização", url: "#" },
+            { label: "Reutilizações", url: "#" },
           ]}
         />
       </div>
@@ -113,12 +138,17 @@ export default function OrgReusesClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          onChange={(options) => {
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+            setCurrentPage(1);
+          }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
@@ -132,12 +162,12 @@ export default function OrgReusesClient() {
               itemsPerPage: itemsPerPage,
               totalItems: reuses.length,
               availablePageSizes: [10, 20, 50],
-              currentPage: currentPage,
+              currentPage: currentPage - 1,
               buttonDropdownAriaLabel: "Selecionar itens por página",
               dropdownListAriaLabel: "Opções de itens por página",
               prevButtonAriaLabel: "Página anterior",
               nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => setCurrentPage(page),
+              onPageChange: (page: number) => setCurrentPage(page + 1),
               onPageSizeChange: (size: number) => {
                 setItemsPerPage(size);
                 setCurrentPage(1);
@@ -173,7 +203,15 @@ export default function OrgReusesClient() {
                     </a>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant="success">Público</StatusDot>
+                    {reuse.deleted ? (
+                      <StatusDot variant="danger">Excluído</StatusDot>
+                    ) : reuse.archived ? (
+                      <StatusDot variant="neutral">Arquivado</StatusDot>
+                    ) : reuse.private ? (
+                      <StatusDot variant="warning">Rascunho</StatusDot>
+                    ) : (
+                      <StatusDot variant="success">Público</StatusDot>
+                    )}
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDate(reuse.created_at)}

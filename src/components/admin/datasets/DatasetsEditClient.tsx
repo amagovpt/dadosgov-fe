@@ -22,13 +22,13 @@ import {
   TableCell,
   Pill,
   Switch,
-  RadioButton,
-  ButtonUploader,
+  DragAndDropUploader,
   CardNoResults,
   Tabs,
   Tab,
   TabHeader,
   TabBody,
+  Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
@@ -38,17 +38,77 @@ import {
   updateDataset,
   deleteDataset,
   uploadResource,
-  deleteResource,
+  createResource,
+  updateResource,
+  replaceResourceFile,
   fetchLicenses,
   fetchFrequencies,
+  fetchResourceTypes,
+  fetchGranularities,
+  fetchSpatialZonesByIds,
+  suggestSpatialZones,
+  suggestTags,
   fetchActivity,
   fetchDiscussions,
 } from "@/services/api";
-import { Dataset, License, Frequency, Activity, Resource, Discussion } from "@/types/api";
+import {
+  Dataset,
+  License,
+  Frequency,
+  Granularity,
+  SpatialZone,
+  TagSuggestion,
+  Activity,
+  Resource,
+  ResourceType,
+  Discussion,
+} from "@/types/api";
+import dynamic from "next/dynamic";
 import StatusDot from "@/components/admin/StatusDot";
+import DeleteResourcePopup from "@/components/admin/datasets/DeleteResourcePopup";
+
+const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEditor"), {
+  ssr: false,
+  loading: () => <p>A carregar editor...</p>,
+});
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
+import { getGranularityLabel } from "@/utils/granularityLabels";
+
+const activityLabels: Record<string, string> = {
+  "created a dataset": "criou um conjunto de dados",
+  "updated a dataset": "atualizou um conjunto de dados",
+  "deleted a dataset": "eliminou um conjunto de dados",
+  "added a resource to a dataset": "adicionou um recurso a um conjunto de dados",
+  "updated a resource": "atualizou um recurso",
+  "removed a resource from a dataset": "removeu um recurso de um conjunto de dados",
+  "created a dataservice": "criou um serviço de dados",
+  "updated a dataservice": "atualizou um serviço de dados",
+  "deleted a dataservice": "eliminou um serviço de dados",
+  "created a topic": "criou um tema",
+  "updated a topic": "atualizou um tema",
+  "added an element to a topic": "adicionou um elemento a um tema",
+  "updated an element in a topic": "atualizou um elemento num tema",
+  "removed an element from a topic": "removeu um elemento de um tema",
+  "created an organization": "criou uma organização",
+  "updated an organization": "atualizou uma organização",
+  "followed a user": "seguiu um utilizador",
+  "discussed a dataservice": "comentou um serviço de dados",
+  "discussed a dataset": "comentou um conjunto de dados",
+  "discussed a reuse": "comentou uma reutilização",
+  "followed a dataservice": "seguiu um serviço de dados",
+  "followed a dataset": "seguiu um conjunto de dados",
+  "followed a reuse": "seguiu uma reutilização",
+  "followed an organization": "seguiu uma organização",
+  "created a reuse": "criou uma reutilização",
+  "updated a reuse": "atualizou uma reutilização",
+  "deleted a reuse": "eliminou uma reutilização",
+};
+
+function translateActivityLabel(label: string): string {
+  return activityLabels[label] || label;
+}
 
 function TransferDatasetPopupContent({
   datasetTitle,
@@ -66,16 +126,15 @@ function TransferDatasetPopupContent({
         </a>
       </p>
       <p>
-        <strong>Essa ação é irreversível.</strong>
-        Você não terá mais acesso para gerenciar esse conjunto de dados.
+        <strong>Esta ação é irreversível.</strong>&nbsp; Vai deixar de gerir este conjunto de dados
       </p>
 
       <div className="flex flex-col gap-[8px]">
         <label className="text-primary-900 text-base font-medium leading-7">
-          Encontre uma organização ou usuário
+          Organização ou utilizador
         </label>
         <InputText
-          placeholder="Procurar..."
+          placeholder="Selecione a identidade para a qual pretende transferir o conjunto de dados..."
           id="transfer-search"
           label=""
         />
@@ -83,31 +142,24 @@ function TransferDatasetPopupContent({
 
       <div className="admin-page__org-card flex flex-col items-center gap-[16px] bg-neutral-50 rounded-lg p-8 text-center">
         <h3 className="text-primary-900 text-lg font-bold leading-7">
-          Você não pertence a nenhuma organização.
+          Não pertence a uma organização.
         </h3>
         <p className="text-neutral-700 text-base leading-7">
-          Recomendamos que publique em nome de uma organização se se tratar de uma
-          atividade profissional.
+          Quando o conjunto de dados for produzido no contexto de atividade profissional, é
+          recomendável que seja publicado em nome da organização responsável.
         </p>
         <Link
           href="/pages/admin/organizations"
           className="inline-flex items-center text-primary-500 text-base hover:underline"
         >
-          <span className="mr-[5px]">Crie ou participe de uma organização</span>
+          <span className="mr-[5px]">Crie ou integre uma organização em dados.gov.pt</span>
           <Icon name="agora-line-arrow-right-circle" className="w-5 h-5" />
         </Link>
       </div>
 
       <div className="flex flex-col gap-[8px]">
-        <label className="text-primary-900 text-base font-medium leading-7">
-          Comentário
-        </label>
-        <InputTextArea
-          placeholder=""
-          id="transfer-comment"
-          label=""
-          rows={3}
-        />
+        <label className="text-primary-900 text-base font-medium leading-7">Comentário</label>
+        <InputTextArea placeholder="" id="transfer-comment" label="" rows={3} />
       </div>
 
       <div className="flex justify-end gap-16 pt-16">
@@ -119,7 +171,7 @@ function TransferDatasetPopupContent({
           leadingIconHover="agora-solid-plane"
           onClick={onClose}
         >
-          Conjunto de dados de transferência
+          Transferir o conjunto de dados
         </Button>
       </div>
     </div>
@@ -135,14 +187,341 @@ function DeleteDatasetPopupContent({
 }) {
   return (
     <div className="flex flex-col gap-[16px]">
-      <p>Essa ação é irreversível.</p>
+      <p>Essa ação é irreversível. Tem a certeza que quer eliminar este conjunto de dados?</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
           Cancelar
         </Button>
-        <Button variant="danger" onClick={onConfirm} hasIcon leadingIcon="agora-line-trash" leadingIconHover="agora-solid-trash">
+        <Button
+          variant="danger"
+          onClick={onConfirm}
+          hasIcon
+          leadingIcon="agora-line-trash"
+          leadingIconHover="agora-solid-trash"
+        >
           Eliminar
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function ResourceDetailPopupContent({
+  resource,
+  onEdit,
+  onDelete,
+  onClose,
+}: {
+  resource: Resource;
+  onEdit: () => void;
+  onDelete: () => void;
+  onClose: () => void;
+}) {
+  const formatSize = (bytes?: number) => {
+    if (!bytes) return "-";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const typeLabel = resource.type === "main" ? "Main file" : resource.type || "-";
+
+  const location =
+    resource.filetype === "remote"
+      ? "Este recurso é um link externo"
+      : "Este recurso encontra-se nos nossos servidores";
+
+  return (
+    <div className="flex flex-col gap-[16px]" style={{ minHeight: "60vh" }}>
+      {resource.description && <p className="text-neutral-700 text-sm">{resource.description}</p>}
+      <div className="flex-1 overflow-y-auto">
+        <table className="text-sm w-full">
+          <tbody>
+            <tr>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">Tipo</td>
+              <td className="py-[4px]">{typeLabel}</td>
+            </tr>
+            <tr>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+                Localização
+              </td>
+              <td className="py-[4px]">{location}</td>
+            </tr>
+            <tr>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">URL</td>
+              <td className="py-[4px] break-all">
+                <a
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-600 underline"
+                >
+                  {resource.url}
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+                Formato
+              </td>
+              <td className="py-[4px]">{resource.format || "-"}</td>
+            </tr>
+            <tr>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+                Mime Type
+              </td>
+              <td className="py-[4px]">{resource.mime || "-"}</td>
+            </tr>
+            <tr>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+                Tamanho
+              </td>
+              <td className="py-[4px]">{formatSize(resource.filesize)}</td>
+            </tr>
+            {resource.checksum && (
+              <tr>
+                <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+                  {resource.checksum.type}
+                </td>
+                <td className="py-[4px] break-all font-mono text-xs">{resource.checksum.value}</td>
+              </tr>
+            )}
+            <tr>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+                Criado em
+              </td>
+              <td className="py-[4px]">
+                {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy HH:mm", {
+                  locale: pt,
+                })}
+              </td>
+            </tr>
+            <tr>
+              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+                Modificado em
+              </td>
+              <td className="py-[4px]">
+                {format(
+                  new Date(resource.last_modified || resource.created_at),
+                  "d 'de' MMMM 'de' yyyy HH:mm",
+                  { locale: pt }
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div className="flex justify-between pt-[8px]">
+        <Button appearance="outline" variant="primary" onClick={onClose}>
+          Cancelar
+        </Button>
+        <div className="flex gap-[8px]">
+          <Button
+            variant="danger"
+            hasIcon
+            leadingIcon="agora-line-trash"
+            leadingIconHover="agora-solid-trash"
+            onClick={onDelete}
+          >
+            Eliminar
+          </Button>
+          <Button
+            variant="primary"
+            hasIcon
+            leadingIcon="agora-line-edit"
+            leadingIconHover="agora-solid-edit"
+            onClick={onEdit}
+          >
+            Editar
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResourceEditPopupContent({
+  resource,
+  datasetId,
+  resourceTypes,
+  onSaved,
+  onCancel,
+}: {
+  resource: Resource;
+  datasetId: string;
+  resourceTypes: ResourceType[];
+  onSaved: () => void;
+  onCancel: () => void;
+}) {
+  const [title, setTitle] = useState(resource.title);
+  const [description, setDescription] = useState(resource.description || "");
+  const [resourceUrl, setResourceUrl] = useState(resource.url || "");
+  const [resourceFormat, setResourceFormat] = useState(resource.format || "");
+  const [mime, setMime] = useState(resource.mime || "");
+  const [filesize, setFilesize] = useState(resource.filesize ? String(resource.filesize) : "");
+  const resourceTypeRef = useRef(resource.type || "main");
+  const replaceFileInputRef = useRef<HTMLInputElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isReplacing, setIsReplacing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (!title.trim()) return;
+    setIsSaving(true);
+    setError(null);
+    try {
+      await updateResource(datasetId, resource.id, {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        url: resourceUrl.trim() || undefined,
+        format: resourceFormat.trim() || undefined,
+        mime: mime.trim() || undefined,
+        filesize: filesize ? Number(filesize) : undefined,
+        type: resourceTypeRef.current,
+      });
+      onSaved();
+    } catch (err) {
+      console.error("Error updating resource:", err);
+      setError("Erro ao guardar as alterações.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleReplaceFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = (e.target as HTMLInputElement).files;
+    if (!files || files.length === 0) return;
+    setIsReplacing(true);
+    setError(null);
+    try {
+      await replaceResourceFile(datasetId, resource.id, files[0]);
+      onSaved();
+    } catch (err: unknown) {
+      const apiErr = err as { status?: number; data?: Record<string, unknown> };
+      console.error("Error replacing file:", apiErr.status, apiErr.data);
+      const msg = apiErr.data?.message
+        ? String(apiErr.data.message)
+        : `Erro ao substituir o ficheiro (${apiErr.status || "desconhecido"}).`;
+      setError(msg);
+    } finally {
+      setIsReplacing(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-[16px]" style={{ minHeight: "60vh" }}>
+      {error && <StatusCard type="danger" description={error} />}
+
+      <div className="flex-1 overflow-y-auto flex flex-col gap-[16px]">
+        <InputText
+          label="Título *"
+          placeholder="Título do recurso"
+          id="res-edit-title"
+          value={title}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+        />
+
+        <IsolatedSelect
+          label="Tipo *"
+          placeholder="Selecione um tipo..."
+          id="res-edit-type"
+          defaultValue={resource.type || "main"}
+          onChangeRef={resourceTypeRef}
+        >
+          <DropdownSection name="resource-types">
+            {resourceTypes.map((rt) => (
+              <DropdownOption key={rt.id} value={rt.id} selected={rt.id === (resource.type || "main")}>
+                {rt.label}
+              </DropdownOption>
+            ))}
+          </DropdownSection>
+        </IsolatedSelect>
+
+        <InputTextArea
+          label="Descrição"
+          placeholder="Descrição do recurso"
+          id="res-edit-description"
+          rows={4}
+          value={description}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
+        />
+
+        <InputText
+          label="URL *"
+          placeholder="URL do recurso"
+          id="res-edit-url"
+          value={resourceUrl}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setResourceUrl(e.target.value)}
+        />
+
+        <div className="grid grid-cols-2 gap-[16px]">
+          <InputText
+            label="Tamanho"
+            placeholder="Tamanho em bytes"
+            id="res-edit-filesize"
+            value={filesize}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilesize(e.target.value)}
+          />
+          <InputText
+            label="Formato *"
+            placeholder="csv, json, xlsx..."
+            id="res-edit-format"
+            value={resourceFormat}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setResourceFormat(e.target.value)}
+          />
+        </div>
+
+        <InputText
+          label="Mime Type"
+          placeholder="application/json, text/csv..."
+          id="res-edit-mime"
+          value={mime}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMime(e.target.value)}
+        />
+
+        {resource.checksum && (
+          <div className="flex items-center gap-[8px]">
+            <span className="text-sm font-semibold">Soma de verificação</span>
+            <span className="bg-neutral-100 rounded px-[8px] py-[2px] text-xs font-mono">
+              {resource.checksum.type}
+            </span>
+            <span className="text-xs font-mono break-all">{resource.checksum.value}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-between pt-[8px]">
+        <Button appearance="outline" variant="primary" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <div className="flex gap-[8px]">
+          <input
+            ref={replaceFileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleReplaceFile}
+            disabled={isReplacing}
+          />
+          <Button
+            appearance="outline"
+            variant="primary"
+            onClick={() => replaceFileInputRef.current?.click()}
+            disabled={isReplacing}
+          >
+            {isReplacing ? "A substituir..." : "Substituir o ficheiro"}
+          </Button>
+          <Button
+            variant="primary"
+            hasIcon
+            trailingIcon="agora-line-check-circle"
+            trailingIconHover="agora-solid-check-circle"
+            onClick={handleSave}
+            disabled={isSaving || !title.trim()}
+          >
+            {isSaving ? "A guardar..." : "Guardar"}
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -169,31 +548,44 @@ export default function DatasetsEditClient() {
   const [temporalStart, setTemporalStart] = useState("");
   const [temporalEnd, setTemporalEnd] = useState("");
   const [featured, setFeatured] = useState(false);
-  const [accessType, setAccessType] = useState("open");
 
   // Refs for IsolatedSelect (avoid setState during render cycle)
   const keywordsRef = useRef("");
-  const restrictionCommunityRef = useRef("");
-  const restrictionEnterpriseRef = useRef("");
-  const restrictionPrivateRef = useRef("");
-  const restrictionReasonRef = useRef("");
   const spatialCoverageRef = useRef("");
   const spatialGranularityRef = useRef("");
 
   // API state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isUploadingRef = useRef(false);
+  const [uploaderKey, setUploaderKey] = useState(0);
   const [apiError, setApiError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
+  const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
 
   // Dropdown data
   const [licenses, setLicenses] = useState<License[]>([]);
   const [frequencies, setFrequencies] = useState<Frequency[]>([]);
+  const [granularities, setGranularities] = useState<Granularity[]>([]);
+  const [tagSuggestions, setTagSuggestions] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
+  const [keywordSearch, setKeywordSearch] = useState("");
+  const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
+  const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
+
+  // Loaded default values for IsolatedSelect (needed because data arrives async after mount)
+  const [loadedLicense, setLoadedLicense] = useState("");
+  const [loadedFrequency, setLoadedFrequency] = useState("");
+  const [loadedKeywords, setLoadedKeywords] = useState("");
+  const [loadedSpatialGranularity, setLoadedSpatialGranularity] = useState("");
+  const [loadedSpatialZones, setLoadedSpatialZones] = useState<string[]>([]);
+  const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
 
   // Activity data
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [discussionsLoading, setDiscussionsLoading] = useState(false);
   const [discussionsLoaded, setDiscussionsLoaded] = useState(false);
+  const [discussionsTotal, setDiscussionsTotal] = useState<number | null>(null);
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
@@ -203,10 +595,12 @@ export default function DatasetsEditClient() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [ds, licensesData, frequenciesData] = await Promise.all([
+        const [ds, licensesData, frequenciesData, granularitiesData, resTypes] = await Promise.all([
           fetchDataset(slug),
           fetchLicenses(),
           fetchFrequencies(),
+          fetchGranularities(),
+          fetchResourceTypes(),
         ]);
         setDataset(ds);
         setTitle(ds.title);
@@ -214,20 +608,64 @@ export default function DatasetsEditClient() {
         setDescription(ds.description);
         setShortDescription(ds.description_short || "");
         setFeatured(ds.featured || false);
-        selectedLicenseRef.current = ds.license || "";
-        selectedFrequencyRef.current = ds.frequency || "";
+
+        const license = ds.license || "";
+        const frequency = ds.frequency || "";
+        const keywords = (ds.tags || []).join(",");
+        const spatialGranularity = ds.spatial?.granularity || "";
+
+        selectedLicenseRef.current = license;
+        selectedFrequencyRef.current = frequency;
+        keywordsRef.current = keywords;
+        spatialGranularityRef.current = spatialGranularity;
+
+        setLoadedLicense(license);
+        setLoadedFrequency(frequency);
+        setLoadedKeywords(keywords);
+        setLoadedSpatialGranularity(spatialGranularity);
+
         if (ds.temporal_coverage) {
-          setTemporalStart(ds.temporal_coverage.start || "");
-          setTemporalEnd(ds.temporal_coverage.end || "");
+          const toDateOnly = (iso: string) => {
+            if (!iso) return "";
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return iso;
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+          };
+          setTemporalStart(toDateOnly(ds.temporal_coverage.start || ""));
+          setTemporalEnd(toDateOnly(ds.temporal_coverage.end || ""));
         }
         setLicenses(licensesData);
         setFrequencies(frequenciesData);
+        setGranularities(granularitiesData);
+        setResourceTypes(resTypes);
+
+        suggestTags("", 50).then(setTagSuggestions);
+
+        // Load initial Portuguese zone suggestions; merge with any already-selected zones
+        suggestSpatialZones("pt", 50).then((suggestions) => {
+          if (ds.spatial?.zones?.length) {
+            fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
+              const currentIds = currentZones.map((z) => z.id);
+              const seen = new Set(currentIds);
+              const merged = [...currentZones, ...suggestions.filter((z) => !seen.has(z.id))];
+              setSpatialZones(merged);
+              setLoadedSpatialZones(currentIds);
+              spatialCoverageRef.current = currentIds.join(",");
+            });
+          } else {
+            setSpatialZones(suggestions);
+          }
+        });
 
         fetchActivity(ds.id, 1, 1)
           .then((res) => {
             if (res.data.length > 0) setLatestActivity(res.data[0]);
           })
           .catch((err) => console.error("Error loading latest activity:", err));
+
+        fetchDiscussions(ds.id, 1, 1)
+          .then((res) => setDiscussionsTotal(res.total))
+          .catch(() => {});
       } catch (error) {
         console.error("Error loading dataset:", error);
         setApiError("Erro ao carregar o conjunto de dados.");
@@ -244,6 +682,7 @@ export default function DatasetsEditClient() {
     fetchDiscussions(dataset.id)
       .then((res) => {
         setDiscussions(res.data);
+        setDiscussionsTotal(res.total);
         setDiscussionsLoaded(true);
       })
       .catch((err) => console.error("Error loading discussions:", err))
@@ -263,112 +702,121 @@ export default function DatasetsEditClient() {
   };
 
   // Memoized children for IsolatedSelect to prevent re-render cascades
-  const licenseOptions = useMemo(
-    () => (
-      <DropdownSection name="licenses">
-        {licenses.map((license) => (
-          <DropdownOption key={license.id} value={license.id}>
-            {license.title}
-          </DropdownOption>
-        ))}
-      </DropdownSection>
-    ),
-    [licenses],
+  const licenseOptions = useMemo(() => {
+    const options = licenses.map((license) => (
+      <DropdownOption key={license.id} value={license.id} selected={license.id === loadedLicense}>
+        {license.title}
+      </DropdownOption>
+    ));
+    return <DropdownSection name="licenses">{options}</DropdownSection>;
+  }, [licenses, loadedLicense]);
+
+  const frequencyOptions = useMemo(() => {
+    const options = frequencies.map((freq) => (
+      <DropdownOption key={freq.id} value={freq.id} selected={freq.id === loadedFrequency}>
+        {getFrequencyLabel(freq.id, freq.label)}
+      </DropdownOption>
+    ));
+    return <DropdownSection name="frequencies">{options}</DropdownSection>;
+  }, [frequencies, loadedFrequency]);
+
+  const selectedKeywords = useMemo(
+    () => (loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
+    [loadedKeywords]
   );
 
-  const frequencyOptions = useMemo(
-    () => (
-      <DropdownSection name="frequencies">
-        {frequencies.map((freq) => (
-          <DropdownOption key={freq.id} value={freq.id}>
-            {getFrequencyLabel(freq.id, freq.label)}
-          </DropdownOption>
-        ))}
-      </DropdownSection>
-    ),
-    [frequencies],
-  );
+  const keywordOptions = useMemo(() => {
+    const trimmed = keywordSearch.trim();
+    const trimmedLower = trimmed.toLowerCase();
+    // Case-insensitive dedupe across suggestions + search results.
+    const seen = new Set<string>();
+    const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
+    // Keep selected keywords that aren't in suggestions visible and checked.
+    const selectedNotInSuggestions = selectedKeywords.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
+    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const options = [
+      ...(showCreate
+        ? [
+            <DropdownOption
+              key={`__create__${trimmedLower}`}
+              value={trimmed}
+              selected={false}
+            >
+              Criar &quot;{trimmed}&quot;
+            </DropdownOption>,
+          ]
+        : []),
+      ...selectedNotInSuggestions.map((keyword) => (
+        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
+          {keyword}
+        </DropdownOption>
+      )),
+      ...uniqueTags.map((tag) => (
+        <DropdownOption
+          key={tag.text.toLowerCase()}
+          value={tag.text}
+          selected={selectedLowerSet.has(tag.text.toLowerCase())}
+        >
+          {tag.text}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="keywords">{options}</DropdownSection>;
+  }, [tagSuggestions, tagSearch, selectedKeywords, keywordSearch]);
 
-  const keywordOptions = useMemo(
-    () => (
-      <DropdownSection name="keywords">
-        {(dataset?.tags || []).map((tag) => (
-          <DropdownOption key={tag} value={tag}>
-            {tag}
-          </DropdownOption>
-        ))}
-      </DropdownSection>
-    ),
-    [dataset?.tags],
-  );
+  const allSpatialZones = useMemo(() => {
+    const seen = new Set<string>();
+    const merged: SpatialZone[] = [];
+    for (const z of [...spatialZones, ...spatialZoneSearch]) {
+      if (!seen.has(z.id)) {
+        seen.add(z.id);
+        merged.push(z);
+      }
+    }
+    return merged;
+  }, [spatialZones, spatialZoneSearch]);
 
-  const communityOptions = useMemo(
-    () => (
-      <DropdownSection name="community">
-        <DropdownOption value="sim">Sim</DropdownOption>
-        <DropdownOption value="nao">Não</DropdownOption>
-        <DropdownOption value="condicional">Condicional</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
-  );
+  const spatialCoverageOptions = useMemo(() => {
+    const options = allSpatialZones.map((z) => (
+      <DropdownOption key={z.id} value={z.id} selected={loadedSpatialZones.includes(z.id)}>
+        {z.name}
+      </DropdownOption>
+    ));
+    if (options.length === 0) {
+      options.push(
+        <DropdownOption key="empty" value="">
+          —
+        </DropdownOption>
+      );
+    }
+    return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
+  }, [allSpatialZones, loadedSpatialZones]);
 
-  const enterpriseOptions = useMemo(
-    () => (
-      <DropdownSection name="enterprise">
-        <DropdownOption value="sim">Sim</DropdownOption>
-        <DropdownOption value="nao">Não</DropdownOption>
-        <DropdownOption value="condicional">Condicional</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
-  );
-
-  const privateOptions = useMemo(
-    () => (
-      <DropdownSection name="private">
-        <DropdownOption value="sim">Sim</DropdownOption>
-        <DropdownOption value="nao">Não</DropdownOption>
-        <DropdownOption value="condicional">Condicional</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
-  );
-
-  const restrictionReasonOptions = useMemo(
-    () => (
-      <DropdownSection name="restriction-reason">
-        <DropdownOption value="confidencialidade-procedimentos">Confidencialidade dos procedimentos das autoridades públicas</DropdownOption>
-        <DropdownOption value="relacoes-internacionais">Relações internacionais, segurança pública ou defesa nacional</DropdownOption>
-        <DropdownOption value="curso-justica">Curso da justiça</DropdownOption>
-        <DropdownOption value="confidencialidade-comercial">Confidencialidade comercial ou industrial</DropdownOption>
-        <DropdownOption value="propriedade-intelectual">Direitos de propriedade intelectual</DropdownOption>
-        <DropdownOption value="dados-pessoais">Confidencialidade dos dados pessoais</DropdownOption>
-        <DropdownOption value="protecao-fornecedores">Proteção dos fornecedores voluntários de informações</DropdownOption>
-        <DropdownOption value="protecao-ambiental">Proteção ambiental</DropdownOption>
-        <DropdownOption value="outros">Outros</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
-  );
-
-  const spatialCoverageOptions = useMemo(
-    () => (
-      <DropdownSection name="spatial-coverage">
-        <DropdownOption value="">—</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
-  );
-
-  const spatialGranularityOptions = useMemo(
-    () => (
-      <DropdownSection name="spatial-granularity">
-        <DropdownOption value="">—</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
-  );
+  const spatialGranularityOptions = useMemo(() => {
+    const options = [
+      <DropdownOption key="empty" value="">
+        —
+      </DropdownOption>,
+      ...granularities.map((g) => (
+        <DropdownOption
+          key={g.id}
+          value={g.id}
+          selected={g.id === loadedSpatialGranularity}
+        >
+          {getGranularityLabel(g.id, g.name)}
+        </DropdownOption>
+      )),
+    ];
+    return <DropdownSection name="spatial-granularity">{options}</DropdownSection>;
+  }, [granularities, loadedSpatialGranularity]);
 
   const clearError = (field: string) => {
     if (formErrors[field]) {
@@ -387,38 +835,100 @@ export default function DatasetsEditClient() {
     if (!description.trim()) errors.description = true;
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      requestAnimationFrame(() => {
+        document
+          .querySelector('[aria-invalid="true"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setFormErrors({});
     setApiError(null);
     setApiSuccess(null);
     setIsSubmitting(true);
 
     try {
+      const tagsValue = keywordsRef.current;
+      const tags = tagsValue ? tagsValue.split(",").filter(Boolean) : [];
+      const granularity = spatialGranularityRef.current || undefined;
+      const zonesValue = spatialCoverageRef.current;
+      const zones = zonesValue ? zonesValue.split(",").filter(Boolean) : undefined;
+
       const updated = await updateDataset(dataset.id, {
         title: title.trim(),
         description: description.trim(),
         description_short: shortDescription.trim() || undefined,
         acronym: acronym.trim() || undefined,
         featured,
+        tags,
         license: selectedLicenseRef.current || undefined,
         frequency: selectedFrequencyRef.current || undefined,
         temporal_coverage: temporalStart
-          ? { start: temporalStart, ...(temporalEnd ? { end: temporalEnd } : {}) }
+          ? {
+              start: new Date(temporalStart).toISOString(),
+              ...(temporalEnd ? { end: new Date(temporalEnd).toISOString() } : {}),
+            }
           : undefined,
+        ...(granularity || zones
+          ? {
+              spatial: {
+                geom: dataset.spatial?.geom ?? null,
+                zones: zones ?? dataset.spatial?.zones ?? [],
+                granularity: granularity ?? null,
+              },
+            }
+          : {}),
       });
       setDataset(updated);
       setApiSuccess("Conjunto de dados atualizado com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
     } catch (error: unknown) {
       const err = error as { status?: number; data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
+        const flattenValue = (val: unknown): string => {
+          if (Array.isArray(val)) return val.map(flattenValue).join("; ");
+          if (val && typeof val === "object")
+            return Object.values(val as Record<string, unknown>)
+              .map(flattenValue)
+              .join("; ");
+          return String(val);
+        };
         const messages = Object.entries(err.data)
-          .map(([key, val]) => `${key}: ${val}`)
+          .map(([key, val]) => `${key}: ${flattenValue(val)}`)
           .join(", ");
         setApiError(messages);
       } else {
         setApiError("Erro ao atualizar o conjunto de dados.");
       }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleArchiveDataset = async () => {
+    if (!dataset) return;
+    setIsSubmitting(true);
+    try {
+      await updateDataset(dataset.id, { archived: new Date().toISOString() });
+      router.push("/pages/admin/me/datasets?status=archived");
+    } catch (error) {
+      console.error("Error archiving dataset:", error);
+      setApiError("Erro ao arquivar o conjunto de dados.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUnarchiveDataset = async () => {
+    if (!dataset) return;
+    setIsSubmitting(true);
+    try {
+      const updated = await updateDataset(dataset.id, { archived: null });
+      setDataset(updated);
+    } catch (error) {
+      console.error("Error unarchiving dataset:", error);
+      setApiError("Erro ao desarquivar o conjunto de dados.");
     } finally {
       setIsSubmitting(false);
     }
@@ -443,37 +953,147 @@ export default function DatasetsEditClient() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = (e.target as HTMLInputElement).files;
     if (!files || files.length === 0 || !dataset) return;
+    if (isUploadingRef.current) return;
+    isUploadingRef.current = true;
     setIsSubmitting(true);
     setApiError(null);
+    setFileUploadError(null);
     try {
       for (const file of Array.from(files)) {
         await uploadResource(dataset.id, file);
       }
       const updated = await fetchDataset(slug);
       setDataset(updated);
+      setUploaderKey((k) => k + 1);
       setApiSuccess("Ficheiro(s) carregado(s) com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
     } catch (error) {
-      console.error("Error uploading resource:", error);
-      setApiError("Erro ao carregar ficheiro(s).");
+      const err = error as { status?: number; data?: Record<string, unknown>; message?: string };
+      console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
+      if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
+        const flattenValue = (val: unknown): string => {
+          if (Array.isArray(val)) return val.map(flattenValue).join("; ");
+          if (val && typeof val === "object")
+            return Object.values(val as Record<string, unknown>)
+              .map(flattenValue)
+              .join("; ");
+          return String(val);
+        };
+        const msg =
+          (err.data.message as string) ||
+          Object.entries(err.data)
+            .map(([k, v]) => `${k}: ${flattenValue(v)}`)
+            .join(", ");
+        setFileUploadError(`Erro ao carregar ficheiro(s): ${msg}`);
+      } else if (err.message) {
+        setFileUploadError(`Erro ao carregar ficheiro(s): ${err.message}`);
+      } else {
+        const statusHint = err.status ? ` (HTTP ${err.status})` : "";
+        setFileUploadError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
+      }
     } finally {
+      isUploadingRef.current = false;
       setIsSubmitting(false);
     }
   };
 
-  const handleDeleteResource = async (resource: Resource) => {
+  const handleDeleteResource = (resource: Resource) => {
     if (!dataset) return;
-    if (!confirm(`Tem certeza que deseja eliminar "${resource.title}"?`)) return;
-    setIsSubmitting(true);
-    try {
-      await deleteResource(dataset.id, resource.id);
-      const updated = await fetchDataset(slug);
-      setDataset(updated);
-    } catch (error) {
-      console.error("Error deleting resource:", error);
-      setApiError("Erro ao eliminar o ficheiro.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    show(
+      <DeleteResourcePopup
+        datasetId={dataset.id}
+        resource={resource}
+        onDeleted={() => {
+          setDataset((prev) =>
+            prev ? { ...prev, resources: prev.resources.filter((r) => r.id !== resource.id) } : prev
+          );
+          setApiSuccess("Ficheiro eliminado com sucesso.");
+          setTimeout(() => setApiSuccess(null), 10000);
+        }}
+      />,
+      {
+        title: "Eliminar ficheiro",
+        closeAriaLabel: "Fechar",
+        dimensions: "m",
+      }
+    );
+  };
+
+  const refreshDataset = async () => {
+    const updated = await fetchDataset(slug);
+    setDataset(updated);
+  };
+
+  const handleResourceEdit = (resource: Resource) => {
+    if (!dataset) return;
+    show(
+      <ResourceEditPopupContent
+        resource={resource}
+        datasetId={dataset.id}
+        resourceTypes={resourceTypes}
+        onSaved={async () => {
+          hide();
+          await refreshDataset();
+          setApiSuccess("Recurso atualizado com sucesso.");
+          setTimeout(() => setApiSuccess(null), 10000);
+        }}
+        onCancel={hide}
+      />,
+      {
+        title: resource.title,
+        closeAriaLabel: "Fechar",
+        dimensions: "l",
+      }
+    );
+  };
+
+  const handleResourceClick = (resource: Resource) => {
+    if (!dataset) return;
+    const openEdit = () => {
+      hide();
+      setTimeout(() => {
+        show(
+          <ResourceEditPopupContent
+            resource={resource}
+            datasetId={dataset.id}
+            resourceTypes={resourceTypes}
+            onSaved={async () => {
+              hide();
+              await refreshDataset();
+              setApiSuccess("Recurso atualizado com sucesso.");
+              setTimeout(() => setApiSuccess(null), 10000);
+            }}
+            onCancel={hide}
+          />,
+          {
+            title: resource.title,
+            closeAriaLabel: "Fechar",
+            dimensions: "l",
+          }
+        );
+      }, 100);
+    };
+
+    const openDelete = () => {
+      hide();
+      setTimeout(() => {
+        handleDeleteResource(resource);
+      }, 100);
+    };
+
+    show(
+      <ResourceDetailPopupContent
+        resource={resource}
+        onEdit={openEdit}
+        onDelete={openDelete}
+        onClose={hide}
+      />,
+      {
+        title: resource.title,
+        closeAriaLabel: "Fechar",
+        dimensions: "l",
+      }
+    );
   };
 
   if (isLoading) {
@@ -488,10 +1108,7 @@ export default function DatasetsEditClient() {
     return (
       <div className="admin-page">
         <StatusCard type="danger" description="Conjunto de dados não encontrado." />
-        <Button
-          variant="primary"
-          onClick={() => router.push("/pages/admin/me/datasets")}
-        >
+        <Button variant="primary" onClick={() => router.push("/pages/admin/me/datasets")}>
           Voltar
         </Button>
       </div>
@@ -552,7 +1169,10 @@ export default function DatasetsEditClient() {
         />
       </div>
 
-      <div className="admin-page__header" style={{ flexDirection: "column", alignItems: "flex-start" }}>
+      <div
+        className="admin-page__header"
+        style={{ flexDirection: "column", alignItems: "flex-start" }}
+      >
         <div className="flex justify-end w-full">
           <Button
             variant="primary"
@@ -568,8 +1188,16 @@ export default function DatasetsEditClient() {
         <h1 className="admin-page__title">{dataset.title}</h1>
       </div>
 
-      {apiError && <StatusCard type="danger" description={apiError} />}
-      {apiSuccess && <StatusCard type="success" description={apiSuccess} />}
+      {apiError && (
+        <div className="my-[24px]">
+          <StatusCard type="danger" description={apiError} />
+        </div>
+      )}
+      {apiSuccess && (
+        <div className="my-[24px]">
+          <StatusCard type="success" description={apiSuccess} />
+        </div>
+      )}
 
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
@@ -578,8 +1206,18 @@ export default function DatasetsEditClient() {
           </Pill>
           {dataset.featured && <Pill variant="informative">DESTAQUE</Pill>}
           <span className="admin-edit-info__stat">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="admin-edit-info__stat-icon">
-              <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" fill="#64718B" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="admin-edit-info__stat-icon"
+            >
+              <path
+                d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z"
+                fill="#64718B"
+              />
             </svg>
             {`${(dataset.metrics?.views ?? 0) + (dataset.metrics?.resources_downloads ?? 0) + (dataset.metrics?.reuses ?? 0) + (dataset.metrics?.followers ?? 0)} estatísticas`}
           </span>
@@ -605,7 +1243,7 @@ export default function DatasetsEditClient() {
                 {latestActivity.actor.first_name} {latestActivity.actor.last_name}
               </Link>
               {" — "}
-              {latestActivity.label}
+              {translateActivityLabel(latestActivity.label)}
               {" — "}
               <span>
                 {format(new Date(latestActivity.created_at), "d 'de' MMMM 'de' yyyy", {
@@ -659,8 +1297,9 @@ export default function DatasetsEditClient() {
                         <>
                           <strong>Modifique a visibilidade do conjunto de dados.</strong>
                           <br />
-                          Este conjunto de dados é atualmente <strong>privado</strong>.
-                          {" Somente você ou membros da sua organização podem visualizá-lo e contribuir para ele."}
+                          Este conjunto de dados encontra‑se atualmente em{" "}
+                          <strong>modo privado</strong>. Apenas os membros da organização o podem
+                          visualizar e editar.
                         </>
                       }
                     />
@@ -673,28 +1312,28 @@ export default function DatasetsEditClient() {
                             const updated = await updateDataset(dataset.id, { private: false });
                             setDataset(updated);
                             setApiSuccess("Conjunto de dados publicado com sucesso.");
+                            setTimeout(() => setApiSuccess(null), 10000);
                           } catch {
                             setApiError("Erro ao publicar o conjunto de dados.");
                           }
                         }}
                         disabled={isSubmitting}
                       >
-                        Publique o conjunto de dados
+                        Publicar o conjunto de dados
                       </Button>
                     </div>
                   </div>
                 )}
 
-                <form
-                  className="admin-page__form"
-                  onSubmit={(e) => e.preventDefault()}
-                >
+                <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
                   <p className="text-neutral-900 text-base leading-7">
                     Os campos marcados com um asterisco ( * ) são obrigatórios.
                   </p>
 
                   <div>
-                    <h2 className="admin-page__section-title admin-page__section-title--no-top">APRESENTOU</h2>
+                    <h2 className="admin-page__section-title admin-page__section-title--no-top">
+                      Destaque
+                    </h2>
                     <Switch
                       id="edit-featured"
                       label="Destaque"
@@ -705,7 +1344,9 @@ export default function DatasetsEditClient() {
                     />
                   </div>
 
-                  <h2 className="admin-page__section-title admin-page__section-title--no-top">Descrição</h2>
+                  <h2 className="admin-page__section-title admin-page__section-title--no-top">
+                    Descrição
+                  </h2>
                   <div className="admin-page__fields-group">
                     <InputText
                       label="Título*"
@@ -726,137 +1367,113 @@ export default function DatasetsEditClient() {
                       placeholder="Insira a sigla aqui"
                       id="edit-acronym"
                       value={acronym}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAcronym(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setAcronym(e.target.value)
+                      }
                     />
-                    <InputTextArea
-                      label="Descrição*"
-                      placeholder="Insira a descrição aqui"
-                      id="edit-description"
-                      rows={6}
-                      maxLength={246}
-                      showCharCounter={true}
-                      value={description}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                        setDescription(e.target.value);
-                        if (e.target.value.trim()) clearError("description");
-                      }}
-                      hasError={formErrors.description ? true : undefined}
-                      hasFeedback={formErrors.description ? true : undefined}
-                      feedbackState="danger"
-                      feedbackText="Campo obrigatório"
-                      errorFeedbackText="Campo obrigatório"
-                    />
-                    <div className="flex items-center justify-between">
-                      <Button appearance="outline" variant="primary" hasIcon leadingIcon="agora-line-edit" leadingIconHover="agora-solid-edit">
-                        Sugira uma breve descrição.
-                      </Button>
-                      <a
-                        href="https://dados.gov.pt"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 text-sm underline inline-flex items-center gap-[8px] hover:text-primary-800"
-                      >
-                        O que achou desta sugestão? <Icon name="agora-line-external-link" className="w-4 h-4" />
-                      </a>
+                    <div className="flex flex-col gap-[8px]">
+                      <span className="text-primary-900 text-base font-medium leading-7">
+                        Descrição *
+                      </span>
+                      <RichTextEditor
+                        content={description}
+                        onChange={(html) => {
+                          setDescription(html);
+                          if (html.trim()) clearError("description");
+                        }}
+                      />
+                      {formErrors.description && (
+                        <span className="text-danger-600 text-sm">Campo obrigatório</span>
+                      )}
                     </div>
-
+                    {/*<InputTextArea
+                      label="Descrição resumida"
+                      placeholder="Insira a descrição aqui"
+                      id="edit-short-description"
+                      rows={3}
+                      maxLength={200}
+                      showCharCounter={true}
+                      value={shortDescription}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        setShortDescription(e.target.value)
+                      }
+                      hasFeedback
+                      feedbackState="info"
+                      feedbackText="Se este campo for deixado em branco, serão utilizados os primeiros 197 caracteres da sua descrição, seguidos de '...' (máximo de 200 caracteres)."
+                    />*/}
                     <IsolatedSelect
                       label="Palavras-chave"
-                      placeholder="Pesquise por uma palavra-chave..."
+                      placeholder="Pesquise ou insira palavras-chave..."
                       id="edit-keywords"
                       type="checkbox"
+                      searchable
+                      searchInputPlaceholder="Escreva para pesquisar ou criar..."
+                      searchNoResultsText="Nenhum resultado encontrado"
+                      defaultValue={loadedKeywords}
                       onChangeRef={keywordsRef}
+                      onSearchCallback={(q) => {
+                        setKeywordSearch(q);
+                        if (!q) return;
+                        suggestTags(q, 20).then(setTagSearch);
+                      }}
+                      onChangeCallback={(value) => {
+                        setLoadedKeywords(value);
+                        const selected = value.split(",").filter(Boolean);
+                        let addedNew = false;
+                        selected.forEach((v) => {
+                          const lower = v.toLowerCase();
+                          const existsInSuggestions = tagSuggestions.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          const existsInSearch = tagSearch.some(
+                            (t) => t.text.toLowerCase() === lower,
+                          );
+                          if (!existsInSuggestions && !existsInSearch) {
+                            addedNew = true;
+                            setTagSuggestions((prev) => {
+                              if (prev.some((t) => t.text.toLowerCase() === lower)) {
+                                return prev;
+                              }
+                              return [...prev, { text: v }];
+                            });
+                          }
+                        });
+                        if (addedNew) {
+                          setKeywordSearch("");
+                        }
+                      }}
                     >
                       {keywordOptions}
                     </IsolatedSelect>
-                    <div className="flex items-center justify-between">
-                      <Button
-                        appearance="outline"
-                        variant="primary"
-                        hasIcon
-                        leadingIcon="agora-line-edit"
-                        leadingIconHover="agora-solid-edit"
-                      >
-                        Sugira palavras-chave
-                      </Button>
-                      <a
-                        href="https://dados.gov.pt"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 text-sm underline inline-flex items-center gap-[8px] hover:text-primary-800"
-                      >
-                        O que achou desta sugestão? <Icon name="agora-line-external-link" className="w-4 h-4" />
-                      </a>
-                    </div>
+
+                    {selectedKeywords.length > 0 && (
+                      <div className="flex flex-wrap gap-8 -mt-8">
+                        {selectedKeywords.map((keyword) => (
+                          <Tag
+                            key={keyword}
+                            aria-label={`Remover ${keyword}`}
+                            onClick={() => {
+                              const next = selectedKeywords
+                                .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                                .join(",");
+                              setLoadedKeywords(next);
+                              keywordsRef.current = next;
+                            }}
+                          >
+                            {keyword}
+                          </Tag>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <h2 className="admin-page__section-title">Acesso</h2>
                   <div className="admin-page__fields-group">
-                    <div className="flex flex-col gap-[8px]">
-                      <span className="text-primary-900 text-base font-medium leading-7">
-                        Tipo de acesso
-                      </span>
-                      <div className="flex flex-col gap-4">
-                        <RadioButton
-                          label="Aberto"
-                          id="edit-access-open"
-                          name="edit-access-type"
-                          checked={accessType === "open"}
-                          onChange={() => setAccessType("open")}
-                        />
-                        <RadioButton
-                          label="Restrito"
-                          id="edit-access-restricted"
-                          name="edit-access-type"
-                          checked={accessType === "restricted"}
-                          onChange={() => setAccessType("restricted")}
-                        />
-                      </div>
-                    </div>
-
-                    {accessType === "restricted" && (
-                      <>
-                        <div className="grid grid-cols-3 gap-8 mt-4 items-end">
-                          <IsolatedSelect
-                            label="Comunidade e Administração"
-                            placeholder=""
-                            id="edit-restriction-community"
-                            onChangeRef={restrictionCommunityRef}
-                          >
-                            {communityOptions}
-                          </IsolatedSelect>
-                          <IsolatedSelect
-                            label="Empresa e Associação"
-                            placeholder=""
-                            id="edit-restriction-enterprise"
-                            onChangeRef={restrictionEnterpriseRef}
-                          >
-                            {enterpriseOptions}
-                          </IsolatedSelect>
-                          <IsolatedSelect
-                            label="Privado"
-                            placeholder=""
-                            id="edit-restriction-private"
-                            onChangeRef={restrictionPrivateRef}
-                          >
-                            {privateOptions}
-                          </IsolatedSelect>
-                        </div>
-                        <IsolatedSelect
-                          label="Motivo da restrição"
-                          placeholder=""
-                          id="edit-restriction-reason"
-                          onChangeRef={restrictionReasonRef}
-                        >
-                          {restrictionReasonOptions}
-                        </IsolatedSelect>
-                      </>
-                    )}
-
                     <IsolatedSelect
                       label="Licença"
-                      placeholder="Selecione uma licença"
+                      placeholder="Selecione uma licença..."
                       id="edit-license"
+                      defaultValue={loadedLicense}
                       onChangeRef={selectedLicenseRef}
                     >
                       {licenseOptions}
@@ -867,8 +1484,9 @@ export default function DatasetsEditClient() {
                   <div className="admin-page__fields-group">
                     <IsolatedSelect
                       label="Frequência de atualização"
-                      placeholder="Selecione uma frequência"
+                      placeholder="Selecione uma frequência..."
                       id="edit-frequency"
+                      defaultValue={loadedFrequency}
                       onChangeRef={selectedFrequencyRef}
                     >
                       {frequencyOptions}
@@ -876,8 +1494,10 @@ export default function DatasetsEditClient() {
 
                     <div className="flex gap-[18px] [&>*]:flex-1">
                       <InputDate
+                        key={`date-start-${temporalStart}`}
                         label="Cobertura temporal (Data de início)"
                         id="edit-date-start"
+                        defaultValue={temporalStart}
                         dayInputPlaceholder="dd"
                         monthInputPlaceholder="mm"
                         yearInputPlaceholder="aaaa"
@@ -896,8 +1516,10 @@ export default function DatasetsEditClient() {
                         }
                       />
                       <InputDate
+                        key={`date-end-${temporalEnd}`}
                         label="Data de fim"
                         id="edit-date-end"
+                        defaultValue={temporalEnd}
                         dayInputPlaceholder="dd"
                         monthInputPlaceholder="mm"
                         yearInputPlaceholder="aaaa"
@@ -922,9 +1544,18 @@ export default function DatasetsEditClient() {
                   <div className="admin-page__fields-group">
                     <IsolatedSelect
                       label="Cobertura espacial"
-                      placeholder="Pesquisar por cobertura espacial..."
+                      placeholder="Selecione uma cobertura espacial..."
                       id="edit-spatial-coverage"
+                      type="checkbox"
+                      searchable
+                      searchInputPlaceholder="Escreva para pesquisar..."
+                      searchNoResultsText="Nenhum resultado encontrado"
+                      defaultValue={loadedSpatialZones.join(",")}
                       onChangeRef={spatialCoverageRef}
+                      onSearchCallback={(q) => {
+                        if (!q) return;
+                        suggestSpatialZones(q, 10).then(setSpatialZoneSearch);
+                      }}
                     >
                       {spatialCoverageOptions}
                     </IsolatedSelect>
@@ -932,6 +1563,7 @@ export default function DatasetsEditClient() {
                       label="Granularidade espacial"
                       placeholder="Selecione uma granularidade..."
                       id="edit-spatial-granularity"
+                      defaultValue={loadedSpatialGranularity}
                       onChangeRef={spatialGranularityRef}
                     >
                       {spatialGranularityOptions}
@@ -941,10 +1573,13 @@ export default function DatasetsEditClient() {
                   <div className="admin-page__actions flex justify-end mt-[24px]">
                     <Button
                       variant="primary"
+                      hasIcon
+                      trailingIcon="agora-line-check-circle"
+                      trailingIconHover="agora-solid-check-circle"
                       onClick={handleSaveMetadata}
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? "A guardar..." : "Guardar alterações"}
+                      {isSubmitting ? "A guardar..." : "Guardar"}
                     </Button>
                   </div>
 
@@ -953,7 +1588,7 @@ export default function DatasetsEditClient() {
                       type="info"
                       description={
                         <>
-                          <strong>Atenção, esta ação não pode ser corrigida.</strong>
+                          <strong>Atenção esta ação é irreversível.</strong>
                           <br />
                           <Button
                             appearance="link"
@@ -968,14 +1603,14 @@ export default function DatasetsEditClient() {
                                   onClose={hide}
                                 />,
                                 {
-                                  title: "Conjunto de dados de transferência",
+                                  title: "Transfira o conjunto de dados",
                                   closeAriaLabel: "Fechar",
                                   dimensions: "m",
-                                },
+                                }
                               );
                             }}
                           >
-                            Transferir o conjunto de dados
+                            Transfira o conjunto de dados
                           </Button>
                         </>
                       }
@@ -984,7 +1619,10 @@ export default function DatasetsEditClient() {
                       type="warning"
                       description={
                         <>
-                          <strong>Um conjunto de dados arquivado não está mais indexado, mas permanece acessível aos utilizadores por meio de um link direto.</strong>
+                          <strong>
+                            Um conjunto de dados arquivado deixa de estar indexado no portal, mas
+                            permanece acessível através de um link direto.
+                          </strong>
                           <br />
                           <Button
                             appearance="link"
@@ -995,9 +1633,12 @@ export default function DatasetsEditClient() {
                             onClick={(e: React.MouseEvent) => {
                               e.preventDefault();
                               e.stopPropagation();
+                              dataset?.archived ? handleUnarchiveDataset() : handleArchiveDataset();
                             }}
                           >
-                            Arquivar o conjunto de dados
+                            {dataset?.archived
+                              ? "Desarquivar o conjunto de dados"
+                              : "Arquivar o conjunto de dados"}
                           </Button>
                         </>
                       }
@@ -1006,7 +1647,7 @@ export default function DatasetsEditClient() {
                       type="danger"
                       description={
                         <>
-                          <strong>Atenção, esta ação não pode ser corrigida.</strong>
+                          <strong>Atenção esta ação é irreversível.</strong>
                           <br />
                           <Button
                             appearance="link"
@@ -1023,16 +1664,15 @@ export default function DatasetsEditClient() {
                                   onConfirm={handleDeleteDataset}
                                 />,
                                 {
-                                  title:
-                                    "Tem a certeza que quer eliminar este conjunto de dados?",
+                                  title: "Elimine o conjunto de dados",
                                   closeAriaLabel: "Fechar",
                                   dimensions: "m",
-                                },
+                                }
                               );
                             }}
                             disabled={isSubmitting}
                           >
-                            Elimine o conjunto de dados
+                            Eliminar o conjunto de dados
                           </Button>
                         </>
                       }
@@ -1044,33 +1684,30 @@ export default function DatasetsEditClient() {
               <aside className="admin-page__auxiliar">
                 <div className="admin-page__auxiliar-inner">
                   <div className="admin-page__auxiliar-header">
-                    <Icon
-                      name="agora-line-question-mark"
-                      className="w-[24px] h-[24px]"
-                    />
+                    <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
                     <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                   </div>
                   <AuxiliarList
                     items={[
                       {
-                        title: "Nomeando seu conjunto de dados",
+                        title: "Dar o nome ao conjunto de dados",
                         content: (
                           <>
                             <p>O título do seu conjunto de dados deve ser o mais preciso e específico possível.</p>
-                            <p>Deve também corresponder ao vocabulário utilizado pelos utilizadores que, na maioria das vezes, procuram dados através de um motor de pesquisa.</p>
+                            <p>Deve também corresponder ao vocabulário utilizado pelos utilizadores que, na maioria das vezes, procuram dados através do motor de pesquisa.</p>
                           </>
                         ),
                         hasError: !!formErrors.title,
                       },
                       {
-                        title: "Adicione uma sigla ao conjunto de dados.",
-                        content: "Tem a opção de adicionar uma sigla ao seu conjunto de dados. As letras que compõem essa sigla não precisam ser separadas por pontos.",
+                        title: "Adicionar uma sigla ao conjunto de dados",
+                        content: "Tem a opção de adicionar uma sigla ao seu conjunto de dados. Não é necessário que as letras que compõem essa sigla estejam separadas por pontos.",
                       },
                       {
-                        title: "Escreva uma boa descrição",
+                        title: "Escrever uma boa descrição",
                         content: (
                           <>
-                            <p>A descrição do seu conjunto de dados permite que os utilizadores obtenham informações sobre o conteúdo e a estrutura dos recursos publicados.</p>
+                            <p>A descrição resumida apresenta o seu conjunto de dados, ajudando os utilizadores a entenderem rapidamente o conteúdo e melhora a sua visibilidade nos resultados de pesquisa.</p>
                             <ul className="list-disc pl-5 mt-2 flex flex-col gap-2">
                               <li>A lista de ficheiros disponibilizados;</li>
                               <li>Descrição do formato do ficheiro;</li>
@@ -1081,22 +1718,24 @@ export default function DatasetsEditClient() {
                         hasError: !!formErrors.description,
                       },
                       {
-                        title: "Escreva uma breve descrição.",
+                        title: "Escrever uma breve descrição",
                         content: "A descrição resumida apresenta seu conjunto de dados em uma ou duas frases. Isso ajuda os utilizadores a entenderem rapidamente o conteúdo e melhora sua visibilidade nos resultados de pesquisa.",
                       },
                       {
-                        title: "Selecione uma licença",
+                        title: "Selecionar  uma licença",
                         content: "As licenças definem as regras para a reutilização. Ao escolher uma licença de reutilização, garante que o conjunto de dados publicado será reutilizado de acordo com os termos de uso que definiu.",
                       },
                       {
-                        title: "Escolha a frequência de atualização.",
-                        content: "A frequência de atualização refere-se à frequência com que planeja atualizar os dados publicados. Essa frequência de atualização é apenas indicativa.",
+                        title: "Escolher  a frequência de atualização",
+                        content: "A frequência de atualização refere-se à frequência com que planeia atualizar os dados publicados. Essa frequência de atualização é apenas indicativa.",
                       },
                       {
-                        title: "Forneça a cobertura de tempo.",
+                        title: "Fornecer  a cobertura de tempo",
                         content: (
                           <>
-                            <p>A abrangência temporal indica o período de tempo dos dados publicados.</p>
+                            <p>
+                              A abrangência temporal indica o período de tempo dos dados publicados.
+                            </p>
                             <p>Por exemplo: de 2012 a 2015.</p>
                           </>
                         ),
@@ -1115,12 +1754,21 @@ export default function DatasetsEditClient() {
           <TabBody>
             <div className="mt-[24px]">
               <div className="flex items-end gap-[16px] mb-[16px]">
-                <ButtonUploader
+                <DragAndDropUploader
+                  key={uploaderKey}
                   label="Ficheiros"
-                  inputLabel="Selecione ou arraste o ficheiro"
+                  dragAndDropLabel="Arraste e largue os ficheiros aqui"
+                  inputLabel="Selecione ou arraste os ficheiros"
                   selectedFilesLabel="ficheiros selecionados"
                   removeFileButtonLabel="Remover ficheiro"
                   replaceFileButtonLabel="Substituir ficheiro"
+                  maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo permitido."
+                  forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                  hasError={!!fileUploadError}
+                  hasFeedback={!!fileUploadError}
+                  feedbackState="danger"
+                  feedbackText={fileUploadError ?? undefined}
+                  multiple
                   onChange={handleFileUpload}
                 />
                 <Button appearance="outline" variant="primary" className="mb-[32px]">
@@ -1129,8 +1777,24 @@ export default function DatasetsEditClient() {
               </div>
 
               <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
-                {dataset.resources.length} {dataset.resources.length === 1 ? "FICHEIRO" : "FICHEIROS"}
+                {dataset.resources.length}{" "}
+                {dataset.resources.length === 1 ? "FICHEIRO" : "FICHEIROS"}
               </h2>
+
+              {dataset.resources.length === 0 && (
+                <CardNoResults
+                  position="center"
+                  icon={
+                    <Icon
+                      name="agora-line-document"
+                      className="w-12 h-12 text-primary-500 icon-xl"
+                    />
+                  }
+                  title="Sem ficheiros"
+                  description="Este conjunto de dados ainda não tem ficheiros. Adicione ficheiros ou links para começar."
+                  hasAnchor={false}
+                />
+              )}
 
               {dataset.resources.length > 0 && (
                 <Table>
@@ -1149,7 +1813,12 @@ export default function DatasetsEditClient() {
                     {dataset.resources.map((resource) => (
                       <TableRow key={resource.id}>
                         <TableCell headerLabel="Nome do ficheiro">
-                          {resource.title}
+                          <button
+                            className="text-primary-600 underline text-left cursor-pointer"
+                            onClick={() => handleResourceClick(resource)}
+                          >
+                            {resource.title}
+                          </button>
                         </TableCell>
                         <TableCell headerLabel="Estado">
                           <StatusDot variant="success">DISPONÍVEL</StatusDot>
@@ -1158,20 +1827,45 @@ export default function DatasetsEditClient() {
                           {resource.type === "main" ? "Ficheiros principais" : resource.type || "-"}
                         </TableCell>
                         <TableCell headerLabel="Formato">
-                          {resource.format || "-"}
+                          {resource.format ? resource.format.toUpperCase() : "-"}
                         </TableCell>
                         <TableCell headerLabel="Criado em">
-                          {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                          {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy", {
+                            locale: pt,
+                          })}
                         </TableCell>
                         <TableCell headerLabel="Atualizado em">
-                          {resource.last_modified
-                            ? format(new Date(resource.last_modified), "d 'de' MMMM 'de' yyyy", { locale: pt })
-                            : format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                          {format(
+                            new Date(resource.last_modified || resource.created_at),
+                            "d 'de' MMMM 'de' yyyy",
+                            { locale: pt }
+                          )}
                         </TableCell>
                         <TableCell headerLabel="Ação">
-                          <a href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
-                            <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                          </a>
+                          <div className="flex items-center gap-[8px]">
+                            <button
+                              className="text-primary-500 hover:text-primary-700"
+                              title="Ver detalhes"
+                              onClick={() => handleResourceClick(resource)}
+                            >
+                              <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                            </button>
+                            <button
+                              className="text-primary-500 hover:text-primary-700"
+                              title="Editar recurso"
+                              onClick={() => handleResourceEdit(resource)}
+                            >
+                              <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                            </button>
+                            <button
+                              className="text-danger-500 hover:text-danger-700"
+                              title="Eliminar ficheiro"
+                              onClick={() => handleDeleteResource(resource)}
+                              disabled={isSubmitting}
+                            >
+                              <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
+                            </button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -1184,12 +1878,10 @@ export default function DatasetsEditClient() {
 
         {/* Discussions Tab */}
         <Tab>
-          <TabHeader>Discussões ({discussions.length})</TabHeader>
+          <TabHeader>Discussões ({discussionsTotal ?? 0})</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              {discussionsLoading && (
-                <p className="text-neutral-700 text-sm">A carregar...</p>
-              )}
+              {discussionsLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
               {discussionsLoaded && discussions.length === 0 && (
                 <CardNoResults
                   position="center"
@@ -1217,12 +1909,12 @@ export default function DatasetsEditClient() {
                                 {disc.user.first_name} {disc.user.last_name}
                               </span>
                               {" — Publicado em "}
-                              {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                              {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", {
+                                locale: pt,
+                              })}
                             </p>
                           </div>
-                          <Pill
-                            variant={disc.closed ? "neutral" : "informative"}
-                          >
+                          <Pill variant={disc.closed ? "neutral" : "informative"}>
                             {disc.closed ? "Fechada" : "Aberta"}
                           </Pill>
                         </div>
@@ -1240,11 +1932,11 @@ export default function DatasetsEditClient() {
                                     {msg.posted_by.first_name} {msg.posted_by.last_name}
                                   </span>
                                   {" — "}
-                                  {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                                  {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", {
+                                    locale: pt,
+                                  })}
                                 </p>
-                                <p className="text-neutral-900 text-sm mt-[4px]">
-                                  {msg.content}
-                                </p>
+                                <p className="text-neutral-900 text-sm mt-[4px]">{msg.content}</p>
                               </div>
                             ))}
                           </div>
@@ -1263,9 +1955,7 @@ export default function DatasetsEditClient() {
           <TabHeader>Atividades</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              {activitiesLoading && (
-                <p className="text-neutral-700 text-sm">A carregar...</p>
-              )}
+              {activitiesLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
               {activitiesLoaded && activities.length === 0 && (
                 <CardNoResults
                   position="center"
@@ -1304,9 +1994,8 @@ export default function DatasetsEditClient() {
                               className="text-primary-600 underline"
                             >
                               {activity.actor?.first_name} {activity.actor?.last_name}
-                            </a>
-                            {" "}
-                            {activity.label}
+                            </a>{" "}
+                            {translateActivityLabel(activity.label)}
                           </p>
                           <p className="text-xs text-neutral-600 mt-[4px]">
                             {new Date(activity.created_at).toLocaleDateString("pt-PT", {
@@ -1326,7 +2015,6 @@ export default function DatasetsEditClient() {
             </div>
           </TabBody>
         </Tab>
-
       </Tabs>
     </div>
   );

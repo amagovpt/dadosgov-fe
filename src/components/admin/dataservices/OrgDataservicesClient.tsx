@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import {
   Breadcrumb,
   CardNoResults,
@@ -21,6 +22,8 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 const formatDate = (dateStr: string) => {
@@ -29,20 +32,44 @@ const formatDate = (dateStr: string) => {
 };
 
 export default function OrgDataservicesClient() {
+  const params = useParams();
+  const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+  const resolvedOrgId = routeOrgId || activeOrg?.id;
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const filteredApis = useMemo(() => {
+    if (!statusFilter) return apis;
+    return apis.filter((a) => {
+      switch (statusFilter) {
+        case "public":
+          return !a.private && !a.archived && !a.deleted;
+        case "draft":
+          return a.private && !a.archived && !a.deleted;
+        case "archived":
+          return !!a.archived && !a.deleted;
+        case "deleted":
+          return !!a.deleted;
+        default:
+          return true;
+      }
+    });
+  }, [apis, statusFilter]);
 
   useEffect(() => {
-    if (!activeOrg) {
+    if (!resolvedOrgId) {
       setIsLoading(false);
       return;
     }
     async function loadDataservices() {
       setIsLoading(true);
       try {
-        const response = await fetchOrgDataservices(activeOrg!.id, 1, 9999);
+        const response = await fetchOrgDataservices(resolvedOrgId!, 1, 9999);
         setApis(response.data || []);
       } catch (error) {
         console.error("Error loading org dataservices:", error);
@@ -51,10 +78,9 @@ export default function OrgDataservicesClient() {
       }
     }
     loadDataservices();
-  }, [activeOrg]);
+  }, [resolvedOrgId]);
 
-  if (isOrgLoading) return <p>A carregar...</p>;
-  if (!activeOrg) {
+  if (!isOrgLoading && !resolvedOrgId) {
     return (
       <div className="admin-page">
         <CardNoResults
@@ -77,8 +103,8 @@ export default function OrgDataservicesClient() {
         <Breadcrumb
           items={[
             { label: "Administração", url: "/pages/admin" },
-            { label: "Organização", url: "#" },
-            { label: "API", url: "/pages/admin/org/dataservices" },
+            { label: orgName || "Organização", url: "#" },
+            { label: "API", url: "#" },
           ]}
         />
       </div>
@@ -89,7 +115,7 @@ export default function OrgDataservicesClient() {
       </div>
 
       <p className="text-neutral-700 text-sm mb-[16px]">
-        {apis.length} resultados
+        {filteredApis.length} resultados
       </p>
 
       <div className="flex items-end gap-[16px] mb-[24px]">
@@ -105,26 +131,30 @@ export default function OrgDataservicesClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          onChange={(options) => {
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+          }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="public">Público</DropdownOption>
-            <DropdownOption value="archived">Arquivo</DropdownOption>
-            <DropdownOption value="draft">Rascunho</DropdownOption>
-            <DropdownOption value="deleted">Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
 
       {isLoading ? (
         <p>A carregar...</p>
-      ) : apis.length > 0 ? (
+      ) : filteredApis.length > 0 ? (
         <Table
           paginationProps={{
             itemsPerPageLabel: "Linhas por página",
             itemsPerPage: 5,
-            totalItems: apis.length,
+            totalItems: filteredApis.length,
             availablePageSizes: [5, 10, 20],
-            currentPage: 1,
+            currentPage: 0,
             buttonDropdownAriaLabel: "Selecionar linhas por página",
             dropdownListAriaLabel: "Opções de linhas por página",
             prevButtonAriaLabel: "Página anterior",
@@ -147,7 +177,7 @@ export default function OrgDataservicesClient() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {apis.map((api, index) => (
+            {filteredApis.map((api, index) => (
               <TableRow key={index}>
                 <TableCell headerLabel="Título">
                   <a
@@ -158,9 +188,15 @@ export default function OrgDataservicesClient() {
                   </a>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot variant={api.private ? "warning" : "success"}>
-                    {api.private ? "Rascunho" : "Público"}
-                  </StatusDot>
+                  {api.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : api.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : api.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
                   {formatDate(api.created_at)}
