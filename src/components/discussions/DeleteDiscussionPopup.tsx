@@ -79,7 +79,8 @@ export default function DeleteDiscussionPopup({
       </div>
 
       <StatusCard
-        type="info"
+        variant="informative"
+        showIcon
         description={
           isMainPost
             ? "Essa ação é irreversível. Todos os comentários nesta discussão também serão apagados."

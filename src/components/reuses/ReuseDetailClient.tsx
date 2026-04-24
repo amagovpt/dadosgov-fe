@@ -531,7 +531,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 <div>
                   <div className="mb-24">
                     <StatusCard
-                      type="info"
+                      variant="informative"
+                      showIcon
                       description={
                         <span>
                           A sua questão não é sobre a reutilização? <Link href="https://dados.gov.pt/pt/" className="underline text-primary-600" target="_blank">Visite o nosso fórum.</Link>

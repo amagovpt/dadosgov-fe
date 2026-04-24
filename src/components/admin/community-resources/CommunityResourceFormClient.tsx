@@ -280,7 +280,8 @@ export default function CommunityResourceFormClient({
           {currentStep === 1 && (
             <>
               <StatusCard
-                type="info"
+                variant="informative"
+                showIcon
                 description={
                   <>
                     <strong>O que é um recurso comunitário?</strong>
@@ -294,7 +295,7 @@ export default function CommunityResourceFormClient({
 
               {apiError && (
                 <div className="mt-[32px] mb-[16px]">
-                  <StatusCard type="danger" description={apiError} />
+                  <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
 
@@ -627,7 +628,8 @@ export default function CommunityResourceFormClient({
           {currentStep === 2 && (
             <>
               <StatusCard
-                type="success"
+                variant="success"
+                showIcon
                 description={
                   <>
                     <strong>O seu recurso comunitário foi criado!</strong>
@@ -711,7 +713,7 @@ export default function CommunityResourceFormClient({
 
               {apiError && (
                 <div className="mt-[32px] mb-[16px]">
-                  <StatusCard type="danger" description={apiError} />
+                  <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
             </>

@@ -205,7 +205,8 @@ export default function OrganizationsNewClient() {
           {currentStep === 1 && (
             <div className="admin-page__form">
               <StatusCard
-                type="info"
+                variant="informative"
+                showIcon
                 description={
                   <>
                     <strong>Inscreva-se numa organização</strong>
@@ -259,7 +260,8 @@ export default function OrganizationsNewClient() {
           {currentStep === 2 && (
             <>
               <StatusCard
-                type="info"
+                variant="informative"
+                showIcon
                 description={
                   <>
                     <strong>O que é uma organização?</strong>
@@ -401,7 +403,8 @@ export default function OrganizationsNewClient() {
           {currentStep === 3 && (
             <div className="admin-page__form">
               <StatusCard
-                type="success"
+                variant="success"
+                showIcon
                 description={
                   <>
                     <strong>A sua organização foi criada!</strong>

@@ -346,12 +346,13 @@ export default function ProfileClient() {
 
                 {saveSuccess && (
                   <StatusCard
-                    type="success"
+                    variant="success"
+                    showIcon
                     description="Perfil guardado com sucesso."
                   />
                 )}
                 {saveError && (
-                  <StatusCard type="danger" description={saveError} />
+                  <StatusCard variant="danger" showIcon description={saveError} />
                 )}
 
                 <div className="admin-page__fields-group">
@@ -467,7 +468,8 @@ export default function ProfileClient() {
 
                     {newToken && (
                       <StatusCard
-                        type="warning"
+                        variant="warning"
+                        showIcon
                         description={
                           <div className="flex flex-col gap-[8px]">
                             <p>
@@ -555,7 +557,8 @@ export default function ProfileClient() {
 
                   {emailChangeSuccess && (
                     <StatusCard
-                      type="success"
+                      variant="success"
+                      showIcon
                       description="Foi enviado um e-mail de confirmação para o novo endereço. Verifique a sua caixa de entrada."
                     />
                   )}

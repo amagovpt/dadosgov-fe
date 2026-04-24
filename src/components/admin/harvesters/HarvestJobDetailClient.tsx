@@ -136,7 +136,7 @@ export default function HarvestJobDetailClient({
   if (!job) {
     return (
       <div className="admin-page">
-        <StatusCard type="danger" description="Trabalho não encontrado." />
+        <StatusCard variant="danger" showIcon description="Trabalho não encontrado." />
       </div>
     );
   }

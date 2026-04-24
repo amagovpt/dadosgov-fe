@@ -134,12 +134,13 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
 
         {requestSuccess && (
           <StatusCard
-            type="success"
+            variant="success"
+            showIcon
             description="Pedido de adesão enviado com sucesso. O administrador da organização irá analisar o seu pedido."
           />
         )}
         {requestError && (
-          <StatusCard type="danger" description={requestError} />
+          <StatusCard variant="danger" showIcon description={requestError} />
         )}
 
         {showRequestForm && (

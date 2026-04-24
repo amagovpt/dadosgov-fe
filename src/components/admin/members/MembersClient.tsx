@@ -134,7 +134,8 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
     <div className="flex flex-col gap-[24px]">
       {hasPendingInvite && (
         <StatusCard
-          type="info"
+          variant="informative"
+          showIcon
           description="Este utilizador já foi convidado para esta organização. O convite encontra-se pendente de aceitação."
         />
       )}

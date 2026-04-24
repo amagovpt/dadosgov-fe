@@ -57,10 +57,10 @@ export function ChangePasswordPopupContent() {
   return (
     <div className="flex flex-col gap-[24px]">
       {success ? (
-        <StatusCard type="success" description="Senha alterada com sucesso." />
+        <StatusCard variant="success" showIcon description="Senha alterada com sucesso." />
       ) : (
         <>
-          {error && <StatusCard type="danger" description={error} />}
+          {error && <StatusCard variant="danger" showIcon description={error} />}
 
           <InputText
             label="Senha atual *"

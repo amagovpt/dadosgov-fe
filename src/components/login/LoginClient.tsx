@@ -542,7 +542,7 @@ function LoginContent() {
                             </div>
 
                             {error && (
-                              <StatusCard type="danger" description={error} />
+                              <StatusCard variant="danger" showIcon description={error} />
                             )}
 
                             <form
@@ -619,7 +619,8 @@ function LoginContent() {
               <div className="xl:col-span-3" />
               <div className="xl:col-span-9 xl:col-start-4">
                 <StatusCard
-                  type="info"
+                  variant="informative"
+                  showIcon
                   description={
                     <div className="flex flex-col gap-8">
                       <p className="text-sm font-bold">Tem dúvidas?</p>

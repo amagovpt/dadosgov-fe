@@ -512,7 +512,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
             <div>
               <div className="mb-24">
                 <StatusCard
-                  type="info"
+                  variant="informative"
+                  showIcon
                   description={
                     <>
                       A sua questão é sobre outro tema que não esta organização?{" "}

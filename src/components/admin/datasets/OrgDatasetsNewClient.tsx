@@ -91,7 +91,8 @@ export default function OrgDatasetsNewClient() {
           <h2 className="admin-page__section-title mb-[16px]">Tipo de publicação</h2>
 
           <StatusCard
-            type="info"
+            variant="informative"
+            showIcon
             description="Se desejar realizar testes, utilize demo.dados.gov.pt"
           />
 

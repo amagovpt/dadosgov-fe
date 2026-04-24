@@ -328,7 +328,8 @@ export default function HarvestersNewClient() {
           {currentStep === 1 && (
             <>
               <StatusCard
-                type="info"
+                variant="informative"
+                showIcon
                 description={
                   <>
                     <strong>O que é um harvester?</strong>
@@ -651,7 +652,8 @@ export default function HarvestersNewClient() {
             <div className="admin-page__form">
               {isPreviewing && (
                 <StatusCard
-                  type="info"
+                  variant="informative"
+                  showIcon
                   description={
                     <>
                       <strong>A pré-visualizar o harvester...</strong>
@@ -751,7 +753,8 @@ export default function HarvestersNewClient() {
                 previewJob.errors.map((error, index) => (
                   <StatusCard
                     key={index}
-                    type="danger"
+                    variant="danger"
+                    showIcon
                     description={
                       <>
                         <strong>ERRO</strong> {error.message}
@@ -761,7 +764,8 @@ export default function HarvestersNewClient() {
                 ))
               ) : previewError ? (
                 <StatusCard
-                  type="danger"
+                  variant="danger"
+                  showIcon
                   description={
                     <>
                       <strong>ERRO</strong> {previewError}
@@ -806,7 +810,8 @@ export default function HarvestersNewClient() {
             <div className="admin-page__form">
               {createError && (
                 <StatusCard
-                  type="danger"
+                  variant="danger"
+                  showIcon
                   description={
                     <>
                       <strong>Erro ao criar o harvester</strong>
@@ -819,7 +824,8 @@ export default function HarvestersNewClient() {
 
               {!createError && (
                 <StatusCard
-                  type="warning"
+                  variant="warning"
+                  showIcon
                   description={
                     <>
                       <strong>
