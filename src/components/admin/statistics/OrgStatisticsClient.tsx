@@ -79,12 +79,6 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm leading-relaxed mb-[24px]">
-        As estatísticas foram compiladas a partir de julho de 2022
-        <br />
-        e atualizadas esta manhã.
-      </p>
-
       <Tabs>
         <Tab active>
           <TabHeader>Organização</TabHeader>
