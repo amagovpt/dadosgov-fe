@@ -557,6 +557,7 @@ export default function DatasetsEditClient() {
   // API state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isUploadingRef = useRef(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
   const [uploaderKey, setUploaderKey] = useState(0);
   const [apiError, setApiError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
@@ -874,7 +875,6 @@ export default function DatasetsEditClient() {
       });
       return;
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
     setFormErrors({});
     setApiError(null);
     setApiSuccess(null);
@@ -915,6 +915,10 @@ export default function DatasetsEditClient() {
       setDataset(updated);
       setApiSuccess("Conjunto de dados atualizado com sucesso.");
       setTimeout(() => setApiSuccess(null), 10000);
+      requestAnimationFrame(() => {
+        tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        tabsRef.current?.focus({ preventScroll: true });
+      });
     } catch (error: unknown) {
       const err = error as { status?: number; data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
@@ -1307,6 +1311,7 @@ export default function DatasetsEditClient() {
         </p>
       </div>
 
+      <div ref={tabsRef} tabIndex={-1} className="outline-none">
       <Tabs
         onTabActivation={(index: number) => {
           setApiError(null);
@@ -2084,6 +2089,7 @@ export default function DatasetsEditClient() {
           </TabBody>
         </Tab>
       </Tabs>
+      </div>
     </div>
   );
 }
