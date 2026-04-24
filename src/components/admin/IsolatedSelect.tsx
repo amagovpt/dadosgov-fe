@@ -4,6 +4,7 @@ import React, { type ReactElement } from "react";
 import {
   InputSelect,
   type DropdownSectionProps,
+  type DropdownOptionProps,
 } from "@ama-pt/agora-design-system";
 
 /**
@@ -16,6 +17,10 @@ import {
  * This component wraps InputSelect in React.memo so it only re-renders when
  * its own props change. Values are stored via a MutableRefObject to avoid
  * triggering parent re-renders on selection.
+ *
+ * The children are cloned to inject `selected={true}` on the matching option
+ * so that InputSelect's internal useEffect([children]) re-reads the correct
+ * selection state even when the children reference changes.
  */
 
 interface IsolatedSelectProps {
@@ -39,6 +44,26 @@ interface IsolatedSelectProps {
   | ReactElement<DropdownSectionProps>[];
 }
 
+function injectSelected(
+  children: ReactElement<DropdownSectionProps> | ReactElement<DropdownSectionProps>[],
+  selectedValues: string[]
+): ReactElement<DropdownSectionProps> | ReactElement<DropdownSectionProps>[] {
+  return React.Children.map(children, (section) => {
+    if (!React.isValidElement(section)) return section;
+    const sectionEl = section as ReactElement<DropdownSectionProps>;
+    const modifiedOptions = React.Children.map(
+      sectionEl.props.children as ReactElement<DropdownOptionProps> | ReactElement<DropdownOptionProps>[],
+      (option) => {
+        if (!React.isValidElement(option)) return option;
+        const optionEl = option as ReactElement<DropdownOptionProps>;
+        const isSelected = selectedValues.includes(String(optionEl.props.value));
+        return React.cloneElement(optionEl, { selected: isSelected });
+      }
+    );
+    return React.cloneElement(sectionEl, {}, modifiedOptions);
+  }) as ReactElement<DropdownSectionProps>[];
+}
+
 const IsolatedSelect = React.memo(function IsolatedSelect({
   label,
   placeholder,
@@ -57,21 +82,35 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
   onSearchCallback,
   children,
 }: IsolatedSelectProps) {
-  // Sync defaultValue into the ref when it changes so handleSave reads the correct value
+  const [internalValue, setInternalValue] = React.useState(defaultValue || "");
+
+  // Sync defaultValue into state and ref when it changes (e.g. after save)
   React.useEffect(() => {
     if (defaultValue !== undefined) {
+      setInternalValue(defaultValue);
       onChangeRef.current = defaultValue;
     }
   }, [defaultValue, onChangeRef]);
 
-  const [internalValue, setInternalValue] = React.useState(defaultValue || "");
+  const selectedValues = React.useMemo(
+    () => (internalValue ? internalValue.split(",").filter(Boolean) : []),
+    [internalValue]
+  );
 
-  // Update internal state if defaultValue prop changes (e.g. after save)
-  React.useEffect(() => {
-    if (defaultValue !== undefined) {
-      setInternalValue(defaultValue);
-    }
-  }, [defaultValue]);
+  // Keep a stable snapshot of children that only updates when the selection changes.
+  // If we included `children` in the deps, every parent re-render (e.g. typing in a
+  // sibling input) would give InputSelect a new children reference, triggering its
+  // internal useEffect([children]) which resets the selected options to [].
+  // By depending only on `internalValue`, the reference stays the same while the user
+  // types elsewhere, so InputSelect never sees a children change and never resets.
+  const latestChildrenRef = React.useRef(children);
+  latestChildrenRef.current = children;
+
+  const childrenWithSelection = React.useMemo(
+    () => injectSelected(latestChildrenRef.current, selectedValues),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [internalValue]
+  );
 
   return (
     <InputSelect
@@ -83,7 +122,6 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
       searchable={searchable}
       searchInputPlaceholder={searchInputPlaceholder}
       searchNoResultsText={searchNoResultsText}
-      value={internalValue !== undefined ? (typeof internalValue === "string" && internalValue !== "" ? (type === "checkbox" ? internalValue.split(",") : [internalValue]) : internalValue) : undefined}
       onSearchInputChange={onSearchCallback}
       onChange={(options) => {
         const value = options.map((o) => o.value as string).join(",");
@@ -97,7 +135,7 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
       errorFeedbackText={errorFeedbackText}
       required={required}
     >
-      {children}
+      {childrenWithSelection}
     </InputSelect>
   );
 });

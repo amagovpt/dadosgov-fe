@@ -579,7 +579,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                           </span>
                           <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id="discussion-identity-reuse" onChangeRef={selectedIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
                             <DropdownSection name="identity">
-                              <DropdownOption value="user">{user.first_name} {user.last_name} (utilizador)</DropdownOption>
+                              <DropdownOption value="user">{`${user.first_name} ${user.last_name} (utilizador)`}</DropdownOption>
                               {user.organizations.map((org) => (
                                 <DropdownOption key={org.id} value={org.id}>{org.name}</DropdownOption>
                               ))}
@@ -654,7 +654,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                                   <span className="block text-sm font-medium text-neutral-900 mb-8">Escolha a identidade com a qual deseja publicar esta mensagem.</span>
                                   <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id={`reply-identity-${disc.id}`} onChangeRef={replyIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
                                     <DropdownSection name="identity">
-                                      <DropdownOption value="user">{user.first_name} {user.last_name} (utilizador)</DropdownOption>
+                                      <DropdownOption value="user">{`${user.first_name} ${user.last_name} (utilizador)`}</DropdownOption>
                                       {user.organizations.map((org) => (<DropdownOption key={org.id} value={org.id}>{org.name}</DropdownOption>))}
                                     </DropdownSection>
                                   </IsolatedSelect>

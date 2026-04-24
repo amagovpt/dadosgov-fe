@@ -29,7 +29,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
     const identityOptions = React.useMemo(() => (
         <DropdownSection name="identity">
             <DropdownOption value="user">
-                {user.first_name} {user.last_name} (utilizador)
+                {`${user.first_name} ${user.last_name} (utilizador)`}
             </DropdownOption>
             {user.organizations.map((org) => (
                 <DropdownOption key={org.id} value={org.id}>
@@ -390,7 +390,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                             >
                                                 <DropdownSection name="identity">
                                                     <DropdownOption value="user">
-                                                        {user.first_name} {user.last_name} (utilizador)
+                                                        {`${user.first_name} ${user.last_name} (utilizador)`}
                                                     </DropdownOption>
                                                     {user.organizations.map((org) => (
                                                         <DropdownOption key={org.id} value={org.id}>
