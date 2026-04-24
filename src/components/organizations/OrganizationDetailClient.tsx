@@ -93,10 +93,10 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   }, [checkOverflow]);
 
   return (
-    <div className="flex flex-col font-sans text-neutral-900 bg-white min-h-screen overflow-x-hidden">
-      <main className="flex-grow container mx-auto px-4 pt-[64px]">
+    <div className="flex flex-col justify-center items-center">
+      <main className="container flex flex-col gap-24">
         {/* Breadcrumb & Action Section */}
-        <div className="flex justify-between items-center mb-[24px]">
+        <div className="flex justify-between items-center ">
           <Breadcrumb
             items={[
               { label: "Home", url: "/" },
@@ -106,7 +106,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           />
         </div>
 
-        <div className="flex justify-end gap-[12px] mb-[24px]">
+        <div className="flex justify-end gap-[12px] ">
           {user && !isMember && !requestSuccess && (
             <Button
               variant="primary"
@@ -143,7 +143,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
         )}
 
         {showRequestForm && (
-          <div className="bg-neutral-50 rounded-lg p-[24px] mb-[24px] flex flex-col gap-[16px]">
+          <div className="bg-neutral-50 rounded-lg p-[24px]  flex flex-col gap-[16px]">
             <h3 className="text-primary-900 text-base font-semibold">
               Pedir adesão a {organization.name}
             </h3>
@@ -180,7 +180,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           </div>
         )}
 
-        <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32 mb-[24px]">
+        <div className="grid xl:grid-cols-12 gap-32 ">
           {/* Main Content Column */}
           <div className="xl:col-span-6 xl:block">
             {/* Title & Header */}
@@ -196,7 +196,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             <div className="prose max-w-none max-w-ch text-neutral-700 text-lg leading-relaxed mb-12 relative">
               {/* Hidden measure element to get full content height */}
               <div ref={measureRef} className="absolute invisible pointer-events-none" style={{ top: 0, left: 0, right: 0 }} aria-hidden="true">
-                <p className="text-neutral-900 text-m-light mb-[24px] max-w-[592px]">
+                <p className="text-neutral-900 text-m-light  max-w-[592px]">
                   {organization.description || "Esta organização não possui descrição."}
                 </p>
                 <div className="mt-8">
@@ -212,7 +212,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                   <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
                     Sobre a organização
                   </h3>
-                  <p className="text-neutral-900 mb-[24px] max-w-[592px]">
+                  <p className="text-neutral-900  max-w-[592px]">
                     {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
                     para a transparência e reutilização de informação pública em Portugal.
                   </p>
@@ -222,7 +222,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 className="overflow-hidden"
                 style={!expanded && isOverflowing && availableHeight ? { maxHeight: availableHeight } : undefined}
               >
-                <p className="text-neutral-900 text-m-light mb-[24px] max-w-[592px]">
+                <p className="text-neutral-900 text-m-light  max-w-[592px]">
                   {organization.description || "Esta organização não possui descrição."}
                 </p>
 
@@ -241,7 +241,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                   <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
                     Sobre a organização
                   </h3>
-                  <p className="text-neutral-900 mb-[24px] max-w-[592px]">
+                  <p className="text-neutral-900  max-w-[592px]">
                     {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
                     para a transparência e reutilização de informação pública em Portugal.
                   </p>
@@ -328,8 +328,8 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                     desde{" "}
                     {organization.created_at
                       ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
-                          locale: pt,
-                        })
+                        locale: pt,
+                      })
                       : "—"}
                   </div>
                 </div>
@@ -356,8 +356,8 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                     desde{" "}
                     {organization.created_at
                       ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
-                          locale: pt,
-                        })
+                        locale: pt,
+                      })
                       : "—"}
                   </div>
                 </div>
