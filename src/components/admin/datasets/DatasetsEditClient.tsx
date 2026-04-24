@@ -643,21 +643,15 @@ export default function DatasetsEditClient() {
 
         suggestTags("", 50).then(setTagSuggestions);
 
-        suggestSpatialZones("", 10).then((initialZones) => {
-          if (ds.spatial?.zones?.length) {
-            fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
-              const currentIds = currentZones.map((z) => z.id);
-              const seen = new Set(currentIds);
-              const merged = [...currentZones, ...initialZones.filter((z) => !seen.has(z.id))];
-              setSpatialZones([...merged].sort((a, b) => a.name.localeCompare(b.name, "pt")));
-              setLoadedSpatialZones(currentIds);
-              setSelectedSpatialZonesValue(currentIds.join(","));
-              spatialCoverageRef.current = currentIds.join(",");
-            });
-          } else {
-            setSpatialZones([...initialZones].sort((a, b) => a.name.localeCompare(b.name, "pt")));
-          }
-        });
+        if (ds.spatial?.zones?.length) {
+          fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
+            const currentIds = currentZones.map((z) => z.id);
+            setSpatialZones(currentZones);
+            setLoadedSpatialZones(currentIds);
+            setSelectedSpatialZonesValue(currentIds.join(","));
+            spatialCoverageRef.current = currentIds.join(",");
+          });
+        }
 
         fetchActivity(ds.id, 1, 1)
           .then((res) => {

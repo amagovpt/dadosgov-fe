@@ -462,7 +462,7 @@ export default function DatasetsAdminClient({
   useEffect(() => {
     async function loadDropdownData() {
       try {
-        const [licensesData, frequenciesData, granularitiesData, myDatasetsData, tagsData, resTypes, initialZones] =
+        const [licensesData, frequenciesData, granularitiesData, myDatasetsData, tagsData, resTypes] =
           await Promise.all([
             fetchLicenses(),
             fetchFrequencies(),
@@ -470,7 +470,6 @@ export default function DatasetsAdminClient({
             fetchMyDatasets(1, 1),
             suggestTags("", 50),
             fetchResourceTypes(),
-            suggestSpatialZones("", 10),
           ]);
         setLicenses(licensesData);
         setFrequencies(frequenciesData);
@@ -478,7 +477,6 @@ export default function DatasetsAdminClient({
         setHasDatasets(myDatasetsData.data.length > 0);
         setTags(tagsData);
         setResourceTypes(resTypes);
-        setSpatialZones([...initialZones].sort((a, b) => a.name.localeCompare(b.name, "pt")));
       } catch (error) {
         console.error("Error loading dropdown data:", error);
       }
