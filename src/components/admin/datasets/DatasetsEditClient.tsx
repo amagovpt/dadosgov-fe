@@ -1143,7 +1143,7 @@ export default function DatasetsEditClient() {
   if (!dataset) {
     return (
       <div className="admin-page">
-        <StatusCard type="danger" description="Conjunto de dados não encontrado." />
+        <StatusCard variant="danger" showIcon description="Conjunto de dados não encontrado." />
         <Button variant="primary" onClick={() => router.push("/pages/admin/me/datasets")}>
           Voltar
         </Button>
@@ -1226,12 +1226,12 @@ export default function DatasetsEditClient() {
 
       {apiError && (
         <div className="my-[24px]">
-          <StatusCard type="danger" description={apiError} />
+          <StatusCard variant="danger" showIcon description={apiError} />
         </div>
       )}
       {apiSuccess && (
         <div className="my-[24px]">
-          <StatusCard type="success" description={apiSuccess} />
+          <StatusCard variant="success" showIcon description={apiSuccess} />
         </div>
       )}
 
@@ -1329,7 +1329,8 @@ export default function DatasetsEditClient() {
                 {dataset.private && (
                   <div className="dataset-edit-visibility-banner">
                     <StatusCard
-                      type="info"
+                      variant="informative"
+                      showIcon
                       description={
                         <>
                           <strong>Modifique a visibilidade do conjunto de dados.</strong>
@@ -1658,7 +1659,8 @@ export default function DatasetsEditClient() {
 
                   <div className="dataset-edit-danger-actions">
                     <StatusCard
-                      type="info"
+                      variant="informative"
+                      showIcon
                       description={
                         <>
                           <strong>Atenção esta ação é irreversível.</strong>
@@ -1689,7 +1691,8 @@ export default function DatasetsEditClient() {
                       }
                     />
                     <StatusCard
-                      type="warning"
+                      variant="warning"
+                      showIcon
                       description={
                         <>
                           <strong>
@@ -1717,7 +1720,8 @@ export default function DatasetsEditClient() {
                       }
                     />
                     <StatusCard
-                      type="danger"
+                      variant="danger"
+                      showIcon
                       description={
                         <>
                           <strong>Atenção esta ação é irreversível.</strong>

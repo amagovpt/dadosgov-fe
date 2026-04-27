@@ -224,7 +224,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
         <Tab>
           <TabHeader>Descrição</TabHeader>
           {renderTabBody(
-            <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32 mt-6">
+            <div className="grid xl:grid-cols-12 gap-32 mt-6">
               {/* Main Content */}
               <div className="xl:col-span-8 max-w-ch">
                 <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed relative">
@@ -512,7 +512,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
             <div>
               <div className="mb-24">
                 <StatusCard
-                  type="info"
+                  variant="informative"
+                  showIcon
                   description={
                     <>
                       A sua questão é sobre outro tema que não esta organização?{" "}

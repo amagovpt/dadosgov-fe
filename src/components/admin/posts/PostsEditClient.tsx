@@ -371,8 +371,8 @@ export default function PostsEditClient() {
         <h1 className="admin-page__title">{post.name}</h1>
       </div>
 
-      {apiError && <StatusCard type="danger" description={apiError} />}
-      {apiSuccess && <StatusCard type="success" description={apiSuccess} />}
+      {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
+      {apiSuccess && <StatusCard variant="success" showIcon description={apiSuccess} />}
 
       <Tabs
         className="mt-8"
@@ -582,7 +582,8 @@ export default function PostsEditClient() {
                 <div className="dataset-edit-danger-actions">
                   {post.published ? (
                     <StatusCard
-                      type="warning"
+                      variant="warning"
+                      showIcon
                       description={
                         <>
                           <strong>Retirar o artigo</strong>
@@ -605,7 +606,8 @@ export default function PostsEditClient() {
                     />
                   ) : (
                     <StatusCard
-                      type="info"
+                      variant="informative"
+                      showIcon
                       description={
                         <>
                           <strong>Artigo despublicado</strong>
@@ -628,7 +630,8 @@ export default function PostsEditClient() {
                     />
                   )}
                   <StatusCard
-                    type="danger"
+                    variant="danger"
+                    showIcon
                     description={
                       <>
                         <strong>Atenção, esta ação não pode ser corrigida.</strong>

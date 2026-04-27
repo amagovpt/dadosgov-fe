@@ -267,7 +267,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
     <TabBody>
       <div className="relative">
         <div
-          className="absolute inset-y-0 -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64 bg-neutral-50 z-0"
+          className="absolute inset-y-0 -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64 bg-neutral-50 z-0 "
           aria-hidden="true"
         />
         <div className="relative z-10 ">
@@ -278,7 +278,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   );
 
   return (
-    <div className="flex flex-col font-sans text-neutral-900 bg-white min-h-screen overflow-x-hidden">
+    <div className="flex flex-col justify-center items-center">
       {/* Hero Section */}
       <section className="bg-white text-neutral-900 pt-24 pb-48 sm:pb-64">
         <div className="container mx-auto px-4 sm:px-16 md:px-32 lg:px-64">
@@ -360,7 +360,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
           )}
 
           {/* Hero Content */}
-          <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32 mt-6 mb-24">
+          <div className="grid xl:grid-cols-12 gap-32 mt-6 mb-24">
             {/* Image Column */}
             <div className="xl:col-span-8">
               <div className=" w-full">
@@ -444,7 +444,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             <Tab>
               <TabHeader>Descrição</TabHeader>
               {renderTabBody(
-                <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32 mt-6">
+                <div className="grid xl:grid-cols-12 gap-32 mt-6">
                   {/* Main Content */}
                   <div className="xl:col-span-8 max-w-ch">
                     <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed relative">
@@ -531,7 +531,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 <div>
                   <div className="mb-24">
                     <StatusCard
-                      type="info"
+                      variant="informative"
+                      showIcon
                       description={
                         <span>
                           A sua questão não é sobre a reutilização? <Link href="https://dados.gov.pt/pt/" className="underline text-primary-600" target="_blank">Visite o nosso fórum.</Link>

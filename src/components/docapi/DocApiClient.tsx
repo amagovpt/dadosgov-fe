@@ -15,7 +15,8 @@ export default function DocApiClient() {
       <h1 className="text-2xl-bold mt-24 mb-16">API do portal</h1>
 
       <StatusCard
-        type="warning"
+        variant="warning"
+        showIcon
         description="Página em manutenção"
       />
     </div>

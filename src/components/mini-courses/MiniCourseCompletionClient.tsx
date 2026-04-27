@@ -70,7 +70,7 @@ export default function MiniCourseCompletionClient({ slug }: Props) {
                 ]}
               />
 
-              <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32 mt-32">
+              <div className="grid xl:grid-cols-12 gap-32 mt-32">
                 {/* Left: Texts */}
                 <div className="xl:col-span-7 xl:block md:pt-32">
 

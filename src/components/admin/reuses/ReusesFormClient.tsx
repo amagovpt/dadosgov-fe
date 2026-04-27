@@ -516,7 +516,8 @@ export default function ReusesFormClient({
           {currentStep === 1 && (
             <>
               <StatusCard
-                type="info"
+                variant="informative"
+                showIcon
                 description={
                   <>
                     <strong>O que é reutilização?</strong>
@@ -530,7 +531,7 @@ export default function ReusesFormClient({
 
               {apiError && (
                 <div className="mt-[32px] mb-[16px]">
-                  <StatusCard type="danger" description={apiError} />
+                  <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
 
@@ -760,19 +761,21 @@ export default function ReusesFormClient({
             <>
               <div className="mb-[24px]">
                 <StatusCard
-                  type="info"
+                  variant="informative"
+                  showIcon
                   description="É importante associar todos os conjuntos de dados, pois ajuda a compreender as referências cruzadas e a melhorar a visibilidade da sua reutilização. Escolha uma das formas de associar os conjuntos de dados: ou publicados neste portal; ou em alternativa indicar links para conjuntos de dados publicados noutros portais."
                 />
               </div>
               <div className="mb-[24px]">
                 <StatusCard
-                  type="warning"
+                  variant="warning"
+                  showIcon
                   description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
                 />
               </div>
               {apiError && (
                 <div className="mt-[32px] mb-[16px]">
-                  <StatusCard type="danger" description={apiError} />
+                  <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
 
@@ -1028,7 +1031,8 @@ export default function ReusesFormClient({
             <>
               <div className="mb-[24px]">
                 <StatusCard
-                  type="success"
+                  variant="success"
+                  showIcon
                   description={
                     <>
                       <strong>A sua reutilização foi criada!</strong>
@@ -1130,7 +1134,7 @@ export default function ReusesFormClient({
 
               {apiError && (
                 <div className="mt-[32px] mb-[16px]">
-                  <StatusCard type="danger" description={apiError} />
+                  <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
 

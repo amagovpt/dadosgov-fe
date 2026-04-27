@@ -261,7 +261,8 @@ export default function OrgProfileClient() {
             <div className="admin-page__fields-group pt-32">
               {saveStatus && (
                 <StatusCard
-                  type={saveStatus === "success" ? "success" : "danger"}
+                  variant={saveStatus === "success" ? "success" : "danger"}
+                  showIcon
                   description={
                     saveStatus === "success"
                       ? "Perfil da organização atualizado com sucesso."
@@ -359,7 +360,8 @@ export default function OrgProfileClient() {
 
               <div className="dataset-edit-danger-actions">
                 <StatusCard
-                  type="danger"
+                  variant="danger"
+                  showIcon
                   description={
                     <>
                       <strong>Atenção Esta ação é irreversível.</strong>

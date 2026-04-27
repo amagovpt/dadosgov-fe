@@ -50,7 +50,7 @@ export default function DataSourcesSection({ className, title, description, data
                                 </div>
                             </InfoBlock.Content>
                         </div>
-                        <div className='relative w-full h-full -z-10 max-[1024]:hidden'>
+                        <div className='relative w-full h-full -z-10 xl:hidden'>
                             <div className='absolute bg-primary-300 w-[373px] h-[373px] -top-[165px] rounded-[50px] left-[250px] ' />
                             <div className='absolute bg-primary-300 w-[108px] h-[108px] top-[10px] rounded-[25px] left-[108px]' />
                             <div className='absolute bg-primary-300 w-[216px] h-[216px] top-[163px] rounded-[50px]' />

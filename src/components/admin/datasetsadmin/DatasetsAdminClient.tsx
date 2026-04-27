@@ -1000,14 +1000,15 @@ export default function DatasetsAdminClient({
         {/* Left: Form */}
         <div className="admin-page__form-area">
           {apiError && (
-            <StatusCard type="danger" description={apiError} />
+            <StatusCard variant="danger" showIcon description={apiError} />
           )}
 
           {/* Step 2: Descreva o conjunto de dados */}
           {currentStep === 2 && (
             <>
               <StatusCard
-                type="info"
+                variant="informative"
+                showIcon
                 description={
                   <>
                     <strong>O que é um conjunto de dados?</strong>
@@ -1512,7 +1513,8 @@ export default function DatasetsAdminClient({
           {currentStep === 3 && (
             <>
               <StatusCard
-                type="info"
+                variant="informative"
+                showIcon
                 description={
                   <>
                     <strong>O que é um ficheiro?</strong>
@@ -1594,7 +1596,8 @@ export default function DatasetsAdminClient({
           {currentStep === 4 && (
             <>
               <StatusCard
-                type="success"
+                variant="success"
+                showIcon
                 description={
                   <>
                     <strong>O seu conjunto de dados foi criado!</strong>

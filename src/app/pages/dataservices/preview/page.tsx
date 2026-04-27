@@ -12,9 +12,9 @@ function DataservicePreviewContent() {
   const description = searchParams.get("description") || "Sem descrição";
 
   return (
-    <div className="flex flex-col font-sans text-neutral-900 bg-white min-h-screen overflow-x-hidden">
-      <main className="flex-grow container mx-auto px-4 pt-[64px]">
-        <div className="flex justify-between items-center mb-[24px]">
+    <div className="flex flex-col justify-center items-center">
+      <main className="container flex flex-col gap-24">
+        <div className="flex justify-between items-center">
           <Breadcrumb
             items={[
               { label: "Home", url: "/" },
@@ -24,7 +24,7 @@ function DataservicePreviewContent() {
           />
         </div>
 
-        <div className="flex justify-end items-center gap-[16px] mb-[24px]">
+        <div className="flex justify-end items-center gap-[16px]">
           <Pill variant="warning">Rascunho</Pill>
           <Button
             variant="primary"
@@ -39,8 +39,8 @@ function DataservicePreviewContent() {
           </Button>
         </div>
 
-        <div className="mb-[24px]">
-          <h1 className="text-xl-bold text-primary-900 leading-tight mb-24">
+        <div className="">
+          <h1 className="text-xl-bold text-primary-900 leading-tight">
             {title}
           </h1>
           <p className="text-neutral-900 text-m-light">{description}</p>
