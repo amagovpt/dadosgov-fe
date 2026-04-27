@@ -66,7 +66,10 @@ interface AddMemberPopupProps {
 
 function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopupProps) {
   const { hide } = usePopupContext();
-  const [suggestions, setSuggestions] = useState<UserSuggestion[]>([]);
+  const [initialSuggestions, setInitialSuggestions] = useState<UserSuggestion[]>([]);
+  const [searchResults, setSearchResults] = useState<UserSuggestion[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const memberIdsRef = useRef<string[]>([]);
   const pendingUserIdsRef = useRef<string[]>([]);
   const selectedUserIdRef = useRef("");
@@ -81,11 +84,11 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
     async function loadData() {
       try {
         const [users, org, requests] = await Promise.all([
-          suggestUsers(""),
+          suggestUsers("", 50),
           fetchOrganization(orgId),
           fetchMembershipRequests(orgId),
         ]);
-        setSuggestions(users);
+        setInitialSuggestions(users);
         memberIdsRef.current = (org?.members || []).map((m: OrganizationMember) => m.user.id);
         pendingUserIdsRef.current = requests
           .filter((r: MembershipRequest) => r.status === "pending" && r.user)
@@ -97,15 +100,41 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
     loadData();
   }, [orgId]);
 
-  const userDropdownChildren = useMemo(() => (
-    <DropdownSection name="users">
-      {suggestions.map((user) => (
-        <DropdownOption key={user.id} value={user.id}>
-          {`${user.first_name} ${user.last_name}`}
-        </DropdownOption>
-      ))}
-    </DropdownSection>
-  ), [suggestions]);
+  // Debounced backend search while the user types in the dropdown input.
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestUsers(q, 50);
+        setSearchResults(res);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const userDropdownChildren = useMemo(() => {
+    // When searching show only backend matches; otherwise show the initial list.
+    const source = searchQuery.trim().length >= 2 ? searchResults : initialSuggestions;
+    return (
+      <DropdownSection name="users">
+        {source.map((user) => (
+          <DropdownOption key={user.id} value={user.id}>
+            {`${user.first_name} ${user.last_name}`}
+          </DropdownOption>
+        ))}
+      </DropdownSection>
+    );
+  }, [initialSuggestions, searchResults, searchQuery]);
 
   const handleAdd = async () => {
     if (!canSubmitRef.current) return;
@@ -134,7 +163,8 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
     <div className="flex flex-col gap-[24px]">
       {hasPendingInvite && (
         <StatusCard
-          type="info"
+          variant="informative"
+          showIcon
           description="Este utilizador já foi convidado para esta organização. O convite encontra-se pendente de aceitação."
         />
       )}
@@ -150,11 +180,14 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
           id="member-user"
           onChangeRef={selectedUserIdRef}
           searchable
-          searchInputPlaceholder="Escreva para pesquisar..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          searchInputPlaceholder="Escreva pelo menos 2 caracteres..."
+          searchNoResultsText={
+            isSearching ? "A pesquisar..." : "Nenhum utilizador encontrado"
+          }
           hasError={alreadyMember}
           errorFeedbackText="Utilizador já está associado a esta organização"
           onChangeCallback={onUserChangeCallback}
+          onSearchCallback={setSearchQuery}
         >
           {userDropdownChildren}
         </IsolatedSelect>

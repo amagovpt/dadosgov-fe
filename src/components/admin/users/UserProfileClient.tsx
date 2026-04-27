@@ -291,9 +291,9 @@ export default function UserProfileClient() {
                 <h2 className="admin-page__section-title">EDITAR PERFIL</h2>
 
                 {saveSuccess && (
-                  <StatusCard type="success" description="Perfil guardado com sucesso." />
+                  <StatusCard variant="success" showIcon description="Perfil guardado com sucesso." />
                 )}
-                {saveError && <StatusCard type="danger" description={saveError} />}
+                {saveError && <StatusCard variant="danger" showIcon description={saveError} />}
 
                 <div className="admin-page__fields-group">
                   <div className="flex gap-[18px]">
@@ -431,7 +431,8 @@ export default function UserProfileClient() {
 
                 {isAdmin && <div className="dataset-edit-danger-actions">
                   <StatusCard
-                    type="warning"
+                    variant="warning"
+                    showIcon
                     description={
                       <>
                         <strong>
@@ -458,7 +459,8 @@ export default function UserProfileClient() {
                     }
                   />
                   <StatusCard
-                    type="danger"
+                    variant="danger"
+                    showIcon
                     description={
                       <>
                         <strong>Atenção esta ação é irreversível.</strong>

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Noto_Sans } from "next/font/google";
-import "@ama-pt/agora-design-system/artifacts/dist/tailwind.css";
 import "./globals.css";
 import { HeaderWrapper } from "@/components/HeaderWrapper";
 import { Footer } from "@/components/Footer";

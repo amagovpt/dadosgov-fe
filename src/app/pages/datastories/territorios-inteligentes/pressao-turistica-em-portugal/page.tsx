@@ -115,7 +115,7 @@ export default function DataStoryDetailPage() {
                     <InfoBlock.Header>
                         <InfoBlock.Title titleLevel="h1" title={data.hero.title} className='text-white text-3xl-bold ' />
                     </InfoBlock.Header>
-                    <InfoBlock.Content className='flex min-[1280px]:flex-row flex-col justify-between min-[1280px]:gap-[136px] gap-32'>
+                    <InfoBlock.Content className='flex xl:flex-row flex-col justify-between xl:gap-[136px] gap-32'>
                         <InfoBlock.Description className='whitespace-pre-wrap text-m-regular text-white' description={data.hero.description} />
                         <div className='w-full h-full flex flex-col gap-[128px] py-[44px]'>
                             <div className='flex flex-col gap-64'>

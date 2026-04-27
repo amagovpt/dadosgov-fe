@@ -29,7 +29,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
     const identityOptions = React.useMemo(() => (
         <DropdownSection name="identity">
             <DropdownOption value="user">
-                {user.first_name} {user.last_name} (utilizador)
+                {`${user.first_name} ${user.last_name} (utilizador)`}
             </DropdownOption>
             {user.organizations.map((org) => (
                 <DropdownOption key={org.id} value={org.id}>
@@ -390,7 +390,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                             >
                                                 <DropdownSection name="identity">
                                                     <DropdownOption value="user">
-                                                        {user.first_name} {user.last_name} (utilizador)
+                                                        {`${user.first_name} ${user.last_name} (utilizador)`}
                                                     </DropdownOption>
                                                     {user.organizations.map((org) => (
                                                         <DropdownOption key={org.id} value={org.id}>
@@ -638,7 +638,8 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                             <div>
                                 <div className="mb-24">
                                     <StatusCard
-                                        type="info"
+                                        variant="info"
+                                        showIcon
                                         description="Estes recursos são publicados pela comunidade e não são da responsabilidade do produtor dos dados."
                                     />
                                 </div>

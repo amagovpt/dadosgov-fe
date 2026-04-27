@@ -81,7 +81,7 @@ function DescriptionWithReadMore({
         style={{ top: 0, left: 0, right: 0 }}
         aria-hidden="true"
       >
-        <div className="text-neutral-900 text-m-light mb-[24px] markdown-container">
+        <div className="text-neutral-900 text-m-light  markdown-container">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
           >
@@ -95,7 +95,7 @@ function DescriptionWithReadMore({
           !expanded && isOverflowing && availableHeight ? { maxHeight: availableHeight } : undefined
         }
       >
-        <div className="text-neutral-900 text-m-light mb-[24px] markdown-container">
+        <div className="text-neutral-900 text-m-light  markdown-container">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
           >
@@ -243,10 +243,10 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
   const qualityMissing = getQualityMissing(dataset.quality);
 
   return (
-    <div className="flex flex-col font-sans text-neutral-900 bg-white min-h-screen overflow-x-hidden">
-      <main className="flex-grow container mx-auto px-4 pt-[64px]">
+    <div className="flex flex-col justify-center items-center">
+      <main className="container flex flex-col gap-24">
         {/* Breadcrumb */}
-        <div className="flex justify-between items-center mb-[24px]">
+        <div className="flex justify-between items-center ">
           <Breadcrumb
             items={[
               { label: "Home", url: "/" },
@@ -257,7 +257,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end items-center gap-[16px] mb-[24px]">
+        <div className="flex justify-end items-center gap-[16px] ">
           {dataset.private && <Pill variant="warning">Rascunho</Pill>}
           {dataset.archived && <Pill variant="neutral">Arquivado</Pill>}
           <Button
@@ -276,24 +276,24 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
             (user && dataset.owner?.id === user.id) ||
             (dataset.organization &&
               organizations.some((org) => org.id === dataset.organization?.id))) && (
-            <Link href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
-              <Button
-                variant="primary"
-                hasIcon={true}
-                leadingIcon="agora-line-edit"
-                leadingIconHover="agora-solid-edit"
-              >
-                Editar
-              </Button>
-            </Link>
-          )}
+              <Link href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
+                <Button
+                  variant="primary"
+                  hasIcon={true}
+                  leadingIcon="agora-line-edit"
+                  leadingIconHover="agora-solid-edit"
+                >
+                  Editar
+                </Button>
+              </Link>
+            )}
         </div>
 
-        <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32 mb-[24px]">
+        <div className="grid xl:grid-cols-12 gap-32 ">
           {/* Main Content Column */}
           <div className="xl:col-span-6 xl:block">
             <div className="flex flex-col gap-4" ref={titleRef}>
-              <h1 className="text-xl-bold text-primary-900 leading-tight mb-24">{dataset.title}</h1>
+              <h1 className="text-xl-bold text-primary-900 leading-tight">{dataset.title}</h1>
             </div>
 
             {/* Description */}

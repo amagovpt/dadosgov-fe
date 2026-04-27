@@ -224,7 +224,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
         <Tab>
           <TabHeader>Descrição</TabHeader>
           {renderTabBody(
-            <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32 mt-6">
+            <div className="grid xl:grid-cols-12 gap-32 mt-6">
               {/* Main Content */}
               <div className="xl:col-span-8 max-w-ch">
                 <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed relative">
@@ -505,14 +505,15 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
           )}
         </Tab>
 
-        {/* Tab 5: Discussões */}
-        <Tab>
+        {/* Tab 5: Discussões — hidden until implemented */}
+        {false && <Tab>
           <TabHeader>Discussões ({discussionCount})</TabHeader>
           {renderTabBody(
             <div>
               <div className="mb-24">
                 <StatusCard
-                  type="info"
+                  variant="informative"
+                  showIcon
                   description={
                     <>
                       A sua questão é sobre outro tema que não esta organização?{" "}
@@ -594,7 +595,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                       >
                         <DropdownSection name="identity">
                           <DropdownOption value="user">
-                            {user.first_name} {user.last_name} (utilizador)
+                            {`${user.first_name} ${user.last_name} (utilizador)`}
                           </DropdownOption>
                           {user.organizations.map((org) => (
                             <DropdownOption key={org.id} value={org.id}>
@@ -811,8 +812,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                                 >
                                   <DropdownSection name="identity">
                                     <DropdownOption value="user">
-                                      {user.first_name} {user.last_name}{" "}
-                                      (utilizador)
+                                      {`${user.first_name} ${user.last_name} (utilizador)`}
                                     </DropdownOption>
                                     {user.organizations.map((org) => (
                                       <DropdownOption
@@ -921,7 +921,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               )}
             </div>
           )}
-        </Tab>
+        </Tab>}
 
         {/* Tab 6: Informações (Statistics, Members, Technical Info) */}
         <Tab>

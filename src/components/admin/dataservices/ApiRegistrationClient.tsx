@@ -221,7 +221,8 @@ export default function ApiRegistrationClient({
           {currentStep === 1 && (
             <>
               <StatusCard
-                type="info"
+                variant="informative"
+                showIcon
                 description={
                   <>
                     <strong>O que é uma API?</strong>
@@ -233,7 +234,7 @@ export default function ApiRegistrationClient({
               />
 
               {apiError && (
-                <StatusCard type="danger" description={apiError} />
+                <StatusCard variant="danger" showIcon description={apiError} />
               )}
 
               <form className="admin-page__form">
@@ -443,7 +444,8 @@ export default function ApiRegistrationClient({
           {currentStep === 2 && (
             <>
               <StatusCard
-                type="info"
+                variant="informative"
+                showIcon
                 description="É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização."
               />
 
@@ -533,7 +535,8 @@ export default function ApiRegistrationClient({
           {currentStep === 3 && (
             <>
               <StatusCard
-                type="success"
+                variant="success"
+                showIcon
                 description={
                   <>
                     <strong>A sua API foi criada!</strong>

@@ -37,7 +37,7 @@ function DeleteConfirmContent({ name, onConfirm }: { name: string; onConfirm: ()
   const { hide } = usePopupContext();
   return (
     <div className="flex flex-col p-2">
-      <StatusCard type="info" description="Esta ação é irreversível." />
+      <StatusCard variant="informative" showIcon description="Esta ação é irreversível." />
       <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
         Tem a certeza que pretende eliminar <span className="font-bold">{name}</span>?
       </p>

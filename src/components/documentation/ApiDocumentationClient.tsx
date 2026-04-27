@@ -15,7 +15,8 @@ export default function ApiDocumentationClient() {
       <h1 className="text-2xl-bold mt-24 mb-16">Referência da API</h1>
 
       <StatusCard
-        type="warning"
+        variant="warning"
+        showIcon
         description="Página em manutenção"
       />
     </div>
