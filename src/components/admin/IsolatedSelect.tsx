@@ -98,18 +98,21 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
   );
 
   // Keep a stable snapshot of children that only updates when the selection changes.
-  // If we included `children` in the deps, every parent re-render (e.g. typing in a
-  // sibling input) would give InputSelect a new children reference, triggering its
-  // internal useEffect([children]) which resets the selected options to [].
-  // By depending only on `internalValue`, the reference stays the same while the user
-  // types elsewhere, so InputSelect never sees a children change and never resets.
+  // For non-searchable selects: depending only on `internalValue` keeps the children
+  // reference stable across unrelated parent re-renders (e.g. typing in a sibling
+  // input), so InputSelect's internal useEffect([children]) does not reset selection.
+  // For searchable selects: the option list legitimately changes as the user types in
+  // the search field, so we must also track `children` identity — otherwise the new
+  // search results never make it into the dropdown until the component is remounted.
+  // Callers that pass `searchable` are expected to memoize their children via
+  // useMemo so the reference is stable across unrelated re-renders.
   const latestChildrenRef = React.useRef(children);
   latestChildrenRef.current = children;
 
   const childrenWithSelection = React.useMemo(
     () => injectSelected(latestChildrenRef.current, selectedValues),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [internalValue]
+    [internalValue, searchable ? children : null]
   );
 
   return (
