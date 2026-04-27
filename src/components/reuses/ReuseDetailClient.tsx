@@ -46,12 +46,12 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const { user, isAdmin } = useAuth();
   const canEdit = Boolean(
     user &&
-      (isAdmin ||
-        (reuse?.owner && reuse.owner.id === user.id) ||
-        (reuse?.organization &&
-          user.organizations?.some(
-            (org) => org.id === reuse.organization?.id,
-          ))),
+    (isAdmin ||
+      (reuse?.owner && reuse.owner.id === user.id) ||
+      (reuse?.organization &&
+        user.organizations?.some(
+          (org) => org.id === reuse.organization?.id,
+        ))),
   );
   const { show, hide } = usePopupContext();
   const [reuse, setReuse] = useState<Reuse | null>(null);
@@ -278,10 +278,10 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   );
 
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center w-full">
       {/* Hero Section */}
       <section className="bg-white text-neutral-900 pt-24 pb-48 sm:pb-64">
-        <div className="container mx-auto px-4 sm:px-16 md:px-32 lg:px-64">
+        <div className="container">
           {/* Breadcrumbs & Actions */}
           <div className="mb-24">
             <div className="mb-24">
@@ -438,251 +438,249 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
       </section>
 
       {/* Tabs Section */}
-      <section className="bg-white sticky top-0 z-20">
-        <div className="container mx-auto px-4 sm:px-16 md:px-32 lg:px-64">
-          <Tabs>
-            <Tab>
-              <TabHeader>Descrição</TabHeader>
-              {renderTabBody(
-                <div className="grid xl:grid-cols-12 gap-32 mt-6">
-                  {/* Main Content */}
-                  <div className="xl:col-span-8 max-w-ch">
-                    <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed relative">
-                      <div ref={descTitleRef}>
-                        <h2 className="font-medium text-base text-neutral-900 uppercase mb-32">Descrição</h2>
-                      </div>
-                      {/* Hidden measure element */}
-                      <div ref={descMeasureRef} className="absolute invisible pointer-events-none" style={{ top: 0, left: 0, right: 0 }} aria-hidden="true">
-                        <div
-                          className="mb-32 text-neutral-900 [&_a]:underline [&_a]:text-primary-600"
-                          dangerouslySetInnerHTML={{ __html: reuse.description }}
-                        />
-                      </div>
-                      <div
-                        className="overflow-hidden"
-                        style={!descExpanded && descOverflowing && descAvailableHeight ? { maxHeight: descAvailableHeight } : undefined}
-                      >
-                        <div
-                          className="mb-32 text-neutral-900 [&_a]:underline [&_a]:text-primary-600"
-                          dangerouslySetInnerHTML={{ __html: reuse.description }}
-                        />
-                      </div>
-                      {descOverflowing && (
-                        <button
-                          onClick={() => setDescExpanded(!descExpanded)}
-                          className="flex items-center gap-8 text-primary-600 cursor-pointer hover:underline mt-8"
-                        >
-                          {descExpanded ? "Ler menos" : "Ler mais"}
-                          {descExpanded ? (
-                            <Icon name="agora-line-arrow-up-circle" className="w-24 h-24" />
-                          ) : (
-                            <Icon name="agora-line-arrow-down-circle" className="w-24 h-24" />
-                          )}
-                        </button>
-                      )}
+      <section className="w-full">
+        <Tabs>
+          <Tab>
+            <TabHeader>Descrição</TabHeader>
+            {renderTabBody(
+              <div className="grid xl:grid-cols-12 gap-32 mt-6">
+                {/* Main Content */}
+                <div className="xl:col-span-8 max-w-ch">
+                  <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed relative">
+                    <div ref={descTitleRef}>
+                      <h2 className="font-medium text-base text-neutral-900 uppercase mb-32">Descrição</h2>
                     </div>
+                    {/* Hidden measure element */}
+                    <div ref={descMeasureRef} className="absolute invisible pointer-events-none" style={{ top: 0, left: 0, right: 0 }} aria-hidden="true">
+                      <div
+                        className="mb-32 text-neutral-900 [&_a]:underline [&_a]:text-primary-600"
+                        dangerouslySetInnerHTML={{ __html: reuse.description }}
+                      />
+                    </div>
+                    <div
+                      className="overflow-hidden"
+                      style={!descExpanded && descOverflowing && descAvailableHeight ? { maxHeight: descAvailableHeight } : undefined}
+                    >
+                      <div
+                        className="mb-32 text-neutral-900 [&_a]:underline [&_a]:text-primary-600"
+                        dangerouslySetInnerHTML={{ __html: reuse.description }}
+                      />
+                    </div>
+                    {descOverflowing && (
+                      <button
+                        onClick={() => setDescExpanded(!descExpanded)}
+                        className="flex items-center gap-8 text-primary-600 cursor-pointer hover:underline mt-8"
+                      >
+                        {descExpanded ? "Ler menos" : "Ler mais"}
+                        {descExpanded ? (
+                          <Icon name="agora-line-arrow-up-circle" className="w-24 h-24" />
+                        ) : (
+                          <Icon name="agora-line-arrow-down-circle" className="w-24 h-24" />
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Sidebar Metadata */}
+                <aside className="xl:col-span-4 xl:block md:pt-64 flex flex-col gap-16" ref={descSidebarRef}>
+                  {reuse.tags && reuse.tags.length > 0 && (
+                    <div className="bg-white p-32 rounded-4">
+                      <h3 className="text-sm font-bold tracking-wider mb-8">Etiquetas</h3>
+                      <div className="flex flex-col items-start gap-8">
+                        {reuse.tags.map((tag) => (
+                          <Pill
+                            key={tag}
+                            appearance="solid"
+                            variant="primary"
+                            className="bg-primary-100 text-primary-700 h-auto py-4 px-8 text-xs font-semibold"
+                          >
+                            {tag}
+                          </Pill>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-white p-32 rounded-4">
+                    <h3 className="text-sm font-bold tracking-wider mb-8">
+                      Última atualização
+                    </h3>
+                    <p className="font-medium text-neutral-900">
+                      {formatDate(reuse.last_modified)}
+                    </p>
                   </div>
 
-                  {/* Sidebar Metadata */}
-                  <aside className="xl:col-span-4 xl:block md:pt-64 flex flex-col gap-16" ref={descSidebarRef}>
-                    {reuse.tags && reuse.tags.length > 0 && (
-                      <div className="bg-white p-32 rounded-4">
-                        <h3 className="text-sm font-bold tracking-wider mb-8">Etiquetas</h3>
-                        <div className="flex flex-col items-start gap-8">
-                          {reuse.tags.map((tag) => (
-                            <Pill
-                              key={tag}
-                              appearance="solid"
-                              variant="primary"
-                              className="bg-primary-100 text-primary-700 h-auto py-4 px-8 text-xs font-semibold"
-                            >
-                              {tag}
-                            </Pill>
-                          ))}
-                        </div>
+                  <div className="bg-white p-32 rounded-4">
+                    <h3 className="text-sm font-bold tracking-wider mb-8">
+                      Data de criação
+                    </h3>
+                    <p className="font-medium text-neutral-900">
+                      {formatDate(reuse.created_at)}
+                    </p>
+                  </div>
+
+                </aside>
+              </div>
+            )}
+          </Tab>
+          <Tab>
+            <TabHeader>Discussões ({discussionCount})</TabHeader>
+            {renderTabBody(
+              <div>
+                <div className="mb-24">
+                  <StatusCard
+                    variant="informative"
+                    showIcon
+                    description={
+                      <span>
+                        A sua questão não é sobre a reutilização? <Link href="https://dados.gov.pt/pt/" className="underline text-primary-600" target="_blank">Visite o nosso fórum.</Link>
+                      </span>
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between mb-24">
+                  <h3 className="font-medium text-neutral-900 text-base">
+                    {discussionCount} {discussionCount === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
+                  </h3>
+                  <div className="flex items-center gap-24">
+                    <InputSearchBar
+                      hasVoiceActionButton={false}
+                      placeholder="Pesquisar"
+                      aria-label="Pesquisar discussões"
+                    />
+                    <Button
+                      variant="primary"
+                      appearance="outline"
+                      hasIcon={true}
+                      leadingIcon="agora-line-plus-circle"
+                      leadingIconHover="agora-solid-plus-circle"
+                      onClick={() => setShowNewDiscussion(!showNewDiscussion)}
+                    >
+                      Nova discussão
+                    </Button>
+                  </div>
+                </div>
+                {showNewDiscussion && (
+                  <div className="bg-white rounded-8 p-32 mb-24">
+                    <div className="flex justify-between items-center mb-16">
+                      <h3 className="font-bold text-neutral-900 text-base">Nova discussão</h3>
+                      <Button variant="primary" appearance="outline" hasIcon leadingIcon="agora-line-x" leadingIconHover="agora-solid-x" onClick={() => setShowNewDiscussion(false)}>
+                        Fechar
+                      </Button>
+                    </div>
+                    <p className="text-sm text-neutral-900 mb-16">
+                      Os campos marcados com um asterisco (<span className="text-red-500">*</span>) são obrigatórios.
+                    </p>
+                    {user?.organizations && user.organizations.length > 0 && (
+                      <div className="mb-24">
+                        <span className="block text-sm font-medium text-neutral-900 mb-8">
+                          Escolha a identidade com a qual deseja publicar esta mensagem.
+                        </span>
+                        <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id="discussion-identity-reuse" onChangeRef={selectedIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
+                          <DropdownSection name="identity">
+                            <DropdownOption key={"user"} value="user">{`${user.first_name} ${user.last_name} (utilizador)`}</DropdownOption>
+                            {user.organizations.map((org) => (
+                              <DropdownOption key={org.id} value={org.id}>{org.name}</DropdownOption>
+                            ))}
+                          </DropdownSection>
+                        </IsolatedSelect>
                       </div>
                     )}
-
-                    <div className="bg-white p-32 rounded-4">
-                      <h3 className="text-sm font-bold tracking-wider mb-8">
-                        Última atualização
-                      </h3>
-                      <p className="font-medium text-neutral-900">
-                        {formatDate(reuse.last_modified)}
-                      </p>
+                    <div className="mb-24">
+                      <InputText label="Título *" value={newDiscTitle} onChange={(e) => setNewDiscTitle(e.target.value)} required />
                     </div>
-
-                    <div className="bg-white p-32 rounded-4">
-                      <h3 className="text-sm font-bold tracking-wider mb-8">
-                        Data de criação
-                      </h3>
-                      <p className="font-medium text-neutral-900">
-                        {formatDate(reuse.created_at)}
-                      </p>
+                    <div className="mb-24">
+                      <InputTextArea label="Mensagem *" value={newDiscMessage} onChange={(e) => setNewDiscMessage(e.target.value)} rows={4} placeholder="Mantenha a cordialidade e postura construtiva. Não partilhe informações pessoais." required />
                     </div>
-
-                  </aside>
-                </div>
-              )}
-            </Tab>
-            <Tab>
-              <TabHeader>Discussões ({discussionCount})</TabHeader>
-              {renderTabBody(
-                <div>
-                  <div className="mb-24">
-                    <StatusCard
-                      variant="informative"
-                      showIcon
-                      description={
-                        <span>
-                          A sua questão não é sobre a reutilização? <Link href="https://dados.gov.pt/pt/" className="underline text-primary-600" target="_blank">Visite o nosso fórum.</Link>
-                        </span>
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center justify-between mb-24">
-                    <h3 className="font-medium text-neutral-900 text-base">
-                      {discussionCount} {discussionCount === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
-                    </h3>
-                    <div className="flex items-center gap-24">
-                      <InputSearchBar
-                        hasVoiceActionButton={false}
-                        placeholder="Pesquisar"
-                        aria-label="Pesquisar discussões"
-                      />
-                      <Button
-                        variant="primary"
-                        appearance="outline"
-                        hasIcon={true}
-                        leadingIcon="agora-line-plus-circle"
-                        leadingIconHover="agora-solid-plus-circle"
-                        onClick={() => setShowNewDiscussion(!showNewDiscussion)}
-                      >
-                        Nova discussão
+                    <div className="flex justify-end">
+                      <Button variant="primary" appearance="solid" onClick={handleCreateDiscussion} disabled={isSubmitting || !newDiscTitle.trim() || !newDiscMessage.trim()}>
+                        {isSubmitting ? 'A enviar...' : 'Enviar'}
                       </Button>
                     </div>
                   </div>
-                  {showNewDiscussion && (
-                    <div className="bg-white rounded-8 p-32 mb-24">
-                      <div className="flex justify-between items-center mb-16">
-                        <h3 className="font-bold text-neutral-900 text-base">Nova discussão</h3>
-                        <Button variant="primary" appearance="outline" hasIcon leadingIcon="agora-line-x" leadingIconHover="agora-solid-x" onClick={() => setShowNewDiscussion(false)}>
-                          Fechar
-                        </Button>
-                      </div>
-                      <p className="text-sm text-neutral-900 mb-16">
-                        Os campos marcados com um asterisco (<span className="text-red-500">*</span>) são obrigatórios.
-                      </p>
-                      {user?.organizations && user.organizations.length > 0 && (
-                        <div className="mb-24">
-                          <span className="block text-sm font-medium text-neutral-900 mb-8">
-                            Escolha a identidade com a qual deseja publicar esta mensagem.
-                          </span>
-                          <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id="discussion-identity-reuse" onChangeRef={selectedIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
-                            <DropdownSection name="identity">
-                              <DropdownOption value="user">{`${user.first_name} ${user.last_name} (utilizador)`}</DropdownOption>
-                              {user.organizations.map((org) => (
-                                <DropdownOption key={org.id} value={org.id}>{org.name}</DropdownOption>
-                              ))}
-                            </DropdownSection>
-                          </IsolatedSelect>
+                )}
+                {discussionCount === 0 ? (
+                  <CardNoResults position="center" icon={<Icon name="agora-line-chat" className="w-[40px] h-[40px] text-primary-500 icon-xl" />} title="Ainda não há discussão." description="" hasAnchor={false} />
+                ) : (
+                  <div className="flex flex-col gap-32">
+                    {discussions.map((disc) => (
+                      <div key={disc.id} className="bg-white rounded-8 p-32">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h4 className="font-bold text-neutral-900 text-base">{disc.title}</h4>
+                            <p className="text-sm text-neutral-900 mt-4">
+                              <span className="text-primary-600 font-medium">{disc.user.first_name} {disc.user.last_name}</span>
+                              {' — Publicado em '}
+                              {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                            </p>
+                          </div>
+                          <div className="flex gap-8">
+                            <Button variant="primary" appearance="outline" hasIcon iconOnly leadingIcon="agora-line-edit" leadingIconHover="agora-solid-edit" aria-label="Editar discussão" onClick={() => show(<EditDiscussionPopup discussion={disc} commentIndex={0} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />, { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
+                            <Button variant="danger" appearance="solid" hasIcon iconOnly leadingIcon="agora-line-trash" leadingIconHover="agora-solid-trash" aria-label="Eliminar discussão" onClick={() => show(<DeleteDiscussionPopup discussion={disc} commentIndex={0} onDeleted={() => { setDiscussions((prev) => prev.filter((d) => d.id !== disc.id)); setDiscussionCount((prev) => prev - 1); }} />, { title: "Tem certeza de que deseja eliminar esta discussão?", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
+                          </div>
                         </div>
-                      )}
-                      <div className="mb-24">
-                        <InputText label="Título *" value={newDiscTitle} onChange={(e) => setNewDiscTitle(e.target.value)} required />
-                      </div>
-                      <div className="mb-24">
-                        <InputTextArea label="Mensagem *" value={newDiscMessage} onChange={(e) => setNewDiscMessage(e.target.value)} rows={4} placeholder="Mantenha a cordialidade e postura construtiva. Não partilhe informações pessoais." required />
-                      </div>
-                      <div className="flex justify-end">
-                        <Button variant="primary" appearance="solid" onClick={handleCreateDiscussion} disabled={isSubmitting || !newDiscTitle.trim() || !newDiscMessage.trim()}>
-                          {isSubmitting ? 'A enviar...' : 'Enviar'}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  {discussionCount === 0 ? (
-                    <CardNoResults position="center" icon={<Icon name="agora-line-chat" className="w-[40px] h-[40px] text-primary-500 icon-xl" />} title="Ainda não há discussão." description="" hasAnchor={false} />
-                  ) : (
-                    <div className="flex flex-col gap-32">
-                      {discussions.map((disc) => (
-                        <div key={disc.id} className="bg-white rounded-8 p-32">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <h4 className="font-bold text-neutral-900 text-base">{disc.title}</h4>
-                              <p className="text-sm text-neutral-900 mt-4">
-                                <span className="text-primary-600 font-medium">{disc.user.first_name} {disc.user.last_name}</span>
-                                {' — Publicado em '}
-                                {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", { locale: pt })}
-                              </p>
+                        {disc.discussion.length > 0 && (
+                          <p className="text-neutral-900 text-sm mt-16 mb-16">{disc.discussion[0].content}</p>
+                        )}
+                        {disc.discussion.length > 1 && (
+                          <div className="mt-16 space-y-16 border-t border-neutral-200 pt-16">
+                            {disc.discussion.slice(1).map((msg, idx) => (
+                              <div key={idx} className="border-l-2 border-primary-600" style={{ paddingLeft: "24px" }}>
+                                <div className="flex justify-between items-start">
+                                  <p className="text-sm text-neutral-900">
+                                    <span className="text-primary-600 font-medium">{msg.posted_by.first_name} {msg.posted_by.last_name}</span>
+                                    {' — '}
+                                    {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                                  </p>
+                                  <div className="flex gap-8">
+                                    <Button variant="primary" appearance="outline" hasIcon iconOnly leadingIcon="agora-line-edit" leadingIconHover="agora-solid-edit" aria-label="Editar comentário" onClick={() => show(<EditDiscussionPopup discussion={disc} commentIndex={idx + 1} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />, { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
+                                    <Button variant="danger" appearance="solid" hasIcon iconOnly leadingIcon="agora-line-trash" leadingIconHover="agora-solid-trash" aria-label="Eliminar comentário" onClick={() => show(<DeleteDiscussionPopup discussion={disc} commentIndex={idx + 1} onDeleted={() => setDiscussions((prev) => prev.map((d) => d.id === disc.id ? { ...d, discussion: d.discussion.filter((_, i) => i !== idx + 1) } : d))} />, { title: "Tem certeza de que deseja apagar esta mensagem?", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
+                                  </div>
+                                </div>
+                                <p className="text-neutral-900 text-sm mt-4">{msg.content}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {replyingTo === disc.id ? (
+                          <div className="mt-48 border-t border-neutral-200 pt-32">
+                            <div className="flex justify-between items-center mb-24">
+                              <h4 className="font-bold text-neutral-900 text-sm uppercase">Responder</h4>
+                              <Button variant="primary" appearance="outline" hasIcon leadingIcon="agora-line-x" leadingIconHover="agora-solid-x" onClick={() => { setReplyingTo(null); setReplyMessage(''); }}>Fechar</Button>
                             </div>
-                            <div className="flex gap-8">
-                              <Button variant="primary" appearance="outline" hasIcon iconOnly leadingIcon="agora-line-edit" leadingIconHover="agora-solid-edit" aria-label="Editar discussão" onClick={() => show(<EditDiscussionPopup discussion={disc} commentIndex={0} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />, { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
-                              <Button variant="danger" appearance="solid" hasIcon iconOnly leadingIcon="agora-line-trash" leadingIconHover="agora-solid-trash" aria-label="Eliminar discussão" onClick={() => show(<DeleteDiscussionPopup discussion={disc} commentIndex={0} onDeleted={() => { setDiscussions((prev) => prev.filter((d) => d.id !== disc.id)); setDiscussionCount((prev) => prev - 1); }} />, { title: "Tem certeza de que deseja eliminar esta discussão?", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
+                            {user?.organizations && user.organizations.length > 0 && (
+                              <div className="mb-16">
+                                <span className="block text-sm font-medium text-neutral-900 mb-8">Escolha a identidade com a qual deseja publicar esta mensagem.</span>
+                                <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id={`reply-identity-${disc.id}`} onChangeRef={replyIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
+                                  <DropdownSection name="identity">
+                                    <DropdownOption value="user">{`${user.first_name} ${user.last_name} (utilizador)`}</DropdownOption>
+                                    {user.organizations.map((org) => (<DropdownOption key={org.id} value={org.id}>{org.name}</DropdownOption>))}
+                                  </DropdownSection>
+                                </IsolatedSelect>
+                              </div>
+                            )}
+                            <div className="mb-16">
+                              <InputTextArea label="Mensagem" value={replyMessage} onChange={(e) => setReplyMessage(e.target.value)} rows={3} placeholder="Mantenha a cordialidade e postura construtiva. Não partilhe informações pessoais." />
+                            </div>
+                            <div className="flex justify-end gap-16">
+                              <Button variant="primary" appearance="outline" disabled={isReplying || !replyMessage.trim()} onClick={async () => { setIsReplying(true); const org = replyIdentityRef.current && replyIdentityRef.current !== 'user' ? replyIdentityRef.current : undefined; const updated = await replyToDiscussion(disc.id, replyMessage.trim(), { organization: org, close: true }); if (updated) { setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d))); setReplyingTo(null); setReplyMessage(''); } setIsReplying(false); }}>Responder e fechar</Button>
+                              <Button variant="primary" appearance="solid" disabled={isReplying || !replyMessage.trim()} onClick={async () => { setIsReplying(true); const org = replyIdentityRef.current && replyIdentityRef.current !== 'user' ? replyIdentityRef.current : undefined; const updated = await replyToDiscussion(disc.id, replyMessage.trim(), { organization: org }); if (updated) { setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d))); setReplyingTo(null); setReplyMessage(''); } setIsReplying(false); }}>Responder</Button>
                             </div>
                           </div>
-                          {disc.discussion.length > 0 && (
-                            <p className="text-neutral-900 text-sm mt-16 mb-16">{disc.discussion[0].content}</p>
-                          )}
-                          {disc.discussion.length > 1 && (
-                            <div className="mt-16 space-y-16 border-t border-neutral-200 pt-16">
-                              {disc.discussion.slice(1).map((msg, idx) => (
-                                <div key={idx} className="border-l-2 border-primary-600" style={{ paddingLeft: "24px" }}>
-                                  <div className="flex justify-between items-start">
-                                    <p className="text-sm text-neutral-900">
-                                      <span className="text-primary-600 font-medium">{msg.posted_by.first_name} {msg.posted_by.last_name}</span>
-                                      {' — '}
-                                      {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", { locale: pt })}
-                                    </p>
-                                    <div className="flex gap-8">
-                                      <Button variant="primary" appearance="outline" hasIcon iconOnly leadingIcon="agora-line-edit" leadingIconHover="agora-solid-edit" aria-label="Editar comentário" onClick={() => show(<EditDiscussionPopup discussion={disc} commentIndex={idx + 1} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />, { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
-                                      <Button variant="danger" appearance="solid" hasIcon iconOnly leadingIcon="agora-line-trash" leadingIconHover="agora-solid-trash" aria-label="Eliminar comentário" onClick={() => show(<DeleteDiscussionPopup discussion={disc} commentIndex={idx + 1} onDeleted={() => setDiscussions((prev) => prev.map((d) => d.id === disc.id ? { ...d, discussion: d.discussion.filter((_, i) => i !== idx + 1) } : d))} />, { title: "Tem certeza de que deseja apagar esta mensagem?", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
-                                    </div>
-                                  </div>
-                                  <p className="text-neutral-900 text-sm mt-4">{msg.content}</p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          {replyingTo === disc.id ? (
-                            <div className="mt-48 border-t border-neutral-200 pt-32">
-                              <div className="flex justify-between items-center mb-24">
-                                <h4 className="font-bold text-neutral-900 text-sm uppercase">Responder</h4>
-                                <Button variant="primary" appearance="outline" hasIcon leadingIcon="agora-line-x" leadingIconHover="agora-solid-x" onClick={() => { setReplyingTo(null); setReplyMessage(''); }}>Fechar</Button>
-                              </div>
-                              {user?.organizations && user.organizations.length > 0 && (
-                                <div className="mb-16">
-                                  <span className="block text-sm font-medium text-neutral-900 mb-8">Escolha a identidade com a qual deseja publicar esta mensagem.</span>
-                                  <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id={`reply-identity-${disc.id}`} onChangeRef={replyIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
-                                    <DropdownSection name="identity">
-                                      <DropdownOption value="user">{`${user.first_name} ${user.last_name} (utilizador)`}</DropdownOption>
-                                      {user.organizations.map((org) => (<DropdownOption key={org.id} value={org.id}>{org.name}</DropdownOption>))}
-                                    </DropdownSection>
-                                  </IsolatedSelect>
-                                </div>
-                              )}
-                              <div className="mb-16">
-                                <InputTextArea label="Mensagem" value={replyMessage} onChange={(e) => setReplyMessage(e.target.value)} rows={3} placeholder="Mantenha a cordialidade e postura construtiva. Não partilhe informações pessoais." />
-                              </div>
-                              <div className="flex justify-end gap-16">
-                                <Button variant="primary" appearance="outline" disabled={isReplying || !replyMessage.trim()} onClick={async () => { setIsReplying(true); const org = replyIdentityRef.current && replyIdentityRef.current !== 'user' ? replyIdentityRef.current : undefined; const updated = await replyToDiscussion(disc.id, replyMessage.trim(), { organization: org, close: true }); if (updated) { setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d))); setReplyingTo(null); setReplyMessage(''); } setIsReplying(false); }}>Responder e fechar</Button>
-                                <Button variant="primary" appearance="solid" disabled={isReplying || !replyMessage.trim()} onClick={async () => { setIsReplying(true); const org = replyIdentityRef.current && replyIdentityRef.current !== 'user' ? replyIdentityRef.current : undefined; const updated = await replyToDiscussion(disc.id, replyMessage.trim(), { organization: org }); if (updated) { setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d))); setReplyingTo(null); setReplyMessage(''); } setIsReplying(false); }}>Responder</Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex justify-end" style={{ marginTop: "32px" }}>
-                              <Button variant="primary" appearance="outline" onClick={() => { setReplyingTo(disc.id); setReplyMessage(''); }}>Responder</Button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </Tab>
-          </Tabs>
-        </div>
+                        ) : (
+                          <div className="flex justify-end" style={{ marginTop: "32px" }}>
+                            <Button variant="primary" appearance="outline" onClick={() => { setReplyingTo(disc.id); setReplyMessage(''); }}>Responder</Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </Tab>
+        </Tabs>
       </section>
 
       {/* Associated Datasets */}
@@ -756,7 +754,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                           titleText={dataset.title}
                           descriptionText={
                             (
-                              <div className="flex flex-col grow">
+                              <div className="flex flex-col">
                                 <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
                                   {dataset.description}
                                 </p>
