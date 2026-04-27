@@ -638,7 +638,8 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                             <div>
                                 <div className="mb-24">
                                     <StatusCard
-                                        type="info"
+                                        variant="info"
+                                        showIcon
                                         description="Estes recursos são publicados pela comunidade e não são da responsabilidade do produtor dos dados."
                                     />
                                 </div>

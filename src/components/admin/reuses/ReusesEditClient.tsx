@@ -560,7 +560,7 @@ export default function ReusesEditClient() {
   if (!reuse) {
     return (
       <div className="admin-page">
-        <StatusCard type="danger" description="Reutilização não encontrada." />
+        <StatusCard variant="danger" showIcon description="Reutilização não encontrada." />
         <Button
           variant="primary"
           onClick={() => router.push("/pages/admin/me/reuses")}
@@ -597,8 +597,8 @@ export default function ReusesEditClient() {
         </Button>
       </div>
 
-      {apiError && <div className="mb-16"><StatusCard type="danger" description={apiError} /></div>}
-      {apiSuccess && <div className="mb-16"><StatusCard type="success" description={apiSuccess} /></div>}
+      {apiError && <div className="mb-16"><StatusCard variant="danger" showIcon description={apiError} /></div>}
+      {apiSuccess && <div className="mb-16"><StatusCard variant="success" showIcon description={apiSuccess} /></div>}
 
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
@@ -654,7 +654,8 @@ export default function ReusesEditClient() {
                 {reuse.private && (
                   <div className="dataset-edit-visibility-banner">
                     <StatusCard
-                      type="info"
+                      variant="informative"
+                      showIcon
                       description={
                         <>
                           <strong>Modifique a visibilidade da reutilização.</strong>
@@ -918,7 +919,8 @@ export default function ReusesEditClient() {
 
                   <div className="dataset-edit-danger-actions">
                     <StatusCard
-                      type="info"
+                      variant="informative"
+                      showIcon
                       description={
                         <>
                           <strong>Atenção esta ação é irreversível.</strong>
@@ -949,7 +951,8 @@ export default function ReusesEditClient() {
                       }
                     />
                     <StatusCard
-                      type="warning"
+                      variant="warning"
+                      showIcon
                       description={
                         <>
                           <strong>
@@ -979,7 +982,8 @@ export default function ReusesEditClient() {
                       }
                     />
                     <StatusCard
-                      type="danger"
+                      variant="danger"
+                      showIcon
                       description={
                         <>
                           <strong>Atenção esta ação é irreversível.</strong>
@@ -1164,7 +1168,8 @@ export default function ReusesEditClient() {
                 >
                   <div className="mb-[24px]">
                     <StatusCard
-                      type="warning"
+                      variant="warning"
+                      showIcon
                       description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
                     />
                   </div>

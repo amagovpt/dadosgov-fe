@@ -383,7 +383,7 @@ export default function CommunityResourceEditClient() {
   if (!resource) {
     return (
       <div className="admin-page">
-        <StatusCard type="danger" description="Recurso comunitário nao encontrado." />
+        <StatusCard variant="danger" showIcon description="Recurso comunitário nao encontrado." />
       </div>
     );
   }
@@ -412,13 +412,13 @@ export default function CommunityResourceEditClient() {
         <div className="admin-page__form-area">
           {successMessage && (
             <div className="mb-[16px]">
-              <StatusCard type="success" description={successMessage} />
+              <StatusCard variant="success" showIcon description={successMessage} />
             </div>
           )}
 
           {apiError && (
             <div className="mb-[16px]">
-              <StatusCard type="danger" description={apiError} />
+              <StatusCard variant="danger" showIcon description={apiError} />
             </div>
           )}
 

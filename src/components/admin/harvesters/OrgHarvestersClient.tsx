@@ -196,7 +196,8 @@ export default function OrgHarvestersClient() {
       {statusFilter === "accepted" && (
         <div className="mb-[24px]">
           <StatusCard
-            type="info"
+            variant="informative"
+            showIcon
             description="O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução — a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
           />
         </div>

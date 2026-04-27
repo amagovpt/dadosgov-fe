@@ -387,7 +387,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   if (!source) {
     return (
       <div className="admin-page">
-        <StatusCard type="danger" description="Harvester não encontrado." />
+        <StatusCard variant="danger" showIcon description="Harvester não encontrado." />
       </div>
     );
   }
@@ -829,14 +829,16 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
                       {isPreviewing && (
                         <StatusCard
-                          type="info"
+                          variant="informative"
+                          showIcon
                           description={<strong>A pré-visualizar o harvester... Por favor aguarde.</strong>}
                         />
                       )}
 
                       {previewError && (
                         <StatusCard
-                          type="danger"
+                          variant="danger"
+                          showIcon
                           description={<><strong>Erro</strong> — {previewError}</>}
                         />
                       )}
@@ -912,7 +914,8 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                               {previewJob.errors.map((error, i) => (
                                 <StatusCard
                                   key={i}
-                                  type="danger"
+                                  variant="danger"
+                                  showIcon
                                   description={<><strong>ERRO</strong> {error.message}</>}
                                 />
                               ))}
@@ -927,7 +930,8 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                 {/* Danger zone */}
                 <div className="dataset-edit-danger-actions">
                   <StatusCard
-                    type="danger"
+                    variant="danger"
+                    showIcon
                     description={
                       <>
                         <strong>Atenção esta ação é irreversível.</strong>

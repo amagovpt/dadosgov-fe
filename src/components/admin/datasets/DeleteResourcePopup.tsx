@@ -39,7 +39,8 @@ export default function DeleteResourcePopup({
         <strong className="text-neutral-900">&quot;{resource.title}&quot;</strong>?
       </p>
       <StatusCard
-        type="warning"
+        variant="warning"
+        showIcon
         description="Esta ação é irreversível e não pode ser desfeita."
       />
       <div className="flex justify-end gap-16">
