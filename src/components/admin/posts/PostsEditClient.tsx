@@ -530,7 +530,7 @@ export default function PostsEditClient() {
 
                     <div>
                       <span className="text-primary-900 text-base font-medium leading-7">
-                        Cobertura *
+                        Imagem de capa
                       </span>
                       <div className="mt-2">
                         <DragAndDropUploader

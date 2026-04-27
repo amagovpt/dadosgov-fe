@@ -75,17 +75,13 @@ export default function PostsNewClient() {
     });
     const selectedLowerSet = new Set(selectedTags.map((k) => k.toLowerCase()));
     const selectedNotInSuggestions = selectedTags.filter(
-      (keyword) => !seen.has(keyword.toLowerCase()),
+      (keyword) => !seen.has(keyword.toLowerCase())
     );
     const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [
-            <DropdownOption
-              key={`__create__${trimmedLower}`}
-              value={trimmed}
-              selected={false}
-            >
+            <DropdownOption key={`__create__${trimmedLower}`} value={trimmed} selected={false}>
               Criar &quot;{trimmed}&quot;
             </DropdownOption>,
           ]
@@ -324,8 +320,8 @@ export default function PostsNewClient() {
                   placeholder="Pesquise ou insira palavras-chave..."
                   id="article-keywords"
                   type="checkbox"
-                  hideSectionNames
-                  searchable
+                  hideSectionNames={true}
+                  searchable={true}
                   searchInputPlaceholder="Escreva para pesquisar ou criar..."
                   searchNoResultsText="Nenhum resultado encontrado"
                   defaultValue={selectedTags.join(",")}
@@ -337,12 +333,8 @@ export default function PostsNewClient() {
                     let addedNew = false;
                     selected.forEach((v) => {
                       const lower = v.toLowerCase();
-                      const existsInTags = tags.some(
-                        (t) => t.text.toLowerCase() === lower,
-                      );
-                      const existsInSearch = tagSearch.some(
-                        (t) => t.text.toLowerCase() === lower,
-                      );
+                      const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
+                      const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
                       if (!existsInTags && !existsInSearch) {
                         addedNew = true;
                         setTags((prev) => {
@@ -369,7 +361,7 @@ export default function PostsNewClient() {
                         aria-label={`Remover ${keyword}`}
                         onClick={() => {
                           const next = selectedTags.filter(
-                            (v) => v.toLowerCase() !== keyword.toLowerCase(),
+                            (v) => v.toLowerCase() !== keyword.toLowerCase()
                           );
                           setSelectedTags(next);
                           selectedKeywordsRef.current = next.join(",");
@@ -383,7 +375,7 @@ export default function PostsNewClient() {
 
                 <div>
                   <span className="text-primary-900 text-base font-medium leading-7">
-                    Imagem de capa *
+                    Imagem de capa
                   </span>
                   <div className="mt-2">
                     <DragAndDropUploader
@@ -407,6 +399,15 @@ export default function PostsNewClient() {
                     />
                   </div>
                 </div>
+                {imageFile && (
+                  <div className="mt-4 flex justify-center">
+                    <img
+                      src={imageFile}
+                      alt="Cobertura do artigo"
+                      className="max-w-[200px] max-h-[150px] object-contain border border-neutral-200 rounded"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="admin-page__actions">
