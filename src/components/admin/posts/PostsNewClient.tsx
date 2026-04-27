@@ -402,7 +402,7 @@ export default function PostsNewClient() {
                 {imageFile && (
                   <div className="mt-4 flex justify-center">
                     <img
-                      src={imageFile}
+                      src={imageFile ? URL.createObjectURL(imageFile) : undefined}
                       alt="Cobertura do artigo"
                       className="max-w-[200px] max-h-[150px] object-contain border border-neutral-200 rounded"
                     />
