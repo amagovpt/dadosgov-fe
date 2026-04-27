@@ -14,13 +14,13 @@ export default function HeroCourses() {
                     ]}
                     className="mb-64"
                 />
-                <div className="flex flex-row lg:flex-col items-center gap-64">
+                <div className="flex lg:flex-row flex-col items-center gap-64">
                     <div className="w-full">
-                        <h1 className="text-[32px] leading-[40px] font-bold text-primary-600 mb-32">
+                        <h1 className="text-3xl-bold text-primary-600 mb-32">
                             Minicursos
                         </h1>
 
-                        <div className="text-[18px] leading-[28px] space-y-16 w-[94%]">
+                        <div className="text-m-regular space-y-16 w-full">
                             <p>
                                 As formações do Mosaico destinam-se a diferentes perfis da Administração Pública e visam apoiar o desenvolvimento de competências essenciais para a transformação digital do Estado. Através de uma abordagem prática, permitem desenvolver conhecimentos técnicos e estratégicos para modernizar serviços públicos e melhorar a eficiência e a qualidade do atendimento.
                             </p>
