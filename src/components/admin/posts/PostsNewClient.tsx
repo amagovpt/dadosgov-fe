@@ -49,10 +49,8 @@ export default function PostsNewClient() {
 
   useEffect(() => {
     const q = keywordSearch.trim();
-    if (q.length < 2) {
-      setTagSearch([]);
-      return;
-    }
+    if (q.length < 2) return;
+
     const timer = setTimeout(async () => {
       try {
         const res = await suggestTags(q, 20);
@@ -68,7 +66,8 @@ export default function PostsNewClient() {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
     const seen = new Set<string>();
-    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
+    const visibleTagSearch = trimmed.length < 2 ? [] : tagSearch;
+    const uniqueTags = [...tags, ...visibleTagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
@@ -325,6 +324,7 @@ export default function PostsNewClient() {
                   placeholder="Pesquise ou insira palavras-chave..."
                   id="article-keywords"
                   type="checkbox"
+                  hideSectionNames
                   searchable
                   searchInputPlaceholder="Escreva para pesquisar ou criar..."
                   searchNoResultsText="Nenhum resultado encontrado"
@@ -383,7 +383,7 @@ export default function PostsNewClient() {
 
                 <div>
                   <span className="text-primary-900 text-base font-medium leading-7">
-                    Cobertura *
+                    Imagem de capa *
                   </span>
                   <div className="mt-2">
                     <DragAndDropUploader
