@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
@@ -18,7 +19,7 @@ import {
 import { Organization } from "@/types/api";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { useAuth } from "@/context/AuthContext";
-import { requestMembership } from "@/services/api";
+import { requestMembership, followEntity, unfollowEntity, isFollowing } from "@/services/api";
 
 interface OrganizationDetailClientProps {
   organization: Organization;
@@ -26,7 +27,9 @@ interface OrganizationDetailClientProps {
 
 export default function OrganizationDetailClient({ organization }: OrganizationDetailClientProps) {
   const { user } = useAuth();
+  const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [requestComment, setRequestComment] = useState("");
@@ -35,6 +38,48 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   const [requestError, setRequestError] = useState<string | null>(null);
 
   const isMember = user?.organizations?.some((org) => org.id === organization.id) ?? false;
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadFavoriteState() {
+      if (!user) {
+        setIsFavorite(false);
+        return;
+      }
+      try {
+        const following = await isFollowing("organizations", organization.id, user.id);
+        if (!cancelled) setIsFavorite(following);
+      } catch (error) {
+        console.error("Error loading favorite state:", error);
+      }
+    }
+    loadFavoriteState();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, organization.id]);
+
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      router.push("/pages/login");
+      return;
+    }
+    if (isTogglingFavorite) return;
+    setIsTogglingFavorite(true);
+    try {
+      if (isFavorite) {
+        await unfollowEntity("organizations", organization.id);
+        setIsFavorite(false);
+      } else {
+        await followEntity("organizations", organization.id);
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
 
   const handleRequestMembership = async () => {
     setIsRequesting(true);
@@ -126,7 +171,8 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
             leadingIconHover="agora-solid-star"
             className="flex-shrink-0"
-            onClick={() => setIsFavorite(!isFavorite)}
+            onClick={handleToggleFavorite}
+            disabled={isTogglingFavorite}
           >
             {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
           </Button>
