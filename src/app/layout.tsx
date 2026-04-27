@@ -45,9 +45,11 @@ export default function RootLayout({
           <ApolloWrapper>
             <PopupProviderWrapper>
               <ScrollTop />
-              <div className="min-h-screen w-full mx-auto flex flex-col">
+              <div className="min-h-screen w-full flex flex-col">
                 <HeaderWrapper />
-                <div className="grow">{children}</div>
+                <div className="">
+                  {children}
+                </div>
                 <Footer />
               </div>
             </PopupProviderWrapper>
