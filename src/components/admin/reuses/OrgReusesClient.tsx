@@ -31,6 +31,9 @@ const formatDate = (dateStr: string) => {
   return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
 };
 
+type SortOrder = "none" | "ascending" | "descending";
+type ReuseSortField = "title" | "created_at" | "datasets";
+
 export default function OrgReusesClient() {
   const params = useParams();
   const routeOrgId = (params?.orgId as string | undefined) ?? undefined;
@@ -44,6 +47,17 @@ export default function OrgReusesClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
+  const [sortField, setSortField] = useState<ReuseSortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+
+  const handleSort = (field: ReuseSortField) => (newOrder: SortOrder) => {
+    setSortField(newOrder === "none" ? null : field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: ReuseSortField): SortOrder =>
+    sortField === field ? sortOrder : "none";
 
   useEffect(() => {
     if (!resolvedOrgId) {
@@ -82,10 +96,30 @@ export default function OrgReusesClient() {
     });
   }, [reuses, statusFilter]);
 
+  const sortedReuses = useMemo(() => {
+    if (!sortField || sortOrder === "none") return filteredReuses;
+    const dir = sortOrder === "ascending" ? 1 : -1;
+    const collator = new Intl.Collator("pt", { sensitivity: "base" });
+    return [...filteredReuses].sort((a, b) => {
+      if (sortField === "title") {
+        return collator.compare(a.title ?? "", b.title ?? "") * dir;
+      }
+      if (sortField === "created_at") {
+        const at = a.created_at ? Date.parse(a.created_at) : 0;
+        const bt = b.created_at ? Date.parse(b.created_at) : 0;
+        return (at - bt) * dir;
+      }
+      // datasets count
+      const ad = a.datasets?.length ?? 0;
+      const bd = b.datasets?.length ?? 0;
+      return (ad - bd) * dir;
+    });
+  }, [filteredReuses, sortField, sortOrder]);
+
   const paginatedReuses = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return filteredReuses.slice(start, start + itemsPerPage);
-  }, [filteredReuses, currentPage, itemsPerPage]);
+    return sortedReuses.slice(start, start + itemsPerPage);
+  }, [sortedReuses, currentPage, itemsPerPage]);
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
@@ -176,16 +210,26 @@ export default function OrgReusesClient() {
           >
             <TableHeader>
               <TableRow>
-                <TableHeaderCell sortType="date" sortOrder="none">
+                <TableHeaderCell
+                  sortType="numeric"
+                  sortOrder={getSortOrder("title")}
+                  onSortChange={handleSort("title")}
+                >
                   Título da reutilização
                 </TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
-                  Estado
-                </TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
+                <TableHeaderCell>Estado</TableHeaderCell>
+                <TableHeaderCell
+                  sortType="date"
+                  sortOrder={getSortOrder("created_at")}
+                  onSortChange={handleSort("created_at")}
+                >
                   Criado em
                 </TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
+                <TableHeaderCell
+                  sortType="numeric"
+                  sortOrder={getSortOrder("datasets")}
+                  onSortChange={handleSort("datasets")}
+                >
                   Conjuntos de dados
                 </TableHeaderCell>
                 <TableHeaderCell>Ações</TableHeaderCell>
