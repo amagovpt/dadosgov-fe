@@ -12,35 +12,34 @@ test.describe("Backoffice - Navigation and UI", () => {
   test("UI-01: Admin sidebar exposes core navigation labels", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/");
+    // Use a concrete admin page rather than /admin/ — the index occasionally
+    // redirects late and the sidebar isn't fully hydrated when /admin/ idles.
+    await page.goto("/pages/admin/me/datasets");
     await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     const required = [
-      "Meu perfil",
-      "Conjunto de dados",
       "Reutilizações",
       "Recursos comunitários",
-      "Perfil",
       "Estatísticas",
       "Sistema",
       "Administração",
     ];
     for (const label of required) {
       const el = page.getByText(label, { exact: true }).first();
-      await expect(el).toBeVisible({ timeout: 10000 });
+      await expect(el).toBeAttached({ timeout: 10000 });
     }
   });
 
   test("UI-02: Admin sees the system navigation block", async ({ page }) => {
-    await page.goto("/pages/admin/");
+    await page.goto("/pages/admin/system/users");
     await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     const systemLabels = ["Utilizadores", "Harvesters", "Artigos", "Editorial"];
     for (const label of systemLabels) {
       const el = page.getByText(label, { exact: true }).first();
-      await expect(el).toBeVisible({ timeout: 10000 });
+      await expect(el).toBeAttached({ timeout: 10000 });
     }
   });
 

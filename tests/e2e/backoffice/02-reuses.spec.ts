@@ -1,14 +1,15 @@
 import { test, expect } from "playwright/test";
+import { loadFixtures } from "../../helpers/fixtures";
 
 /**
  * Backoffice — Reuses CRUD.
  *
- * Auth via auth-setup storage state. Heavy CRUD steps depend on fixtures the
- * test admin doesn't own out of the box (reuses, organisation memberships);
- * they stay skipped until a deterministic seed is available.
+ * Auth via auth-setup storage state. Fixtures (admin-owned org/reuse linked
+ * to the seeded dataset) come from `scripts/seed_e2e_fixtures.py`.
  */
-test.describe("Backoffice - Reuses CRUD", () => {
+const fixtures = loadFixtures();
 
+test.describe("Backoffice - Reuses CRUD", () => {
   test("RU-01: 'Os meus reuses' page renders with empty-state CTA", async ({
     page,
   }) => {
@@ -75,12 +76,38 @@ test.describe("Backoffice - Reuses CRUD", () => {
     await expect(reuseOption).toBeVisible({ timeout: 5000 });
   });
 
-  test.skip("RU-06: Step 1 - fill all fields and validate", async () => {
-    // Requires multi-step wizard cleanup. Re-enable with seed.
+  test("RU-06: Public reuse detail mirrors the seeded title", async ({
+    page,
+  }) => {
+    await page.goto(`/pages/reuses/${fixtures.reuse.slug}`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    // The reuse title is rendered as <h3> inside Agora's <CardArticle>.
+    const titleHeading = page
+      .locator("h3", { hasText: fixtures.reuse.title })
+      .first();
+    await expect(titleHeading).toBeVisible({ timeout: 15000 });
   });
 
-  test.skip("RU-07: Step 2 - associate datasets and services", async () => {
-    // Requires datasets in the system + form persistence cleanup.
+  test("RU-07: Seeded reuse links back to its associated dataset", async ({
+    page,
+  }) => {
+    await page.goto(`/pages/reuses/${fixtures.reuse.slug}`);
+    await page.waitForLoadState("networkidle");
+
+    // Detail page shows "N conjunto(s) de dados associados".
+    const associatedHeading = page
+      .getByRole("heading", {
+        name: /\d+ conjuntos? de dados associados?/i,
+      })
+      .first();
+    await expect(associatedHeading).toBeVisible({ timeout: 10000 });
+
+    const datasetLink = page
+      .locator(`a[href$="/pages/datasets/${fixtures.dataset.slug}"]`)
+      .first();
+    await expect(datasetLink).toBeVisible({ timeout: 10000 });
   });
 
   test.skip("RU-08: Step 3 - optional cover image, save and create", async () => {
@@ -88,15 +115,15 @@ test.describe("Backoffice - Reuses CRUD", () => {
   });
 
   test.skip("RU-09: Edit title, URL, and type then save", async () => {
-    // Requires a reuse owned by the admin user.
+    // Mutates seeded reuse; needs restore step in teardown.
   });
 
   test.skip("RU-10: Change cover image updates it", async () => {
-    // Requires a reuse owned by the admin user.
+    // Requires file upload + cleanup.
   });
 
   test.skip("RU-11: Delete reuse removes it from listing", async () => {
-    // Destructive — needs a disposable test database.
+    // Destructive against seeded reuse — would break dependent tests.
   });
 
   test.skip("RU-12: Publish draft reuse makes it visible on portal", async () => {

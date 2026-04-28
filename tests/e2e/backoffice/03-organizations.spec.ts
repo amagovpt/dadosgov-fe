@@ -1,15 +1,16 @@
 import { test, expect } from "playwright/test";
+import { loadFixtures } from "../../helpers/fixtures";
 
 /**
  * Backoffice — Organizations.
  *
- * Auth via auth-setup storage state. The seeded e2e admin has no organisation
- * membership, so /admin/me/* and /admin/org/* routes are limited. Listing
- * lives at /pages/admin/system/organizations and creation at
- * /pages/admin/organizations/new.
+ * Auth via auth-setup storage state. The seeded e2e admin is a member of
+ * the organisation provisioned by `scripts/seed_e2e_fixtures.py`, so
+ * /admin/org/* routes resolve normally.
  */
-test.describe("Backoffice - Organizations", () => {
+const fixtures = loadFixtures();
 
+test.describe("Backoffice - Organizations", () => {
   test("OR-01: System organizations listing renders", async ({ page }) => {
     await page.goto("/pages/admin/system/organizations");
     await page.waitForLoadState("networkidle");
@@ -46,30 +47,46 @@ test.describe("Backoffice - Organizations", () => {
     await expect(heading).toBeVisible({ timeout: 10000 });
   });
 
-  test.skip("OR-04: Create org with name and description", async () => {
-    // Destructive — needs cleanup of created org.
+  test("OR-04: Public org page mirrors the seeded organisation name", async ({
+    page,
+  }) => {
+    await page.goto(`/pages/organizations/${fixtures.organization.slug}`);
+    await page.waitForLoadState("networkidle");
+
+    const heading = page.locator("main h1").first();
+    await expect(heading).toHaveText(new RegExp(fixtures.organization.name, "i"), {
+      timeout: 15000,
+    });
   });
 
-  test.skip("OR-05: Edit org name, description, logo", async () => {
-    // Requires org owned by admin.
+  test("OR-05: Org datasets tab activates after click", async ({ page }) => {
+    await page.goto(`/pages/organizations/${fixtures.organization.slug}`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(3000);
+
+    const datasetsTab = page
+      .locator('[role="tab"]', { hasText: /^Conjuntos de dados \(\d+\)/i })
+      .first();
+    await datasetsTab.click();
+    await page.waitForTimeout(2000);
+
+    // The org datasets tab uses Agora CardLinks (no real <a href>); just
+    // assert the tab itself becomes active.
+    await expect(datasetsTab).toHaveClass(/active/, { timeout: 10000 });
   });
 
-  test.skip("OR-06: Org members tab", async () => {
-    // Requires org with members.
+  test.skip("OR-06: Edit org name, description, logo", async () => {
+    // Mutates the seeded fixture; needs restore step in teardown.
   });
 
   test.skip("OR-07: Add/remove org member roles", async () => {
-    // Requires org with members + cleanup.
+    // Mutates the seeded fixture; needs restore step in teardown.
   });
 
-  test.skip("OR-08: Verify org datasets/reuses listings", async () => {
-    // Requires seeded fixtures.
-  });
-
-  test("OR-09: Anonymous visitor on /admin/system/organizations is redirected", async ({
+  test("OR-08: Anonymous visitor on /admin/system/organizations is redirected", async ({
     browser,
   }) => {
-    const context = await browser.newContext();
+    const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
     await page.goto("/pages/admin/system/organizations");
     await page.waitForLoadState("networkidle");
