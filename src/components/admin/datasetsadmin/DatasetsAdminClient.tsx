@@ -54,6 +54,18 @@ import { useAuth } from "@/context/AuthContext";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 
+const ZONE_PT_NAMES: Record<string, string> = {
+  "country-group:world": "Mundo",
+  "country-group:ue": "União Europeia",
+  "country:za": "Africa do Sul",
+  "country:dz": "Argelia",
+  "country:ao": "Angola",
+};
+
+function getZoneName(zone: SpatialZone): string {
+  return ZONE_PT_NAMES[zone.id] || zone.name;
+}
+
 interface DatasetsAdminClientProps {
   currentStep: number;
   datasetId?: string | null;
@@ -165,9 +177,9 @@ export default function DatasetsAdminClient({
     createdDataset?.organization?.id ||
     (createdDataset ? "user" : "");
   const licenseDefaultValue =
-    selectedLicenseRef.current || createdDataset?.license || "";
+    selectedLicenseRef.current || createdDataset?.license || (licenses.length > 0 ? "notspecified" : "");
   const frequencyDefaultValue =
-    selectedFrequencyRef.current || createdDataset?.frequency || "";
+    selectedFrequencyRef.current || createdDataset?.frequency || (frequencies.length > 0 ? "unknown" : "");
   const keywordsDefaultValue =
     selectedKeywordsValue ||
     selectedKeywordsRef.current ||
@@ -291,14 +303,14 @@ export default function DatasetsAdminClient({
         merged.push(z);
       }
     }
-    return merged.sort((a, b) => a.name.localeCompare(b.name, "pt"));
+    return merged.sort((a, b) => getZoneName(a).localeCompare(getZoneName(b), "pt"));
   }, [spatialZones, spatialZoneSearch]);
 
   const spatialCoverageOptions = useMemo(() => {
     const selectedIds = new Set(selectedSpatialZonesValue.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
       <DropdownOption key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
-        {z.code ? `${z.name} (${z.code})` : z.name}
+        {z.code ? `${getZoneName(z)} (${z.code})` : getZoneName(z)}
       </DropdownOption>
     ));
     if (options.length === 0) {
@@ -491,6 +503,7 @@ export default function DatasetsAdminClient({
         try {
           const dataset = await fetchDataset(datasetId as string);
           setCreatedDataset(dataset);
+          if (dataset.acronym) setDatasetAcronym(dataset.acronym);
         } catch (error) {
           console.error("Error restoring dataset:", error);
           setApiError("Não foi possível recuperar o conjunto de dados. Volte ao passo anterior.");
@@ -571,33 +584,35 @@ export default function DatasetsAdminClient({
       errors.temporalCoverage = true;
     }
 
-    // Validate contact point fields.
-    // At least one valid contact (saved or draft with name + email/link) is required.
-    const hasSavedContact = selectedContactPointIds.length > 0;
-    const draftErrorsMap: Record<number, Record<string, boolean>> = {};
-    let hasValidDraft = false;
+    // Validate contact point fields only when an org producer is selected
+    // (personal producers don't have the contact section shown in the UI).
+    if (selectedProducer && selectedProducer !== "user") {
+      const hasSavedContact = selectedContactPointIds.length > 0;
+      const draftErrorsMap: Record<number, Record<string, boolean>> = {};
+      let hasValidDraft = false;
 
-    draftContacts.forEach((draft) => {
-      const draftErrors: Record<string, boolean> = {};
-      if (!draft.name.trim()) draftErrors.name = true;
-      if (!draft.email.trim() && !draft.link.trim()) {
-        draftErrors.email = true;
-        draftErrors.link = true;
-      }
-      if (Object.keys(draftErrors).length === 0) {
-        hasValidDraft = true;
-      } else {
-        draftErrorsMap[draft.id] = draftErrors;
-      }
-    });
+      draftContacts.forEach((draft) => {
+        const draftErrors: Record<string, boolean> = {};
+        if (!draft.name.trim()) draftErrors.name = true;
+        if (!draft.email.trim() && !draft.link.trim()) {
+          draftErrors.email = true;
+          draftErrors.link = true;
+        }
+        if (Object.keys(draftErrors).length === 0) {
+          hasValidDraft = true;
+        } else {
+          draftErrorsMap[draft.id] = draftErrors;
+        }
+      });
 
-    if (!hasSavedContact && !hasValidDraft) {
-      setDraftContacts((prev) =>
-        prev.map((d) =>
-          draftErrorsMap[d.id] ? { ...d, errors: draftErrorsMap[d.id] } : d,
-        ),
-      );
-      errors.contactDrafts = true;
+      if (!hasSavedContact && !hasValidDraft) {
+        setDraftContacts((prev) =>
+          prev.map((d) =>
+            draftErrorsMap[d.id] ? { ...d, errors: draftErrorsMap[d.id] } : d,
+          ),
+        );
+        errors.contactDrafts = true;
+      }
     }
 
     if (
@@ -642,8 +657,8 @@ export default function DatasetsAdminClient({
       }
       if (startRaw || endRaw) {
         payload.temporal_coverage = {
-          ...(startRaw ? { start: startRaw } : {}),
-          ...(endRaw ? { end: endRaw } : {}),
+          ...(startTime !== null ? { start: new Date(startTime).toISOString() } : {}),
+          ...(endTime !== null ? { end: new Date(endTime).toISOString() } : {}),
         };
       }
       const spatialZoneIds = spatialCoverageRef.current.split(",").filter(Boolean);
@@ -1093,6 +1108,7 @@ export default function DatasetsAdminClient({
                     label="Sigla"
                     placeholder="Insira a sigla aqui"
                     id="api-acronym"
+                    required={false}
                     value={datasetAcronym}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setDatasetAcronym(e.target.value);
@@ -1103,7 +1119,7 @@ export default function DatasetsAdminClient({
                     placeholder="Insira a descrição aqui"
                     id="dataset-description"
                     rows={4}
-                    maxLength={10000}
+                    maxLength={3000}
                     showCharCounter={true}
                     value={datasetDescription}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -1443,7 +1459,7 @@ export default function DatasetsAdminClient({
                       {selectedZoneObjects.map((zone) => (
                         <Tag
                           key={zone.id}
-                          aria-label={`Remover ${zone.name}`}
+                          aria-label={`Remover ${getZoneName(zone)}`}
                           onMouseDown={(e) => e.preventDefault()}
                           onClick={() => {
                             const savedScroll = window.scrollY;
@@ -1463,7 +1479,7 @@ export default function DatasetsAdminClient({
                             }, 50);
                           }}
                         >
-                          {zone.code ? `${zone.name} (${zone.code})` : zone.name}
+                          {zone.code ? `${getZoneName(zone)} (${zone.code})` : getZoneName(zone)}
                         </Tag>
                       ))}
                     </div>

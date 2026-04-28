@@ -708,14 +708,17 @@ export default function DatasetsEditClient() {
     return <DropdownSection name="licenses">{options}</DropdownSection>;
   }, [licenses, loadedLicense]);
 
+  const frequencyDefaultValue =
+    loadedFrequency || (frequencies.length > 0 ? "unknown" : "");
+
   const frequencyOptions = useMemo(() => {
     const options = frequencies.map((freq) => (
-      <DropdownOption key={freq.id} value={freq.id} selected={freq.id === loadedFrequency}>
+      <DropdownOption key={freq.id} value={freq.id} selected={freq.id === frequencyDefaultValue}>
         {getFrequencyLabel(freq.id, freq.label)}
       </DropdownOption>
     ));
     return <DropdownSection name="frequencies">{options}</DropdownSection>;
-  }, [frequencies, loadedFrequency]);
+  }, [frequencies, frequencyDefaultValue]);
 
   const selectedKeywords = useMemo(
     () => (loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
@@ -1404,6 +1407,7 @@ export default function DatasetsEditClient() {
                       label="Sigla"
                       placeholder="Insira a sigla aqui"
                       id="edit-acronym"
+                      required={false}
                       value={acronym}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setAcronym(e.target.value)
@@ -1521,10 +1525,10 @@ export default function DatasetsEditClient() {
                   <h2 className="admin-page__section-title">Tempo</h2>
                   <div className="admin-page__fields-group">
                     <IsolatedSelect
-                      label="Frequência de atualização"
+                      label="Frequência de atualização *"
                       placeholder="Selecione uma frequência..."
                       id="edit-frequency"
-                      defaultValue={loadedFrequency}
+                      defaultValue={frequencyDefaultValue}
                       onChangeRef={selectedFrequencyRef}
                     >
                       {frequencyOptions}
@@ -1685,7 +1689,7 @@ export default function DatasetsEditClient() {
                               );
                             }}
                           >
-                            Transfira o conjunto de dados
+                            Tranferir o conjunto de dados
                           </Button>
                         </>
                       }
