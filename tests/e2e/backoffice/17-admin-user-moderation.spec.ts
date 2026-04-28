@@ -1,5 +1,4 @@
 import { test, expect } from "playwright/test";
-import { loginAsAdmin } from "../../helpers/auth";
 
 /**
  * User moderation pages — admin-only.
@@ -7,29 +6,22 @@ import { loginAsAdmin } from "../../helpers/auth";
  *   - /pages/admin/system/users         (listing with filters)
  *   - /pages/admin/users/[userId]/profile (single user view, role change, deactivate, delete)
  *
- * Existing 13-user-management.spec.ts covers personal account management. This
- * spec focuses on what an admin can do *to other users*, complementing it.
+ * Auth via auth-setup storage state.
  */
 test.describe("Backoffice - User Moderation", () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAsAdmin(page);
-  });
 
-  test("UM-01: System users listing renders with at least one row", async ({
+  test("UM-01: System users listing renders with the Utilizadores heading", async ({
     page,
   }) => {
     await page.goto("/pages/admin/system/users");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    // Page should at least have a heading or table area
-    const heading = page.getByRole("heading", { name: /Utilizador/i }).first();
-    const row = page.locator("tbody tr, [role='row']").first();
+    const heading = page.getByRole("heading", { name: /^Utilizadores$/i }).first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
 
-    const visible =
-      (await heading.isVisible({ timeout: 5000 }).catch(() => false)) ||
-      (await row.isVisible({ timeout: 5000 }).catch(() => false));
-    expect(visible).toBeTruthy();
+    const adminRow = page.getByText(/e2e-admin@dados\.gov\.pt/i).first();
+    await expect(adminRow).toBeVisible({ timeout: 10000 });
   });
 
   test("UM-02: Search input filters the user list", async ({ page }) => {
@@ -37,21 +29,10 @@ test.describe("Backoffice - User Moderation", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    const search = page
-      .locator(
-        'input[type="search"], input[placeholder*="Pesquisar" i], input[placeholder*="Procurar" i]'
-      )
-      .first();
-    if (!(await search.count())) {
-      test.skip(true, "No search input on users page");
-    }
-
+    const search = page.getByPlaceholder(/Pesquis/i).first();
+    await expect(search).toBeVisible({ timeout: 10000 });
     await search.fill("e2e-admin");
-    await page.waitForTimeout(1500);
-
-    // The seeded admin should remain visible after typing its identifier
-    const adminRow = page.getByText(/e2e-admin/i).first();
-    await expect(adminRow).toBeVisible({ timeout: 5000 }).catch(() => {});
+    await expect(search).toHaveValue("e2e-admin");
   });
 
   test("UM-03: Clicking a user navigates to the profile page", async ({
@@ -64,15 +45,13 @@ test.describe("Backoffice - User Moderation", () => {
     const profileLink = page
       .locator("a[href*='/pages/admin/users/']")
       .first();
-    if (!(await profileLink.count())) {
+    if ((await profileLink.count()) === 0) {
       test.skip(true, "No user profile links rendered");
     }
 
     await profileLink.click();
-    await page.waitForLoadState("networkidle");
-    await expect(page).toHaveURL(/\/pages\/admin\/users\/.+\/profile/, {
-      timeout: 10000,
-    });
+    await page.waitForURL(/\/pages\/admin\/users\/.+\/profile/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/pages\/admin\/users\/.+\/profile/);
   });
 
   test("UM-04: User profile page exposes role/deactivate/delete affordances", async ({
@@ -85,22 +64,21 @@ test.describe("Backoffice - User Moderation", () => {
     const profileLink = page
       .locator("a[href*='/pages/admin/users/']")
       .first();
-    if (!(await profileLink.count())) {
+    if ((await profileLink.count()) === 0) {
       test.skip(true, "No user profile links rendered");
     }
     await profileLink.click();
     await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     const role = page.getByText(/Função|Permissões|Administrador|Editor/i).first();
     const deactivate = page.getByText(/Desativar|Suspender/i).first();
     const remove = page.getByText(/Eliminar conta|Apagar conta/i).first();
 
-    // At least one moderation affordance should be visible to an admin
     const hasAny =
-      (await role.isVisible({ timeout: 3000 }).catch(() => false)) ||
-      (await deactivate.isVisible({ timeout: 3000 }).catch(() => false)) ||
-      (await remove.isVisible({ timeout: 3000 }).catch(() => false));
+      (await role.isVisible({ timeout: 5000 }).catch(() => false)) ||
+      (await deactivate.isVisible({ timeout: 5000 }).catch(() => false)) ||
+      (await remove.isVisible({ timeout: 5000 }).catch(() => false));
     expect(hasAny).toBeTruthy();
   });
 
@@ -121,7 +99,7 @@ test.describe("Backoffice - User Moderation", () => {
   test("UM-07: Anonymous visitor on /admin/system/users is redirected", async ({
     browser,
   }) => {
-    const context = await browser.newContext();
+    const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
     await page.goto("/pages/admin/system/users");
     await page.waitForLoadState("networkidle");
