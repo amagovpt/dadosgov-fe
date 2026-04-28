@@ -331,7 +331,7 @@ export default function CommunityResourceFormClient({
                 <h2 className="admin-page__section-title">Ficheiro ou link</h2>
 
                 <div className="admin-page__fields-group">
-                  <div>
+                  <div className="[&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                     <DragAndDropUploader
                       label="Ficheiros"
                       dragAndDropLabel="Arraste e largue o ficheiro aqui"
