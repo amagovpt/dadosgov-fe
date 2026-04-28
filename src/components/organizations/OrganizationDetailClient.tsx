@@ -342,11 +342,11 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                       year: "numeric",
                     })}
                   </div>
-                  <div className="pt-8">
+                  {/* <div className="pt-8">
                     <div className="text-neutral-900 text-sm font-medium">
                       <span className="text-m-semibold">Tipo:</span> Publicador Oficial
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </CardArticle>
 
