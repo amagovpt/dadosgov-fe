@@ -27,7 +27,12 @@ export default function PublishDropdown({ darkMode = false }: PublishDropdownPro
       label: "Uma reutilização",
       href: "/pages/admin/reuses/new",
     },
-    { icon: "agora-line-award", label: "Um harvester", href: "/pages/admin/harvesters/new" },
+    {
+      icon: null as string | null,
+      customIcon: "/Icons/harvester.svg",
+      label: "Um harvester",
+      href: "/pages/admin/harvesters/new",
+    },
     {
       icon: "agora-line-buildings",
       label: "Uma organização",

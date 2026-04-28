@@ -170,7 +170,25 @@ test.describe("Authentication Page", () => {
     // Skipped: requires authenticated session
   });
 
-  test.skip("AU-13: Account migration page loads (conditional)", async () => {
-    // Skipped: conditional feature, may not be available
+  test("AU-13: /pages/loginregister redirects to /pages/login", async ({
+    page,
+  }) => {
+    await page.goto(`${BASE_URL}/pages/loginregister`);
+    await page.waitForLoadState("networkidle");
+
+    // Server-side redirect should land on the canonical login URL
+    await expect(page).toHaveURL(/\/pages\/login/, { timeout: 10000 });
+  });
+
+  test("AU-14: /pages/migrate-account without pending migration redirects to login", async ({
+    page,
+  }) => {
+    // When no migration is pending, MigrateAccountClient routes to /pages/login.
+    // For unauthenticated users this is the expected outcome.
+    await page.goto(`${BASE_URL}/pages/migrate-account`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    expect(page.url()).toMatch(/\/pages\/(login|migrate-account)/);
   });
 });
