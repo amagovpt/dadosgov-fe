@@ -30,6 +30,9 @@ const formatDate = (dateStr: string) => {
   }
 };
 
+type SortOrder = "none" | "ascending" | "descending";
+type DiscussionSortField = "created" | "closed";
+
 interface OrgDiscussionsClientProps {
   orgId: string;
 }
@@ -42,6 +45,17 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [sortField, setSortField] = useState<DiscussionSortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+
+  const handleSort = (field: DiscussionSortField) => (newOrder: SortOrder) => {
+    setSortField(newOrder === "none" ? null : field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: DiscussionSortField): SortOrder =>
+    sortField === field ? sortOrder : "none";
 
   useEffect(() => {
     async function loadDiscussions() {
@@ -59,10 +73,22 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
     loadDiscussions();
   }, [orgId]);
 
+  const sortedDiscussions = useMemo(() => {
+    if (!sortField || sortOrder === "none") return discussions;
+    const dir = sortOrder === "ascending" ? 1 : -1;
+    return [...discussions].sort((a, b) => {
+      const av = sortField === "created" ? a.created : a.closed;
+      const bv = sortField === "created" ? b.created : b.closed;
+      const at = av ? Date.parse(av) : 0;
+      const bt = bv ? Date.parse(bv) : 0;
+      return (at - bt) * dir;
+    });
+  }, [discussions, sortField, sortOrder]);
+
   const paginatedDiscussions = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return discussions.slice(start, start + itemsPerPage);
-  }, [discussions, currentPage, itemsPerPage]);
+    return sortedDiscussions.slice(start, start + itemsPerPage);
+  }, [sortedDiscussions, currentPage, itemsPerPage]);
 
   const openDiscussion = (discussion: Discussion) => {
     show(
@@ -141,10 +167,18 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
             <TableHeader>
               <TableRow>
                 <TableHeaderCell>Título</TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
+                <TableHeaderCell
+                  sortType="date"
+                  sortOrder={getSortOrder("created")}
+                  onSortChange={handleSort("created")}
+                >
                   Criado em
                 </TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
+                <TableHeaderCell
+                  sortType="date"
+                  sortOrder={getSortOrder("closed")}
+                  onSortChange={handleSort("closed")}
+                >
                   Fechado em
                 </TableHeaderCell>
               </TableRow>
