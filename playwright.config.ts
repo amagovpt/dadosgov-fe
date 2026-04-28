@@ -2,6 +2,7 @@ import { defineConfig } from "playwright/test";
 
 export default defineConfig({
   testDir: "./tests",
+  globalSetup: require.resolve("./tests/global-setup.ts"),
   timeout: 60_000,
   retries: 0,
   reporter: [
