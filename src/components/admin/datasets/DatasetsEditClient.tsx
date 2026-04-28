@@ -1834,7 +1834,7 @@ export default function DatasetsEditClient() {
           <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              <div className="flex items-end gap-[16px] mb-[16px]">
+              <div className="flex items-end gap-[16px] mb-[16px] [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                 <DragAndDropUploader
                   key={uploaderKey}
                   label="Ficheiros"

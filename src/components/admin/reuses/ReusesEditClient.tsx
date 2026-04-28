@@ -895,7 +895,7 @@ export default function ReusesEditClient() {
                           />
                         </div>
                       )}
-                      <div className="mt-2">
+                      <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                         <DragAndDropUploader
                           label="Ficheiros"
                           dragAndDropLabel="Arraste e largue o ficheiro aqui"

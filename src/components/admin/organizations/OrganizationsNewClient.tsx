@@ -335,7 +335,7 @@ export default function OrganizationsNewClient() {
 
                 <h2 className="admin-page__section-title">Logotipo</h2>
 
-                <div className="admin-page__fields-group">
+                <div className="admin-page__fields-group [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                   <DragAndDropUploader
                     label="Ficheiro"
                     dragAndDropLabel="Arraste e largue o ficheiro aqui"
