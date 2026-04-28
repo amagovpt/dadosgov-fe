@@ -426,6 +426,9 @@ function RefuseMembershipPopupContent({
   );
 }
 
+type SortOrder = "none" | "ascending" | "descending";
+type MemberSortField = "name" | "since";
+
 interface MembersClientProps {
   orgId?: string;
 }
@@ -450,6 +453,17 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [requestAction, setRequestAction] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<MemberSortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+
+  const handleSort = (field: MemberSortField) => (newOrder: SortOrder) => {
+    setSortField(newOrder === "none" ? null : field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: MemberSortField): SortOrder =>
+    sortField === field ? sortOrder : "none";
 
   const loadMembers = useCallback(async () => {
     if (!resolvedOrgId) return;
@@ -521,11 +535,28 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     );
   };
 
-  const totalPages = Math.ceil(members.length / itemsPerPage);
+  const sortedMembers = useMemo(() => {
+    if (!sortField || sortOrder === "none") return members;
+    const dir = sortOrder === "ascending" ? 1 : -1;
+    const collator = new Intl.Collator("pt", { sensitivity: "base" });
+    return [...members].sort((a, b) => {
+      if (sortField === "name") {
+        const an = `${a.user.first_name ?? ""} ${a.user.last_name ?? ""}`.trim();
+        const bn = `${b.user.first_name ?? ""} ${b.user.last_name ?? ""}`.trim();
+        return collator.compare(an, bn) * dir;
+      }
+      // since
+      const at = a.since ? Date.parse(a.since) : 0;
+      const bt = b.since ? Date.parse(b.since) : 0;
+      return (at - bt) * dir;
+    });
+  }, [members, sortField, sortOrder]);
+
+  const totalPages = Math.ceil(sortedMembers.length / itemsPerPage);
   const paginatedMembers = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return members.slice(start, start + itemsPerPage);
-  }, [members, currentPage, itemsPerPage]);
+    return sortedMembers.slice(start, start + itemsPerPage);
+  }, [sortedMembers, currentPage, itemsPerPage]);
 
   return (
     <div className="admin-page">
@@ -669,11 +700,19 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       >
         <TableHeader>
           <TableRow>
-            <TableHeaderCell sortType="date" sortOrder="none">
+            <TableHeaderCell
+              sortType="numeric"
+              sortOrder={getSortOrder("name")}
+              onSortChange={handleSort("name")}
+            >
               Membros
             </TableHeaderCell>
             <TableHeaderCell>Estatuto</TableHeaderCell>
-            <TableHeaderCell sortType="date" sortOrder="none">
+            <TableHeaderCell
+              sortType="date"
+              sortOrder={getSortOrder("since")}
+              onSortChange={handleSort("since")}
+            >
               Membro desde
             </TableHeaderCell>
             <TableHeaderCell>Ações</TableHeaderCell>
