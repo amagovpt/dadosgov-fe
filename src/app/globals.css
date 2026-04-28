@@ -2265,6 +2265,11 @@ div.max-w-ch,
   margin-bottom: 1em !important;
 }
 
+/* Fix: hide empty dropdown section headers (InputSelect renders them internally, no prop to suppress) */
+li.section-name:empty {
+  display: none;
+}
+
 /* Fix: agora-file-list overrides block the outline button hover fill */
 .agora-file-list .delete-action.error .agora-btn-outline-danger:hover:not(:disabled) .icon,
 .agora-file-list .delete-action.error .agora-btn-outline-danger:hover:not(:disabled) svg,
