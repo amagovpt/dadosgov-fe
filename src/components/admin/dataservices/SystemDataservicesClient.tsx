@@ -26,6 +26,15 @@ const formatDate = (dateStr: string) => {
   return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
 };
 
+type SortOrder = "none" | "ascending" | "descending";
+type DataserviceSortField = "title" | "created_at" | "last_modified";
+
+const SORT_FIELD_MAP: Record<DataserviceSortField, string> = {
+  title: "title",
+  created_at: "created",
+  last_modified: "last_modified",
+};
+
 export default function SystemDataservicesClient() {
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -34,13 +43,31 @@ export default function SystemDataservicesClient() {
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [sortField, setSortField] = useState<DataserviceSortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const sortParam = useMemo(() => {
+    if (!sortField || sortOrder === "none") return undefined;
+    const apiField = SORT_FIELD_MAP[sortField];
+    return `${sortOrder === "descending" ? "-" : ""}${apiField}`;
+  }, [sortField, sortOrder]);
+
+  const handleSort = (field: DataserviceSortField) => (newOrder: SortOrder) => {
+    setSortField(newOrder === "none" ? null : field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: DataserviceSortField): SortOrder =>
+    sortField === field ? sortOrder : "none";
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetchDataservices(currentPage, pageSize, {
         q: searchQuery.trim() || undefined,
+        sort: sortParam,
       });
       setApis(response.data || []);
       setTotalItems(response.total || 0);
@@ -49,7 +76,7 @@ export default function SystemDataservicesClient() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, searchQuery]);
+  }, [currentPage, pageSize, searchQuery, sortParam]);
 
   useEffect(() => {
     loadData();
@@ -158,10 +185,28 @@ export default function SystemDataservicesClient() {
         >
           <TableHeader>
             <TableRow>
-              <TableHeaderCell>Título da API</TableHeaderCell>
+              <TableHeaderCell
+                sortType="numeric"
+                sortOrder={getSortOrder("title")}
+                onSortChange={handleSort("title")}
+              >
+                Título da API
+              </TableHeaderCell>
               <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell>Criado em</TableHeaderCell>
-              <TableHeaderCell>Modificado em</TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("created_at")}
+                onSortChange={handleSort("created_at")}
+              >
+                Criado em
+              </TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("last_modified")}
+                onSortChange={handleSort("last_modified")}
+              >
+                Modificado em
+              </TableHeaderCell>
               <TableHeaderCell>Ações</TableHeaderCell>
             </TableRow>
           </TableHeader>

@@ -29,6 +29,9 @@ const formatDate = (dateStr: string) => {
   return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
 };
 
+type SortOrder = "none" | "ascending" | "descending";
+type ReuseSortField = "title" | "created_at" | "datasets";
+
 export default function ReusesClient() {
   const { displayName } = useCurrentUser();
 
@@ -36,7 +39,17 @@ export default function ReusesClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [sortField, setSortField] = useState<ReuseSortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSort = (field: ReuseSortField) => (newOrder: SortOrder) => {
+    setSortField(newOrder === "none" ? null : field);
+    setSortOrder(newOrder);
+  };
+
+  const getSortOrder = (field: ReuseSortField): SortOrder =>
+    sortField === field ? sortOrder : "none";
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -83,6 +96,25 @@ export default function ReusesClient() {
       }
     });
   }, [reuses, searchQuery, statusFilter]);
+
+  const sortedReuses = useMemo(() => {
+    if (!sortField || sortOrder === "none") return filteredReuses;
+    const dir = sortOrder === "ascending" ? 1 : -1;
+    const collator = new Intl.Collator("pt", { sensitivity: "base" });
+    return [...filteredReuses].sort((a, b) => {
+      if (sortField === "title") {
+        return collator.compare(a.title ?? "", b.title ?? "") * dir;
+      }
+      if (sortField === "created_at") {
+        const at = a.created_at ? Date.parse(a.created_at) : 0;
+        const bt = b.created_at ? Date.parse(b.created_at) : 0;
+        return (at - bt) * dir;
+      }
+      const ad = a.datasets?.length ?? 0;
+      const bd = b.datasets?.length ?? 0;
+      return (ad - bd) * dir;
+    });
+  }, [filteredReuses, sortField, sortOrder]);
 
   const getStatus = (reuse: Reuse) => {
     if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
@@ -161,21 +193,33 @@ export default function ReusesClient() {
         >
           <TableHeader>
             <TableRow>
-              <TableHeaderCell sortType="date" sortOrder="none">
+              <TableHeaderCell
+                sortType="numeric"
+                sortOrder={getSortOrder("title")}
+                onSortChange={handleSort("title")}
+              >
                 Título da reutilização
               </TableHeaderCell>
               <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell sortType="date" sortOrder="none">
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("created_at")}
+                onSortChange={handleSort("created_at")}
+              >
                 Criado em
               </TableHeaderCell>
-              <TableHeaderCell sortType="date" sortOrder="none">
+              <TableHeaderCell
+                sortType="numeric"
+                sortOrder={getSortOrder("datasets")}
+                onSortChange={handleSort("datasets")}
+              >
                 Conjuntos de dados
               </TableHeaderCell>
               <TableHeaderCell>Ações</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredReuses.map((reuse) => {
+            {sortedReuses.map((reuse) => {
               const status = getStatus(reuse);
               return (
                 <TableRow key={reuse.id}>
