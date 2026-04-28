@@ -115,9 +115,14 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
             {dataset.tags?.length > 0 && (
               <div>
                 <p className="font-bold text-neutral-900 text-sm mb-8">Palavras-chave</p>
-                <div className="flex flex-wrap gap-8">
+                <div className="flex flex-col items-start gap-8">
                   {dataset.tags.map((tag) => (
-                    <Pill key={tag} variant="secondary" appearance="outline" className="rounded-full">
+                    <Pill
+                      key={tag}
+                      appearance="solid"
+                      variant="primary"
+                      className="bg-primary-100 text-primary-700 h-auto py-4 px-8 text-xs font-semibold"
+                    >
                       {tag}
                     </Pill>
                   ))}

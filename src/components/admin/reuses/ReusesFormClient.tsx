@@ -619,6 +619,9 @@ export default function ReusesFormClient({
                     label="Tipo *"
                     placeholder="Selecione um tipo..."
                     id="reuse-type"
+                    searchable
+                    searchInputPlaceholder="Escreva para pesquisar..."
+                    searchNoResultsText="Nenhum resultado encontrado"
                     onChangeRef={selectedReuseTypeRef}
                     defaultValue={selectedReuseTypeValue}
                     onChangeCallback={(v) => setSelectedReuseTypeValue(v || "")}
@@ -631,6 +634,9 @@ export default function ReusesFormClient({
                     label="Tema *"
                     placeholder="Selecione um tema..."
                     id="reuse-theme"
+                    searchable
+                    searchInputPlaceholder="Escreva para pesquisar..."
+                    searchNoResultsText="Nenhum resultado encontrado"
                     onChangeRef={selectedReuseTopicRef}
                     defaultValue={selectedReuseTopicValue}
                     onChangeCallback={(v) => setSelectedReuseTopicValue(v || "")}
