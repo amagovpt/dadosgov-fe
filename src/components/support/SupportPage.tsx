@@ -12,6 +12,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import PageBanner from "@/components/PageBanner";
+import { submitSupportContact, type SupportTopic } from "@/services/api";
 
 const FAQ_DATA = [
   {
@@ -123,6 +124,8 @@ const SupportPage = () => {
   const [description, setDescription] = React.useState("");
   const [errors, setErrors] = React.useState({ email: "", subject: "", description: "" });
   const [successMessage, setSuccessMessage] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const TOGGLE_SUCCESS_MAP: Record<string, string> = {
     question: "Pergunta enviada com sucesso.",
@@ -130,7 +133,7 @@ const SupportPage = () => {
     feedback: "Feedback enviado com sucesso.",
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors = {
       email: email.trim() ? "" : "Campo obrigatório",
       subject: subjectBody.trim() ? "" : "Campo obrigatório",
@@ -138,13 +141,30 @@ const SupportPage = () => {
     };
     setErrors(newErrors);
     const hasErrors = Object.values(newErrors).some(Boolean);
-    if (!hasErrors) {
-      setSuccessMessage(TOGGLE_SUCCESS_MAP[selectedToggle!]);
+    if (hasErrors || !selectedToggle) return;
+
+    setErrorMessage("");
+    setIsSubmitting(true);
+    try {
+      await submitSupportContact({
+        topic: selectedToggle as SupportTopic,
+        email: email.trim(),
+        subject: subjectBody.trim(),
+        message: description.trim(),
+      });
+      setSuccessMessage(TOGGLE_SUCCESS_MAP[selectedToggle]);
       setSelectedToggle(null);
       setEmail("");
       setSubjectBody("");
       setDescription("");
       setErrors({ email: "", subject: "", description: "" });
+    } catch (err) {
+      console.error("Support form submission failed:", err);
+      setErrorMessage(
+        "Não foi possível enviar o seu pedido. Tente novamente em alguns instantes.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -988,6 +1008,7 @@ const SupportPage = () => {
               setDescription("");
               setErrors({ email: "", subject: "", description: "" });
               setSuccessMessage("");
+              setErrorMessage("");
             }}
           >
             <Toggle
@@ -1083,15 +1104,23 @@ const SupportPage = () => {
                 </div>
 
                 <div className="mt-[20px]">
-                  <Button onClick={handleSubmit}>Enviar</Button>
+                  <Button onClick={handleSubmit} disabled={isSubmitting}>
+                    {isSubmitting ? "A enviar..." : "Enviar"}
+                  </Button>
                 </div>
+
+                {errorMessage && (
+                  <div className="mt-[20px]">
+                    <StatusCard variant="danger" description={errorMessage} />
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {successMessage && (
             <div className="mt-[32px] max-w-2xl">
-              <StatusCard type="success" description={successMessage} />
+              <StatusCard variant="success" description={successMessage} />
             </div>
           )}
         </div>

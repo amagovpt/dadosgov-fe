@@ -3767,3 +3767,28 @@ export async function updateHomeFeaturedReuses(
     throw new Error(`Failed to update home featured reuses: ${res.statusText}`);
   return await res.json();
 }
+
+export type SupportTopic = "question" | "bug" | "feedback";
+
+export async function submitSupportContact(payload: {
+  topic: SupportTopic;
+  email: string;
+  subject: string;
+  message: string;
+}): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/site/contact/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const data = await res.json();
+      detail = data?.message || data?.errors ? JSON.stringify(data.errors || data.message) : "";
+    } catch {
+      // ignore — keep generic message
+    }
+    throw new Error(detail || `Failed to submit support form: ${res.statusText}`);
+  }
+}
