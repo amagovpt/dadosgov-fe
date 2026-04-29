@@ -250,21 +250,34 @@ export default function DatasetsAdminClient({
   const tagOptions = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
-    // Deduplicate tags by lowercased text (keeps the first occurrence).
+    // Deduplicate tags by lowercased text (keeps the first occurrence),
+    // and apply client-side substring match so the dropdown reflects the query
+    // even before the debounced backend search returns. The Agora InputSelect's
+    // own searchable filter does not reliably re-apply when children change
+    // mid-typing, so we filter here.
     const seen = new Set<string>();
     const uniqueTags = [...tags, ...tagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
+      if (trimmedLower && !key.includes(trimmedLower)) return false;
       return true;
     });
     const selectedLowerSet = new Set(
       selectedKeywords.map((k) => k.toLowerCase()),
     );
     const selectedNotInSuggestions = selectedKeywords.filter(
-      (keyword) => !seen.has(keyword.toLowerCase()),
+      (keyword) => {
+        const lower = keyword.toLowerCase();
+        if (trimmedLower && !lower.includes(trimmedLower)) return false;
+        return !seen.has(lower);
+      },
     );
-    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const showCreate =
+      trimmed.length > 0 &&
+      ![...tags, ...tagSearch, ...selectedKeywords.map((k) => ({ text: k }))].some(
+        (t) => t.text.toLowerCase() === trimmedLower,
+      );
     const options = [
       ...(showCreate
         ? [
