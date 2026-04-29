@@ -75,9 +75,9 @@ export default function DataStoryDetailPage() {
       },
     ],
     dataSourcesSection: {
-      title: "Datasets utilizados nesta página",
+      title: "Conjuntos de dados utilizados nesta página",
       description:
-        "Os indicadores apresentados usam os seguintes datasets, que servem de base aos valores mostrados nesta página.",
+        "Os indicadores apresentados usam os seguintes conjuntos de dados, que servem de base aos valores mostrados nesta página.",
       dataSources: [
         {
           children: "Esperança de vida à nascença (anos)",
