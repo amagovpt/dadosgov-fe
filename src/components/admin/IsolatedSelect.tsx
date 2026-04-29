@@ -33,15 +33,14 @@ interface IsolatedSelectProps {
   hasError?: boolean;
   errorFeedbackText?: string;
   hideLabel?: boolean;
+  hideSectionNames?: boolean;
   searchable?: boolean;
   required?: boolean;
   searchInputPlaceholder?: string;
   searchNoResultsText?: string;
   onChangeCallback?: (value: string) => void;
   onSearchCallback?: (query: string) => void;
-  children:
-  | ReactElement<DropdownSectionProps>
-  | ReactElement<DropdownSectionProps>[];
+  children: ReactElement<DropdownSectionProps> | ReactElement<DropdownSectionProps>[];
 }
 
 function injectSelected(
@@ -52,7 +51,9 @@ function injectSelected(
     if (!React.isValidElement(section)) return section;
     const sectionEl = section as ReactElement<DropdownSectionProps>;
     const modifiedOptions = React.Children.map(
-      sectionEl.props.children as ReactElement<DropdownOptionProps> | ReactElement<DropdownOptionProps>[],
+      sectionEl.props.children as
+        | ReactElement<DropdownOptionProps>
+        | ReactElement<DropdownOptionProps>[],
       (option) => {
         if (!React.isValidElement(option)) return option;
         const optionEl = option as ReactElement<DropdownOptionProps>;
@@ -74,6 +75,7 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
   hasError,
   errorFeedbackText,
   hideLabel,
+  hideSectionNames,
   searchable,
   required,
   searchInputPlaceholder,
@@ -97,22 +99,16 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
     [internalValue]
   );
 
-  // Keep a stable snapshot of children that only updates when the selection changes.
-  // For non-searchable selects: depending only on `internalValue` keeps the children
-  // reference stable across unrelated parent re-renders (e.g. typing in a sibling
-  // input), so InputSelect's internal useEffect([children]) does not reset selection.
-  // For searchable selects: the option list legitimately changes as the user types in
-  // the search field, so we must also track `children` identity — otherwise the new
-  // search results never make it into the dropdown until the component is remounted.
-  // Callers that pass `searchable` are expected to memoize their children via
-  // useMemo so the reference is stable across unrelated re-renders.
+  // Keep a stable snapshot of children while still updating when the actual
+  // option list changes. This lets the select render new search results and
+  // created tags without losing the selected state.
   const latestChildrenRef = React.useRef(children);
   latestChildrenRef.current = children;
 
   const childrenWithSelection = React.useMemo(
     () => injectSelected(latestChildrenRef.current, selectedValues),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [internalValue, searchable ? children : null]
+    [latestChildrenRef, selectedValues, children]
   );
 
   return (
@@ -137,6 +133,7 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
       feedbackState="danger"
       errorFeedbackText={errorFeedbackText}
       required={required}
+      hideSectionNames={hideSectionNames}
     >
       {childrenWithSelection}
     </InputSelect>

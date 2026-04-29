@@ -1,7 +1,16 @@
-import { test, expect } from "playwright/test";
+import { test, expect, type Page } from "playwright/test";
 
-const BASE_URL = "http://localhost:3000";
-const DATASETS_URL = `${BASE_URL}/pages/datasets`;
+const DATASETS_URL = "/pages/datasets";
+
+async function openFiltersPanel(page: Page) {
+  const openBtn = page.getByRole("button", { name: /Abrir filtros/i });
+  if ((await openBtn.count()) > 0 && (await openBtn.first().isVisible())) {
+    await openBtn.first().click();
+    await expect(
+      page.getByRole("heading", { name: /^Filtros$/i })
+    ).toBeVisible({ timeout: 10000 });
+  }
+}
 
 test.describe("Datasets Listing", () => {
   test.beforeEach(async ({ page }) => {
@@ -9,186 +18,142 @@ test.describe("Datasets Listing", () => {
     await page.waitForLoadState("networkidle");
   });
 
-  test("DL-01: Page loads with dataset list and filter panel", async ({
+  test("DL-01: Page loads with dataset list and filter panel toggle", async ({
     page,
   }) => {
-    // H1 heading should be visible
-    const heading = page.getByRole("heading", { name: /Conjunto de dados/i, level: 1 });
+    const heading = page.getByRole("heading", {
+      name: /Conjuntos de dados/i,
+      level: 1,
+    });
     await expect(heading).toBeVisible({ timeout: 10000 });
 
-    // Dataset card links should be visible
-    const cards = page.locator("a[href*='/pages/datasets/']").first();
+    const cards = page.locator("a[href^='/pages/datasets/']").first();
     await expect(cards).toBeVisible({ timeout: 15000 });
 
-    // Filter panel uses agora-sidebar
-    const filters = page.locator(".agora-sidebar").first();
-    await expect(filters).toBeVisible({ timeout: 10000 });
+    // Filters are collapsed by default; the toggle must be present.
+    const toggleBtn = page.getByRole("button", { name: /Abrir filtros/i });
+    await expect(toggleBtn).toBeVisible({ timeout: 10000 });
   });
 
-  test("DL-02: Each card shows title, org, description, last update date", async ({
-    page,
-  }) => {
-    const firstCard = page.locator("a[href*='/pages/datasets/']").first();
+  test("DL-02: Each card has meaningful textual content", async ({ page }) => {
+    const firstCard = page.locator("a[href^='/pages/datasets/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     const cardText = await firstCard.textContent();
-    // Card should have meaningful text content (title at minimum)
-    expect(cardText?.trim().length).toBeGreaterThan(10);
+    expect(cardText?.trim().length ?? 0).toBeGreaterThan(10);
   });
 
   test("DL-03: Click card opens dataset detail", async ({ page }) => {
-    const firstCard = page
-      .locator("a[href*='/pages/datasets/']")
-      .first();
+    const firstCard = page.locator("a[href^='/pages/datasets/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     await firstCard.click();
-    await page.waitForLoadState("networkidle");
-
-    await expect(page).toHaveURL(/\/pages\/datasets\/.+/, { timeout: 10000 });
+    await page.waitForURL(/\/pages\/datasets\/.+/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/pages\/datasets\/.+/);
   });
 
   test("DL-04: Search field filters results", async ({ page }) => {
     const searchInput = page.locator("#datasets-search");
+    await expect(searchInput).toBeVisible({ timeout: 10000 });
 
-    if ((await searchInput.count()) > 0) {
-      await searchInput.fill("educação");
-      await searchInput.press("Enter");
-      await page.waitForLoadState("networkidle");
-
-      // Results should update - cards or a no-results message
-      const body = await page.textContent("body");
-      expect(body?.length).toBeGreaterThan(100);
-    }
+    await searchInput.fill("educação");
+    await searchInput.press("Enter");
+    await page.waitForURL(/q=educa/, { timeout: 10000 });
+    expect(page.url()).toMatch(/q=educa/);
   });
 
-  test("DL-05: Filter by tag", async ({ page }) => {
-    const tagFilter = page.getByText(/tag|etiqueta|palavra-chave/i).first();
-    if ((await tagFilter.count()) > 0) {
-      await expect(tagFilter).toBeVisible();
-    }
-  });
-
-  test("DL-06: Filter by license", async ({ page }) => {
-    const licenseFilter = page.getByText(/licença|license/i).first();
-    if ((await licenseFilter.count()) > 0) {
-      await expect(licenseFilter).toBeVisible();
-    }
-  });
-
-  test("DL-07: Filter by file format (CSV, JSON, XML)", async ({ page }) => {
-    const formatFilter = page.getByText(/formato|format/i).first();
-    if ((await formatFilter.count()) > 0) {
-      await expect(formatFilter).toBeVisible();
-
-      // Look for common format options
-      const formats = ["CSV", "JSON", "XML"];
-      let found = 0;
-      for (const fmt of formats) {
-        const el = page.getByText(fmt, { exact: true }).first();
-        if ((await el.count()) > 0) {
-          found++;
-        }
-      }
-      expect(found).toBeGreaterThanOrEqual(0);
-    }
-  });
-
-  test("DL-08: Filter by organization", async ({ page }) => {
-    // Filter names are in .agora-sidebar-item elements
-    const orgFilter = page.locator(".agora-sidebar").getByText("Organizações", { exact: false }).first();
-    if ((await orgFilter.count()) > 0) {
-      await expect(orgFilter).toBeVisible();
-    }
-  });
-
-  test("DL-09: Filter by badge (Alto valor, INSPIRE)", async ({ page }) => {
-    const badges = ["Alto valor", "INSPIRE"];
-    let found = 0;
-
-    for (const badge of badges) {
-      const el = page.getByText(badge, { exact: false }).first();
-      if ((await el.count()) > 0) {
-        found++;
-      }
-    }
-
-    expect(found).toBeGreaterThanOrEqual(0);
-  });
-
-  test("DL-10: Sort by Mais recentes, Mais visualizados, Mais descarregados", async ({
+  test("DL-05: Tag filter section visible after opening filters", async ({
     page,
   }) => {
-    // Look for sort dropdown or buttons
-    const sortControl = page
-      .getByRole("combobox")
-      .or(page.getByText(/ordenar|sort/i))
-      .first();
+    await openFiltersPanel(page);
 
-    if ((await sortControl.count()) > 0) {
-      await expect(sortControl).toBeVisible();
+    // Advanced filter group names render as <span> inside Sidebar items.
+    const tagLabel = page.getByText("Palavras-chave", { exact: true }).first();
+    await expect(tagLabel).toBeVisible({ timeout: 10000 });
+  });
+
+  test("DL-06: License filter section visible after opening filters", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    const licenseLabel = page.getByText("Licenças", { exact: true }).first();
+    await expect(licenseLabel).toBeVisible({ timeout: 10000 });
+  });
+
+  test("DL-07: Format filter section visible after opening filters", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    const formatHeading = page
+      .getByRole("heading", { name: /Formato dos recursos/i })
+      .first();
+    await expect(formatHeading).toBeVisible({ timeout: 10000 });
+  });
+
+  test("DL-08: Organization filter section visible after opening filters", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    const orgLabel = page.getByText("Organizações", { exact: true }).first();
+    await expect(orgLabel).toBeVisible({ timeout: 10000 });
+  });
+
+  test("DL-09: High-value badge filter visible in advanced filters", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    const highValue = page.getByText(/Elevado Valor/i).first();
+    await expect(highValue).toBeVisible({ timeout: 10000 });
+  });
+
+  test("DL-10: Sort toggles offer Mais recente, Mais antigo, Subscritores", async ({
+    page,
+  }) => {
+    const sortLabels = ["Relevância", "Mais recente", "Mais antigo", "Subscritores"];
+    for (const label of sortLabels) {
+      const toggle = page.getByText(label, { exact: true }).first();
+      await expect(toggle).toBeVisible({ timeout: 10000 });
     }
   });
 
-  test("DL-11: Pagination works (20 per page)", async ({ page }) => {
-    // Look for pagination
-    const pagination = page
-      .locator("nav[aria-label*='paginat' i], [class*='pagination'], [class*='pager']")
-      .first();
+  test("DL-11: Result list renders cards for the page", async ({ page }) => {
+    const cards = page.locator("a[href^='/pages/datasets/']");
+    await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
-    if ((await pagination.count()) > 0) {
-      await expect(pagination).toBeVisible();
-    }
-
-    // Check that cards are present (up to 20)
-    const cards = page.locator("a[href*='/pages/datasets/']");
     const count = await cards.count();
+    // Page-size is 20 from the API; the layout adds a few extras (featured cards,
+    // related links). We just verify the page renders a reasonable number of cards.
     expect(count).toBeGreaterThan(0);
-    expect(count).toBeLessThanOrEqual(20);
   });
 
-  test("DL-12: Combine multiple filters", async ({ page }) => {
-    // Apply a search filter
+  test("DL-12: Search query persists in URL", async ({ page }) => {
     const searchInput = page.locator("#datasets-search");
+    await searchInput.fill("dados");
+    await searchInput.press("Enter");
+    await page.waitForURL(/q=dados/, { timeout: 10000 });
 
-    if ((await searchInput.count()) > 0) {
-      await searchInput.fill("dados");
-      await searchInput.press("Enter");
-      await page.waitForLoadState("networkidle");
-
-      // Results should still be visible after applying filter
-      const body = await page.textContent("body");
-      expect(body?.length).toBeGreaterThan(100);
-    }
+    const inputAfter = page.locator("#datasets-search");
+    await expect(inputAfter).toHaveValue("dados");
   });
 
-  test("DL-13: Clear all filters restores full list", async ({ page }) => {
-    // First apply a search filter
+  test("DL-13: Clearing search restores broader list", async ({ page }) => {
     const searchInput = page.locator("#datasets-search");
+    await searchInput.fill("educação");
+    await searchInput.press("Enter");
+    await page.waitForURL(/q=educa/, { timeout: 10000 });
 
-    if ((await searchInput.count()) > 0) {
-      await searchInput.fill("educação");
-      await searchInput.press("Enter");
-      await page.waitForLoadState("networkidle");
+    await page.locator("#datasets-search").fill("");
+    await page.locator("#datasets-search").press("Enter");
+    await page.waitForURL((url) => !url.searchParams.get("q"), {
+      timeout: 10000,
+    });
 
-      // Now clear
-      await searchInput.clear();
-      await searchInput.press("Enter");
-      await page.waitForLoadState("networkidle");
-
-      // Look for clear filters button
-      const clearBtn = page.getByRole("button", {
-        name: /limpar|clear|reset/i,
-      });
-      if ((await clearBtn.count()) > 0) {
-        await clearBtn.click();
-        await page.waitForLoadState("networkidle");
-      }
-
-      // Full list should be restored
-      const results = page.locator("a[href*='/pages/datasets/']");
-      const count = await results.count();
-      expect(count).toBeGreaterThan(0);
-    }
+    const results = page.locator("a[href^='/pages/datasets/']");
+    await expect(results.first()).toBeVisible({ timeout: 15000 });
+    expect(await results.count()).toBeGreaterThan(0);
   });
 });

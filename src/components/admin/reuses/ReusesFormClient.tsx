@@ -730,7 +730,7 @@ export default function ReusesFormClient({
                     <span className="text-primary-900 text-base font-medium leading-7">
                       Imagem de capa
                     </span>
-                    <div className="mt-2">
+                    <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                       <DragAndDropUploader
                         dragAndDropLabel="Arraste e largue a imagem aqui"
                         inputLabel="Selecionar ficheiro"

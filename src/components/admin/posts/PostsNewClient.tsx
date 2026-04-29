@@ -49,10 +49,8 @@ export default function PostsNewClient() {
 
   useEffect(() => {
     const q = keywordSearch.trim();
-    if (q.length < 2) {
-      setTagSearch([]);
-      return;
-    }
+    if (q.length < 2) return;
+
     const timer = setTimeout(async () => {
       try {
         const res = await suggestTags(q, 20);
@@ -68,7 +66,8 @@ export default function PostsNewClient() {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
     const seen = new Set<string>();
-    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
+    const visibleTagSearch = trimmed.length < 2 ? [] : tagSearch;
+    const uniqueTags = [...tags, ...visibleTagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
@@ -76,17 +75,13 @@ export default function PostsNewClient() {
     });
     const selectedLowerSet = new Set(selectedTags.map((k) => k.toLowerCase()));
     const selectedNotInSuggestions = selectedTags.filter(
-      (keyword) => !seen.has(keyword.toLowerCase()),
+      (keyword) => !seen.has(keyword.toLowerCase())
     );
     const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [
-            <DropdownOption
-              key={`__create__${trimmedLower}`}
-              value={trimmed}
-              selected={false}
-            >
+            <DropdownOption key={`__create__${trimmedLower}`} value={trimmed} selected={false}>
               Criar &quot;{trimmed}&quot;
             </DropdownOption>,
           ]
@@ -325,7 +320,8 @@ export default function PostsNewClient() {
                   placeholder="Pesquise ou insira palavras-chave..."
                   id="article-keywords"
                   type="checkbox"
-                  searchable
+                  hideSectionNames={true}
+                  searchable={true}
                   searchInputPlaceholder="Escreva para pesquisar ou criar..."
                   searchNoResultsText="Nenhum resultado encontrado"
                   defaultValue={selectedTags.join(",")}
@@ -337,12 +333,8 @@ export default function PostsNewClient() {
                     let addedNew = false;
                     selected.forEach((v) => {
                       const lower = v.toLowerCase();
-                      const existsInTags = tags.some(
-                        (t) => t.text.toLowerCase() === lower,
-                      );
-                      const existsInSearch = tagSearch.some(
-                        (t) => t.text.toLowerCase() === lower,
-                      );
+                      const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
+                      const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
                       if (!existsInTags && !existsInSearch) {
                         addedNew = true;
                         setTags((prev) => {
@@ -369,7 +361,7 @@ export default function PostsNewClient() {
                         aria-label={`Remover ${keyword}`}
                         onClick={() => {
                           const next = selectedTags.filter(
-                            (v) => v.toLowerCase() !== keyword.toLowerCase(),
+                            (v) => v.toLowerCase() !== keyword.toLowerCase()
                           );
                           setSelectedTags(next);
                           selectedKeywordsRef.current = next.join(",");
@@ -383,9 +375,9 @@ export default function PostsNewClient() {
 
                 <div>
                   <span className="text-primary-900 text-base font-medium leading-7">
-                    Cobertura *
+                    Imagem de capa
                   </span>
-                  <div className="mt-2">
+                  <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                     <DragAndDropUploader
                       label="Ficheiros"
                       dragAndDropLabel="Arraste e largue o ficheiro aqui"
@@ -407,6 +399,15 @@ export default function PostsNewClient() {
                     />
                   </div>
                 </div>
+                {imageFile && (
+                  <div className="mt-4 flex justify-center">
+                    <img
+                      src={imageFile ? URL.createObjectURL(imageFile) : undefined}
+                      alt="Cobertura do artigo"
+                      className="max-w-[200px] max-h-[150px] object-contain border border-neutral-200 rounded"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="admin-page__actions">

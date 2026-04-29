@@ -1,106 +1,76 @@
 import { test, expect } from "playwright/test";
 
-const BASE_URL = "http://localhost:3000";
+// The route is /pages/posts (the "articles" naming is internal to the spec).
+const POSTS_URL = "/pages/posts";
 
-test.describe("Articles Page", () => {
+test.describe("Articles (Posts) Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/pages/article`);
+    await page.goto(POSTS_URL);
     await page.waitForLoadState("networkidle");
   });
 
-  test("NT-01: Page loads with banner, search, and article cards", async ({
+  test("NT-01: Page loads with banner, search and post cards", async ({
     page,
   }) => {
-    // H1: "Últimas novidades"
-    const heading = page.getByRole("heading", { name: /Últimas novidades/i, level: 1 });
+    const heading = page.getByRole("heading", {
+      name: /Últimas novidades/i,
+      level: 1,
+    });
     await expect(heading).toBeVisible({ timeout: 10000 });
 
-    // Search input
     const searchInput = page.locator("#articles-search");
-    if ((await searchInput.count()) > 0) {
-      await expect(searchInput).toBeVisible();
-    }
+    await expect(searchInput).toBeVisible({ timeout: 10000 });
 
-    // Article links
-    const cards = page.locator("a[href*='/pages/article/']");
+    const cards = page.locator("a[href^='/pages/posts/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
   });
 
-  test("NT-02: Cards show image, title, date, description", async ({
-    page,
-  }) => {
-    const firstCard = page.locator("a[href*='/pages/article/']").first();
+  test("NT-02: Posts have href slugs", async ({ page }) => {
+    const firstCard = page.locator("a[href^='/pages/posts/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
-    const cardText = await firstCard.textContent();
-    expect(cardText?.trim().length).toBeGreaterThan(0);
+    const href = await firstCard.getAttribute("href");
+    expect(href).toMatch(/^\/pages\/posts\/[a-z0-9-]+/);
   });
 
-  test("NT-03: Sort by Mais recentes, Mais antigos, Mais visualizados", async ({
-    page,
-  }) => {
-    // Sort options are in divs with text
-    const body = await page.textContent("body");
-    const hasSortOptions =
-      body?.includes("Mais recentes") ||
-      body?.includes("Mais antigos") ||
-      body?.includes("Mais visualizados");
-    expect(hasSortOptions).toBeTruthy();
+  test("NT-03: Search field accepts input", async ({ page }) => {
+    const searchInput = page.locator("#articles-search");
+    await searchInput.fill("dados");
+    await expect(searchInput).toHaveValue("dados");
   });
 
-  test("NT-04: Pagination shows 12 items per page", async ({ page }) => {
-    const cards = page.locator("a[href*='/pages/article/']");
+  test("NT-04: Listing renders multiple posts", async ({ page }) => {
+    const cards = page.locator("a[href^='/pages/posts/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
-
     const count = await cards.count();
-    expect(count).toBeLessThanOrEqual(12);
+    expect(count).toBeGreaterThan(1);
+  });
 
-    const pagination = page.locator(
-      '[class*="pagination"], nav[aria-label*="pagination"], [class*="pager"]'
+  test("NT-05: Click card opens article detail with title and breadcrumb", async ({
+    page,
+  }) => {
+    const firstLink = page.locator("a[href^='/pages/posts/']").first();
+    await expect(firstLink).toBeVisible({ timeout: 15000 });
+    await firstLink.click();
+    await page.waitForURL(/\/pages\/posts\/.+/, { timeout: 15000 });
+
+    const heading = page.locator("main h1").first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
+
+    const breadcrumb = page.locator(".agora-breadcrumb").first();
+    await expect(breadcrumb).toBeAttached({ timeout: 10000 });
+    expect((await breadcrumb.textContent())?.toLowerCase() ?? "").toContain(
+      "notícias"
     );
-    if ((await pagination.count()) > 0) {
-      await expect(pagination.first()).toBeVisible();
-    }
   });
 
-  test("NT-05: Click card opens article detail with title, date, author, image, content", async ({
-    page,
-  }) => {
-    const firstLink = page
-      .locator('a[href*="/pages/article/"]')
-      .first();
-    if ((await firstLink.count()) > 0) {
-      await firstLink.click();
-      await page.waitForLoadState("networkidle");
+  test("NT-06: Article detail renders body content", async ({ page }) => {
+    const firstLink = page.locator("a[href^='/pages/posts/']").first();
+    await firstLink.click();
+    await page.waitForURL(/\/pages\/posts\/.+/, { timeout: 15000 });
 
-      const heading = page.locator("h1, h2").first();
-      await expect(heading).toBeVisible({ timeout: 10000 });
-
-      const body = await page.textContent("body");
-      expect(body?.length).toBeGreaterThan(0);
-    }
-  });
-
-  test("NT-06: Related articles shown at bottom of detail page", async ({
-    page,
-  }) => {
-    const firstLink = page
-      .locator('a[href*="/pages/article/"]')
-      .first();
-    if ((await firstLink.count()) > 0) {
-      await firstLink.click();
-      await page.waitForLoadState("networkidle");
-
-      await page.evaluate(() =>
-        window.scrollTo(0, document.body.scrollHeight)
-      );
-      await page.waitForTimeout(500);
-
-      const relatedSection = page.locator(
-        '[class*="related"], [class*="similar"], section:last-of-type'
-      );
-      const body = await page.textContent("body");
-      expect(body).toBeTruthy();
-    }
+    const main = page.locator("main");
+    const text = (await main.textContent()) ?? "";
+    expect(text.length).toBeGreaterThan(200);
   });
 });

@@ -7,7 +7,6 @@
 
 /* Full icon state control for header cards */
 @layer utilities {
-
   .header-card-wrapper svg.leading-icon-active,
   .header-card-wrapper svg.trailing-icon-active {
     display: none !important;
@@ -153,8 +152,6 @@ header.sticky .languages-panel-menu {
   flex-direction: column !important;
 }
 
-
-
 .agora-header .icon-container {
   border-width: 0;
   border-radius: 0%;
@@ -179,9 +176,8 @@ li.ecosystem-panel-menu {
 .ecosystem-custom-panel {
   background-color: rgb(241, 243, 248);
   box-shadow: 0px 16px 16px 0px #00000029;
-  border-top: 4px solid var(--Neutral-200, #E1E4EA);
+  border-top: 4px solid var(--Neutral-200, #e1e4ea);
 }
-
 
 /* Blue bottom bar scoped to the button span (icon + "Ecossistema" text only) */
 li.ecosystem-panel-menu .panel-menu-link-wrapper {
@@ -205,7 +201,7 @@ li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::a
 .agora-languages svg.icon,
 .agora-unauthenticated svg.icon,
 .agora-header .agora-areas svg.icon {
-  fill: #FFFFFF;
+  fill: #ffffff;
 }
 
 /* 3.2 Header Cards & Icons */
@@ -310,11 +306,11 @@ li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::a
 }
 
 /* 3.3 Header Navigation Panels */
-.agora-header .navigation-links-layout>.title {
+.agora-header .navigation-links-layout > .title {
   display: none;
 }
 
-.navigation-links-layout[data-submenu]>.title {
+.navigation-links-layout[data-submenu] > .title {
   display: block;
 }
 
@@ -323,7 +319,7 @@ li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::a
   padding-top: 80px;
 }
 
-.navigation-links-layout[data-submenu]>.links>.link-wrapper:first-child {
+.navigation-links-layout[data-submenu] > .links > .link-wrapper:first-child {
   grid-column: 1 / -1 !important;
   position: absolute;
   top: 16px;
@@ -335,15 +331,15 @@ li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::a
   z-index: 1;
 }
 
-.navigation-links-layout[data-submenu]>.links>.link-wrapper:first-child .agora-btn,
-.navigation-links-layout[data-submenu]>.links>.link-wrapper:first-child .agora-btn .agora-icon {
+.navigation-links-layout[data-submenu] > .links > .link-wrapper:first-child .agora-btn,
+.navigation-links-layout[data-submenu] > .links > .link-wrapper:first-child .agora-btn .agora-icon {
   padding: 8px 0;
   font-weight: 600;
   color: var(--color-neutral-900) !important;
 }
 
 .voltar-btn svg,
-.navigation-links-layout[data-submenu]>.links>.link-wrapper:first-child .agora-btn svg {
+.navigation-links-layout[data-submenu] > .links > .link-wrapper:first-child .agora-btn svg {
   fill: var(--color-neutral-900) !important;
 }
 
@@ -412,11 +408,11 @@ li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::a
 }
 
 /* Auth page button active state */
-header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-link-wrapper {
+header[data-auth-page][data-no-user] .unauthenticated-panel-menu > .panel-menu-link-wrapper {
   position: relative;
 }
 
-header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-link-wrapper::after {
+header[data-auth-page][data-no-user] .unauthenticated-panel-menu > .panel-menu-link-wrapper::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -427,40 +423,89 @@ header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-lin
 }
 
 /* Hide "Autenticar" active state (bar + text + icon) when any other panel is open */
-header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper::after,
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper::after {
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper::after,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper::after {
   display: none;
 }
-header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper,
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper {
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .children-wrapper,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .children-wrapper {
   color: inherit;
 }
-header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .solid,
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .solid {
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .solid,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .solid {
   display: none;
 }
-header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .line,
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .line {
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .line,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .line {
   display: block;
 }
-header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper svg,
-header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper svg {
+header[data-auth-page][data-no-user]:has(.panel-menu-button[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  svg,
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  svg {
   fill: currentColor;
 }
 
-header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper {
+header[data-auth-page][data-no-user]
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .children-wrapper {
   color: var(--color-primary-600);
 }
 
-header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .line {
+header[data-auth-page][data-no-user]
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .line {
   display: none;
 }
 
-header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .solid {
+header[data-auth-page][data-no-user]
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .solid {
   display: block;
 }
 
-header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper svg {
+header[data-auth-page][data-no-user]
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  svg {
   fill: var(--color-primary-600);
 }
 
@@ -535,10 +580,12 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
 }
 
 .agora-card-highlight-newsletter .card-container:before {
-  background: linear-gradient(90deg,
-      var(--color-brand-blue-dark) 0%,
-      rgba(var(--color-brand-blue-dark-rgb), 0.64) 55%,
-      rgba(var(--color-brand-blue-dark-rgb), 0.08) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--color-brand-blue-dark) 0%,
+    rgba(var(--color-brand-blue-dark-rgb), 0.64) 55%,
+    rgba(var(--color-brand-blue-dark-rgb), 0.08) 100%
+  );
   pointer-events: none;
 }
 
@@ -617,8 +664,7 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   padding: 4rem;
 }
 
-
-.tab-panel-content>* {
+.tab-panel-content > * {
   position: relative;
   z-index: 1;
 }
@@ -629,7 +675,7 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   display: none !important;
 }
 
-.tab-panel-content .tab-panel-content>* {
+.tab-panel-content .tab-panel-content > * {
   z-index: auto;
 }
 
@@ -733,10 +779,13 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   flex: 1;
 }
 
-.datastories .agora-card-links-datasets-px0 .agora-card-links .card-links-container .bottom-container {
+.datastories
+  .agora-card-links-datasets-px0
+  .agora-card-links
+  .card-links-container
+  .bottom-container {
   margin-top: auto;
 }
-
 
 .agora-card-links-datasets .agora-card-links .title h2 {
   text-decoration: underline;
@@ -830,7 +879,7 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
 
 /* Dataset reuse card layout */
 .dataset-reuse-card-wrapper .card-general,
-.dataset-reuse-card-wrapper .card-general>div {
+.dataset-reuse-card-wrapper .card-general > div {
   height: 100% !important;
   display: flex !important;
   overflow: hidden !important;
@@ -885,23 +934,23 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
 
 /* Quality progress bar warning color when score <= 45% */
 .quality-progress-warning .progress-complete {
-  background-color: #D4A017 !important;
+  background-color: #d4a017 !important;
 }
 
 .quality-progress-warning .progress-bar::-webkit-progress-value {
-  background-color: #D4A017 !important;
+  background-color: #d4a017 !important;
 }
 
 .quality-progress-warning .progress-bar::-moz-progress-bar {
-  background-color: #D4A017 !important;
+  background-color: #d4a017 !important;
 }
 
 .quality-progress-warning .progress-progress .progress-bar::-webkit-progress-value {
-  background-color: #D4A017 !important;
+  background-color: #d4a017 !important;
 }
 
 .quality-progress-warning .progress-progress .progress-bar::-moz-progress-bar {
-  background-color: #D4A017 !important;
+  background-color: #d4a017 !important;
 }
 
 /* Quality progress bar success color when score > 50% */
@@ -926,7 +975,7 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
 }
 
 /* Force buttons row inside CardNoResults extra-description */
-.agora-card-no-results .extra-description>div {
+.agora-card-no-results .extra-description > div {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -945,7 +994,6 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   padding: 80px;
   margin: 0 !important;
 }
-
 
 .pagination-filters {
   position: relative;
@@ -1019,7 +1067,7 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   background-color: var(--color-primary-100) !important;
 }
 
-.card-general-listing .card-general>.image {
+.card-general-listing .card-general > .image {
   height: 88px !important;
   background-color: var(--color-primary-100);
   display: flex;
@@ -1036,7 +1084,7 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   opacity: 0 !important;
 }
 
-.card-general-listing .card-general>.image img {
+.card-general-listing .card-general > .image img {
   height: 56px !important;
   width: auto !important;
   object-fit: contain !important;
@@ -1046,7 +1094,7 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   min-height: 64px;
 }
 
-.card-general-listing>* {
+.card-general-listing > * {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -1080,11 +1128,11 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   flex-direction: column;
 }
 
-.card-general-listing .content>div.p-32 {
+.card-general-listing .content > div.p-32 {
   padding-top: 0 !important;
 }
 
-.card-general-listing .content>div:first-child {
+.card-general-listing .content > div:first-child {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -1134,7 +1182,6 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   display: none;
 }
 
-
 .login-page .agora-tabs.desktop .tab-panel .tab-panel-content {
   padding-left: 64px;
   padding-right: 64px;
@@ -1157,7 +1204,7 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
    ========================================================================== */
 
 /* 7.1 Admin Wrapper & Header */
-body:has(.admin-wrapper)>div>header.sticky {
+body:has(.admin-wrapper) > div > header.sticky {
   display: none;
 }
 
@@ -1181,7 +1228,7 @@ body:has(.admin-wrapper)>div>header.sticky {
   padding: 0 112px;
 }
 
-.admin-header .authenticated-panel-menu>.agora-btn {
+.admin-header .authenticated-panel-menu > .agora-btn {
   background-color: var(--color-white);
   color: var(--color-primary-500);
   border-color: transparent;
@@ -1189,7 +1236,7 @@ body:has(.admin-wrapper)>div>header.sticky {
   font-size: 16px;
 }
 
-.admin-header[style*="--admin-avatar-url"] .authenticated-panel-menu>.agora-btn {
+.admin-header[style*="--admin-avatar-url"] .authenticated-panel-menu > .agora-btn {
   background-image: var(--admin-avatar-url);
   background-size: cover;
   background-position: center;
@@ -1199,20 +1246,20 @@ body:has(.admin-wrapper)>div>header.sticky {
   overflow: hidden;
 }
 
-.admin-header[style*="--admin-avatar-url"] .authenticated-panel-menu>.agora-btn .icon {
+.admin-header[style*="--admin-avatar-url"] .authenticated-panel-menu > .agora-btn .icon {
   display: none;
 }
 
-.admin-header .authenticated-panel-menu>.agora-btn .children-wrapper {
+.admin-header .authenticated-panel-menu > .agora-btn .children-wrapper {
   color: var(--color-primary-500);
 }
 
 /* Initials avatar when no image */
-.admin-header[style*="--admin-initials"] .authenticated-panel-menu>.agora-btn .icon {
+.admin-header[style*="--admin-initials"] .authenticated-panel-menu > .agora-btn .icon {
   display: none;
 }
 
-.admin-header[style*="--admin-initials"] .authenticated-panel-menu>.agora-btn::before {
+.admin-header[style*="--admin-initials"] .authenticated-panel-menu > .agora-btn::before {
   content: var(--admin-initials);
   font-size: 16px;
   font-weight: 600;
@@ -1242,7 +1289,9 @@ body:has(.admin-wrapper)>div>header.sticky {
   background-color: transparent;
 }
 
-.admin-sidebar-nav.agora-sidebar .agora-sidebar-item .agora-btn-link-neutral.agora-sidebar-button-item {
+.admin-sidebar-nav.agora-sidebar
+  .agora-sidebar-item
+  .agora-btn-link-neutral.agora-sidebar-button-item {
   padding: 16px !important;
   border-left: 3px solid transparent !important;
   overflow: hidden;
@@ -1250,7 +1299,10 @@ body:has(.admin-wrapper)>div>header.sticky {
   text-align: left !important;
 }
 
-.admin-sidebar-nav.agora-sidebar .agora-sidebar-item .agora-btn-link-neutral.agora-sidebar-button-item>*:not(.agora-icon):not([class*="icon"]) {
+.admin-sidebar-nav.agora-sidebar
+  .agora-sidebar-item
+  .agora-btn-link-neutral.agora-sidebar-button-item
+  > *:not(.agora-icon):not([class*="icon"]) {
   overflow: hidden;
   min-width: 0;
   flex: 1;
@@ -1279,8 +1331,8 @@ body:has(.admin-wrapper)>div>header.sticky {
   font-weight: 700;
 }
 
-.admin-sidebar-nav .agora-sidebar-item>.agora-sidebar-button-item:hover,
-.admin-sidebar-nav .agora-sidebar-item>button:hover,
+.admin-sidebar-nav .agora-sidebar-item > .agora-sidebar-button-item:hover,
+.admin-sidebar-nav .agora-sidebar-item > button:hover,
 .admin-sidebar-nav .agora-sidebar-item .agora-btn-link-neutral:hover,
 .admin-side-nav .agora-sidebar .agora-sidebar-item .agora-btn-link-neutral:hover {
   border-left: 3px solid transparent !important;
@@ -1293,7 +1345,11 @@ body:has(.admin-wrapper)>div>header.sticky {
   height: 20px;
 }
 
-.admin-side-nav .agora-sidebar.darkMode .agora-sidebar-item .agora-sidebar-anchor-item .data-children-wrapper {
+.admin-side-nav
+  .agora-sidebar.darkMode
+  .agora-sidebar-item
+  .agora-sidebar-anchor-item
+  .data-children-wrapper {
   gap: 8px;
   font-weight: 400;
   padding-left: 16px;
@@ -1444,12 +1500,14 @@ body:has(.admin-wrapper)>div>header.sticky {
   margin-top: 32px;
 }
 
-.datasets-new-page__cards>* {
+.datasets-new-page__cards > * {
   flex: 1;
 }
 
 .datasets-new-page__cards .card-action {
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
   border: 1px solid transparent;
   cursor: pointer;
 }
@@ -1877,8 +1935,8 @@ body:has(.admin-wrapper)>div>header.sticky {
   max-width: 14px !important;
   margin-right: 8px;
   flex-shrink: 0;
-  fill: #64718B !important;
-  color: #64718B !important;
+  fill: #64718b !important;
+  color: #64718b !important;
 }
 
 .admin-edit-info__stat-icon,
@@ -1888,8 +1946,8 @@ body:has(.admin-wrapper)>div>header.sticky {
   min-width: 14px !important;
   max-width: 14px !important;
   flex-shrink: 0;
-  fill: #64718B !important;
-  color: #64718B !important;
+  fill: #64718b !important;
+  color: #64718b !important;
 }
 
 /* Dataset edit visibility banner */
@@ -1927,7 +1985,6 @@ body:has(.admin-wrapper)>div>header.sticky {
 .admin-edit-info__activity a {
   font-size: 14px !important;
 }
-
 
 /* Dataset edit danger actions */
 .dataset-edit-danger-actions {
@@ -2276,4 +2333,14 @@ li.section-name:empty {
 .agora-file-list .replace-action .agora-btn-outline-primary:hover:not(:disabled) .icon,
 .agora-file-list .replace-action .agora-btn-outline-primary:hover:not(:disabled) svg {
   fill: #fff !important;
+}
+
+/* ==========================================================================
+   [11] AGORA ANCHOR OVERRIDES
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  a.agora-anchor span {
+    text-wrap: wrap !important;
+  }
 }

@@ -31,6 +31,12 @@ import {
   InputTextArea,
   DragAndDropUploader,
   StatusCard,
+  Table,
+  TableHeader,
+  TableHeaderCell,
+  TableBody,
+  TableRow,
+  TableCell,
   Tabs,
   Tab,
   TabHeader,
@@ -38,6 +44,38 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
+
+const activityLabels: Record<string, string> = {
+  "created a dataset": "criou um conjunto de dados",
+  "updated a dataset": "atualizou um conjunto de dados",
+  "deleted a dataset": "eliminou um conjunto de dados",
+  "added a resource to a dataset": "adicionou um recurso a um conjunto de dados",
+  "updated a resource": "atualizou um recurso",
+  "removed a resource from a dataset": "removeu um recurso de um conjunto de dados",
+  "created a dataservice": "criou um serviço de dados",
+  "updated a dataservice": "atualizou um serviço de dados",
+  "deleted a dataservice": "eliminou um serviço de dados",
+  "created a topic": "criou um tema",
+  "updated a topic": "atualizou um tema",
+  "added an element to a topic": "adicionou um elemento a um tema",
+  "updated an element in a topic": "atualizou um elemento num tema",
+  "removed an element from a topic": "removeu um elemento de um tema",
+  "created an organization": "criou uma organização",
+  "updated an organization": "atualizou uma organização",
+  "followed a user": "seguiu um utilizador",
+  "discussed a dataservice": "comentou um serviço de dados",
+  "discussed a dataset": "comentou um conjunto de dados",
+  "discussed a reuse": "comentou uma reutilização",
+  "followed a dataservice": "seguiu um serviço de dados",
+  "followed a dataset": "seguiu um conjunto de dados",
+  "followed a reuse": "seguiu uma reutilização",
+  "followed an organization": "seguiu uma organização",
+  "created a reuse": "criou uma reutilização",
+  "updated a reuse": "atualizou uma reutilização",
+  "deleted a reuse": "eliminou uma reutilização",
+};
+
+const translateActivityLabel = (label: string) => activityLabels[label] ?? label;
 
 export default function ProfileClient() {
   const router = useRouter();
@@ -74,7 +112,7 @@ export default function ProfileClient() {
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
   const [activityPage, setActivityPage] = useState(1);
   const [activityTotal, setActivityTotal] = useState(0);
-  const activityPageSize = 20;
+  const [activityPageSize, setActivityPageSize] = useState(20);
 
   const [subscriptions, setSubscriptions] = useState<UserFollowing[]>([]);
   const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(true);
@@ -122,7 +160,7 @@ export default function ProfileClient() {
       }
     }
     loadActivities();
-  }, [user?.id, activityPage]);
+  }, [user?.id, activityPage, activityPageSize]);
 
   useEffect(() => {
     async function loadSubscriptions() {
@@ -138,8 +176,6 @@ export default function ProfileClient() {
     }
     loadSubscriptions();
   }, []);
-
-  const totalActivityPages = Math.ceil(activityTotal / activityPageSize);
 
   const handleSave = async () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -260,16 +296,6 @@ export default function ProfileClient() {
     }
   };
 
-  const groupActivitiesByMonth = (acts: Activity[]) => {
-    const groups: Record<string, Activity[]> = {};
-    acts.forEach((act) => {
-      const key = format(new Date(act.created_at), "MMMM 'de' yyyy", { locale: pt });
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(act);
-    });
-    return groups;
-  };
-
   const lastModified = profile?.since
     ? format(new Date(profile.since), "d 'de' MMMM 'de' yyyy", { locale: pt })
     : "";
@@ -291,7 +317,10 @@ export default function ProfileClient() {
       <div className="profile-card">
         <Avatar
           avatarType={profile?.avatar_thumbnail ? "image" : "initials"}
-          srcPath={profile?.avatar_thumbnail || undefined}
+          srcPath={
+            (profile?.avatar_thumbnail ||
+              `${(profile?.first_name || "")[0] || ""}${(profile?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
+          }
           alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
           className="profile-card__avatar"
         />
@@ -406,7 +435,7 @@ export default function ProfileClient() {
                     <span className="text-primary-900 text-base font-medium leading-7">
                       Foto de perfil
                     </span>
-                    <div className="mt-2">
+                    <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                       <DragAndDropUploader
                         label="Ficheiros"
                         dragAndDropLabel="Arraste e largue o ficheiro aqui"
@@ -678,15 +707,16 @@ export default function ProfileClient() {
             <TabHeader>Atividades</TabHeader>
             <TabBody>
               <div className="mt-[24px]">
-                {isLoadingActivities ? (
-                  <p className="text-neutral-900 text-base">A carregar atividades...</p>
-                ) : activities.length === 0 ? (
+                {isLoadingActivities && (
+                  <p className="text-neutral-700 text-sm">A carregar...</p>
+                )}
+                {!isLoadingActivities && activities.length === 0 && (
                   <CardNoResults
                     className="datasets-page__empty"
                     position="center"
                     icon={
                       <Icon
-                        name="agora-line-edit"
+                        name="agora-line-time"
                         className="w-12 h-12 text-primary-500 icon-xl"
                       />
                     }
@@ -694,93 +724,77 @@ export default function ProfileClient() {
                     description="Nenhuma atividade registada."
                     hasAnchor={false}
                   />
-                ) : (
-                  <div className="space-y-32">
-                    {Object.entries(groupActivitiesByMonth(activities)).map(
-                      ([month, acts]) => (
-                        <div key={month}>
-                          <h3 className="text-neutral-900 text-sm font-medium mb-16">
-                            {month}
-                          </h3>
-                          <div className="relative border-l-2 border-neutral-200 ml-4">
-                            {acts.map((act, idx) => (
-                              <div
-                                key={idx}
-                                className="flex items-start gap-16 pb-16 ml-16 relative"
-                              >
-                                <div className="absolute -left-[25px] top-1 w-8 h-8 rounded-full bg-neutral-300" />
-                                <div className="flex-1 flex items-start justify-between">
-                                  <div>
-                                    <span className="text-sm">
-                                      <Icon
-                                        name="agora-line-user"
-                                        className="w-4 h-4 inline text-primary-600 mr-4"
-                                      />
-                                      <span className="text-primary-600 font-medium">
-                                        {act.actor.first_name} {act.actor.last_name}
-                                      </span>
-                                      {" ► "}
-                                      <span className="text-neutral-900">{act.label}</span>
-                                    </span>
-                                    {act.related_to_url && (
-                                      <div>
-                                        <a
-                                          href={act.related_to_url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-primary-600 text-sm underline"
-                                        >
-                                          {act.related_to}
-                                          <Icon
-                                            name="agora-line-external-link"
-                                            className="w-3 h-3 inline ml-4"
-                                          />
-                                        </a>
-                                      </div>
-                                    )}
-                                  </div>
-                                  <span className="text-neutral-900 text-sm whitespace-nowrap ml-16">
-                                    {format(
-                                      new Date(act.created_at),
-                                      "d 'de' MMMM 'de' yyyy",
-                                      { locale: pt }
-                                    )}
-                                  </span>
-                                </div>
+                )}
+                {!isLoadingActivities && activities.length > 0 && (
+                  <>
+                    <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+                      {activityTotal} ATIVIDADES
+                    </h2>
+                    <Table
+                      paginationProps={{
+                        itemsPerPageLabel: "Itens por página",
+                        itemsPerPage: activityPageSize,
+                        totalItems: activityTotal,
+                        availablePageSizes: [10, 20, 50],
+                        currentPage: activityPage - 1,
+                        buttonDropdownAriaLabel: "Selecionar itens por página",
+                        dropdownListAriaLabel: "Opções de itens por página",
+                        prevButtonAriaLabel: "Página anterior",
+                        nextButtonAriaLabel: "Próxima página",
+                        onPageChange: (page: number) => setActivityPage(page + 1),
+                        onPageSizeChange: (size: number) => {
+                          setActivityPageSize(size);
+                          setActivityPage(1);
+                        },
+                      }}
+                    >
+                      <TableHeader>
+                        <TableRow>
+                          <TableHeaderCell>Utilizador</TableHeaderCell>
+                          <TableHeaderCell>Ação</TableHeaderCell>
+                          <TableHeaderCell>Data</TableHeaderCell>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {activities.map((activity, index) => (
+                          <TableRow key={index}>
+                            <TableCell headerLabel="Utilizador">
+                              <div className="flex items-center gap-[8px]">
+                                <Avatar
+                                  avatarType={
+                                    activity.actor?.avatar_thumbnail ? "image" : "initials"
+                                  }
+                                  srcPath={
+                                    (activity.actor?.avatar_thumbnail ||
+                                      `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
+                                  }
+                                  alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
+                                />
+                                <a
+                                  href={`/pages/admin/users/${activity.actor?.id}`}
+                                  className="text-primary-600 underline text-sm"
+                                >
+                                  {activity.actor?.first_name} {activity.actor?.last_name}
+                                </a>
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      )
-                    )}
-                    {totalActivityPages > 1 && (
-                      <div className="flex items-center justify-center gap-8 mt-32">
-                        <Button
-                          variant="primary"
-                          appearance="outline"
-                          onClick={() => setActivityPage((p) => Math.max(1, p - 1))}
-                          disabled={activityPage === 1}
-                        >
-                          Anterior
-                        </Button>
-                        <span className="text-neutral-900 text-sm">
-                          Página {activityPage} de {totalActivityPages}
-                        </span>
-                        <Button
-                          variant="primary"
-                          appearance="outline"
-                          onClick={() =>
-                            setActivityPage((p) =>
-                              Math.min(totalActivityPages, p + 1)
-                            )
-                          }
-                          disabled={activityPage === totalActivityPages}
-                        >
-                          Seguinte
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                            </TableCell>
+                            <TableCell headerLabel="Ação">
+                              {translateActivityLabel(activity.label)}
+                            </TableCell>
+                            <TableCell headerLabel="Data">
+                              {new Date(activity.created_at).toLocaleDateString("pt-PT", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </>
                 )}
               </div>
             </TabBody>
