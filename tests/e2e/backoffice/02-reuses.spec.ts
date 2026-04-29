@@ -51,6 +51,9 @@ test.describe("Backoffice - Reuses CRUD", () => {
     await expect(urlInput).toHaveValue("https://example.com/reuse");
   });
 
+  // Reuse-specific select coverage moved to the cross-form regression matrix
+  // at `tests/helpers/select-regression.ts` (driven by `99-select-regression.spec.ts`).
+
   test("RU-04: System reuses listing renders for admin", async ({ page }) => {
     await page.goto("/pages/admin/system/reuses");
     await page.waitForLoadState("networkidle");
