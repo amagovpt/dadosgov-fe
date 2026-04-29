@@ -728,25 +728,22 @@ export default function DatasetsEditClient() {
   const keywordOptions = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
-    // Case-insensitive dedupe across suggestions + search results, and apply
-    // client-side substring match against the query. The Agora InputSelect's
-    // own searchable filter does not reliably re-apply when children change
-    // mid-typing, so we filter here.
+    // Selected tags stay visible regardless of query so the InputSelect keeps
+    // tracking them across searches; otherwise typing a new query would drop
+    // them from the children and the next onChange would lose those selections.
+    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
     const seen = new Set<string>();
     const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
+      if (selectedLowerSet.has(key)) return true;
       if (trimmedLower && !key.includes(trimmedLower)) return false;
       return true;
     });
-    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
-    // Keep selected keywords that aren't in suggestions visible and checked.
-    const selectedNotInSuggestions = selectedKeywords.filter((keyword) => {
-      const lower = keyword.toLowerCase();
-      if (trimmedLower && !lower.includes(trimmedLower)) return false;
-      return !seen.has(lower);
-    });
+    const selectedNotInSuggestions = selectedKeywords.filter(
+      (keyword) => !seen.has(keyword.toLowerCase()),
+    );
     const showCreate =
       trimmed.length > 0 &&
       ![...tagSuggestions, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&

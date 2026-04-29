@@ -164,25 +164,24 @@ export default function ReusesFormClient({
   const keywordsChildren = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
-    // Deduplicate tags by lowercased text (keeps the first occurrence),
-    // and apply client-side substring match so the dropdown reflects the query
-    // even before the debounced backend search returns. The Agora InputSelect's
-    // own searchable filter does not reliably re-apply when children change
-    // mid-typing, so we filter here.
-    const seen = new Set<string>();
-    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
-      const key = t.text.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      if (trimmedLower && !key.includes(trimmedLower)) return false;
-      return true;
-    });
+    // Selected tags stay visible regardless of query so the InputSelect keeps
+    // tracking them across searches; otherwise typing a new query would drop
+    // them from the children and the next onChange would lose those selections.
     const selectedSet = new Set(
       selectedKeywordsValue
         .split(",")
         .map((v) => v.trim().toLowerCase())
         .filter(Boolean)
     );
+    const seen = new Set<string>();
+    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      if (selectedSet.has(key)) return true;
+      if (trimmedLower && !key.includes(trimmedLower)) return false;
+      return true;
+    });
     const showCreate =
       trimmed.length > 0 &&
       ![...tags, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
