@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_UDATA_VERSION: udataVersion,
   },
+  // Allow `next dev` to run a 2nd instance side-by-side (the disposable
+  // test stack on port 3001) without colliding on the default `.next` lock.
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
   // Standalone output for Docker deployment
   output: "standalone",
   typescript: {
