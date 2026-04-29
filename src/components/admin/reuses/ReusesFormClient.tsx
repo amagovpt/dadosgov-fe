@@ -68,6 +68,7 @@ export default function ReusesFormClient({
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
   const [reuseTopics, setReuseTopics] = useState<ReuseTopic[]>([]);
   const [tags, setTags] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
   const [keywordSearch, setKeywordSearch] = useState("");
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
   // Persist selected values across step navigation (uncontrolled IsolatedSelect
@@ -93,6 +94,23 @@ export default function ReusesFormClient({
     fetchReuseTopics().then(setReuseTopics);
     suggestTags("", 50).then(setTags);
   }, []);
+
+  useEffect(() => {
+    const q = keywordSearch.trim();
+    if (q.length < 2) {
+      setTagSearch([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestTags(q, 20);
+        setTagSearch(res);
+      } catch {
+        setTagSearch([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keywordSearch]);
 
   useEffect(() => {
     setSelectedDatasets([]);
@@ -148,7 +166,7 @@ export default function ReusesFormClient({
     const trimmedLower = trimmed.toLowerCase();
     // Deduplicate tags by lowercased text (keeps the first occurrence).
     const seen = new Set<string>();
-    const uniqueTags = tags.filter((t) => {
+    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
@@ -184,17 +202,20 @@ export default function ReusesFormClient({
       )),
     ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, keywordSearch, selectedKeywordsValue]);
+  }, [tags, tagSearch, keywordSearch, selectedKeywordsValue]);
 
   const handleKeywordChange = useCallback((value: string) => {
     setSelectedKeywordsValue(value);
     const selected = value.split(",").filter(Boolean);
     let addedNew = false;
     selected.forEach((v) => {
-      if (!tags.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+      const lower = v.toLowerCase();
+      const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
+      const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
+      if (!existsInTags && !existsInSearch) {
         addedNew = true;
         setTags((prev) => {
-          if (prev.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+          if (prev.some((t) => t.text.toLowerCase() === lower)) {
             return prev;
           }
           return [...prev, { text: v }];
@@ -206,7 +227,7 @@ export default function ReusesFormClient({
     if (addedNew) {
       setKeywordSearch("");
     }
-  }, [tags]);
+  }, [tags, tagSearch]);
 
   const handleStep1Next = async () => {
     const errors: Record<string, boolean> = {};

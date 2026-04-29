@@ -169,6 +169,7 @@ export default function DatasetsAdminClient({
   const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
   const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
   const [tags, setTags] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
   const [keywordSearch, setKeywordSearch] = useState("");
   const producerDefaultValue =
@@ -251,7 +252,7 @@ export default function DatasetsAdminClient({
     const trimmedLower = trimmed.toLowerCase();
     // Deduplicate tags by lowercased text (keeps the first occurrence).
     const seen = new Set<string>();
-    const uniqueTags = tags.filter((t) => {
+    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
@@ -292,7 +293,7 @@ export default function DatasetsAdminClient({
       )),
     ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, selectedKeywords, keywordSearch]);
+  }, [tags, tagSearch, selectedKeywords, keywordSearch]);
 
   const allSpatialZones = useMemo(() => {
     const seen = new Set<string>();
@@ -495,6 +496,23 @@ export default function DatasetsAdminClient({
     }
     loadDropdownData();
   }, []);
+
+  useEffect(() => {
+    const q = keywordSearch.trim();
+    if (q.length < 2) {
+      setTagSearch([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestTags(q, 20);
+        setTagSearch(res);
+      } catch {
+        setTagSearch([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keywordSearch]);
 
   // Restore dataset from API when datasetId is in the URL
   useEffect(() => {
@@ -1164,10 +1182,13 @@ export default function DatasetsAdminClient({
                       const selected = value.split(",").filter(Boolean);
                       let addedNew = false;
                       selected.forEach((v) => {
-                        if (!tags.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+                        const lower = v.toLowerCase();
+                        const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
+                        const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
+                        if (!existsInTags && !existsInSearch) {
                           addedNew = true;
                           setTags((prev) => {
-                            if (prev.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+                            if (prev.some((t) => t.text.toLowerCase() === lower)) {
                               return prev;
                             }
                             return [...prev, { text: v }];
