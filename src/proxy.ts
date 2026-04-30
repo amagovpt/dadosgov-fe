@@ -15,7 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_HOST = process.env.BACKEND_HOST || "";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   if (!BACKEND_HOST) {
     return NextResponse.next();
   }
