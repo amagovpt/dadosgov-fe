@@ -219,7 +219,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                 </div>
               </div>
 
-              {/* Conjuntos de Dados */}
+              {/* Conjuntos de dados */}
               <div className="flex items-center gap-16">
                 <div className="stats-icon-square border-2 border-[#A6D5FF] text-[#A6D5FF]">
                   <Icon
@@ -239,7 +239,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                       </span>
                     )}
                   </div>
-                  <span className="text-s-regular">Conjuntos de Dados</span>
+                  <span className="text-s-regular">Conjuntos de dados</span>
                 </div>
               </div>
 
