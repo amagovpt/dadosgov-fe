@@ -26,6 +26,7 @@
     "@tiptap/pm": "^3.21.0",
     "@tiptap/react": "^3.21.0",
     "@tiptap/starter-kit": "^3.21.0",
+    "cheerio": "^1.2.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.20",
     "graphql": "^16.13.2",

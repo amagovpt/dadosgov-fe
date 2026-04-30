@@ -10,7 +10,7 @@ import {
   Icon,
   CardNoResults,
   Toggle,
-  ToggleGroup,
+  //ToggleGroup,
   Pill,
   Sidebar,
   SidebarItem,
@@ -22,6 +22,7 @@ import { suggestTags } from "@/services/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Datastories } from "@/types/datastories/datastories";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 /*const SORT_OPTIONS: Record<string, string> = {
   recentes: "",
@@ -557,7 +558,7 @@ export default function DataStoriesClient({
                             title={<div className="underline text-xl-bold">{story.title}</div>}
                             description={
                               <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
-                                {story.description}
+                                {formatHtmlParagraphs(story.description)}
                               </p>
                             }
                             date={<span className="font-[300]">Publicado há {timeAgo}</span>}
