@@ -549,7 +549,7 @@ export default function DataStoriesClient({
                             onClick={() => router.push(`/pages/datastories/${story.slug}`)}
                             className="cursor-pointer text-neutral-900 h-full"
                             variant="transparent"
-                            image={{ src: story.image?.url ?? "", alt: story.title }}
+                            image={{ src: story.image?.at(0)?.url ?? "", alt: story.title }}
                             category={story.organizationName}
                             title={<div className="underline text-xl-bold">{story.title}</div>}
                             description={

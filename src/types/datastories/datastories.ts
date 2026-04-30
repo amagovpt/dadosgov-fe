@@ -6,7 +6,7 @@ export type DataStoryMetadata = {
   description: string;
   image: {
     url: string;
-  };
+  }[];
   createdAt: string;
   tags: {
     tag: string;
