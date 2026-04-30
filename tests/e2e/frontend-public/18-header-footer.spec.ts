@@ -90,6 +90,102 @@ test.describe("Header and Footer", () => {
     // Skipped: requires authenticated session
   });
 
+  test("NV-13: Conhecimento dropdown opens and shows all main menu items", async ({
+    page,
+  }) => {
+    const header = page.locator("header").first();
+    const conhecimentoBtn = header.getByText(/^Conhecimento$/i).first();
+
+    await conhecimentoBtn.click();
+
+    await expect(
+      page.getByText("O que é o dados.gov.pt", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByText("Publicar dados", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByText("Reutilizar dados", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByText("Sobre dados abertos", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByText("Desenvolvimento", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+  });
+
+  test("NV-14: Conhecimento > Desenvolvimento submenu shows Documentação da API", async ({
+    page,
+  }) => {
+    const header = page.locator("header").first();
+    const conhecimentoBtn = header.getByText(/^Conhecimento$/i).first();
+
+    await conhecimentoBtn.click();
+    await page.waitForTimeout(300);
+
+    const desenvolvimentoCard = page
+      .locator('[data-group="main"]')
+      .filter({ hasText: "Desenvolvimento" })
+      .first();
+    await expect(desenvolvimentoCard).toBeVisible({ timeout: 10000 });
+    await desenvolvimentoCard.click();
+
+    const apiDocCard = page
+      .locator('[data-group="submenu-desenvolvimento"]')
+      .filter({ hasText: "Documentação da API" })
+      .first();
+    await expect(apiDocCard).toBeVisible({ timeout: 10000 });
+  });
+
+  test("NV-15: Conhecimento > Desenvolvimento > back button returns to main menu", async ({
+    page,
+  }) => {
+    const header = page.locator("header").first();
+
+    await header.getByText(/^Conhecimento$/i).first().click();
+    await page.waitForTimeout(300);
+
+    await page
+      .locator('[data-group="main"]')
+      .filter({ hasText: "Desenvolvimento" })
+      .first()
+      .click();
+    await page.waitForTimeout(300);
+
+    const backBtn = page
+      .locator('[data-group="submenu-desenvolvimento"][data-is-back="true"]')
+      .first();
+    await expect(backBtn).toBeVisible({ timeout: 10000 });
+    await backBtn.click();
+
+    await expect(
+      page.getByText("O que é o dados.gov.pt", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+  });
+
+  test("NV-16: Publicar dropdown opens and shows all creation links", async ({
+    page,
+  }) => {
+    const header = page.locator("header").first();
+    const publicarBtn = header.getByText(/^Publicar$/i).first();
+
+    await publicarBtn.click();
+
+    await expect(
+      page.getByText("Novo Conjunto de Dados", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByText("Nova Reutilização", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByText("Nova Organização", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByText("Novo Harvester", { exact: true })
+    ).toBeVisible({ timeout: 10000 });
+  });
+
   test("NV-08: Footer shows the 3 link columns: Dados abertos, Portal, Desenvolvimento", async ({
     page,
   }) => {
