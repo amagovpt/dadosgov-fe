@@ -206,7 +206,7 @@ export default function DatasetsClient({
             </p>
           }
         >
-          <PublishDropdown darkMode={true} />
+          <PublishDropdown darkMode={true} outline={false} />
         </PageBanner>
 
         {/* Search Section */}
