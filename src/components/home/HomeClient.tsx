@@ -451,7 +451,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                   }}
                   subtitle={
                     story.created_at
-                      ? `Publicado a ${format(new Date(story.created_at), "dd MMM yyyy", { locale: pt })}`
+                      ? `Publicado a ${format(new Date(story.created_at), "dd MM yyyy", { locale: pt })}`
                       : ""
                   }
                   title={story.title}
@@ -495,7 +495,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                       }}
                       subtitle={
                         post.created_at
-                          ? `Publicado a ${format(new Date(post.created_at), "d MMM yyyy", { locale: pt })}`
+                          ? `Publicado a ${format(new Date(post.created_at), "d MM yyyy", { locale: pt })}`
                           : ""
                       }
                       title={post.name}
