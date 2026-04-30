@@ -7,6 +7,7 @@ import { Pill, Accordion, AccordionGroup } from "@ama-pt/agora-design-system";
 import { Dataset } from "@/types/api";
 import { frequencyLabelsMap } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
+import { SeeMoreToggle } from "@/components/SeeMoreToggle";
 
 interface DatasetInfoProps {
   dataset: Dataset;
@@ -176,28 +177,13 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
                   ))}
                 </div>
                 {hasHiddenTags && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllTags((prev) => !prev)}
+                  <SeeMoreToggle
+                    isExpanded={showAllTags}
+                    onToggle={() => setShowAllTags((prev) => !prev)}
                     className="mt-8 inline-flex items-center gap-4 bg-transparent border-0 p-0 text-m-regular text-primary-600 hover:text-primary-900"
-                  >
-                    <svg
-                      className={`block h-20 w-20 [transform-style:preserve-3d] transition-transform duration-[250ms] ease-linear ${showAllTags ? "[transform:rotateX(180deg)]" : "[transform:rotateX(0deg)]"}`}
-                      style={{
-                        transformOrigin: "center",
-                      }}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                    <span className="text-s-regular">{showAllTags ? "Ver menos" : "Ver mais"}</span>
-                  </button>
+                    iconClassName="h-20 w-20"
+                    textClassName="text-s-regular"
+                  />
                 )}
               </div>
             )}
