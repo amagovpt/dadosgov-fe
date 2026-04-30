@@ -138,20 +138,19 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   }, [checkOverflow]);
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <main className="container flex flex-col gap-24">
-        {/* Breadcrumb & Action Section */}
-        <div className="flex justify-between items-center ">
-          <Breadcrumb
-            items={[
-              { label: "Home", url: "/" },
-              { label: "Organizações", url: "/pages/organizations" },
-              { label: organization.name, url: `/pages/organizations/${organization.slug}` },
-            ]}
-          />
-        </div>
+    <main className="w-full flex flex-col gap-24 justify-center items-center ">
+      {/* Breadcrumb & Action Section */}
+      <div className="container flex justify-between items-center ">
+        <Breadcrumb
+          items={[
+            { label: "Home", url: "/" },
+            { label: "Organizações", url: "/pages/organizations" },
+            { label: organization.name, url: `/pages/organizations/${organization.slug}` },
+          ]}
+        />
+      </div>
 
-        <div className="flex justify-end gap-[12px] ">
+      <div className="container flex justify-end gap-12">
           {user && !isMember && !requestSuccess && (
             <Button
               variant="primary"
@@ -176,241 +175,241 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           >
             {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
           </Button>
+      </div>
+
+      {requestSuccess && (
+        <StatusCard
+          variant="success"
+          showIcon
+          description="Pedido de adesão enviado com sucesso. O administrador da organização irá analisar o seu pedido."
+        />
+      )}
+      {requestError && (
+        <StatusCard variant="danger" showIcon description={requestError} />
+      )}
+
+      {showRequestForm && (
+        <div className="container bg-neutral-50 rounded-lg p-[24px]  flex flex-col gap-[16px]">
+          <h3 className="text-primary-900 text-base font-semibold">
+            Pedir adesão a {organization.name}
+          </h3>
+          <InputTextArea
+            label="Comentário (opcional)"
+            placeholder="Explique por que pretende aderir a esta organização..."
+            id="membership-comment"
+            rows={3}
+            value={requestComment}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setRequestComment(e.target.value)
+            }
+          />
+          <div className="flex gap-[12px]">
+            <Button
+              appearance="outline"
+              variant="neutral"
+              onClick={() => {
+                setShowRequestForm(false);
+                setRequestComment("");
+                setRequestError(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleRequestMembership}
+              disabled={isRequesting}
+            >
+              {isRequesting ? "A enviar..." : "Enviar pedido"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="container flex flex-col xl:flex-row gap-32 ">
+        {/* Main Content Column */}
+        <div className="w-full">
+          {/* Title & Header */}
+          <div className="flex flex-col gap-4" ref={titleRef}>
+            <div className="flex justify-between items-start">
+              <h1 className="text-xl-bold text-primary-900 leading-tight mb-24 max-w-[592px]">
+                {organization.name}
+              </h1>
+            </div>
+          </div>
+
+          {/* Description Section */}
+          <div className="text-neutral-700 text-lg leading-relaxed mb-12 relative">
+            {/* Hidden measure element to get full content height */}
+            <div ref={measureRef} className="absolute invisible pointer-events-none" style={{ top: 0, left: 0, right: 0 }} aria-hidden="true">
+              <p className="text-neutral-900 text-m-light  max-w-[592px]">
+                {organization.description || "Esta organização não possui descrição."}
+              </p>
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
+                  Observações preliminares
+                </h3>
+                <p className="text-neutral-900 mb-[16px] max-w-[592px]">
+                  Informações adicionais sobre o papel desta organização na gestão e publicação de
+                  dados abertos.
+                </p>
+              </div>
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
+                  Sobre a organização
+                </h3>
+                <p className="text-neutral-900  max-w-[592px]">
+                  {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
+                  para a transparência e reutilização de informação pública em Portugal.
+                </p>
+              </div>
+            </div>
+            <div
+              className="overflow-hidden"
+              style={!expanded && isOverflowing && availableHeight ? { maxHeight: availableHeight } : undefined}
+            >
+              <p className="text-neutral-900 text-m-light  max-w-[592px]">
+                {organization.description || "Esta organização não possui descrição."}
+              </p>
+
+              {/* Static sections to mirror dataset page as requested (copy) */}
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
+                  Observações preliminares
+                </h3>
+                <p className="text-neutral-900 mb-[16px] max-w-[592px]">
+                  Informações adicionais sobre o papel desta organização na gestão e publicação de
+                  dados abertos.
+                </p>
+              </div>
+
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
+                  Sobre a organização
+                </h3>
+                <p className="text-neutral-900  max-w-[592px]">
+                  {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
+                  para a transparência e reutilização de informação pública em Portugal.
+                </p>
+              </div>
+            </div>
+            {isOverflowing && (
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="flex items-center gap-8 text-primary-600 cursor-pointer hover:underline mt-8"
+              >
+                {expanded ? "Ler menos" : "Ler mais"}
+                {expanded ? (
+                  <Icon name="agora-line-arrow-up-circle" className="w-24 h-24" />
+                ) : (
+                  <Icon name="agora-line-arrow-down-circle" className="w-24 h-24" />
+                )}
+              </button>
+            )}
+          </div>
         </div>
 
-        {requestSuccess && (
-          <StatusCard
-            variant="success"
-            showIcon
-            description="Pedido de adesão enviado com sucesso. O administrador da organização irá analisar o seu pedido."
-          />
-        )}
-        {requestError && (
-          <StatusCard variant="danger" showIcon description={requestError} />
-        )}
-
-        {showRequestForm && (
-          <div className="bg-neutral-50 rounded-lg p-[24px]  flex flex-col gap-[16px]">
-            <h3 className="text-primary-900 text-base font-semibold">
-              Pedir adesão a {organization.name}
-            </h3>
-            <InputTextArea
-              label="Comentário (opcional)"
-              placeholder="Explique por que pretende aderir a esta organização..."
-              id="membership-comment"
-              rows={3}
-              value={requestComment}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setRequestComment(e.target.value)
-              }
-            />
-            <div className="flex gap-[12px]">
-              <Button
-                appearance="outline"
-                variant="neutral"
-                onClick={() => {
-                  setShowRequestForm(false);
-                  setRequestComment("");
-                  setRequestError(null);
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleRequestMembership}
-                disabled={isRequesting}
-              >
-                {isRequesting ? "A enviar..." : "Enviar pedido"}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        <div className="grid xl:grid-cols-12 gap-32 ">
-          {/* Main Content Column */}
-          <div className="xl:col-span-6 xl:block">
-            {/* Title & Header */}
-            <div className="flex flex-col gap-4" ref={titleRef}>
-              <div className="flex justify-between items-start">
-                <h1 className="text-xl-bold text-primary-900 leading-tight mb-24 max-w-[592px]">
-                  {organization.name}
-                </h1>
-              </div>
-            </div>
-
-            {/* Description Section */}
-            <div className="prose max-w-none max-w-ch text-neutral-700 text-lg leading-relaxed mb-12 relative">
-              {/* Hidden measure element to get full content height */}
-              <div ref={measureRef} className="absolute invisible pointer-events-none" style={{ top: 0, left: 0, right: 0 }} aria-hidden="true">
-                <p className="text-neutral-900 text-m-light  max-w-[592px]">
-                  {organization.description || "Esta organização não possui descrição."}
-                </p>
-                <div className="mt-8">
-                  <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
-                    Observações preliminares
-                  </h3>
-                  <p className="text-neutral-900 mb-[16px] max-w-[592px]">
-                    Informações adicionais sobre o papel desta organização na gestão e publicação de
-                    dados abertos.
-                  </p>
-                </div>
-                <div className="mt-8">
-                  <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
-                    Sobre a organização
-                  </h3>
-                  <p className="text-neutral-900  max-w-[592px]">
-                    {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
-                    para a transparência e reutilização de informação pública em Portugal.
-                  </p>
-                </div>
-              </div>
-              <div
-                className="overflow-hidden"
-                style={!expanded && isOverflowing && availableHeight ? { maxHeight: availableHeight } : undefined}
-              >
-                <p className="text-neutral-900 text-m-light  max-w-[592px]">
-                  {organization.description || "Esta organização não possui descrição."}
-                </p>
-
-                {/* Static sections to mirror dataset page as requested (copy) */}
-                <div className="mt-8">
-                  <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
-                    Observações preliminares
-                  </h3>
-                  <p className="text-neutral-900 mb-[16px] max-w-[592px]">
-                    Informações adicionais sobre o papel desta organização na gestão e publicação de
-                    dados abertos.
-                  </p>
-                </div>
-
-                <div className="mt-8">
-                  <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
-                    Sobre a organização
-                  </h3>
-                  <p className="text-neutral-900  max-w-[592px]">
-                    {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
-                    para a transparência e reutilização de informação pública em Portugal.
-                  </p>
-                </div>
-              </div>
-              {isOverflowing && (
-                <button
-                  onClick={() => setExpanded(!expanded)}
-                  className="flex items-center gap-8 text-primary-600 cursor-pointer hover:underline mt-8"
-                >
-                  {expanded ? "Ler menos" : "Ler mais"}
-                  {expanded ? (
-                    <Icon name="agora-line-arrow-up-circle" className="w-24 h-24" />
+        <div className="w-full">
+          <div className="flex flex-col h-fit card-article-3_2 organization_detail" ref={sidebarRef}>
+            <CardArticle
+              className="card-detail-info border-none shadow-none mb-16 bg-[#F2F6FF] p-32 rounded-4"
+              subtitle={
+                <div className="flex flex-col gap-16">
+                  {organization.logo ? (
+                    <div className="w-fit h-[48px] card-article-3_2-img py-8 rounded-8 border-2 border-primary-300 flex items-center justify-center">
+                      <img
+                        src={organization.logo}
+                        alt={organization.name}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
                   ) : (
-                    <Icon name="agora-line-arrow-down-circle" className="w-24 h-24" />
+                    <div className="w-fit px-12 py-6 bg-neutral-100 rounded-8 border border-neutral-200 flex items-center justify-center text-neutral-400">
+                      <Icon name="agora-line-building" className="w-6 h-6" />
+                    </div>
                   )}
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="xl:col-span-6">
-            <div className="flex flex-col h-fit card-article-3_2 organization_detail" ref={sidebarRef}>
-              <CardArticle
-                className="card-detail-info border-none shadow-none mb-16 bg-[#F2F6FF] p-32 rounded-4"
-                subtitle={
-                  <div className="flex flex-col gap-16">
-                    {organization.logo ? (
-                      <div className="w-fit h-[48px] card-article-3_2-img py-8 rounded-8 border-2 border-primary-300 flex items-center justify-center">
-                        <img
-                          src={organization.logo}
-                          alt={organization.name}
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-fit px-12 py-6 bg-neutral-100 rounded-8 border border-neutral-200 flex items-center justify-center text-neutral-400">
-                        <Icon name="agora-line-building" className="w-6 h-6" />
-                      </div>
-                    )}
-                    <div className="text-neutral-900 text-m-light mb-[8px]">Organização</div>
-                  </div>
-                }
-              >
-                <div className="space-y-16">
-                  <div className="text-neutral-900 text-sm mb-[16px]">
-                    <span className="text-m-semibold">Última atualização:</span>{" "}
-                    {new Date(organization.last_modified).toLocaleDateString("pt-PT", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </div>
-                  {/* <div className="pt-8">
+                  <div className="text-neutral-900 text-m-light mb-[8px]">Organização</div>
+                </div>
+              }
+            >
+              <div className="space-y-16">
+                <div className="text-neutral-900 text-sm mb-[16px]">
+                  <span className="text-m-semibold">Última atualização:</span>{" "}
+                  {new Date(organization.last_modified).toLocaleDateString("pt-PT", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </div>
+                {/* <div className="pt-8">
                     <div className="text-neutral-900 text-sm font-medium">
                       <span className="text-m-semibold">Tipo:</span> Publicador Oficial
                     </div>
                   </div> */}
-                </div>
-              </CardArticle>
+              </div>
+            </CardArticle>
 
-              {/* Metrics Box */}
-              <div className="grid grid-cols-2 gap-16 mb-16">
-                <div className="bg-[#F2F6FF] rounded-4 p-32">
-                  <div className="text-sm mb-[8px]">Visualizações</div>
-                  <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
-                    {organization.metrics?.views
-                      ? organization.metrics.views >= 1000
-                        ? `${(organization.metrics.views / 1000).toFixed(1).replace(".", ",")} mil`
-                        : organization.metrics.views.toLocaleString("pt-PT")
-                      : "0"}
-                  </div>
-                  <div className="flex items-center gap-1 mb-[8px]">
-                    <Pill appearance="outline" variant="success" className="h-auto">
-                      +{organization.metrics?.views
-                        ? organization.metrics.views >= 1000
-                          ? `${(organization.metrics.views / 1000).toFixed(2).replace(".", ",")} mil`
-                          : organization.metrics.views.toLocaleString("pt-PT")
-                        : "0"}{" "}
-                      total
-                    </Pill>
-                  </div>
-                  <div className="text-xs text-neutral-900 mt-1">
-                    desde{" "}
-                    {organization.created_at
-                      ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
-                        locale: pt,
-                      })
-                      : "—"}
-                  </div>
+            {/* Metrics Box */}
+            <div className="grid grid-cols-2 gap-16 mb-16">
+              <div className="bg-[#F2F6FF] rounded-4 p-32">
+                <div className="text-sm mb-[8px]">Visualizações</div>
+                <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
+                  {organization.metrics?.views
+                    ? organization.metrics.views >= 1000
+                      ? `${(organization.metrics.views / 1000).toFixed(1).replace(".", ",")} mil`
+                      : organization.metrics.views.toLocaleString("pt-PT")
+                    : "0"}
                 </div>
-                <div className="bg-[#F2F6FF] rounded-4 p-32">
-                  <div className="text-sm mb-[8px]">Seguidores</div>
-                  <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
-                    {organization.metrics?.followers
-                      ? organization.metrics.followers >= 1000
-                        ? `${(organization.metrics.followers / 1000).toFixed(1).replace(".", ",")} mil`
-                        : organization.metrics.followers.toLocaleString("pt-PT")
-                      : "0"}
-                  </div>
-                  <div className="flex items-center gap-1 mb-[8px]">
-                    <Pill appearance="outline" variant="success" className="h-auto">
-                      +{organization.metrics?.followers
-                        ? organization.metrics.followers >= 1000
-                          ? `${(organization.metrics.followers / 1000).toFixed(2).replace(".", ",")} mil`
-                          : organization.metrics.followers.toLocaleString("pt-PT")
-                        : "0"}{" "}
-                      total
-                    </Pill>
-                  </div>
-                  <div className="text-xs text-neutral-900 mt-1">
-                    desde{" "}
-                    {organization.created_at
-                      ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
-                        locale: pt,
-                      })
-                      : "—"}
-                  </div>
+                <div className="flex items-center gap-1 mb-[8px]">
+                  <Pill appearance="outline" variant="success" className="h-auto">
+                    +{organization.metrics?.views
+                      ? organization.metrics.views >= 1000
+                        ? `${(organization.metrics.views / 1000).toFixed(2).replace(".", ",")} mil`
+                        : organization.metrics.views.toLocaleString("pt-PT")
+                      : "0"}{" "}
+                    total
+                  </Pill>
+                </div>
+                <div className="text-xs text-neutral-900 mt-1">
+                  desde{" "}
+                  {organization.created_at
+                    ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
+                      locale: pt,
+                    })
+                    : "—"}
                 </div>
               </div>
+              <div className="bg-[#F2F6FF] rounded-4 p-32">
+                <div className="text-sm mb-[8px]">Seguidores</div>
+                <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
+                  {organization.metrics?.followers
+                    ? organization.metrics.followers >= 1000
+                      ? `${(organization.metrics.followers / 1000).toFixed(1).replace(".", ",")} mil`
+                      : organization.metrics.followers.toLocaleString("pt-PT")
+                    : "0"}
+                </div>
+                <div className="flex items-center gap-1 mb-[8px]">
+                  <Pill appearance="outline" variant="success" className="h-auto">
+                    +{organization.metrics?.followers
+                      ? organization.metrics.followers >= 1000
+                        ? `${(organization.metrics.followers / 1000).toFixed(2).replace(".", ",")} mil`
+                        : organization.metrics.followers.toLocaleString("pt-PT")
+                      : "0"}{" "}
+                    total
+                  </Pill>
+                </div>
+                <div className="text-xs text-neutral-900 mt-1">
+                  desde{" "}
+                  {organization.created_at
+                    ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
+                      locale: pt,
+                    })
+                    : "—"}
+                </div>
+              </div>
+            </div>
 
-              {/* Quality Box (Copying from dataset page)
+            {/* Quality Box (Copying from dataset page)
               <div className="bg-[#F2F6FF] rounded-4 p-32 mb-16">
                 <div className="flex justify-between items-end mb-4">
                   <h3 className="text-l-semibold font-bold text-neutral-900 mb-[8px]">Qualidade dos metadados</h3>
@@ -426,11 +425,11 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                   <a href="#" className="hover:underline font-medium">Saiba mais sobre este indicador</a>
                 </div>
               </div> */}
-            </div>
           </div>
         </div>
+      </div>
 
-        {/* <div className="bg-primary-100 p-32 rounded-lg mb-[8px]">
+      {/* <div className="bg-primary-100 p-32 rounded-lg mb-[8px]">
           <h3 className="text-l-semibold font-bold text-neutral-900 mb-24 max-w-[592px]">
             Está à procura do preço de venda de um imóvel ou terreno?
           </h3>
@@ -445,9 +444,8 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           </div>
         </div> */}
 
-        {/* Tabs Section */}
-        <OrganizationTabs organization={organization} />
-      </main>
-    </div>
+      {/* Tabs Section */}
+      <OrganizationTabs organization={organization} />
+    </main>
   );
 }

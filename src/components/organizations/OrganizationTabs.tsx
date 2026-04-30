@@ -188,7 +188,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
             aria-hidden="true"
           />
           <div className="relative z-10">
-            <div className="container mx-auto max-w-5xl">{content}</div>
+            <div className="container">{content}</div>
           </div>
         </div>
       </TabBody>
@@ -220,7 +220,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
   };
 
   return (
-    <div className="mt-64">
+    <div className="w-full">
       <Tabs>
         {/* Tab 1: Descrição */}
         <Tab>
