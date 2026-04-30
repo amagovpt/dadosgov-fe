@@ -3,9 +3,7 @@ import Section from "@/components/datastories/Components/Shared/Section";
 import { Metadata } from "next";
 import { CardCompound } from "@/components/datastories/Components/Shared/CardCompound";
 import FooterReference from "@/components/datastories/Components/Shared/FooterReference";
-import DataSourcesSection, {
-  DataSourcesSectionProps,
-} from "@/components/datastories/Components/Shared/DataSourcesSection";
+import DataSourcesSection from "@/components/datastories/Components/Shared/DataSourcesSection";
 import { getDatastory } from "@/queries/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
@@ -15,6 +13,8 @@ export const metadata: Metadata = {
 
 export default async function DataStoryDetailPage() {
   const datastory = await getDatastory("servicos-publicos/o-canal-presencial", "pt");
+
+  console.log("datastory", datastory);
 
   return (
     <main className="flex flex-col">
@@ -37,10 +37,12 @@ export default async function DataStoryDetailPage() {
                 {datastory.hero.cards.map((card, index) => (
                   <CardCompound.Root key={index}>
                     {card.card?.icon && <CardCompound.Icon icon={card.card.icon} />}
-                    {card.card?.bignumber && <CardCompound.BigNumber
-                      number={card.card.bignumber.number}
-                      detail={card.card.bignumber.description}
-                    />}
+                    {card.card?.bignumber && (
+                      <CardCompound.BigNumber
+                        number={card.card.bignumber.number}
+                        detail={card.card.bignumber.description}
+                      />
+                    )}
                     <CardCompound.Subtitle>{card.card?.title}</CardCompound.Subtitle>
                     <CardCompound.Description>{card.card?.subtitle}</CardCompound.Description>
                   </CardCompound.Root>
@@ -86,7 +88,7 @@ export default async function DataStoryDetailPage() {
         </Section>
       ))}
 
-      {/* <DataSourcesSection {...(datastory.dataSourcesSection as DataSourcesSectionProps)} /> */}
+      <DataSourcesSection {...datastory.dataSource} />
     </main>
   );
 }

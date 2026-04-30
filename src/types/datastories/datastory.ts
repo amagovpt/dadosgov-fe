@@ -37,7 +37,19 @@ export type DatastorySection = {
   iframeSource: string;
 };
 
+type Source = {
+  children: string;
+  href: string;
+};
+
+export type DatastorySource = {
+  title: string;
+  description: string;
+  sources: Source[];
+};
+
 export type Datastory = {
   hero: DatastoryHero;
   sections: DatastorySection[];
+  dataSource: DatastorySource;
 };

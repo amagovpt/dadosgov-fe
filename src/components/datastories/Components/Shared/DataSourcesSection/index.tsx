@@ -3,17 +3,10 @@ import Section from "../Section";
 import { InfoBlock } from "../InfoBlock";
 import { Anchor } from "@ama-pt/agora-design-system";
 import { twMerge } from "tailwind-merge";
+import { DatastorySource } from "@/types/datastories/datastory";
 
-export type DataSourcesSectionProps = {
+export type DataSourcesSectionProps = DatastorySource & {
   className?: string;
-  title: string;
-  description?: string;
-  dataSources: [
-    {
-      children: string;
-      href: string;
-    },
-  ];
 };
 
 // eslint-disable-next-line max-len
@@ -21,7 +14,7 @@ export default function DataSourcesSection({
   className,
   title,
   description,
-  dataSources,
+  sources,
 }: DataSourcesSectionProps) {
   return (
     <Section className={twMerge("flex items-center justify-center relative overflow-hidden", className)}>
@@ -41,7 +34,7 @@ export default function DataSourcesSection({
               </InfoBlock.Header>
               <InfoBlock.Content>
                 <div className="flex flex-col gap-16">
-                  {dataSources.map((source, index) => (
+                  {sources.map((source, index) => (
                     <Anchor
                       href={source.href}
                       className="!justify-start !text-nowrap"

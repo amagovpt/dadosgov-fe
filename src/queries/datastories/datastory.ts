@@ -42,6 +42,16 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
               }
             }
           }
+          dataSource {
+            ${locale} {
+              title
+              description
+              sources {
+                children
+                href
+              }
+            }
+          }
         }
       }
     }

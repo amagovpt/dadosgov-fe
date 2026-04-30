@@ -49,13 +49,9 @@ export default function DataStoriesClient({
   initialFilters,
   datastories,
 }: DataStoriesClientProps) {
-  console.log("datastories", datastories);
-
   const router = useRouter();
 
   const stories = Array.isArray(datastories) ? datastories : [];
-
-  console.log("stories", stories);
 
   const atualizacaoOptions = [
     {
