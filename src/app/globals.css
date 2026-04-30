@@ -664,7 +664,8 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   padding: 4rem;
 }
 
-.tab-panel-content > * {
+
+.tab-panel-content>* {
   position: relative;
   z-index: 1;
 }

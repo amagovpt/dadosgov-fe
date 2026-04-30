@@ -217,7 +217,7 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
         <div className="mt-32 pt-24">
           <AccordionGroup>
             {hasExtras && (
-              <Accordion headingTitle="Extras" headingLevel="h3">
+              (<Accordion headingTitle="Extras" headingLevel="h3">
                 <div className="grid grid-cols-3 gap-24 p-16">
                   {dataset.page && (
                     <div>
@@ -234,10 +234,10 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
                     </span>
                   </div>
                 </div>
-              </Accordion>
+              </Accordion>) as any
             )}
             {hasHarvest && (
-              <Accordion headingTitle="Harvest" headingLevel="h3">
+              (<Accordion headingTitle="Harvest" headingLevel="h3">
                 <div className="grid grid-cols-3 gap-x-24 gap-y-24 p-16">
                   {[
                     "backend",
@@ -264,7 +264,7 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
                     );
                   })}
                 </div>
-              </Accordion>
+              </Accordion>) as any
             )}
           </AccordionGroup>
         </div>

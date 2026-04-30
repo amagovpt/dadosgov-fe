@@ -2088,7 +2088,7 @@ export async function fetchTopic(slugOrId: string): Promise<Topic | null> {
 export async function replyToDiscussion(
   discussionId: string,
   comment: string,
-  options?: { organization?: string }
+  options?: { organization?: string, close?: boolean }
 ): Promise<Discussion | null> {
   try {
     const res = await fetch(
@@ -2481,14 +2481,16 @@ export async function fetchSpatialZonesByIds(ids: string[]): Promise<SpatialZone
     );
     if (!res.ok) throw new Error(`Failed to fetch spatial zones: ${res.statusText}`);
     const geojson = await res.json() as {
-      features?: Array<{ id: string; properties: { name: string; code: string; uri?: string } }>;
+      features?: Array<{ id: string; properties: { name: string; code: string; uri?: string; level?: any } }>;
     };
     return (geojson.features ?? []).map((f) => ({
       id: f.id,
       name: f.properties.name,
       code: f.properties.code,
       uri: f.properties.uri ?? "",
-    }));
+      // Some backends include a level reference; keep it flexible (could be id or object)
+      level: (f.properties as any).level ?? "",
+    })) as SpatialZone[];
   } catch (error) {
     console.error("Error fetching spatial zones by ids:", error);
     return [];

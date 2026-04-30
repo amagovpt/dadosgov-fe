@@ -38,8 +38,9 @@ export default function DiscussionsClient() {
 
     async function loadDiscussions() {
       try {
-        const data = await fetchOrgDiscussions(activeOrg!.id);
-        setDiscussions(data);
+        const { data } = await fetchOrgDiscussions(activeOrg!.id);
+        if (data) setDiscussions(data);
+
       } catch (error) {
         console.error("Error loading discussions:", error);
       } finally {

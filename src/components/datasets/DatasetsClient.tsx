@@ -4,7 +4,6 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Button,
   InputSearch,
   Icon,
   CardGeneral,
@@ -25,6 +24,7 @@ import { pt } from "date-fns/locale";
 
 import PageBanner from "@/components/PageBanner";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import Button from "../Primitives/Button";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -266,7 +266,7 @@ export default function DatasetsClient({
                 }}
               >
                 {Object.entries(SORT_LABELS).map(([key, label]) => (
-                  <Toggle key={key} value={key} selected={currentSortKey === key}>
+                  <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                     {label}
                   </Toggle>
                 ))}

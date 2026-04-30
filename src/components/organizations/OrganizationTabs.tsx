@@ -179,19 +179,21 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
   const datasets = datasetsResponse?.data || [];
 
-  const renderTabBody = (content: React.ReactNode) => (
-    <TabBody>
-      <div className="relative">
-        <div
-          className="absolute inset-y-0 -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64 bg-primary-100 z-0"
-          aria-hidden="true"
-        />
-        <div className="relative z-10">
-          <div className="container mx-auto max-w-5xl">{content}</div>
+  const renderTabBody = (content: React.ReactNode) => {
+    return (
+      <TabBody>
+        <div className="relative">
+          <div
+            className="absolute inset-y-0 -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64 bg-primary-100 z-0"
+            aria-hidden="true"
+          />
+          <div className="relative z-10">
+            <div className="container mx-auto max-w-5xl">{content}</div>
+          </div>
         </div>
-      </div>
-    </TabBody>
-  );
+      </TabBody>
+    )
+  };
 
   const renderPagination = (
     currentPage: number,
@@ -282,9 +284,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
         {/* Tab 2: Conjuntos de dados */}
         <Tab>
-          <TabHeader>
-            Conjuntos de dados ({organization.metrics?.datasets || 0})
-          </TabHeader>
+          <TabHeader> Conjuntos de dados ({organization.metrics?.datasets || 0})</TabHeader>
           {renderTabBody(
             <div>
               <h3 className="font-medium text-neutral-900 text-base mb-24">
@@ -409,9 +409,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
         {/* Tab 3: Reutilizações */}
         <Tab>
-          <TabHeader>
-            Reutilizações ({organization.metrics?.reuses || 0})
-          </TabHeader>
+          <TabHeader>Reutilizações ({organization.metrics?.reuses || 0})</TabHeader>
+          
           {renderTabBody(
             <div>
               <h3 className="font-medium text-neutral-900 text-base mb-16">
@@ -506,7 +505,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
         </Tab>
 
         {/* Tab 5: Discussões — hidden until implemented */}
-        {false && <Tab>
+        {/* {false && <Tab>
           <TabHeader>Discussões ({discussionCount})</TabHeader>
           {renderTabBody(
             <div>
@@ -844,7 +843,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                                 setIsReplying(true);
                                 const org =
                                   replyIdentityRef.current &&
-                                  replyIdentityRef.current !== "user"
+                                    replyIdentityRef.current !== "user"
                                     ? replyIdentityRef.current
                                     : undefined;
                                 const updated = await replyToDiscussion(
@@ -874,7 +873,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                                 setIsReplying(true);
                                 const org =
                                   replyIdentityRef.current &&
-                                  replyIdentityRef.current !== "user"
+                                    replyIdentityRef.current !== "user"
                                     ? replyIdentityRef.current
                                     : undefined;
                                 const updated = await replyToDiscussion(
@@ -921,7 +920,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               )}
             </div>
           )}
-        </Tab>}
+        </Tab>} */}
 
         {/* Tab 6: Informações (Statistics, Members, Technical Info) */}
         <Tab>
@@ -1001,10 +1000,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                     <span className="text-sm">
                       {organization.last_modified
                         ? format(
-                            new Date(organization.last_modified),
-                            "d 'de' MMMM 'de' yyyy",
-                            { locale: pt }
-                          )
+                          new Date(organization.last_modified),
+                          "d 'de' MMMM 'de' yyyy",
+                          { locale: pt }
+                        )
                         : "—"}
                     </span>
                   </div>
@@ -1017,10 +1016,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                     <span className="text-sm">
                       {organization.created_at
                         ? format(
-                            new Date(organization.created_at),
-                            "d 'de' MMMM 'de' yyyy",
-                            { locale: pt }
-                          )
+                          new Date(organization.created_at),
+                          "d 'de' MMMM 'de' yyyy",
+                          { locale: pt }
+                        )
                         : "—"}
                     </span>
                   </div>

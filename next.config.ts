@@ -23,9 +23,6 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   // Standalone output for Docker deployment
   output: "standalone",
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   // Prevent Next.js from stripping trailing slashes on proxied routes,
   // which causes redirect loops with Flask (Flask adds trailing slash,
   // Next.js removes it → 308 loop).
@@ -79,6 +76,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "http",
         hostname: "localhost:7000/static",
+      },
+      {
+        protocol: "https",
+        hostname: "172.31.204.12",
       },
     ],
   },

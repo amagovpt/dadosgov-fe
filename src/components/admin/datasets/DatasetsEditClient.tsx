@@ -411,7 +411,7 @@ function ResourceEditPopupContent({
 
   return (
     <div className="flex flex-col gap-[16px]" style={{ minHeight: "60vh" }}>
-      {error && <StatusCard type="danger" description={error} />}
+      {error && <StatusCard variant="danger" description={error} />}
 
       <div className="flex-1 overflow-y-auto flex flex-col gap-[16px]">
         <InputText
@@ -2072,7 +2072,6 @@ export default function DatasetsEditClient() {
                               `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
                           }
                           alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
-                          size="sm"
                         />
                         <div>
                           <p className="text-sm text-neutral-900">
