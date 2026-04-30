@@ -35,8 +35,10 @@ export default async function DataStoriesPage({
     throw new Error(error?.message ?? "Failed to fetch data");
   }
 
+  console.log("data", data);
+
   const datastories = Object.values(
-    flattenData(data.queryDataStoriesContents as Record<string, unknown>)
+    flattenData(data.queryDataStoriesContents as unknown as Record<string, unknown>)
   ) as Datastories;
 
   return (

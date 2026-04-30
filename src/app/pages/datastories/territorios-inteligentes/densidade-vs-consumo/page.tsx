@@ -14,8 +14,6 @@ export const metadata: Metadata = {
 export default async function DataStoryDetailPage() {
   const datastory = await getDatastory("servicos-publicos/o-canal-presencial", "pt");
 
-  console.log("datastory", datastory);
-
   return (
     <main className="flex flex-col">
       <Section className="bg-primary-900 flex items-center justify-center ">
