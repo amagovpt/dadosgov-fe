@@ -1,6 +1,4 @@
 'use client';
-
-import React from 'react';
 import { Sidebar, SidebarItem, Checkbox, InputSelect, DropdownSection, DropdownOption } from '@ama-pt/agora-design-system';
 
 export const MiniCoursesFilters = () => {
@@ -10,9 +8,9 @@ export const MiniCoursesFilters = () => {
   ];
 
   return (
-    <div className="h-full">
-      <div className="mb-32">
-        <h2 className="font-bold text-[24px] text-neutral-900 mb-16 mt-[270px]">Ordenar</h2>
+    <div className=" flex flex-col gap-64">
+      <div className="flex justify-center flex-col gap-16">
+        <h2 className="text-l-bold text-neutral-900">Ordenar</h2>
         <InputSelect
           label="Ordenar"
           id="sort-minicourses"
@@ -27,33 +25,32 @@ export const MiniCoursesFilters = () => {
         </InputSelect>
       </div>
 
-      <div className="mb-6">
-        <h2 className="font-bold text-[24px] text-neutral-900 pb-32">Filtrar</h2>
-      </div>
-
-      <Sidebar variant="filter">
-        {filterGroups.map((group, index) => (
-          <SidebarItem
-            key={index}
-            variant="filter"
-            item={{
-              children: group.name,
-              hasIcon: true,
-              collapsedIconTrailing: 'agora-line-minus-circle',
-              collapsedIconHoverTrailing: 'agora-solid-minus-circle',
-              expandedIconTrailing: 'agora-line-plus-circle',
-              expandedIconHoverTrailing: 'agora-solid-plus-circle'
-            }}
-          >
-            <div className="px-6 py-4 bg-white border-t border-neutral-100">
-              <div className="flex flex-col gap-2">
-                <Checkbox label="Opção 1" value="opt1" />
-                <Checkbox label="Opção 2" value="opt2" />
+      <div className="">
+        <h2 className="text-l-bold text-neutral-900 ">Filtrar</h2>
+        <Sidebar variant="filter">
+          {filterGroups.map((group, index) => (
+            <SidebarItem
+              key={index}
+              variant="filter"
+              item={{
+                children: group.name,
+                hasIcon: true,
+                collapsedIconTrailing: 'agora-line-minus-circle',
+                collapsedIconHoverTrailing: 'agora-solid-minus-circle',
+                expandedIconTrailing: 'agora-line-plus-circle',
+                expandedIconHoverTrailing: 'agora-solid-plus-circle'
+              }}
+            >
+              <div className="px-6 py-4 bg-white border-t border-neutral-100">
+                <div className="flex flex-col gap-2">
+                  <Checkbox label="Opção 1" value="opt1" />
+                  <Checkbox label="Opção 2" value="opt2" />
+                </div>
               </div>
-            </div>
-          </SidebarItem>
-        ))}
-      </Sidebar>
+            </SidebarItem>
+          ))}
+        </Sidebar>
+      </div>
     </div>
   );
 };

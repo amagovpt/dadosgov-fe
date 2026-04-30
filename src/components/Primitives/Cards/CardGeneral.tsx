@@ -3,6 +3,6 @@ import { CardGeneral as CardGeneralADS, CardGeneralProps } from '@ama-pt/agora-d
 
 export default function CardGeneral(args: CardGeneralProps) {
     return (
-        <CardGeneralADS {...args} />
+        <CardGeneralADS {...args}/>
     )
 }

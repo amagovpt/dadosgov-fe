@@ -1,113 +1,123 @@
-import CardGeneral from "@/components/Cards/CardGeneral";
+import CardGeneral from "@/components/Primitives/Cards/CardGeneral";
+import SimpleCardImage from "@/components/Primitives/Cards/SimpleCardImage";
 import HeroCourses from "@/components/Courses/Hero";
 import Button from "@/components/Primitives/Button";
+import apolloClient from "@/services/apollo-client";
+import { getCoursesPage } from "@/services/queries/courses/courses";
+import { flattenData } from "@/utils/flattenObject";
+import { PageCourses } from "@/services/types/courses";
+import dayjs from "dayjs";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-export default function page() {
+
+export default async function page() {
+
+
+  const { data, error } = await apolloClient.query<{
+    findPageCursosSingleton: {
+      data: Record<string, unknown>
+    }
+  }>({
+    query: getCoursesPage("pt")
+  })
+
+  if (!data && error) {
+    console.error("Error fetching courses page data:", error);
+    return <div>Error loading page data</div>;
+  }
+
+  const { hero, miniCourses, otherCourses } = flattenData(data?.findPageCursosSingleton?.data || {}) as unknown as PageCourses;
+
   return (
     <main className="w-full h-full">
-      <HeroCourses />
+      <HeroCourses {...{
+        img: {
+          src: hero.image[0].url ?? "/card-full-image.png",
+          alt: hero.title ?? "Curso"
+        },
+        updatedAt: hero.updatedAt,
+        title: hero.title,
+        description: hero.description,
+        breadcrumbItems: [
+          { label: 'Início', url: '/' },
+          { label: 'Cursos', url: '/pages/courses/' },
+        ]
+      }} />
       <section className="bg-secondary-700 py-64 flex items-center justify-center">
         <div className="container flex flex-col items-center justify-center gap-32">
           <div className="w-full text-white flex flex-col gap-16">
             <h2 className="text-xl-bold">
-              Mini Cursos
+              {formatHtmlParagraphs(miniCourses.title)}
             </h2>
             <span>
-              Formações curtas, práticas e de acesso livre, pensadas para uma aprendizagem rápida.
+              {formatHtmlParagraphs(miniCourses.description)}
             </span>
           </div>
-          <div className="w-full h-full grid gap-32 grid-cols-12">
-            <div className="col-span-12 lg:col-span-4 bg-wihte">
-              <CardGeneral {
-                ...{
-                  titleText: "Introdução à Análise de Dados",
-                  descriptionText: "Aprenda os fundamentos da análise de dados, incluindo coleta, limpeza e visualização de dados.",
-                  subtitleText: "Publicado: ",
-                  imageIndent: true,
-                  image: {
-                    src: "/card-full-image.png",
-                    alt: "Introdução à Análise de Dados"
+          <div className="w-full h-full grid gap-32 grid-cols-12 ">
+            {miniCourses.courses.map((course, index) => (
+              <div className="col-span-12 lg:col-span-4 bg-wihte [&_a]:hidden " key={index}>
+                <CardGeneral {
+                  ...{
+                    titleText: course.title,
+                    descriptionText: formatHtmlParagraphs(course.description),
+                    subtitleText: `Publicado a ${dayjs(course.updatedAt).format('DD.MM.YYYY')}`,
+                    imageIndent: true,
+                    image: {
+                      src: "/card-full-image.png",
+                      alt: course.title ?? "Curso"
+                    },
+                    isBlockedLink: true,
+                    anchor: {
+                      href: `mini-courses/${course.id}`,
+                      children: ""
+                    }
                   }
-                }
-              } />
-            </div>
-            <div className="col-span-12 lg:col-span-4 bg-wihte">
-              <CardGeneral {
-                ...{
-                  titleText: "Introdução à Análise de Dados",
-                  descriptionText: "Aprenda os fundamentos da análise de dados, incluindo coleta, limpeza e visualização de dados.",
-                  subtitleText: "Publicado: ",
-                  imageIndent: true,
-                  image: {
-                    src: "/card-full-image.png",
-                    alt: "Introdução à Análise de Dados"
-                  }
-                }
-              } />
-            </div>
-            <div className="col-span-12 lg:col-span-4 bg-wihte">
-              <CardGeneral {
-                ...{
-                  titleText: "Introdução à Análise de Dados",
-                  descriptionText: "Aprenda os fundamentos da análise de dados, incluindo coleta, limpeza e visualização de dados.",
-                  subtitleText: "Publicado: ",
-                  imageIndent: true,
-                  image: {
-                    src: "/card-full-image.png",
-                    alt: "Introdução à Análise de Dados"
-                  }
-                }
-              } />
-            </div>
+                } />
+              </div>
+            ))}
+
           </div>
           <div className="w-full ">
-            <Button variant="primary" appearance="link" className="!text-white [&_.icon]:hover:!fill-white [&_.icon]:!fill-white hover:!decoration-white" trailingIcon="agora-line-arrow-right-circle" trailingIconHover="agora-solid-arrow-right-circle" hasIcon={true}>
-              Ver mais mini cursos
-            </Button>
+            {miniCourses.anchor && (
+              <Button variant="primary" appearance="link" className="!text-white [&_.icon]:hover:!fill-white [&_.icon]:!fill-white hover:!decoration-white" trailingIcon="agora-line-arrow-right-circle" trailingIconHover="agora-solid-arrow-right-circle" hasIcon={true}>
+                {miniCourses.anchor.children}
+              </Button>
+            )}
           </div>
         </div>
       </section>
       <section className="pt-64 flex items-center justify-center">
-        <div className="container flex flex-col items-center justify-center">
+        <div className="container flex flex-col items-center justify-center gap-32">
           <div className="w-full text-primary-900 flex flex-col gap-16">
             <h2 className="text-xl-bold">
-              Outros cursos recomendados
+              {otherCourses.title}
             </h2>
             <div>
               <span>
-                Formações certificadas que permitem desenvolver competências digitais de forma aprofundada
+                {formatHtmlParagraphs(otherCourses.description)}
               </span>
               <div className="w-full bg-neutral-200 h-2 mt-12" />
             </div>
           </div>
           <div className="w-full h-full grid gap-32 grid-cols-12 py-32">
-            <div className="col-span-12 lg:col-span-4 bg-wihte">
-              <CardGeneral {
-                ...{
-                  titleText: "Introdução à Análise de Dados",
-                  descriptionText: "Aprenda os fundamentos da análise de dados, incluindo coleta, limpeza e visualização de dados.",
-                  subtitleText: "Iniciante",
-                }
-              } />
-            </div>
-            <div className="col-span-12 lg:col-span-4 bg-wihte">
-              <CardGeneral {
-                ...{
-                  titleText: "Introdução à Análise de Dados",
-                  descriptionText: "Aprenda os fundamentos da análise de dados, incluindo coleta, limpeza e visualização de dados.",
-                  subtitleText: "Iniciante",
-                }
-              } />
-            </div>
-            <div className="col-span-12 lg:col-span-4 bg-wihte">
-              <CardGeneral {
-                ...{
-                  titleText: "Introdução à Análise de Dados",
-                  descriptionText: "Aprenda os fundamentos da análise de dados, incluindo coleta, limpeza e visualização de dados.",
-                  subtitleText: "Iniciante",
-                }
-              } />
-            </div>
+            {otherCourses.courses.map((course, index) => (
+              <div className="col-span-12 lg:col-span-4 bg-wihte" key={index}>
+                <SimpleCardImage
+                  {...{
+                    img: {
+                      src: course.image[0].url ?? "/courses/academia_portugal.png",
+                      alt: "Academia Portugal Digital"
+                    },
+                    title: course.title,
+                    description: formatHtmlParagraphs(course.description),
+                    link: {
+                      href: course.anchor?.href ?? "#",
+                      text: course.anchor?.children ?? ""
+                    }
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
 
