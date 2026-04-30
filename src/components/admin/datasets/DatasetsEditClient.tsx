@@ -5,14 +5,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   Icon,
   InputText,
   InputTextArea,
   InputDate,
-  DropdownSection,
-  DropdownOption,
   StatusCard,
   Table,
   TableHeader,
@@ -31,6 +28,9 @@ import {
   Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/admin/Breadcrumb/Breadcrumb";
+import DropdownSection from "@/components/admin/DropdownSection/DropdownSection";
+import DropdownOption from "@/components/admin/DropdownOption/DropdownOption";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {

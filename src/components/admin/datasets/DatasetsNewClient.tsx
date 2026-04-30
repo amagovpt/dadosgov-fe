@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   CardAction,
   StatusCard,
@@ -11,6 +10,7 @@ import {
 import DatasetsAdminClient from "@/components/admin/datasetsadmin/DatasetsAdminClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import Breadcrumb from "@/components/admin/Breadcrumb/Breadcrumb";
 
 export default function DatasetsNewClient() {
   const searchParams = useSearchParams();

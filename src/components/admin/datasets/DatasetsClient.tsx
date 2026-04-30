@@ -9,8 +9,6 @@ import {
   Icon,
   InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -24,6 +22,8 @@ import { fetchMyDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import DropdownOption from "@/components/admin/DropdownOption/DropdownOption";
+import DropdownSection from "@/components/admin/DropdownSection/DropdownSection";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],

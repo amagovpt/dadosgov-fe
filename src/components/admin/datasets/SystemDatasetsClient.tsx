@@ -2,13 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -21,6 +18,9 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchAdminDatasets, fetchDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import Breadcrumb from "@/components/admin/Breadcrumb/Breadcrumb";
+import DropdownSection from "@/components/admin/DropdownSection/DropdownSection";
+import DropdownOption from "@/components/admin/DropdownOption/DropdownOption";
 
 
 type SortOrder = "none" | "ascending" | "descending";

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   InputSelect,
@@ -17,10 +16,12 @@ import {
   TableCell,
   Button,
 } from "@ama-pt/agora-design-system";
+
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import Breadcrumb from "@/components/admin/Breadcrumb/Breadcrumb";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 
