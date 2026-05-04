@@ -2,18 +2,14 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Button,
-  Icon,
-  CardArticle,
-  CardGeneral,
-  ProgressBar,
-} from "@ama-pt/agora-design-system";
+import { Button, Icon, CardArticle, CardGeneral, ProgressBar } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import { Dataset, Post, Reuse, SiteMetrics } from "@/types/api";
 import { formatDistanceToNow, format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
+import { Datastory } from "@/types/datastories/datastory";
+import { DataStoryMetadata } from "@/types/datastories/datastories";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -37,11 +33,18 @@ function formatStatNumber(value: number): { number: string; suffix: string } {
 interface HomeClientProps {
   siteMetrics: SiteMetrics;
   latestDatasets: Dataset[];
+  datastories: DataStoryMetadata[];
   latestReuses: Reuse[];
   posts: Post[];
 }
 
-export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, posts }: HomeClientProps) {
+export default function HomeClient({
+  siteMetrics,
+  latestDatasets,
+  datastories,
+  latestReuses,
+  posts,
+}: HomeClientProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
@@ -49,7 +52,10 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (publishDropdownWrapperRef.current && !publishDropdownWrapperRef.current.contains(e.target as Node)) {
+      if (
+        publishDropdownWrapperRef.current &&
+        !publishDropdownWrapperRef.current.contains(e.target as Node)
+      ) {
         setShowPublishDropdown(false);
       }
     }
@@ -109,8 +115,14 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                         variant="primary"
                         darkMode={true}
                         hasIcon={true}
-                        trailingIcon={showPublishDropdown ? "agora-line-chevron-up" : "agora-line-chevron-down"}
-                        trailingIconHover={showPublishDropdown ? "agora-solid-chevron-up" : "agora-solid-chevron-down"}
+                        trailingIcon={
+                          showPublishDropdown ? "agora-line-chevron-up" : "agora-line-chevron-down"
+                        }
+                        trailingIconHover={
+                          showPublishDropdown
+                            ? "agora-solid-chevron-up"
+                            : "agora-solid-chevron-down"
+                        }
                         className="px-24 py-16 h-auto relative z-10"
                         style={{ borderRadius: "4px" }}
                         onClick={() => {
@@ -128,10 +140,27 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                       {showPublishDropdown && (
                         <div className="publish-custom-dropdown">
                           {[
-                            { icon: "agora-line-layers-menu", label: "Um conjunto de dados", href: "/pages/admin/datasets/new" },
-                            { icon: null, customIcon: "/Icons/bar_chart_primary.svg", label: "Uma reutilização", href: "/pages/admin/reuses/new" },
-                            { icon: "agora-line-award", label: "Um harvester", href: "/pages/admin/harvesters/new" },
-                            { icon: "agora-line-buildings", label: "Uma organização", href: "/pages/admin/organizations/new" },
+                            {
+                              icon: "agora-line-layers-menu",
+                              label: "Um conjunto de dados",
+                              href: "/pages/admin/datasets/new",
+                            },
+                            {
+                              icon: null,
+                              customIcon: "/Icons/bar_chart_primary.svg",
+                              label: "Uma reutilização",
+                              href: "/pages/admin/reuses/new",
+                            },
+                            {
+                              icon: "agora-line-award",
+                              label: "Um harvester",
+                              href: "/pages/admin/harvesters/new",
+                            },
+                            {
+                              icon: "agora-line-buildings",
+                              label: "Uma organização",
+                              href: "/pages/admin/organizations/new",
+                            },
                           ].map((item, index) => (
                             <button
                               key={index}
@@ -142,9 +171,17 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                               }}
                             >
                               {item.icon ? (
-                                <Icon name={item.icon} className="w-[24px] h-[24px] text-primary-600" />
+                                <Icon
+                                  name={item.icon}
+                                  className="w-[24px] h-[24px] text-primary-600"
+                                />
                               ) : (
-                                <img src={item.customIcon} alt="" className="w-[24px] h-[24px]" aria-hidden="true" />
+                                <img
+                                  src={item.customIcon}
+                                  alt=""
+                                  className="w-[24px] h-[24px]"
+                                  aria-hidden="true"
+                                />
                               )}
                               <span>{item.label}</span>
                             </button>
@@ -278,21 +315,21 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
             <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32">
               {latestDatasets.length > 0 ? (
                 latestDatasets.map((dataset) => {
-                  const qualityScore = dataset.quality?.score != null
-                    ? Math.round(dataset.quality.score * 100)
-                    : 0;
+                  const qualityScore =
+                    dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0;
                   const formatMetric = (value: number | undefined) => {
                     if (!value) return "0";
-                    if (value >= 1_000_000) return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
+                    if (value >= 1_000_000)
+                      return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
                     if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
                     return String(value);
                   };
                   const timeAgo = dataset.last_modified
                     ? formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
-                      .replace("aproximadamente ", "")
-                      .replace("quase ", "")
-                      .replace("menos de ", "")
-                      .replace("cerca de ", "")
+                        .replace("aproximadamente ", "")
+                        .replace("quase ", "")
+                        .replace("menos de ", "")
+                        .replace("cerca de ", "")
                     : "Desconhecido";
 
                   return (
@@ -304,7 +341,8 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                       <CardGeneral
                         variant="neutral-100"
                         image={{
-                          src: dataset.organization?.logo || "/images/placeholders/organization.png",
+                          src:
+                            dataset.organization?.logo || "/images/placeholders/organization.png",
                           alt: dataset.organization?.name || "Organização",
                           height: "56px",
                           className: "bg-primary-100 !object-contain !h-[56px]",
@@ -312,8 +350,13 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                         subtitleText={
                           (
                             <div className="flex flex-col">
-                              <span style={{ fontSize: "16px" }} className="text-neutral-900">{timeAgo}</span>
-                              <span style={{ fontSize: "16px", fontWeight: 300 }} className="text-neutral-900 mt-4">
+                              <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                                {timeAgo}
+                              </span>
+                              <span
+                                style={{ fontSize: "16px", fontWeight: 300 }}
+                                className="text-neutral-900 mt-4"
+                              >
                                 {dataset.organization?.name || "Sem Organização"}
                               </span>
                             </div>
@@ -326,7 +369,9 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                               <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
                                 {dataset.description}
                               </p>
-                              <div className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}>
+                              <div
+                                className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
+                              >
                                 <ProgressBar
                                   value={qualityScore}
                                   max={100}
@@ -339,7 +384,11 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                                 <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
                                   <div className="flex items-center gap-8" title="Visualizações">
                                     <Icon
-                                      name={dataset.metrics?.views ? "agora-solid-eye" : "agora-line-eye"}
+                                      name={
+                                        dataset.metrics?.views
+                                          ? "agora-solid-eye"
+                                          : "agora-line-eye"
+                                      }
                                       dimensions="xs"
                                       className="fill-neutral-700"
                                       aria-hidden="true"
@@ -348,20 +397,35 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                                   </div>
                                   <div className="flex items-center gap-8" title="Downloads">
                                     <Icon
-                                      name={dataset.metrics?.resources_downloads ? "agora-solid-download" : "agora-line-download"}
+                                      name={
+                                        dataset.metrics?.resources_downloads
+                                          ? "agora-solid-download"
+                                          : "agora-line-download"
+                                      }
                                       dimensions="xs"
                                       className="fill-neutral-700"
                                       aria-hidden="true"
                                     />
-                                    <span>{formatMetric(dataset.metrics?.resources_downloads)}</span>
+                                    <span>
+                                      {formatMetric(dataset.metrics?.resources_downloads)}
+                                    </span>
                                   </div>
                                   <div className="flex items-center gap-8" title="Reutilizações">
-                                    <img src="/Icons/bar_chart.svg" className="w-16 h-16" alt="" aria-hidden="true" />
+                                    <img
+                                      src="/Icons/bar_chart.svg"
+                                      className="w-16 h-16"
+                                      alt=""
+                                      aria-hidden="true"
+                                    />
                                     <span>{dataset.metrics?.reuses || 0}</span>
                                   </div>
                                   <div className="flex items-center gap-8" title="Favoritos">
                                     <Icon
-                                      name={dataset.metrics?.followers ? "agora-solid-star" : "agora-line-star"}
+                                      name={
+                                        dataset.metrics?.followers
+                                          ? "agora-solid-star"
+                                          : "agora-line-star"
+                                      }
                                       dimensions="xs"
                                       className="fill-neutral-700"
                                       aria-hidden="true"
@@ -416,42 +480,21 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
           <div className="container mx-auto px-4">
             <h2 className="text-xl-bold text-white">Data Stories</h2>
             <p className="mt-16 mb-32 max-w-3xl text-white">
-              Histórias contadas com dados abertos — análises e visualizações sobre temas de interesse público.
+              Histórias contadas com dados abertos — análises e visualizações sobre temas de
+              interesse público.
             </p>
             <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32 storytellings">
-              {[
-                {
-                  id: "1",
-                  slug: "servicos-publicos/o-canal-presencial",
-                  title: "Serviços Públicos: o canal presencial",
-                  image: "/laptop.png",
-                  created_at: "2024-03-11T12:00:00Z",
-                },
-                {
-                  id: "2",
-                  slug: "territorios-inteligentes/pressao-turistica-em-portugal",
-                  title: "Territórios Inteligentes: Pressão turística em Portugal",
-                  image: "/laptop.png",
-                  created_at: "2024-03-10T12:00:00Z",
-                },
-                {
-                  id: "3",
-                  slug: "servicos-publicos/o-canal-digital",
-                  title: "Serviços Públicos: o canal digital",
-                  image: "/laptop.png",
-                  created_at: "2024-03-09T12:00:00Z",
-                },
-              ].map((story) => (
+              {datastories.map((story) => (
                 <CardArticle
-                  key={story.id}
+                  key={story.slug}
                   variant="indented"
                   image={{
-                    src: story.image,
+                    src: story.image?.at(0)?.url,
                     alt: story.title,
                   }}
                   subtitle={
-                    story.created_at
-                      ? `Publicado a ${format(new Date(story.created_at), "dd MMM yyyy", { locale: pt })}`
+                    story.createdAt
+                      ? `Publicado a ${format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt })}`
                       : ""
                   }
                   title={story.title}
@@ -547,26 +590,30 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
             <h2 className="text-xl-bold mb-32 text-primary-900">Utilizado diariamente por:</h2>
             <div className="flex flex-col mt-32">
               <div className="flex flex-wrap items-center justify-between gap-x-32">
-                {Array(5).fill("arte_black.svg").map((logo, i) => (
-                  <div key={`row1-${i}`} className="flex items-center justify-center">
-                    <img
-                      src={`/Logos/${logo}`}
-                      alt={`Logo ${logo.replace(".svg", "")}`}
-                      className="h-[32px] w-auto object-contain"
-                    />
-                  </div>
-                ))}
+                {Array(5)
+                  .fill("arte_black.svg")
+                  .map((logo, i) => (
+                    <div key={`row1-${i}`} className="flex items-center justify-center">
+                      <img
+                        src={`/Logos/${logo}`}
+                        alt={`Logo ${logo.replace(".svg", "")}`}
+                        className="h-[32px] w-auto object-contain"
+                      />
+                    </div>
+                  ))}
               </div>
               <div className="flex flex-wrap items-center justify-between gap-x-32 mt-32">
-                {Array(5).fill("arte_black.svg").map((logo, i) => (
-                  <div key={`row2-${i}`} className="flex items-center justify-center">
-                    <img
-                      src={`/Logos/${logo}`}
-                      alt={`Logo ${logo.replace(".svg", "")}`}
-                      className="h-[32px] w-auto object-contain"
-                    />
-                  </div>
-                ))}
+                {Array(5)
+                  .fill("arte_black.svg")
+                  .map((logo, i) => (
+                    <div key={`row2-${i}`} className="flex items-center justify-center">
+                      <img
+                        src={`/Logos/${logo}`}
+                        alt={`Logo ${logo.replace(".svg", "")}`}
+                        className="h-[32px] w-auto object-contain"
+                      />
+                    </div>
+                  ))}
               </div>
             </div>
             <div className="mt-32">

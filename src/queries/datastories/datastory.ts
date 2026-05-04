@@ -1,7 +1,56 @@
 import apolloClient from "@/services/apollo-client";
+import { DataStoryMetadata } from "@/types/datastories/datastories";
 import { Datastory } from "@/types/datastories/datastory";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
+
+export async function getDatastoryMetadata(
+  slug: string,
+  locale: string = "pt"
+): Promise<DataStoryMetadata> {
+  const query = gql(/* GraphQL */ `
+    query QueryPublicDataModal($slug: String!) {
+      queryDataStoriesContents(filter: $slug) {
+        data {
+          metadata{
+            ${locale} {
+              slug
+              title
+              image {
+                  url
+              }
+              createdAt
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  const { data, error } = await apolloClient.query<{
+    queryDataStoriesContents: Array<{
+      data: Record<string, unknown>;
+    }>;
+  }>({
+    query: query,
+    variables: {
+      slug: `data/id/iv eq '${slug}'`,
+    },
+  });
+
+  if (!data || error) {
+    console.error("Error fetching datastory information:", error);
+    throw new Error("Failed to fetch datastory information");
+  }
+
+  const datastory = data.queryDataStoriesContents[0]?.data;
+
+  if (!datastory) {
+    return {} as DataStoryMetadata;
+  }
+
+  return flattenData(datastory).metadata as DataStoryMetadata;
+}
 
 export async function getDatastory(slug: string, locale: string = "pt"): Promise<Datastory> {
   const query = gql(/* GraphQL */ `
