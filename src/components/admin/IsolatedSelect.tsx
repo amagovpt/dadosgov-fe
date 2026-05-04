@@ -121,7 +121,11 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
       searchable={searchable}
       searchInputPlaceholder={searchInputPlaceholder}
       searchNoResultsText={searchNoResultsText}
-      onSearchInputChange={onSearchCallback}
+      onSearchInputChange={
+        onSearchCallback
+          ? (q) => queueMicrotask(() => onSearchCallback(q))
+          : undefined
+      }
       onChange={(options) => {
         const value = options.map((o) => o.value as string).join(",");
         setInternalValue(value);

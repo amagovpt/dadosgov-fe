@@ -68,6 +68,7 @@ export default function ReusesFormClient({
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
   const [reuseTopics, setReuseTopics] = useState<ReuseTopic[]>([]);
   const [tags, setTags] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
   const [keywordSearch, setKeywordSearch] = useState("");
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
   // Persist selected values across step navigation (uncontrolled IsolatedSelect
@@ -93,6 +94,23 @@ export default function ReusesFormClient({
     fetchReuseTopics().then(setReuseTopics);
     suggestTags("", 50).then(setTags);
   }, []);
+
+  useEffect(() => {
+    const q = keywordSearch.trim();
+    if (q.length < 2) {
+      setTagSearch([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestTags(q, 20);
+        setTagSearch(res);
+      } catch {
+        setTagSearch([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keywordSearch]);
 
   useEffect(() => {
     setSelectedDatasets([]);
@@ -146,21 +164,28 @@ export default function ReusesFormClient({
   const keywordsChildren = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
-    // Deduplicate tags by lowercased text (keeps the first occurrence).
-    const seen = new Set<string>();
-    const uniqueTags = tags.filter((t) => {
-      const key = t.text.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    // Selected tags stay visible regardless of query so the InputSelect keeps
+    // tracking them across searches; otherwise typing a new query would drop
+    // them from the children and the next onChange would lose those selections.
     const selectedSet = new Set(
       selectedKeywordsValue
         .split(",")
         .map((v) => v.trim().toLowerCase())
         .filter(Boolean)
     );
-    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const seen = new Set<string>();
+    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
+      const key = t.text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      if (selectedSet.has(key)) return true;
+      if (trimmedLower && !key.includes(trimmedLower)) return false;
+      return true;
+    });
+    const showCreate =
+      trimmed.length > 0 &&
+      ![...tags, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
+      !selectedSet.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [
@@ -184,17 +209,20 @@ export default function ReusesFormClient({
       )),
     ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, keywordSearch, selectedKeywordsValue]);
+  }, [tags, tagSearch, keywordSearch, selectedKeywordsValue]);
 
   const handleKeywordChange = useCallback((value: string) => {
     setSelectedKeywordsValue(value);
     const selected = value.split(",").filter(Boolean);
     let addedNew = false;
     selected.forEach((v) => {
-      if (!tags.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+      const lower = v.toLowerCase();
+      const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
+      const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
+      if (!existsInTags && !existsInSearch) {
         addedNew = true;
         setTags((prev) => {
-          if (prev.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+          if (prev.some((t) => t.text.toLowerCase() === lower)) {
             return prev;
           }
           return [...prev, { text: v }];
@@ -206,7 +234,7 @@ export default function ReusesFormClient({
     if (addedNew) {
       setKeywordSearch("");
     }
-  }, [tags]);
+  }, [tags, tagSearch]);
 
   const handleStep1Next = async () => {
     const errors: Record<string, boolean> = {};
@@ -469,7 +497,6 @@ export default function ReusesFormClient({
   ), [reuseTypes]);
 
   const datasetOptions = useMemo(() => {
-    const seen = new Set<string>();
     const selectedIds = new Set(selectedDatasets.map((d) => d.id));
     // Show first the selected (keeps them visible even when not in results),
     // then the search results (if any), then the producer's own datasets.
@@ -478,21 +505,13 @@ export default function ReusesFormClient({
       ...datasetSearchResults,
       ...myDatasets,
     ];
-    const options = combined.reduce<React.ReactElement[]>((acc, d) => {
-      if (!seen.has(d.id)) {
-        seen.add(d.id);
-        acc.push(
-          <DropdownOption
-            key={d.id}
-            value={d.id}
-            selected={selectedIds.has(d.id)}
-          >
-            {d.title}
-          </DropdownOption>
-        );
-      }
-      return acc;
-    }, []);
+    // Deduplicate while preserving order
+    const unique = Array.from(new Map(combined.map((d) => [d.id, d])).values());
+    const options = unique.map((d) => (
+      <DropdownOption key={d.id} value={d.id} selected={selectedIds.has(d.id)}>
+        {d.title}
+      </DropdownOption>
+    ));
     return <DropdownSection name="datasets">{options}</DropdownSection>;
   }, [myDatasets, datasetSearchResults, selectedDatasets]);
 

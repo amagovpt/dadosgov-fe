@@ -342,18 +342,26 @@ export default function ReusesEditClient() {
   const keywordOptions = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
+    // Selected tags stay visible regardless of query so the InputSelect keeps
+    // tracking them across searches; otherwise typing a new query would drop
+    // them from the children and the next onChange would lose those selections.
+    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
     const seen = new Set<string>();
     const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
+      if (selectedLowerSet.has(key)) return true;
+      if (trimmedLower && !key.includes(trimmedLower)) return false;
       return true;
     });
-    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
     const selectedNotInSuggestions = selectedKeywords.filter(
       (keyword) => !seen.has(keyword.toLowerCase()),
     );
-    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const showCreate =
+      trimmed.length > 0 &&
+      ![...tagSuggestions, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
+      !selectedLowerSet.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [
@@ -1688,7 +1696,6 @@ export default function ReusesEditClient() {
                               `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
                           }
                           alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
-                          size="sm"
                         />
                         <div>
                           <p className="text-sm text-neutral-900">

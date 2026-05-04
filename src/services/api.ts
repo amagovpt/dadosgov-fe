@@ -2088,7 +2088,7 @@ export async function fetchTopic(slugOrId: string): Promise<Topic | null> {
 export async function replyToDiscussion(
   discussionId: string,
   comment: string,
-  options?: { organization?: string }
+  options?: { organization?: string, close?: boolean }
 ): Promise<Discussion | null> {
   try {
     const res = await fetch(
@@ -2481,14 +2481,16 @@ export async function fetchSpatialZonesByIds(ids: string[]): Promise<SpatialZone
     );
     if (!res.ok) throw new Error(`Failed to fetch spatial zones: ${res.statusText}`);
     const geojson = await res.json() as {
-      features?: Array<{ id: string; properties: { name: string; code: string; uri?: string } }>;
+      features?: Array<{ id: string; properties: { name: string; code: string; uri?: string; level?: any } }>;
     };
     return (geojson.features ?? []).map((f) => ({
       id: f.id,
       name: f.properties.name,
       code: f.properties.code,
       uri: f.properties.uri ?? "",
-    }));
+      // Some backends include a level reference; keep it flexible (could be id or object)
+      level: (f.properties as any).level ?? "",
+    })) as SpatialZone[];
   } catch (error) {
     console.error("Error fetching spatial zones by ids:", error);
     return [];
@@ -3766,4 +3768,29 @@ export async function updateHomeFeaturedReuses(
   if (!res.ok)
     throw new Error(`Failed to update home featured reuses: ${res.statusText}`);
   return await res.json();
+}
+
+export type SupportTopic = "question" | "bug" | "feedback";
+
+export async function submitSupportContact(payload: {
+  topic: SupportTopic;
+  email: string;
+  subject: string;
+  message: string;
+}): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/site/contact/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const data = await res.json();
+      detail = data?.message || data?.errors ? JSON.stringify(data.errors || data.message) : "";
+    } catch {
+      // ignore — keep generic message
+    }
+    throw new Error(detail || `Failed to submit support form: ${res.statusText}`);
+  }
 }

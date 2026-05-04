@@ -44,6 +44,8 @@ interface ReuseDetailClientProps {
 export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const router = useRouter();
   const { user, isAdmin } = useAuth();
+  const [reuse, setReuse] = useState<Reuse | null>(null);
+
   const canEdit = Boolean(
     user &&
     (isAdmin ||
@@ -53,8 +55,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
           (org) => org.id === reuse.organization?.id,
         ))),
   );
+
   const { show, hide } = usePopupContext();
-  const [reuse, setReuse] = useState<Reuse | null>(null);
   const [isLoadingReuse, setIsLoadingReuse] = useState(true);
   const [fullDatasets, setFullDatasets] = useState<Dataset[]>([]);
   const [isLoadingDatasets, setIsLoadingDatasets] = useState(true);
@@ -277,11 +279,16 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
     </TabBody>
   );
 
+  const renderSetDropdown = user && user.organizations ? [{ value: 'user', label: `${user.first_name} ${user.last_name} (utilizador)` }, ...user.organizations.map((org) => ({ value: org.id, label: org.name }))] : [];
+
+
+
+
   return (
     <div className="flex flex-col justify-center items-center w-full">
       {/* Hero Section */}
-      <section className="bg-white text-neutral-900 pt-24 pb-48 sm:pb-64">
-        <div className="container">
+      <section className="container bg-white text-neutral-900">
+        <div className="w-full">
           {/* Breadcrumbs & Actions */}
           <div className="mb-24">
             <div className="mb-24">
@@ -579,9 +586,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                         </span>
                         <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id="discussion-identity-reuse" onChangeRef={selectedIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
                           <DropdownSection name="identity">
-                            <DropdownOption key={"user"} value="user">{`${user.first_name} ${user.last_name} (utilizador)`}</DropdownOption>
-                            {user.organizations.map((org) => (
-                              <DropdownOption key={org.id} value={org.id}>{org.name}</DropdownOption>
+                            {renderSetDropdown.map((option) => (
+                              <DropdownOption key={option.value} value={option.value}>{option.label}</DropdownOption>
                             ))}
                           </DropdownSection>
                         </IsolatedSelect>
@@ -654,8 +660,9 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                                 <span className="block text-sm font-medium text-neutral-900 mb-8">Escolha a identidade com a qual deseja publicar esta mensagem.</span>
                                 <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id={`reply-identity-${disc.id}`} onChangeRef={replyIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
                                   <DropdownSection name="identity">
-                                    <DropdownOption value="user">{`${user.first_name} ${user.last_name} (utilizador)`}</DropdownOption>
-                                    {user.organizations.map((org) => (<DropdownOption key={org.id} value={org.id}>{org.name}</DropdownOption>))}
+                                    {renderSetDropdown.map((option) => (
+                                      <DropdownOption key={option.value} value={option.value}>{option.label}</DropdownOption>
+                                    ))}
                                   </DropdownSection>
                                 </IsolatedSelect>
                               </div>
@@ -685,7 +692,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
       {/* Associated Datasets */}
       {datasetRefs.length > 0 && (
-        <section className="bg-white py-64">
+        <section className="w-full py-32">
           <div className="container mx-auto md:gap-32 xl:gap-64 bg-white">
             <h2 className="text-xl font-bold text-[#000032] mb-32">
               {datasetRefs.length} conjunto{datasetRefs.length !== 1 ? 's' : ''} de dados

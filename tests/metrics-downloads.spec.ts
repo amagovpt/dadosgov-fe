@@ -19,7 +19,7 @@ const PG_CONFIG = {
   database: "postgres",
 };
 
-const BACKEND_DIR = "/home/adbrum/workspace/babel/new-dadosgov/backend";
+const BACKEND_DIR = "/home/adbrum/workspace/babel/dadosgov/backend";
 const NUM_DOWNLOADS = 5;
 
 function runUdata(cmd: string): string {

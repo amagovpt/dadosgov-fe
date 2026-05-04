@@ -670,7 +670,7 @@ export default function CommunityResourceEditClient() {
             {/* Excluir o recurso */}
             <div className="dataset-edit-danger-actions">
               <StatusCard
-                type="danger"
+                variant="danger"
                 description={
                   <>
                     <strong>Atenção esta ação é irreversível.</strong>

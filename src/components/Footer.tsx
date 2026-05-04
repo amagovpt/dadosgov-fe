@@ -161,7 +161,7 @@ export const Footer = () => {
           rel: "noopener noreferrer",
           children: l.label,
         }))}
-        copyright="© 2022 República Portuguesa. Todos os direitos reservados."
+        copyright="© 2026 República Portuguesa. Todos os direitos reservados."
       />
     </footer>
   );

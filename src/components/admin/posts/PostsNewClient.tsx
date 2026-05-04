@@ -65,19 +65,27 @@ export default function PostsNewClient() {
   const keywordOptions = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
+    // Selected tags stay visible regardless of query so the InputSelect keeps
+    // tracking them across searches; otherwise typing a new query would drop
+    // them from the children and the next onChange would lose those selections.
+    const selectedLowerSet = new Set(selectedTags.map((k) => k.toLowerCase()));
     const seen = new Set<string>();
     const visibleTagSearch = trimmed.length < 2 ? [] : tagSearch;
     const uniqueTags = [...tags, ...visibleTagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
+      if (selectedLowerSet.has(key)) return true;
+      if (trimmedLower && !key.includes(trimmedLower)) return false;
       return true;
     });
-    const selectedLowerSet = new Set(selectedTags.map((k) => k.toLowerCase()));
     const selectedNotInSuggestions = selectedTags.filter(
-      (keyword) => !seen.has(keyword.toLowerCase())
+      (keyword) => !seen.has(keyword.toLowerCase()),
     );
-    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const showCreate =
+      trimmed.length > 0 &&
+      ![...tags, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
+      !selectedLowerSet.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [

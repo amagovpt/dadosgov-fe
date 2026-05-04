@@ -259,10 +259,6 @@ export default function OrgHarvestersClient() {
               prevButtonAriaLabel: "Página anterior",
               nextButtonAriaLabel: "Próxima página",
               onPageChange: (page: number) => setCurrentPage(page + 1),
-              onItemsPerPageChange: (size: number) => {
-                setItemsPerPage(size);
-                setCurrentPage(1);
-              },
             }}
           >
             <TableHeader>

@@ -169,6 +169,7 @@ export default function DatasetsAdminClient({
   const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
   const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
   const [tags, setTags] = useState<TagSuggestion[]>([]);
+  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
   const [keywordSearch, setKeywordSearch] = useState("");
   const producerDefaultValue =
@@ -249,21 +250,26 @@ export default function DatasetsAdminClient({
   const tagOptions = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
-    // Deduplicate tags by lowercased text (keeps the first occurrence).
+    // Selected tags stay visible regardless of query so the InputSelect keeps
+    // tracking them across searches; otherwise typing a new query would drop
+    // them from the children and the next onChange would lose those selections.
+    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
     const seen = new Set<string>();
-    const uniqueTags = tags.filter((t) => {
+    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
+      if (selectedLowerSet.has(key)) return true;
+      if (trimmedLower && !key.includes(trimmedLower)) return false;
       return true;
     });
-    const selectedLowerSet = new Set(
-      selectedKeywords.map((k) => k.toLowerCase()),
-    );
     const selectedNotInSuggestions = selectedKeywords.filter(
       (keyword) => !seen.has(keyword.toLowerCase()),
     );
-    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const showCreate =
+      trimmed.length > 0 &&
+      ![...tags, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
+      !selectedLowerSet.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [
@@ -292,7 +298,7 @@ export default function DatasetsAdminClient({
       )),
     ];
     return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, selectedKeywords, keywordSearch]);
+  }, [tags, tagSearch, selectedKeywords, keywordSearch]);
 
   const allSpatialZones = useMemo(() => {
     const seen = new Set<string>();
@@ -496,6 +502,23 @@ export default function DatasetsAdminClient({
     loadDropdownData();
   }, []);
 
+  useEffect(() => {
+    const q = keywordSearch.trim();
+    if (q.length < 2) {
+      setTagSearch([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await suggestTags(q, 20);
+        setTagSearch(res);
+      } catch {
+        setTagSearch([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [keywordSearch]);
+
   // Restore dataset from API when datasetId is in the URL
   useEffect(() => {
     if (datasetId && !createdDataset) {
@@ -657,9 +680,9 @@ export default function DatasetsAdminClient({
       }
       if (startRaw || endRaw) {
         payload.temporal_coverage = {
-          ...(startTime !== null ? { start: new Date(startTime).toISOString() } : {}),
-          ...(endTime !== null ? { end: new Date(endTime).toISOString() } : {}),
-        };
+          ...(startRaw ? { start: startRaw } : {}),
+          ...(endRaw ? { end: endRaw } : {}),
+        } as Parameters<typeof createDataset>[0]["temporal_coverage"];
       }
       const spatialZoneIds = spatialCoverageRef.current.split(",").filter(Boolean);
       const spatialGranularity = spatialGranularityRef.current || null;
@@ -1164,10 +1187,13 @@ export default function DatasetsAdminClient({
                       const selected = value.split(",").filter(Boolean);
                       let addedNew = false;
                       selected.forEach((v) => {
-                        if (!tags.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+                        const lower = v.toLowerCase();
+                        const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
+                        const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
+                        if (!existsInTags && !existsInSearch) {
                           addedNew = true;
                           setTags((prev) => {
-                            if (prev.some((t) => t.text.toLowerCase() === v.toLowerCase())) {
+                            if (prev.some((t) => t.text.toLowerCase() === lower)) {
                               return prev;
                             }
                             return [...prev, { text: v }];

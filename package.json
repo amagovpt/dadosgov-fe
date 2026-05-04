@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "next lint",
     "test:e2e": "playwright test --project=frontend-public --reporter=html",
     "test:e2e:backoffice": "playwright test --project=backoffice --reporter=html",
     "test:e2e:all": "playwright test --project=frontend-public --project=backoffice --reporter=html",
@@ -45,6 +45,7 @@
     }
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/pg": "^8.18.0",
     "@types/react": "^19",

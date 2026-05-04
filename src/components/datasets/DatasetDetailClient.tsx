@@ -243,226 +243,224 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
   const qualityMissing = getQualityMissing(dataset.quality);
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <main className="container flex flex-col gap-24">
-        {/* Breadcrumb */}
-        <div className="flex justify-between items-center ">
-          <Breadcrumb
-            items={[
-              { label: "Home", url: "/" },
-              { label: "Conjuntos de dados", url: "/pages/datasets" },
-              { label: dataset.title, url: `/pages/datasets/${dataset.slug}` },
-            ]}
+    <main className="w-full flex flex-col gap-64 justify-center items-center ">
+      {/* Breadcrumb */}
+      <div className="container flex justify-between items-center py-64">
+        <Breadcrumb
+          items={[
+            { label: "Home", url: "/" },
+            { label: "Conjuntos de dados", url: "/pages/datasets" },
+            { label: dataset.title, url: `/pages/datasets/${dataset.slug}` },
+          ]}
+        />
+      </div>
+
+      {/* Actions */}
+      <div className="container flex justify-end items-center gap-16">
+        {dataset.private && <Pill variant="warning">Rascunho</Pill>}
+        {dataset.archived && <Pill variant="neutral">Arquivado</Pill>}
+        <Button
+          variant="primary"
+          appearance={isFavorite ? "solid" : "outline"}
+          hasIcon={true}
+          leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
+          leadingIconHover="agora-solid-star"
+          className="flex-shrink-0"
+          onClick={handleToggleFavorite}
+          disabled={isTogglingFavorite}
+        >
+          {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+        </Button>
+        {(isAdmin ||
+          (user && dataset.owner?.id === user.id) ||
+          (dataset.organization &&
+            organizations.some((org) => org.id === dataset.organization?.id))) && (
+            <Link href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
+              <Button
+                variant="primary"
+                hasIcon={true}
+                leadingIcon="agora-line-edit"
+                leadingIconHover="agora-solid-edit"
+              >
+                Editar
+              </Button>
+            </Link>
+          )}
+      </div>
+
+      <div className="container grid xl:grid-cols-12 gap-32 ">
+        {/* Main Content Column */}
+        <div className="xl:col-span-6 xl:block">
+          <div className="flex flex-col gap-4" ref={titleRef}>
+            <h1 className="text-xl-bold text-primary-900 leading-tight">{dataset.title}</h1>
+          </div>
+
+          {/* Description */}
+          <DescriptionWithReadMore
+            text={dataset.description}
+            sidebarRef={sidebarRef}
+            titleRef={titleRef}
           />
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end items-center gap-[16px] ">
-          {dataset.private && <Pill variant="warning">Rascunho</Pill>}
-          {dataset.archived && <Pill variant="neutral">Arquivado</Pill>}
-          <Button
-            variant="primary"
-            appearance={isFavorite ? "solid" : "outline"}
-            hasIcon={true}
-            leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
-            leadingIconHover="agora-solid-star"
-            className="flex-shrink-0"
-            onClick={handleToggleFavorite}
-            disabled={isTogglingFavorite}
-          >
-            {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-          </Button>
-          {(isAdmin ||
-            (user && dataset.owner?.id === user.id) ||
-            (dataset.organization &&
-              organizations.some((org) => org.id === dataset.organization?.id))) && (
-              <Link href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
-                <Button
-                  variant="primary"
-                  hasIcon={true}
-                  leadingIcon="agora-line-edit"
-                  leadingIconHover="agora-solid-edit"
-                >
-                  Editar
-                </Button>
-              </Link>
-            )}
-        </div>
+        {/* Sidebar */}
+        <div className="xl:col-span-6">
+          <div className="flex flex-col h-fit" ref={sidebarRef}>
+            <div className="flex flex-col gap-16 bg-[#F2F6FF] rounded-4 p-32 mb-16">
+              {dataset.organization?.logo ? (
+                <div className="w-fit h-[48px] card-article-3_2-img py-8 rounded-8 border-2 border-primary-300 flex items-center justify-center">
+                  <img
+                    src={dataset.organization.logo}
+                    alt={dataset.organization.name}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-fit px-12 py-6 bg-neutral-100 rounded-8 border border-neutral-200 flex items-center justify-center text-neutral-400">
+                  <Icon name="agora-line-building" className="w-6 h-6" />
+                </div>
+              )}
 
-        <div className="grid xl:grid-cols-12 gap-32 ">
-          {/* Main Content Column */}
-          <div className="xl:col-span-6 xl:block">
-            <div className="flex flex-col gap-4" ref={titleRef}>
-              <h1 className="text-xl-bold text-primary-900 leading-tight">{dataset.title}</h1>
-            </div>
-
-            {/* Description */}
-            <DescriptionWithReadMore
-              text={dataset.description}
-              sidebarRef={sidebarRef}
-              titleRef={titleRef}
-            />
-          </div>
-
-          {/* Sidebar */}
-          <div className="xl:col-span-6">
-            <div className="flex flex-col h-fit" ref={sidebarRef}>
-              <div className="flex flex-col gap-16 bg-[#F2F6FF] rounded-4 p-32 mb-16">
-                {dataset.organization?.logo ? (
-                  <div className="w-fit h-[48px] card-article-3_2-img py-8 rounded-8 border-2 border-primary-300 flex items-center justify-center">
-                    <img
-                      src={dataset.organization.logo}
-                      alt={dataset.organization.name}
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-fit px-12 py-6 bg-neutral-100 rounded-8 border border-neutral-200 flex items-center justify-center text-neutral-400">
-                    <Icon name="agora-line-building" className="w-6 h-6" />
+              <div className="space-y-16">
+                <div className="text-neutral-900 text-m-light mb-[8px]">
+                  {dataset.organization ? (
+                    <Link
+                      href={`/pages/organizations/${dataset.organization.slug}`}
+                      className="hover:underline"
+                    >
+                      {dataset.organization.name}
+                    </Link>
+                  ) : (
+                    "Organização Desconhecida"
+                  )}
+                </div>
+                <div className="text-neutral-900 text-sm mb-[16px]">
+                  <span className="text-m-semibold">Última atualização:</span>{" "}
+                  {new Date(dataset.last_modified).toLocaleDateString("pt-PT", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </div>
+                {dataset.license && (
+                  <div className="text-sm">
+                    <a
+                      href={
+                        dataset.license_url ||
+                        `https://dados.gov.pt/pt/licenses/${dataset.license}/`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-600 underline"
+                    >
+                      <span className="text-m-semibold">Licença:</span>{" "}
+                      {dataset.license_title || dataset.license}
+                    </a>
                   </div>
                 )}
-
-                <div className="space-y-16">
-                  <div className="text-neutral-900 text-m-light mb-[8px]">
-                    {dataset.organization ? (
-                      <Link
-                        href={`/pages/organizations/${dataset.organization.slug}`}
-                        className="hover:underline"
-                      >
-                        {dataset.organization.name}
-                      </Link>
-                    ) : (
-                      "Organização Desconhecida"
-                    )}
-                  </div>
-                  <div className="text-neutral-900 text-sm mb-[16px]">
-                    <span className="text-m-semibold">Última atualização:</span>{" "}
-                    {new Date(dataset.last_modified).toLocaleDateString("pt-PT", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </div>
-                  {dataset.license && (
-                    <div className="text-sm">
-                      <a
-                        href={
-                          dataset.license_url ||
-                          `https://dados.gov.pt/pt/licenses/${dataset.license}/`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 underline"
-                      >
-                        <span className="text-m-semibold">Licença:</span>{" "}
-                        {dataset.license_title || dataset.license}
-                      </a>
-                    </div>
-                  )}
-                  {dataset.contact_points && dataset.contact_points.length > 0 && (
-                    <div className="border-t border-neutral-200 pt-16 flex flex-col gap-12">
-                      {dataset.contact_points.map((cp) => (
-                        <div key={cp.id} className="text-sm">
-                          <div className="text-m-semibold mb-4">
-                            {CONTACT_ROLE_LABELS[cp.role] ?? cp.role}
-                          </div>
-                          <div className="text-neutral-900 mb-4">{cp.name}</div>
-                          {cp.email && (
-                            <a
-                              href={`mailto:${cp.email}`}
-                              className="text-primary-600 underline break-all block"
-                            >
-                              {cp.email}
-                            </a>
-                          )}
-                          {cp.contact_form && (
-                            <a
-                              href={cp.contact_form}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-600 underline block"
-                            >
-                              Formulário de contacto
-                            </a>
-                          )}
+                {dataset.contact_points && dataset.contact_points.length > 0 && (
+                  <div className="border-t border-neutral-200 pt-16 flex flex-col gap-12">
+                    {dataset.contact_points.map((cp) => (
+                      <div key={cp.id} className="text-sm">
+                        <div className="text-m-semibold mb-4">
+                          {CONTACT_ROLE_LABELS[cp.role] ?? cp.role}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Metrics */}
-              <div className="grid grid-cols-2 gap-16 mb-16">
-                <div className="bg-[#F2F6FF] rounded-4 p-32">
-                  <div className="text-sm mb-[8px]">Visualizações</div>
-                  <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
-                    {formatMetricValue(dataset.metrics?.views)}
-                  </div>
-                </div>
-                <div className="bg-[#F2F6FF] rounded-4 p-32">
-                  <div className="text-sm mb-[8px]">Downloads</div>
-                  <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
-                    {formatMetricValue(dataset.metrics?.resources_downloads)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Quality */}
-              <CardExpandable
-                variant="primary-100"
-                cardTitle="Qualidade dos metadados"
-                cardHeadingLevel="h3"
-                cardSubtitle={
-                  <div className="flex flex-col gap-4 mt-8">
-                    <div
-                      className={
-                        qualityScore <= 45
-                          ? "quality-progress-warning"
-                          : qualityScore > 50
-                            ? "quality-progress-success"
-                            : ""
-                      }
-                    >
-                      <ProgressBar value={qualityScore} max={100} hidePercentageValue={true} />
-                    </div>
-                    <div className="text-xs text-neutral-700">
-                      {qualityScore}%
-                      {qualityDetails.length > 0 && ` (${qualityDetails.join(", ")})`}
-                    </div>
-                  </div>
-                }
-                accordionHeadingTitle={
-                  qualityExpanded ? "Fechar informação" : "Ver mais informação"
-                }
-                accordionHeadingLevel="h4"
-                expanded={qualityExpanded}
-                onExpanded={() => setQualityExpanded(true)}
-                onCollapsed={() => setQualityExpanded(false)}
-              >
-                {qualityMissing.length > 0 && (
-                  <div className="flex flex-col gap-8">
-                    {qualityMissing.map((label) => (
-                      <div key={label} className="flex items-center gap-8">
-                        <Icon
-                          name="agora-line-alert-triangle"
-                          className="w-[20px] h-[20px] fill-[#B06112]"
-                        />
-                        <span className="text-neutral-900 text-base">
-                          {label} dos dados não preenchidos
-                        </span>
+                        <div className="text-neutral-900 mb-4">{cp.name}</div>
+                        {cp.email && (
+                          <a
+                            href={`mailto:${cp.email}`}
+                            className="text-primary-600 underline break-all block"
+                          >
+                            {cp.email}
+                          </a>
+                        )}
+                        {cp.contact_form && (
+                          <a
+                            href={cp.contact_form}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-600 underline block"
+                          >
+                            Formulário de contacto
+                          </a>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
-              </CardExpandable>
+              </div>
             </div>
+
+            {/* Metrics */}
+            <div className="grid grid-cols-2 gap-16 mb-16">
+              <div className="bg-[#F2F6FF] rounded-4 p-32">
+                <div className="text-sm mb-[8px]">Visualizações</div>
+                <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
+                  {formatMetricValue(dataset.metrics?.views)}
+                </div>
+              </div>
+              <div className="bg-[#F2F6FF] rounded-4 p-32">
+                <div className="text-sm mb-[8px]">Downloads</div>
+                <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
+                  {formatMetricValue(dataset.metrics?.resources_downloads)}
+                </div>
+              </div>
+            </div>
+
+            {/* Quality */}
+            <CardExpandable
+              variant="primary-100"
+              cardTitle="Qualidade dos metadados"
+              cardHeadingLevel="h3"
+              cardSubtitle={
+                <div className="flex flex-col gap-4 mt-8">
+                  <div
+                    className={
+                      qualityScore <= 45
+                        ? "quality-progress-warning"
+                        : qualityScore > 50
+                          ? "quality-progress-success"
+                          : ""
+                    }
+                  >
+                    <ProgressBar value={qualityScore} max={100} hidePercentageValue={true} />
+                  </div>
+                  <div className="text-xs text-neutral-700">
+                    {qualityScore}%
+                    {qualityDetails.length > 0 && ` (${qualityDetails.join(", ")})`}
+                  </div>
+                </div>
+              }
+              accordionHeadingTitle={
+                qualityExpanded ? "Fechar informação" : "Ver mais informação"
+              }
+              accordionHeadingLevel="h4"
+              expanded={qualityExpanded}
+              onExpanded={() => setQualityExpanded(true)}
+              onCollapsed={() => setQualityExpanded(false)}
+            >
+              {qualityMissing.length > 0 && (
+                <div className="flex flex-col gap-8">
+                  {qualityMissing.map((label) => (
+                    <div key={label} className="flex items-center gap-8">
+                      <Icon
+                        name="agora-line-alert-triangle"
+                        className="w-[20px] h-[20px] fill-[#B06112]"
+                      />
+                      <span className="text-neutral-900 text-base">
+                        {label} dos dados não preenchidos
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardExpandable>
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <DatasetTabs dataset={dataset} />
-      </main>
-    </div>
+      {/* Tabs */}
+      <DatasetTabs dataset={dataset} />
+    </main>
   );
 }

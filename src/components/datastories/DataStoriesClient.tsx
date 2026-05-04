@@ -336,7 +336,7 @@ export default function DataStoriesClient({
                 }}
               >
                 {Object.entries(SORT_LABELS).map(([key, label]) => (
-                  <Toggle key={key} value={key} selected={currentSortKey === key}>
+                  <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                     {label}
                   </Toggle>
                 ))}
