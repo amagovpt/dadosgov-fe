@@ -316,17 +316,12 @@ export default function ReusesClient({
     [initialFilters, currentPage]
   );
 
-
-  useEffect(() => {
-    setSearchQuery(initialFilters?.q || "");
-  }, [initialFilters?.q]);
-
   useEffect(() => {
     if (searchQuery === currentQuery) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
-    }, 400);
+      router.replace(buildUrl({ q: searchQuery.trim(), page: 1 }), { scroll: false });
+    }, 200);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
@@ -334,7 +329,7 @@ export default function ReusesClient({
 
   const handleSearch = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
+    router.replace(buildUrl({ q: searchQuery.trim(), page: 1 }), { scroll: false });
   }, [router, buildUrl, searchQuery]);
 
   const handleSortChange = useCallback(
@@ -405,7 +400,7 @@ export default function ReusesClient({
               label="Pesquisar"
               placeholder="Pesquisar reutilizações..."
               id="reuses-search"
-              defaultValue={initialFilters?.q || ""}
+              value={searchQuery}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               onKeyDown={(e: React.KeyboardEvent) => {
                 if (e.key === "Enter") handleSearch();
