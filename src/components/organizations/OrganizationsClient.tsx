@@ -148,7 +148,7 @@ export default function OrganizationsClient({
             </p>
           }
         >
-          <PublishDropdown darkMode={true} />
+          <PublishDropdown darkMode={true} outline={false} />
         </PageBanner>
 
         {/* Search Section */}

@@ -219,7 +219,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                 </div>
               </div>
 
-              {/* Conjuntos de Dados */}
+              {/* Conjuntos de dados */}
               <div className="flex items-center gap-16">
                 <div className="stats-icon-square border-2 border-[#A6D5FF] text-[#A6D5FF]">
                   <Icon
@@ -239,7 +239,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                       </span>
                     )}
                   </div>
-                  <span className="text-s-regular">Conjuntos de Dados</span>
+                  <span className="text-s-regular">Conjuntos de dados</span>
                 </div>
               </div>
 
@@ -451,7 +451,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                   }}
                   subtitle={
                     story.created_at
-                      ? `Publicado a ${format(new Date(story.created_at), "dd MMM yyyy", { locale: pt })}`
+                      ? `Publicado a ${format(new Date(story.created_at), "dd MM yyyy", { locale: pt })}`
                       : ""
                   }
                   title={story.title}
@@ -495,7 +495,7 @@ export default function HomeClient({ siteMetrics, latestDatasets, latestReuses, 
                       }}
                       subtitle={
                         post.created_at
-                          ? `Publicado a ${format(new Date(post.created_at), "d MMM yyyy", { locale: pt })}`
+                          ? `Publicado a ${format(new Date(post.created_at), "d MM yyyy", { locale: pt })}`
                           : ""
                       }
                       title={post.name}

@@ -395,7 +395,7 @@ export default function ReusesClient({
             </p>
           }
         >
-          <PublishDropdown darkMode={true} />
+          <PublishDropdown darkMode={true} outline={false} />
         </PageBanner>
 
         {/* Search Section */}

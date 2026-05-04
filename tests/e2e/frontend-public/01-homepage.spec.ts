@@ -71,7 +71,7 @@ test.describe("Homepage", () => {
 
   test("HP-06: Stats section shows 4 counters", async ({ page }) => {
     const expectedLabels = [
-      "Conjuntos de Dados",
+      "Conjuntos de dados",
       "Reutilizações",
       "Organizações",
       "Utilizadores",
