@@ -2,6 +2,8 @@ import { fetchReuses, fetchReuseTypes, fetchSiteInfo } from '@/services/api';
 import ReusesClient from '@/components/reuses/ReusesClient';
 import { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
     title: 'Reutilizações - dados.gov.pt',
     description: 'Descubra como os dados abertos estão a ser utilizados para criar valor em Portugal. Explore as reutilizações da comunidade.',

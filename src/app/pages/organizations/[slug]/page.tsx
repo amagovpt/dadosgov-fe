@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import { fetchOrganization } from '@/services/api';
 import OrganizationDetailClient from '@/components/organizations/OrganizationDetailClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page({
     params,
 }: {
