@@ -1,5 +1,6 @@
-import { Typograph } from "@/components/Typograph";
+import { Typograph } from "@/components/Generics/Typograph";
 import * as cheerio from "cheerio";
+import type { AnyNode } from "domhandler";
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -17,66 +18,101 @@ export function formatHtmlParagraphs(
     .contents()
     .each((i, el) => {
       if (el.type === "text") {
-        elements.push($(el).text());
+        const text = $(el).text();
+        if (text.trim() !== "") elements.push(text);
       } else if (el.type === "tag") {
         // handle paragraphs
         if (el.tagName === "p") {
-          const children: React.ReactNode[] = [];
-          $(el)
-            .contents()
-            .each((_, child) => {
-              if (child.type === "text") {
-                children.push($(child).text());
-              } else if (child.type === "tag") {
-                // handle line breaks
-                if (child.tagName === "br") {
-                  children.push(<br key={`br-${i}-${children.length}`} />);
-                } else if (child.tagName === "a") {
-                  const href = $(child).attr("href") || "#";
-                  const linkText = $(child).text();
-                  children.push(
-                    <a
-                      key={`a-${href}-${linkText}-${i}`}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      {linkText}
-                    </a>
-                  );
-                } else if (child.tagName === "u") {
-                  const underlinedText = $(child).text();
-                  children.push(
-                    <u key={`u-${underlinedText}-${i}`} className="underline">
-                      {underlinedText}
-                    </u>
-                  );
-                } else if (child.tagName === "strong") {
-                  const strongText = $(child).text();
-                  children.push(
-                    <strong
-                      key={`strong-${strongText}-${i}`}
-                      className="font-bold"
-                    >
-                      {strongText}
-                    </strong>
-                  );
-                } else if (child.tagName === "b") {
-                  const boldText = $(child).text();
-                  children.push(
-                    <b key={`b-${boldText}-${i}`} className="font-bold">
-                      {boldText}
-                    </b>
-                  );
-                }
+          const processNode = (
+            child: AnyNode,
+            key: string
+          ): React.ReactNode | null => {
+            if (child.type === "text") return $(child).text();
+            if (child.type !== "tag") return null;
+            const tag = child.tagName;
+            if (tag === "br") return <br key={key} />;
+            if (tag === "a") {
+              const href = $(child).attr("href") || "#";
+              const linkText = $(child).text();
+              return (
+                <a
+                  key={key}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  {linkText}
+                </a>
+              );
+            }
+            if (tag === "u")
+              return (
+                <u key={key} className="underline">
+                  {$(child).text()}
+                </u>
+              );
+            if (tag === "strong")
+              return (
+                <strong key={key} className="font-bold">
+                  {$(child).text()}
+                </strong>
+              );
+            if (tag === "b")
+              return (
+                <b key={key} className="font-bold">
+                  {$(child).text()}
+                </b>
+              );
+            return null;
+          };
+
+          const childNodes = $(el).contents().toArray();
+
+          // Split on 3+ consecutive <br> into separate paragraphs
+          const segments: AnyNode[][] = [[]];
+          let pendingBrs: AnyNode[] = [];
+
+          for (const child of childNodes) {
+            const tagName = child.type === "tag" ? child.tagName : null;
+            if (tagName === "br") {
+              pendingBrs.push(child);
+            } else {
+              if (pendingBrs.length >= 3) {
+                segments.push([]);
+              } else {
+                segments[segments.length - 1].push(...pendingBrs);
               }
-            });
-          elements.push(
-            <Typograph tag="p" key={`p-${i}`} className={paragraphStyle}>
-              {children}
-            </Typograph>
-          );
+              pendingBrs = [];
+              segments[segments.length - 1].push(child);
+            }
+          }
+          if (pendingBrs.length > 0 && pendingBrs.length < 3) {
+            segments[segments.length - 1].push(...pendingBrs);
+          }
+
+          segments.forEach((segment, segIdx) => {
+            const children: React.ReactNode[] = segment
+              .map((child, childIdx) =>
+                processNode(child, `node-${i}-${segIdx}-${childIdx}`)
+              )
+              .filter((n): n is React.ReactNode => n !== null);
+
+            const hasContent = children.some(
+              (c) => typeof c !== "string" || c.trim() !== ""
+            );
+            if (hasContent) {
+              elements.push(
+                <Typograph
+                  tag="p"
+                  key={`p-${i}-${segIdx}`}
+                  className={paragraphStyle}
+                >
+                  {children}
+                </Typograph>
+              );
+            }
+          });
         } else if (el.tagName === "ol") {
           // handle ordered lists
           const listItems: React.ReactNode[] = [];

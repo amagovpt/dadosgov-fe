@@ -1375,7 +1375,7 @@ export async function updatePost(
 export async function fetchAdminPosts(
   page: number = 1,
   pageSize: number = 100,
-  sort: string = "-published"
+  sort: string = "-created_at"
 ): Promise<APIResponse<Post>> {
   try {
     const params = new URLSearchParams({
