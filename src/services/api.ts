@@ -1279,7 +1279,7 @@ export async function fetchPosts(
 export async function fetchHomepageData(): Promise<HomepageData> {
   try {
     const res = await fetch(`${API_BASE_URL}/site/home/`, {
-      cache: "no-store",
+      next: { revalidate: 60 },
     });
 
     if (!res.ok) {

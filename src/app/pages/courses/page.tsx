@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import CardGeneral from "@/components/Primitives/Cards/CardGeneral";
 import SimpleCardImage from "@/components/Primitives/Cards/SimpleCardImage";
 import HeroCourses from "@/components/Courses/Hero";
