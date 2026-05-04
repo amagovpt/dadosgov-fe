@@ -21,7 +21,7 @@ export interface SimpleCardImageProps {
 export default function SimpleCardImage(args: SimpleCardImageProps) {
     return (
         <div className={twMerge("w-full h-full bg-neutral-100 flex flex-col gap-16 p-32", args.className)}>
-            {args.img && (<Image src={args.img.src} alt={args.img.alt || ""} width={126} height={33} />)}
+            {args.img && (<Image src={args.img.src} alt={args.img.alt || ""} width={126} height={33} unoptimized/>)}
             <span className='text-l-bold'>
                 {args.title}
             </span>

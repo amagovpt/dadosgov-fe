@@ -1,8 +1,5 @@
 import { Pagination } from '@/components/Pagination';
-import { miniCoursesData } from '@/data/miniCoursesData';
 import HeroCourses from '@/components/Courses/Hero';
-import { MiniCoursesFilters } from '@/components/Courses/mini-courses/MiniCoursesFilters';
-import InputSearch from '@/components/Primitives/InputSearch';
 import CardIllustrative from '@/components/Primitives/Cards/CardIllustrative';
 import Link from 'next/link';
 import IconAgora from '@/components/Primitives/IconAgora';
@@ -11,10 +8,17 @@ import { flattenData } from '@/utils/flattenObject';
 import { getMiniCoursesPages } from '@/services/queries/courses/minicourses';
 import { PageMiniCourses } from '@/services/types/courses';
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
+import { getAssets } from '@/utils/getAssets';
+import MiniCoursesSearchInput from '@/components/Courses/MiniCoursesSearchInput';
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; q?: string }>;
+}) {
 
-
+  const { page, q } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page ?? "1", 10));
 
   const { data, error } = await apolloClient.query<{
     findPageMinicursosSingleton: {
@@ -32,12 +36,27 @@ export default async function Page() {
   const { hero, minicursos } = flattenData(data?.findPageMinicursosSingleton?.data || {}) as unknown as PageMiniCourses;
 
 
+  const searchQuery = q?.trim().toLowerCase() ?? "";
+  const filteredCourses = searchQuery
+    ? minicursos.filter(
+      (c) =>
+        c.title.toLowerCase().includes(searchQuery) ||
+        c.description.toLowerCase().includes(searchQuery)
+    )
+    : minicursos;
+
+  const PAGE_SIZE = 4;
+
+  const totalItems = filteredCourses.length;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const paginatedCourses = filteredCourses.slice(start, start + PAGE_SIZE);
+
   return (
     <main className=" flex flex-col gap-32">
       <HeroCourses
         {...{
           img: {
-            src: hero.image[0]?.url ?? "/card-full-image.png",
+            src: hero.image && hero.image[0] ? getAssets(hero.image[0]?.id) : "/card-full-image.png",
             alt: hero.title ?? "Minicursos"
           },
           updatedAt: hero.updatedAt ?? "2025-09-30T12:00",
@@ -59,7 +78,7 @@ export default async function Page() {
                 <h2 className="text-l-semibold ">
                   Que minicurso procura?
                 </h2>
-                <InputSearch
+                <MiniCoursesSearchInput
                   id="courses-search"
                   label="Pesquisar minicursos"
                   hideLabel
@@ -67,19 +86,17 @@ export default async function Page() {
                 />
               </div>
             </div>
-            {/* Sidebar */}
-            <div className="xl:col-span-3">
-              <MiniCoursesFilters />
-            </div>
 
             {/* Results Area */}
-            <div className="xl:col-span-9 ">
+            <div className="col-span-12 ">
               <div className="flex justify-end mb-16">
-                <span className="text-[14px] text-neutral-500 font-medium tracking-tight">{minicursos.length} resultados</span>
+                <span className="text-[14px] text-neutral-500 font-medium tracking-tight">
+                  {paginatedCourses.length} de {totalItems} resultados
+                </span>
               </div>
 
               <div className="flex flex-col gap-24 mini-courses-cards">
-                {minicursos.map((course) => (
+                {paginatedCourses.map((course) => (
                   <CardIllustrative
                     key={course.id}
                     variant="primary-100"
@@ -98,9 +115,9 @@ export default async function Page() {
               {/* Pagination */}
               <div className="mt-64 flex justify-center pb-64 mini-courses-pagination">
                 <Pagination
-                  currentPage={1}
-                  totalItems={minicursos.length}
-                  pageSize={4}
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  pageSize={PAGE_SIZE}
                   baseUrl="/pages/courses/mini-courses"
                 />
               </div>

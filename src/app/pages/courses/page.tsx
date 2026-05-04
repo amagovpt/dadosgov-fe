@@ -8,6 +8,7 @@ import { flattenData } from "@/utils/flattenObject";
 import { PageCourses } from "@/services/types/courses";
 import dayjs from "dayjs";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { getAssets } from "@/utils/getAssets";
 
 
 export default async function page() {
@@ -28,11 +29,13 @@ export default async function page() {
 
   const { hero, miniCourses, otherCourses } = flattenData(data?.findPageCursosSingleton?.data || {}) as unknown as PageCourses;
 
+
+
   return (
     <main className="w-full h-full">
       <HeroCourses {...{
         img: {
-          src: hero.image[0].url ?? "/card-full-image.png",
+          src: hero.image && hero.image[0].id ? getAssets(hero.image[0].id) : "/card-full-image.png",
           alt: hero.title ?? "Curso"
         },
         updatedAt: hero.updatedAt,
@@ -55,16 +58,19 @@ export default async function page() {
           </div>
           <div className="w-full h-full grid gap-32 grid-cols-12 ">
             {miniCourses.courses.map((course, index) => (
-              <div className="col-span-12 lg:col-span-4 bg-wihte [&_a]:hidden " key={index}>
+              <div className="col-span-12 lg:col-span-4 bg-wihte [&_a]:hidden [&_p]:hidden [&_.content]:!h-full" key={index}>
                 <CardGeneral {
                   ...{
                     titleText: course.title,
-                    descriptionText: formatHtmlParagraphs(course.description),
+                    descriptionText: "",
                     subtitleText: `Publicado a ${dayjs(course.updatedAt).format('DD.MM.YYYY')}`,
                     imageIndent: true,
+                    className: "",
                     image: {
-                      src: "/card-full-image.png",
-                      alt: course.title ?? "Curso"
+                      src: course.cover && course.cover[0] ? getAssets(course.cover[0].id) : "/card-full-image.png",
+                      alt: course.title ?? "Curso",
+                      width: 352,
+                      height: 208
                     },
                     isBlockedLink: true,
                     anchor: {
@@ -93,7 +99,7 @@ export default async function page() {
               {otherCourses.title}
             </h2>
             <div>
-              <span>
+              <span className="">
                 {formatHtmlParagraphs(otherCourses.description)}
               </span>
               <div className="w-full bg-neutral-200 h-2 mt-12" />
@@ -105,7 +111,7 @@ export default async function page() {
                 <SimpleCardImage
                   {...{
                     img: {
-                      src: course.image[0].url ?? "/courses/academia_portugal.png",
+                      src: course.image && course.image[0].id ? getAssets(course.image[0].id) : "courses/academia_portugal.png",
                       alt: "Academia Portugal Digital"
                     },
                     title: course.title,

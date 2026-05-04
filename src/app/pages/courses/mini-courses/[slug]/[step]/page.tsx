@@ -8,9 +8,11 @@ export default async function Page({
   params: Promise<{ slug: string; step: string }>;
 }) {
   const { slug, step } = await params;
-  const stepCourse = await getMiniCourseStepsPage(slug);
+  const { steps, title, conclusion } = await getMiniCourseStepsPage(slug);
 
-  if (!stepCourse?.steps) {
+  const dataSteps = [...steps, conclusion];
+
+  if (!steps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-lg text-neutral-600">Minicurso não encontrado.</p>
@@ -18,5 +20,5 @@ export default async function Page({
     );
   }
 
-  return <MiniCourseStepClient stepCourse={stepCourse.steps} slug={slug} step={parseInt(step, 10)} />;
+  return <MiniCourseStepClient title={title} stepCourse={dataSteps} slug={slug} step={parseInt(step, 10)} />;
 }

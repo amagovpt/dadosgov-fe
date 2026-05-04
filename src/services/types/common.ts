@@ -1,6 +1,7 @@
 export interface Image {
     url: string
-    filename: string
+    fileName: string
+    id: string
 }
 
 export interface Hero {

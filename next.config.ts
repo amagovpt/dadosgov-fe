@@ -3,6 +3,9 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:7000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
+
+const urlAPI = new URL(API_URL);
 
 // Read udata version from backend pyproject.toml at build time
 let udataVersion = "unknown";
@@ -13,6 +16,7 @@ try {
 } catch {
   // backend dir not available (e.g. standalone frontend deploy)
 }
+
 
 const nextConfig: NextConfig = {
   env: {
@@ -60,7 +64,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com; frame-src 'self' https://app.powerbi.com; font-src 'self' data:; connect-src 'self' http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt; frame-ancestors 'none';",
+              `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: http://localhost:7000 ${API_URL} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com; frame-src 'self' https://app.powerbi.com; font-src 'self' data:; connect-src 'self' http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt; frame-ancestors 'none';`,
           },
         ],
       },
@@ -78,9 +82,9 @@ const nextConfig: NextConfig = {
         hostname: "localhost:7000/static",
       },
       {
-        protocol: "https",
-        hostname: "172.31.204.12",
-      },
+        protocol: urlAPI.protocol.slice(0, -1) as "http" | "https", // remove trailing colon
+        hostname: urlAPI.hostname || "",
+      }
     ],
   },
   async rewrites() {

@@ -14,6 +14,8 @@ export function getMiniCoursesPages(locale: string = "pt") {
                         description
                         image {
                             url
+                            id
+                            fileName
                         }
                         updatedAt
                     }
@@ -52,6 +54,9 @@ export async function getMiniCourseIntroductionPage(slug: string, locale: string
             id {
                 iv
             }
+            title {
+                ${locale}
+            }
             updatedAt {
                 iv
             }
@@ -62,6 +67,7 @@ export async function getMiniCourseIntroductionPage(slug: string, locale: string
                     image {
                         url
                         fileName
+                        id
                     }
                     imagePosition
                 }
@@ -89,11 +95,18 @@ export async function getMiniCourseIntroductionPage(slug: string, locale: string
     const stepsCourses = data.queryMinicursosContents[0]?.data;
 
     if (!stepsCourses) {
-        return null
+        return {} as {
+            updatedAt: string;
+            id: string;
+            title: string;
+            introduction: MiniCourseDetail['introduction'];
+        };
     }
 
     return flattenData(stepsCourses) as unknown as {
         updatedAt: string;
+        id: string;
+        title: string;
         introduction: MiniCourseDetail['introduction'];
     };
 
@@ -109,6 +122,9 @@ export async function getMiniCourseStepsPage(slug: string, locale: string = "pt"
             id {
                 iv
             }
+            title {
+                ${locale}
+            }
             steps {
                 ${locale} {
                 step {
@@ -116,54 +132,12 @@ export async function getMiniCourseStepsPage(slug: string, locale: string = "pt"
                     description
                     image {
                     url
-                    sourceUrl
+                    id
                     fileName
                     }
                     imagePosition
                 }
                 }
-            }
-            }
-        }
-    }
-    `
-    const { data, error } = await apolloClient.query<{
-        queryMinicursosContents: Array<{
-            data: Record<string, unknown>;
-        }>;
-    }>({
-        query: query,
-        variables: {
-            query: `data/id/iv eq '${slug}'`,
-        },
-    });
-
-    if (!data || error) {
-        console.error("Error fetching Steps data information:", error);
-        throw new Error("Failed to fetch introduction data information");
-    }
-
-    const stepsCourses = data.queryMinicursosContents[0]?.data;
-
-    if (!stepsCourses) {
-        return null;
-    }
-
-    return flattenData(stepsCourses) as unknown as {
-        steps: MiniCourseDetail['steps'];
-    };
-
-}
-
-export async function getMiniCourseConclusionPage(slug: string, locale: string = "pt") {
-    const query = gql`
-    query GetMiniCourseIntroductionPage($query: String!) {
-        queryMinicursosContents(
-            filter: $query
-        ) {
-            data {
-            id {
-                iv
             }
             conclusion {
                 ${locale} {
@@ -172,6 +146,7 @@ export async function getMiniCourseConclusionPage(slug: string, locale: string =
                     image {
                         url
                         fileName
+                        id
                     }
                     imagePosition
                 }
@@ -199,9 +174,19 @@ export async function getMiniCourseConclusionPage(slug: string, locale: string =
     const stepsCourses = data.queryMinicursosContents[0]?.data;
 
     if (!stepsCourses) {
-        return {} as MiniCourseDetail['steps'];
+        return {} as {
+            id: string;
+            title: string;
+            steps: MiniCourseDetail['steps'];
+            conclusion: MiniCourseDetail['conclusion'];
+        };
     }
 
-    return flattenData(stepsCourses) as unknown as MiniCourseDetail['steps'];
+    return flattenData(stepsCourses) as unknown as {
+        id: string;
+        title: string;
+        steps: MiniCourseDetail['steps'];
+        conclusion: MiniCourseDetail['conclusion'];
+    };
 
 }

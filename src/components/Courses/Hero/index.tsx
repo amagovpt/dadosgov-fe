@@ -45,7 +45,7 @@ export default function HeroCourses(args: HeroCoursesProps) {
                     </div>
                     {
                         args.img && (<div className="w-full h-full flex items-center justify-center">
-                            <Image src={args.img?.src} alt={args.img.alt || ""} width={597} height={390} />
+                            <Image src={args.img?.src} alt={args.img.alt || ""} width={597} height={390} unoptimized/>
                         </div>)
                     }
 

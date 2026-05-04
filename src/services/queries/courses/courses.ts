@@ -12,6 +12,8 @@ export function getCoursesPage(locale: string = "pt") {
                     updatedAt
                     image {
                         url
+                        fileName
+                        id
                     }
                 }
             }
@@ -31,6 +33,8 @@ export function getCoursesPage(locale: string = "pt") {
                                 cover {
                                     iv {
                                         url
+                                        fileName
+                                        id
                                     }
                                 }
                             }
@@ -53,6 +57,7 @@ export function getCoursesPage(locale: string = "pt") {
                         iv {
                             fileName
                             url
+                            id
                         }
                         }
                         title {

@@ -3,23 +3,34 @@ import { useRouter } from 'next/navigation';
 import { Breadcrumb, Button } from '@ama-pt/agora-design-system';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
-import { twJoin } from 'tailwind-merge';
+import { twJoin, twMerge } from 'tailwind-merge';
 import { BodyCourse } from '@/services/types/courses';
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
+import Link from 'next/link';
+import { getAssets } from '@/utils/getAssets';
 
 interface Props {
+  title: string;
   slug: string;
   stepCourse: BodyCourse[];
   step: number;
 }
 
-export default function CourseStepClient({ slug, stepCourse, step }: Props) {
+const socialLinks = [
+  { name: 'Facebook', icon: 'agora-line-facebook' },
+  { name: 'Twitter', icon: 'agora-line-twitter' },
+  { name: 'LinkedIn', icon: 'agora-line-linkedin' },
+  { name: 'WhatsApp', customIcon: '/Icons/whatsapp.svg' },
+  { name: 'e-mail', icon: 'agora-line-mail' },
+];
+
+export default function CourseStepClient({ title, slug, stepCourse, step }: Props) {
+
+
   const router = useRouter();
   const course = stepCourse;
   const parentRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-
-  const positionImg = "right"
 
   function getImagePositionClass(position: string) {
     switch (position) {
@@ -67,26 +78,27 @@ export default function CourseStepClient({ slug, stepCourse, step }: Props) {
 
   const handleNext = () => {
     if (isLastStep) {
-      router.push(`/pages/courses/mini-courses/${slug}/conclusion`);
+      router.push(`/pages/courses/mini-courses`);
     } else {
-      router.push(`/pages/courses/mini-courses/${slug}/steps/${step + 1}`);
+      router.push(`/pages/courses/mini-courses/${slug}/${step + 1}`);
     }
   };
 
   const handlePrevious = () => {
-    router.push(`/pages/courses/mini-courses/${slug}/steps/${step - 1}`);
+    router.push(`/pages/courses/mini-courses/${slug}/${step - 1}`);
   };
 
 
 
   return (
-    <main className="w-full flex flex-col justify-center items-center bg-primary-100">
-      <div className='container py-64'>
+    <main className="w-full flex flex-col justify-center items-center bg-primary-100 gap-64 py-64">
+      <div className='container '>
         <Breadcrumb
           items={[
             { label: 'Início', url: '/' },
+            { label: 'Cursos', url: '/pages/courses/' },
             { label: 'Mini Cursos', url: '/pages/courses/mini-courses/' },
-            { label: course[step].title, url: '#' },
+            { label: title, url: '#' },
           ]}
         />
       </div>
@@ -114,13 +126,12 @@ export default function CourseStepClient({ slug, stepCourse, step }: Props) {
                   </div>
 
                   <div className='flex flex-col gap-32'>
-
                     <div className="bg-white rounded-b-8 shadow-[0_20px_20px_rgba(0,0,0,0.05)]  p-48">
-                      <div className={twJoin("flex gap-16", getImagePositionClass(positionImg))}>
+                      <div className={twJoin("flex gap-16", getImagePositionClass(currentStep.imagePosition ?? "left"))}>
                         <div className="flex-1 flex flex-col gap-8">
                           {currentStep.title && (
-                            <h2 className="text-l-bold text-neutral-900">
-                              {currentStep.title}
+                            <h2 className={twMerge("text-l-bold text-neutral-900", isLastStep ? "!text-xl-bold text-brand-blue-secondary whitespace-break-spaces" : "")}>
+                              {currentStep.title.replace('! ', `! \n`)}
                             </h2>
                           )}
                           {currentStep.description && (
@@ -130,14 +141,15 @@ export default function CourseStepClient({ slug, stepCourse, step }: Props) {
                           )}
                         </div>
 
-                        <div className="bg-primary-100 rounded-8 flex items-center justify-center">
+                        <div className="rounded-8">
                           {currentStep.image && (
                             <Image
-                              src={currentStep.image[0]?.url ?? "/card-full-image.png"}
+                              src={getAssets(currentStep.image[0]?.id) ?? "/card-full-image.png"}
                               alt={currentStep.title ?? "Imagem do passo"}
-                              width={280}
+                              width={["top", "bottom"].includes(currentStep.imagePosition ?? "") ? 796 : 350}
                               height={281}
-                              className="max-w-full max-h-full object-contain"
+                              className="max-w-full max-h-full object-contain bg-primary-100"
+                              unoptimized
                             />
                           )}
                         </div>
@@ -166,7 +178,7 @@ export default function CourseStepClient({ slug, stepCourse, step }: Props) {
                           trailingIconHover="agora-solid-arrow-right-circle"
                           onClick={handleNext}
                         >
-                          {isLastStep ? "Concluir curso" : "Seguinte"}
+                          {isLastStep ? "Ver mais cursos" : "Seguinte"}
                         </Button>
                       </div>
                     </div>
@@ -177,6 +189,40 @@ export default function CourseStepClient({ slug, stepCourse, step }: Props) {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      {/* Share section */}
+      <div className={twMerge("container flex flex-col gap-16", isLastStep ? "block" : "hidden")}>
+        <p className="text-m-regular text-primary-800 ">
+          Partilhar este minicurso
+        </p>
+        <div className="flex flex-row gap-16">
+          {socialLinks.map((link) => (
+            <Link key={link.name} href="#" className="no-underline">
+              <Button
+                appearance="link"
+                variant="primary"
+                hasIcon={!!link.icon}
+                leadingIcon={link.icon}
+                leadingIconHover={link.icon?.replace(
+                  'agora-line-',
+                  'agora-solid-'
+                )}
+                className="!flex !items-center !text-neutral-700 hover:!text-primary-700 font-medium !gap-8"
+              >
+                <div className="flex items-center gap-8">
+                  {!link.icon && link.customIcon && (
+                    <img
+                      src={link.customIcon}
+                      alt=""
+                      className="w-20 h-20 flex-shrink-0"
+                    />
+                  )}
+                  <span>{link.name}</span>
+                </div>
+              </Button>
+            </Link>
+          ))}
         </div>
       </div>
     </main >
