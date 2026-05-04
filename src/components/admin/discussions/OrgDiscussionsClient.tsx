@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { format } from "date-fns";
+import { pt } from "date-fns/locale";
 import {
   Breadcrumb,
   CardNoResults,
@@ -11,22 +13,25 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  usePopupContext,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDiscussions } from "@/services/api";
 import { Discussion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
+import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
 
 const formatDate = (dateStr: string) => {
   try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+    return format(new Date(dateStr), "d 'de' MMMM 'de' yyyy HH:mm", { locale: pt });
   } catch {
     return dateStr;
   }
 };
+
+type SortOrder = "none" | "ascending" | "descending";
+type DiscussionSortField = "created" | "closed";
 
 interface OrgDiscussionsClientProps {
   orgId: string;
@@ -34,11 +39,23 @@ interface OrgDiscussionsClientProps {
 
 export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProps) {
   const { user } = useAuth();
+  const { show } = usePopupContext();
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [sortField, setSortField] = useState<DiscussionSortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+
+  const handleSort = (field: DiscussionSortField) => (newOrder: SortOrder) => {
+    setSortField(newOrder === "none" ? null : field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: DiscussionSortField): SortOrder =>
+    sortField === field ? sortOrder : "none";
 
   useEffect(() => {
     async function loadDiscussions() {
@@ -56,11 +73,35 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
     loadDiscussions();
   }, [orgId]);
 
-  const totalPages = Math.ceil(discussions.length / itemsPerPage);
+  const sortedDiscussions = useMemo(() => {
+    if (!sortField || sortOrder === "none") return discussions;
+    const dir = sortOrder === "ascending" ? 1 : -1;
+    return [...discussions].sort((a, b) => {
+      const av = sortField === "created" ? a.created : a.closed;
+      const bv = sortField === "created" ? b.created : b.closed;
+      const at = av ? Date.parse(av) : 0;
+      const bt = bv ? Date.parse(bv) : 0;
+      return (at - bt) * dir;
+    });
+  }, [discussions, sortField, sortOrder]);
+
   const paginatedDiscussions = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return discussions.slice(start, start + itemsPerPage);
-  }, [discussions, currentPage, itemsPerPage]);
+    return sortedDiscussions.slice(start, start + itemsPerPage);
+  }, [sortedDiscussions, currentPage, itemsPerPage]);
+
+  const openDiscussion = (discussion: Discussion) => {
+    show(
+      <DiscussionDetailPopup
+        discussion={discussion}
+        onUpdated={(updated) =>
+          setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))
+        }
+        onDeleted={() => setDiscussions((prev) => prev.filter((d) => d.id !== discussion.id))}
+      />,
+      { title: "Discussão", closeAriaLabel: "Fechar", dimensions: "l" }
+    );
+  };
 
   return (
     <div className="admin-page">
@@ -125,54 +166,46 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
           >
             <TableHeader>
               <TableRow>
-                <TableHeaderCell sortType="date" sortOrder="none">
-                  Título
+                <TableHeaderCell>Título</TableHeaderCell>
+                <TableHeaderCell
+                  sortType="date"
+                  sortOrder={getSortOrder("created")}
+                  onSortChange={handleSort("created")}
+                >
+                  Criado em
                 </TableHeaderCell>
-                <TableHeaderCell>Autor</TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
-                  Data
+                <TableHeaderCell
+                  sortType="date"
+                  sortOrder={getSortOrder("closed")}
+                  onSortChange={handleSort("closed")}
+                >
+                  Fechado em
                 </TableHeaderCell>
-                <TableHeaderCell>Mensagens</TableHeaderCell>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedDiscussions.map((discussion) => (
-                <TableRow key={discussion.id}>
+                <TableRow
+                  key={discussion.id}
+                  className="cursor-pointer hover:bg-neutral-50"
+                  onClick={() => openDiscussion(discussion)}
+                >
                   <TableCell headerLabel="Título">
-                    <span className="font-medium">{discussion.title}</span>
+                    <a
+                      href={discussion.url}
+                      className="text-primary-600 underline"
+                      onClick={(e) => e.stopPropagation()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {discussion.title}
+                    </a>
                   </TableCell>
-                  <TableCell headerLabel="Autor">
-                    <div className="flex items-center gap-[8px]">
-                      {discussion.user?.avatar_thumbnail ? (
-                        <img
-                          src={discussion.user.avatar_thumbnail}
-                          alt={`${discussion.user.first_name} ${discussion.user.last_name}`}
-                          className="w-[24px] h-[24px] rounded-full"
-                        />
-                      ) : (
-                        <Icon
-                          name="agora-line-user"
-                          className="w-[24px] h-[24px]"
-                        />
-                      )}
-                      <span>
-                        {discussion.user?.first_name} {discussion.user?.last_name}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell headerLabel="Estado">
-                    {discussion.closed ? (
-                      <StatusDot variant="success">Fechada</StatusDot>
-                    ) : (
-                      <StatusDot variant="informative">Aberta</StatusDot>
-                    )}
-                  </TableCell>
-                  <TableCell headerLabel="Data">
+                  <TableCell headerLabel="Criado em">
                     {formatDate(discussion.created)}
                   </TableCell>
-                  <TableCell headerLabel="Mensagens">
-                    {discussion.discussion?.length || 0}
+                  <TableCell headerLabel="Fechado em">
+                    {discussion.closed ? formatDate(discussion.closed) : "-"}
                   </TableCell>
                 </TableRow>
               ))}

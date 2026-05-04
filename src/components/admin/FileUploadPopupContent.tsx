@@ -21,7 +21,7 @@ export default function FileUploadPopupContent({
 
   return (
     <div className="flex flex-col gap-6 p-2">
-      <div className="[&_.download-icon]:hidden">
+      <div className="[&_.download-icon]:hidden [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
       <DragAndDropUploader
         multiple
         label="Ficheiros"

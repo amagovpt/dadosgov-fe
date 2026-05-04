@@ -5,14 +5,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   Icon,
   InputText,
   InputTextArea,
   InputDate,
-  DropdownSection,
-  DropdownOption,
   StatusCard,
   Table,
   TableHeader,
@@ -31,6 +28,9 @@ import {
   Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import { Dropdown } from "@/components/Primitives/Dropdown";
+
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
@@ -411,7 +411,7 @@ function ResourceEditPopupContent({
 
   return (
     <div className="flex flex-col gap-[16px]" style={{ minHeight: "60vh" }}>
-      {error && <StatusCard type="danger" description={error} />}
+      {error && <StatusCard variant="danger" description={error} />}
 
       <div className="flex-1 overflow-y-auto flex flex-col gap-[16px]">
         <InputText
@@ -429,13 +429,13 @@ function ResourceEditPopupContent({
           defaultValue={resource.type || "main"}
           onChangeRef={resourceTypeRef}
         >
-          <DropdownSection name="resource-types">
+          <Dropdown.Section name="resource-types">
             {resourceTypes.map((rt) => (
-              <DropdownOption key={rt.id} value={rt.id} selected={rt.id === (resource.type || "main")}>
+              <Dropdown.Option key={rt.id} value={rt.id} selected={rt.id === (resource.type || "main")}>
                 {rt.label}
-              </DropdownOption>
+              </Dropdown.Option>
             ))}
-          </DropdownSection>
+          </Dropdown.Section>
         </IsolatedSelect>
 
         <InputTextArea
@@ -701,21 +701,24 @@ export default function DatasetsEditClient() {
   // Memoized children for IsolatedSelect to prevent re-render cascades
   const licenseOptions = useMemo(() => {
     const options = licenses.map((license) => (
-      <DropdownOption key={license.id} value={license.id} selected={license.id === loadedLicense}>
+      <Dropdown.Option key={license.id} value={license.id} selected={license.id === loadedLicense}>
         {license.title}
-      </DropdownOption>
+      </Dropdown.Option>
     ));
-    return <DropdownSection name="licenses">{options}</DropdownSection>;
+    return <Dropdown.Section name="licenses">{options}</Dropdown.Section>;
   }, [licenses, loadedLicense]);
+
+  const frequencyDefaultValue =
+    loadedFrequency || (frequencies.length > 0 ? "unknown" : "");
 
   const frequencyOptions = useMemo(() => {
     const options = frequencies.map((freq) => (
-      <DropdownOption key={freq.id} value={freq.id} selected={freq.id === loadedFrequency}>
+      <Dropdown.Option key={freq.id} value={freq.id} selected={freq.id === frequencyDefaultValue}>
         {getFrequencyLabel(freq.id, freq.label)}
-      </DropdownOption>
+      </Dropdown.Option>
     ));
-    return <DropdownSection name="frequencies">{options}</DropdownSection>;
-  }, [frequencies, loadedFrequency]);
+    return <Dropdown.Section name="frequencies">{options}</Dropdown.Section>;
+  }, [frequencies, frequencyDefaultValue]);
 
   const selectedKeywords = useMemo(
     () => (loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
@@ -725,48 +728,54 @@ export default function DatasetsEditClient() {
   const keywordOptions = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
-    // Case-insensitive dedupe across suggestions + search results.
+    // Selected tags stay visible regardless of query so the InputSelect keeps
+    // tracking them across searches; otherwise typing a new query would drop
+    // them from the children and the next onChange would lose those selections.
+    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
     const seen = new Set<string>();
     const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
+      if (selectedLowerSet.has(key)) return true;
+      if (trimmedLower && !key.includes(trimmedLower)) return false;
       return true;
     });
-    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
-    // Keep selected keywords that aren't in suggestions visible and checked.
     const selectedNotInSuggestions = selectedKeywords.filter(
       (keyword) => !seen.has(keyword.toLowerCase()),
     );
-    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const showCreate =
+      trimmed.length > 0 &&
+      ![...tagSuggestions, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
+      !selectedLowerSet.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [
-            <DropdownOption
+            <Dropdown.Option
               key={`__create__${trimmedLower}`}
               value={trimmed}
               selected={false}
             >
               Criar &quot;{trimmed}&quot;
-            </DropdownOption>,
+            </Dropdown.Option>,
           ]
         : []),
       ...selectedNotInSuggestions.map((keyword) => (
-        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
+        <Dropdown.Option key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
           {keyword}
-        </DropdownOption>
+        </Dropdown.Option>
       )),
       ...uniqueTags.map((tag) => (
-        <DropdownOption
+        <Dropdown.Option
           key={tag.text.toLowerCase()}
           value={tag.text}
           selected={selectedLowerSet.has(tag.text.toLowerCase())}
         >
           {tag.text}
-        </DropdownOption>
+        </Dropdown.Option>
       )),
     ];
-    return <DropdownSection name="keywords">{options}</DropdownSection>;
+    return <Dropdown.Section name="keywords">{options}</Dropdown.Section>;
   }, [tagSuggestions, tagSearch, selectedKeywords, keywordSearch]);
 
   const allSpatialZones = useMemo(() => {
@@ -819,36 +828,36 @@ export default function DatasetsEditClient() {
     const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
     const selectedIds = new Set(effective.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
-      <DropdownOption key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
+      <Dropdown.Option key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
         {z.code ? `${z.name} (${z.code})` : z.name}
-      </DropdownOption>
+      </Dropdown.Option>
     ));
     if (options.length === 0) {
       options.push(
-        <DropdownOption key="empty" value="">
+        <Dropdown.Option key="empty" value="">
           —
-        </DropdownOption>
+        </Dropdown.Option>
       );
     }
-    return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
+    return <Dropdown.Section name="spatial-coverage">{options}</Dropdown.Section>;
   }, [allSpatialZones, selectedSpatialZonesValue, loadedSpatialZones]);
 
   const spatialGranularityOptions = useMemo(() => {
     const options = [
-      <DropdownOption key="empty" value="">
+      <Dropdown.Option key="empty" value="">
         —
-      </DropdownOption>,
+      </Dropdown.Option>,
       ...granularities.map((g) => (
-        <DropdownOption
+        <Dropdown.Option
           key={g.id}
           value={g.id}
           selected={g.id === loadedSpatialGranularity}
         >
           {getGranularityLabel(g.id, g.name)}
-        </DropdownOption>
+        </Dropdown.Option>
       )),
     ];
-    return <DropdownSection name="spatial-granularity">{options}</DropdownSection>;
+    return <Dropdown.Section name="spatial-granularity">{options}</Dropdown.Section>;
   }, [granularities, loadedSpatialGranularity]);
 
   const clearError = (field: string) => {
@@ -1404,6 +1413,7 @@ export default function DatasetsEditClient() {
                       label="Sigla"
                       placeholder="Insira a sigla aqui"
                       id="edit-acronym"
+                      required={false}
                       value={acronym}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setAcronym(e.target.value)
@@ -1521,10 +1531,10 @@ export default function DatasetsEditClient() {
                   <h2 className="admin-page__section-title">Tempo</h2>
                   <div className="admin-page__fields-group">
                     <IsolatedSelect
-                      label="Frequência de atualização"
+                      label="Frequência de atualização *"
                       placeholder="Selecione uma frequência..."
                       id="edit-frequency"
-                      defaultValue={loadedFrequency}
+                      defaultValue={frequencyDefaultValue}
                       onChangeRef={selectedFrequencyRef}
                     >
                       {frequencyOptions}
@@ -1685,7 +1695,7 @@ export default function DatasetsEditClient() {
                               );
                             }}
                           >
-                            Transfira o conjunto de dados
+                            Tranferir o conjunto de dados
                           </Button>
                         </>
                       }
@@ -1830,7 +1840,7 @@ export default function DatasetsEditClient() {
           <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              <div className="flex items-end gap-[16px] mb-[16px]">
+              <div className="flex items-end gap-[16px] mb-[16px] [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                 <DragAndDropUploader
                   key={uploaderKey}
                   label="Ficheiros"
@@ -2062,7 +2072,6 @@ export default function DatasetsEditClient() {
                               `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
                           }
                           alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
-                          size="sm"
                         />
                         <div>
                           <p className="text-sm text-neutral-900">

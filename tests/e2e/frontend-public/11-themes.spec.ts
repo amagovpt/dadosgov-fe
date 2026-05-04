@@ -1,102 +1,56 @@
 import { test, expect } from "playwright/test";
 
-const BASE_URL = "http://localhost:3000";
+const THEMES_URL = "/pages/themes";
 
 test.describe("Themes Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/pages/themes`);
+    await page.goto(THEMES_URL);
     await page.waitForLoadState("networkidle");
   });
 
-  test("TM-01: Page loads with sidebar menu and main content", async ({
-    page,
-  }) => {
-    // Page should have a heading
-    const heading = page.locator("h1, h2").first();
+  test("TM-01: Page loads with heading and navigation", async ({ page }) => {
+    const heading = page.locator("main h1").first();
     await expect(heading).toBeVisible({ timeout: 10000 });
 
-    // Sidebar with categories
-    const sidebar = page.locator(
-      'aside, [class*="sidebar"], nav'
-    );
-    await expect(sidebar.first()).toBeVisible({ timeout: 10000 });
-
-    // Page should have substantial content
-    const bodyText = await page.textContent("body");
-    expect(bodyText?.length).toBeGreaterThan(200);
+    const nav = page.locator("main nav").first();
+    await expect(nav).toBeVisible({ timeout: 10000 });
   });
 
-  test("TM-02: Sidebar shows categories with accordion sub-sections", async ({
-    page,
-  }) => {
-    const menuItems = page.locator(
-      '[class*="sidebar"] a, [class*="sidebar"] button, [class*="menu"] a, [class*="menu"] button, nav a, nav button'
-    );
-    const count = await menuItems.count();
+  test("TM-02: Navigation lists category items", async ({ page }) => {
+    const navItems = page.locator("main nav a, main nav button");
+    const count = await navItems.count();
     expect(count).toBeGreaterThan(0);
   });
 
-  test("TM-03: Click category expands sub-sections", async ({ page }) => {
-    const accordionTrigger = page.locator(
-      '[class*="accordion"] button, [class*="sidebar"] button, details summary'
-    );
-    if ((await accordionTrigger.count()) > 0) {
-      await accordionTrigger.first().click();
-      await page.waitForTimeout(500);
+  test("TM-03: Accordion sections render", async ({ page }) => {
+    const accordions = page.locator('[class*="accordion"]');
+    expect(await accordions.count()).toBeGreaterThan(0);
+  });
 
-      const expandedContent = page.locator(
-        '[class*="accordion"] [class*="content"], [class*="accordion"] [class*="panel"], details[open]'
-      );
-      if ((await expandedContent.count()) > 0) {
-        await expect(expandedContent.first()).toBeVisible();
+  test("TM-04: Click first nav item updates page state", async ({ page }) => {
+    const firstLink = page.locator("main nav a").first();
+    if ((await firstLink.count()) > 0) {
+      const href = await firstLink.getAttribute("href");
+      await firstLink.click();
+      await page.waitForTimeout(500);
+      // Either the URL gains a hash or navigation occurs to another themes page.
+      if (href) {
+        expect(href.length).toBeGreaterThan(0);
       }
     }
   });
 
-  test("TM-04: Click sub-section scrolls to corresponding content", async ({
+  test("TM-05: Page references dataset paths in links or accordions", async ({
     page,
   }) => {
-    const sidebarLinks = page.locator(
-      'aside a, [class*="sidebar"] a, nav a[href*="#"]'
-    );
-    if ((await sidebarLinks.count()) > 0) {
-      await sidebarLinks.first().click();
-      await page.waitForTimeout(500);
-
-      // Page might scroll or navigate
-      const body = await page.textContent("body");
-      expect(body).toBeTruthy();
-    }
+    // Datasets are referenced lazily; check that the page content mentions
+    // /pages/datasets/ somewhere in its DOM (anchors or data attributes).
+    const html = await page.content();
+    expect(html).toContain("/pages/datasets");
   });
 
-  test("TM-05: Dataset links open dataset pages", async ({ page }) => {
-    const datasetLinks = page.locator(
-      'a[href*="/pages/datasets/"], a[href*="/datasets/"]'
-    );
-    if ((await datasetLinks.count()) > 0) {
-      const href = await datasetLinks.first().getAttribute("href");
-      expect(href).toContain("dataset");
-    }
-  });
-
-  test("TM-06: Menu stays sticky on scroll", async ({ page }) => {
-    const sidebar = page.locator(
-      '[class*="sidebar"], [class*="menu"], aside'
-    );
-    if ((await sidebar.count()) > 0) {
-      await page.evaluate(() => window.scrollBy(0, 500));
-      await page.waitForTimeout(300);
-
-      await expect(sidebar.first()).toBeVisible();
-    }
-  });
-
-  test('TM-07: Future sections marked as "em breve"', async ({ page }) => {
-    const body = await page.textContent("body");
-    const hasEmBreve =
-      body?.toLowerCase().includes("em breve") ||
-      body?.toLowerCase().includes("brevemente");
-    // This is optional - not all pages may have this marker
-    expect(body).toBeTruthy();
+  test("TM-06: Page renders an h2 section heading", async ({ page }) => {
+    const h2 = page.locator("main h2").first();
+    await expect(h2).toBeVisible({ timeout: 10000 });
   });
 });

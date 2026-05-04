@@ -67,6 +67,9 @@ const getStatus = (source: HarvestSource): StatusInfo => {
   return { label: "Sem execução", variant: "informative" };
 };
 
+type SortOrder = "none" | "ascending" | "descending";
+type HarvesterSortField = "name" | "created_at" | "last_job";
+
 export default function OrgHarvestersClient() {
   const params = useParams();
   const orgIdFromUrl = params?.orgId as string | undefined;
@@ -81,6 +84,24 @@ export default function OrgHarvestersClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
+  const [sortField, setSortField] = useState<HarvesterSortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+
+  const handleSort = (field: HarvesterSortField) => (newOrder: SortOrder) => {
+    setSortField(newOrder === "none" ? null : field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: HarvesterSortField): SortOrder =>
+    sortField === field ? sortOrder : "none";
+
+  const lastJobTimestamp = (h: HarvestSource): number => {
+    const j = h.last_job;
+    if (!j) return 0;
+    const v = j.started ?? j.ended ?? j.created;
+    return v ? Date.parse(v) : 0;
+  };
 
   useEffect(() => {
     if (orgIdFromUrl && activeOrg?.id !== orgIdFromUrl) {
@@ -121,10 +142,29 @@ export default function OrgHarvestersClient() {
     });
   }, [harvesters, statusFilter]);
 
+  const sortedHarvesters = useMemo(() => {
+    if (!sortField || sortOrder === "none") return filteredHarvesters;
+    const dir = sortOrder === "ascending" ? 1 : -1;
+    const collator = new Intl.Collator("pt", { sensitivity: "base" });
+    return [...filteredHarvesters].sort((a, b) => {
+      if (sortField === "name") {
+        return collator.compare(a.name ?? "", b.name ?? "") * dir;
+      }
+      if (sortField === "created_at") {
+        const at = a.created_at ? Date.parse(a.created_at) : 0;
+        const bt = b.created_at ? Date.parse(b.created_at) : 0;
+        return (at - bt) * dir;
+      }
+      // last_job: prefer started, fall back to ended/created (matches the
+      // value rendered in the cell)
+      return (lastJobTimestamp(a) - lastJobTimestamp(b)) * dir;
+    });
+  }, [filteredHarvesters, sortField, sortOrder]);
+
   const paginatedHarvesters = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return filteredHarvesters.slice(start, start + itemsPerPage);
-  }, [filteredHarvesters, currentPage, itemsPerPage]);
+    return sortedHarvesters.slice(start, start + itemsPerPage);
+  }, [sortedHarvesters, currentPage, itemsPerPage]);
 
   if (!isOrgLoading && !orgId) {
     return (
@@ -219,23 +259,31 @@ export default function OrgHarvestersClient() {
               prevButtonAriaLabel: "Página anterior",
               nextButtonAriaLabel: "Próxima página",
               onPageChange: (page: number) => setCurrentPage(page + 1),
-              onItemsPerPageChange: (size: number) => {
-                setItemsPerPage(size);
-                setCurrentPage(1);
-              },
             }}
           >
             <TableHeader>
               <TableRow>
-                <TableHeaderCell sortType="date" sortOrder="none">
+                <TableHeaderCell
+                  sortType="numeric"
+                  sortOrder={getSortOrder("name")}
+                  onSortChange={handleSort("name")}
+                >
                   Nome
                 </TableHeaderCell>
                 <TableHeaderCell>Estado</TableHeaderCell>
                 <TableHeaderCell>Implementação</TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
+                <TableHeaderCell
+                  sortType="date"
+                  sortOrder={getSortOrder("created_at")}
+                  onSortChange={handleSort("created_at")}
+                >
                   Criado em
                 </TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
+                <TableHeaderCell
+                  sortType="date"
+                  sortOrder={getSortOrder("last_job")}
+                  onSortChange={handleSort("last_job")}
+                >
                   Última execução
                 </TableHeaderCell>
                 <TableHeaderCell>Conjuntos de dados</TableHeaderCell>

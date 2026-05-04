@@ -9,8 +9,6 @@ import {
   Icon,
   InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -24,6 +22,7 @@ import { fetchMyDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { Dropdown } from "@/components/Primitives/Dropdown";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],
@@ -201,13 +200,13 @@ export default function DatasetsClient() {
             setCurrentPage(1);
           }}
         >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
-          </DropdownSection>
+          <Dropdown.Section name="status">
+            <Dropdown.Option value="" selected={statusFilter === ""}>Todos</Dropdown.Option>
+            <Dropdown.Option value="public" selected={statusFilter === "public"}>Público</Dropdown.Option>
+            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>Arquivado</Dropdown.Option>
+            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>Rascunho</Dropdown.Option>
+            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>Excluído</Dropdown.Option>
+          </Dropdown.Section>
         </InputSelect>
       </div>
 

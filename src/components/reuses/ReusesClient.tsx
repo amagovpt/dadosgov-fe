@@ -395,7 +395,7 @@ export default function ReusesClient({
             </p>
           }
         >
-          <PublishDropdown darkMode={true} />
+          <PublishDropdown darkMode={true} outline={false} />
         </PageBanner>
 
         {/* Search Section */}
@@ -454,7 +454,7 @@ export default function ReusesClient({
                 }}
               >
                 {Object.entries(SORT_LABELS).map(([key, label]) => (
-                  <Toggle key={key} value={key} selected={sortDefault === key}>
+                  <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                     {label}
                   </Toggle>
                 ))}

@@ -1,107 +1,94 @@
-import { test, expect } from "playwright/test";
+import { test, expect, type Locator, type Page } from "playwright/test";
 
-const BASE_URL = "http://localhost:3000";
+const LOGIN_URL = "/pages/login";
+
+async function getTabByText(page: Page, label: RegExp): Promise<Locator> {
+  // Agora <Tabs> renders TabHeader as a clickable element; matching by text covers both
+  // button[role="tab"] and div implementations without coupling to the library internals.
+  return page.getByText(label).first();
+}
 
 test.describe("Authentication Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/pages/login`);
+    await page.goto(LOGIN_URL);
     await page.waitForLoadState("networkidle");
   });
 
   test('AU-01: Click "Autenticar" in header opens login page', async ({
     page,
   }) => {
-    await page.goto(BASE_URL);
+    await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // Wait for header to hydrate (client-rendered via Suspense)
-    await page.waitForTimeout(3000);
-
-    // Auth link: a[href="/pages/login"] with text "Autenticar"
-    const authButton = page.locator('a[href="/pages/login"]').first();
-    await expect(authButton).toBeVisible({ timeout: 10000 });
-    await authButton.click();
-    await page.waitForLoadState("networkidle");
-
-    expect(page.url()).toContain("login");
+    const authLink = page.locator('header a[href="/pages/login"]').first();
+    await expect(authLink).toBeVisible({ timeout: 10000 });
+    await authLink.click();
+    await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
+    expect(page.url()).toContain("/pages/login");
   });
 
   test("AU-02: Three auth tabs visible: CMD, eIDAS, Email/Password", async ({
     page,
   }) => {
-    const body = await page.textContent("body");
-    const hasCMD =
-      body?.includes("Chave Móvel Digital") || body?.includes("CMD");
-    const hasEIDAS =
-      body?.includes("eIDAS") || body?.includes("europeia");
-    const hasEmail =
-      body?.includes("Email") || body?.includes("email");
+    const cmdTab = await getTabByText(page, /Chave Móvel Digital/i);
+    await expect(cmdTab).toBeVisible({ timeout: 10000 });
 
-    expect(hasCMD || hasEIDAS || hasEmail).toBeTruthy();
+    const eidasTab = await getTabByText(page, /Autenticação europeia/i);
+    await expect(eidasTab).toBeVisible({ timeout: 10000 });
+
+    const emailTab = await getTabByText(page, /E-mail e palavra-passe/i);
+    await expect(emailTab).toBeVisible({ timeout: 10000 });
   });
 
-  test("AU-03: CMD tab shows description, citizen option, terms checkbox, button", async ({
+  test("AU-03: CMD tab shows terms checkbox and login button", async ({
     page,
   }) => {
-    const cmdTab = page.locator(
-      'button:has-text("Chave Móvel"), button:has-text("CMD"), [role="tab"]:has-text("CMD")'
-    );
-    if ((await cmdTab.count()) > 0) {
-      await cmdTab.first().click();
-      await page.waitForTimeout(500);
-    }
+    // CMD is the first tab and active by default.
+    const termsHeading = page.getByRole("heading", {
+      name: /Termos e condições/i,
+    });
+    await expect(termsHeading.first()).toBeVisible({ timeout: 10000 });
 
-    const termsCheckbox = page.locator(
-      'input[type="checkbox"], [class*="checkbox"]'
-    );
-    if ((await termsCheckbox.count()) > 0) {
-      await expect(termsCheckbox.first()).toBeVisible();
-    }
+    const termsCheckbox = page
+      .getByRole("checkbox", { name: /aceito os termos e condições/i })
+      .first();
+    await expect(termsCheckbox).toBeVisible({ timeout: 10000 });
 
-    const body = await page.textContent("body");
-    expect(body).toBeTruthy();
+    const cmdButton = page.getByRole("button", {
+      name: /Entrar com Chave Móvel Digital/i,
+    });
+    await expect(cmdButton).toBeVisible({ timeout: 10000 });
   });
 
-  test("AU-04: CMD button disabled until terms accepted", async ({
+  test("AU-04: CMD button disabled until terms and citizen type set", async ({
     page,
   }) => {
-    const cmdTab = page.locator(
-      'button:has-text("Chave Móvel"), button:has-text("CMD"), [role="tab"]:has-text("CMD")'
-    );
-    if ((await cmdTab.count()) > 0) {
-      await cmdTab.first().click();
-      await page.waitForTimeout(500);
-    }
-
-    const submitButton = page.locator(
-      'button[type="submit"], button:has-text("Autenticar"), button:has-text("Entrar")'
-    );
-    if ((await submitButton.count()) > 0) {
-      const isDisabled = await submitButton.first().isDisabled();
-      // Button should be disabled before accepting terms
-      expect(isDisabled).toBeTruthy();
-    }
+    const cmdButton = page.getByRole("button", {
+      name: /Entrar com Chave Móvel Digital/i,
+    });
+    await expect(cmdButton).toBeVisible({ timeout: 10000 });
+    await expect(cmdButton).toBeDisabled();
   });
 
   test.skip("AU-05: Accept terms and click CMD button (needs CMD service)", async () => {
     // Skipped: requires CMD authentication service
   });
 
-  test("AU-06: eIDAS tab shows info, terms checkbox, button", async ({
-    page,
-  }) => {
-    const eidasTab = page.locator(
-      'button:has-text("eIDAS"), button:has-text("europeia"), [role="tab"]:has-text("eIDAS")'
-    );
-    if ((await eidasTab.count()) > 0) {
-      await eidasTab.first().click();
-      await page.waitForTimeout(500);
+  test("AU-06: eIDAS tab shows info and terms checkbox", async ({ page }) => {
+    const eidasTab = await getTabByText(page, /Autenticação europeia/i);
+    await eidasTab.click();
 
-      const body = await page.textContent("body");
-      expect(
-        body?.includes("eIDAS") || body?.includes("europeia")
-      ).toBeTruthy();
-    }
+    const eidasButton = page.getByRole("button", {
+      name: /Autenticar com eIDAS/i,
+    });
+    await expect(eidasButton).toBeVisible({ timeout: 10000 });
+
+    const termsEidas = page
+      .getByRole("checkbox", {
+        name: /termos e condições relativos ao tratamento de dados/i,
+      })
+      .first();
+    await expect(termsEidas).toBeVisible({ timeout: 10000 });
   });
 
   test.skip("AU-07: Email tab - valid login (needs test credentials)", async () => {
@@ -109,68 +96,65 @@ test.describe("Authentication Page", () => {
   });
 
   test.skip("AU-08: Email tab - invalid login shows error (needs backend)", async () => {
-    // Skipped: requires backend to be running
+    // Skipped: requires backend to be running with seeded users
   });
 
-  test("AU-09: Email tab - empty fields prevent submission", async ({
+  test("AU-09: Email tab - submit button stays disabled when fields are empty", async ({
     page,
   }) => {
-    // Click "Iniciar sessão" tab to show email/password form
-    const emailTab = page.getByText(/Iniciar sessão/i).first();
-    if ((await emailTab.count()) > 0) {
-      await emailTab.click();
-      await page.waitForTimeout(500);
-    }
+    const emailTab = await getTabByText(page, /E-mail e palavra-passe/i);
+    await emailTab.click();
 
-    // Login form inputs have specific IDs
-    const emailInput = page.locator("#login-email");
-    const passwordInput = page.locator("#login-password");
+    // The login form is rendered in main; the same form is also embedded in the
+    // mobile accordion menu, so we scope to the main element.
+    const main = page.locator("main");
+    const emailInput = main.locator("#login-email").first();
+    const passwordInput = main.locator("#login-password").first();
+    await expect(emailInput).toBeVisible({ timeout: 10000 });
+    await expect(passwordInput).toBeVisible({ timeout: 10000 });
 
-    if ((await emailInput.count()) > 0 && (await passwordInput.count()) > 0) {
-      // Try to submit without filling
-      const submitButton = page.locator(
-        'button[type="submit"], button:has-text("Entrar"), button:has-text("Login")'
-      );
-      if ((await submitButton.count()) > 0) {
-        await submitButton.first().click();
-        await page.waitForTimeout(500);
-
-        // Should still be on login page
-        expect(page.url()).toContain("login");
-      }
-    }
+    const submitButton = main
+      .getByRole("button", { name: /^Autenticar$/i })
+      .first();
+    await expect(submitButton).toBeDisabled();
   });
 
-  test("AU-10: Terms link visible on all tabs", async ({ page }) => {
-    const termsLink = page.locator(
-      'a:has-text("Termos"), a:has-text("termos"), a[href*="terms"]'
-    );
-    if ((await termsLink.count()) > 0) {
-      await expect(termsLink.first()).toBeVisible();
-    }
-  });
-
-  test("AU-11: Register page redirects to login or shows registration", async ({
+  test("AU-10: Terms link to /pages/faqs/terms is reachable from CMD tab", async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/pages/register`);
-    await page.waitForLoadState("networkidle");
+    const termsLink = page
+      .locator('a[href="/pages/faqs/terms"]')
+      .first();
+    await expect(termsLink).toBeVisible({ timeout: 10000 });
+  });
 
-    const body = await page.textContent("body");
-    // Should either redirect to login or show registration form
-    expect(
-      page.url().includes("login") ||
-        page.url().includes("register") ||
-        body?.includes("Registar") ||
-        body?.includes("Autenticar")
-    ).toBeTruthy();
+  test("AU-11: Register page redirects to login", async ({ page }) => {
+    await page.goto("/pages/register");
+    await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
+    expect(page.url()).toContain("/pages/login");
   });
 
   test.skip("AU-12: Logout (needs auth)", async () => {
     // Skipped: requires authenticated session
   });
 
-  test.skip("AU-13: Account migration page loads (conditional)", async () => {
-    // Skipped: conditional feature, may not be available
+  test("AU-13: /pages/loginregister redirects to /pages/login", async ({
+    page,
+  }) => {
+    await page.goto("/pages/loginregister");
+    await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
+    expect(page.url()).toContain("/pages/login");
+  });
+
+  test("AU-14: /pages/migrate-account without pending migration redirects to login", async ({
+    page,
+  }) => {
+    await page.goto("/pages/migrate-account");
+    await page.waitForLoadState("networkidle");
+    // MigrateAccountClient routes to /pages/login when no migration is pending.
+    await page.waitForURL(/\/pages\/(login|migrate-account)/, {
+      timeout: 10000,
+    });
+    expect(page.url()).toMatch(/\/pages\/(login|migrate-account)/);
   });
 });

@@ -25,16 +25,12 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
     const [replyMessage, setReplyMessage] = useState('');
     const [isReplying, setIsReplying] = useState(false);
     const identityRef = useRef('');
+    const renderSetDropdown = user && user.organizations ? [{ value: 'user', label: `${user.first_name} ${user.last_name} (utilizador)` }, ...user.organizations.map((org) => ({ value: org.id, label: org.name }))] : [];
 
     const identityOptions = React.useMemo(() => (
         <DropdownSection name="identity">
-            <DropdownOption value="user">
-                {`${user.first_name} ${user.last_name} (utilizador)`}
-            </DropdownOption>
-            {user.organizations.map((org) => (
-                <DropdownOption key={org.id} value={org.id}>
-                    {org.name}
-                </DropdownOption>
+            {renderSetDropdown.map((option) => (
+                <DropdownOption key={option.value} value={option.value}>{option.label}</DropdownOption>
             ))}
         </DropdownSection>
     ), [user]);
@@ -125,6 +121,9 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     const [communityResources, setCommunityResources] = useState<CommunityResource[]>([]);
     const [communityCount, setCommunityCount] = useState(0);
 
+    const renderSetDropdown = user && user.organizations ? [{ value: 'user', label: `${user.first_name} ${user.last_name} (utilizador)` }, ...user.organizations.map((org) => ({ value: org.id, label: org.name }))] : [];
+
+
     const handleCreateDiscussion = async () => {
         if (!newDiscTitle.trim() || !newDiscMessage.trim()) return;
         setIsSubmitting(true);
@@ -192,7 +191,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     );
 
     return (
-        <div className="mt-64">
+        <div className="w-full">
             <Tabs>
                 <Tab>
                     <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
@@ -389,13 +388,8 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                 searchNoResultsText="Sem resultados"
                                             >
                                                 <DropdownSection name="identity">
-                                                    <DropdownOption value="user">
-                                                        {`${user.first_name} ${user.last_name} (utilizador)`}
-                                                    </DropdownOption>
-                                                    {user.organizations.map((org) => (
-                                                        <DropdownOption key={org.id} value={org.id}>
-                                                            {org.name}
-                                                        </DropdownOption>
+                                                    {renderSetDropdown.map((option) => (
+                                                        <DropdownOption key={option.value} value={option.value}>{option.label}</DropdownOption>
                                                     ))}
                                                 </DropdownSection>
                                             </IsolatedSelect>
@@ -638,7 +632,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                             <div>
                                 <div className="mb-24">
                                     <StatusCard
-                                        variant="info"
+                                        variant="informative"
                                         showIcon
                                         description="Estes recursos são publicados pela comunidade e não são da responsabilidade do produtor dos dados."
                                     />

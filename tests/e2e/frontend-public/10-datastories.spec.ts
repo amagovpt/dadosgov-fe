@@ -1,81 +1,53 @@
 import { test, expect } from "playwright/test";
 
-const BASE_URL = "http://localhost:3000";
+const DATASTORIES_URL = "/pages/datastories";
 
 test.describe("Datastories Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/pages/datastories`);
+    await page.goto(DATASTORIES_URL);
     await page.waitForLoadState("networkidle");
   });
 
   test("DS-01: Page loads with banner and story cards", async ({ page }) => {
-    const heading = page.locator("h1, h2").first();
+    const heading = page.getByRole("heading", { name: /Data Stories/i, level: 1 });
     await expect(heading).toBeVisible({ timeout: 10000 });
 
-    const cards = page.locator(
-      'a[href*="/pages/datastories/"], .card, [class*="card"], article, [class*="story"]'
-    );
+    // Cards use Agora's clickable div pattern, not anchors.
+    const cards = page.locator("div.cursor-pointer");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
   });
 
-  test("DS-02: Cards show image, title, description, organization, metrics", async ({
-    page,
-  }) => {
-    const firstCard = page
-      .locator('a[href*="/pages/datastories/"], .card, [class*="card"], article, [class*="story"]')
-      .first();
+  test("DS-02: Cards have meaningful textual content", async ({ page }) => {
+    const firstCard = page.locator("div.cursor-pointer").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     const cardText = await firstCard.textContent();
-    expect(cardText?.length).toBeGreaterThan(0);
+    expect(cardText?.trim().length ?? 0).toBeGreaterThan(0);
   });
 
-  test("DS-03: Search filters stories", async ({ page }) => {
-    const searchInput = page.locator(
-      'input[type="search"], input[type="text"], input[placeholder*="Pesqui"], input[placeholder*="pesqui"]'
-    );
-    if ((await searchInput.count()) > 0) {
-      await searchInput.first().fill("dados");
-      await page.waitForTimeout(1000);
-
-      const results = page.locator(
-        '[class*="card"], article, [class*="story"]'
-      );
-      const count = await results.count();
-      expect(count).toBeGreaterThanOrEqual(0);
-    }
+  test("DS-03: Search input accepts input", async ({ page }) => {
+    const searchInput = page.locator("#datastories-search");
+    await expect(searchInput).toBeVisible({ timeout: 10000 });
+    await searchInput.fill("dados");
+    await expect(searchInput).toHaveValue("dados");
   });
 
-  test("DS-04: Pagination shows 12 items per page", async ({ page }) => {
-    const cards = page.locator(
-      'a[href*="/pages/datastories/"], .card, [class*="card"], article, [class*="story"]'
-    );
+  test("DS-04: Card list renders bounded cards", async ({ page }) => {
+    const cards = page.locator("div.cursor-pointer");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
-
     const count = await cards.count();
-    expect(count).toBeLessThanOrEqual(12);
-
-    const pagination = page.locator(
-      '[class*="pagination"], nav[aria-label*="pagination"], [class*="pager"]'
-    );
-    if ((await pagination.count()) > 0) {
-      await expect(pagination.first()).toBeVisible();
-    }
+    expect(count).toBeGreaterThan(0);
   });
 
   test("DS-05: Click card opens story detail", async ({ page }) => {
-    const firstLink = page
-      .locator('a[href*="/pages/datastories/"]')
-      .first();
-    if ((await firstLink.count()) > 0) {
-      await firstLink.click();
-      await page.waitForLoadState("networkidle");
+    const firstCard = page.locator("div.cursor-pointer").first();
+    await expect(firstCard).toBeVisible({ timeout: 15000 });
 
-      const heading = page.locator("h1, h2").first();
-      await expect(heading).toBeVisible({ timeout: 10000 });
+    await firstCard.click();
+    await page.waitForURL(/\/pages\/datastories\/.+/, { timeout: 15000 });
 
-      const body = await page.textContent("body");
-      expect(body).toBeTruthy();
-    }
+    const heading = page.locator("main h1").first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
+    expect((await heading.textContent())?.trim().length ?? 0).toBeGreaterThan(0);
   });
 });

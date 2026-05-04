@@ -33,15 +33,14 @@ interface IsolatedSelectProps {
   hasError?: boolean;
   errorFeedbackText?: string;
   hideLabel?: boolean;
+  hideSectionNames?: boolean;
   searchable?: boolean;
   required?: boolean;
   searchInputPlaceholder?: string;
   searchNoResultsText?: string;
   onChangeCallback?: (value: string) => void;
   onSearchCallback?: (query: string) => void;
-  children:
-  | ReactElement<DropdownSectionProps>
-  | ReactElement<DropdownSectionProps>[];
+  children: ReactElement<DropdownSectionProps> | ReactElement<DropdownSectionProps>[];
 }
 
 function injectSelected(
@@ -52,7 +51,9 @@ function injectSelected(
     if (!React.isValidElement(section)) return section;
     const sectionEl = section as ReactElement<DropdownSectionProps>;
     const modifiedOptions = React.Children.map(
-      sectionEl.props.children as ReactElement<DropdownOptionProps> | ReactElement<DropdownOptionProps>[],
+      sectionEl.props.children as
+        | ReactElement<DropdownOptionProps>
+        | ReactElement<DropdownOptionProps>[],
       (option) => {
         if (!React.isValidElement(option)) return option;
         const optionEl = option as ReactElement<DropdownOptionProps>;
@@ -74,6 +75,7 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
   hasError,
   errorFeedbackText,
   hideLabel,
+  hideSectionNames,
   searchable,
   required,
   searchInputPlaceholder,
@@ -97,19 +99,16 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
     [internalValue]
   );
 
-  // Keep a stable snapshot of children that only updates when the selection changes.
-  // If we included `children` in the deps, every parent re-render (e.g. typing in a
-  // sibling input) would give InputSelect a new children reference, triggering its
-  // internal useEffect([children]) which resets the selected options to [].
-  // By depending only on `internalValue`, the reference stays the same while the user
-  // types elsewhere, so InputSelect never sees a children change and never resets.
+  // Keep a stable snapshot of children while still updating when the actual
+  // option list changes. This lets the select render new search results and
+  // created tags without losing the selected state.
   const latestChildrenRef = React.useRef(children);
   latestChildrenRef.current = children;
 
   const childrenWithSelection = React.useMemo(
     () => injectSelected(latestChildrenRef.current, selectedValues),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [internalValue]
+    [latestChildrenRef, selectedValues, children]
   );
 
   return (
@@ -122,7 +121,11 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
       searchable={searchable}
       searchInputPlaceholder={searchInputPlaceholder}
       searchNoResultsText={searchNoResultsText}
-      onSearchInputChange={onSearchCallback}
+      onSearchInputChange={
+        onSearchCallback
+          ? (q) => queueMicrotask(() => onSearchCallback(q))
+          : undefined
+      }
       onChange={(options) => {
         const value = options.map((o) => o.value as string).join(",");
         setInternalValue(value);
@@ -134,6 +137,7 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
       feedbackState="danger"
       errorFeedbackText={errorFeedbackText}
       required={required}
+      hideSectionNames={hideSectionNames}
     >
       {childrenWithSelection}
     </InputSelect>

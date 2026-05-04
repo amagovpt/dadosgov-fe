@@ -5,4 +5,3 @@ export default function Button(args: ButtonProps) {
     return (
         <ButtonADS {...args} />
     )
-}

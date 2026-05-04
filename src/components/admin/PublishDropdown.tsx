@@ -7,9 +7,10 @@ import { useAuth } from "@/context/AuthContext";
 
 interface PublishDropdownProps {
   darkMode?: boolean;
+  outline?: boolean;
 }
 
-export default function PublishDropdown({ darkMode = false }: PublishDropdownProps) {
+export default function PublishDropdown({ darkMode = false, outline = true }: PublishDropdownProps) {
   const router = useRouter();
   const { hasOrganization } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -27,7 +28,12 @@ export default function PublishDropdown({ darkMode = false }: PublishDropdownPro
       label: "Uma reutilização",
       href: "/pages/admin/reuses/new",
     },
-    { icon: "agora-line-award", label: "Um harvester", href: "/pages/admin/harvesters/new" },
+    {
+      icon: null as string | null,
+      customIcon: "/Icons/harvester.svg",
+      label: "Um harvester",
+      href: "/pages/admin/harvesters/new",
+    },
     {
       icon: "agora-line-buildings",
       label: "Uma organização",
@@ -51,6 +57,7 @@ export default function PublishDropdown({ darkMode = false }: PublishDropdownPro
     <div className="relative inline-block publish-dropdown-wrapper" ref={wrapperRef}>
       <Button
         variant="primary"
+        appearance={outline ? "outline" : undefined}
         darkMode={darkMode}
         hasIcon={true}
         trailingIcon={showDropdown ? "agora-line-chevron-up" : "agora-line-chevron-down"}

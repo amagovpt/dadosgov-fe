@@ -1,183 +1,81 @@
 import { test, expect } from "playwright/test";
 
-const BASE_URL = "http://localhost:3000";
+const MINICOURSES_URL = "/pages/mini-courses";
 
 test.describe("Mini-Courses Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/pages/courses/mini-courses/`);
+    await page.goto(MINICOURSES_URL);
     await page.waitForLoadState("networkidle");
   });
 
-  test("MC-01: Page loads with purple banner, search, and course cards", async ({
+  test("MC-01: Page loads with banner, search and course cards", async ({
     page,
   }) => {
-    const heading = page.locator("h1, h2").first();
+    const heading = page.getByRole("heading", { name: /Minicursos/i, level: 1 });
     await expect(heading).toBeVisible({ timeout: 10000 });
 
-    // Course cards or links
-    const cards = page.locator(
-      'a[href*="/pages/courses/mini-courses/"], .card, [class*="card"], article, [class*="course"]'
-    );
+    const cards = page.locator("a[href^='/pages/mini-courses/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
   });
 
-  test("MC-02: Banner shows Minicursos title, Mosaico description, date, illustration", async ({
-    page,
-  }) => {
-    const body = await page.textContent("body");
-    expect(body?.toLowerCase()).toContain("minicursos");
-
-    const illustration = page.locator(
-      '[class*="banner"] img, [class*="hero"] img, [class*="banner"] svg, [class*="hero"] svg'
-    );
-    if ((await illustration.count()) > 0) {
-      await expect(illustration.first()).toBeVisible();
-    }
+  test("MC-02: Banner copy mentions Minicursos", async ({ page }) => {
+    const main = page.locator("main");
+    const text = (await main.textContent()) ?? "";
+    expect(text.toLowerCase()).toContain("minicurso");
   });
 
-  test('MC-03: Search field filters courses with counter "X de Y resultados"', async ({
+  test("MC-03: Search section is present and accepts input", async ({
     page,
   }) => {
-    const searchInput = page.locator(
-      'input[type="search"], input[type="text"], input[placeholder*="Pesqui"], input[placeholder*="pesqui"]'
-    );
-    if ((await searchInput.count()) > 0) {
-      await searchInput.first().fill("dados");
-      await page.waitForTimeout(1000);
-
-      const body = await page.textContent("body");
-      const hasCounter =
-        body?.match(/\d+\s*de\s*\d+\s*resultado/) !== null;
-      // Counter may or may not appear depending on implementation
-      expect(body).toBeTruthy();
-    }
+    const searchHeading = page.getByRole("heading", {
+      name: /Que minicurso procura/i,
+    });
+    await expect(searchHeading).toBeVisible({ timeout: 10000 });
   });
 
-  test("MC-04: Cards show title, description, and arrow", async ({
-    page,
-  }) => {
-    const firstCard = page
-      .locator('a[href*="/pages/courses/mini-courses/"], .card, [class*="card"], article, [class*="course"]')
-      .first();
+  test("MC-04: Cards expose href slugs", async ({ page }) => {
+    // Card links wrap image-only content; the surrounding article carries the
+    // textual content. Validate the href slug instead of inner text.
+    const firstCard = page.locator("a[href^='/pages/mini-courses/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
-    const cardText = await firstCard.textContent();
-    expect(cardText?.length).toBeGreaterThan(0);
+    const href = await firstCard.getAttribute("href");
+    expect(href).toMatch(/^\/pages\/mini-courses\/[a-z0-9-]+$/);
   });
 
-  test("MC-05: Click card opens course detail with overview", async ({
+  test("MC-05: Click card opens course detail", async ({ page }) => {
+    const firstLink = page.locator("a[href^='/pages/mini-courses/']").first();
+    await expect(firstLink).toBeVisible({ timeout: 15000 });
+    await firstLink.click();
+    await page.waitForURL(/\/pages\/mini-courses\/.+/, { timeout: 15000 });
+
+    const heading = page.locator("main h1").first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
+    expect((await heading.textContent())?.trim().length ?? 0).toBeGreaterThan(0);
+  });
+
+  test("MC-06: Course detail exposes objectives toggle", async ({ page }) => {
+    const firstLink = page.locator("a[href^='/pages/mini-courses/']").first();
+    await firstLink.click();
+    await page.waitForURL(/\/pages\/mini-courses\/.+/, { timeout: 15000 });
+
+    const objectivesBtn = page.getByRole("button", { name: /Ver objetivos/i });
+    await expect(objectivesBtn).toBeVisible({ timeout: 10000 });
+  });
+
+  test("MC-07: Listing shows ordering and filtering controls", async ({
     page,
   }) => {
-    const firstLink = page
-      .locator('a[href*="/pages/courses/mini-courses/"]')
-      .first();
-    if ((await firstLink.count()) > 0) {
-      await firstLink.click();
-      await page.waitForLoadState("networkidle");
-
-      const heading = page.locator("h1, h2").first();
-      await expect(heading).toBeVisible({ timeout: 10000 });
-
-      const body = await page.textContent("body");
-      expect(body).toBeTruthy();
-    }
+    const ordenar = page.getByRole("heading", { name: /^Ordenar$/i });
+    const filtrar = page.getByRole("heading", { name: /^Filtrar$/i });
+    await expect(ordenar).toBeVisible({ timeout: 10000 });
+    await expect(filtrar).toBeVisible({ timeout: 10000 });
   });
 
-  test("MC-06: Objectives section visible in course detail", async ({
-    page,
-  }) => {
-    const firstLink = page
-      .locator('a[href*="/pages/courses/mini-courses/"]')
-      .first();
-    if ((await firstLink.count()) > 0) {
-      await firstLink.click();
-      await page.waitForLoadState("networkidle");
-
-      const body = await page.textContent("body");
-      const hasObjectives =
-        body?.toLowerCase().includes("objetivo") ||
-        body?.toLowerCase().includes("objetivos") ||
-        body?.toLowerCase().includes("aprender");
-      expect(body).toBeTruthy();
-    }
-  });
-
-  test("MC-07: Navigate between steps/lessons", async ({ page }) => {
-    const firstLink = page
-      .locator('a[href*="/pages/courses/mini-courses/"]')
-      .first();
-    if ((await firstLink.count()) > 0) {
-      await firstLink.click();
-      await page.waitForLoadState("networkidle");
-
-      const stepNav = page.locator(
-        'button:has-text("Seguinte"), button:has-text("Próximo"), a:has-text("Seguinte"), a:has-text("Próximo"), [class*="step"], [class*="lesson"]'
-      );
-      if ((await stepNav.count()) > 0) {
-        await stepNav.first().click();
-        await page.waitForTimeout(500);
-      }
-    }
-  });
-
-  test("MC-08: Conclusion page accessible", async ({ page }) => {
-    const firstLink = page
-      .locator('a[href*="/pages/courses/mini-courses/"]')
-      .first();
-    if ((await firstLink.count()) > 0) {
-      await firstLink.click();
-      await page.waitForLoadState("networkidle");
-
-      const body = await page.textContent("body");
-      const hasConclusion =
-        body?.toLowerCase().includes("conclusão") ||
-        body?.toLowerCase().includes("conclusao") ||
-        body?.toLowerCase().includes("concluir");
-      expect(body).toBeTruthy();
-    }
-  });
-
-  test("MC-09: Pagination shows 4 items per page", async ({ page }) => {
-    const cards = page.locator(
-      'a[href*="/pages/courses/mini-courses/"], .card, [class*="card"], article, [class*="course"]'
-    );
+  test("MC-08: Listing renders multiple minicourses", async ({ page }) => {
+    const cards = page.locator("a[href^='/pages/mini-courses/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
-
     const count = await cards.count();
-    expect(count).toBeLessThanOrEqual(4);
-
-    const pagination = page.locator(
-      '[class*="pagination"], nav[aria-label*="pagination"], [class*="pager"]'
-    );
-    if ((await pagination.count()) > 0) {
-      await expect(pagination.first()).toBeVisible();
-    }
-  });
-
-  test('MC-10: Feedback component shows "O conteúdo da página foi útil?"', async ({
-    page,
-  }) => {
-    const feedbackSection = page.locator(
-      'text="O conteúdo da página foi útil?", [class*="feedback"]'
-    );
-    if ((await feedbackSection.count()) > 0) {
-      await expect(feedbackSection.first()).toBeVisible();
-    } else {
-      // Check in course detail page
-      const firstLink = page
-        .locator('a[href*="/pages/courses/mini-courses/"]')
-        .first();
-      if ((await firstLink.count()) > 0) {
-        await firstLink.click();
-        await page.waitForLoadState("networkidle");
-
-        const feedback = page.locator(
-          'text="O conteúdo da página foi útil?", [class*="feedback"]'
-        );
-        if ((await feedback.count()) > 0) {
-          await expect(feedback.first()).toBeVisible();
-        }
-      }
-    }
+    expect(count).toBeGreaterThan(1);
   });
 });

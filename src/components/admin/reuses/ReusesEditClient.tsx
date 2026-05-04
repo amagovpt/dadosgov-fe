@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
+  Avatar,
   Breadcrumb,
   Button,
   Icon,
@@ -49,6 +50,38 @@ import { formatDistanceToNow } from "date-fns";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
+
+const activityLabels: Record<string, string> = {
+  "created a dataset": "criou um conjunto de dados",
+  "updated a dataset": "atualizou um conjunto de dados",
+  "deleted a dataset": "eliminou um conjunto de dados",
+  "added a resource to a dataset": "adicionou um recurso a um conjunto de dados",
+  "updated a resource": "atualizou um recurso",
+  "removed a resource from a dataset": "removeu um recurso de um conjunto de dados",
+  "created a dataservice": "criou um serviço de dados",
+  "updated a dataservice": "atualizou um serviço de dados",
+  "deleted a dataservice": "eliminou um serviço de dados",
+  "created a topic": "criou um tema",
+  "updated a topic": "atualizou um tema",
+  "added an element to a topic": "adicionou um elemento a um tema",
+  "updated an element in a topic": "atualizou um elemento num tema",
+  "removed an element from a topic": "removeu um elemento de um tema",
+  "created an organization": "criou uma organização",
+  "updated an organization": "atualizou uma organização",
+  "followed a user": "seguiu um utilizador",
+  "discussed a dataservice": "comentou um serviço de dados",
+  "discussed a dataset": "comentou um conjunto de dados",
+  "discussed a reuse": "comentou uma reutilização",
+  "followed a dataservice": "seguiu um serviço de dados",
+  "followed a dataset": "seguiu um conjunto de dados",
+  "followed a reuse": "seguiu uma reutilização",
+  "followed an organization": "seguiu uma organização",
+  "created a reuse": "criou uma reutilização",
+  "updated a reuse": "atualizou uma reutilização",
+  "deleted a reuse": "eliminou uma reutilização",
+};
+
+const translateActivityLabel = (label: string) => activityLabels[label] ?? label;
 
 function TransferReusePopupContent({
   reuseTitle,
@@ -193,10 +226,8 @@ export default function ReusesEditClient() {
 
   // Activities tab state
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [isLoadingActivities, setIsLoadingActivities] = useState(true);
-  const [activityPage, setActivityPage] = useState(1);
-  const [activityTotal, setActivityTotal] = useState(0);
-  const activityPageSize = 20;
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
+  const [activitiesLoaded, setActivitiesLoaded] = useState(false);
 
   // Datasets tab state
   const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
@@ -311,18 +342,26 @@ export default function ReusesEditClient() {
   const keywordOptions = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
+    // Selected tags stay visible regardless of query so the InputSelect keeps
+    // tracking them across searches; otherwise typing a new query would drop
+    // them from the children and the next onChange would lose those selections.
+    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
     const seen = new Set<string>();
     const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
+      if (selectedLowerSet.has(key)) return true;
+      if (trimmedLower && !key.includes(trimmedLower)) return false;
       return true;
     });
-    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
     const selectedNotInSuggestions = selectedKeywords.filter(
       (keyword) => !seen.has(keyword.toLowerCase()),
     );
-    const showCreate = trimmed.length > 0 && !seen.has(trimmedLower);
+    const showCreate =
+      trimmed.length > 0 &&
+      ![...tagSuggestions, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
+      !selectedLowerSet.has(trimmedLower);
     const options = [
       ...(showCreate
         ? [
@@ -371,22 +410,17 @@ export default function ReusesEditClient() {
     loadAssociatedDatasets();
   }, [reuse]);
 
-  useEffect(() => {
-    if (!reuseId) return;
-    async function loadActivities() {
-      setIsLoadingActivities(true);
-      try {
-        const response = await fetchActivity(reuseId!, activityPage, activityPageSize);
-        setActivities(response.data || []);
-        setActivityTotal(response.total || 0);
-      } catch (error) {
-        console.error("Error loading activities:", error);
-      } finally {
-        setIsLoadingActivities(false);
-      }
-    }
-    loadActivities();
-  }, [reuseId, activityPage]);
+  const loadActivities = () => {
+    if (activitiesLoaded || !reuseId) return;
+    setActivitiesLoading(true);
+    fetchActivity(reuseId)
+      .then((res) => {
+        setActivities(res.data);
+        setActivitiesLoaded(true);
+      })
+      .catch((err) => console.error("Error loading activities:", err))
+      .finally(() => setActivitiesLoading(false));
+  };
 
   const loadDiscussions = () => {
     if (discussionsLoaded || !reuseId) return;
@@ -398,18 +432,6 @@ export default function ReusesEditClient() {
       })
       .catch((err) => console.error("Error loading discussions:", err))
       .finally(() => setDiscussionsLoading(false));
-  };
-
-  const totalActivityPages = Math.ceil(activityTotal / activityPageSize);
-
-  const groupActivitiesByMonth = (acts: Activity[]) => {
-    const groups: Record<string, Activity[]> = {};
-    acts.forEach((act) => {
-      const key = format(new Date(act.created_at), "MMMM 'de' yyyy", { locale: pt });
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(act);
-    });
-    return groups;
   };
 
   const clearError = (field: string) => {
@@ -643,6 +665,7 @@ export default function ReusesEditClient() {
           setApiError(null);
           setApiSuccess(null);
           if (index === 3) loadDiscussions();
+          if (index === 4) loadActivities();
         }}
       >
         {/* Metadata Tab */}
@@ -880,7 +903,7 @@ export default function ReusesEditClient() {
                           />
                         </div>
                       )}
-                      <div className="mt-2">
+                      <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                         <DragAndDropUploader
                           label="Ficheiros"
                           dragAndDropLabel="Arraste e largue o ficheiro aqui"
@@ -1643,92 +1666,61 @@ export default function ReusesEditClient() {
           <TabHeader>Atividades</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              {isLoadingActivities ? (
-                <p className="text-neutral-900 text-base">A carregar atividades...</p>
-              ) : activities.length === 0 ? (
+              {activitiesLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
+              {activitiesLoaded && activities.length === 0 && (
                 <CardNoResults
                   position="center"
                   icon={
-                    <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
+                    <Icon name="agora-line-time" className="w-12 h-12 text-primary-500 icon-xl" />
                   }
                   title="Sem atividades"
-                  description="Nenhuma atividade registada nesta reutilização."
+                  description="Ainda não existem atividades registadas nesta reutilização."
                   hasAnchor={false}
                 />
-              ) : (
-                <div className="space-y-32">
-                  {Object.entries(groupActivitiesByMonth(activities)).map(([month, acts]) => (
-                    <div key={month}>
-                      <h3 className="text-neutral-900 text-sm font-medium mb-16">{month}</h3>
-                      <div className="relative border-l-2 border-neutral-200 ml-4">
-                        {acts.map((act, idx) => (
-                          <div key={idx} className="flex items-start gap-16 pb-16 ml-16 relative">
-                            <div className="absolute -left-[25px] top-1 w-8 h-8 rounded-full bg-neutral-300" />
-                            <div className="flex-1 flex items-start justify-between">
-                              <div>
-                                <span className="text-sm">
-                                  <Icon
-                                    name="agora-line-user"
-                                    className="w-4 h-4 inline text-primary-600 mr-4"
-                                  />
-                                  <span className="text-primary-600 font-medium">
-                                    {act.actor.first_name} {act.actor.last_name}
-                                  </span>
-                                  {" ► "}
-                                  <span className="text-neutral-900">{act.label}</span>
-                                </span>
-                                {act.related_to_url && (
-                                  <div>
-                                    <a
-                                      href={act.related_to_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-primary-600 text-sm underline"
-                                    >
-                                      {act.related_to}
-                                      <Icon
-                                        name="agora-line-external-link"
-                                        className="w-3 h-3 inline ml-4"
-                                      />
-                                    </a>
-                                  </div>
-                                )}
-                              </div>
-                              <span className="text-neutral-900 text-sm whitespace-nowrap ml-16">
-                                {format(new Date(act.created_at), "d 'de' MMMM 'de' yyyy", {
-                                  locale: pt,
-                                })}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+              )}
+              {activitiesLoaded && activities.length > 0 && (
+                <>
+                  <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+                    {activities.length} ATIVIDADES
+                  </h2>
+                  <div className="flex flex-col gap-[12px]">
+                    {activities.map((activity, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-[12px] p-[12px] bg-neutral-50 rounded-lg"
+                      >
+                        <Avatar
+                          avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
+                          srcPath={
+                            (activity.actor?.avatar_thumbnail ||
+                              `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
+                          }
+                          alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
+                        />
+                        <div>
+                          <p className="text-sm text-neutral-900">
+                            <a
+                              href={`/pages/admin/users/${activity.actor?.id}`}
+                              className="text-primary-600 underline"
+                            >
+                              {activity.actor?.first_name} {activity.actor?.last_name}
+                            </a>{" "}
+                            {translateActivityLabel(activity.label)}
+                          </p>
+                          <p className="text-xs text-neutral-600 mt-[4px]">
+                            {new Date(activity.created_at).toLocaleDateString("pt-PT", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                  {totalActivityPages > 1 && (
-                    <div className="flex items-center justify-center gap-8 mt-32">
-                      <Button
-                        variant="primary"
-                        appearance="outline"
-                        onClick={() => setActivityPage((p) => Math.max(1, p - 1))}
-                        disabled={activityPage === 1}
-                      >
-                        Anterior
-                      </Button>
-                      <span className="text-neutral-900 text-sm">
-                        Página {activityPage} de {totalActivityPages}
-                      </span>
-                      <Button
-                        variant="primary"
-                        appearance="outline"
-                        onClick={() => setActivityPage((p) => Math.min(totalActivityPages, p + 1))}
-                        disabled={activityPage === totalActivityPages}
-                      >
-                        Seguinte
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </TabBody>

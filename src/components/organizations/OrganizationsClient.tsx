@@ -148,7 +148,7 @@ export default function OrganizationsClient({
             </p>
           }
         >
-          <PublishDropdown darkMode={true} />
+          <PublishDropdown darkMode={true} outline={false} />
         </PageBanner>
 
         {/* Search Section */}
@@ -208,7 +208,7 @@ export default function OrganizationsClient({
                 }}
               >
                 {Object.entries(SORT_LABELS).map(([key, label]) => (
-                  <Toggle key={key} value={key} selected={currentSortKey === key}>
+                  <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                     {label}
                   </Toggle>
                 ))}

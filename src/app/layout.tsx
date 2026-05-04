@@ -39,15 +39,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt">
+    <html lang="pt" data-scroll-behavior="smooth">
       <body className={`${notoSans.variable} antialiased font-sans`}>
         <AuthProvider>
           <ApolloWrapper>
             <PopupProviderWrapper>
               <ScrollTop />
-              <div className="min-h-screen w-full mx-auto flex flex-col">
+              <div className="min-h-screen w-full flex flex-col">
                 <HeaderWrapper />
-                <div className="grow">{children}</div>
+                <div className="">
+                  {children}
+                </div>
                 <Footer />
               </div>
             </PopupProviderWrapper>

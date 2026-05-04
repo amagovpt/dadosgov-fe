@@ -1,216 +1,130 @@
 import { test, expect } from "playwright/test";
-import { loginAsAdmin, loginAsEditor } from "../../helpers/auth";
 
+/**
+ * Backoffice — Navigation and UI smoke tests.
+ *
+ * Auth via auth-setup storage state. The admin layout exposes a sidebar
+ * grouped by "Meu perfil" (personal), "Sistema" (admin-only), and
+ * "Administração" (anchors).
+ */
 test.describe("Backoffice - Navigation and UI", () => {
-  test.describe("Sidebar Navigation", () => {
-    test("UI-01: Sidebar shows correct sections per user type", async ({
-      page,
-    }) => {
-      // Test as admin
-      await loginAsAdmin(page);
-      await page.goto("/pages/admin/");
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
 
-      // Sidebar links: "Conjunto de dados", "Reutilizações", "Recursos comunitários", "Perfil", "Estatísticas"
-      const datasetsLink = page.getByText("Conjunto de dados").first();
-      await expect(datasetsLink).toBeVisible({ timeout: 5000 }).catch(() => {});
+  test("UI-01: Admin sidebar exposes core navigation labels", async ({
+    page,
+  }) => {
+    // Use a concrete admin page rather than /admin/ — the index occasionally
+    // redirects late and the sidebar isn't fully hydrated when /admin/ idles.
+    await page.goto("/pages/admin/me/datasets");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(3000);
 
-      const reusesLink = page.getByText("Reutilizações").first();
-      await expect(reusesLink).toBeVisible({ timeout: 5000 }).catch(() => {});
-
-      const communityLink = page.getByText("Recursos comunitários").first();
-      await expect(communityLink).toBeVisible({ timeout: 5000 }).catch(() => {});
-
-      const profileLink = page.getByText("Perfil").first();
-      await expect(profileLink).toBeVisible({ timeout: 5000 }).catch(() => {});
-
-      const statsLink = page.getByText("Estatísticas").first();
-      await expect(statsLink).toBeVisible({ timeout: 5000 }).catch(() => {});
-
-      // Test as editor
-      await loginAsEditor(page);
-      await page.goto("/pages/admin/");
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
-
-      // Editor should see personal section too
-      const editorDatasetsLink = page.getByText("Conjunto de dados").first();
-      await expect(editorDatasetsLink).toBeVisible({ timeout: 5000 }).catch(() => {});
-    });
+    const required = [
+      "Reutilizações",
+      "Recursos comunitários",
+      "Estatísticas",
+      "Sistema",
+      "Administração",
+    ];
+    for (const label of required) {
+      const el = page.getByText(label, { exact: true }).first();
+      await expect(el).toBeAttached({ timeout: 10000 });
+    }
   });
 
-  test.describe("Header", () => {
-    test.beforeEach(async ({ page }) => {
-      await loginAsAdmin(page);
-    });
+  test("UI-02: Admin sees the system navigation block", async ({ page }) => {
+    await page.goto("/pages/admin/system/users");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(3000);
 
-    test("UI-02: Header shows user name and active org", async ({ page }) => {
-      await page.goto("/pages/admin/");
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
-
-      // Header rendered
-      const header = page.locator("header").first();
-      await expect(header).toBeVisible({ timeout: 10000 });
-    });
+    const systemLabels = ["Utilizadores", "Harvesters", "Artigos", "Editorial"];
+    for (const label of systemLabels) {
+      const el = page.getByText(label, { exact: true }).first();
+      await expect(el).toBeAttached({ timeout: 10000 });
+    }
   });
 
-  test.describe("Quick Publish Menu", () => {
-    test.beforeEach(async ({ page }) => {
-      await loginAsAdmin(page);
-    });
+  test("UI-03: Header logout link is present in the user dropdown", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
 
-    test("UI-03: Quick publish menu offers dataset, reuse, harvester, org", async ({
-      page,
-    }) => {
-      await page.goto("/pages/admin/me/datasets/");
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
-
-      // BTN "Publicar dados.gov.pt"
-      const publishBtn = page.getByText("Publicar dados.gov.pt").first();
-      if (await publishBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await publishBtn.click();
-        await page.waitForTimeout(500);
-
-        // Check dropdown items
-        const datasetOption = page.getByText("Um conjunto de dados").first();
-        await expect(datasetOption).toBeVisible({ timeout: 3000 }).catch(() => {});
-
-        const reuseOption = page.getByText("Uma reutilização").first();
-        await expect(reuseOption).toBeVisible({ timeout: 3000 }).catch(() => {});
-
-        const harvesterOption = page.getByText("Um harvester").first();
-        await expect(harvesterOption).toBeVisible({ timeout: 3000 }).catch(() => {});
-
-        const orgOption = page.getByText("Uma organização").first();
-        await expect(orgOption).toBeVisible({ timeout: 3000 }).catch(() => {});
-      }
-    });
+    const logoutLink = page.getByText(/^Sair$/i).first();
+    await expect(logoutLink).toBeAttached({ timeout: 10000 });
   });
 
-  test.describe("Listings Functionality", () => {
-    test.beforeEach(async ({ page }) => {
-      await loginAsAdmin(page);
-    });
+  test("UI-04: Quick publish menu offers dataset, reuse, harvester, organisation", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/me/datasets/");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
 
-    test("UI-04: Pagination works in all listings", async ({ page }) => {
-      const listingPages = [
-        "/pages/admin/me/datasets/",
-        "/pages/admin/me/reuses/",
-        "/pages/admin/system/datasets/",
-        "/pages/admin/system/organizations/",
-      ];
-      for (const listingPage of listingPages) {
-        await page.goto(listingPage);
-        await page.waitForLoadState("networkidle");
-        await page.waitForTimeout(2000);
+    const publishBtn = page.getByText("Publicar dados.gov.pt").first();
+    await expect(publishBtn).toBeVisible({ timeout: 10000 });
+    await publishBtn.click();
+    await page.waitForTimeout(500);
 
-        // Pagination - "Linhas por página 5"
-        const paginationText = page.getByText(/Linhas por página/i).first();
-        if (await paginationText.isVisible({ timeout: 3000 }).catch(() => false)) {
-          // Pagination exists on this page
-        }
-      }
-    });
-
-    test("UI-05: Search works in system listings", async ({ page }) => {
-      const systemPages = [
-        "/pages/admin/system/datasets/",
-        "/pages/admin/system/reuses/",
-        "/pages/admin/system/organizations/",
-        "/pages/admin/system/users/",
-      ];
-      for (const systemPage of systemPages) {
-        await page.goto(systemPage);
-        await page.waitForLoadState("networkidle");
-        await page.waitForTimeout(2000);
-
-        // InputSearchBar with placeholder containing "Pesquis"
-        const searchInput = page.getByPlaceholder(/Pesquis/i).first();
-        if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-          await searchInput.fill("test");
-          await page.waitForTimeout(1000);
-          await searchInput.clear();
-        }
-      }
-    });
-
-    test("UI-06: Sort by column headers (title, date)", async ({
-      page,
-    }) => {
-      await page.goto("/pages/admin/system/datasets/");
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
-
-      // Sort buttons: "Título do conjunto de dados", "Criado em", "Modificado em"
-      const titleHeader = page.getByText("Título do conjunto de dados").first();
-      if (await titleHeader.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await titleHeader.click();
-        await page.waitForTimeout(1000);
-        // Click again for reverse sort
-        await titleHeader.click();
-        await page.waitForTimeout(1000);
-      }
-
-      const dateHeader = page.getByText("Criado em").first();
-      if (await dateHeader.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await dateHeader.click();
-        await page.waitForTimeout(1000);
-      }
-
-      const modifiedHeader = page.getByText("Modificado em").first();
-      if (await modifiedHeader.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await modifiedHeader.click();
-        await page.waitForTimeout(1000);
-      }
-    });
+    for (const label of [
+      /Um conjunto de dados/i,
+      /Uma reutilização/i,
+      /Um harvester/i,
+      /Uma organização/i,
+    ]) {
+      const opt = page.getByText(label).first();
+      await expect(opt).toBeVisible({ timeout: 10000 });
+    }
   });
 
-  test.describe("Statistics and Discussions", () => {
-    test.beforeEach(async ({ page }) => {
-      await loginAsAdmin(page);
-    });
-
-    test("UI-07: Statistics pages load (personal, org)", async ({
-      page,
-    }) => {
-      // Personal stats - H1="Estatísticas"
-      await page.goto("/pages/admin/statistics/");
+  test("UI-05: System listings expose a search affordance", async ({
+    page,
+  }) => {
+    const systemPages = [
+      "/pages/admin/system/datasets/",
+      "/pages/admin/system/reuses/",
+      "/pages/admin/system/organizations/",
+      "/pages/admin/system/users/",
+    ];
+    for (const route of systemPages) {
+      await page.goto(route);
       await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
-      const personalHeading = page.getByRole("heading", { name: "Estatísticas" }).first();
-      await expect(personalHeading).toBeVisible({ timeout: 10000 }).catch(() => {});
+      await page.waitForTimeout(1500);
 
-      // Org stats - H1="Estatísticas da organização"
-      await page.goto("/pages/admin/org/statistics/");
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
-      const orgHeading = page.getByRole("heading", { name: /Estatísticas da organização/i }).first();
-      await expect(orgHeading).toBeVisible({ timeout: 10000 }).catch(() => {});
-    });
-
-    test("UI-08: Organization discussions section", async ({ page }) => {
-      await page.goto("/pages/admin/org/discussions/");
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
-
-      // H1 "Discussões"
-      const heading = page.getByRole("heading", { name: /Discussões/i }).first();
-      await expect(heading).toBeVisible({ timeout: 10000 });
-
-      // Check for discussion items if they exist
-      const discussionLink = page.locator('a[href*="/discussions/"]').first();
-      if (await discussionLink.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await discussionLink.click();
-        await page.waitForLoadState("networkidle");
-        await page.waitForTimeout(2000);
-
-        // Verify discussion detail page loaded
-        const detailContent = await page.locator("main").first().textContent().catch(() => "");
-        expect((detailContent || "").length).toBeGreaterThan(50);
-      }
-    });
+      const searchInput = page.getByPlaceholder(/Pesquis/i).first();
+      if ((await searchInput.count()) === 0) continue;
+      await searchInput.fill("zzz_test_input");
+      await expect(searchInput).toHaveValue("zzz_test_input");
+      await searchInput.fill("");
+    }
   });
+
+  test("UI-06: Personal statistics page renders with Estatísticas heading", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/me/statistics");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    const heading = page.getByRole("heading", { name: /^Estatísticas$/i }).first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
+  });
+
+  test("UI-07: Global statistics page renders for the admin user", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/statistics");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    const heading = page.getByRole("heading", { name: /^Estatísticas$/i }).first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
+  });
+
+  test.skip(
+    "UI-08: Sort by column headers (title, date)",
+    async () => {
+      // Tied to deterministic dataset listing — re-enable with seeded fixture.
+    }
+  );
 });
