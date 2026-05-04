@@ -3,17 +3,11 @@ import Section from "../Section";
 import { InfoBlock } from "../InfoBlock";
 import { Anchor } from "@ama-pt/agora-design-system";
 import { twMerge } from "tailwind-merge";
+import { DatastorySource } from "@/types/datastories/datastory";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-export type DataSourcesSectionProps = {
+export type DataSourcesSectionProps = DatastorySource & {
   className?: string;
-  title: string;
-  description?: string;
-  dataSources: [
-    {
-      children: string;
-      href: string;
-    },
-  ];
 };
 
 // eslint-disable-next-line max-len
@@ -21,10 +15,12 @@ export default function DataSourcesSection({
   className,
   title,
   description,
-  dataSources,
+  sources,
 }: DataSourcesSectionProps) {
   return (
-    <Section className={twMerge("flex items-center justify-center relative overflow-hidden", className)}>
+    <Section
+      className={twMerge("flex items-center justify-center relative overflow-hidden", className)}
+    >
       <div className="z-10 container py-96 overflow-hidden">
         <InfoBlock.Root>
           <InfoBlock.Content className="grid grid-cols-1 xl:grid-sols-2 gap-64 ">
@@ -36,12 +32,15 @@ export default function DataSourcesSection({
                   className="text-xl-bold text-primary-900"
                 />
                 <InfoBlock.Content className="flex">
-                  <InfoBlock.Description className="text-m-regular" description={description} />
+                  <InfoBlock.Description
+                    className="text-m-regular"
+                    description={formatHtmlParagraphs(description) as string[]}
+                  />
                 </InfoBlock.Content>
               </InfoBlock.Header>
               <InfoBlock.Content>
                 <div className="flex flex-col gap-16">
-                  {dataSources.map((source, index) => (
+                  {sources.map((source, index) => (
                     <Anchor
                       href={source.href}
                       className="!justify-start !text-nowrap"

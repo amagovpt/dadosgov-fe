@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   CardLinks,
   InputSearch,
@@ -10,158 +10,113 @@ import {
   Icon,
   CardNoResults,
   Toggle,
-  ToggleGroup,
+  //ToggleGroup,
   Pill,
   Sidebar,
   SidebarItem,
   Checkbox,
-} from '@ama-pt/agora-design-system';
-import { Pagination } from '@/components/Pagination';
-import PageBanner from '@/components/PageBanner';
-import { suggestTags } from '@/services/api';
-import { formatDistanceToNow } from 'date-fns';
-import { pt } from 'date-fns/locale';
+} from "@ama-pt/agora-design-system";
+import { Pagination } from "@/components/Pagination";
+import PageBanner from "@/components/PageBanner";
+import { suggestTags } from "@/services/api";
+import { formatDistanceToNow } from "date-fns";
+import { pt } from "date-fns/locale";
+import { Datastories } from "@/types/datastories/datastories";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-const SORT_OPTIONS: Record<string, string> = {
-  recentes: '',
-  visualizados: '-views',
+/*const SORT_OPTIONS: Record<string, string> = {
+  recentes: "",
+  visualizados: "-views",
 };
 
 const SORT_LABELS: Record<string, string> = {
-  recentes: 'Mais recentes',
-  visualizados: 'Mais visualizados',
-};
-
-const ALL_DATA_STORIES = [
-  {
-    id: '1',
-    slug: 'servicos-publicos/o-canal-presencial',
-    title: 'Serviços Públicos: o canal presencial',
-    description:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    organization: { name: 'Serviços Públicos' },
-    tema: 'servicos_publicos',
-    image: '/laptop.png',
-    created_at: '2024-01-15T12:00:00Z',
-    metrics: { views: 3200, followers: 25 },
-    datasets: [1, 2, 3],
-    tags: ['serviços', 'presencial', 'atendimento'],
-  },
-  {
-    id: '2',
-    slug: 'territorios-inteligentes/pressao-turistica-em-portugal',
-    title: 'Territórios Inteligentes: Pressão turística em Portugal',
-    description:
-      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    organization: { name: 'Territórios Inteligentes' },
-    tema: 'territorios_inteligentes',
-    image: '/laptop.png',
-    created_at: '2024-06-20T12:00:00Z',
-    metrics: { views: 450, followers: 5 },
-    datasets: [1, 2],
-    tags: ['turismo', 'pressão turística', 'territórios'],
-  },
-  {
-    id: '3',
-    slug: 'territorios-inteligentes/esperanca-de-vida-em-portugal',
-    title: 'Territórios Inteligentes: Esperança de vida em Portugal',
-    description:
-      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    organization: { name: 'Territórios Inteligentes' },
-    tema: 'territorios_inteligentes',
-    image: '/laptop.png',
-    created_at: '2024-11-05T12:00:00Z',
-    metrics: { views: 1800, followers: 14 },
-    datasets: [1, 2],
-    tags: ['esperança de vida', 'saúde', 'territórios'],
-  },
-  {
-    id: '4',
-    slug: 'territorios-inteligentes/densidade-vs-consumo',
-    title: 'Territórios Inteligentes: A densidade populacional influencia o consumo doméstico de energia elétrica?',
-    description:
-      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    organization: { name: 'Territórios Inteligentes' },
-    tema: 'territorios_inteligentes',
-    image: '/laptop.png',
-    created_at: '2025-02-10T12:00:00Z',
-    metrics: { views: 720, followers: 9 },
-    datasets: [1, 2],
-    tags: ['energia', 'densidade populacional', 'consumo'],
-  },
-];
+  recentes: "Mais recentes",
+  visualizados: "Mais visualizados",
+};*/
 
 const now = new Date();
 const daysAgo = (dateStr: string, days: number) =>
   (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24) <= days;
 
-const atualizacaoOptions = [
-  {
-    id: 'all',
-    label: 'Todos',
-    count: String(ALL_DATA_STORIES.length),
-  },
-  {
-    id: '30_days',
-    label: 'Os últimos 30 dias',
-    count: String(ALL_DATA_STORIES.filter(s => daysAgo(s.created_at, 30)).length),
-  },
-  {
-    id: '12_months',
-    label: 'Os últimos 12 meses',
-    count: String(ALL_DATA_STORIES.filter(s => daysAgo(s.created_at, 365)).length),
-  },
-  {
-    id: '3_years',
-    label: 'Os últimos 3 anos',
-    count: String(ALL_DATA_STORIES.filter(s => daysAgo(s.created_at, 365 * 3)).length),
-  },
-];
-
-const TOGGLE_FILTERS = {
-  temas: {
-    title: 'Temas',
-    options: ALL_DATA_STORIES.reduce((acc, story) => {
-      if (!acc.some((option) => option.id === story.tema)) {
-        acc.push({
-          id: story.tema,
-          label: story.organization.name,
-          count: String(ALL_DATA_STORIES.filter((s) => s.tema === story.tema).length),
-        });
-      }
-      return acc;
-    }, [] as { id: string; label: string; count: string }[]),
-  },
-  atualizacao: {
-    title: 'Data da atualização',
-    options: atualizacaoOptions,
-  },
-};
-
-type FilterKey = keyof typeof TOGGLE_FILTERS;
-
 interface DataStoriesClientProps {
   currentPage: number;
   initialFilters?: { q?: string; sort?: string };
+  datastories: Datastories;
 }
 
-export default function DataStoriesClient({ currentPage, initialFilters }: DataStoriesClientProps) {
+export default function DataStoriesClient({
+  currentPage,
+  initialFilters,
+  datastories,
+}: DataStoriesClientProps) {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || '');
+
+  const stories = Array.isArray(datastories) ? datastories : [];
+
+  const atualizacaoOptions = [
+    {
+      id: "all",
+      label: "Todos",
+      count: String(stories.length),
+    },
+    {
+      id: "30_days",
+      label: "Os últimos 30 dias",
+      count: String(stories.filter((s) => daysAgo(s.createdAt, 30)).length),
+    },
+    {
+      id: "12_months",
+      label: "Os últimos 12 meses",
+      count: String(stories.filter((s) => daysAgo(s.createdAt, 365)).length),
+    },
+    {
+      id: "3_years",
+      label: "Os últimos 3 anos",
+      count: String(stories.filter((s) => daysAgo(s.createdAt, 365 * 3)).length),
+    },
+  ];
+
+  const TOGGLE_FILTERS = {
+    temas: {
+      title: "Temas",
+      options: stories.reduce(
+        (acc, story) => {
+          if (!acc.some((option) => option.id === story.theme)) {
+            acc.push({
+              id: story.theme,
+              label: story.organizationName,
+              count: String(stories.filter((s) => s.theme === story.theme).length),
+            });
+          }
+          return acc;
+        },
+        [] as { id: string; label: string; count: string }[]
+      ),
+    },
+    atualizacao: {
+      title: "Data da atualização",
+      options: atualizacaoOptions,
+    },
+  };
+
+  type FilterKey = keyof typeof TOGGLE_FILTERS;
+
+  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || "");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const currentQuery = initialFilters?.q || '';
+  const currentQuery = initialFilters?.q || "";
+
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<FilterKey, string>>({
-    temas: 'all',
-    atualizacao: 'all',
+    temas: "all",
+    atualizacao: "all",
   });
-  const [currentSortKey, setCurrentSortKey] = useState('recentes');
+  //const [currentSortKey, setCurrentSortKey] = useState("recentes");
 
   const handleToggleFilterChange = (filterKey: FilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({
       ...prev,
-      [filterKey]: prev[filterKey] === optionId ? 'all' : optionId,
+      [filterKey]: prev[filterKey] === optionId ? "all" : optionId,
     }));
   };
 
@@ -184,7 +139,7 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
   }, []);
 
   const handleAdvancedFilterChange = (paramName: string, value: string) => {
-    if (paramName === 'tag') {
+    if (paramName === "tag") {
       setSelectedTags((prev) =>
         prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
       );
@@ -192,18 +147,18 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
   };
 
   const handleClearAdvancedFilter = (paramName: string) => {
-    if (paramName === 'tag') {
+    if (paramName === "tag") {
       setSelectedTags([]);
     }
   };
 
   const handleFilterSearchChange = (groupName: string, value: string) => {
     setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-    if (groupName === 'Palavras-chave') handleTagSearch(value);
+    if (groupName === "Palavras-chave") handleTagSearch(value);
   };
 
   const getActiveValues = (paramName: string) => {
-    if (paramName === 'tag') return selectedTags;
+    if (paramName === "tag") return selectedTags;
     return [];
   };
 
@@ -214,16 +169,16 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
     searchable: boolean;
     suggest?: boolean;
   }[] = [
-      {
-        name: 'Palavras-chave',
-        param: 'tag',
-        data: filterTagOptions,
-        searchable: true,
-        suggest: true,
-      },
-    ];
+    {
+      name: "Palavras-chave",
+      param: "tag",
+      data: filterTagOptions,
+      searchable: true,
+      suggest: true,
+    },
+  ];
 
-  const filteredStories = ALL_DATA_STORIES.filter((story) => {
+  const filteredStories = stories.filter((story) => {
     const q = searchQuery.toLowerCase();
     if (
       q &&
@@ -234,42 +189,33 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
     }
 
     // Toggle filter: temas
-    if (selectedToggleFilters.temas !== 'all' && story.tema !== selectedToggleFilters.temas) {
+    if (selectedToggleFilters.temas !== "all" && story.theme !== selectedToggleFilters.temas) {
       return false;
     }
 
     // Advanced filter: tags (local state)
-    if (selectedTags.length > 0 && !selectedTags.some((t) => story.tags.includes(t))) {
+    if (selectedTags.length > 0 && !selectedTags.some((t) => story.tags.tag === t)) {
       return false;
     }
 
     // Filtro de atualização
-    if (
-      selectedToggleFilters.atualizacao === '30_days' &&
-      !daysAgo(story.created_at, 30)
-    ) {
+    if (selectedToggleFilters.atualizacao === "30_days" && !daysAgo(story.createdAt, 30)) {
       return false;
     }
-    if (
-      selectedToggleFilters.atualizacao === '12_months' &&
-      !daysAgo(story.created_at, 365)
-    ) {
+    if (selectedToggleFilters.atualizacao === "12_months" && !daysAgo(story.createdAt, 365)) {
       return false;
     }
-    if (
-      selectedToggleFilters.atualizacao === '3_years' &&
-      !daysAgo(story.created_at, 365 * 3)
-    ) {
+    if (selectedToggleFilters.atualizacao === "3_years" && !daysAgo(story.createdAt, 365 * 3)) {
       return false;
     }
 
     return true;
   });
 
-  const sortValue = SORT_OPTIONS[currentSortKey] || '';
+  //const sortValue = SORT_OPTIONS[currentSortKey] || "";
   const sortedStories = [...filteredStories].sort((a, b) => {
-    if (sortValue === '-views') return (b.metrics.views || 0) - (a.metrics.views || 0);
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    //if (sortValue === "-views") return (b.metrics.views || 0) - (a.metrics.views || 0);
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   const total = sortedStories.length;
@@ -282,11 +228,11 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
       const q = overrides.q ?? initialFilters?.q;
       const page = overrides.page ?? currentPage;
 
-      if (q) params.set('q', q);
-      if (page > 1) params.set('page', String(page));
+      if (q) params.set("q", q);
+      if (page > 1) params.set("page", String(page));
 
       const qs = params.toString();
-      return `/pages/datastories${qs ? `?${qs}` : ''}`;
+      return `/pages/datastories${qs ? `?${qs}` : ""}`;
     },
     [initialFilters, currentPage]
   );
@@ -307,14 +253,14 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
     router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
   }, [router, buildUrl, searchQuery]);
 
-  const handleSortChange = useCallback((value: string) => {
+  /*const handleSortChange = useCallback((value: string) => {
     setCurrentSortKey(value);
-  }, []);
+  }, []);*/
 
-  const sortDefault = (() => {
-    const reverseMap: Record<string, string> = { '-views': 'visualizados' };
-    return reverseMap[initialFilters?.sort || ''] || 'recentes';
-  })();
+  /*const sortDefault = (() => {
+    const reverseMap: Record<string, string> = { "-views": "visualizados" };
+    return reverseMap[initialFilters?.sort || ""] || "recentes";
+  })();*/
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters datastories">
@@ -343,10 +289,10 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
               label="Pesquisar"
               placeholder="Pesquisar data stories, temas..."
               id="datastories-search"
-              defaultValue={initialFilters?.q || ''}
+              defaultValue={initialFilters?.q || ""}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === 'Enter') handleSearch();
+                if (e.key === "Enter") handleSearch();
               }}
             />
             <div className="mt-8 text-s-regular text-neutral-900">
@@ -365,27 +311,27 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                 hasIcon
                 {...(filtersOpen
                   ? {
-                    leadingIcon: 'agora-line-chevron-left',
-                    leadingIconHover: 'agora-solid-chevron-left',
-                  }
+                      leadingIcon: "agora-line-chevron-left",
+                      leadingIconHover: "agora-solid-chevron-left",
+                    }
                   : {
-                    trailingIcon: 'agora-line-chevron-right',
-                    trailingIconHover: 'agora-solid-chevron-right',
-                  })}
+                      trailingIcon: "agora-line-chevron-right",
+                      trailingIconHover: "agora-solid-chevron-right",
+                    })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
-                {filtersOpen ? 'Ocultar filtros' : 'Abrir filtros'}
+                {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
               </Button>
               <span className="text-neutral-900 text-l-regular whitespace-nowrap">
-                {total.toLocaleString('pt-PT')} Resultados
+                {total.toLocaleString("pt-PT")} Resultados
               </span>
             </div>
-            <div className="xl:col-span-7 flex items-center justify-end py-16">
+            {/*<div className="xl:col-span-7 flex items-center justify-end py-16">
               <ToggleGroup
                 multiple={false}
                 value={currentSortKey}
                 onChange={(val) => {
-                  const selected = val.length > 0 ? val[0] : 'recentes';
+                  const selected = val.length > 0 ? val[0] : "recentes";
                   if (selected !== currentSortKey) handleSortChange(selected);
                 }}
               >
@@ -395,12 +341,12 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                   </Toggle>
                 ))}
               </ToggleGroup>
-            </div>
+            </div>*/}
           </div>
           <div className="divider-neutral-200 mb-24" />
 
           <div
-            className={`grid grid-filters gap-x-[32px] ${filtersOpen ? 'md:grid-cols-3 xl:grid-cols-12' : ''}`}
+            className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
             {filtersOpen && (
@@ -434,8 +380,8 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                                 <span
                                   className={
                                     isSelected
-                                      ? 'text-primary-600 font-bold'
-                                      : 'text-neutral-900 font-bold'
+                                      ? "text-primary-600 font-bold"
+                                      : "text-neutral-900 font-bold"
                                   }
                                 >
                                   {option.label}
@@ -463,14 +409,14 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
 
                 <Sidebar variant="filter" className="font-bold">
                   {advancedFilterGroups.map((group, index) => {
-                    const sq = filterSearchQueries[group.name] || '';
+                    const sq = filterSearchQueries[group.name] || "";
                     const activeValues = getActiveValues(group.param);
                     const activeCount = activeValues.length;
 
                     const selectedItems: { id: string; name: string }[] = group.suggest
                       ? activeValues
-                        .filter((v) => !group.data.some((d) => d.id === v))
-                        .map((v) => ({ id: v, name: v }))
+                          .filter((v) => !group.data.some((d) => d.id === v))
+                          .map((v) => ({ id: v, name: v }))
                       : [];
 
                     const allData = [...selectedItems, ...group.data];
@@ -478,8 +424,8 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                     const filteredData = group.suggest
                       ? allData
                       : allData.filter((item) =>
-                        item.name.toLowerCase().includes(sq.toLowerCase())
-                      );
+                          item.name.toLowerCase().includes(sq.toLowerCase())
+                        );
 
                     const showScroll = filteredData.length > 5;
 
@@ -490,10 +436,10 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                         item={{
                           children: <span className="font-bold">{group.name}</span>,
                           hasIcon: true,
-                          collapsedIconTrailing: 'agora-line-minus-circle',
-                          collapsedIconHoverTrailing: 'agora-solid-minus-circle',
-                          expandedIconTrailing: 'agora-line-plus-circle',
-                          expandedIconHoverTrailing: 'agora-solid-plus-circle',
+                          collapsedIconTrailing: "agora-line-minus-circle",
+                          collapsedIconHoverTrailing: "agora-solid-minus-circle",
+                          expandedIconTrailing: "agora-line-plus-circle",
+                          expandedIconHoverTrailing: "agora-solid-plus-circle",
                         }}
                         hasPill={activeCount > 0}
                         pillValue={activeCount}
@@ -513,7 +459,7 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                                 label="Pesquisar"
                                 hideLabel
                                 placeholder={
-                                  group.suggest ? 'Escreva para pesquisar...' : 'Pesquisar'
+                                  group.suggest ? "Escreva para pesquisar..." : "Pesquisar"
                                 }
                                 value={sq}
                                 onChange={(e) =>
@@ -528,7 +474,7 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                             </div>
                           )}
                           <div
-                            className={`flex flex-col gap-2 ${showScroll ? 'max-h-[225px] overflow-y-auto' : ''}`}
+                            className={`flex flex-col gap-2 ${showScroll ? "max-h-[225px] overflow-y-auto" : ""}`}
                           >
                             {!group.suggest ? null : filteredData.length > 0 ? (
                               filteredData.map((item) => (
@@ -539,9 +485,7 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                                   value={item.id}
                                   name={group.param}
                                   checked={activeValues.includes(item.id)}
-                                  onChange={() =>
-                                    handleAdvancedFilterChange(group.param, item.id)
-                                  }
+                                  onChange={() => handleAdvancedFilterChange(group.param, item.id)}
                                 />
                               ))
                             ) : group.suggest && sq.length < 2 ? (
@@ -565,11 +509,11 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
                     variant="primary"
                     appearance="outline"
                     onClick={() => {
-                      setSelectedToggleFilters({ temas: 'all', atualizacao: 'all' });
-                      setSearchQuery('');
-                      setCurrentSortKey('recentes');
+                      setSelectedToggleFilters({ temas: "all", atualizacao: "all" });
+                      setSearchQuery("");
+                      //setCurrentSortKey("recentes");
                       setSelectedTags([]);
-                      router.push('/pages/datastories');
+                      router.push("/pages/datastories");
                     }}
                   >
                     Limpar filtros
@@ -579,82 +523,82 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
             )}
 
             {/* Results Area */}
-            <div className={filtersOpen ? 'xl:col-span-7' : 'col-span-full'}>
+            <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>
               <div>
                 <div
                   className="grid agora-card-links-datasets-px0 gap-32"
                   style={{
                     gridTemplateColumns: filtersOpen
-                      ? 'repeat(1, minmax(0, 1fr))'
-                      : 'repeat(2, minmax(0, 1fr))',
+                      ? "repeat(1, minmax(0, 1fr))"
+                      : "repeat(2, minmax(0, 1fr))",
                   }}
                 >
                   {pagedStories.length > 0 ? (
                     pagedStories.map((story) => {
-                      const timeAgo = story.created_at
-                        ? formatDistanceToNow(new Date(story.created_at), { locale: pt })
-                          .replace('aproximadamente ', '')
-                          .replace('quase ', '')
-                          .replace('menos de ', '')
-                          .replace('cerca de ', '')
-                        : 'Desconhecido';
+                      const timeAgo = story.createdAt
+                        ? formatDistanceToNow(new Date(story.createdAt), { locale: pt })
+                            .replace("aproximadamente ", "")
+                            .replace("quase ", "")
+                            .replace("menos de ", "")
+                            .replace("cerca de ", "")
+                        : "Desconhecido";
 
                       return (
-                        <div key={story.id} className="h-full">
+                        <div key={story.slug} className="h-full">
                           <CardLinks
                             onClick={() => router.push(`/pages/datastories/${story.slug}`)}
                             className="cursor-pointer text-neutral-900 h-full"
                             variant="transparent"
-                            image={{ src: story.image, alt: story.title }}
-                            category={story.organization.name}
+                            image={{ src: story.image?.at(0)?.url ?? "", alt: story.title }}
+                            category={story.organizationName}
                             title={<div className="underline text-xl-bold">{story.title}</div>}
                             description={
                               <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
-                                {story.description}
+                                {formatHtmlParagraphs(story.description)}
                               </p>
                             }
                             date={<span className="font-[300]">Publicado há {timeAgo}</span>}
-                            links={[
+                            /*links={[
                               {
-                                href: '#',
+                                href: "#",
                                 hasIcon: true,
-                                leadingIcon: 'agora-line-eye',
-                                leadingIconHover: 'agora-solid-eye',
-                                trailingIcon: '',
-                                trailingIconHover: '',
-                                trailingIconActive: '',
-                                children: story.metrics.views.toLocaleString('pt-PT'),
-                                title: 'Visualizações',
+                                leadingIcon: "agora-line-eye",
+                                leadingIconHover: "agora-solid-eye",
+                                trailingIcon: "",
+                                trailingIconHover: "",
+                                trailingIconActive: "",
+                                children: story.metrics.views.toLocaleString("pt-PT"),
+                                title: "Visualizações",
                                 onClick: (e: React.MouseEvent) => e.preventDefault(),
-                                className: 'text-[#034AD8]',
+                                className: "text-[#034AD8]",
                               },
                               {
-                                href: '#',
+                                href: "#",
                                 hasIcon: true,
-                                leadingIcon: 'agora-line-layers-menu',
-                                leadingIconHover: 'agora-solid-layers-menu',
-                                trailingIcon: '',
-                                trailingIconHover: '',
-                                trailingIconActive: '',
+                                leadingIcon: "agora-line-layers-menu",
+                                leadingIconHover: "agora-solid-layers-menu",
+                                trailingIcon: "",
+                                trailingIconHover: "",
+                                trailingIconActive: "",
                                 children: `${story.datasets.length} datasets`,
-                                title: 'Datasets',
+                                title: "Datasets",
                                 onClick: (e: React.MouseEvent) => e.preventDefault(),
-                                className: 'text-[#034AD8]',
+                                className: "text-[#034AD8]",
                               },
                               {
-                                href: '#',
+                                href: "#",
                                 hasIcon: true,
-                                leadingIcon: 'agora-line-star',
-                                leadingIconHover: 'agora-solid-star',
-                                trailingIcon: '',
-                                trailingIconHover: '',
-                                trailingIconActive: '',
+                                leadingIcon: "agora-line-star",
+                                leadingIconHover: "agora-solid-star",
+                                trailingIcon: "",
+                                trailingIconHover: "",
+                                trailingIconActive: "",
                                 children: story.metrics.followers,
-                                title: 'Favoritos',
+                                title: "Favoritos",
                                 onClick: (e: React.MouseEvent) => e.preventDefault(),
-                                className: 'text-[#034AD8]',
+                                className: "text-[#034AD8]",
                               },
-                            ]}
+                            ]}*/
                             mainLink={
                               <Link href={`/pages/datastories/${story.slug}`}>
                                 <span className="underline">{story.title}</span>

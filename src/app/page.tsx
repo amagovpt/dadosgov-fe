@@ -1,13 +1,30 @@
 import { fetchHomepageData } from "@/services/api";
 import HomeClient from "@/components/home/HomeClient";
+import { getDatastoryMetadata } from "@/queries/datastories/datastory";
+import { DataStoryMetadata } from "@/types/datastories/datastories";
 
 export default async function Home() {
   const data = await fetchHomepageData();
+
+  const datastory1 = await getDatastoryMetadata(
+    "territorios-inteligentes/densidade-vs-consumo",
+    "pt"
+  );
+  const datastory2 = await getDatastoryMetadata(
+    "servicos-publicos/o-canal-presencial",
+    "pt"
+  );
+  const datastory3 = await getDatastoryMetadata(
+    "territorios-inteligentes/pressao-turistica-em-portugal",
+    "pt"
+  );
+  const datastories: DataStoryMetadata[] = [datastory1, datastory2, datastory3];
 
   return (
     <HomeClient
       siteMetrics={data.site_metrics}
       latestDatasets={data.latest_datasets}
+      datastories={datastories}
       latestReuses={data.latest_reuses}
       posts={data.latest_posts}
     />
