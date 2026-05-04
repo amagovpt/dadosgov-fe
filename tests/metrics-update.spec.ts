@@ -22,7 +22,7 @@ const PG_CONFIG = {
 
 function runUdataCommand(cmd: string): string {
   return execSync(cmd, {
-    cwd: "/home/adbrum/workspace/babel/new-dadosgov/backend",
+    cwd: "/home/adbrum/workspace/babel/dadosgov/backend",
     encoding: "utf-8",
     timeout: 120_000,
   });
