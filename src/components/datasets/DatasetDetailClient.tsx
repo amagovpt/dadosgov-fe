@@ -292,7 +292,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
         <div className="grid xl:grid-cols-12 gap-32 ">
           {/* Main Content Column */}
           <div className="xl:col-span-6 xl:block">
-            <div className="flex flex-col gap-4" ref={titleRef}>
+            <div className="flex flex-col gap-4 mb-24" ref={titleRef}>
               <h1 className="text-xl-bold text-primary-900 leading-tight">{dataset.title}</h1>
             </div>
 
