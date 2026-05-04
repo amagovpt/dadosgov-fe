@@ -24,6 +24,7 @@ ARG NEXT_PUBLIC_SAML_ENABLED=true
 ARG NEXT_PUBLIC_SENTRY_DSN=
 ARG NEXT_PUBLIC_MATOMO_HOST=
 ARG NEXT_PUBLIC_MATOMO_SITE_ID=1
+ARG NEXT_PUBLIC_API_URL=http://host.docker.internal:3333
 
 # BACKEND_URL is used by next.config.ts rewrites (server-side only)
 ARG BACKEND_URL=http://host.docker.internal:7000

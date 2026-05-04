@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Pagination } from '@/components/Pagination';
 import HeroCourses from '@/components/Courses/Hero';
 import CardIllustrative from '@/components/Primitives/Cards/CardIllustrative';
