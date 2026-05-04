@@ -4,7 +4,6 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  InputSearch,
   Icon,
   CardGeneral,
   CardLinks,
@@ -18,6 +17,7 @@ import {
 import { deleteDataset } from "@/services/api";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
+import SearchFilter from "@/components/Shared/SearchFilter";
 import { APIResponse, Dataset, DatasetFilters, SiteMetrics } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -98,12 +98,6 @@ export default function DatasetsClient({
   const [searchQuery, setSearchQuery] = React.useState(currentQuery);
   const [filtersOpen, setFiltersOpen] = React.useState(false);
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const handleSearchRef = React.useRef<() => void>(() => {});
-
-  // Sync local state when URL changes externally (e.g. header SearchDropdown navigation)
-  React.useEffect(() => {
-    setSearchQuery(initialFilters.q || "");
-  }, [initialFilters.q]);
 
   const currentSortKey =
     Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
@@ -175,8 +169,6 @@ export default function DatasetsClient({
     router.replace(buildUrl({ q: searchQuery.trim() || null }), { scroll: false });
   }, [searchQuery, router, buildUrl]);
 
-  handleSearchRef.current = handleSearch;
-
   const handleSort = React.useCallback(
     (selectedKey: string) => {
       const sortValue = SORT_OPTIONS[selectedKey] || null;
@@ -209,24 +201,14 @@ export default function DatasetsClient({
           <PublishDropdown darkMode={true} outline={false} />
         </PageBanner>
 
-        {/* Search Section */}
-        <div className="container mx-auto pt-32 pb-16 px-4">
-          <div className="max-w-[592px]">
-            <InputSearch
-              label="Pesquisar"
-              placeholder="Pesquisar por conjuntos de dados..."
-              id="datasets-search"
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter") handleSearchRef.current();
-              }}
-            />
-            <div className="mt-8 text-s-regular text-neutral-900">
-              Exemplos: &quot;educação&quot;, &quot;saúde pública&quot;, &quot;ambiente&quot;
-            </div>
-          </div>
-        </div>
+        {/* Search Filter */}
+        <SearchFilter
+          id="datasets-search"
+          placeholder="Pesquisar por conjuntos de dados..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={handleSearch}
+        />
 
         {/* Main Content */}
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
@@ -464,3 +446,4 @@ export default function DatasetsClient({
     </div>
   );
 }
+

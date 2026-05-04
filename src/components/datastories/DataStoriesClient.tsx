@@ -18,6 +18,7 @@ import {
 } from '@ama-pt/agora-design-system';
 import { Pagination } from '@/components/Pagination';
 import PageBanner from '@/components/PageBanner';
+import SearchFilter from '@/components/Shared/SearchFilter';
 import { suggestTags } from '@/services/api';
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -295,7 +296,7 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
     if (searchQuery === currentQuery) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
+      router.replace(buildUrl({ q: searchQuery.trim(), page: 1 }), { scroll: false });
     }, 200);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -304,7 +305,7 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
 
   const handleSearch = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
+    router.replace(buildUrl({ q: searchQuery.trim(), page: 1 }), { scroll: false });
   }, [router, buildUrl, searchQuery]);
 
   const handleSortChange = useCallback((value: string) => {
@@ -336,25 +337,17 @@ export default function DataStoriesClient({ currentPage, initialFilters }: DataS
           }
         />
 
-        {/* Search Section */}
-        <div className="container mx-auto pt-32 pb-16 px-4">
-          <div className="max-w-[592px]">
-            <InputSearch
-              label="Pesquisar"
-              placeholder="Pesquisar data stories, temas..."
-              id="datastories-search"
-              defaultValue={initialFilters?.q || ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === 'Enter') handleSearch();
-              }}
-            />
-            <div className="mt-8 text-s-regular text-neutral-900">
-              Exemplos: &quot;serviços públicos&quot;, &quot;turismo&quot;, &quot;territórios&quot;
-            </div>
-          </div>
-        </div>
+        {/* Search Filter */}
+        <SearchFilter
+          id="datastories-search"
+          placeholder="Pesquisar data stories, temas..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={handleSearch}
+          examplesText='Exemplos: "serviços públicos", "turismo", "territórios"'
+        />
 
+        {/* Main Content */}
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
           {/* Results count + Sort toggles */}
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">
