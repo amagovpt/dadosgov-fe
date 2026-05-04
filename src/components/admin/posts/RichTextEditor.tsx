@@ -87,7 +87,7 @@ const icons = {
   ),
 };
 
-function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> }) {
+function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
   if (!editor) return null;
 
   const btnClass = (active: boolean) =>

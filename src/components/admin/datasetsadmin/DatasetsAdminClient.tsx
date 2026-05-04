@@ -680,9 +680,9 @@ export default function DatasetsAdminClient({
       }
       if (startRaw || endRaw) {
         payload.temporal_coverage = {
-          ...(startTime !== null ? { start: new Date(startTime).toISOString() } : {}),
-          ...(endTime !== null ? { end: new Date(endTime).toISOString() } : {}),
-        };
+          ...(startRaw ? { start: startRaw } : {}),
+          ...(endRaw ? { end: endRaw } : {}),
+        } as Parameters<typeof createDataset>[0]["temporal_coverage"];
       }
       const spatialZoneIds = spatialCoverageRef.current.split(",").filter(Boolean);
       const spatialGranularity = spatialGranularityRef.current || null;

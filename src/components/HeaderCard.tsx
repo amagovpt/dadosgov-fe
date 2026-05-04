@@ -47,6 +47,7 @@ export const HeaderCard = ({
         iconDefault={iconDefault}
         iconHover={iconHover}
         titleText={title}
+        descriptionText={description}
         anchor={{
           href,
           children: "",

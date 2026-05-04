@@ -558,14 +558,6 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
   padding: 4rem;
 }
 
-.tab-panel-content::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  left: -100%;
-  right: -100%;
-  background-color: var(--color-primary-100);
-}
 
 .tab-panel-content>* {
   position: relative;

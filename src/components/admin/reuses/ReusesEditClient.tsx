@@ -1696,7 +1696,6 @@ export default function ReusesEditClient() {
                               `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
                           }
                           alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
-                          size="sm"
                         />
                         <div>
                           <p className="text-sm text-neutral-900">

@@ -1,11 +1,11 @@
-import { InfoBlock } from "@/components/datastories/Components/Shared/InfoBlock";
-import Section from "@/components/datastories/Components/Shared/Section";
+import { InfoBlock } from "@/components/Shared/InfoBlock";
+import Section from "@/components/Shared/Section";
 import { Metadata } from "next";
-import { CardCompound } from "@/components/datastories/Components/Shared/CardCompound";
-import FooterReference from "@/components/datastories/Components/Shared/FooterReference";
+import { CardCompound } from "@/components/Shared/CardCompound";
+import FooterReference from "@/components/Shared/FooterReference";
 import DataSourcesSection, {
   DataSourcesSectionProps,
-} from "@/components/datastories/Components/Shared/DataSourcesSection";
+} from "@/components/Shared/DataSourcesSection";
 
 export const metadata: Metadata = {
   title: "Data Story - dados.gov.pt",

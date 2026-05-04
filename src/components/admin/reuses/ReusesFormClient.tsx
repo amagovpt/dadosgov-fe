@@ -497,7 +497,6 @@ export default function ReusesFormClient({
   ), [reuseTypes]);
 
   const datasetOptions = useMemo(() => {
-    const seen = new Set<string>();
     const selectedIds = new Set(selectedDatasets.map((d) => d.id));
     // Show first the selected (keeps them visible even when not in results),
     // then the search results (if any), then the producer's own datasets.
@@ -506,21 +505,13 @@ export default function ReusesFormClient({
       ...datasetSearchResults,
       ...myDatasets,
     ];
-    const options = combined.reduce<React.ReactElement[]>((acc, d) => {
-      if (!seen.has(d.id)) {
-        seen.add(d.id);
-        acc.push(
-          <DropdownOption
-            key={d.id}
-            value={d.id}
-            selected={selectedIds.has(d.id)}
-          >
-            {d.title}
-          </DropdownOption>
-        );
-      }
-      return acc;
-    }, []);
+    // Deduplicate while preserving order
+    const unique = Array.from(new Map(combined.map((d) => [d.id, d])).values());
+    const options = unique.map((d) => (
+      <DropdownOption key={d.id} value={d.id} selected={selectedIds.has(d.id)}>
+        {d.title}
+      </DropdownOption>
+    ));
     return <DropdownSection name="datasets">{options}</DropdownSection>;
   }, [myDatasets, datasetSearchResults, selectedDatasets]);
 
