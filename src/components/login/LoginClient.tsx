@@ -33,6 +33,7 @@ function LoginContent() {
   const [citizenType, setCitizenType] = useState<string | null>(null);
   const [termsCmdAccepted, setTermsCmdAccepted] = useState(false);
   const [termsEidasAccepted, setTermsEidasAccepted] = useState(false);
+  const [termsEmailAccepted, setTermsEmailAccepted] = useState(false);
 
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
 
@@ -427,26 +428,28 @@ function LoginContent() {
                         pública de <strong>outro Estado-Membro</strong> da UE? Agora já é possível
                         recupera-los diretamente do portal emissor entrando com a sua autenticação Europeia.
                       </p>
-                      <div className="flex flex-col gap-24">
-                        <div className="mt-8">
-                          <Checkbox
-                            id="terms-eidas"
-                            className="text-sm text-neutral-700 leading-relaxed"
-                            onChange={(e) => setTermsEidasAccepted(e.target.checked)}
+                      <div className="flex flex-col gap-8 mt-8">
+                        <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
+                        <p className="text-sm">
+                          Deve ler atentamente os{" "}
+                          <a
+                            href="/pages/faqs/terms"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
                           >
-                            Declaro que li e aceito os{" "}
-                            <a
-                              href="/pages/faqs/terms"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
-                            >
-                              termos e condições relativos ao tratamento de dados
-                              pessoais
-                            </a>{" "}
-                            para a criação de conta e acesso ao portal dados.gov.pt
-                          </Checkbox>
-                        </div>
+                            Termos e condições para o tratamento dos seus dados
+                          </a>
+                        </p>
+                        <Checkbox
+                          id="terms-eidas"
+                          className="text-sm text-neutral-700 leading-relaxed"
+                          onChange={(e) => setTermsEidasAccepted(e.target.checked)}
+                        >
+                          Declaro que li e aceito os termos e condições para o tratamento dos
+                          meus dados pessoais no acesso e utilização da Área Reservada do
+                          dados.gov.pt.
+                        </Checkbox>
                       </div>
                       <div className="mt-16">
                         <Button
@@ -485,7 +488,7 @@ function LoginContent() {
                         </div>
                       </div>
                       <div className="w-full h-[2px] bg-neutral-400 my-[32px]"></div>
-                      <div className="flex flex-col gap-32 max-w-[560px]">
+                      <div className="flex flex-col gap-32">
                         {migrationRequired ? (
                           <>
                             <div>
@@ -561,12 +564,12 @@ function LoginContent() {
                                 id="login-email"
                                 name="email"
                                 type="email"
-                                className="w-full"
+                                className="w-full max-w-[560px]"
                                 disabled={isLoading}
                                 onChange={(e) => setLoginEmail(e.target.value)}
                               />
 
-                              <div className="flex flex-col gap-8">
+                              <div className="flex flex-col gap-8 max-w-[560px]">
                                 <InputPassword
                                   label="Palavra-passe *"
                                   placeholder="Introduza aqui a palavra-passe"
@@ -594,12 +597,35 @@ function LoginContent() {
                                   Recuperar palavra-passe
                                 </button>
                               </div>
+                              <div className="flex flex-col gap-8 mt-8">
+                                <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
+                                <p className="text-sm">
+                                  Deve ler atentamente os{" "}
+                                  <a
+                                    href="/pages/faqs/terms"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
+                                  >
+                                    Termos e condições para o tratamento dos seus dados
+                                  </a>
+                                </p>
+                                <Checkbox
+                                  id="terms-email"
+                                  className="text-sm text-neutral-700 leading-relaxed"
+                                  onChange={(e) => setTermsEmailAccepted(e.target.checked)}
+                                >
+                                  Declaro que li e aceito os termos e condições para o tratamento dos
+                                  meus dados pessoais no acesso e utilização da Área Reservada do
+                                  dados.gov.pt.
+                                </Checkbox>
+                              </div>
                               <div className="mt-8">
                                 <Button
                                   variant="primary"
                                   type="submit"
                                   className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                                  disabled={isLoading || !loginEmail || !loginPassword}
+                                  disabled={isLoading || !loginEmail || !loginPassword || !termsEmailAccepted}
                                 >
                                   {isLoading ? "A autenticar..." : "Autenticar"}
                                 </Button>
