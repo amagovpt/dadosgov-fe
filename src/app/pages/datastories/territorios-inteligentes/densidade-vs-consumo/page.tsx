@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DataStoryDetailPage() {
-  const datastory = await getDatastory("servicos-publicos/o-canal-presencial", "pt");
+  const datastory = await getDatastory("territorios-inteligentes/densidade-vs-consumo", "pt");
 
   return <DatastoryDetails datastory={datastory} />;
 }
