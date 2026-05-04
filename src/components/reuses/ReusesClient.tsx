@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -20,6 +20,8 @@ import {
   Checkbox,
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
+import SearchFilter from "@/components/Shared/SearchFilter";
+import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { fetchOrganizations, suggestTags } from "@/services/api";
 import {
   APIResponse,
@@ -180,10 +182,8 @@ export default function ReusesClient({
 }: ReusesClientProps) {
   const router = useRouter();
   const { data: reuses, total, page_size } = initialData;
-  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || "");
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const currentQuery = initialFilters?.q || "";
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Toggle filters state
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<
@@ -316,21 +316,18 @@ export default function ReusesClient({
     [initialFilters, currentPage]
   );
 
-  useEffect(() => {
-    if (searchQuery === currentQuery) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      router.replace(buildUrl({ q: searchQuery.trim(), page: 1 }), { scroll: false });
-    }, 200);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchQuery, currentQuery, router, buildUrl]);
+  const onSearchNavigate = useCallback(
+    (query: string) => {
+      router.replace(buildUrl({ q: query, page: 1 }), { scroll: false });
+    },
+    [router, buildUrl]
+  );
 
-  const handleSearch = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    router.replace(buildUrl({ q: searchQuery.trim(), page: 1 }), { scroll: false });
-  }, [router, buildUrl, searchQuery]);
+  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
+    currentQuery,
+    onSearchNavigate,
+    debounceMs: 200,
+  });
 
   const handleSortChange = useCallback(
     (value: string) => {
@@ -393,25 +390,16 @@ export default function ReusesClient({
           <PublishDropdown darkMode={true} outline={false} />
         </PageBanner>
 
-        {/* Search Section */}
-        <div className="container mx-auto pt-32 pb-16 px-4">
-          <div className="max-w-[592px]">
-            <InputSearch
-              label="Pesquisar"
-              placeholder="Pesquisar reutilizações..."
-              id="reuses-search"
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter") handleSearch();
-              }}
-            />
-            <div className="mt-8 text-s-regular text-neutral-900">
-              Exemplos: &quot;educação&quot;, &quot;saúde pública&quot;, &quot;ambiente&quot;
-            </div>
-          </div>
-        </div>
+        {/* Search Filter */}
+        <SearchFilter
+          id="reuses-search"
+          placeholder="Pesquisar reutilizações..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={handleSearch}
+        />
 
+        {/* Main Content */}
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
           {/* Results count + Sort toggles */}
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">

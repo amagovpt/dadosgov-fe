@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Button,
-  InputSearch,
   Icon,
   CardGeneral,
   ToggleGroup,
@@ -14,6 +13,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import { OrganizationsFilters } from "./OrganizationsFilters";
+import SearchFilter from "@/components/Shared/SearchFilter";
+import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import {
   APIResponse,
   OrgBadges,
@@ -65,9 +66,7 @@ export default function OrganizationsClient({
 
   const currentQuery = initialFilters.q || "";
   const currentSort = initialFilters.sort || "";
-  const [searchQuery, setSearchQuery] = React.useState(currentQuery);
   const [filtersOpen, setFiltersOpen] = React.useState(false);
-  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentSortKey =
     Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
@@ -103,21 +102,18 @@ export default function OrganizationsClient({
     [initialFilters]
   );
 
-  React.useEffect(() => {
-    if (searchQuery === currentQuery) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      router.replace(buildUrl({ q: searchQuery.trim() || null }), { scroll: false });
-    }, 200);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchQuery, currentQuery, router, buildUrl]);
+  const onSearchNavigate = React.useCallback(
+    (query: string) => {
+      router.replace(buildUrl({ q: query || null }), { scroll: false });
+    },
+    [router, buildUrl]
+  );
 
-  const handleSearch = React.useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    router.replace(buildUrl({ q: searchQuery.trim() || null }), { scroll: false });
-  }, [searchQuery, router, buildUrl]);
+  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
+    currentQuery,
+    onSearchNavigate,
+    debounceMs: 200,
+  });
 
   const handleSort = React.useCallback(
     (selectedKey: string) => {
@@ -151,24 +147,14 @@ export default function OrganizationsClient({
           <PublishDropdown darkMode={true} outline={false} />
         </PageBanner>
 
-        {/* Search Section */}
-        <div className="container mx-auto pt-32 pb-16 px-4">
-          <div className="max-w-[592px]">
-            <InputSearch
-              label="Pesquisar"
-              placeholder="Pesquisar organizações..."
-              id="organizations-search"
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter") handleSearch();
-              }}
-            />
-            <div className="mt-8 text-s-regular text-neutral-900">
-              Exemplos: &quot;educação&quot;, &quot;saúde pública&quot;, &quot;ambiente&quot;
-            </div>
-          </div>
-        </div>
+        {/* Search Filter */}
+        <SearchFilter
+          id="organizations-search"
+          placeholder="Pesquisar organizações..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={handleSearch}
+        />
 
         {/* Main Content */}
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
