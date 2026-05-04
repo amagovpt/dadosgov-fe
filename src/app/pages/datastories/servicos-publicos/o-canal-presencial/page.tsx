@@ -1,9 +1,9 @@
-import { CardCompound } from "@/components/datastories/Components/Shared/CardCompound";
+import { CardCompound } from "@/components/Shared/CardCompound";
 import DataSourcesSection, {
   DataSourcesSectionProps,
-} from "@/components/datastories/Components/Shared/DataSourcesSection";
-import { InfoBlock } from "@/components/datastories/Components/Shared/InfoBlock";
-import Section from "@/components/datastories/Components/Shared/Section";
+} from "@/components/Shared/DataSourcesSection";
+import { InfoBlock } from "@/components/Shared/InfoBlock";
+import Section from "@/components/Shared/Section";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

@@ -9,7 +9,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import DatasetsAdminClient from "@/components/admin/datasetsadmin/DatasetsAdminClient";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import Breadcrumb from "@/components/admin/Breadcrumb/Breadcrumb";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";

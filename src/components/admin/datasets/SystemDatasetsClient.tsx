@@ -18,9 +18,8 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchAdminDatasets, fetchDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import Breadcrumb from "@/components/admin/Breadcrumb/Breadcrumb";
-import DropdownSection from "@/components/admin/DropdownSection/DropdownSection";
-import DropdownOption from "@/components/admin/DropdownOption/DropdownOption";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import { Dropdown } from "@/components/Primitives/Dropdown";
 
 
 type SortOrder = "none" | "ascending" | "descending";
@@ -174,13 +173,13 @@ export default function SystemDatasetsClient() {
             setCurrentPage(1);
           }}
         >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
-          </DropdownSection>
+          <Dropdown.Section name="status">
+            <Dropdown.Option value="" selected={statusFilter === ""}>Todos</Dropdown.Option>
+            <Dropdown.Option value="public" selected={statusFilter === "public"}>Público</Dropdown.Option>
+            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>Arquivado</Dropdown.Option>
+            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>Rascunho</Dropdown.Option>
+            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>Excluído</Dropdown.Option>
+          </Dropdown.Section>
         </InputSelect>
       </div>
 
