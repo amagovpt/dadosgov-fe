@@ -833,10 +833,6 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
 }
 
 /* Quality progress bar warning color when score <= 45% */
-.quality-progress-warning .progress-complete {
-  background-color: #D4A017 !important;
-}
-
 .quality-progress-warning .progress-bar::-webkit-progress-value {
   background-color: #D4A017 !important;
 }
@@ -854,10 +850,6 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
 }
 
 /* Quality progress bar success color when score > 50% */
-.quality-progress-success .progress-complete {
-  background-color: #22863a !important;
-}
-
 .quality-progress-success .progress-bar::-webkit-progress-value {
   background-color: #22863a !important;
 }
