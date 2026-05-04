@@ -1,10 +1,11 @@
-import { InfoBlock } from "@/components/datastories/Components/Shared/InfoBlock";
-import Section from "@/components/datastories/Components/Shared/Section";
-import { CardCompound } from "@/components/datastories/Components/Shared/CardCompound";
-import FooterReference from "@/components/datastories/Components/Shared/FooterReference";
-import DataSourcesSection from "@/components/datastories/Components/Shared/DataSourcesSection";
+
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { Datastory } from "@/types/datastories/datastory";
+import Section from "../Shared/Section";
+import { InfoBlock } from "../Shared/InfoBlock";
+import { CardCompound } from "../Shared/CardCompound";
+import FooterReference from "../Shared/FooterReference";
+import DataSourcesSection from "../Shared/DataSourcesSection";
 
 export type DatastoryDetailsProps = {
   datastory: Datastory;
