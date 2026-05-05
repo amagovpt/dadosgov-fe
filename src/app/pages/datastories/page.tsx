@@ -5,7 +5,6 @@ import { Datastories } from "@/types/datastories/datastories";
 import { flattenData } from "@/utils/flattenObject";
 import { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Data Stories - dados.gov.pt",
