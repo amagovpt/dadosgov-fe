@@ -326,10 +326,10 @@ export default function HomeClient({
                   };
                   const timeAgo = dataset.last_modified
                     ? formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
-                        .replace("aproximadamente ", "")
-                        .replace("quase ", "")
-                        .replace("menos de ", "")
-                        .replace("cerca de ", "")
+                      .replace("aproximadamente ", "")
+                      .replace("quase ", "")
+                      .replace("menos de ", "")
+                      .replace("cerca de ", "")
                     : "Desconhecido";
 
                   return (
@@ -483,45 +483,53 @@ export default function HomeClient({
               Histórias contadas com dados abertos — análises e visualizações sobre temas de
               interesse público.
             </p>
-            <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32 storytellings">
-              {datastories.map((story) => (
-                <CardArticle
-                  key={story.slug}
-                  variant="indented"
-                  image={{
-                    src: story.image?.at(0)?.url,
-                    alt: story.title,
-                  }}
-                  subtitle={
-                    story.createdAt
-                      ? `Publicado a ${format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt })}`
-                      : ""
-                  }
-                  title={story.title}
-                  mainAnchor={{
-                    href: `/pages/datastories/${story.slug}`,
-                  }}
-                  blockedLink={true}
-                />
-              ))}
-            </div>
-            <div className="mt-32">
-              <Link href="/pages/datastories">
-                <Button
-                  variant="primary"
-                  appearance="link"
-                  hasIcon={true}
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  className="p-0! h-auto icon-white"
-                  darkMode={false}
-                >
-                  <span className="text-white">Ver todas as Data Stories</span>
-                </Button>
-              </Link>
-            </div>
+            {datastories && datastories.length > 0 ? (<>
+              <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32 storytellings">
+                {datastories.map((story) => (
+                  <CardArticle
+                    key={story.slug}
+                    variant="indented"
+                    image={{
+                      src: story.image?.at(0)?.url,
+                      alt: story.title,
+                    }}
+                    subtitle={
+                      story.createdAt
+                        ? `Publicado a ${format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt })}`
+                        : ""
+                    }
+                    title={story.title}
+                    mainAnchor={{
+                      href: `/pages/datastories/${story.slug}`,
+                    }}
+                    blockedLink={true}
+                  />
+                ))}
+              </div>
+              <div className="mt-32">
+                <Link href="/pages/datastories">
+                  <Button
+                    variant="primary"
+                    appearance="link"
+                    hasIcon={true}
+                    trailingIcon="agora-line-arrow-right-circle"
+                    trailingIconHover="agora-solid-arrow-right-circle"
+                    className="p-0! h-auto icon-white"
+                    darkMode={false}
+                  >
+                    <span className="text-white">Ver todas as Data Stories</span>
+                  </Button>
+                </Link>
+              </div>
+            </>
+            ) : (
+              <div className="xl:col-span-3 text-center py-32 text-neutral-500">
+                Nenhum Data Story encontrado.
+              </div>
+            )}
           </div>
         </div>
+
 
         {/* Latest News */}
         <div className="xl:py-64 bg-white latest-news-section">
