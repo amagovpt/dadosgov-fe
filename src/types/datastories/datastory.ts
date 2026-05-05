@@ -14,14 +14,12 @@ type Anchor = {
 };
 
 type Card = {
-  card: {
-    id: string;
-    icon: string;
-    title: string;
-    subtitle: string;
-    bignumber: BigNumber;
-    anchor: Anchor;
-  };
+  id: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+  bignumber: BigNumber;
+  anchor: Anchor;
 };
 
 export type DatastoryHero = {

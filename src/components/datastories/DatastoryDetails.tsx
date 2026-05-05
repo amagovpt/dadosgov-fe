@@ -14,6 +14,11 @@ export type DatastoryDetailsProps = {
 };
 
 export default function DatastoryDetails({ breadcrumbItems, datastory }: DatastoryDetailsProps) {
+
+  console.log("datastory", datastory);
+  console.log("datastory.hero.cards", datastory.hero.cards);
+
+
   return (
     <main className="flex flex-col">
       <Section className="bg-primary-900 flex items-center justify-center ">
@@ -29,28 +34,30 @@ export default function DatastoryDetails({ breadcrumbItems, datastory }: Datasto
           <InfoBlock.Content className="flex min-[1280px]:flex-row flex-col justify-between min-[1280px]:gap-[136px] gap-32">
             <InfoBlock.Description
               className="whitespace-pre-wrap text-m-regular text-white"
+              classNameContent="flex flex-col gap-32"
               description={formatHtmlParagraphs(datastory.hero.description) as string[]}
             />
-            <div className="w-full h-full flex flex-col gap-[128px] py-[44px]">
+            <div className="w-full h-full flex flex-col gap-128">
               <div className="flex flex-col gap-64">
                 {datastory.hero.cards.map((card, index) => (
                   <CardCompound.Root key={index}>
-                    {card.card?.icon && <CardCompound.Icon icon={card.card.icon} />}
-                    {card.card?.bignumber && (
+                    {card?.icon && <CardCompound.Icon icon={card.icon} />}
+                    {card?.bignumber ? (
                       <CardCompound.BigNumber
-                        number={card.card.bignumber.number}
-                        detail={card.card.bignumber.description}
+                        number={card.bignumber.number}
+                        detail={card.bignumber.description}
                       />
-                    )}
-                    <CardCompound.Subtitle>{card.card?.title}</CardCompound.Subtitle>
-                    <CardCompound.Description>{card.card?.subtitle}</CardCompound.Description>
+                    ) : <div className="w-full h-16" />}
+                    <CardCompound.Subtitle>{card?.title}</CardCompound.Subtitle>
+                    {card?.subtitle && <CardCompound.Description>{card?.subtitle}</CardCompound.Description>}
+                    {card.anchor && <CardCompound.Anchor href={card.anchor.href} className="py-16">{card.anchor.children}</CardCompound.Anchor>}
                   </CardCompound.Root>
                 ))}
               </div>
-              <FooterReference
-                text="Ano de referência"
+              {datastory.hero.dateReference && <FooterReference
+                text={`${datastory.hero.dateReference?.date.includes("-") || datastory.hero.dateReference?.date.includes(" ") ? "Período" : "Ano"} de referência`}
                 period={datastory.hero.dateReference?.date}
-              />
+              />}
             </div>
           </InfoBlock.Content>
         </InfoBlock.Root>

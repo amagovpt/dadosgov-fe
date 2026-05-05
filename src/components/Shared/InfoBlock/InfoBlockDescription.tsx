@@ -5,11 +5,13 @@ import { twMerge } from "tailwind-merge";
 export interface IInfoBlockDescriptionProps {
   description?: string[] | string;
   className?: string;
+  classNameContent?: string;
 }
 
 export default function InfoBlockDescription({
   description,
   className,
+  classNameContent,
 }: IInfoBlockDescriptionProps) {
 
   return (
@@ -20,7 +22,7 @@ export default function InfoBlockDescription({
       )}
       data-testid="info-block-description"
     >
-      <Typograph tag="p" className="w-full">
+      <Typograph tag="div" className={twMerge("w-full", classNameContent)}>
         {description}
       </Typograph>
     </div>
