@@ -204,7 +204,7 @@ export default function ReusesClient({
         params.set("modified_since", DATE_RANGE_MAP[optionId]());
       }
       params.set("page", "1");
-      router.push(`/pages/reuses?${params.toString()}`);
+      router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
     }
   };
 
@@ -251,14 +251,14 @@ export default function ReusesClient({
       params.append(paramName, value);
     }
     params.set("page", "1");
-    router.push(`/pages/reuses?${params.toString()}`);
+    router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
   };
 
   const handleClearAdvancedFilter = (paramName: string) => {
     const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
     params.delete(paramName);
     params.set("page", "1");
-    router.push(`/pages/reuses?${params.toString()}`);
+    router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
   };
 
   const handleFilterSearchChange = (groupName: string, value: string) => {
@@ -330,25 +330,28 @@ export default function ReusesClient({
 
   const handleSortChange = useCallback(
     (value: string) => {
-      router.push(buildUrl({ sort: SORT_OPTIONS[value] || undefined, page: 1 }));
+      router.replace(buildUrl({ sort: SORT_OPTIONS[value] || undefined, page: 1 }), {
+        scroll: false,
+      });
     },
     [router, buildUrl]
   );
 
   const handleTypeFilter = useCallback(
     (typeId: string) => {
-      router.push(
+      router.replace(
         buildUrl({
           type: typeId === initialFilters?.type ? undefined : typeId,
           page: 1,
-        })
+        }),
+        { scroll: false }
       );
     },
     [router, buildUrl, initialFilters?.type]
   );
 
   const handleClearFilters = useCallback(() => {
-    router.push("/pages/reuses");
+    router.replace("/pages/reuses", { scroll: false });
   }, [router]);
 
   const sortDefault = (() => {
@@ -615,7 +618,7 @@ export default function ReusesClient({
                       setSelectedToggleFilters({
                         atualizacao: "all",
                       });
-                      router.push("/pages/reuses");
+                      router.replace("/pages/reuses", { scroll: false });
                     }}
                   >
                     Limpar filtros
