@@ -1,4 +1,3 @@
-
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { Datastory } from "@/types/datastories/datastory";
 import Section from "../Shared/Section";
@@ -6,17 +5,21 @@ import { InfoBlock } from "../Shared/InfoBlock";
 import { CardCompound } from "../Shared/CardCompound";
 import FooterReference from "../Shared/FooterReference";
 import DataSourcesSection from "../Shared/DataSourcesSection";
+import Breadcrumb from "../Primitives/Breadcrumb/Breadcrumb";
+import { BreadcrumbItem } from "@/types/shared";
 
 export type DatastoryDetailsProps = {
+  breadcrumbItems: BreadcrumbItem[];
   datastory: Datastory;
 };
 
-export default function DatastoryDetails({ datastory }: DatastoryDetailsProps) {
+export default function DatastoryDetails({ breadcrumbItems, datastory }: DatastoryDetailsProps) {
   return (
     <main className="flex flex-col">
       <Section className="bg-primary-900 flex items-center justify-center ">
         <InfoBlock.Root className="py-[96px]">
           <InfoBlock.Header>
+            <Breadcrumb items={breadcrumbItems} darkMode />
             <InfoBlock.Title
               titleLevel="h1"
               title={datastory.hero.title}
