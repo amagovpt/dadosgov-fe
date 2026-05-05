@@ -47,11 +47,9 @@ export const TagsCollapse: React.FC<TagsCollapseProps> = ({
     updateWidth();
     const observer = new ResizeObserver(updateWidth);
     observer.observe(root);
-    window.addEventListener("resize", updateWidth);
 
     return () => {
       observer.disconnect();
-      window.removeEventListener("resize", updateWidth);
     };
   }, []);
 
@@ -136,4 +134,3 @@ export const TagsCollapse: React.FC<TagsCollapseProps> = ({
     </div>
   );
 };
-
