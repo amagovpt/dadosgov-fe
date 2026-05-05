@@ -10,6 +10,7 @@ import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
 import { Datastory } from "@/types/datastories/datastory";
 import { DataStoryMetadata } from "@/types/datastories/datastories";
+import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -314,144 +315,9 @@ export default function HomeClient({
 
             <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32">
               {latestDatasets.length > 0 ? (
-                latestDatasets.map((dataset) => {
-                  const qualityScore =
-                    dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0;
-                  const formatMetric = (value: number | undefined) => {
-                    if (!value) return "0";
-                    if (value >= 1_000_000)
-                      return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
-                    if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
-                    return String(value);
-                  };
-                  const timeAgo = dataset.last_modified
-                    ? formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
-                      .replace("aproximadamente ", "")
-                      .replace("quase ", "")
-                      .replace("menos de ", "")
-                      .replace("cerca de ", "")
-                    : "Desconhecido";
-
-                  return (
-                    <Link
-                      key={dataset.id}
-                      href={`/pages/datasets/${dataset.slug}`}
-                      className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
-                    >
-                      <CardGeneral
-                        variant="neutral-100"
-                        image={{
-                          src:
-                            dataset.organization?.logo || "/images/placeholders/organization.png",
-                          alt: dataset.organization?.name || "Organização",
-                          height: "56px",
-                          className: "bg-primary-100 !object-contain !h-[56px]",
-                        }}
-                        subtitleText={
-                          (
-                            <div className="flex flex-col">
-                              <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                                {timeAgo}
-                              </span>
-                              <span
-                                style={{ fontSize: "16px", fontWeight: 300 }}
-                                className="text-neutral-900 mt-4"
-                              >
-                                {dataset.organization?.name || "Sem Organização"}
-                              </span>
-                            </div>
-                          ) as unknown as string
-                        }
-                        titleText={dataset.title}
-                        descriptionText={
-                          (
-                            <div className="flex flex-col grow">
-                              <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
-                                {dataset.description}
-                              </p>
-                              <div
-                                className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
-                              >
-                                <ProgressBar
-                                  value={qualityScore}
-                                  max={100}
-                                  hideLabel={true}
-                                  hidePercentageValue={true}
-                                />
-                                <span className="text-[14px] text-neutral-900 mt-4 block">
-                                  {qualityScore}% Qualidade dos metadados
-                                </span>
-                                <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
-                                  <div className="flex items-center gap-8" title="Visualizações">
-                                    <Icon
-                                      name={
-                                        dataset.metrics?.views
-                                          ? "agora-solid-eye"
-                                          : "agora-line-eye"
-                                      }
-                                      dimensions="xs"
-                                      className="fill-neutral-700"
-                                      aria-hidden="true"
-                                    />
-                                    <span>{formatMetric(dataset.metrics?.views)}</span>
-                                  </div>
-                                  <div className="flex items-center gap-8" title="Downloads">
-                                    <Icon
-                                      name={
-                                        dataset.metrics?.resources_downloads
-                                          ? "agora-solid-download"
-                                          : "agora-line-download"
-                                      }
-                                      dimensions="xs"
-                                      className="fill-neutral-700"
-                                      aria-hidden="true"
-                                    />
-                                    <span>
-                                      {formatMetric(dataset.metrics?.resources_downloads)}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-8" title="Reutilizações">
-                                    <img
-                                      src="/Icons/bar_chart.svg"
-                                      className="w-16 h-16"
-                                      alt=""
-                                      aria-hidden="true"
-                                    />
-                                    <span>{dataset.metrics?.reuses || 0}</span>
-                                  </div>
-                                  <div className="flex items-center gap-8" title="Favoritos">
-                                    <Icon
-                                      name={
-                                        dataset.metrics?.followers
-                                          ? "agora-solid-star"
-                                          : "agora-line-star"
-                                      }
-                                      dimensions="xs"
-                                      className="fill-neutral-700"
-                                      aria-hidden="true"
-                                    />
-                                    <span>{formatMetric(dataset.metrics?.followers)}</span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-8 text-primary-600 mt-16">
-                                  <Icon
-                                    name="agora-line-arrow-right-circle"
-                                    className="w-32 h-32"
-                                    aria-hidden="true"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ) as unknown as string
-                        }
-                        isBlockedLink={true}
-                        anchor={{
-                          href: `/pages/datasets/${dataset.slug}`,
-                        }}
-                      />
-                    </Link>
-                  );
-                })
+                latestDatasets.map((dataset, index) => (
+                  <CardMetrics key={`featured-dataset-${index}`} {...dataset as CardMetricsProps} />
+                ))
               ) : (
                 <div className="xl:col-span-3 text-center py-32 text-neutral-500">
                   Nenhum conjunto de dados encontrado.
