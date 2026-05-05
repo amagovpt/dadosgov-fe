@@ -326,7 +326,6 @@ export default function ReusesClient({
   const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
     currentQuery,
     onSearchNavigate,
-    debounceMs: 200,
   });
 
   const handleSortChange = useCallback(

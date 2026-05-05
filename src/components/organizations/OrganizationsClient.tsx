@@ -112,7 +112,6 @@ export default function OrganizationsClient({
   const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
     currentQuery,
     onSearchNavigate,
-    debounceMs: 200,
   });
 
   const handleSort = React.useCallback(

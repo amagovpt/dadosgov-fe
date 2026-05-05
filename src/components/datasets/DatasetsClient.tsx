@@ -18,6 +18,7 @@ import { deleteDataset } from "@/services/api";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
+import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { APIResponse, Dataset, DatasetFilters, SiteMetrics } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -95,9 +96,7 @@ export default function DatasetsClient({
 
   const currentQuery = initialFilters.q || "";
   const currentSort = initialFilters.sort || "";
-  const [searchQuery, setSearchQuery] = React.useState(currentQuery);
   const [filtersOpen, setFiltersOpen] = React.useState(false);
-  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentSortKey =
     Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
@@ -153,21 +152,17 @@ export default function DatasetsClient({
     [initialFilters]
   );
 
-  React.useEffect(() => {
-    if (searchQuery === currentQuery) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      router.replace(buildUrl({ q: searchQuery.trim() || null }), { scroll: false });
-    }, 200);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchQuery, currentQuery, router, buildUrl]);
+  const onSearchNavigate = React.useCallback(
+    (query: string) => {
+      router.replace(buildUrl({ q: query || null }), { scroll: false });
+    },
+    [router, buildUrl]
+  );
 
-  const handleSearch = React.useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    router.replace(buildUrl({ q: searchQuery.trim() || null }), { scroll: false });
-  }, [searchQuery, router, buildUrl]);
+  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
+    currentQuery,
+    onSearchNavigate,
+  });
 
   const handleSort = React.useCallback(
     (selectedKey: string) => {
