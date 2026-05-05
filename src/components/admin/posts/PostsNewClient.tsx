@@ -13,7 +13,7 @@ import {
   RadioButton,
   Tag,
 } from "@ama-pt/agora-design-system";
-import { suggestTags, createPost, uploadPostImage } from "@/services/api";
+import { suggestTags, createPost, uploadPostImage, publishPost } from "@/services/api";
 import type { TagSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
@@ -38,7 +38,8 @@ export default function PostsNewClient() {
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [tags, setTags] = useState<TagSuggestion[]>([]);
   const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"draft" | "publish" | null>(null);
+  const isSaving = pendingAction !== null;
   const [saveError, setSaveError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -145,7 +146,7 @@ export default function PostsNewClient() {
     router.push("/pages/admin/system/posts/new?step=2");
   };
 
-  const handleSave = async () => {
+  const handleSave = async (publish: boolean) => {
     if (!articleContent.trim()) {
       setFormErrors({ articleContent: true });
       requestAnimationFrame(() => {
@@ -156,7 +157,7 @@ export default function PostsNewClient() {
       return;
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setIsSaving(true);
+    setPendingAction(publish ? "publish" : "draft");
     setSaveError(null);
     try {
       const payload: PostCreatePayload = {
@@ -171,6 +172,9 @@ export default function PostsNewClient() {
         if (imageFile) {
           await uploadPostImage(result.id, imageFile);
         }
+        if (publish) {
+          await publishPost(result.id);
+        }
         router.push("/pages/admin/system/posts");
       } else {
         setSaveError("Erro ao guardar o artigo. Verifique a autenticação.");
@@ -178,7 +182,7 @@ export default function PostsNewClient() {
     } catch {
       setSaveError("Erro ao guardar o artigo.");
     } finally {
-      setIsSaving(false);
+      setPendingAction(null);
     }
   };
 
@@ -467,14 +471,25 @@ export default function PostsNewClient() {
                   Anterior
                 </Button>
                 <Button
+                  appearance="outline"
                   variant="primary"
                   hasIcon
                   trailingIcon="agora-line-check-circle"
                   trailingIconHover="agora-solid-check-circle"
-                  onClick={handleSave}
+                  onClick={() => handleSave(false)}
                   disabled={isSaving}
                 >
-                  {isSaving ? "A guardar..." : "Guardar"}
+                  {pendingAction === "draft" ? "A guardar..." : "Guardar como rascunho"}
+                </Button>
+                <Button
+                  variant="primary"
+                  hasIcon
+                  trailingIcon="agora-line-check-circle"
+                  trailingIconHover="agora-solid-check-circle"
+                  onClick={() => handleSave(true)}
+                  disabled={isSaving}
+                >
+                  {pendingAction === "publish" ? "A publicar..." : "Publicar artigo"}
                 </Button>
               </div>
             </form>

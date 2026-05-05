@@ -1,11 +1,8 @@
 import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 
-const baseUrl =
-  process.env.NEXT_PUBLIC_API_URL &&
-  !process.env.NEXT_PUBLIC_API_URL.endsWith("/")
-    ? process.env.NEXT_PUBLIC_API_URL
-    : (process.env.NEXT_PUBLIC_API_URL || "").slice(0, -1);
+const rawUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
+const baseUrl = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
 
 const link = new HttpLink({
   uri: `${baseUrl}/graphql`,

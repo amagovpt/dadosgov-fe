@@ -32,6 +32,10 @@
   .header-card-wrapper:hover svg.trailing-icon-hover {
     display: block !important;
   }
+
+  .header-card-wrapper .description {
+    display: none;
+  }
 }
 
 /*

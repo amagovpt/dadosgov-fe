@@ -1279,7 +1279,7 @@ export async function fetchPosts(
 export async function fetchHomepageData(): Promise<HomepageData> {
   try {
     const res = await fetch(`${API_BASE_URL}/site/home/`, {
-      cache: "no-store",
+      next: { revalidate: 60 },
     });
 
     if (!res.ok) {
@@ -1375,7 +1375,7 @@ export async function updatePost(
 export async function fetchAdminPosts(
   page: number = 1,
   pageSize: number = 100,
-  sort: string = "-published"
+  sort: string = "-created_at"
 ): Promise<APIResponse<Post>> {
   try {
     const params = new URLSearchParams({

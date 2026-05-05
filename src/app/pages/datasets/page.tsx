@@ -2,6 +2,8 @@ import { fetchDatasets, fetchSiteInfo } from '@/services/api';
 import { DatasetFilters } from '@/types/api';
 import DatasetsClient from '@/components/datasets/DatasetsClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page({
   searchParams,
 }: {

@@ -3,6 +3,8 @@ import OrganizationsClient from '@/components/organizations/OrganizationsClient'
 import { OrganizationFilters } from '@/types/api';
 import { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
     title: 'Organizações - dados.gov.pt',
     description: 'Explore as organizações que publicam dados abertos em Portugal.',
