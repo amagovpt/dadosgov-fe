@@ -872,7 +872,7 @@ export default function ReusesEditClient() {
 
                     {selectedKeywords.length > 0 && (
                       <div className="flex flex-wrap gap-8 -mt-8">
-                        {selectedKeywords.map((keyword) => (
+                        {[...selectedKeywords].sort((a, b) => a.localeCompare(b)).map((keyword) => (
                           <Tag
                             key={keyword}
                             aria-label={`Remover ${keyword}`}
