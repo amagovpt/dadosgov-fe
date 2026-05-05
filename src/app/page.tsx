@@ -3,6 +3,8 @@ import HomeClient from "@/components/home/HomeClient";
 import { getDatastoryMetadata } from "@/queries/datastories/datastory";
 import { DataStoryMetadata } from "@/types/datastories/datastories";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const data = await fetchHomepageData();
 
