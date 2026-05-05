@@ -17,7 +17,9 @@ export async function getDatastoryMetadata(
               slug
               title
               image {
-                  url
+                fileName
+                url
+                id
               }
               createdAt
             }

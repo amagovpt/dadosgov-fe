@@ -25,6 +25,7 @@ import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Datastories } from "@/types/datastories/datastories";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { getAssets } from "@/utils/getAssets";
 
 /*const SORT_OPTIONS: Record<string, string> = {
   recentes: "",
@@ -195,14 +196,14 @@ export default function DataStoriesClient({
     searchable: boolean;
     suggest?: boolean;
   }[] = [
-    {
-      name: "Palavras-chave",
-      param: "tag",
-      data: filterTagOptions,
-      searchable: true,
-      suggest: true,
-    },
-  ];
+      {
+        name: "Palavras-chave",
+        param: "tag",
+        data: filterTagOptions,
+        searchable: true,
+        suggest: true,
+      },
+    ];
 
   const filteredStories = stories.filter((story) => {
     const q = searchQuery.toLowerCase();
@@ -298,13 +299,13 @@ export default function DataStoriesClient({
                 hasIcon
                 {...(filtersOpen
                   ? {
-                      leadingIcon: "agora-line-chevron-left",
-                      leadingIconHover: "agora-solid-chevron-left",
-                    }
+                    leadingIcon: "agora-line-chevron-left",
+                    leadingIconHover: "agora-solid-chevron-left",
+                  }
                   : {
-                      trailingIcon: "agora-line-chevron-right",
-                      trailingIconHover: "agora-solid-chevron-right",
-                    })}
+                    trailingIcon: "agora-line-chevron-right",
+                    trailingIconHover: "agora-solid-chevron-right",
+                  })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
@@ -402,8 +403,8 @@ export default function DataStoriesClient({
 
                     const selectedItems: { id: string; name: string }[] = group.suggest
                       ? activeValues
-                          .filter((v) => !group.data.some((d) => d.id === v))
-                          .map((v) => ({ id: v, name: v }))
+                        .filter((v) => !group.data.some((d) => d.id === v))
+                        .map((v) => ({ id: v, name: v }))
                       : [];
 
                     const allData = [...selectedItems, ...group.data];
@@ -411,8 +412,8 @@ export default function DataStoriesClient({
                     const filteredData = group.suggest
                       ? allData
                       : allData.filter((item) =>
-                          item.name.toLowerCase().includes(sq.toLowerCase())
-                        );
+                        item.name.toLowerCase().includes(sq.toLowerCase())
+                      );
 
                     const showScroll = filteredData.length > 5;
 
@@ -524,10 +525,10 @@ export default function DataStoriesClient({
                     pagedStories.map((story) => {
                       const timeAgo = story.createdAt
                         ? formatDistanceToNow(new Date(story.createdAt), { locale: pt })
-                            .replace("aproximadamente ", "")
-                            .replace("quase ", "")
-                            .replace("menos de ", "")
-                            .replace("cerca de ", "")
+                          .replace("aproximadamente ", "")
+                          .replace("quase ", "")
+                          .replace("menos de ", "")
+                          .replace("cerca de ", "")
                         : "Desconhecido";
 
                       return (
@@ -536,7 +537,7 @@ export default function DataStoriesClient({
                             onClick={() => router.push(`/pages/datastories/${story.slug}`)}
                             className="cursor-pointer text-neutral-900 h-full"
                             variant="transparent"
-                            image={{ src: story.image?.at(0)?.url ?? "", alt: story.title }}
+                            image={{ src: story.image && story.image[0] ? getAssets(story.image[0].id) : "/card-full-image.png", alt: story.title }}
                             category={story.organizationName}
                             title={<div className="underline text-xl-bold">{story.title}</div>}
                             description={
