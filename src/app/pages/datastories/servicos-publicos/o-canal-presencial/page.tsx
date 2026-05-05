@@ -3,6 +3,8 @@ import { getDatastory, getDatastoryMetadata } from "@/queries/datastories/datast
 import DatastoryDetails from "@/components/datastories/DatastoryDetails";
 import { BreadcrumbItem } from "@/types/shared";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   //params,
 }: {
