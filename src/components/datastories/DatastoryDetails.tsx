@@ -14,11 +14,6 @@ export type DatastoryDetailsProps = {
 };
 
 export default function DatastoryDetails({ breadcrumbItems, datastory }: DatastoryDetailsProps) {
-
-  console.log("datastory", datastory);
-  console.log("datastory.hero.cards", datastory.hero.cards);
-
-
   return (
     <main className="flex flex-col">
       <Section className="bg-primary-900 flex items-center justify-center ">
