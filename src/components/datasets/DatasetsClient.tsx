@@ -2,16 +2,11 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Icon,
-  CardGeneral,
-  CardLinks,
   ToggleGroup,
   Toggle,
-  Pill,
   CardNoResults,
-  ProgressBar,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { deleteDataset } from "@/services/api";

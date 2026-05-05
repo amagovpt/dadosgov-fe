@@ -2,13 +2,12 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Icon, CardArticle, CardGeneral, ProgressBar } from "@ama-pt/agora-design-system";
+import { Button, Icon, CardArticle } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import { Dataset, Post, Reuse, SiteMetrics } from "@/types/api";
 import { formatDistanceToNow, format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
-import { Datastory } from "@/types/datastories/datastory";
 import { DataStoryMetadata } from "@/types/datastories/datastories";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 
