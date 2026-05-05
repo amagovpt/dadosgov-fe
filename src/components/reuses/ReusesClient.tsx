@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -20,6 +20,8 @@ import {
   Checkbox,
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
+import SearchFilter from "@/components/Shared/SearchFilter";
+import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { fetchOrganizations, suggestTags } from "@/services/api";
 import {
   APIResponse,
@@ -180,10 +182,8 @@ export default function ReusesClient({
 }: ReusesClientProps) {
   const router = useRouter();
   const { data: reuses, total, page_size } = initialData;
-  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || "");
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const currentQuery = initialFilters?.q || "";
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Toggle filters state
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<
@@ -204,7 +204,7 @@ export default function ReusesClient({
         params.set("modified_since", DATE_RANGE_MAP[optionId]());
       }
       params.set("page", "1");
-      router.push(`/pages/reuses?${params.toString()}`);
+      router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
     }
   };
 
@@ -251,14 +251,14 @@ export default function ReusesClient({
       params.append(paramName, value);
     }
     params.set("page", "1");
-    router.push(`/pages/reuses?${params.toString()}`);
+    router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
   };
 
   const handleClearAdvancedFilter = (paramName: string) => {
     const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
     params.delete(paramName);
     params.set("page", "1");
-    router.push(`/pages/reuses?${params.toString()}`);
+    router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
   };
 
   const handleFilterSearchChange = (groupName: string, value: string) => {
@@ -316,48 +316,42 @@ export default function ReusesClient({
     [initialFilters, currentPage]
   );
 
+  const onSearchNavigate = useCallback(
+    (query: string) => {
+      router.replace(buildUrl({ q: query, page: 1 }), { scroll: false });
+    },
+    [router, buildUrl]
+  );
 
-  useEffect(() => {
-    setSearchQuery(initialFilters?.q || "");
-  }, [initialFilters?.q]);
-
-  useEffect(() => {
-    if (searchQuery === currentQuery) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
-    }, 400);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchQuery, currentQuery, router, buildUrl]);
-
-  const handleSearch = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
-  }, [router, buildUrl, searchQuery]);
+  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
+    currentQuery,
+    onSearchNavigate,
+  });
 
   const handleSortChange = useCallback(
     (value: string) => {
-      router.push(buildUrl({ sort: SORT_OPTIONS[value] || undefined, page: 1 }));
+      router.replace(buildUrl({ sort: SORT_OPTIONS[value] || undefined, page: 1 }), {
+        scroll: false,
+      });
     },
     [router, buildUrl]
   );
 
   const handleTypeFilter = useCallback(
     (typeId: string) => {
-      router.push(
+      router.replace(
         buildUrl({
           type: typeId === initialFilters?.type ? undefined : typeId,
           page: 1,
-        })
+        }),
+        { scroll: false }
       );
     },
     [router, buildUrl, initialFilters?.type]
   );
 
   const handleClearFilters = useCallback(() => {
-    router.push("/pages/reuses");
+    router.replace("/pages/reuses", { scroll: false });
   }, [router]);
 
   const sortDefault = (() => {
@@ -398,25 +392,16 @@ export default function ReusesClient({
           <PublishDropdown darkMode={true} outline={false} />
         </PageBanner>
 
-        {/* Search Section */}
-        <div className="container mx-auto pt-32 pb-16 px-4">
-          <div className="max-w-[592px]">
-            <InputSearch
-              label="Pesquisar"
-              placeholder="Pesquisar reutilizações..."
-              id="reuses-search"
-              defaultValue={initialFilters?.q || ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter") handleSearch();
-              }}
-            />
-            <div className="mt-8 text-s-regular text-neutral-900">
-              Exemplos: &quot;educação&quot;, &quot;saúde pública&quot;, &quot;ambiente&quot;
-            </div>
-          </div>
-        </div>
+        {/* Search Filter */}
+        <SearchFilter
+          id="reuses-search"
+          placeholder="Pesquisar reutilizações..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={handleSearch}
+        />
 
+        {/* Main Content */}
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
           {/* Results count + Sort toggles */}
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">
@@ -633,7 +618,7 @@ export default function ReusesClient({
                       setSelectedToggleFilters({
                         atualizacao: "all",
                       });
-                      router.push("/pages/reuses");
+                      router.replace("/pages/reuses", { scroll: false });
                     }}
                   >
                     Limpar filtros

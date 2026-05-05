@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -18,6 +18,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import PageBanner from "@/components/PageBanner";
+import SearchFilter from '@/components/Shared/SearchFilter';
+import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { suggestTags } from "@/services/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -101,11 +103,35 @@ export default function DataStoriesClient({
 
   type FilterKey = keyof typeof TOGGLE_FILTERS;
 
-  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || "");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const currentQuery = initialFilters?.q || "";
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const buildUrl = useCallback(
+    (overrides: { q?: string | null; page?: number } = {}) => {
+      const params = new URLSearchParams();
+      const q = "q" in overrides ? overrides.q : initialFilters?.q;
+      const page = overrides.page ?? currentPage;
+
+      if (q) params.set("q", q);
+      if (page > 1) params.set("page", String(page));
+
+      const qs = params.toString();
+      return `/pages/datastories${qs ? `?${qs}` : ""}`;
+    },
+    [initialFilters, currentPage]
+  );
+
+  const onSearchNavigate = useCallback(
+    (query: string) => {
+      router.replace(buildUrl({ q: query || null, page: 1 }), { scroll: false });
+    },
+    [router, buildUrl]
+  );
+
+  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
+    currentQuery,
+    onSearchNavigate,
+  });
 
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<FilterKey, string>>({
     temas: "all",
@@ -222,37 +248,6 @@ export default function DataStoriesClient({
   const pageSize = 12;
   const pagedStories = sortedStories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const buildUrl = useCallback(
-    (overrides: { q?: string; page?: number } = {}) => {
-      const params = new URLSearchParams();
-      const q = overrides.q ?? initialFilters?.q;
-      const page = overrides.page ?? currentPage;
-
-      if (q) params.set("q", q);
-      if (page > 1) params.set("page", String(page));
-
-      const qs = params.toString();
-      return `/pages/datastories${qs ? `?${qs}` : ""}`;
-    },
-    [initialFilters, currentPage]
-  );
-
-  useEffect(() => {
-    if (searchQuery === currentQuery) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
-    }, 200);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchQuery, currentQuery, router, buildUrl]);
-
-  const handleSearch = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    router.push(buildUrl({ q: searchQuery || undefined, page: 1 }));
-  }, [router, buildUrl, searchQuery]);
-
   /*const handleSortChange = useCallback((value: string) => {
     setCurrentSortKey(value);
   }, []);*/
@@ -282,25 +277,17 @@ export default function DataStoriesClient({
           }
         />
 
-        {/* Search Section */}
-        <div className="container mx-auto pt-32 pb-16 px-4">
-          <div className="max-w-[592px]">
-            <InputSearch
-              label="Pesquisar"
-              placeholder="Pesquisar data stories, temas..."
-              id="datastories-search"
-              defaultValue={initialFilters?.q || ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter") handleSearch();
-              }}
-            />
-            <div className="mt-8 text-s-regular text-neutral-900">
-              Exemplos: &quot;serviços públicos&quot;, &quot;turismo&quot;, &quot;territórios&quot;
-            </div>
-          </div>
-        </div>
+        {/* Search Filter */}
+        <SearchFilter
+          id="datastories-search"
+          placeholder="Pesquisar data stories, temas..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={handleSearch}
+          examplesText='Exemplos: "serviços públicos", "turismo", "territórios"'
+        />
 
+        {/* Main Content */}
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
           {/* Results count + Sort toggles */}
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">

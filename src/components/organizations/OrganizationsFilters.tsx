@@ -12,6 +12,7 @@ import {
   Button,
   Checkbox,
 } from "@ama-pt/agora-design-system";
+import { fetchOrganizations } from "@/services/api";
 import { OrgBadges, Organization, OrganizationFilters, SiteMetrics } from "@/types/api";
 
 const ORG_TYPE_OPTIONS = [
@@ -30,10 +31,12 @@ function toArray(v: string | string[] | undefined): string[] {
 interface OrganizationsFiltersProps {
   siteMetrics: SiteMetrics;
   orgBadges: OrgBadges;
-  orgBadgeCounts: Record<string, number>;
+  orgBadgeCounts?: Record<string, number>;
   initialFilters: OrganizationFilters;
   allOrganizations?: Organization[];
 }
+let organizationsCache: Organization[] | null = null;
+let organizationBadgeCountsCache: Record<string, number> | null = null;
 
 const BADGE_LABELS_PT: Record<string, string> = {
   association: "Associação",
@@ -46,19 +49,100 @@ const BADGE_LABELS_PT: Record<string, string> = {
 export const OrganizationsFilters = ({
   siteMetrics,
   orgBadges,
-  orgBadgeCounts,
+  orgBadgeCounts = {},
   initialFilters,
   allOrganizations = [],
 }: OrganizationsFiltersProps) => {
   const router = useRouter();
   const [badgeSearch, setBadgeSearch] = React.useState("");
   const [orgSearch, setOrgSearch] = React.useState("");
+  const [resolvedOrgBadgeCounts, setResolvedOrgBadgeCounts] = React.useState<Record<string, number>>(
+    () =>
+      Object.keys(orgBadgeCounts).length > 0
+        ? orgBadgeCounts
+        : organizationBadgeCountsCache ?? {}
+  );
+  const [resolvedOrganizations, setResolvedOrganizations] = React.useState<Organization[]>(
+    () => (allOrganizations.length > 0 ? allOrganizations : organizationsCache ?? [])
+  );
 
   const activeBadges = toArray(initialFilters.badge);
   const activeOrgs = toArray(initialFilters.organization);
   const selectedOrgType = activeBadges.length === 1 ? activeBadges[0] : "all";
 
-  const totalOrgs = Object.values(orgBadgeCounts).reduce((sum, c) => sum + c, 0);
+  React.useEffect(() => {
+    if (Object.keys(orgBadgeCounts).length === 0) return;
+    organizationBadgeCountsCache = orgBadgeCounts;
+    setResolvedOrgBadgeCounts(orgBadgeCounts);
+  }, [orgBadgeCounts]);
+
+  React.useEffect(() => {
+    if (allOrganizations.length === 0) return;
+    organizationsCache = allOrganizations;
+    setResolvedOrganizations(allOrganizations);
+  }, [allOrganizations]);
+
+  const badgeKeys = React.useMemo(() => Object.keys(orgBadges), [orgBadges]);
+  const resolvedCountsSize = Object.keys(resolvedOrgBadgeCounts).length;
+
+  React.useEffect(() => {
+    if (resolvedOrganizations.length > 0) return;
+
+    let cancelled = false;
+
+    async function loadOrganizations() {
+      try {
+        const res = await fetchOrganizations(1, 500, { sort: "name" });
+        if (!cancelled) {
+          organizationsCache = res.data;
+          setResolvedOrganizations(res.data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to load organizations filter list", error);
+        }
+      }
+    }
+
+    loadOrganizations();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resolvedOrganizations.length]);
+
+  React.useEffect(() => {
+    if (resolvedCountsSize > 0 || badgeKeys.length === 0) return;
+
+    let cancelled = false;
+
+    async function loadBadgeCounts() {
+      try {
+        const results = await Promise.all(
+          badgeKeys.map((badge) => fetchOrganizations(1, 1, { badge }))
+        );
+        if (cancelled) return;
+
+        const counts = Object.fromEntries(
+          badgeKeys.map((kind, i) => [kind, results[i].total])
+        ) as Record<string, number>;
+        organizationBadgeCountsCache = counts;
+        setResolvedOrgBadgeCounts(counts);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to load organizations badge counts", error);
+        }
+      }
+    }
+
+    loadBadgeCounts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [badgeKeys, resolvedCountsSize]);
+
+  const totalOrgs = Object.values(resolvedOrgBadgeCounts).reduce((sum, c) => sum + c, 0);
 
   const buildUrl = (updates: {
     badges?: string[];
@@ -97,14 +181,14 @@ export const OrganizationsFilters = ({
   const entries = Object.keys(orgBadges).map((kind) => ({
     kind,
     label: BADGE_LABELS_PT[kind] || orgBadges[kind],
-    count: orgBadgeCounts[kind] ?? 0,
+    count: resolvedOrgBadgeCounts[kind] ?? 0,
   }));
 
   const filteredEntries = badgeSearch.trim()
     ? entries.filter((entry) => entry.label.toLowerCase().includes(badgeSearch.toLowerCase()))
     : entries;
 
-  const orgItems = allOrganizations.map((o) => ({ id: o.id, name: o.name }));
+  const orgItems = resolvedOrganizations.map((o) => ({ id: o.id, name: o.name }));
   const selectedOrgItems = activeOrgs
     .filter((id) => !orgItems.some((o) => o.id === id))
     .map((id) => ({ id, name: id }));
@@ -125,7 +209,7 @@ export const OrganizationsFilters = ({
             const isSelected = selectedOrgType === option.id;
             const count = option.id === "all"
               ? totalOrgs
-              : (orgBadgeCounts[option.badge] ?? 0);
+              : (resolvedOrgBadgeCounts[option.badge] ?? 0);
             return (
               <Toggle
                 key={option.id}
