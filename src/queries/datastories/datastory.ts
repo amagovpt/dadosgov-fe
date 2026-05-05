@@ -54,7 +54,7 @@ export async function getDatastoryMetadata(
 
 export async function getDatastory(slug: string, locale: string = "pt"): Promise<Datastory> {
   const query = gql(/* GraphQL */ `
-    query QueryPublicDataModal($slug: String!) {
+    query QueryGetDataStoriesData($slug: String!) {
       queryDataStoriesContents(filter: $slug) {
         data {
           hero {
