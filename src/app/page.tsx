@@ -15,7 +15,7 @@ export default async function Home() {
 
     datastories = homeData.datastories;
   } catch (error) {
-    console.error("Error fetching datastories metadata:", error);
+    console.error("Error fetching home data:", error);
     // Fallback: use empty array if any datastory fails to load
     datastories = [];
   }
