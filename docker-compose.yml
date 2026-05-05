@@ -1,20 +1,25 @@
 services:
   app:
     container_name: udata-frontend-app
-    build: .
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE}
+        NEXT_PUBLIC_API_V2_BASE: ${NEXT_PUBLIC_API_V2_BASE}
+        NEXT_PUBLIC_FRONT_BASE: ${NEXT_PUBLIC_FRONT_BASE}
+        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
+        NEXT_PUBLIC_STATIC_URL: ${NEXT_PUBLIC_STATIC_URL}
+        NEXT_PUBLIC_READ_ONLY_MODE: ${NEXT_PUBLIC_READ_ONLY_MODE}
+        NEXT_PUBLIC_REQUIRE_EMAIL_CONFIRMATION: ${NEXT_PUBLIC_REQUIRE_EMAIL_CONFIRMATION}
+        NEXT_PUBLIC_SAML_ENABLED: ${NEXT_PUBLIC_SAML_ENABLED}
+        NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_BASE: /api/1
-      NEXT_PUBLIC_API_V2_BASE: /api/2
       BACKEND_URL: http://host.docker.internal:7000
       BACKEND_HOST: localhost:7000
-      NEXT_PUBLIC_FRONT_BASE: http://localhost:3000
-      NEXT_PUBLIC_BASE_URL: https://dados.gov.pt/
-      NEXT_PUBLIC_STATIC_URL: https://dados.gov.pt/static/
-      NEXT_PUBLIC_READ_ONLY_MODE: "false"
-      NEXT_PUBLIC_REQUIRE_EMAIL_CONFIRMATION: "true"
-      NEXT_PUBLIC_SAML_ENABLED: "true"
+      API_URL_INTERNAL: ${API_URL_INTERNAL}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
