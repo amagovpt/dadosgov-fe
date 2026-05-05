@@ -27,6 +27,7 @@ import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
 import PageBanner from "@/components/PageBanner";
+import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 
 interface OrganizationsClientProps {
   initialData: APIResponse<Organization>;
@@ -166,13 +167,13 @@ export default function OrganizationsClient({
                 hasIcon
                 {...(filtersOpen
                   ? {
-                      leadingIcon: "agora-line-chevron-left",
-                      leadingIconHover: "agora-solid-chevron-left",
-                    }
+                    leadingIcon: "agora-line-chevron-left",
+                    leadingIconHover: "agora-solid-chevron-left",
+                  }
                   : {
-                      trailingIcon: "agora-line-chevron-right",
-                      trailingIconHover: "agora-solid-chevron-right",
-                    })}
+                    trailingIcon: "agora-line-chevron-right",
+                    trailingIconHover: "agora-solid-chevron-right",
+                  })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
@@ -231,117 +232,21 @@ export default function OrganizationsClient({
                   }}
                 >
                   {organizations.length > 0 ? (
-                    organizations.map((org) => {
-                      const formatMetric = (value: number | undefined) => {
-                        if (!value) return "0";
-                        if (value >= 1_000_000)
-                          return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
-                        if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
-                        return String(value);
-                      };
+                    organizations.map((org, index) => {
                       const timeAgo = org.last_modified
                         ? formatDistanceToNow(new Date(org.last_modified), { locale: pt })
-                            .replace("aproximadamente ", "")
-                            .replace("quase ", "")
-                            .replace("menos de ", "")
-                            .replace("cerca de ", "")
+                          .replace("aproximadamente ", "")
+                          .replace("quase ", "")
+                          .replace("menos de ", "")
+                          .replace("cerca de ", "")
                         : "Desconhecido";
-
-                      return (
-                        <Link
-                          key={org.id}
-                          href={`/pages/organizations/${org.slug}`}
-                          className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
-                        >
-                          <CardGeneral
-                            variant="neutral-100"
-                            image={{
-                              src: org.logo || "/images/placeholders/organization.png",
-                              alt: org.name,
-                              height: "56px",
-                              className: "bg-primary-100 !object-contain !h-[56px]",
-                            }}
-                            subtitleText={
-                              (
-                                <div className="flex flex-col">
-                                  <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                                    {timeAgo}
-                                  </span>
-                                  <span
-                                    style={{ fontSize: "16px", fontWeight: 300 }}
-                                    className="text-neutral-900 mt-4"
-                                  >
-                                    Organização
-                                  </span>
-                                </div>
-                              ) as unknown as string
-                            }
-                            titleText={org.name}
-                            descriptionText={
-                              (
-                                <div className="flex flex-col grow">
-                                  {org.description && (
-                                    <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
-                                      {org.description}
-                                    </p>
-                                  )}
-                                  <div className="mt-auto">
-                                    <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
-                                      <div
-                                        className="flex items-center gap-8"
-                                        title="Visualizações"
-                                      >
-                                        <Icon
-                                          name="agora-solid-eye"
-                                          dimensions="xs"
-                                          className="fill-neutral-700"
-                                          aria-hidden="true"
-                                        />
-                                        <span>{formatMetric(org.metrics?.views)}</span>
-                                      </div>
-                                      <div className="flex items-center gap-8" title="Datasets">
-                                        <Icon
-                                          name="agora-solid-layers-menu"
-                                          dimensions="xs"
-                                          className="fill-neutral-700"
-                                          aria-hidden="true"
-                                        />
-                                        <span>{org.metrics?.datasets || 0}</span>
-                                      </div>
-                                      <div className="flex items-center gap-8" title="Reutilizações">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" className="w-16 h-16 fill-neutral-700" aria-hidden="true">
-                                          <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" />
-                                        </svg>
-                                        <span>{org.metrics?.reuses || 0}</span>
-                                      </div>
-                                      <div className="flex items-center gap-8" title="Favoritos">
-                                        <Icon
-                                          name="agora-solid-star"
-                                          dimensions="xs"
-                                          className="fill-neutral-700"
-                                          aria-hidden="true"
-                                        />
-                                        <span>{formatMetric(org.metrics?.followers)}</span>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-8 text-primary-600 mt-16">
-                                      <Icon
-                                        name="agora-line-arrow-right-circle"
-                                        className="w-32 h-32"
-                                        aria-hidden="true"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              ) as unknown as string
-                            }
-                            isBlockedLink={true}
-                            anchor={{
-                              href: `/pages/organizations/${org.slug}`,
-                            }}
-                          />
-                        </Link>
-                      );
+                      const cardProps = {
+                        ...org,
+                        last_modified: timeAgo,
+                        title: org.name,
+                        link: `/pages/organizations/${org.slug}`
+                      } as CardMetricsProps;
+                      return <CardMetrics key={`dataset-${index}`} {...cardProps} hideProgressBar />
                     })
                   ) : (
                     <div className="col-span-full">

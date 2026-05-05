@@ -323,7 +323,11 @@ export default function HomeClient({
                       .replace("menos de ", "")
                       .replace("cerca de ", "")
                     : "Desconhecido";
-                  const cardProps = { ...dataset, last_modified: timeAgo } as CardMetricsProps;
+                  const cardProps = {
+                    ...dataset,
+                    last_modified: timeAgo,
+                    link: `/pages/datasets/${dataset.slug}`
+                  } as CardMetricsProps;
                   return <CardMetrics key={`featured-dataset-${index}`} {...cardProps} />
                 }
                 )

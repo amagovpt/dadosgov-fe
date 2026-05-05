@@ -5,7 +5,7 @@ import Link from "next/link";
 import Icon from "../../Primitives/Icon";
 
 export type CardMetricsProps = {
-    slug: string;
+    link: string;
     title: string;
     description: string;
     last_modified?: string;
@@ -22,16 +22,18 @@ export type CardMetricsProps = {
         reuses?: number;
         followers?: number;
     };
+    hideProgressBar?: boolean;
 };
 
 export default function CardMetrics({
-    slug,
+    link,
     title,
     description,
     last_modified,
     organization,
     quality,
     metrics,
+    hideProgressBar = false,
 }: CardMetricsProps) {
     const qualityScore = quality?.score != null ? Math.round(quality.score * 100) : 0;
 
@@ -44,7 +46,7 @@ export default function CardMetrics({
 
     return (
         <Link
-            href={`/pages/datasets/${slug}`}
+            href={link}
             className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
         >
             <CardGeneral
@@ -72,15 +74,17 @@ export default function CardMetrics({
                         <div
                             className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
                         >
-                            <ProgressBar
-                                value={qualityScore}
-                                max={100}
-                                hideLabel={true}
-                                hidePercentageValue={true}
-                            />
-                            <span className="text-[14px] text-neutral-900 mt-4 block">
-                                {qualityScore}% Qualidade dos metadados
-                            </span>
+                            {!hideProgressBar && (<>
+                                <ProgressBar
+                                    value={qualityScore}
+                                    max={100}
+                                    hideLabel={true}
+                                    hidePercentageValue={true}
+                                />
+                                <span className="text-[14px] text-neutral-900 mt-4 block">
+                                    {qualityScore}% Qualidade dos metadados
+                                </span>
+                            </>)}
                             <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
                                 <div className="flex items-center gap-8" title="Visualizações">
                                     <Icon
@@ -134,7 +138,7 @@ export default function CardMetrics({
                 }
                 isBlockedLink={true}
                 anchor={{
-                    href: `/pages/datasets/${slug}`,
+                    href: link,
                 }}
             />
         </Link>
