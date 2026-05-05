@@ -32,6 +32,7 @@ import { useAuth } from '@/context/AuthContext';
 import IsolatedSelect from '@/components/admin/IsolatedSelect';
 import EditDiscussionPopup from '@/components/discussions/EditDiscussionPopup';
 import DeleteDiscussionPopup from '@/components/discussions/DeleteDiscussionPopup';
+import { TagsCollapse } from '@/components/Shared/TagsCollapse';
 import { localizeReuseTypeId } from '@/lib/reuse-labels';
 
 import { format, formatDistanceToNow } from 'date-fns';
@@ -113,6 +114,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
       observer.disconnect();
     };
   }, [checkDescOverflow, reuse]);
+
+  const reuseTags = reuse?.tags ?? [];
 
   const handleCreateDiscussion = async () => {
     if (!reuse || !newDiscTitle.trim() || !newDiscMessage.trim()) return;
@@ -490,22 +493,14 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 </div>
 
                 {/* Sidebar Metadata */}
-                <aside className="xl:col-span-4 xl:block md:pt-64 flex flex-col gap-16" ref={descSidebarRef}>
-                  {reuse.tags && reuse.tags.length > 0 && (
-                    <div className="bg-white p-32 rounded-4">
-                      <h3 className="text-sm font-bold tracking-wider mb-8">Etiquetas</h3>
-                      <div className="flex flex-col items-start gap-8">
-                        {reuse.tags.map((tag) => (
-                          <Pill
-                            key={tag}
-                            appearance="solid"
-                            variant="primary"
-                            className="bg-primary-100 text-primary-700 h-auto py-4 px-8 text-xs font-semibold"
-                          >
-                            {tag}
-                          </Pill>
-                        ))}
-                      </div>
+                <aside className="xl:col-span-4 xl:block md:pt-64 flex flex-col gap-16 min-w-0" ref={descSidebarRef}>
+                  {reuseTags.length > 0 && (
+                    <div className="bg-white p-32 rounded-4 min-w-0">
+                      <TagsCollapse
+                        tags={reuseTags}
+                        title="Etiquetas"
+                        titleClassName="text-sm font-bold tracking-wider mb-8"
+                      />
                     </div>
                   )}
 

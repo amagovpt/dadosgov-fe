@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { Pill, Accordion, AccordionGroup } from "@ama-pt/agora-design-system";
+import { Accordion, AccordionGroup } from "@ama-pt/agora-design-system";
 import { Dataset } from "@/types/api";
 import { frequencyLabelsMap } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
-import { SeeMoreToggle } from "@/components/SeeMoreToggle";
+import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 
 interface DatasetInfoProps {
   dataset: Dataset;
@@ -83,51 +83,11 @@ const CopyButton = ({ text }: { text: string }) => {
 };
 
 export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
-  const [showAllTags, setShowAllTags] = useState(false);
-  const [collapsedVisibleTagCount, setCollapsedVisibleTagCount] = useState<number | null>(null);
-  const tagsMeasureRef = useRef<HTMLDivElement>(null);
   const tags = dataset?.tags ?? [];
-  const tagPillClass =
-    "bg-primary-100 text-primary-700 h-auto py-2 px-6 text-xs font-medium whitespace-nowrap shrink-0";
-
-  useEffect(() => {
-    if (!(dataset?.tags?.length) || showAllTags) return;
-
-    const calculateFirstRowCount = () => {
-      const measureContainer = tagsMeasureRef.current;
-      if (!measureContainer) return;
-
-      const items = Array.from(
-        measureContainer.querySelectorAll<HTMLElement>("[data-tag-measure-item='true']")
-      );
-
-      if (!items.length) {
-        setCollapsedVisibleTagCount(null);
-        return;
-      }
-
-      const firstRowTop = items[0].offsetTop;
-      const nextRowIndex = items.findIndex((item) => item.offsetTop > firstRowTop);
-      const firstRowCount = nextRowIndex === -1 ? items.length : nextRowIndex;
-      setCollapsedVisibleTagCount(Math.max(1, firstRowCount));
-    };
-
-    const rafId = window.requestAnimationFrame(calculateFirstRowCount);
-    const observer = new ResizeObserver(calculateFirstRowCount);
-    if (tagsMeasureRef.current) observer.observe(tagsMeasureRef.current);
-
-    return () => {
-      window.cancelAnimationFrame(rafId);
-      observer.disconnect();
-    };
-  }, [dataset?.tags, showAllTags]);
 
   if (!dataset) return null;
 
   const hasInfo = dataset.tags?.length > 0 || dataset.id || dataset.license;
-  const collapsedCount = collapsedVisibleTagCount ?? tags.length;
-  const visibleTags = showAllTags ? tags : tags.slice(0, collapsedCount);
-  const hasHiddenTags = tags.length > collapsedCount;
   const hasTemporal = dataset.created_at || dataset.frequency || dataset.last_modified;
   const hasSpatial = dataset.spatial?.zones?.length || dataset.spatial?.granularity;
   const hasExtras = Boolean(dataset.page || (dataset.contact_points && dataset.contact_points.length > 0));
@@ -154,37 +114,12 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-24">
             {tags.length > 0 && (
-              <div className="relative">
-                <p className="font-bold text-neutral-900 text-sm mb-8">Palavras-chave</p>
-                <div className="absolute inset-x-0 top-0 invisible pointer-events-none">
-                  <div ref={tagsMeasureRef} className="flex flex-wrap items-start gap-8">
-                    {tags.map((tag, index) => (
-                      <div key={`measure-${tag}-${index}`} data-tag-measure-item="true">
-                        <Pill appearance="solid" variant="primary" className={tagPillClass}>
-                          {tag}
-                        </Pill>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div
-                  className={`flex items-start gap-8 ${showAllTags ? "flex-wrap" : "flex-nowrap"} overflow-hidden`}
-                >
-                  {visibleTags.map((tag, index) => (
-                    <Pill key={`${tag}-${index}`} appearance="solid" variant="primary" className={tagPillClass}>
-                      {tag}
-                    </Pill>
-                  ))}
-                </div>
-                {hasHiddenTags && (
-                  <SeeMoreToggle
-                    isExpanded={showAllTags}
-                    onToggle={() => setShowAllTags((prev) => !prev)}
-                    className="mt-8 inline-flex items-center gap-4 bg-transparent border-0 p-0 text-m-regular text-primary-600 hover:text-primary-900"
-                    iconClassName="h-20 w-20"
-                    textClassName="text-s-regular"
-                  />
-                )}
+              <div className="min-w-0">
+                <TagsCollapse
+                  tags={tags}
+                  title="Palavras-chave"
+                  titleClassName="font-bold text-neutral-900 text-sm mb-8"
+                />
               </div>
             )}
             {dataset.id && (
