@@ -703,6 +703,7 @@ export default function ReusesFormClient({
                         .split(",")
                         .map((v) => v.trim())
                         .filter(Boolean)
+                        .sort((a, b) => a.localeCompare(b))
                         .map((keyword) => (
                           <Tag
                             key={keyword}
