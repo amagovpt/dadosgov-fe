@@ -315,9 +315,18 @@ export default function HomeClient({
 
             <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32">
               {latestDatasets.length > 0 ? (
-                latestDatasets.map((dataset, index) => (
-                  <CardMetrics key={`featured-dataset-${index}`} {...dataset as CardMetricsProps} />
-                ))
+                latestDatasets.map((dataset, index) => {
+                  const timeAgo = dataset.last_modified
+                    ? formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
+                      .replace("aproximadamente ", "")
+                      .replace("quase ", "")
+                      .replace("menos de ", "")
+                      .replace("cerca de ", "")
+                    : "Desconhecido";
+                  const cardProps = { ...dataset, last_modified: timeAgo } as CardMetricsProps;
+                  return <CardMetrics key={`featured-dataset-${index}`} {...cardProps} />
+                }
+                )
               ) : (
                 <div className="xl:col-span-3 text-center py-32 text-neutral-500">
                   Nenhum conjunto de dados encontrado.
