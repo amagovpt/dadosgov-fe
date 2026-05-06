@@ -23,10 +23,7 @@ import { Pagination } from "@/components/Pagination";
 import { CategoryToggles } from "@/components/CategoryToggles";
 import { fetchOrganizations, suggestTags } from "@/services/api";
 import { APIResponse, Dataservice, Organization, SiteMetrics } from "@/types/api";
-import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
-
-import PageBanner from "@/components/PageBanner";
+import HeroGeneral from "@/components/HeroGeneral";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";
 
@@ -296,7 +293,7 @@ export default function DataservicesClient({
   return (
     <div className="filters dataservice flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
-        <PageBanner
+        <HeroGeneral
           title="APIs"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
@@ -330,8 +327,8 @@ export default function DataservicesClient({
           <div className="mt-8 text-s-regular text-neutral-200">
             Exemplos: &quot;geolocalização&quot;, &quot;transportes&quot;, &quot;saúde&quot;
           </div>
-          <div className="shadow-lg dropdown absolute mb-64 w-full bg-white text-neutral-900"></div>
-        </PageBanner>
+          <div className="absolute w-full mb-64 bg-white text-neutral-900 shadow-lg dropdown"></div>
+        </HeroGeneral>
 
         <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
           <div className="grid-filters grid md:grid-cols-3 xl:grid-cols-12">

@@ -17,8 +17,8 @@ import {
   Checkbox,
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
-import PageBanner from "@/components/PageBanner";
-import SearchFilter from "@/components/Shared/SearchFilter";
+import HeroGeneral from "@/components/HeroGeneral";
+import SearchFilter from '@/components/Shared/SearchFilter';
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { suggestTags } from "@/services/api";
 import { formatDistanceToNow } from "date-fns";
@@ -265,7 +265,7 @@ export default function DataStoriesClient({
   return (
     <div className="filters datastories flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
-        <PageBanner
+        <HeroGeneral
           title="Data Stories"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"

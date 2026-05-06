@@ -18,7 +18,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
-import PageBanner from "@/components/PageBanner";
+import HeroGeneral from "@/components/HeroGeneral";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 
@@ -120,7 +120,7 @@ export default function OrganizationsClient({
   return (
     <div className="filters organization flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
-        <PageBanner
+        <HeroGeneral
           title="Organizações"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
@@ -138,7 +138,7 @@ export default function OrganizationsClient({
           }
         >
           <PublishDropdown darkMode={true} outline={false} />
-        </PageBanner>
+        </HeroGeneral>
 
         {/* Search Filter */}
         <SearchFilter

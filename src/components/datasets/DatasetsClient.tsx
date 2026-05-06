@@ -18,7 +18,7 @@ import { APIResponse, Dataset, DatasetFilters, SiteMetrics } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
-import PageBanner from "@/components/PageBanner";
+import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import Button from "../Primitives/Button";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
@@ -173,7 +173,7 @@ export default function DatasetsClient({
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters dataset">
       <main className="flex-grow bg-primary-50">
-        <PageBanner
+        <HeroGeneral
           title="Conjuntos de dados"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
@@ -191,7 +191,7 @@ export default function DatasetsClient({
           }
         >
           <PublishDropdown darkMode={true} outline={false} />
-        </PageBanner>
+        </HeroGeneral>
 
         {/* Search Filter */}
         <SearchFilter
