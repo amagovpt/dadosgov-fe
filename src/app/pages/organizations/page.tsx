@@ -30,11 +30,20 @@ export default async function OrganizationsPage({
         apiFilters.sort = '-last_modified';
     }
 
-    const [initialData, siteInfo, orgBadges] = await Promise.all([
+    const [initialData, siteInfo, orgBadges, allOrganizations] = await Promise.all([
         fetchOrganizations(page, 20, apiFilters),
         fetchSiteInfo(),
         fetchOrgBadges(),
+        fetchOrganizations(1, 100, { sort: "-datasets" }),
     ]);
+
+    const badgeKeys = Object.keys(orgBadges);
+    const badgeCountResponses = await Promise.all(
+        badgeKeys.map((badge) => fetchOrganizations(1, 1, { badge }))
+    );
+    const orgBadgeCounts = Object.fromEntries(
+        badgeKeys.map((badge, index) => [badge, badgeCountResponses[index].total])
+    ) as Record<string, number>;
 
     return (
         <OrganizationsClient
@@ -42,9 +51,9 @@ export default async function OrganizationsPage({
             currentPage={page}
             siteMetrics={siteInfo.metrics}
             orgBadges={orgBadges}
-            orgBadgeCounts={{}}
+            orgBadgeCounts={orgBadgeCounts}
             initialFilters={filters}
-            allOrganizations={[]}
+            allOrganizations={allOrganizations.data}
         />
     );
 }
