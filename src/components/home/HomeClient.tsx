@@ -8,8 +8,9 @@ import { Dataset, Post, Reuse, SiteMetrics } from "@/types/api";
 import { formatDistanceToNow, format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
-import { DataStoryMetadata } from "@/types/datastories/datastories";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
+import { Datastory } from "@/types/home";
+import { getAssets } from "@/utils/getAssets";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -33,7 +34,7 @@ function formatStatNumber(value: number): { number: string; suffix: string } {
 interface HomeClientProps {
   siteMetrics: SiteMetrics;
   latestDatasets: Dataset[];
-  datastories: DataStoryMetadata[];
+  datastories: Datastory[];
   latestReuses: Reuse[];
   posts: Post[];
 }
@@ -368,7 +369,7 @@ export default function HomeClient({
                     key={story.slug}
                     variant="indented"
                     image={{
-                      src: story.image?.at(0)?.url,
+                      src: story.image && story.image[0] ? getAssets(story.image[0].id) : "/card-full-image.png",
                       alt: story.title,
                     }}
                     subtitle={

@@ -13,7 +13,9 @@ export function getDataStories(locale: string = "pt") {
                         title
                         description
                         image {
+                            fileName
                             url
+                            id
                         }
                         createdAt
                         tags {
