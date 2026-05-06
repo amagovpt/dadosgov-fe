@@ -43,12 +43,16 @@ import {
   fetchActivity,
   fetchDiscussions,
   suggestTags,
+  requestTransfer,
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import RecipientSelect, {
+  type RecipientSelection,
+} from "@/components/admin/RecipientSelect";
 import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
 
 const activityLabels: Record<string, string> = {
@@ -85,18 +89,40 @@ const translateActivityLabel = (label: string) => activityLabels[label] ?? label
 
 function TransferReusePopupContent({
   reuseTitle,
-  onClose,
+  onConfirm,
 }: {
   reuseTitle: string;
-  onClose: () => void;
+  onConfirm: (recipient: RecipientSelection, comment: string) => Promise<void>;
 }) {
+  const [recipient, setRecipient] = useState<RecipientSelection | null>(null);
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showRecipientError, setShowRecipientError] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!recipient) {
+      setShowRecipientError(true);
+      return;
+    }
+    setShowRecipientError(false);
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    try {
+      await onConfirm(recipient, comment.trim());
+      // Parent is responsible for hide() on success.
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : null;
+      setErrorMessage(msg || "Erro ao pedir a transferência da reutilização.");
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-[16px]">
       <p>
         <Icon name="agora-line-document" className="inline w-4 h-4 mr-[4px]" />
-        <a href="#" className="text-primary-600 underline">
-          {reuseTitle}
-        </a>
+        <span className="text-primary-600">{reuseTitle}</span>
       </p>
       <p>
         <strong>Esta ação é irreversível.</strong>&nbsp;
@@ -105,13 +131,27 @@ function TransferReusePopupContent({
 
       <div className="flex flex-col gap-[8px]">
         <label className="text-primary-900 text-base font-medium leading-7">
-          Organização ou utilizador
+          Organização ou utilizador <span className="text-danger-600">*</span>
         </label>
-        <InputText
+        <RecipientSelect
+          id="transfer-reuse-recipient"
           placeholder="Selecione a identidade para a qual pretende transferir a reutilização..."
-          id="transfer-reuse-search"
-          label=""
+          onChange={(selection) => {
+            setRecipient(selection);
+            if (selection) setShowRecipientError(false);
+          }}
+          hasError={showRecipientError}
+          errorFeedbackText="Selecione um utilizador ou organização"
         />
+        {recipient && (
+          <p className="text-sm text-neutral-700">
+            Destinatário selecionado:{" "}
+            <strong className="text-primary-900">{recipient.label}</strong>{" "}
+            <span className="text-neutral-500">
+              ({recipient.class === "User" ? "utilizador" : "organização"})
+            </span>
+          </p>
+        )}
       </div>
 
       <div className="admin-page__org-card flex flex-col items-center gap-[16px] bg-neutral-50 rounded-lg p-8 text-center">
@@ -136,12 +176,20 @@ function TransferReusePopupContent({
           Comentário
         </label>
         <InputTextArea
-          placeholder=""
+          placeholder="Mensagem opcional para o destinatário..."
           id="transfer-reuse-comment"
           label=""
           rows={3}
+          value={comment}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setComment(e.target.value)
+          }
         />
       </div>
+
+      {errorMessage && (
+        <p className="text-danger-600 text-sm">{errorMessage}</p>
+      )}
 
       <div className="flex justify-end gap-16 pt-16">
         <Button
@@ -150,9 +198,10 @@ function TransferReusePopupContent({
           hasIcon
           leadingIcon="agora-line-plane"
           leadingIconHover="agora-solid-plane"
-          onClick={onClose}
+          onClick={handleConfirm}
+          disabled={isSubmitting}
         >
-          Transferir a reutilização
+          {isSubmitting ? "A transferir..." : "Transferir a reutilização"}
         </Button>
       </div>
     </div>
@@ -551,6 +600,25 @@ export default function ReusesEditClient() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleTransferReuse = async (
+    recipient: RecipientSelection,
+    comment: string,
+  ) => {
+    if (!reuse) throw new Error("Reutilização não carregada.");
+    setApiError(null);
+    setApiSuccess(null);
+    await requestTransfer({
+      subject: { class: "Reuse", id: reuse.id },
+      recipient: { class: recipient.class, id: recipient.id },
+      comment: comment || undefined,
+    });
+    hide();
+    setApiSuccess(
+      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
+    );
+    setTimeout(() => setApiSuccess(null), 15000);
   };
 
   const handleUnarchiveReuse = async () => {
@@ -958,7 +1026,7 @@ export default function ReusesEditClient() {
                               show(
                                 <TransferReusePopupContent
                                   reuseTitle={reuse.title}
-                                  onClose={hide}
+                                  onConfirm={handleTransferReuse}
                                 />,
                                 {
                                   title: "Transfira a reutilização",
