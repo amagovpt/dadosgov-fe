@@ -258,7 +258,13 @@ export const Header = () => {
               leadingIcon="agora-line-user"
               leadingIconHover="agora-solid-user"
             >
-              <Link href={user ? `/pages/users/${user.slug}` : "/pages/login"}>
+              <Link
+                href={
+                  user
+                    ? `/pages/users/${user.slug}`
+                    : `/pages/login${pathname && pathname !== "/pages/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`
+                }
+              >
                 {user ? `${user.first_name} ${user.last_name}` : "Autenticar"}
               </Link>
             </UnauthenticatedLink>
