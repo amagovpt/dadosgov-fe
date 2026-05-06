@@ -237,7 +237,7 @@ export const Header = () => {
 
           <Search label="Pesquisar">
             <CustomSearch>
-              <div style={{ maxWidth: "40vw" }}>
+              <div className='max-w-xl'>
                 <SearchDropdown
                   id="header-search"
                   hasVoiceActionButton={false}

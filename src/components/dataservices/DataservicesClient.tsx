@@ -26,7 +26,7 @@ import { APIResponse, Dataservice, Organization, SiteMetrics } from "@/types/api
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
-import PageBanner from "@/components/PageBanner";
+import HeroGeneral from "@/components/HeroGeneral";
 
 const SORT_OPTIONS: Record<string, string> = {
   relevancia: "",
@@ -294,7 +294,7 @@ export default function DataservicesClient({
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters dataservice">
       <main className="flex-grow bg-primary-50">
-        <PageBanner
+        <HeroGeneral
           title="APIs"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
@@ -329,7 +329,7 @@ export default function DataservicesClient({
             Exemplos: &quot;geolocalização&quot;, &quot;transportes&quot;, &quot;saúde&quot;
           </div>
           <div className="absolute w-full mb-64 bg-white text-neutral-900 shadow-lg dropdown"></div>
-        </PageBanner>
+        </HeroGeneral>
 
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-white">
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters">

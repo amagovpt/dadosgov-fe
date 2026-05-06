@@ -11,7 +11,7 @@ import {
   DropdownOption,
   Icon,
 } from "@ama-pt/agora-design-system";
-import PageBanner from "@/components/PageBanner";
+import HeroGeneral from "@/components/HeroGeneral";
 import { Pagination } from "@/components/Pagination";
 
 import { fetchPosts } from "@/services/api";
@@ -139,7 +139,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters article">
       <main className="grow bg-primary-50">
-        <PageBanner
+        <HeroGeneral
           title="Últimas novidades"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
@@ -165,7 +165,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
           <div className="mt-8 text-s-regular text-neutral-200">
             Exemplos: &quot;webinar&quot;, &quot;estudos&quot;, &quot;eventos&quot;
           </div>
-        </PageBanner>
+        </HeroGeneral>
 
         <div className="container mx-auto md:gap-32 xl:gap-64">
           <div className="pt-32 pb-64">

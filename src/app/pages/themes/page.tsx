@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { Icon, Accordion, AccordionGroup } from '@ama-pt/agora-design-system';
-import PageBanner from '@/components/PageBanner';
+import HeroGeneral from '@/components/HeroGeneral';
 
 export default function ThemesPage() {
   return (
     <main className="flex-grow bg-white">
-      <PageBanner
+      <HeroGeneral
         title="Dados relacionados à cultura"
         breadcrumbItems={[
           { label: 'Home', url: '/' },
@@ -22,7 +22,7 @@ export default function ThemesPage() {
             Pode descobrir todos os dados relacionados com a cultura em <a href="#" className="underline hover:text-primary-200 transition-colors">culture.data.gouv.fr</a>, a plataforma dedicada a referenciar, promover e divulgar dados culturais públicos.
           </p>
         </div>
-      </PageBanner>
+      </HeroGeneral>
 
       <div className="container mx-auto px-4 py-64">
         <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32">

@@ -54,16 +54,15 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
   }, [showDropdown]);
 
   return (
-    <div className="relative inline-block publish-dropdown-wrapper" ref={wrapperRef}>
+    <div className="relative inline-block" ref={wrapperRef}>
       <Button
         variant="primary"
         appearance={outline ? "outline" : undefined}
+        className="!bg-white hover:!text-primary-900 [&_.icon]:hover:!fill-primary-900"
         darkMode={darkMode}
         hasIcon={true}
         trailingIcon={showDropdown ? "agora-line-chevron-up" : "agora-line-chevron-down"}
         trailingIconHover={showDropdown ? "agora-solid-chevron-up" : "agora-solid-chevron-down"}
-        className="px-24 py-16 h-auto relative z-10"
-        style={{ borderRadius: "4px" }}
         onClick={() => setShowDropdown((v) => !v)}
       >
         <span className="text-lg font-medium">
@@ -71,23 +70,23 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
         </span>
       </Button>
       {showDropdown && (
-        <div className="publish-custom-dropdown">
+        <div className="absolute left-0 mt-8 bg-white border-1 rounded-4 shadow-lg py-8 z-10 max-w-256">
           {PUBLISH_ITEMS.map((item, index) => (
             <button
               key={index}
-              className="publish-custom-dropdown__item"
+              className="flex items-center gap-8 w-full text-left text-nowrap p-16 border-b-2 border-b-neutral-200 last-of-type:border-none hover:bg-primary-50"
               onClick={() => {
                 setShowDropdown(false);
                 router.push(item.href);
               }}
             >
               {item.icon ? (
-                <Icon name={item.icon} className="w-[24px] h-[24px] text-primary-600" />
+                <Icon name={item.icon} className="w-24 h-24 text-primary-600" />
               ) : (
                 <img
                   src={item.customIcon!}
                   alt=""
-                  className="w-[24px] h-[24px]"
+                  className="w-24 h-24"
                   style={{ filter: "invert(22%) sepia(93%) saturate(2500%) hue-rotate(215deg) brightness(95%) contrast(105%)" }}
                   aria-hidden="true"
                 />
