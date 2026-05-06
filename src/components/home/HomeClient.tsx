@@ -420,7 +420,7 @@ export default function HomeClient({
                   <div key={post.id} className="latest-news-card-wrapper h-full">
                     <CardArticle
                       image={{
-                        src: post.image_thumbnail || post.image || "",
+                        src: post.image_thumbnail || post.image || undefined,
                         alt: post.name,
                       }}
                       subtitle={
