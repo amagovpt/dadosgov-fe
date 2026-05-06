@@ -1,25 +1,23 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Icon,
   CardGeneral,
-  CardLinks,
   ToggleGroup,
   Toggle,
-  Pill,
   CardNoResults,
   ProgressBar,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { deleteDataset } from "@/services/api";
+import { deleteDataset, fetchDatasets } from "@/services/api";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
-import { APIResponse, Dataset, DatasetFilters, SiteMetrics } from "@/types/api";
+import { APIResponse, Dataset, DatasetFilters } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
@@ -30,8 +28,6 @@ import Button from "../Primitives/Button";
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
   currentPage: number;
-  siteMetrics?: SiteMetrics;
-  initialFilters?: DatasetFilters;
   filterCounts?: Record<string, number>;
 }
 
@@ -52,13 +48,16 @@ const SORT_LABELS: Record<string, string> = {
 export default function DatasetsClient({
   initialData,
   currentPage,
-  siteMetrics,
-  initialFilters = {},
   filterCounts,
 }: DatasetsClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
   const { show, hide } = usePopupContext();
-  const { data: datasets, total, page_size } = initialData;
+  const [listData, setListData] = React.useState<APIResponse<Dataset>>(initialData);
+  const activePage = Number(searchParams.get("page") || String(currentPage || 1));
+  const { data: datasets, total, page_size } = listData;
 
   const handleDeleteDataset = (dataset: { id: string; title: string }) => {
     show(
@@ -94,63 +93,89 @@ export default function DatasetsClient({
     );
   };
 
-  const currentQuery = initialFilters.q || "";
-  const currentSort = initialFilters.sort || "";
+
+  const currentQuery = searchParams.get("q") || "";
+  const currentSort = searchParams.get("sort") || "";
   const [filtersOpen, setFiltersOpen] = React.useState(false);
 
   const currentSortKey =
     Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
 
+  const getLiveParams = React.useCallback(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search);
+    }
+    return new URLSearchParams(Array.from(searchParams.entries()));
+  }, [searchParams]);
+
   const buildUrl = React.useCallback(
     (overrides: Record<string, string | null>) => {
-      const params = new URLSearchParams();
-      if (initialFilters.q) params.set("q", initialFilters.q);
-      if (initialFilters.sort) params.set("sort", initialFilters.sort);
-      if (initialFilters.tag) {
-        const tags = Array.isArray(initialFilters.tag) ? initialFilters.tag : [initialFilters.tag];
-        tags.forEach((t) => params.append("tag", t));
-      }
-      if (initialFilters.license) {
-        const licenses = Array.isArray(initialFilters.license)
-          ? initialFilters.license
-          : [initialFilters.license];
-        licenses.forEach((l) => params.append("license", l));
-      }
-      if (initialFilters.format) {
-        const formats = Array.isArray(initialFilters.format)
-          ? initialFilters.format
-          : [initialFilters.format];
-        formats.forEach((f) => params.append("format", f));
-      }
-      if (initialFilters.organization) {
-        const orgs = Array.isArray(initialFilters.organization)
-          ? initialFilters.organization
-          : [initialFilters.organization];
-        orgs.forEach((o) => params.append("organization", o));
-      }
-      if (initialFilters.badge) {
-        const badges = Array.isArray(initialFilters.badge)
-          ? initialFilters.badge
-          : [initialFilters.badge];
-        badges.forEach((b) => params.append("badge", b));
-      }
-      if (initialFilters.schema) params.set("schema", initialFilters.schema);
-      if (initialFilters.geozone) params.set("geozone", initialFilters.geozone);
-      if (initialFilters.granularity) params.set("granularity", initialFilters.granularity);
-      if (initialFilters.featured) params.set("featured", "true");
+      const params = getLiveParams();
       for (const [key, value] of Object.entries(overrides)) {
-        if (value) {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
+        if (value) params.set(key, value);
+        else params.delete(key);
       }
-      params.set("page", "1");
+      params.delete("page");
+      params.sort();
       const qs = params.toString();
-      return `/pages/datasets${qs ? `?${qs}` : ""}`;
+      return `${pathname}${qs ? `?${qs}` : ""}`;
     },
-    [initialFilters]
+    [getLiveParams, pathname]
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadDatasetsFromUrl() {
+      const params = new URLSearchParams(queryString);
+      const tags = params
+        .getAll("tag")
+        .flatMap((value) => value.split(","))
+        .map((value) => value.trim())
+        .filter(Boolean);
+      const licenses = params.getAll("license");
+      const formats = params.getAll("format");
+      const organizations = params.getAll("organization");
+      const badges = params.getAll("badge");
+      const frequencies = params.getAll("frequency");
+
+      const filters: DatasetFilters = {
+        ...(params.get("q") && { q: params.get("q") as string }),
+        ...(params.get("schema") && { schema: params.get("schema") as string }),
+        ...(params.get("geozone") && { geozone: params.get("geozone") as string }),
+        ...(params.get("granularity") && { granularity: params.get("granularity") as string }),
+        ...(params.get("sort") && { sort: params.get("sort") as string }),
+        ...(params.get("modified_since") && {
+          modified_since: params.get("modified_since") as string,
+        }),
+        ...(params.get("featured") && { featured: params.get("featured") === "true" }),
+        ...(tags.length > 0 && { tag: tags.length === 1 ? tags[0] : tags }),
+        ...(licenses.length > 0 && { license: licenses.length === 1 ? licenses[0] : licenses }),
+        ...(formats.length > 0 && { format: formats.length === 1 ? formats[0] : formats }),
+        ...(organizations.length > 0 && {
+          organization: organizations.length === 1 ? organizations[0] : organizations,
+        }),
+        ...(badges.length > 0 && { badge: badges.length === 1 ? badges[0] : badges }),
+        ...(frequencies.length > 0 && {
+          frequency: frequencies.length === 1 ? frequencies[0] : frequencies,
+        }),
+      };
+
+      if (!filters.sort && !filters.q) {
+        filters.sort = "-created";
+      }
+
+      const next = await fetchDatasets(activePage, initialData.page_size || 20, filters);
+      if (!cancelled) {
+        setListData(next);
+      }
+    }
+
+    loadDatasetsFromUrl();
+    return () => {
+      cancelled = true;
+    };
+  }, [queryString, activePage, initialData.page_size]);
 
   const onSearchNavigate = React.useCallback(
     (query: string) => {
@@ -431,7 +456,7 @@ export default function DatasetsClient({
                 </div>
 
                 <div className="pb-64 mt-64 flex justify-center">
-                  <Pagination currentPage={currentPage} totalItems={total} pageSize={page_size} />
+                  <Pagination currentPage={activePage} totalItems={total} pageSize={page_size} />
                 </div>
               </div>
             </div>

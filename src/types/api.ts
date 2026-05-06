@@ -722,6 +722,7 @@ export interface DatasetFilters {
   tag?: string | string[];
   license?: string | string[];
   format?: string | string[];
+  frequency?: string | string[];
   schema?: string;
   geozone?: string;
   granularity?: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Sidebar, SidebarItem, Checkbox, InputSearch, Icon, Toggle, Pill, Button } from "@ama-pt/agora-design-system";
 import {
@@ -105,7 +105,11 @@ function detectFormatoFromParams(params: URLSearchParams): string {
 }
 
 function detectRotuloFromParams(params: URLSearchParams): string {
-  const tags = params.getAll("tag");
+  const tags = params
+    .getAll("tag")
+    .flatMap((value) => value.split(","))
+    .map((value) => value.trim())
+    .filter(Boolean);
   if (tags.includes("hvd")) return "high_value";
   return "all";
 }
@@ -118,6 +122,38 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
+  const paramsRef = React.useRef(queryString);
+  const getWorkingParams = React.useCallback(() => {
+    return new URLSearchParams(paramsRef.current);
+  }, []);
+
+  const readParamValues = React.useCallback((params: URLSearchParams, paramName: string) => {
+    const values = params.getAll(paramName);
+    if (paramName === "tag") {
+      return values
+        .flatMap((value) => value.split(","))
+        .map((value) => value.trim())
+        .filter(Boolean);
+    }
+    return values;
+  }, []);
+
+  const writeParamValues = React.useCallback((params: URLSearchParams, paramName: string, values: string[]) => {
+    params.delete(paramName);
+    if (values.length === 0) return;
+    values.forEach((value) => params.append(paramName, value));
+  }, []);
+
+  const navigateWithParams = React.useCallback(
+    (params: URLSearchParams) => {
+      params.set("page", "1");
+      const search = params.toString();
+      paramsRef.current = search;
+      router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
+    },
+    [pathname, router]
+  );
 
   const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>(() => ({
     formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
@@ -125,10 +161,20 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
     rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
   }));
 
+  useEffect(() => {
+    paramsRef.current = queryString;
+    const current = new URLSearchParams(queryString);
+    setSelectedToggleFilters({
+      formato: detectFormatoFromParams(current),
+      atualizacao: detectAtualizacaoFromParams(current),
+      rotulo: detectRotuloFromParams(current),
+    });
+  }, [queryString]);
+
   const handleToggleFilterChange = (filterKey: ToggleFilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
 
-    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    const current = getWorkingParams();
 
     if (filterKey === "formato") {
       current.delete("format");
@@ -144,17 +190,14 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
         current.set("modified_since", DATE_RANGE_MAP[optionId]());
       }
     } else if (filterKey === "rotulo") {
-      const tags = current.getAll("tag").filter((t) => t !== "hvd");
-      current.delete("tag");
-      tags.forEach((t) => current.append("tag", t));
+      const tags = readParamValues(current, "tag").filter((t) => t !== "hvd");
       if (optionId === "high_value") {
-        current.append("tag", "hvd");
+        tags.push("hvd");
       }
+      writeParamValues(current, "tag", Array.from(new Set(tags)));
     }
 
-    current.set("page", "1");
-    const search = current.toString();
-    router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
+    navigateWithParams(current);
   };
 
   const [organizations, setOrganizations] = React.useState<Organization[]>([]);
@@ -168,7 +211,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   const [searchQueries, setSearchQueries] = React.useState<Record<string, string>>({});
   const filterCounts = serverCounts || {};
 
-  React.useEffect(() => {
+  useEffect(() => {
     async function loadFilterData() {
       try {
         const [orgsRes, licensesRes, frequenciesRes, granularitiesRes] =
@@ -231,27 +274,17 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   }, []);
 
   const handleFilterChange = (paramName: string, value: string) => {
-    const current = new URLSearchParams(Array.from(searchParams.entries()));
-    const currentValues = current.getAll(paramName);
+    const current = getWorkingParams();
+    const currentValues = readParamValues(current, paramName);
 
-    if (currentValues.includes(value)) {
-      current.delete(paramName);
-      currentValues.filter((v) => v !== value).forEach((v) => current.append(paramName, v));
-    } else {
-      current.append(paramName, value);
-    }
+    const isCurrentlyChecked = currentValues.includes(value);
+    const nextValues = isCurrentlyChecked
+      ? currentValues.filter((v) => v !== value)
+      : [...currentValues, value];
+    const uniqueValues = Array.from(new Set(nextValues));
+    writeParamValues(current, paramName, uniqueValues);
 
-    current.set("page", "1");
-    const search = current.toString();
-    router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
-  };
-
-  const handleClearFilter = (paramName: string) => {
-    const current = new URLSearchParams(Array.from(searchParams.entries()));
-    current.delete(paramName);
-    current.set("page", "1");
-    const search = current.toString();
-    router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
+    navigateWithParams(current);
   };
 
   const handleSearchChange = (groupName: string, value: string) => {
@@ -262,7 +295,10 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
     if (groupName === "Cobertura Espacial") handleZoneSearch(value);
   };
 
-  const getActiveValues = (paramName: string) => searchParams.getAll(paramName);
+  const getActiveValues = (paramName: string) => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    return readParamValues(current, paramName);
+  };
 
   const filterGroups: {
     name: string;
@@ -395,10 +431,11 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
             : [];
 
           const allData = [...selectedItems, ...group.data];
+          const uniqueData = Array.from(new Map(allData.map((item) => [item.id, item])).values());
 
           const filteredData = group.suggest
-            ? allData
-            : allData.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+            ? uniqueData
+            : uniqueData.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
           const showSearch = group.searchable;
           const showScroll = filteredData.length > 5;
@@ -443,6 +480,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
                     filteredData.map((item) => (
                       <Checkbox
                         key={item.id}
+                        id={`dataset-${group.param}-${encodeURIComponent(item.id)}`}
                         label={item.name}
                         className="font-bold"
                         value={item.id}
@@ -470,6 +508,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
           variant="primary"
           appearance="outline"
           onClick={() => {
+            paramsRef.current = "";
             setSelectedToggleFilters({
               formato: "all",
               atualizacao: "all",

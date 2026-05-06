@@ -330,6 +330,7 @@ export async function fetchDatasets(
         ["tag", filters.tag],
         ["license", filters.license],
         ["format", filters.format],
+        ["frequency", filters.frequency],
         ["badge", filters.badge],
         ["organization", filters.organization],
       ];
@@ -394,6 +395,7 @@ export async function fetchAdminDatasets(
         ["tag", filters.tag],
         ["license", filters.license],
         ["format", filters.format],
+        ["frequency", filters.frequency],
         ["badge", filters.badge],
         ["organization", filters.organization],
       ];
@@ -428,7 +430,6 @@ export async function fetchAdminDatasets(
     };
   }
 }
-
 export async function fetchDataset(slug: string): Promise<Dataset> {
   try {
     const res = await fetch(`${API_AUTH_URL}/datasets/${slug}/`, {
@@ -3805,3 +3806,4 @@ export async function submitSupportContact(payload: {
     throw new Error(detail || `Failed to submit support form: ${res.statusText}`);
   }
 }
+
