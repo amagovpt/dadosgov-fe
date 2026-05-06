@@ -20,6 +20,7 @@ import { Organization } from "@/types/api";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { useAuth } from "@/context/AuthContext";
 import { requestMembership, followEntity, unfollowEntity, isFollowing } from "@/services/api";
+import { formatMetricValue } from "@/utils/formatNumber";
 
 interface OrganizationDetailClientProps {
   organization: Organization;
@@ -138,9 +139,9 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   }, [checkOverflow]);
 
   return (
-    <main className="w-full flex flex-col gap-24 justify-center items-center ">
+    <main className="flex w-full flex-col items-center justify-center gap-24">
       {/* Breadcrumb & Action Section */}
-      <div className="container flex justify-between items-center ">
+      <div className="container flex items-center justify-between">
         <Breadcrumb
           items={[
             { label: "Home", url: "/" },
@@ -151,30 +152,30 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
       </div>
 
       <div className="container flex justify-end gap-12">
-          {user && !isMember && !requestSuccess && (
-            <Button
-              variant="primary"
-              appearance="outline"
-              hasIcon={true}
-              leadingIcon="agora-line-plus-circle"
-              leadingIconHover="agora-solid-plus-circle"
-              onClick={() => setShowRequestForm(!showRequestForm)}
-            >
-              Pedir adesão
-            </Button>
-          )}
+        {user && !isMember && !requestSuccess && (
           <Button
             variant="primary"
-            appearance={isFavorite ? "solid" : "outline"}
+            appearance="outline"
             hasIcon={true}
-            leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
-            leadingIconHover="agora-solid-star"
-            className="flex-shrink-0"
-            onClick={handleToggleFavorite}
-            disabled={isTogglingFavorite}
+            leadingIcon="agora-line-plus-circle"
+            leadingIconHover="agora-solid-plus-circle"
+            onClick={() => setShowRequestForm(!showRequestForm)}
           >
-            {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            Pedir adesão
           </Button>
+        )}
+        <Button
+          variant="primary"
+          appearance={isFavorite ? "solid" : "outline"}
+          hasIcon={true}
+          leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
+          leadingIconHover="agora-solid-star"
+          className="flex-shrink-0"
+          onClick={handleToggleFavorite}
+          disabled={isTogglingFavorite}
+        >
+          {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+        </Button>
       </div>
 
       {requestSuccess && (
@@ -184,13 +185,11 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           description="Pedido de adesão enviado com sucesso. O administrador da organização irá analisar o seu pedido."
         />
       )}
-      {requestError && (
-        <StatusCard variant="danger" showIcon description={requestError} />
-      )}
+      {requestError && <StatusCard variant="danger" showIcon description={requestError} />}
 
       {showRequestForm && (
-        <div className="container bg-neutral-50 rounded-lg p-[24px]  flex flex-col gap-[16px]">
-          <h3 className="text-primary-900 text-base font-semibold">
+        <div className="rounded-lg container flex flex-col gap-[16px] bg-neutral-50 p-[24px]">
+          <h3 className="text-base font-semibold text-primary-900">
             Pedir adesão a {organization.name}
           </h3>
           <InputTextArea
@@ -215,50 +214,51 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             >
               Cancelar
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleRequestMembership}
-              disabled={isRequesting}
-            >
+            <Button variant="primary" onClick={handleRequestMembership} disabled={isRequesting}>
               {isRequesting ? "A enviar..." : "Enviar pedido"}
             </Button>
           </div>
         </div>
       )}
 
-      <div className="container flex flex-col xl:flex-row gap-32 ">
+      <div className="container flex flex-col gap-32 xl:flex-row">
         {/* Main Content Column */}
         <div className="w-full">
           {/* Title & Header */}
           <div className="flex flex-col gap-4" ref={titleRef}>
-            <div className="flex justify-between items-start">
-              <h1 className="text-xl-bold text-primary-900 leading-tight mb-24 max-w-[592px]">
+            <div className="flex items-start justify-between">
+              <h1 className="mb-24 max-w-[592px] text-xl-bold leading-tight text-primary-900">
                 {organization.name}
               </h1>
             </div>
           </div>
 
           {/* Description Section */}
-          <div className="text-neutral-700 text-lg leading-relaxed mb-12 relative">
+          <div className="text-lg relative mb-12 leading-relaxed text-neutral-700">
             {/* Hidden measure element to get full content height */}
-            <div ref={measureRef} className="absolute invisible pointer-events-none" style={{ top: 0, left: 0, right: 0 }} aria-hidden="true">
-              <p className="text-neutral-900 text-m-light  max-w-[592px]">
+            <div
+              ref={measureRef}
+              className="pointer-events-none invisible absolute"
+              style={{ top: 0, left: 0, right: 0 }}
+              aria-hidden="true"
+            >
+              <p className="max-w-[592px] text-m-light text-neutral-900">
                 {organization.description || "Esta organização não possui descrição."}
               </p>
               <div className="mt-8">
-                <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
+                <h3 className="text-xl mb-[16px] font-bold text-primary-900">
                   Observações preliminares
                 </h3>
-                <p className="text-neutral-900 mb-[16px] max-w-[592px]">
+                <p className="mb-[16px] max-w-[592px] text-neutral-900">
                   Informações adicionais sobre o papel desta organização na gestão e publicação de
                   dados abertos.
                 </p>
               </div>
               <div className="mt-8">
-                <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
+                <h3 className="text-xl mb-[16px] font-bold text-primary-900">
                   Sobre a organização
                 </h3>
-                <p className="text-neutral-900  max-w-[592px]">
+                <p className="max-w-[592px] text-neutral-900">
                   {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
                   para a transparência e reutilização de informação pública em Portugal.
                 </p>
@@ -266,28 +266,32 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             </div>
             <div
               className="overflow-hidden"
-              style={!expanded && isOverflowing && availableHeight ? { maxHeight: availableHeight } : undefined}
+              style={
+                !expanded && isOverflowing && availableHeight
+                  ? { maxHeight: availableHeight }
+                  : undefined
+              }
             >
-              <p className="text-neutral-900 text-m-light  max-w-[592px]">
+              <p className="max-w-[592px] text-m-light text-neutral-900">
                 {organization.description || "Esta organização não possui descrição."}
               </p>
 
               {/* Static sections to mirror dataset page as requested (copy) */}
               <div className="mt-8">
-                <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
+                <h3 className="text-xl mb-[16px] font-bold text-primary-900">
                   Observações preliminares
                 </h3>
-                <p className="text-neutral-900 mb-[16px] max-w-[592px]">
+                <p className="mb-[16px] max-w-[592px] text-neutral-900">
                   Informações adicionais sobre o papel desta organização na gestão e publicação de
                   dados abertos.
                 </p>
               </div>
 
               <div className="mt-8">
-                <h3 className="text-xl font-bold text-primary-900 mb-[16px]">
+                <h3 className="text-xl mb-[16px] font-bold text-primary-900">
                   Sobre a organização
                 </h3>
-                <p className="text-neutral-900  max-w-[592px]">
+                <p className="max-w-[592px] text-neutral-900">
                   {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
                   para a transparência e reutilização de informação pública em Portugal.
                 </p>
@@ -296,13 +300,13 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             {isOverflowing && (
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-8 text-primary-600 cursor-pointer hover:underline mt-8"
+                className="mt-8 flex cursor-pointer items-center gap-8 text-primary-600 hover:underline"
               >
                 {expanded ? "Ler menos" : "Ler mais"}
                 {expanded ? (
-                  <Icon name="agora-line-arrow-up-circle" className="w-24 h-24" />
+                  <Icon name="agora-line-arrow-up-circle" className="h-24 w-24" />
                 ) : (
-                  <Icon name="agora-line-arrow-down-circle" className="w-24 h-24" />
+                  <Icon name="agora-line-arrow-down-circle" className="h-24 w-24" />
                 )}
               </button>
             )}
@@ -310,13 +314,16 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
         </div>
 
         <div className="w-full">
-          <div className="flex flex-col h-fit card-article-3_2 organization_detail" ref={sidebarRef}>
+          <div
+            className="card-article-3_2 organization_detail flex h-fit flex-col"
+            ref={sidebarRef}
+          >
             <CardArticle
-              className="card-detail-info border-none shadow-none mb-16 bg-[#F2F6FF] p-32 rounded-4"
+              className="card-detail-info mb-16 rounded-4 border-none bg-[#F2F6FF] p-32 shadow-none"
               subtitle={
                 <div className="flex flex-col gap-16">
                   {organization.logo ? (
-                    <div className="w-fit h-[48px] card-article-3_2-img py-8 rounded-8 border-2 border-primary-300 flex items-center justify-center">
+                    <div className="card-article-3_2-img flex h-[48px] w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
                       <img
                         src={organization.logo}
                         alt={organization.name}
@@ -324,16 +331,16 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                       />
                     </div>
                   ) : (
-                    <div className="w-fit px-12 py-6 bg-neutral-100 rounded-8 border border-neutral-200 flex items-center justify-center text-neutral-400">
-                      <Icon name="agora-line-building" className="w-6 h-6" />
+                    <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-6 text-neutral-400">
+                      <Icon name="agora-line-building" className="h-6 w-6" />
                     </div>
                   )}
-                  <div className="text-neutral-900 text-m-light mb-[8px]">Organização</div>
+                  <div className="mb-[8px] text-m-light text-neutral-900">Organização</div>
                 </div>
               }
             >
               <div className="space-y-16">
-                <div className="text-neutral-900 text-sm mb-[16px]">
+                <div className="text-sm mb-[16px] text-neutral-900">
                   <span className="text-m-semibold">Última atualização:</span>{" "}
                   {new Date(organization.last_modified).toLocaleDateString("pt-PT", {
                     day: "numeric",
@@ -350,60 +357,42 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             </CardArticle>
 
             {/* Metrics Box */}
-            <div className="grid grid-cols-2 gap-16 mb-16">
-              <div className="bg-[#F2F6FF] rounded-4 p-32">
+            <div className="mb-16 grid grid-cols-2 gap-16">
+              <div className="rounded-4 bg-[#F2F6FF] p-32">
                 <div className="text-sm mb-[8px]">Visualizações</div>
-                <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
-                  {organization.metrics?.views
-                    ? organization.metrics.views >= 1000
-                      ? `${(organization.metrics.views / 1000).toFixed(1).replace(".", ",")} mil`
-                      : organization.metrics.views.toLocaleString("pt-PT")
-                    : "0"}
+                <div className="mb-[8px] text-l-semibold font-bold text-neutral-900">
+                  {formatMetricValue(organization.metrics?.views)}
                 </div>
-                <div className="flex items-center gap-1 mb-[8px]">
+                <div className="gap-1 mb-[8px] flex items-center">
                   <Pill appearance="outline" variant="success" className="h-auto">
-                    +{organization.metrics?.views
-                      ? organization.metrics.views >= 1000
-                        ? `${(organization.metrics.views / 1000).toFixed(2).replace(".", ",")} mil`
-                        : organization.metrics.views.toLocaleString("pt-PT")
-                      : "0"}{" "}
-                    total
+                    +{formatMetricValue(organization.metrics?.views, 2)} total
                   </Pill>
                 </div>
-                <div className="text-xs text-neutral-900 mt-1">
+                <div className="text-xs mt-1 text-neutral-900">
                   desde{" "}
                   {organization.created_at
                     ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
-                      locale: pt,
-                    })
+                        locale: pt,
+                      })
                     : "—"}
                 </div>
               </div>
-              <div className="bg-[#F2F6FF] rounded-4 p-32">
+              <div className="rounded-4 bg-[#F2F6FF] p-32">
                 <div className="text-sm mb-[8px]">Seguidores</div>
-                <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
-                  {organization.metrics?.followers
-                    ? organization.metrics.followers >= 1000
-                      ? `${(organization.metrics.followers / 1000).toFixed(1).replace(".", ",")} mil`
-                      : organization.metrics.followers.toLocaleString("pt-PT")
-                    : "0"}
+                <div className="mb-[8px] text-l-semibold font-bold text-neutral-900">
+                  {formatMetricValue(organization.metrics?.followers)}
                 </div>
-                <div className="flex items-center gap-1 mb-[8px]">
+                <div className="gap-1 mb-[8px] flex items-center">
                   <Pill appearance="outline" variant="success" className="h-auto">
-                    +{organization.metrics?.followers
-                      ? organization.metrics.followers >= 1000
-                        ? `${(organization.metrics.followers / 1000).toFixed(2).replace(".", ",")} mil`
-                        : organization.metrics.followers.toLocaleString("pt-PT")
-                      : "0"}{" "}
-                    total
+                    +{formatMetricValue(organization.metrics?.followers, 2)} total
                   </Pill>
                 </div>
-                <div className="text-xs text-neutral-900 mt-1">
+                <div className="text-xs mt-1 text-neutral-900">
                   desde{" "}
                   {organization.created_at
                     ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
-                      locale: pt,
-                    })
+                        locale: pt,
+                      })
                     : "—"}
                 </div>
               </div>

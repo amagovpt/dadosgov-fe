@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Avatar, Button, Icon, InputTextArea, usePopupContext } from "@ama-pt/agora-design-system";
 import { Discussion, Dataset, Reuse } from "@/types/api";
@@ -33,16 +33,6 @@ function SubjectCard({ subject }: { subject: Subject }) {
   if (!subject) return null;
 
   const isDataset = "quality" in subject;
-  const qualityScore = isDataset
-    ? Math.round(((subject as Dataset).quality?.score ?? 0) * 100)
-    : 0;
-  const timeAgo = subject.last_modified
-    ? formatDistanceToNow(new Date(subject.last_modified), { locale: pt })
-        .replace("aproximadamente ", "")
-        .replace("quase ", "")
-        .replace("menos de ", "")
-        .replace("cerca de ", "")
-    : "Desconhecido";
 
   const logo = subject.organization?.logo_thumbnail || subject.organization?.logo || null;
   const href = isDataset
@@ -54,42 +44,73 @@ function SubjectCard({ subject }: { subject: Subject }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex rounded-[4px] overflow-hidden border-2 border-transparent hover:border-primary-500 transition-colors bg-primary-100"
+      className="flex overflow-hidden rounded-[4px] border-2 border-transparent bg-primary-100 transition-colors hover:border-primary-500"
     >
-      <div className="flex items-center justify-center w-[120px] shrink-0 bg-primary-100 p-16">
+      <div className="flex w-[120px] shrink-0 items-center justify-center bg-primary-100 p-16">
         {logo ? (
-          <img src={logo} alt={subject.organization?.name || "Organização"} className="max-h-[56px] w-auto object-contain" />
+          <img
+            src={logo}
+            alt={subject.organization?.name || "Organização"}
+            className="max-h-[56px] w-auto object-contain"
+          />
         ) : (
-          <Icon name="agora-line-database" className="w-[40px] h-[40px] text-primary-500" />
+          <Icon name="agora-line-database" className="h-[40px] w-[40px] text-primary-500" />
         )}
       </div>
-      <div className="flex flex-col gap-4 bg-primary-100 p-16 min-w-0 flex-1">
-        <p className="text-xs text-primary-600 font-medium truncate">{subject.organization?.name || "Sem Organização"}</p>
-        <p className="font-bold text-neutral-900 text-sm leading-tight">{subject.title}</p>
-        <p className="text-xs text-neutral-700 line-clamp-2">{subject.description}</p>
-        <div className="flex items-center flex-wrap gap-8 text-xs text-neutral-600 mt-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-4 bg-primary-100 p-16">
+        <p className="text-xs truncate font-medium text-primary-600">
+          {subject.organization?.name || "Sem Organização"}
+        </p>
+        <p className="text-sm font-bold leading-tight text-neutral-900">{subject.title}</p>
+        <p className="text-xs line-clamp-2 text-neutral-700">{subject.description}</p>
+        <div className="text-xs mt-4 flex flex-wrap items-center gap-8 text-neutral-600">
           <div className="flex items-center gap-4" title="Visualizações">
-            <Icon name="agora-solid-eye" dimensions="xs" className="fill-neutral-600" aria-hidden="true" />
+            <Icon
+              name="agora-solid-eye"
+              dimensions="xs"
+              className="fill-neutral-600"
+              aria-hidden="true"
+            />
             <span>{formatMetric(subject.metrics?.views)}</span>
           </div>
           <div className="flex items-center gap-4" title="Downloads">
-            <Icon name="agora-solid-download" dimensions="xs" className="fill-neutral-600" aria-hidden="true" />
+            <Icon
+              name="agora-solid-download"
+              dimensions="xs"
+              className="fill-neutral-600"
+              aria-hidden="true"
+            />
             <span>{formatMetric(subject.metrics?.resources_downloads)}</span>
           </div>
           <div className="flex items-center gap-4" title="Reutilizações">
-            <svg width="14" height="14" viewBox="0 0 24 24" className="fill-neutral-600" aria-hidden="true">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              className="fill-neutral-600"
+              aria-hidden="true"
+            >
               <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" />
             </svg>
             <span>{subject.metrics?.reuses || 0}</span>
           </div>
           <div className="flex items-center gap-4" title="Favoritos">
-            <Icon name="agora-solid-star" dimensions="xs" className="fill-neutral-600" aria-hidden="true" />
+            <Icon
+              name="agora-solid-star"
+              dimensions="xs"
+              className="fill-neutral-600"
+              aria-hidden="true"
+            />
             <span>{formatMetric(subject.metrics?.followers)}</span>
           </div>
         </div>
       </div>
-      <div className="flex items-center pr-16 bg-primary-100 shrink-0">
-        <Icon name="agora-line-arrow-right-circle" className="w-[32px] h-[32px] text-primary-600" aria-hidden="true" />
+      <div className="flex shrink-0 items-center bg-primary-100 pr-16">
+        <Icon
+          name="agora-line-arrow-right-circle"
+          className="h-[32px] w-[32px] text-primary-600"
+          aria-hidden="true"
+        />
       </div>
     </Link>
   );
@@ -167,12 +188,12 @@ export default function DiscussionDetailPopup({
     <div className="flex flex-col gap-24">
       <SubjectCard subject={subject} />
 
-      <h3 className="font-bold text-primary-600 text-base">{discussion.title}</h3>
+      <h3 className="text-base font-bold text-primary-600">{discussion.title}</h3>
 
       <div className="flex flex-col gap-16">
         {discussion.discussion.map((msg, idx) => (
           <div key={idx}>
-            <div className="flex items-center gap-8 mb-4">
+            <div className="mb-4 flex items-center gap-8">
               <Avatar
                 avatarType={msg.posted_by.avatar_thumbnail ? "image" : "initials"}
                 srcPath={
@@ -182,15 +203,17 @@ export default function DiscussionDetailPopup({
                 alt={`${msg.posted_by.first_name} ${msg.posted_by.last_name}`}
               />
               <p className="text-sm">
-                <span className="text-primary-600 font-medium">
+                <span className="font-medium text-primary-600">
                   {msg.posted_by.first_name} {msg.posted_by.last_name}
                 </span>
-                <span className="text-neutral-500 ml-8">
+                <span className="ml-8 text-neutral-500">
                   {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy HH:mm", { locale: pt })}
                 </span>
               </p>
             </div>
-            <p className="text-sm text-neutral-900 whitespace-pre-wrap break-words">{msg.content}</p>
+            <p className="text-sm whitespace-pre-wrap break-words text-neutral-900">
+              {msg.content}
+            </p>
           </div>
         ))}
       </div>
@@ -205,8 +228,8 @@ export default function DiscussionDetailPopup({
         />
       )}
 
-      <div className="flex items-center justify-end gap-12 flex-wrap">
-        <div className="flex items-center gap-12 flex-wrap">
+      <div className="flex flex-wrap items-center justify-end gap-12">
+        <div className="flex flex-wrap items-center gap-12">
           {discussion.permissions?.delete && (
             <Button
               variant="danger"
