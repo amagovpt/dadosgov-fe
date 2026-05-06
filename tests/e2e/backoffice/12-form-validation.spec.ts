@@ -76,4 +76,62 @@ test.describe("Backoffice - Form Validation", () => {
   test.skip("FV-08: File upload size guard surfaces an error", async () => {
     // Requires a fixture file > 4MB and cleanup.
   });
+
+  test("FV-09: Upload modal rejects file with invalid extension and shows error", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/me/datasets/new/?step=3");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    const addFilesBtn = page
+      .getByRole("button", { name: /Adicionar ficheiros/i })
+      .first();
+    await expect(addFilesBtn).toBeVisible({ timeout: 10000 });
+    await addFilesBtn.click();
+
+    const modal = page.locator('[role="dialog"]').first();
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Wait for allowed extensions to be fetched by the popup
+    await page.waitForTimeout(1500);
+
+    const fileInput = modal.locator('input[type="file"]').first();
+    await fileInput.setInputFiles(
+      { name: "erwerwr.txt2", mimeType: "text/plain", buffer: Buffer.from("test") },
+    );
+
+    const errorMsg = modal.getByText(/Tipo de ficheiro inválido/i).first();
+    await expect(errorMsg).toBeVisible({ timeout: 5000 });
+  });
+
+  test("FV-10: Upload modal accepts file with valid extension and shows no error", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/me/datasets/new/?step=3");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    const addFilesBtn = page
+      .getByRole("button", { name: /Adicionar ficheiros/i })
+      .first();
+    await expect(addFilesBtn).toBeVisible({ timeout: 10000 });
+    await addFilesBtn.click();
+
+    const modal = page.locator('[role="dialog"]').first();
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Wait for allowed extensions to be fetched by the popup
+    await page.waitForTimeout(1500);
+
+    const fileInput = modal.locator('input[type="file"]').first();
+    await fileInput.setInputFiles(
+      { name: "data.csv", mimeType: "text/csv", buffer: Buffer.from("col1,col2\nval1,val2") },
+    );
+
+    const errorMsg = modal.getByText(/Tipo de ficheiro inválido/i).first();
+    await expect(errorMsg).not.toBeVisible({ timeout: 3000 });
+
+    await expect(modal.getByText("data.csv").first()).toBeVisible({ timeout: 5000 });
+  });
 });
