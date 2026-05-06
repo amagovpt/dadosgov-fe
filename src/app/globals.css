@@ -462,7 +462,12 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
    [05] UI COMPONENTS
    ========================================================================== */
 
-/* 5.1 Newsletter Card */
+/* 5.1 Dropdown section-name — hide when empty (no label provided) */
+li.section-name:empty {
+  display: none;
+}
+
+/* 5.2 Newsletter Card */
 .agora-card-highlight-newsletter {
   user-select: text !important;
   overflow: visible !important;
@@ -2059,8 +2064,8 @@ div.max-w-ch,
    ========================================================================== */
 
 .rte-wrapper {
-  border: 1px solid var(--color-neutral-300, #d1d5db);
-  border-radius: 6px;
+  border: 2px solid var(--color-neutral-700);
+  border-radius: 4px;
   overflow: hidden;
 }
 
@@ -2070,7 +2075,7 @@ div.max-w-ch,
   align-items: center;
   gap: 2px;
   padding: 6px 8px;
-  border-bottom: 1px solid var(--color-neutral-300, #d1d5db);
+  border-bottom: 2px solid var(--color-neutral-700);
   background: var(--color-neutral-50, #f9fafb);
 }
 

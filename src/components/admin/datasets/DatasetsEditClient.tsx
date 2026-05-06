@@ -692,7 +692,7 @@ export default function DatasetsEditClient() {
             if (!iso) return "";
             const d = new Date(iso);
             if (isNaN(d.getTime())) return iso;
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+            return `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${d.getUTCFullYear()}`;
           };
           setTemporalStart(toDateOnly(ds.temporal_coverage.start || ""));
           setTemporalEnd(toDateOnly(ds.temporal_coverage.end || ""));
@@ -942,6 +942,13 @@ export default function DatasetsEditClient() {
     const errors: Record<string, boolean> = {};
     if (!title.trim()) errors.title = true;
     if (!description.trim()) errors.description = true;
+    if (temporalStart && temporalEnd) {
+      const [startDd, startMm, startYyyy] = temporalStart.split("/");
+      const [endDd, endMm, endYyyy] = temporalEnd.split("/");
+      const startDate = new Date(`${startYyyy}-${startMm}-${startDd}`);
+      const endDate = new Date(`${endYyyy}-${endMm}-${endDd}`);
+      if (endDate <= startDate) errors.temporalEnd = true;
+    }
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       requestAnimationFrame(() => {
@@ -974,8 +981,18 @@ export default function DatasetsEditClient() {
         frequency: selectedFrequencyRef.current || undefined,
         temporal_coverage: temporalStart
           ? {
-              start: new Date(temporalStart).toISOString(),
-              ...(temporalEnd ? { end: new Date(temporalEnd).toISOString() } : {}),
+              start: (() => {
+                const [dd, mm, yyyy] = temporalStart.split("/");
+                return new Date(`${yyyy}-${mm}-${dd}T00:00:00.000Z`).toISOString();
+              })(),
+              ...(temporalEnd
+                ? {
+                    end: (() => {
+                      const [dd, mm, yyyy] = temporalEnd.split("/");
+                      return new Date(`${yyyy}-${mm}-${dd}T00:00:00.000Z`).toISOString();
+                    })(),
+                  }
+                : {}),
             }
           : undefined,
         ...(granularity || zones
@@ -1300,23 +1317,18 @@ export default function DatasetsEditClient() {
         />
       </div>
 
-      <div
-        className="admin-page__header"
-        style={{ flexDirection: "column", alignItems: "flex-start" }}
-      >
-        <div className="flex justify-end w-full">
-          <Button
-            variant="primary"
-            appearance="outline"
-            onClick={() => window.open(`/pages/datasets/${dataset.slug}`, "_blank")}
-          >
-            <span className="admin-edit-info__btn-content">
-              <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
-              Ver página pública
-            </span>
-          </Button>
-        </div>
+      <div className="admin-page__header">
         <h1 className="admin-page__title">{dataset.title}</h1>
+        <Button
+          variant="primary"
+          appearance="outline"
+          onClick={() => window.open(`/pages/datasets/${dataset.slug}`, "_blank")}
+        >
+          <span className="admin-edit-info__btn-content">
+            <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
+            Ver página pública
+          </span>
+        </Button>
       </div>
 
       {apiError && (
@@ -1648,6 +1660,8 @@ export default function DatasetsEditClient() {
                         label="Data de fim"
                         id="edit-date-end"
                         defaultValue={temporalEnd}
+                        hasError={!!formErrors.temporalEnd}
+                        errorFeedbackText="A data de fim tem de ser posterior à data de início"
                         dayInputPlaceholder="dd"
                         monthInputPlaceholder="mm"
                         yearInputPlaceholder="aaaa"
