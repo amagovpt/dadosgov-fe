@@ -222,7 +222,10 @@ export default function DataStoriesClient({
     }
 
     // Advanced filter: tags (local state)
-    if (selectedTags.length > 0 && !selectedTags.some((t) => story.tags.tag === t)) {
+    if (
+      selectedTags.length > 0 &&
+      !selectedTags.some((t) => Object.values(story.tags).includes(t))
+    ) {
       return false;
     }
 
