@@ -96,23 +96,24 @@ export default async function Page({
                   {paginatedCourses.length} de {totalItems} resultados
                 </span>
               </div>
-
-              <div className="flex flex-col gap-24 mini-courses-cards">
-                {paginatedCourses.map((course) => (
-                  <CardIllustrative
-                    key={course.id}
-                    variant="primary-100"
-                    isCardHorizontal
-                    title={course.title}
-                    description={formatHtmlParagraphs(course.description)}
-                    mainLink={
-                      <Link href={`/pages/courses/mini-courses/${course.id}`} className="flex items-center h-full">
-                        <IconAgora name="agora-line-arrow-right-circle" className="w-24 h-24" />
-                      </Link>
-                    }
-                  />
-                ))}
-              </div>
+              {paginatedCourses.length > 0 && (
+                <div className="flex flex-col gap-24 mini-courses-cards">
+                  {paginatedCourses.map((course) => (
+                    <CardIllustrative
+                      key={course.id}
+                      variant="primary-100"
+                      isCardHorizontal
+                      title={course.title}
+                      description={formatHtmlParagraphs(course.description)}
+                      mainLink={
+                        <Link href={`/pages/courses/mini-courses/${course.id}`} className="flex items-center h-full">
+                          <IconAgora name="agora-line-arrow-right-circle" className="w-24 h-24" />
+                        </Link>
+                      }
+                    />
+                  ))}
+                </div>
+              )}
 
               {/* Pagination */}
               <div className="mt-64 flex justify-center pb-64 mini-courses-pagination">
