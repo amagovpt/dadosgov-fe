@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import NextImage from "next/image";
 import {
   Button,
@@ -19,6 +20,12 @@ import {
 import { fetchCsrfToken, login } from "@/services/api";
 
 function LoginContent() {
+  const searchParams = useSearchParams();
+  const nextUrl = (() => {
+    const raw = searchParams.get("next") || "/";
+    return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+  })();
+
   const [cmdModalOpen, setCmdModalOpen] = useState(false);
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
   const [isHoveredClose, setIsHoveredClose] = useState(false);
@@ -91,11 +98,13 @@ function LoginContent() {
   };
 
   const handleSamlLogin = () => {
-    submitSamlForm("/saml/login");
+    const endpoint = nextUrl !== "/" ? `/saml/login?next=${encodeURIComponent(nextUrl)}` : "/saml/login";
+    submitSamlForm(endpoint);
   };
 
   const handleEidasLogin = () => {
-    submitSamlForm("/saml/eidas/login");
+    const endpoint = nextUrl !== "/" ? `/saml/eidas/login?next=${encodeURIComponent(nextUrl)}` : "/saml/eidas/login";
+    submitSamlForm(endpoint);
   };
 
   const breadcrumbItems = [
@@ -133,7 +142,7 @@ function LoginContent() {
       const response = await login(payload);
 
       // 4. Redirect on success (full reload to update auth state)
-      window.location.href = response.redirect || "/";
+      window.location.href = nextUrl;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Ocorreu um erro ao tentar iniciar sessão.";
       if (message === "migration_required") {
@@ -673,5 +682,9 @@ function LoginContent() {
 }
 
 export default function LoginClient() {
-  return <LoginContent />;
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
+  );
 }

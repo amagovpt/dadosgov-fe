@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "playwright/test";
+import { ADMIN_CREDS } from "../../helpers/auth";
 
 const LOGIN_URL = "/pages/login";
 
@@ -156,5 +157,63 @@ test.describe("Authentication Page", () => {
       timeout: 10000,
     });
     expect(page.url()).toMatch(/\/pages\/(login|migrate-account)/);
+  });
+});
+
+test.describe("Authentication - Post-login redirect", () => {
+  test("AU-15: Header 'Autenticar' link includes ?next= with the current page path", async ({
+    page,
+  }) => {
+    await page.goto("/pages/datasets");
+    await page.waitForLoadState("networkidle");
+
+    const authLink = page
+      .locator('header a[href*="/pages/login?next="]')
+      .first();
+    await expect(authLink).toBeVisible({ timeout: 10000 });
+
+    const href = await authLink.getAttribute("href");
+    expect(href).toContain("next=");
+    expect(href).toContain(encodeURIComponent("/pages/datasets"));
+  });
+
+  // Requires seeded e2e-admin user: run `udata user create --admin` with e2e-admin@dados.gov.pt
+  test("AU-16: After email/password login, user is redirected back to the page they came from", async ({
+    page,
+  }) => {
+    const targetPage = "/pages/datasets";
+    await page.goto(`/pages/login?next=${encodeURIComponent(targetPage)}`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    const emailTab = page.getByText(/E-mail e palavra-passe/i).first();
+    await emailTab.scrollIntoViewIfNeeded();
+    await emailTab.click();
+    await page.waitForTimeout(500);
+
+    const main = page.locator("main");
+
+    const emailInput = main.locator("#login-email").first();
+    await emailInput.scrollIntoViewIfNeeded();
+    await emailInput.fill(ADMIN_CREDS.email);
+
+    const passwordInput = main.locator("#login-password").first();
+    await passwordInput.scrollIntoViewIfNeeded();
+    await passwordInput.fill(ADMIN_CREDS.password);
+
+    const termsCheckbox = main
+      .getByRole("checkbox", { name: /aceito os termos/i })
+      .first();
+    await termsCheckbox.check();
+
+    const submitBtn = main.locator("form button[type='submit']").first();
+    await submitBtn.scrollIntoViewIfNeeded();
+    await submitBtn.click();
+
+    await page.waitForURL((url) => url.pathname === targetPage, {
+      timeout: 30000,
+      waitUntil: "networkidle",
+    });
+    expect(page.url()).toContain(targetPage);
   });
 });
