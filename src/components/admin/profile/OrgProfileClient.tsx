@@ -54,7 +54,7 @@ export default function OrgProfileClient() {
   const { show, hide } = usePopupContext();
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const orgId = routeOrgId || activeOrg?.id;
   const cachedOrgName = useOrganizationName(orgId, user?.organizations);
@@ -67,6 +67,7 @@ export default function OrgProfileClient() {
   const [url, setUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [descriptionError, setDescriptionError] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null);
@@ -140,6 +141,7 @@ export default function OrgProfileClient() {
   const handleDeleteOrg = async () => {
     if (!org) return;
     setIsDeleting(true);
+    setDeleteError(false);
     try {
       await deleteOrganization(org.id);
       hide();
@@ -147,6 +149,7 @@ export default function OrgProfileClient() {
     } catch (error) {
       console.error("Error deleting organization:", error);
       hide();
+      setDeleteError(true);
     } finally {
       setIsDeleting(false);
     }
@@ -358,43 +361,52 @@ export default function OrgProfileClient() {
                 </Button>
               </div>
 
-              <div className="dataset-edit-danger-actions">
-                <StatusCard
-                  variant="danger"
-                  showIcon
-                  description={
-                    <>
-                      <strong>Atenção Esta ação é irreversível.</strong>
-                      <br />
-                      <Button
-                        appearance="link"
-                        variant="primary"
-                        hasIcon
-                        trailingIcon="agora-line-arrow-right-circle"
-                        trailingIconHover="agora-solid-arrow-right-circle"
-                        onClick={(e: React.MouseEvent) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          show(
-                            <DeleteOrgPopupContent
-                              onClose={hide}
-                              onConfirm={handleDeleteOrg}
-                            />,
-                            {
-                              title: "Tem a certeza que quer eliminar esta organização?",
-                              closeAriaLabel: "Fechar",
-                              dimensions: "m",
-                            },
-                          );
-                        }}
-                        disabled={isDeleting}
-                      >
-                        Eliminar a organização
-                      </Button>
-                    </>
-                  }
-                />
-              </div>
+              {(isAdmin || org.members?.some((m) => m.user.id === user?.id && m.role === "admin")) && (
+                <div className="dataset-edit-danger-actions">
+                  {deleteError && (
+                    <StatusCard
+                      variant="danger"
+                      showIcon
+                      description="Ocorreu um erro ao eliminar a organização. Por favor, tente novamente."
+                    />
+                  )}
+                  <StatusCard
+                    variant="danger"
+                    showIcon
+                    description={
+                      <>
+                        <strong>Atenção Esta ação é irreversível.</strong>
+                        <br />
+                        <Button
+                          appearance="link"
+                          variant="primary"
+                          hasIcon
+                          trailingIcon="agora-line-arrow-right-circle"
+                          trailingIconHover="agora-solid-arrow-right-circle"
+                          onClick={(e: React.MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            show(
+                              <DeleteOrgPopupContent
+                                onClose={hide}
+                                onConfirm={handleDeleteOrg}
+                              />,
+                              {
+                                title: "Tem a certeza que quer eliminar esta organização?",
+                                closeAriaLabel: "Fechar",
+                                dimensions: "m",
+                              },
+                            );
+                          }}
+                          disabled={isDeleting}
+                        >
+                          Eliminar a organização
+                        </Button>
+                      </>
+                    }
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
