@@ -13,6 +13,7 @@ import { Datastory } from "@/types/home";
 import { getAssets } from "@/utils/getAssets";
 import HeroGeneral from "../HeroGeneral";
 import PublishDropdown from "../admin/PublishDropdown";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -127,12 +128,12 @@ export default function HomeClient({
                         <span className="text-m-bold">
                           {formatStatNumber(stats?.reuses ?? 0).suffix}
                         </span>
+
                       )}
                     </div>
                     <span className="text-m-regular">Reutilizações</span>
                   </div>
                 </div>
-
                 {/* Utilizadores */}
                 <div className="flex items-center gap-16">
                   <div className="px-24 py-24 rounded-8 border-2 border-[#FFD700] text-[#FFD700]">
@@ -156,7 +157,6 @@ export default function HomeClient({
                     <span className="text-m-regular">Utilizadores</span>
                   </div>
                 </div>
-
                 {/* Conjuntos de dados */}
                 <div className="flex items-center gap-16">
                   <div className="px-24 py-24 rounded-8 border-2 border-[#A6D5FF] text-[#A6D5FF]">
@@ -180,7 +180,6 @@ export default function HomeClient({
                     <span className="text-m-regular">Conjuntos de dados</span>
                   </div>
                 </div>
-
                 {/* Organizações */}
                 <div className="flex items-center gap-16">
                   <div className="px-24 py-24 rounded-8 border-2 border-[#CBFF3F] !text-[#CBFF3F]">
@@ -210,30 +209,23 @@ export default function HomeClient({
         </div>
 
         {/* Featured Datasets */}
-        <div className="xl:pt-64 pb-64 bg-white">
+        <div className="bg-white pb-64 xl:pt-64">
           <div className="container mx-auto px-4">
-            <h2 className="text-xl-bold mb-32 text-primary-900 ">Conjuntos de dados</h2>
+            <h2 className="mb-32 text-xl-bold text-primary-900">Conjuntos de dados</h2>
 
-            <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32">
+            <div className="grid gap-32 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
               {latestDatasets.length > 0 ? (
                 latestDatasets.map((dataset, index) => {
-                  const timeAgo = dataset.last_modified
-                    ? formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
-                      .replace("aproximadamente ", "")
-                      .replace("quase ", "")
-                      .replace("menos de ", "")
-                      .replace("cerca de ", "")
-                    : "Desconhecido";
+                  const timeAgo = formatDateToTimeAgo(dataset.last_modified);
                   const cardProps = {
                     ...dataset,
                     last_modified: timeAgo,
-                    link: `/pages/datasets/${dataset.slug}`
+                    link: `/pages/datasets/${dataset.slug}`,
                   } as CardMetricsProps;
-                  return <CardMetrics key={`featured-dataset-${index}`} {...cardProps} />
-                }
-                )
+                  return <CardMetrics key={`featured-dataset-${index}`} {...cardProps} />;
+                })
               ) : (
-                <div className="xl:col-span-3 text-center py-32 text-neutral-500">
+                <div className="py-32 text-center text-neutral-500 xl:col-span-3">
                   Nenhum conjunto de dados encontrado.
                 </div>
               )}
@@ -256,66 +248,69 @@ export default function HomeClient({
         </div>
 
         {/* Data Stories */}
-        <div className="xl:py-64 bg-primary-900">
+        <div className="bg-primary-900 xl:py-64">
           <div className="container mx-auto px-4">
             <h2 className="text-xl-bold text-white">Data Stories</h2>
-            <p className="mt-16 mb-32 max-w-3xl text-white">
+            <p className="mb-32 mt-16 max-w-3xl text-white">
               Histórias contadas com dados abertos — análises e visualizações sobre temas de
               interesse público.
             </p>
-            {datastories && datastories.length > 0 ? (<>
-              <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32 storytellings">
-                {datastories.map((story) => (
-                  <CardArticle
-                    key={story.slug}
-                    variant="indented"
-                    image={{
-                      src: story.image && story.image[0] ? getAssets(story.image[0].id) : "/card-full-image.png",
-                      alt: story.title,
-                    }}
-                    subtitle={
-                      story.createdAt
-                        ? `Publicado a ${format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt })}`
-                        : ""
-                    }
-                    title={story.title}
-                    mainAnchor={{
-                      href: `/pages/datastories/${story.slug}`,
-                    }}
-                    blockedLink={true}
-                  />
-                ))}
-              </div>
-              <div className="mt-32">
-                <Link href="/pages/datastories">
-                  <Button
-                    variant="primary"
-                    appearance="link"
-                    hasIcon={true}
-                    trailingIcon="agora-line-arrow-right-circle"
-                    trailingIconHover="agora-solid-arrow-right-circle"
-                    className="p-0! h-auto icon-white"
-                    darkMode={false}
-                  >
-                    <span className="text-white">Ver todas as Data Stories</span>
-                  </Button>
-                </Link>
-              </div>
-            </>
+            {datastories && datastories.length > 0 ? (
+              <>
+                <div className="storytellings grid gap-32 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
+                  {datastories.map((story) => (
+                    <CardArticle
+                      key={story.slug}
+                      variant="indented"
+                      image={{
+                        src:
+                          story.image && story.image[0]
+                            ? getAssets(story.image[0].id)
+                            : "/card-full-image.png",
+                        alt: story.title,
+                      }}
+                      subtitle={
+                        story.createdAt
+                          ? `Publicado a ${format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt })}`
+                          : ""
+                      }
+                      title={story.title}
+                      mainAnchor={{
+                        href: `/pages/datastories/${story.slug}`,
+                      }}
+                      blockedLink={true}
+                    />
+                  ))}
+                </div>
+                <div className="mt-32">
+                  <Link href="/pages/datastories">
+                    <Button
+                      variant="primary"
+                      appearance="link"
+                      hasIcon={true}
+                      trailingIcon="agora-line-arrow-right-circle"
+                      trailingIconHover="agora-solid-arrow-right-circle"
+                      className="p-0! icon-white h-auto"
+                      darkMode={false}
+                    >
+                      <span className="text-white">Ver todas as Data Stories</span>
+                    </Button>
+                  </Link>
+                </div>
+              </>
             ) : (
-              <div className="xl:col-span-3 text-center py-32 text-neutral-500">
+              <div className="py-32 text-center text-neutral-500 xl:col-span-3">
                 Nenhum Data Story encontrado.
               </div>
             )}
           </div>
         </div>
 
-
         {/* Latest News */}
-        <div className="xl:py-64 bg-white latest-news-section">
+        <div className="latest-news-section bg-white xl:py-64">
           <div className="container mx-auto px-4">
-            <h2 className="text-xl-bold mb-32 text-primary-900">Últimas novidades</h2>
-            <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32">
+            <h2 className="mb-32 text-xl-bold text-primary-900">Últimas novidades</h2>
+            <div className="grid gap-32 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
               {posts.length > 0 ? (
                 posts.map((post) => (
                   <div key={post.id} className="latest-news-card-wrapper h-full">
@@ -350,7 +345,7 @@ export default function HomeClient({
                   </div>
                 ))
               ) : (
-                <div className="xl:col-span-3 text-center py-32 text-neutral-500">
+                <div className="py-32 text-center text-neutral-500 xl:col-span-3">
                   Nenhuma novidade encontrada.
                 </div>
               )}
@@ -373,10 +368,10 @@ export default function HomeClient({
         </div>
 
         {/* Utilizado diariamente por */}
-        <div className="xl:pb-64 bg-white">
+        <div className="bg-white xl:pb-64">
           <div className="container mx-auto px-4">
-            <h2 className="text-xl-bold mb-32 text-primary-900">Utilizado diariamente por:</h2>
-            <div className="flex flex-col mt-32">
+            <h2 className="mb-32 text-xl-bold text-primary-900">Utilizado diariamente por:</h2>
+            <div className="mt-32 flex flex-col">
               <div className="flex flex-wrap items-center justify-between gap-x-32">
                 {Array(5)
                   .fill("arte_black.svg")
@@ -390,7 +385,7 @@ export default function HomeClient({
                     </div>
                   ))}
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-x-32 mt-32">
+              <div className="mt-32 flex flex-wrap items-center justify-between gap-x-32">
                 {Array(5)
                   .fill("arte_black.svg")
                   .map((logo, i) => (

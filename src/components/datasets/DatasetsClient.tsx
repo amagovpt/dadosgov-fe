@@ -22,6 +22,7 @@ import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import Button from "../Primitives/Button";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -272,13 +273,7 @@ export default function DatasetsClient({
                 >
                   {datasets.length > 0 ? (
                     datasets.map((dataset, index) => {
-                      const timeAgo = dataset.last_modified
-                        ? formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
-                          .replace("aproximadamente ", "")
-                          .replace("quase ", "")
-                          .replace("menos de ", "")
-                          .replace("cerca de ", "")
-                        : "Desconhecido";
+                      const timeAgo = formatDateToTimeAgo(dataset.last_modified);
                       const cardProps = {
                         ...dataset,
                         last_modified: timeAgo,

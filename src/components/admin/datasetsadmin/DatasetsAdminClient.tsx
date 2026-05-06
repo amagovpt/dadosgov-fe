@@ -55,6 +55,7 @@ import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackBut
 import { useAuth } from "@/context/AuthContext";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 const ZONE_PT_NAMES: Record<string, string> = {
   "country-group:world": "Mundo",
@@ -92,10 +93,7 @@ export default function DatasetsAdminClient({
       if (!parsed.hostname) return false;
 
       const hostname = parsed.hostname.toLowerCase();
-      const isIpv4 =
-        /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(
-          hostname,
-        );
+      const isIpv4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(hostname);
 
       const labels = hostname.split(".");
       const hasValidDomainShape = labels.length >= 2;
@@ -104,7 +102,7 @@ export default function DatasetsAdminClient({
           label.length > 0 &&
           !label.startsWith("-") &&
           !label.endsWith("-") &&
-          /^[a-z0-9-]+$/i.test(label),
+          /^[a-z0-9-]+$/i.test(label)
       );
       const tld = labels[labels.length - 1] || "";
       const hasValidTld = /^([a-z]{2,}|xn--[a-z0-9-]{2,})$/i.test(tld);
@@ -180,13 +178,15 @@ export default function DatasetsAdminClient({
     createdDataset?.organization?.id ||
     (createdDataset ? "user" : "");
   const licenseDefaultValue =
-    selectedLicenseRef.current || createdDataset?.license || (licenses.length > 0 ? "notspecified" : "");
+    selectedLicenseRef.current ||
+    createdDataset?.license ||
+    (licenses.length > 0 ? "notspecified" : "");
   const frequencyDefaultValue =
-    selectedFrequencyRef.current || createdDataset?.frequency || (frequencies.length > 0 ? "unknown" : "");
+    selectedFrequencyRef.current ||
+    createdDataset?.frequency ||
+    (frequencies.length > 0 ? "unknown" : "");
   const keywordsDefaultValue =
-    selectedKeywordsValue ||
-    selectedKeywordsRef.current ||
-    (createdDataset?.tags?.join(",") ?? "");
+    selectedKeywordsValue || selectedKeywordsRef.current || (createdDataset?.tags?.join(",") ?? "");
   const selectedKeywords = keywordsDefaultValue
     .split(",")
     .map((k) => k.trim())
@@ -201,7 +201,7 @@ export default function DatasetsAdminClient({
       // Pin newly selected zones; unpin deselected ones
       const seen = new Set(prev.map((z) => z.id));
       const additions = spatialZoneSearchRef.current.filter(
-        (z) => ids.has(z.id) && !seen.has(z.id),
+        (z) => ids.has(z.id) && !seen.has(z.id)
       );
       const kept = prev.filter((z) => ids.has(z.id));
       if (additions.length === 0 && kept.length === prev.length) return prev;
@@ -238,11 +238,7 @@ export default function DatasetsAdminClient({
 
   const frequencyOptions = useMemo(() => {
     const options = frequencies.map((freq) => (
-      <DropdownOption
-        key={freq.id}
-        value={freq.id}
-        selected={frequencyDefaultValue === freq.id}
-      >
+      <DropdownOption key={freq.id} value={freq.id} selected={frequencyDefaultValue === freq.id}>
         {getFrequencyLabel(freq.id, freq.label)}
       </DropdownOption>
     ));
@@ -266,7 +262,7 @@ export default function DatasetsAdminClient({
       return true;
     });
     const selectedNotInSuggestions = selectedKeywords.filter(
-      (keyword) => !seen.has(keyword.toLowerCase()),
+      (keyword) => !seen.has(keyword.toLowerCase())
     );
     const showCreate =
       trimmed.length > 0 &&
@@ -275,11 +271,7 @@ export default function DatasetsAdminClient({
     const options = [
       ...(showCreate
         ? [
-            <DropdownOption
-              key={`__create__${trimmedLower}`}
-              value={trimmed}
-              selected={false}
-            >
+            <DropdownOption key={`__create__${trimmedLower}`} value={trimmed} selected={false}>
               Criar &quot;{trimmed}&quot;
             </DropdownOption>,
           ]
@@ -322,7 +314,11 @@ export default function DatasetsAdminClient({
       </DropdownOption>
     ));
     if (options.length === 0) {
-      options.push(<DropdownOption key="empty" value="">—</DropdownOption>);
+      options.push(
+        <DropdownOption key="empty" value="">
+          —
+        </DropdownOption>
+      );
     }
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
   }, [allSpatialZones, selectedSpatialZonesValue]);
@@ -345,22 +341,16 @@ export default function DatasetsAdminClient({
 
   const granularityOptions = useMemo(() => {
     const options = granularities.map((g) => (
-      <DropdownOption
-        key={g.id}
-        value={g.id}
-        selected={spatialGranularityDefaultValue === g.id}
-      >
+      <DropdownOption key={g.id} value={g.id} selected={spatialGranularityDefaultValue === g.id}>
         {getGranularityLabel(g.id, g.name)}
       </DropdownOption>
     ));
     return <DropdownSection name="spatial-granularity">{options}</DropdownSection>;
   }, [granularities, spatialGranularityDefaultValue]);
 
-
   useEffect(() => {
     if (selectedKeywordsValue) return;
-    const restored =
-      selectedKeywordsRef.current || (createdDataset?.tags?.join(",") ?? "");
+    const restored = selectedKeywordsRef.current || (createdDataset?.tags?.join(",") ?? "");
     if (!restored) return;
     setSelectedKeywordsValue(restored);
     selectedKeywordsRef.current = restored;
@@ -391,17 +381,15 @@ export default function DatasetsAdminClient({
 
   const toggleExistingContact = (id: string) => {
     setSelectedContactPointIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
   const updateDraft = (draftId: number, field: string, value: string) => {
     setDraftContacts((prev) =>
       prev.map((d) =>
-        d.id === draftId
-          ? { ...d, [field]: value, errors: { ...d.errors, [field]: false } }
-          : d,
-      ),
+        d.id === draftId ? { ...d, [field]: value, errors: { ...d.errors, [field]: false } } : d
+      )
     );
   };
 
@@ -416,15 +404,15 @@ export default function DatasetsAdminClient({
       errors.link = true;
     }
     if (Object.keys(errors).length > 0) {
-      setDraftContacts((prev) =>
-        prev.map((d) => (d.id === draftId ? { ...d, errors } : d)),
-      );
+      setDraftContacts((prev) => prev.map((d) => (d.id === draftId ? { ...d, errors } : d)));
       requestAnimationFrame(() => {
-        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document
+          .querySelector('[aria-invalid="true"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
       });
       return;
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     try {
       const payload: Parameters<typeof createContactPoint>[0] = {
@@ -455,9 +443,7 @@ export default function DatasetsAdminClient({
       errors.link = true;
     }
     if (Object.keys(errors).length > 0) {
-      setDraftContacts((prev) =>
-        prev.map((d) => (d.id === saveDraftId ? { ...d, errors } : d)),
-      );
+      setDraftContacts((prev) => prev.map((d) => (d.id === saveDraftId ? { ...d, errors } : d)));
       return;
     }
 
@@ -482,15 +468,21 @@ export default function DatasetsAdminClient({
   useEffect(() => {
     async function loadDropdownData() {
       try {
-        const [licensesData, frequenciesData, granularitiesData, myDatasetsData, tagsData, resTypes] =
-          await Promise.all([
-            fetchLicenses(),
-            fetchFrequencies(),
-            fetchGranularities(),
-            fetchMyDatasets(1, 1),
-            suggestTags("", 50),
-            fetchResourceTypes(),
-          ]);
+        const [
+          licensesData,
+          frequenciesData,
+          granularitiesData,
+          myDatasetsData,
+          tagsData,
+          resTypes,
+        ] = await Promise.all([
+          fetchLicenses(),
+          fetchFrequencies(),
+          fetchGranularities(),
+          fetchMyDatasets(1, 1),
+          suggestTags("", 50),
+          fetchResourceTypes(),
+        ]);
         setLicenses(licensesData);
         setFrequencies(frequenciesData);
         setGranularities(granularitiesData);
@@ -568,11 +560,7 @@ export default function DatasetsAdminClient({
       const month = Number(ptMatch[2]);
       const year = Number(ptMatch[3]);
       const d = new Date(year, month - 1, day);
-      if (
-        d.getFullYear() === year &&
-        d.getMonth() === month - 1 &&
-        d.getDate() === day
-      ) {
+      if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {
         return d.getTime();
       }
       return null;
@@ -584,9 +572,7 @@ export default function DatasetsAdminClient({
     return Number.isNaN(isoTime) ? null : isoTime;
   };
 
-  const handleStep2Next = async (
-    e?: React.MouseEvent<HTMLButtonElement>,
-  ) => {
+  const handleStep2Next = async (e?: React.MouseEvent<HTMLButtonElement>) => {
     const errors: Record<string, boolean> = {};
     if (!selectedProducerRef.current) errors.datasetProducer = true;
     if (!datasetTitle.trim()) errors.datasetTitle = true;
@@ -632,17 +618,14 @@ export default function DatasetsAdminClient({
 
       if (!hasSavedContact && !hasValidDraft) {
         setDraftContacts((prev) =>
-          prev.map((d) =>
-            draftErrorsMap[d.id] ? { ...d, errors: draftErrorsMap[d.id] } : d,
-          ),
+          prev.map((d) => (draftErrorsMap[d.id] ? { ...d, errors: draftErrorsMap[d.id] } : d))
         );
         errors.contactDrafts = true;
       }
     }
 
     if (
-      (errors.temporalCoverage ||
-        errors.temporalCoverageInvalidFormat) &&
+      (errors.temporalCoverage || errors.temporalCoverageInvalidFormat) &&
       Object.keys(errors).length === 1
     ) {
       e?.preventDefault();
@@ -667,8 +650,7 @@ export default function DatasetsAdminClient({
         payload.description_short = datasetShortDescription.trim();
       } else {
         const desc = datasetDescription.trim();
-        payload.description_short =
-          desc.length > 197 ? desc.slice(0, 197) + "..." : desc;
+        payload.description_short = desc.length > 197 ? desc.slice(0, 197) + "..." : desc;
       }
       if (selectedProducerRef.current && selectedProducerRef.current !== "user") {
         payload.organization = selectedProducerRef.current;
@@ -706,16 +688,17 @@ export default function DatasetsAdminClient({
       if (onDatasetCreated) {
         onDatasetCreated(dataset.id);
       } else {
-        router.push(
-          `/pages/admin/datasets/new?step=${currentStep + 1}&datasetId=${dataset.id}`,
-        );
+        router.push(`/pages/admin/datasets/new?step=${currentStep + 1}&datasetId=${dataset.id}`);
       }
     } catch (error: unknown) {
       const err = error as { status?: number; data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
         const flattenValue = (val: unknown): string => {
           if (Array.isArray(val)) return val.map(flattenValue).join("; ");
-          if (val && typeof val === "object") return Object.values(val as Record<string, unknown>).map(flattenValue).join("; ");
+          if (val && typeof val === "object")
+            return Object.values(val as Record<string, unknown>)
+              .map(flattenValue)
+              .join("; ");
           return String(val);
         };
         const messages = Object.entries(err.data)
@@ -764,7 +747,9 @@ export default function DatasetsAdminClient({
       return;
     }
     if (!createdDataset) {
-      setApiError("Erro: o conjunto de dados não foi criado. Volte ao passo anterior e preencha o formulário.");
+      setApiError(
+        "Erro: o conjunto de dados não foi criado. Volte ao passo anterior e preencha o formulário."
+      );
       return;
     }
 
@@ -853,7 +838,7 @@ export default function DatasetsAdminClient({
       content: (
         <>
           <p>O formato deve ser:</p>
-          <ul className="list-disc pl-5 mt-2 flex flex-col gap-2">
+          <ul className="pl-5 mt-2 flex list-disc flex-col gap-2">
             <li>
               <strong>Aberto:</strong> um formato aberto não adiciona especificações técnicas que
               restrinjam o uso dos dados (por exemplo, o uso de software pago);
@@ -879,7 +864,7 @@ export default function DatasetsAdminClient({
             A descrição de um ficheiro facilita a reutilização de dados. Inclui, entre outras
             coisas:
           </p>
-          <ul className="list-disc pl-5 mt-2 flex flex-col gap-2">
+          <ul className="pl-5 mt-2 flex list-disc flex-col gap-2">
             <li>Uma descrição geral do conjunto de dados;</li>
             <li>Uma descrição do método de produção de dados;</li>
             <li>Uma descrição do modelo de dados;</li>
@@ -898,8 +883,7 @@ export default function DatasetsAdminClient({
   const auxiliarItems =
     currentStep === 3 || currentStep === 4 ? auxiliarItemsStep3 : auxiliarItemsStep2;
   const hasTemporalCoverageError =
-    !!formErrors.temporalCoverage ||
-    !!formErrors.temporalCoverageInvalidFormat;
+    !!formErrors.temporalCoverage || !!formErrors.temporalCoverageInvalidFormat;
   const temporalCoverageErrorText = formErrors.temporalCoverageInvalidFormat
     ? "Formato de data inválido. Utilize o formato dd/mm/aaaa."
     : "A data de início não pode ser posterior à data de fim.";
@@ -910,9 +894,7 @@ export default function DatasetsAdminClient({
       <div className="admin-page__body">
         {/* Left: Form */}
         <div className="admin-page__form-area">
-          {apiError && (
-            <StatusCard variant="danger" showIcon description={apiError} />
-          )}
+          {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
           {/* Step 2: Descreva o conjunto de dados */}
           {currentStep === 2 && (
@@ -928,13 +910,13 @@ export default function DatasetsAdminClient({
                   </>
                 }
               />
-              <p className="text-neutral-900 text-base leading-7 pt-32">
+              <p className="pt-32 text-base leading-7 text-neutral-900">
                 Os campos marcados com um asterisco ( * ) são obrigatórios.
               </p>
               <h2 className="admin-page__section-title">Produtor</h2>
 
               <div className="admin-page__fields-group">
-                <span className="text-primary-900 text-base font-medium leading-7">
+                <span className="text-base font-medium leading-7 text-primary-900">
                   Confirme a identidade que pretende utilizar na publicação.
                 </span>
                 <IsolatedSelect
@@ -961,12 +943,13 @@ export default function DatasetsAdminClient({
               </div>
 
               {(!user?.organizations || user.organizations.length === 0) && (
-                <div className="admin-page__org-card flex flex-col items-center gap-[16px] bg-neutral-50 rounded-lg p-8 text-center mt-[24px]">
-                  <h3 className="text-primary-900 text-lg font-bold leading-7">
+                <div className="admin-page__org-card rounded-lg mt-[24px] flex flex-col items-center gap-[16px] bg-neutral-50 p-8 text-center">
+                  <h3 className="text-lg font-bold leading-7 text-primary-900">
                     Não pertence a uma organização.
                   </h3>
-                  <p className="text-neutral-700 text-base leading-7">
-                    Quando o conjunto de dados for produzido no contexto de atividade profissional, é recomendável que seja publicado em nome da organização responsável.
+                  <p className="text-base leading-7 text-neutral-700">
+                    Quando o conjunto de dados for produzido no contexto de atividade profissional,
+                    é recomendável que seja publicado em nome da organização responsável.
                   </p>
                   <Button
                     variant="primary"
@@ -977,13 +960,7 @@ export default function DatasetsAdminClient({
                 </div>
               )}
 
-
-
-
-              <form
-                className="admin-page__form"
-                onSubmit={(e) => e.preventDefault()}
-              >
+              <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
                 <h2 className="admin-page__section-title">Descrição</h2>
 
                 <div className="admin-page__fields-group">
@@ -1024,7 +1001,9 @@ export default function DatasetsAdminClient({
                       if (e.target.value.trim()) clearError("datasetDescription");
                     }}
                     hasError={!!formErrors.datasetDescription}
-                    hasFeedback={!!formErrors.datasetDescription || datasetDescription.length < 1000}
+                    hasFeedback={
+                      !!formErrors.datasetDescription || datasetDescription.length < 1000
+                    }
                     feedbackState={formErrors.datasetDescription ? "danger" : "warning"}
                     feedbackText="Recomenda-se que a descrição tenha pelo menos 1000 caracteres."
                     errorFeedbackText="Campo obrigatório"
@@ -1063,7 +1042,9 @@ export default function DatasetsAdminClient({
                       selected.forEach((v) => {
                         const lower = v.toLowerCase();
                         const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
-                        const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
+                        const existsInSearch = tagSearch.some(
+                          (t) => t.text.toLowerCase() === lower
+                        );
                         if (!existsInTags && !existsInSearch) {
                           addedNew = true;
                           setTags((prev) => {
@@ -1083,7 +1064,7 @@ export default function DatasetsAdminClient({
                   </IsolatedSelect>
 
                   {selectedKeywords.length > 0 && (
-                    <div className="flex flex-wrap gap-8 -mt-8">
+                    <div className="-mt-8 flex flex-wrap gap-8">
                       {selectedKeywords.map((keyword) => (
                         <Tag
                           key={keyword}
@@ -1103,8 +1084,6 @@ export default function DatasetsAdminClient({
                   )}
                 </div>
 
-
-
                 <h2 className="admin-page__section-title">Acesso</h2>
 
                 <div className="admin-page__fields-group">
@@ -1121,9 +1100,7 @@ export default function DatasetsAdminClient({
 
                 {selectedProducer && selectedProducer !== "user" && (
                   <>
-                    <h2 className="admin-page__section-title">
-                      Pontos de contacto
-                    </h2>
+                    <h2 className="admin-page__section-title">Pontos de contacto</h2>
 
                     <div className="admin-page__fields-group">
                       {orgContactPoints.length > 0 && (
@@ -1142,95 +1119,73 @@ export default function DatasetsAdminClient({
                       )}
 
                       {draftContacts.map((draft) => (
-                          <div key={draft.id}>
-                            <div
-                              className="text-primary-900 text-base
-                                font-medium leading-7"
-                              style={{ paddingBottom: "16px" }}
-                            >
-                              Novo ponto de contacto
-                            </div>
-                            <div style={{ paddingBottom: "24px" }}>
-                              <InputText
-                                label="Nome *"
-                                placeholder="Por exemplo, o nome do serviço."
-                                id={`contact-name-${draft.id}`}
-                                value={draft.name}
-                                onChange={(
-                                  e: React.ChangeEvent<HTMLInputElement>,
-                                ) =>
-                                  updateDraft(
-                                    draft.id,
-                                    "name",
-                                    e.target.value,
-                                  )
-                                }
-                                hasError={!!draft.errors.name}
-                                hasFeedback={!!draft.errors.name}
-                                feedbackState="danger"
-                                errorFeedbackText="Campo obrigatório"
-                              />
-                            </div>
-                            <div
-                              className="grid grid-cols-2 gap-[18px]"
-                              style={{ paddingBottom: "24px" }}
-                            >
-                              <InputText
-                                label="E-mail"
-                                placeholder="contact@organisation.org"
-                                id={`contact-email-${draft.id}`}
-                                value={draft.email}
-                                onChange={(
-                                  e: React.ChangeEvent<HTMLInputElement>,
-                                ) =>
-                                  updateDraft(
-                                    draft.id,
-                                    "email",
-                                    e.target.value,
-                                  )
-                                }
-                                hasError={!!draft.errors.email}
-                                hasFeedback={!!draft.errors.email}
-                                feedbackState="danger"
-                                errorFeedbackText="É necessário um endereço de e-mail caso não seja fornecido um link."
-                              />
-                              <InputText
-                                label="Website"
-                                placeholder="https://..."
-                                id={`contact-link-${draft.id}`}
-                                value={draft.link}
-                                onChange={(
-                                  e: React.ChangeEvent<HTMLInputElement>,
-                                ) =>
-                                  updateDraft(
-                                    draft.id,
-                                    "link",
-                                    e.target.value,
-                                  )
-                                }
-                                hasError={!!draft.errors.link}
-                                hasFeedback={!!draft.errors.link}
-                                feedbackState="danger"
-                                errorFeedbackText="É necessário um link caso não seja fornecido um endereço de e‑mail."
-                              />
-                            </div>
-                            <div style={{ paddingBottom: "24px" }}>
-                              <Button
-                                appearance="outline"
-                                variant="primary"
-                                hasIcon
-                                leadingIcon="agora-line-check-circle"
-                                leadingIconHover="agora-solid-check-circle"
-                                onClick={() =>
-                                  handleSaveContactDraft(draft.id)
-                                }
-                              >
-                                Guardar contacto
-                              </Button>
-                            </div>
+                        <div key={draft.id}>
+                          <div
+                            className="text-base font-medium leading-7 text-primary-900"
+                            style={{ paddingBottom: "16px" }}
+                          >
+                            Novo ponto de contacto
                           </div>
-                        ),
-                      )}
+                          <div style={{ paddingBottom: "24px" }}>
+                            <InputText
+                              label="Nome *"
+                              placeholder="Por exemplo, o nome do serviço."
+                              id={`contact-name-${draft.id}`}
+                              value={draft.name}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                updateDraft(draft.id, "name", e.target.value)
+                              }
+                              hasError={!!draft.errors.name}
+                              hasFeedback={!!draft.errors.name}
+                              feedbackState="danger"
+                              errorFeedbackText="Campo obrigatório"
+                            />
+                          </div>
+                          <div
+                            className="grid grid-cols-2 gap-[18px]"
+                            style={{ paddingBottom: "24px" }}
+                          >
+                            <InputText
+                              label="E-mail"
+                              placeholder="contact@organisation.org"
+                              id={`contact-email-${draft.id}`}
+                              value={draft.email}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                updateDraft(draft.id, "email", e.target.value)
+                              }
+                              hasError={!!draft.errors.email}
+                              hasFeedback={!!draft.errors.email}
+                              feedbackState="danger"
+                              errorFeedbackText="É necessário um endereço de e-mail caso não seja fornecido um link."
+                            />
+                            <InputText
+                              label="Website"
+                              placeholder="https://..."
+                              id={`contact-link-${draft.id}`}
+                              value={draft.link}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                updateDraft(draft.id, "link", e.target.value)
+                              }
+                              hasError={!!draft.errors.link}
+                              hasFeedback={!!draft.errors.link}
+                              feedbackState="danger"
+                              errorFeedbackText="É necessário um link caso não seja fornecido um endereço de e‑mail."
+                            />
+                          </div>
+                          <div style={{ paddingBottom: "24px" }}>
+                            <Button
+                              appearance="outline"
+                              variant="primary"
+                              hasIcon
+                              leadingIcon="agora-line-check-circle"
+                              leadingIconHover="agora-solid-check-circle"
+                              onClick={() => handleSaveContactDraft(draft.id)}
+                            >
+                              Guardar contacto
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
 
                       <div style={{ marginTop: "-16px" }}>
                         <Button
@@ -1355,7 +1310,7 @@ export default function DatasetsAdminClient({
                   </IsolatedSelect>
 
                   {selectedZoneObjects.length > 0 && (
-                    <div className="flex flex-wrap gap-8 -mt-8">
+                    <div className="-mt-8 flex flex-wrap gap-8">
                       {selectedZoneObjects.map((zone) => (
                         <Tag
                           key={zone.id}
@@ -1372,7 +1327,7 @@ export default function DatasetsAdminClient({
                             setTimeout(() => {
                               document
                                 .getElementById(
-                                  "agora-input-select-dataset-spatial-coverage-control",
+                                  "agora-input-select-dataset-spatial-coverage-control"
                                 )
                                 ?.focus({ preventScroll: true });
                               window.scrollTo({ top: savedScroll, behavior: "instant" });
@@ -1435,8 +1390,8 @@ export default function DatasetsAdminClient({
                   <>
                     <strong>O que é um ficheiro?</strong>
                     <br />
-                    Um conjunto de dados pode conter vários tipos de ficheiros
-                    (atualizações, histórico, documentação, código-fonte, API, links, etc.).
+                    Um conjunto de dados pode conter vários tipos de ficheiros (atualizações,
+                    histórico, documentação, código-fonte, API, links, etc.).
                   </>
                 }
               />
@@ -1476,7 +1431,7 @@ export default function DatasetsAdminClient({
                   onEditMeta={handleEditMeta}
                 />
                 {showInvalidUrlError && (
-                  <span className="text-danger-500 text-sm">
+                  <span className="text-sm text-danger-500">
                     Formato de URL inválido. Insira um URL https:// com domínio válido.
                   </span>
                 )}
@@ -1524,34 +1479,32 @@ export default function DatasetsAdminClient({
               />
 
               {(() => {
-                const qualityScore = createdDataset?.quality?.score != null
-                  ? Math.round(createdDataset.quality.score * 100)
-                  : 0;
+                const qualityScore =
+                  createdDataset?.quality?.score != null
+                    ? Math.round(createdDataset.quality.score * 100)
+                    : 0;
                 const formatMetric = (value: number | undefined) => {
                   if (!value) return "0";
-                  if (value >= 1_000_000) return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
+                  if (value >= 1_000_000)
+                    return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
                   if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
                   return String(value);
                 };
-                const timeAgo = createdDataset?.last_modified
-                  ? formatDistanceToNow(new Date(createdDataset.last_modified), { locale: pt })
-                      .replace("aproximadamente ", "")
-                      .replace("quase ", "")
-                      .replace("menos de ", "")
-                      .replace("cerca de ", "")
-                  : "agora";
+                const timeAgo = formatDateToTimeAgo(createdDataset?.last_modified, "agora");
                 const href = createdDataset
                   ? `/pages/datasets/${createdDataset.slug}`
                   : `/pages/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`;
                 return (
                   <Link
                     href={href}
-                    className="card-general-listing rounded-[4px] overflow-hidden flex flex-col"
+                    className="card-general-listing flex flex-col overflow-hidden rounded-[4px]"
                   >
                     <CardGeneral
                       variant="neutral-100"
                       image={{
-                        src: createdDataset?.organization?.logo || "/images/placeholders/organization.png",
+                        src:
+                          createdDataset?.organization?.logo ||
+                          "/images/placeholders/organization.png",
                         alt: createdDataset?.organization?.name || "Organização",
                         height: "56px",
                         className: "bg-primary-100 !object-contain !h-[56px]",
@@ -1559,8 +1512,13 @@ export default function DatasetsAdminClient({
                       subtitleText={
                         (
                           <div className="flex flex-col">
-                            <span style={{ fontSize: "16px" }} className="text-neutral-900">{timeAgo}</span>
-                            <span style={{ fontSize: "16px", fontWeight: 300 }} className="text-neutral-900 mt-4">
+                            <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                              {timeAgo}
+                            </span>
+                            <span
+                              style={{ fontSize: "16px", fontWeight: 300 }}
+                              className="mt-4 text-neutral-900"
+                            >
                               {createdDataset?.organization?.name || "Sem Organização"}
                             </span>
                           </div>
@@ -1569,24 +1527,30 @@ export default function DatasetsAdminClient({
                       titleText={createdDataset?.title || datasetTitle || "Sem título"}
                       descriptionText={
                         (
-                          <div className="flex flex-col grow">
-                            <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
+                          <div className="flex grow flex-col">
+                            <p className="mb-16 line-clamp-3 text-m-regular text-neutral-800">
                               {createdDataset?.description || datasetDescription || "Sem descrição"}
                             </p>
-                            <div className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}>
+                            <div
+                              className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
+                            >
                               <ProgressBar
                                 value={qualityScore}
                                 max={100}
                                 hideLabel={true}
                                 hidePercentageValue={true}
                               />
-                              <span className="text-[14px] text-neutral-900 mt-4 block">
+                              <span className="mt-4 block text-[14px] text-neutral-900">
                                 {qualityScore}% Qualidade dos metadados
                               </span>
-                              <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
+                              <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
                                 <div className="flex items-center gap-8" title="Visualizações">
                                   <Icon
-                                    name={createdDataset?.metrics?.views ? "agora-solid-eye" : "agora-line-eye"}
+                                    name={
+                                      createdDataset?.metrics?.views
+                                        ? "agora-solid-eye"
+                                        : "agora-line-eye"
+                                    }
                                     dimensions="xs"
                                     className="fill-neutral-700"
                                     aria-hidden="true"
@@ -1595,20 +1559,35 @@ export default function DatasetsAdminClient({
                                 </div>
                                 <div className="flex items-center gap-8" title="Downloads">
                                   <Icon
-                                    name={createdDataset?.metrics?.resources_downloads ? "agora-solid-download" : "agora-line-download"}
+                                    name={
+                                      createdDataset?.metrics?.resources_downloads
+                                        ? "agora-solid-download"
+                                        : "agora-line-download"
+                                    }
                                     dimensions="xs"
                                     className="fill-neutral-700"
                                     aria-hidden="true"
                                   />
-                                  <span>{formatMetric(createdDataset?.metrics?.resources_downloads)}</span>
+                                  <span>
+                                    {formatMetric(createdDataset?.metrics?.resources_downloads)}
+                                  </span>
                                 </div>
                                 <div className="flex items-center gap-8" title="Reutilizações">
-                                  <img src="/Icons/bar_chart.svg" className="w-16 h-16" alt="" aria-hidden="true" />
+                                  <img
+                                    src="/Icons/bar_chart.svg"
+                                    className="h-16 w-16"
+                                    alt=""
+                                    aria-hidden="true"
+                                  />
                                   <span>{createdDataset?.metrics?.reuses || 0}</span>
                                 </div>
                                 <div className="flex items-center gap-8" title="Favoritos">
                                   <Icon
-                                    name={createdDataset?.metrics?.followers ? "agora-solid-star" : "agora-line-star"}
+                                    name={
+                                      createdDataset?.metrics?.followers
+                                        ? "agora-solid-star"
+                                        : "agora-line-star"
+                                    }
                                     dimensions="xs"
                                     className="fill-neutral-700"
                                     aria-hidden="true"
@@ -1616,10 +1595,10 @@ export default function DatasetsAdminClient({
                                   <span>{formatMetric(createdDataset?.metrics?.followers)}</span>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-8 text-primary-600 mt-16">
+                              <div className="mt-16 flex items-center gap-8 text-primary-600">
                                 <Icon
                                   name="agora-line-arrow-right-circle"
-                                  className="w-32 h-32"
+                                  className="h-32 w-32"
                                   aria-hidden="true"
                                 />
                               </div>
@@ -1645,11 +1624,7 @@ export default function DatasetsAdminClient({
                 >
                   Guardar o rascunho
                 </Button>
-                <Button
-                  variant="primary"
-                  onClick={handlePublish}
-                  disabled={isSubmitting}
-                >
+                <Button variant="primary" onClick={handlePublish} disabled={isSubmitting}>
                   {isSubmitting ? "A publicar..." : "Publicar o conjunto de dados"}
                 </Button>
               </div>
@@ -1662,10 +1637,7 @@ export default function DatasetsAdminClient({
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon
-                  name="agora-line-question-mark"
-                  className="w-[24px] h-[24px]"
-                />
+                <Icon name="agora-line-question-mark" className="h-[24px] w-[24px]" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />

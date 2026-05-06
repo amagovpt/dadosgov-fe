@@ -143,13 +143,13 @@ export default function HarvestersNewClient() {
   const buildPayload = (): HarvestSourceCreatePayload => {
     const producer = selectedProducerRef.current;
     const backend = selectedTypeRef.current || "dcat";
-    console.log("[harvester] buildPayload:", {
+    /*console.log("[harvester] buildPayload:", {
       name: harvesterName,
       url: harvesterUrl,
       backend,
       producer,
       typeRef: selectedTypeRef.current,
-    });
+    });*/
     return {
       name: harvesterName,
       url: harvesterUrl,

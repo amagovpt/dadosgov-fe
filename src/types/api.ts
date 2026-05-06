@@ -1109,3 +1109,14 @@ export interface TransferRequestPayload {
   recipient: { class: TransferRecipientClass; id: string };
   comment?: string;
 }
+
+export interface SystemLogFile {
+  name: string;
+  size: number;
+  modified: string;
+}
+
+export interface SystemLogContent extends SystemLogFile {
+  truncated: boolean;
+  content: string;
+}

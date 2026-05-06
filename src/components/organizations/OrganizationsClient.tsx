@@ -2,13 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import {
-  Button,
-  Icon,
-  ToggleGroup,
-  Toggle,
-  CardNoResults,
-} from "@ama-pt/agora-design-system";
+import { Button, Icon, ToggleGroup, Toggle, CardNoResults } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import { OrganizationsFilters } from "./OrganizationsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
@@ -26,6 +20,7 @@ import { pt } from "date-fns/locale";
 
 import HeroGeneral from "@/components/HeroGeneral";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 interface OrganizationsClientProps {
   initialData: APIResponse<Organization>;
@@ -123,7 +118,7 @@ export default function OrganizationsClient({
   );
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters organization">
+    <div className="filters organization flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
         <HeroGeneral
           title="Organizações"
@@ -135,7 +130,7 @@ export default function OrganizationsClient({
             { label: "Organizações", url: "/pages/organizations" },
           ]}
           subtitle={
-            <p className="text-primary-100 max-w-[592px]">
+            <p className="max-w-[592px] text-primary-100">
               {total === 0
                 ? "Não existem resultados disponíveis para a sua pesquisa"
                 : `Pesquise através de ${total.toLocaleString("pt-PT")} organizações em dados.gov.pt`}
@@ -155,32 +150,32 @@ export default function OrganizationsClient({
         />
 
         {/* Main Content */}
-        <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
+        <div className="container mx-auto bg-primary-50 md:gap-32 xl:gap-64">
           {/* Results count + Sort toggles */}
-          <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">
-            <div className="xl:col-span-5 flex flex-row items-end gap-24 pl-0 py-16">
+          <div className="grid-filters grid gap-x-[32px] md:grid-cols-3 xl:grid-cols-12">
+            <div className="flex flex-row items-end gap-24 py-16 pl-0 xl:col-span-5">
               <Button
                 appearance="outline"
                 variant="neutral"
                 hasIcon
                 {...(filtersOpen
                   ? {
-                    leadingIcon: "agora-line-chevron-left",
-                    leadingIconHover: "agora-solid-chevron-left",
-                  }
+                      leadingIcon: "agora-line-chevron-left",
+                      leadingIconHover: "agora-solid-chevron-left",
+                    }
                   : {
-                    trailingIcon: "agora-line-chevron-right",
-                    trailingIconHover: "agora-solid-chevron-right",
-                  })}
+                      trailingIcon: "agora-line-chevron-right",
+                      trailingIconHover: "agora-solid-chevron-right",
+                    })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
               </Button>
-              <span className="text-neutral-900 text-l-regular whitespace-nowrap">
+              <span className="whitespace-nowrap text-l-regular text-neutral-900">
                 {total.toLocaleString("pt-PT")} Resultados
               </span>
             </div>
-            <div className="xl:col-span-7 flex items-center justify-end py-16">
+            <div className="flex items-center justify-end py-16 xl:col-span-7">
               <ToggleGroup
                 multiple={false}
                 value={currentSortKey}
@@ -202,7 +197,7 @@ export default function OrganizationsClient({
           <div className="divider-neutral-200 mb-24" />
 
           <div
-            className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
+            className={`grid-filters grid gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
             {filtersOpen && (
@@ -231,26 +226,22 @@ export default function OrganizationsClient({
                 >
                   {organizations.length > 0 ? (
                     organizations.map((org, index) => {
-                      const timeAgo = org.last_modified
-                        ? formatDistanceToNow(new Date(org.last_modified), { locale: pt })
-                          .replace("aproximadamente ", "")
-                          .replace("quase ", "")
-                          .replace("menos de ", "")
-                          .replace("cerca de ", "")
-                        : "Desconhecido";
+                      const timeAgo = formatDateToTimeAgo(org.last_modified);
                       const cardProps = {
                         ...org,
                         last_modified: timeAgo,
                         title: org.name,
-                        link: `/pages/organizations/${org.slug}`
+                        link: `/pages/organizations/${org.slug}`,
                       } as CardMetricsProps;
-                      return <CardMetrics key={`dataset-${index}`} {...cardProps} hideProgressBar />
+                      return (
+                        <CardMetrics key={`dataset-${index}`} {...cardProps} hideProgressBar />
+                      );
                     })
                   ) : (
                     <div className="col-span-full">
                       <CardNoResults
                         icon={
-                          <Icon name="agora-line-search" className="w-12 h-12 text-primary-500" />
+                          <Icon name="agora-line-search" className="h-12 w-12 text-primary-500" />
                         }
                         title="Nenhuma organização encontrada"
                         subtitle={
@@ -259,7 +250,7 @@ export default function OrganizationsClient({
                           </span>
                         }
                         description={
-                          <div className="max-w-[592px] mx-auto">
+                          <div className="mx-auto max-w-[592px]">
                             Experimente remover filtros ou usar outros termos de pesquisa.
                           </div>
                         }
@@ -270,7 +261,7 @@ export default function OrganizationsClient({
                   )}
                 </div>
 
-                <div className="pb-64 mt-8 flex justify-center">
+                <div className="mt-8 flex justify-center pb-64">
                   <Pagination
                     currentPage={currentPage}
                     totalItems={total}

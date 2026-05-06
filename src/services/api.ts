@@ -82,6 +82,8 @@ import {
   HarvestSourceCreatePayload,
   HarvestSourceUpdatePayload,
   HomepageData,
+  SystemLogContent,
+  SystemLogFile,
   Transfer,
   TransferRequestPayload,
 } from "@/types/api";
@@ -3819,4 +3821,40 @@ export async function requestTransfer(payload: TransferRequestPayload): Promise<
     throw new Error(detail || `Failed to request transfer: ${res.statusText}`);
   }
   return await res.json();
+}
+
+/**
+ * Fetch the list of available host log files (admin only).
+ */
+export async function fetchSystemLogs(): Promise<SystemLogFile[]> {
+  try {
+    const res = await authFetch("/site/logs/", { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch logs: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching system logs:", error);
+    return [];
+  }
+}
+
+/**
+ * Fetch the content of a single host log file (admin only). Backend tails to ~1MB.
+ */
+export async function fetchSystemLogContent(
+  filename: string
+): Promise<SystemLogContent | null> {
+  try {
+    const res = await authFetch(`/site/logs/${encodeURIComponent(filename)}/`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch log content: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching system log content:", error);
+    return null;
+  }
 }

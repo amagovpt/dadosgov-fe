@@ -151,7 +151,7 @@ export default function CommunityResourceEditClient() {
     try {
       const schemaUrlVal = schemaUrl.trim();
       const schemaNameVal = selectedSchemaRef.current;
-      console.log("[debug] schemaUrl:", schemaUrlVal, "schemaRef:", schemaNameVal, "loadedSchema:", loadedSchema);
+      /*console.log("[debug] schemaUrl:", schemaUrlVal, "schemaRef:", schemaNameVal, "loadedSchema:", loadedSchema);*/
       const schemaPayload = schemaUrlVal
         ? { url: schemaUrlVal }
         : schemaNameVal
