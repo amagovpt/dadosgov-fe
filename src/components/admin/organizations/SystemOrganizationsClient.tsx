@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Breadcrumb,
+  Button,
   CardNoResults,
   Icon,
   InputSearchBar,
@@ -12,10 +13,39 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  usePopupContext,
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { fetchOrganizations } from "@/services/api";
+import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
+
+function DeleteOrgPopupContent({
+  onClose,
+  onConfirm,
+}: {
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-[16px]">
+      <p>Esta ação é irreversível.</p>
+      <div className="flex justify-end gap-[16px] pt-[16px]">
+        <Button appearance="outline" variant="neutral" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button
+          variant="danger"
+          onClick={onConfirm}
+          hasIcon
+          leadingIcon="agora-line-trash"
+          leadingIconHover="agora-solid-trash"
+        >
+          Eliminar
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 type SortField = "name" | "created_at";
 type SortOrder = "ascending" | "descending" | "none";
@@ -35,6 +65,7 @@ const formatDate = (dateStr: string) => {
 };
 
 export default function SystemOrganizationsClient() {
+  const { show, hide } = usePopupContext();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +74,7 @@ export default function SystemOrganizationsClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+  const [deletingOrgId, setDeletingOrgId] = useState<string | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadData = useCallback(async () => {
@@ -87,6 +119,32 @@ export default function SystemOrganizationsClient() {
 
   const getSortOrder = (field: SortField): SortOrder => {
     return sortField === field ? sortOrder : "none";
+  };
+
+  const handleDeleteOrg = (org: Organization) => {
+    show(
+      <DeleteOrgPopupContent
+        onClose={hide}
+        onConfirm={async () => {
+          setDeletingOrgId(org.id);
+          try {
+            await deleteOrganization(org.id);
+            hide();
+            await loadData();
+          } catch (error) {
+            console.error("Error deleting organization:", error);
+            hide();
+          } finally {
+            setDeletingOrgId(null);
+          }
+        }}
+      />,
+      {
+        title: "Tem a certeza que quer eliminar esta organização?",
+        closeAriaLabel: "Fechar",
+        dimensions: "m",
+      },
+    );
   };
 
   return (
@@ -198,6 +256,14 @@ export default function SystemOrganizationsClient() {
                     <a href={`/pages/admin/org/${org.id}/profile`}>
                       <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
                     </a>
+                    <button
+                      aria-label={`Eliminar ${org.name}`}
+                      disabled={deletingOrgId === org.id}
+                      onClick={() => handleDeleteOrg(org)}
+                      className="text-danger-600 disabled:opacity-50"
+                    >
+                      <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
+                    </button>
                   </div>
                 </TableCell>
               </TableRow>
