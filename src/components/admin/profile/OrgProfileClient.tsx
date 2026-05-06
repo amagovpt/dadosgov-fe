@@ -361,7 +361,7 @@ export default function OrgProfileClient() {
                 </Button>
               </div>
 
-              {(isAdmin || org.members?.some((m) => m.user.id === user?.id && m.role === "admin")) && (
+              {(isAdmin || org?.members?.some((m) => m.user.id === user?.id && m.role === "admin")) && (
                 <div className="dataset-edit-danger-actions">
                   {deleteError && (
                     <StatusCard
