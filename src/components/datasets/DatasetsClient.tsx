@@ -59,6 +59,7 @@ export default function DatasetsClient({
   const activePage = Number(searchParams.get("page") || String(currentPage || 1));
   const { data: datasets, total, page_size } = listData;
 
+  //TODO: Check if can be removed
   const handleDeleteDataset = (dataset: { id: string; title: string }) => {
     show(
       <div className="flex flex-col gap-[16px]">
