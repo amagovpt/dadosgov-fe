@@ -155,22 +155,12 @@ export default function SystemLogsClient() {
           <Button
             variant="primary"
             appearance="outline"
-            hasIcon={true}
-            leadingIcon={
-              autoRefresh ? "agora-line-pause-circle" : "agora-line-refresh"
-            }
-            leadingIconHover={
-              autoRefresh ? "agora-solid-pause-circle" : "agora-solid-refresh"
-            }
             onClick={() => setAutoRefresh((v) => !v)}
           >
             {autoRefresh ? "Parar auto-atualizar" : "Auto-atualizar (10s)"}
           </Button>
           <Button
             variant="primary"
-            hasIcon={true}
-            leadingIcon="agora-line-refresh"
-            leadingIconHover="agora-solid-refresh"
             onClick={handleManualRefresh}
             disabled={isLoadingFiles || isLoadingContent}
           >
@@ -237,21 +227,44 @@ export default function SystemLogsClient() {
           </div>
 
           {content && (
-            <div className="flex flex-wrap items-center gap-[8px] mb-[12px]">
-              <Pill variant="neutral">
-                <Icon name="agora-line-file" className="w-[14px] h-[14px] mr-[4px]" />
-                {content.name}
-              </Pill>
-              <Pill variant="neutral">{formatBytes(content.size)}</Pill>
-              <Pill variant="neutral">
-                <Icon name="agora-line-clock" className="w-[14px] h-[14px] mr-[4px]" />
-                {formatDateTime(content.modified)}
-              </Pill>
+            <div className="flex flex-wrap items-center gap-x-[20px] gap-y-[8px] mb-[12px] px-[16px] py-[12px] rounded-[8px] border border-neutral-200 bg-accent-light text-sm text-brand-blue-secondary">
+              <span className="inline-flex items-center gap-[6px]">
+                <Icon
+                  name="agora-line-file"
+                  className="w-[16px] h-[16px] text-brand-blue-primary"
+                />
+                <span className="text-neutral-700 font-medium">Ficheiro:</span>
+                <span className="font-semibold break-all">{content.name}</span>
+              </span>
+              <span
+                className="hidden sm:block w-px h-[18px] bg-neutral-300"
+                aria-hidden="true"
+              />
+              <span className="inline-flex items-center gap-[6px]">
+                <Icon
+                  name="agora-line-document"
+                  className="w-[16px] h-[16px] text-brand-blue-primary"
+                />
+                <span className="text-neutral-700 font-medium">Tamanho:</span>
+                <span className="font-semibold">{formatBytes(content.size)}</span>
+              </span>
+              <span
+                className="hidden sm:block w-px h-[18px] bg-neutral-300"
+                aria-hidden="true"
+              />
+              <span className="inline-flex items-center gap-[6px]">
+                <Icon
+                  name="agora-line-clock"
+                  className="w-[16px] h-[16px] text-brand-blue-primary"
+                />
+                <span className="text-neutral-700 font-medium">Modificado:</span>
+                <span className="font-semibold">{formatDateTime(content.modified)}</span>
+              </span>
               {content.truncated && (
                 <Pill variant="warning">A mostrar apenas o final do ficheiro</Pill>
               )}
               {lastRefresh && (
-                <span className="text-neutral-600 text-xs ml-auto">
+                <span className="ml-auto text-neutral-600 text-xs italic">
                   Atualizado às {formatDateTime(lastRefresh.toISOString())}
                 </span>
               )}
@@ -266,28 +279,35 @@ export default function SystemLogsClient() {
 
           <pre
             ref={viewerRef}
-            className="admin-log-viewer"
             aria-label="Conteúdo do ficheiro de log"
             tabIndex={0}
+            className="block w-full min-h-[320px] max-h-[calc(100vh-360px)] overflow-auto py-[16px] rounded-[8px] border border-neutral-300 bg-brand-blue-secondary text-neutral-100 font-mono text-[12.5px] leading-[1.55] whitespace-pre"
           >
             {isLoadingContent && !content ? (
-              <span className="admin-log-viewer__placeholder">A carregar conteúdo...</span>
-            ) : !content || lines.length === 0 ? (
-              <span className="admin-log-viewer__placeholder">
-                Ficheiro vazio.
+              <span className="block px-[16px] italic text-neutral-400">
+                A carregar conteúdo...
               </span>
+            ) : !content || lines.length === 0 ? (
+              <span className="block px-[16px] italic text-neutral-400">Ficheiro vazio.</span>
             ) : (
               lines.map((line, idx) => {
                 const severity = lineSeverity(line);
+                const textColor =
+                  severity === "error"
+                    ? "text-red-300"
+                    : severity === "warn"
+                      ? "text-yellow-300"
+                      : severity === "info"
+                        ? "text-sky-300"
+                        : "text-neutral-100";
                 return (
-                  <span
-                    key={idx}
-                    className={`admin-log-viewer__line${
-                      severity ? ` admin-log-viewer__line--${severity}` : ""
-                    }`}
-                  >
-                    <span className="admin-log-viewer__lineno">{idx + 1}</span>
-                    <span className="admin-log-viewer__text">{line || " "}</span>
+                  <span key={idx} className="flex gap-[16px] px-[16px] hover:bg-white/5">
+                    <span className="flex-shrink-0 w-[56px] text-right text-neutral-500 select-none">
+                      {idx + 1}
+                    </span>
+                    <span className={`flex-1 whitespace-pre-wrap break-words ${textColor}`}>
+                      {line || " "}
+                    </span>
                   </span>
                 );
               })
