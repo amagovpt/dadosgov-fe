@@ -1858,6 +1858,17 @@ export async function fetchActivity(
   }
 }
 
+export async function fetchAllowedExtensions(): Promise<string[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/datasets/extensions/`, { next: { revalidate: 3600 } });
+    if (!res.ok) throw new Error(`Failed to fetch allowed extensions: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching allowed extensions:", error);
+    return [];
+  }
+}
+
 export async function suggestFormats(query: string): Promise<FormatSuggestion[]> {
   try {
     const res = await fetch(

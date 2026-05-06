@@ -35,6 +35,7 @@ import {
   fetchOrgContactPoints,
   createContactPoint,
   fetchResourceTypes,
+  fetchAllowedExtensions,
 } from "@/services/api";
 import {
   License,
@@ -153,6 +154,7 @@ export default function DatasetsAdminClient({
   // Step 3 state
   const [resourceUrls, setResourceUrls] = useState<string[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [allowedExtensions, setAllowedExtensions] = useState<string[] | null>(null);
   const [resourceMetadata, setResourceMetadata] = useState<Record<string, PendingResourceMeta>>({});
 
   // API state
@@ -475,6 +477,7 @@ export default function DatasetsAdminClient({
           myDatasetsData,
           tagsData,
           resTypes,
+          extData,
         ] = await Promise.all([
           fetchLicenses(),
           fetchFrequencies(),
@@ -482,6 +485,7 @@ export default function DatasetsAdminClient({
           fetchMyDatasets(1, 1),
           suggestTags("", 50),
           fetchResourceTypes(),
+          fetchAllowedExtensions(),
         ]);
         setLicenses(licensesData);
         setFrequencies(frequenciesData);
@@ -489,6 +493,7 @@ export default function DatasetsAdminClient({
         setHasDatasets(myDatasetsData.data.length > 0);
         setTags(tagsData);
         setResourceTypes(resTypes);
+        setAllowedExtensions(extData);
       } catch (error) {
         console.error("Error loading dropdown data:", error);
       }
@@ -1429,6 +1434,7 @@ export default function DatasetsAdminClient({
                   resourceTypes={resourceTypes}
                   resourceMetadata={resourceMetadata}
                   onEditMeta={handleEditMeta}
+                  allowedExtensions={allowedExtensions}
                 />
                 {showInvalidUrlError && (
                   <span className="text-sm text-danger-500">
