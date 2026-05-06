@@ -216,7 +216,13 @@ function ResourceItem({
   onRemove: () => void;
 }) {
   const { show } = usePopupContext();
-  const displayName = currentMeta.title || name;
+  const extMatch = !isUrl ? name.match(/(\.[^.]+)$/) : null;
+  const fileExt = extMatch ? extMatch[1] : "";
+  const baseDisplayName = currentMeta.title || name;
+  const displayName =
+    !isUrl && fileExt && !baseDisplayName.toLowerCase().endsWith(fileExt.toLowerCase())
+      ? baseDisplayName + fileExt
+      : baseDisplayName;
 
   const handleEdit = () => {
     show(
@@ -243,7 +249,7 @@ function ResourceItem({
   return (
     <div className="file-item">
       <div className="file-info">
-        <span className="name">{displayName}</span>
+        <span className="name">{isUrl ? name : displayName}</span>
         {size && <span className="size">{size}</span>}
       </div>
       <div className="actions">
