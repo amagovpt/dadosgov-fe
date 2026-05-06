@@ -50,7 +50,11 @@ import {
   suggestTags,
   fetchActivity,
   fetchDiscussions,
+  requestTransfer,
 } from "@/services/api";
+import RecipientSelect, {
+  type RecipientSelection,
+} from "@/components/admin/RecipientSelect";
 import {
   Dataset,
   License,
@@ -112,18 +116,40 @@ function translateActivityLabel(label: string): string {
 
 function TransferDatasetPopupContent({
   datasetTitle,
-  onClose,
+  onConfirm,
 }: {
   datasetTitle: string;
-  onClose: () => void;
+  onConfirm: (recipient: RecipientSelection, comment: string) => Promise<void>;
 }) {
+  const [recipient, setRecipient] = useState<RecipientSelection | null>(null);
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showRecipientError, setShowRecipientError] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!recipient) {
+      setShowRecipientError(true);
+      return;
+    }
+    setShowRecipientError(false);
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    try {
+      await onConfirm(recipient, comment.trim());
+      // Parent is responsible for hide() on success.
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : null;
+      setErrorMessage(msg || "Erro ao pedir a transferência do conjunto de dados.");
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-[16px]">
       <p>
         <Icon name="agora-line-document" className="inline w-4 h-4 mr-[4px]" />
-        <a href="#" className="text-primary-600 underline">
-          {datasetTitle}
-        </a>
+        <span className="text-primary-600">{datasetTitle}</span>
       </p>
       <p>
         <strong>Esta ação é irreversível.</strong>&nbsp; Vai deixar de gerir este conjunto de dados
@@ -131,13 +157,27 @@ function TransferDatasetPopupContent({
 
       <div className="flex flex-col gap-[8px]">
         <label className="text-primary-900 text-base font-medium leading-7">
-          Organização ou utilizador
+          Organização ou utilizador <span className="text-danger-600">*</span>
         </label>
-        <InputText
+        <RecipientSelect
+          id="transfer-dataset-recipient"
           placeholder="Selecione a identidade para a qual pretende transferir o conjunto de dados..."
-          id="transfer-search"
-          label=""
+          onChange={(selection) => {
+            setRecipient(selection);
+            if (selection) setShowRecipientError(false);
+          }}
+          hasError={showRecipientError}
+          errorFeedbackText="Selecione um utilizador ou organização"
         />
+        {recipient && (
+          <p className="text-sm text-neutral-700">
+            Destinatário selecionado:{" "}
+            <strong className="text-primary-900">{recipient.label}</strong>{" "}
+            <span className="text-neutral-500">
+              ({recipient.class === "User" ? "utilizador" : "organização"})
+            </span>
+          </p>
+        )}
       </div>
 
       <div className="admin-page__org-card flex flex-col items-center gap-[16px] bg-neutral-50 rounded-lg p-8 text-center">
@@ -159,8 +199,21 @@ function TransferDatasetPopupContent({
 
       <div className="flex flex-col gap-[8px]">
         <label className="text-primary-900 text-base font-medium leading-7">Comentário</label>
-        <InputTextArea placeholder="" id="transfer-comment" label="" rows={3} />
+        <InputTextArea
+          placeholder="Mensagem opcional para o destinatário..."
+          id="transfer-dataset-comment"
+          label=""
+          rows={3}
+          value={comment}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setComment(e.target.value)
+          }
+        />
       </div>
+
+      {errorMessage && (
+        <p className="text-danger-600 text-sm">{errorMessage}</p>
+      )}
 
       <div className="flex justify-end gap-16 pt-16">
         <Button
@@ -169,9 +222,10 @@ function TransferDatasetPopupContent({
           hasIcon
           leadingIcon="agora-line-plane"
           leadingIconHover="agora-solid-plane"
-          onClick={onClose}
+          onClick={handleConfirm}
+          disabled={isSubmitting}
         >
-          Transferir o conjunto de dados
+          {isSubmitting ? "A transferir..." : "Transferir o conjunto de dados"}
         </Button>
       </div>
     </div>
@@ -965,6 +1019,25 @@ export default function DatasetsEditClient() {
     }
   };
 
+  const handleTransferDataset = async (
+    recipient: RecipientSelection,
+    comment: string,
+  ) => {
+    if (!dataset) throw new Error("Conjunto de dados não carregado.");
+    setApiError(null);
+    setApiSuccess(null);
+    await requestTransfer({
+      subject: { class: "Dataset", id: dataset.id },
+      recipient: { class: recipient.class, id: recipient.id },
+      comment: comment || undefined,
+    });
+    hide();
+    setApiSuccess(
+      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
+    );
+    setTimeout(() => setApiSuccess(null), 15000);
+  };
+
   const handleUnarchiveDataset = async () => {
     if (!dataset) return;
     setIsSubmitting(true);
@@ -1685,7 +1758,7 @@ export default function DatasetsEditClient() {
                               show(
                                 <TransferDatasetPopupContent
                                   datasetTitle={dataset.title}
-                                  onClose={hide}
+                                  onConfirm={handleTransferDataset}
                                 />,
                                 {
                                   title: "Transfira o conjunto de dados",
