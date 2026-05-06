@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Button,
@@ -15,12 +15,12 @@ import { Pagination } from "@/components/Pagination";
 import { OrganizationsFilters } from "./OrganizationsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
+import { fetchOrganizations } from "@/services/api";
 import {
   APIResponse,
   OrgBadges,
   Organization,
   OrganizationFilters,
-  SiteMetrics,
 } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDistanceToNow } from "date-fns";
@@ -31,10 +31,8 @@ import PageBanner from "@/components/PageBanner";
 interface OrganizationsClientProps {
   initialData: APIResponse<Organization>;
   currentPage: number;
-  siteMetrics: SiteMetrics;
   orgBadges: OrgBadges;
   orgBadgeCounts: Record<string, number>;
-  initialFilters: OrganizationFilters;
   allOrganizations?: Organization[];
 }
 
@@ -55,52 +53,78 @@ const SORT_LABELS: Record<string, string> = {
 export default function OrganizationsClient({
   initialData,
   currentPage,
-  siteMetrics,
   orgBadges,
   orgBadgeCounts,
-  initialFilters,
   allOrganizations,
 }: OrganizationsClientProps) {
   const router = useRouter();
-  const { data: organizations, total, page_size } = initialData;
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
+  const [listData, setListData] = React.useState<APIResponse<Organization>>(initialData);
+  const activePage = Number(searchParams.get("page") || String(currentPage || 1));
+  const { data: organizations, total, page_size } = listData;
 
-  const currentQuery = initialFilters.q || "";
-  const currentSort = initialFilters.sort || "";
+  const currentQuery = searchParams.get("q") || "";
+  const currentSort = searchParams.get("sort") || "";
   const [filtersOpen, setFiltersOpen] = React.useState(false);
 
   const currentSortKey =
     Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
 
+  const getLiveParams = React.useCallback(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search);
+    }
+    return new URLSearchParams(Array.from(searchParams.entries()));
+  }, [searchParams]);
+
   const buildUrl = React.useCallback(
     (overrides: Record<string, string | null>) => {
-      const params = new URLSearchParams();
-      if (initialFilters.q) params.set("q", initialFilters.q);
-      if (initialFilters.badge) {
-        const badges = Array.isArray(initialFilters.badge)
-          ? initialFilters.badge
-          : [initialFilters.badge];
-        badges.forEach((b) => params.append("badge", b));
-      }
-      if (initialFilters.organization) {
-        const orgs = Array.isArray(initialFilters.organization)
-          ? initialFilters.organization
-          : [initialFilters.organization];
-        orgs.forEach((o) => params.append("organization", o));
-      }
-      if (initialFilters.sort) params.set("sort", initialFilters.sort);
+      const params = getLiveParams();
       for (const [key, value] of Object.entries(overrides)) {
-        if (value) {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
+        if (value) params.set(key, value);
+        else params.delete(key);
       }
-      params.set("page", "1");
+      params.delete("page");
+      params.sort();
       const qs = params.toString();
-      return `/pages/organizations${qs ? `?${qs}` : ""}`;
+      return `${pathname}${qs ? `?${qs}` : ""}`;
     },
-    [initialFilters]
+    [getLiveParams, pathname]
   );
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    async function loadOrganizationsFromUrl() {
+      const params = new URLSearchParams(queryString);
+      const badges = params.getAll("badge");
+      const organizationsFilter = params.getAll("organization");
+
+      const filters: OrganizationFilters = {
+        ...(params.get("q") && { q: params.get("q") as string }),
+        ...(params.get("sort") && { sort: params.get("sort") as string }),
+        ...(badges.length > 0 && { badge: badges.length === 1 ? badges[0] : badges }),
+        ...(organizationsFilter.length > 0 && {
+          organization:
+            organizationsFilter.length === 1 ? organizationsFilter[0] : organizationsFilter,
+        }),
+      };
+
+      if (!filters.sort && !filters.q) {
+        filters.sort = "-last_modified";
+      }
+
+      const next = await fetchOrganizations(activePage, initialData.page_size || 20, filters);
+      if (!cancelled) setListData(next);
+    }
+
+    loadOrganizationsFromUrl();
+    return () => {
+      cancelled = true;
+    };
+  }, [queryString, activePage, initialData.page_size]);
 
   const onSearchNavigate = React.useCallback(
     (query: string) => {
@@ -209,10 +233,8 @@ export default function OrganizationsClient({
             {filtersOpen && (
               <div className="xl:col-span-5 xl:block">
                 <OrganizationsFilters
-                  siteMetrics={siteMetrics}
                   orgBadges={orgBadges}
                   orgBadgeCounts={orgBadgeCounts}
-                  initialFilters={initialFilters}
                   allOrganizations={allOrganizations}
                 />
               </div>
@@ -369,10 +391,9 @@ export default function OrganizationsClient({
 
                 <div className="pb-64 mt-8 flex justify-center">
                   <Pagination
-                    currentPage={currentPage}
+                    currentPage={activePage}
                     totalItems={total}
                     pageSize={page_size}
-                    baseUrl="/pages/organizations"
                   />
                 </div>
               </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Sidebar,
   SidebarItem,
@@ -12,7 +12,7 @@ import {
   Button,
   Checkbox,
 } from "@ama-pt/agora-design-system";
-import { OrgBadges, Organization, OrganizationFilters, SiteMetrics } from "@/types/api";
+import { OrgBadges, Organization } from "@/types/api";
 
 const ORG_TYPE_OPTIONS = [
   { id: "all", label: "Todos", badge: "" },
@@ -22,16 +22,9 @@ const ORG_TYPE_OPTIONS = [
   { id: "association", label: "Associação", badge: "association" },
 ];
 
-function toArray(v: string | string[] | undefined): string[] {
-  if (!v) return [];
-  return Array.isArray(v) ? v : [v];
-}
-
 interface OrganizationsFiltersProps {
-  siteMetrics: SiteMetrics;
   orgBadges: OrgBadges;
   orgBadgeCounts?: Record<string, number>;
-  initialFilters: OrganizationFilters;
   allOrganizations?: Organization[];
 }
 
@@ -44,56 +37,74 @@ const BADGE_LABELS_PT: Record<string, string> = {
 };
 
 export const OrganizationsFilters = ({
-  siteMetrics,
   orgBadges,
   orgBadgeCounts = {},
-  initialFilters,
   allOrganizations = [],
 }: OrganizationsFiltersProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
+  const paramsRef = React.useRef(queryString);
   const [badgeSearch, setBadgeSearch] = React.useState("");
   const [orgSearch, setOrgSearch] = React.useState("");
   const resolvedOrgBadgeCounts = orgBadgeCounts;
   const resolvedOrganizations = allOrganizations;
 
-  const activeBadges = toArray(initialFilters.badge);
-  const activeOrgs = toArray(initialFilters.organization);
+  const activeBadges = searchParams.getAll("badge");
+  const activeOrgs = searchParams.getAll("organization");
   const selectedOrgType = activeBadges.length === 1 ? activeBadges[0] : "all";
 
   const totalOrgs = Object.values(resolvedOrgBadgeCounts).reduce((sum, c) => sum + c, 0);
 
-  const buildUrl = (updates: {
+  const getWorkingParams = React.useCallback(() => {
+    return new URLSearchParams(paramsRef.current);
+  }, []);
+
+  const navigateWithParams = React.useCallback(
+    (params: URLSearchParams) => {
+      params.set("page", "1");
+      const search = params.toString();
+      paramsRef.current = search;
+      router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
+    },
+    [pathname, router]
+  );
+
+  React.useEffect(() => {
+    paramsRef.current = queryString;
+  }, [queryString]);
+
+  const updateFilters = (updates: {
     badges?: string[];
     orgs?: string[];
   }) => {
-    const newParams = new URLSearchParams();
-    if (initialFilters.q) newParams.set("q", initialFilters.q);
-    if (initialFilters.sort) newParams.set("sort", initialFilters.sort);
+    const newParams = getWorkingParams();
     const badges = updates.badges !== undefined ? updates.badges : activeBadges;
     const orgs = updates.orgs !== undefined ? updates.orgs : activeOrgs;
+    newParams.delete("badge");
+    newParams.delete("organization");
     badges.forEach((b) => newParams.append("badge", b));
     orgs.forEach((o) => newParams.append("organization", o));
-    newParams.set("page", "1");
-    const qs = newParams.toString();
-    router.replace(`/pages/organizations${qs ? `?${qs}` : ""}`, { scroll: false });
+    navigateWithParams(newParams);
   };
 
   const handleOrgTypeChange = (optionId: string) => {
-    buildUrl({ badges: optionId === "all" ? [] : [optionId] });
+    updateFilters({ badges: optionId === "all" ? [] : [optionId] });
   };
 
   const toggleBadge = (kind: string) => {
     const next = activeBadges.includes(kind)
       ? activeBadges.filter((b) => b !== kind)
       : [...activeBadges, kind];
-    buildUrl({ badges: next });
+    updateFilters({ badges: next });
   };
 
   const toggleOrg = (id: string) => {
     const next = activeOrgs.includes(id)
       ? activeOrgs.filter((o) => o !== id)
       : [...activeOrgs, id];
-    buildUrl({ orgs: next });
+    updateFilters({ orgs: next });
   };
 
   const entries = Object.keys(orgBadges).map((kind) => ({
@@ -110,7 +121,9 @@ export const OrganizationsFilters = ({
   const selectedOrgItems = activeOrgs
     .filter((id) => !orgItems.some((o) => o.id === id))
     .map((id) => ({ id, name: id }));
-  const allOrgItems = [...selectedOrgItems, ...orgItems];
+  const allOrgItems = Array.from(
+    new Map([...selectedOrgItems, ...orgItems].map((item) => [item.id, item])).values()
+  );
   const filteredOrgs = orgSearch.trim()
     ? allOrgItems.filter((o) => o.name.toLowerCase().includes(orgSearch.toLowerCase()))
     : allOrgItems;
@@ -205,6 +218,7 @@ export const OrganizationsFilters = ({
                 filteredOrgs.map((o) => (
                   <Checkbox
                     key={o.id}
+                    id={`organization-filter-org-${encodeURIComponent(o.id)}`}
                     label={o.name}
                     className="font-bold"
                     value={o.id}
@@ -254,6 +268,7 @@ export const OrganizationsFilters = ({
               {filteredEntries.map((entry) => (
                 <Checkbox
                   key={entry.kind}
+                  id={`organization-filter-badge-${encodeURIComponent(entry.kind)}`}
                   label={`${entry.label} (${entry.count.toLocaleString("pt-PT")})`}
                   className="font-bold"
                   value={entry.kind}
