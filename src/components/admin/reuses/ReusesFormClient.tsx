@@ -34,6 +34,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import Link from "next/link";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
@@ -397,80 +398,13 @@ export default function ReusesFormClient({
       });
     }
   };
-  const auxiliarItemsStep1 = [
-    {
-      title: "Dar um título",
-      content: (
-        <p>
-          Prefira um título que explique claramente como a reutilização utiliza os dados, em vez
-          de usar apenas o nome do site ou da aplicação. Por exemplo: “Sistema de Pesquisa de
-          Acordos Comerciais” em vez de “acordoscomerciais.pt”.
-        </p>
-      ),
-      hasError: !!formErrors.reuseName,
-    },
-    {
-      title: "Adicionar um link",
-      content: (
-        <p>
-          Insira o link da página onde a reutilização pode ser consultada. Prefira o link direto
-          para o conteúdo e certifique-se de que o endereço permanece estável.
-        </p>
-      ),
-      hasError: !!formErrors.reuseLink,
-    },
-    {
-      title: "Escolher um tipo",
-      content: (
-        <p>
-          Indique o tipo em que deve ser classificada a reutilização (API, aplicação, artigo de
-          imprensa, visualização, etc.).
-        </p>
-      ),
-      hasError: !!formErrors.reuseType,
-    },
-    {
-      title: "Escolher um tema",
-      content: <p>Escolha o tema associado à sua reutilização.</p>,
-      hasError: !!formErrors.reuseTopic,
-    },
-    {
-      title: "Descrever a reutilização",
-      content: (
-        <p>
-          Pode indicar, de forma objetiva, como a reutilização foi desenvolvida, o que permite
-          realizar ou demonstrar e, se relevante, acrescentar informação sobre o contexto em que a
-          reutilização foi criada. Recomenda-se manter um tom neutro; conteúdos com caráter
-          excessivamente promocional poderão não ser aceites.
-        </p>
-      ),
-      hasError: !!formErrors.reuseDescription || !!formErrors.reuseDescriptionLength,
-    },
-    {
-      title: "Adicionar palavras-chave",
-      content: (
-        <p>
-          As palavras-chave são apresentadas na página da reutilização e melhoram a sua
-          visibilidade nos motores de pesquisa. Ao selecionar uma palavra-chave, pode consultar
-          outras reutilizações às quais essa mesma palavra foi associada. Com base no conteúdo da
-          reutilização, podem ser sugeridas palavras-chave automaticamente. Pode aceitá-las,
-          modificá-las ou excluí-las.
-        </p>
-      ),
-    },
-    {
-      title: "Escolher uma imagem",
-      content: (
-        <p>
-          Se a sua reutilização tiver uma componente visual, pode apresentar uma pré-visualização
-          através de uma imagem ou de uma captura de ecrã (preferíveis a logótipos ou a simples
-          ilustrações). Esta imagem será exibida na secção “Reutilizações” na listagem das mesmas.
-        </p>
-      ),
-    },
-  ];
-
-  const auxiliarItems = auxiliarItemsStep1;
+  const auxiliarItems = getReuseAuxiliarItems({
+    title: !!formErrors.reuseName,
+    link: !!formErrors.reuseLink,
+    type: !!formErrors.reuseType,
+    topic: !!formErrors.reuseTopic,
+    description: !!formErrors.reuseDescription || !!formErrors.reuseDescriptionLength,
+  });
 
   const producerOptions = useMemo(() => {
     const options = [

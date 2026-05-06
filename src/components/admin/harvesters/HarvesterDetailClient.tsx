@@ -353,24 +353,24 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
   const auxiliarItems = [
     {
-      title: "Escolha um nome",
+      title: "Dar um nome",
       content:
         "Dê um nome ao seu harvester. Esta é uma referência interna que o ajudará a identificá-lo caso crie vários harvesters. O nome do seu harvester não será público.",
       hasError: !!formErrors.harvesterName,
     },
     {
-      title: "Descreva o seu harvester",
+      title: "Descrever o seu harvester",
       content:
         "Adicione detalhes no campo de descrição para seu uso interno. A descrição é opcional.",
     },
     {
-      title: "Selecione o URL correto",
+      title: "Adicionar o URL",
       content:
         "Insira aqui o URL do portal que deseja recolher. Normalmente, trata-se do URL da página inicial do seu portal de dados abertos. O URL permite que o harvester navegue e recupere todos os seus conjuntos de dados.",
       hasError: !!formErrors.harvesterUrl,
     },
     {
-      title: "Selecione o tipo de implementação",
+      title: "Identificar o tipo de implementação",
       content:
         "Escolha o formato dos metadados (por exemplo, DCAT, CKAN, etc.). Esse formato permite que o harvester saiba como ler e interpretar os seus metadados, para que possam ser transcritos corretamente em dados.gov.pt.",
     },

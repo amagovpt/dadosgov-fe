@@ -48,6 +48,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
 
@@ -941,6 +942,7 @@ export default function ReusesEditClient() {
                   </div>
 
                   <div className="dataset-edit-danger-actions">
+                    {/* Transfer reuse section hidden — keep for future use
                     <StatusCard
                       variant="informative"
                       showIcon
@@ -973,6 +975,7 @@ export default function ReusesEditClient() {
                         </>
                       }
                     />
+                    */}
                     <StatusCard
                       variant="warning"
                       showIcon
@@ -1051,55 +1054,11 @@ export default function ReusesEditClient() {
                     <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                   </div>
                   <AuxiliarList
-                    items={[
-                      {
-                        title: "Dar um nome à reutilização",
-                        content:
-                          'Prefira um título que permita entender como os dados são usados, em vez do nome do site ou aplicação  ("Mecanismo de Busca de Acordos Comerciais" em vez de "Acordos-Comerciais.fr", por exemplo).',
-                        hasError: !!formErrors.title,
-                      },
-                      {
-                        title: "Escolher o link",
-                        content:
-                          "Insira o link para a página onde a reutilização é visível. Aponte para a reutilização em si, e não para uma página inicial. Certifique-se de que a ligação esteja estável ao longo do tempo.",
-                        hasError: !!formErrors.url,
-                      },
-                      {
-                        title: "Escolher um tipo",
-                        content:
-                          "Indique o tipo em que deve ser classificada a reutilização (API, aplicação, artigo de imprensa, visualização, etc.).",
-                      },
-                      {
-                        title: "Descrever a reutilização",
-                        content:
-                          "Pode preencher o método de criação da reutilização, o que a reutilização permite que faça, mostre ou diga mais sobre si mesmo e o contexto dessa reutilização. É aconselhado que mantenha um tom neutro: se a reutilização parecer uma mensagem promocional, podemos removê-la.",
-                        hasError: !!formErrors.description,
-                      },
-                      {
-                        title: "Adicionar palavras-chave",
-                        content: (
-                          <>
-                            <p>
-                              As palavras-chave aparecem na página de destino e melhoram o
-                              posicionamento nos mecanismos de pesquisa. Para cada palavra-chave,
-                              pode obter uma lista de reutilizações para as quais essa
-                              palavra-chave também foi atribuída.
-                            </p>
-                            <p className="font-bold mt-3">Sugestões automáticas</p>
-                            <p className="mt-2">
-                              Com base no conteúdo que reutiliza, podem ser sugeridas
-                              palavras-chave automaticamente. Pode aceitá-las, modificá-las ou
-                              excluí-las.
-                            </p>
-                          </>
-                        ),
-                      },
-                      {
-                        title: "Escolher uma imagem",
-                        content:
-                          'Se a sua reutilização assumir a forma de uma representação gráfica, pode fornecer uma pré-visualização usando uma imagem ou captura de ecrã. Esta imagem aparecerá na secção "Reutilizações" da página do conjunto de dados associado.',
-                      },
-                    ]}
+                    items={getReuseAuxiliarItems({
+                      title: !!formErrors.title,
+                      link: !!formErrors.url,
+                      description: !!formErrors.description,
+                    })}
                   />
                 </div>
               </aside>
