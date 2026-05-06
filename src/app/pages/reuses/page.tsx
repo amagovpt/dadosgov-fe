@@ -1,5 +1,6 @@
-import { fetchReuses, fetchReuseTypes, fetchSiteInfo } from '@/services/api';
+import { fetchReuses } from '@/services/api';
 import ReusesClient from '@/components/reuses/ReusesClient';
+import { ReuseFilters } from '@/types/api';
 import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -16,15 +17,15 @@ export default async function ReusesPage({
         page?: string;
         q?: string;
         type?: string;
-        tag?: string;
-        organization?: string;
+        tag?: string | string[];
+        organization?: string | string[];
         sort?: string;
         modified_since?: string;
     }>;
 }) {
     const resolvedSearchParams = await searchParams;
     const page = Number(resolvedSearchParams?.page) || 1;
-    const filters = {
+    const filters: ReuseFilters = {
         ...(resolvedSearchParams?.q && { q: resolvedSearchParams.q }),
         ...(resolvedSearchParams?.type && { type: resolvedSearchParams.type }),
         ...(resolvedSearchParams?.tag && { tag: resolvedSearchParams.tag }),
@@ -43,10 +44,8 @@ export default async function ReusesPage({
     const d12m = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString().slice(0, 10);
     const d3y = new Date(now.getFullYear() - 3, now.getMonth(), now.getDate()).toISOString().slice(0, 10);
 
-    const [initialData, reuseTypes, siteInfo, totalRes, d30Res, d12mRes, d3yRes] = await Promise.all([
+    const [initialData, totalRes, d30Res, d12mRes, d3yRes] = await Promise.all([
         fetchReuses(page, 12, apiFilters),
-        fetchReuseTypes(),
-        fetchSiteInfo(),
         fetchReuses(1, 1),
         fetchReuses(1, 1, { modified_since: d30 }),
         fetchReuses(1, 1, { modified_since: d12m }),
@@ -64,9 +63,6 @@ export default async function ReusesPage({
         <ReusesClient
             initialData={initialData}
             currentPage={page}
-            initialFilters={filters}
-            reuseTypes={reuseTypes}
-            siteMetrics={siteInfo.metrics}
             filterCounts={filterCounts}
         />
     );

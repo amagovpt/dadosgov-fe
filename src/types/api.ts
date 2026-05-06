@@ -353,8 +353,8 @@ export interface ReuseSuggestion {
 export interface ReuseFilters {
   q?: string;
   type?: string;
-  tag?: string;
-  organization?: string;
+  tag?: string | string[];
+  organization?: string | string[];
   owner?: string;
   dataset?: string;
   sort?: string;

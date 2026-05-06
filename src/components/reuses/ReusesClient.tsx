@@ -1,15 +1,12 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   CardLinks,
   InputSearch,
   Button,
-  InputSelect,
-  DropdownSection,
-  DropdownOption,
   Icon,
   CardNoResults,
   Toggle,
@@ -22,21 +19,18 @@ import {
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
-import { fetchOrganizations, suggestTags } from "@/services/api";
+import { fetchOrganizations, fetchReuses, suggestTags } from "@/services/api";
 import {
   APIResponse,
   Organization,
   Reuse,
   ReuseFilters,
-  ReuseType,
-  SiteMetrics,
 } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
 import PageBanner from "@/components/PageBanner";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { localizeReuseType } from "@/lib/reuse-labels";
 
 const SORT_OPTIONS: Record<string, string> = {
   relevancia: "",
@@ -51,70 +45,6 @@ const SORT_LABELS: Record<string, string> = {
   antigos: "Mais antigo",
   subscritores: "Subscritores",
 };
-
-function TypeSelect({
-  currentType,
-  reuseTypes,
-  onTypeChange,
-}: {
-  currentType: string;
-  reuseTypes: ReuseType[];
-  onTypeChange: (value: string) => void;
-}) {
-  const [mounted, setMounted] = React.useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const selectRef = React.useRef<any>(null);
-  const lastValue = React.useRef(currentType);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  React.useEffect(() => {
-    if (!mounted) return;
-    const interval = setInterval(() => {
-      const selected = selectRef.current?.selectedOptions?.[0]?.value;
-      if (selected !== undefined && selected !== lastValue.current) {
-        lastValue.current = selected;
-        onTypeChange(selected);
-      }
-    }, 150);
-    return () => clearInterval(interval);
-  }, [mounted, onTypeChange]);
-
-  if (!mounted) {
-    const match = reuseTypes.find((rt) => rt.id === currentType);
-    const label = match ? localizeReuseType(match) : "Todos os tipos";
-    return (
-      <div>
-        <label className="text-s-regular text-neutral-700 mb-4 block">Tipo:</label>
-        <div className="w-full border border-neutral-300 rounded-8 px-16 py-12 text-m-regular text-neutral-900 bg-white">
-          {label}
-        </div>
-      </div>
-    );
-  }
-
-  // Cast to accept mixed children (static + mapped elements)
-  const FlexDropdownSection = DropdownSection as React.FC<
-    Omit<React.ComponentProps<typeof DropdownSection>, "children"> & { children: React.ReactNode }
-  >;
-
-  return (
-    <InputSelect label="Tipo:" id="filter-type" ref={selectRef}>
-      <FlexDropdownSection name="types">
-        <DropdownOption value="" selected={!currentType}>
-          Todos os tipos
-        </DropdownOption>
-        {reuseTypes.map((rt) => (
-          <DropdownOption key={rt.id} value={rt.id} selected={currentType === rt.id}>
-            {localizeReuseType(rt)}
-          </DropdownOption>
-        ))}
-      </FlexDropdownSection>
-    </InputSelect>
-  );
-}
 
 const REUSE_TOGGLE_FILTERS = {
   atualizacao: {
@@ -166,45 +96,98 @@ type ReuseFilterKey = keyof typeof REUSE_TOGGLE_FILTERS;
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
   currentPage: number;
-  initialFilters?: ReuseFilters;
-  reuseTypes?: ReuseType[];
-  siteMetrics?: SiteMetrics;
   filterCounts?: Record<string, number>;
 }
 
 export default function ReusesClient({
   initialData,
   currentPage,
-  initialFilters,
-  reuseTypes = [],
-  siteMetrics,
   filterCounts = {},
 }: ReusesClientProps) {
   const router = useRouter();
-  const { data: reuses, total, page_size } = initialData;
-  const currentQuery = initialFilters?.q || "";
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
+  const [listData, setListData] = useState<APIResponse<Reuse>>(initialData);
+  const activePage = Number(searchParams.get("page") || String(currentPage || 1));
+  const { data: reuses, total, page_size } = listData;
+  const currentQuery = searchParams.get("q") || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Toggle filters state
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<
     Record<ReuseFilterKey, string>
   >({
-    atualizacao: detectAtualizacaoFromParams(initialFilters),
+    atualizacao: detectAtualizacaoFromParams({
+      modified_since: searchParams.get("modified_since") || undefined,
+    }),
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(queryString);
+    const modifiedSince = params.get("modified_since") || undefined;
+    setSelectedToggleFilters((prev) => ({
+      ...prev,
+      atualizacao: detectAtualizacaoFromParams({ modified_since: modifiedSince }),
+    }));
+  }, [queryString]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadReusesFromUrl() {
+      const params = new URLSearchParams(queryString);
+      const tags = params.getAll("tag");
+      const organizations = params.getAll("organization");
+
+      const filters: ReuseFilters = {
+        ...(params.get("q") && { q: params.get("q") as string }),
+        ...(params.get("type") && { type: params.get("type") as string }),
+        ...(params.get("sort") && { sort: params.get("sort") as string }),
+        ...(params.get("modified_since") && {
+          modified_since: params.get("modified_since") as string,
+        }),
+        ...(tags.length > 0 && { tag: tags.length === 1 ? tags[0] : tags }),
+        ...(organizations.length > 0 && {
+          organization: organizations.length === 1 ? organizations[0] : organizations,
+        }),
+      };
+
+      const next = await fetchReuses(activePage, initialData.page_size || 12, filters);
+      if (!cancelled) setListData(next);
+    }
+
+    loadReusesFromUrl();
+    return () => {
+      cancelled = true;
+    };
+  }, [queryString, activePage, initialData.page_size]);
+
+  const navigateWithParams = useCallback((params: URLSearchParams) => {
+    // First page is implicit; keep URLs clean and stable.
+    params.delete("page");
+    params.sort();
+    const nextUrl = `${pathname}${params.size > 0 ? `?${params.toString()}` : ""}`;
+    router.replace(nextUrl, { scroll: false });
+  }, [pathname, router]);
+
+  const getLiveParams = useCallback(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search);
+    }
+    return new URLSearchParams(Array.from(searchParams.entries()));
+  }, [searchParams]);
 
   const handleToggleFilterChange = (filterKey: ReuseFilterKey, optionId: string) => {
     setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
 
     if (filterKey === "atualizacao") {
-      const params = new URLSearchParams(
-        typeof window !== "undefined" ? window.location.search : ""
-      );
+      const params = getLiveParams();
       params.delete("modified_since");
       if (optionId !== "all" && DATE_RANGE_MAP[optionId]) {
         params.set("modified_since", DATE_RANGE_MAP[optionId]());
       }
-      params.set("page", "1");
-      router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
+      navigateWithParams(params);
     }
   };
 
@@ -242,33 +225,34 @@ export default function ReusesClient({
   }, []);
 
   const handleAdvancedFilterChange = (paramName: string, value: string) => {
-    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+    const params = getLiveParams();
     const currentValues = params.getAll(paramName);
-    if (currentValues.includes(value)) {
+
+    // Read actual current state from URL at click time to avoid stale render state.
+    const isCurrentlyChecked = currentValues.includes(value);
+
+    if (isCurrentlyChecked) {
       params.delete(paramName);
       currentValues.filter((v) => v !== value).forEach((v) => params.append(paramName, v));
     } else {
       params.append(paramName, value);
     }
-    params.set("page", "1");
-    router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
+    navigateWithParams(params);
   };
 
   const handleClearAdvancedFilter = (paramName: string) => {
-    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+    const params = getLiveParams();
     params.delete(paramName);
-    params.set("page", "1");
-    router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
+    navigateWithParams(params);
   };
 
   const handleFilterSearchChange = (groupName: string, value: string) => {
     setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-    if (groupName === "Temático") handleTagSearch(value);
+    if (groupName === "Palavras-chave") handleTagSearch(value);
   };
 
   const getActiveValues = (paramName: string) => {
-    if (typeof window === "undefined") return [];
-    return new URLSearchParams(window.location.search).getAll(paramName);
+    return searchParams.getAll(paramName);
   };
 
   const advancedFilterGroups: {
@@ -295,30 +279,60 @@ export default function ReusesClient({
 
   const buildUrl = useCallback(
     (overrides: Partial<ReuseFilters> & { page?: number } = {}) => {
-      const params = new URLSearchParams();
-      const q = overrides.q ?? initialFilters?.q;
-      const type = overrides.type ?? initialFilters?.type;
-      const tag = overrides.tag ?? initialFilters?.tag;
-      const organization = overrides.organization ?? initialFilters?.organization;
-      const sort = "sort" in overrides ? overrides.sort : initialFilters?.sort;
-      const page = overrides.page ?? currentPage;
+      const params = getLiveParams();
 
-      if (q) params.set("q", q);
-      if (type) params.set("type", type);
-      if (tag) params.set("tag", tag);
-      if (organization) params.set("organization", organization);
-      if (sort) params.set("sort", sort);
-      if (page > 1) params.set("page", String(page));
+      if ("q" in overrides) {
+        if (overrides.q) params.set("q", overrides.q);
+        else params.delete("q");
+      }
+
+      if ("type" in overrides) {
+        if (overrides.type) params.set("type", overrides.type);
+        else params.delete("type");
+      }
+
+      if ("tag" in overrides) {
+        params.delete("tag");
+        const tag = overrides.tag;
+        if (tag) {
+          if (Array.isArray(tag)) tag.forEach((value) => params.append("tag", value));
+          else params.append("tag", tag);
+        }
+      }
+
+      if ("organization" in overrides) {
+        params.delete("organization");
+        const organization = overrides.organization;
+        if (organization) {
+          if (Array.isArray(organization)) {
+            organization.forEach((value) => params.append("organization", value));
+          } else {
+            params.append("organization", organization);
+          }
+        }
+      }
+
+      if ("sort" in overrides) {
+        if (overrides.sort) params.set("sort", overrides.sort);
+        else params.delete("sort");
+      }
+
+      if ("page" in overrides) {
+        if (overrides.page && overrides.page > 1) params.set("page", String(overrides.page));
+        else params.delete("page");
+      } else if (activePage > 1) {
+        params.set("page", String(activePage));
+      }
 
       const qs = params.toString();
       return `/pages/reuses${qs ? `?${qs}` : ""}`;
     },
-    [initialFilters, currentPage]
+    [activePage, getLiveParams]
   );
 
   const onSearchNavigate = useCallback(
     (query: string) => {
-      router.replace(buildUrl({ q: query, page: 1 }), { scroll: false });
+      router.replace(buildUrl({ q: query || undefined, page: 1 }), { scroll: false });
     },
     [router, buildUrl]
   );
@@ -337,38 +351,14 @@ export default function ReusesClient({
     [router, buildUrl]
   );
 
-  const handleTypeFilter = useCallback(
-    (typeId: string) => {
-      router.replace(
-        buildUrl({
-          type: typeId === initialFilters?.type ? undefined : typeId,
-          page: 1,
-        }),
-        { scroll: false }
-      );
-    },
-    [router, buildUrl, initialFilters?.type]
-  );
-
-  const handleClearFilters = useCallback(() => {
-    router.replace("/pages/reuses", { scroll: false });
-  }, [router]);
-
   const sortDefault = (() => {
     const reverseMap: Record<string, string> = {
       "-last_modified": "recentes",
       last_modified: "antigos",
       "-followers": "subscritores",
     };
-    return reverseMap[initialFilters?.sort || ""] || "relevancia";
+    return reverseMap[searchParams.get("sort") || ""] || "relevancia";
   })();
-
-  const hasActiveFilters = !!(
-    initialFilters?.q ||
-    initialFilters?.type ||
-    initialFilters?.tag ||
-    initialFilters?.organization
-  );
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters reuse">
@@ -525,10 +515,13 @@ export default function ReusesClient({
                       : [];
 
                     const allData = [...selectedItems, ...group.data];
+                    const uniqueData = Array.from(
+                      new Map(allData.map((item) => [item.id, item])).values()
+                    );
 
                     const filteredData = group.suggest
-                      ? allData
-                      : allData.filter((item) =>
+                      ? uniqueData
+                      : uniqueData.filter((item) =>
                         item.name.toLowerCase().includes(sq.toLowerCase())
                       );
 
@@ -586,6 +579,7 @@ export default function ReusesClient({
                               filteredData.map((item) => (
                                 <Checkbox
                                   key={item.id}
+                                  id={`reuse-${group.param}-${encodeURIComponent(item.id)}`}
                                   label={item.name}
                                   className="font-bold"
                                   value={item.id}
@@ -749,7 +743,7 @@ export default function ReusesClient({
                 {/* Pagination */}
                 <div className="pb-64 mt-8 flex justify-center">
                   <Pagination
-                    currentPage={currentPage}
+                    currentPage={activePage}
                     totalItems={total}
                     pageSize={page_size}
                     baseUrl={buildUrl()}
