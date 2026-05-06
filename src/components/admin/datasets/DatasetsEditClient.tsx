@@ -78,6 +78,7 @@ const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEd
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import IsolatedInput from "@/components/admin/IsolatedInput";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 
@@ -632,6 +633,8 @@ export default function DatasetsEditClient() {
   const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
 
   // Loaded default values for IsolatedSelect (needed because data arrives async after mount)
+  const [loadedTitle, setLoadedTitle] = useState("");
+  const [loadedAcronym, setLoadedAcronym] = useState("");
   const [loadedLicense, setLoadedLicense] = useState("");
   const [loadedFrequency, setLoadedFrequency] = useState("");
   const [loadedKeywords, setLoadedKeywords] = useState("");
@@ -663,6 +666,8 @@ export default function DatasetsEditClient() {
         setDataset(ds);
         setTitle(ds.title);
         setAcronym(ds.acronym || "");
+        setLoadedTitle(ds.title);
+        setLoadedAcronym(ds.acronym || "");
         setDescription(ds.description);
         setShortDescription(ds.description_short || "");
         setFeatured(ds.featured || false);
@@ -915,15 +920,22 @@ export default function DatasetsEditClient() {
     return <Dropdown.Section name="spatial-granularity">{options}</Dropdown.Section>;
   }, [granularities, loadedSpatialGranularity]);
 
-  const clearError = (field: string) => {
-    if (formErrors[field]) {
-      setFormErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  };
+  const clearError = useCallback((field: string) => {
+    setFormErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }, []);
+
+  const handleTitleChange = useCallback(
+    (value: string) => {
+      setTitle(value);
+      if (value.trim()) clearError("title");
+    },
+    [clearError]
+  );
 
   const handleSaveMetadata = async () => {
     if (!dataset) return;
@@ -1469,29 +1481,23 @@ export default function DatasetsEditClient() {
                     Descrição
                   </h2>
                   <div className="admin-page__fields-group">
-                    <InputText
+                    <IsolatedInput
                       label="Título*"
                       placeholder="Insira o título aqui"
                       id="edit-title"
-                      value={title}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setTitle(e.target.value);
-                        if (e.target.value.trim()) clearError("title");
-                      }}
+                      defaultValue={loadedTitle}
+                      onChange={handleTitleChange}
                       hasError={!!formErrors.title}
                       hasFeedback={!!formErrors.title}
                       feedbackState="danger"
                       errorFeedbackText="Campo obrigatório"
                     />
-                    <InputText
+                    <IsolatedInput
                       label="Sigla"
                       placeholder="Insira a sigla aqui"
                       id="edit-acronym"
-                      required={false}
-                      value={acronym}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setAcronym(e.target.value)
-                      }
+                      defaultValue={loadedAcronym}
+                      onChange={setAcronym}
                     />
                     <div className="flex flex-col gap-[8px]">
                       <span className="text-primary-900 text-base font-medium leading-7">

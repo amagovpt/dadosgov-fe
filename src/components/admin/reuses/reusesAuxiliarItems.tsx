@@ -63,11 +63,8 @@ export function getReuseAuxiliarItems(errors: ReuseAuxiliarErrors = {}): Auxilia
       title: "Adicionar palavras-chave",
       content: (
         <p>
-          As palavras-chave são apresentadas na página da reutilização e melhoram a sua visibilidade
-          nos motores de pesquisa. Ao selecionar uma palavra-chave, pode consultar outras
-          reutilizações às quais essa mesma palavra foi associada. Com base no conteúdo da
-          reutilização, podem ser sugeridas palavras-chave automaticamente. Pode aceitá-las,
-          modificá-las ou excluí-las.
+          As palavras-chave ajudam a caracterizar a reutilização, tornam-na mais fácil de encontrar e
+          contribuem para um melhor posicionamento nos motores de busca.
         </p>
       ),
     },
