@@ -7,6 +7,7 @@ export interface AuxiliarItem {
   title: string;
   content: React.ReactNode;
   hasError?: boolean;
+  hidden?: boolean;
 }
 
 interface AuxiliarListProps {
@@ -22,7 +23,7 @@ export default function AuxiliarList({ items }: AuxiliarListProps) {
 
   return (
     <ul className="auxiliar-list">
-      {items.map((item, idx) => (
+      {items.filter((item) => !item.hidden).map((item, idx) => (
         <li key={idx}>
           <button
             type="button"

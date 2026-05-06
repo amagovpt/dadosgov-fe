@@ -76,6 +76,7 @@ const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEd
   loading: () => <p>A carregar editor...</p>,
 });
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
@@ -1741,6 +1742,7 @@ export default function DatasetsEditClient() {
                   </div>
 
                   <div className="dataset-edit-danger-actions">
+                    {/* Transfer dataset section hidden — keep for future use
                     <StatusCard
                       variant="informative"
                       showIcon
@@ -1773,6 +1775,7 @@ export default function DatasetsEditClient() {
                         </>
                       }
                     />
+                    */}
                     <StatusCard
                       variant="warning"
                       showIcon
@@ -1848,59 +1851,10 @@ export default function DatasetsEditClient() {
                     <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                   </div>
                   <AuxiliarList
-                    items={[
-                      {
-                        title: "Dar o nome ao conjunto de dados",
-                        content: (
-                          <>
-                            <p>O título do seu conjunto de dados deve ser o mais preciso e específico possível.</p>
-                            <p>Deve também corresponder ao vocabulário utilizado pelos utilizadores que, na maioria das vezes, procuram dados através do motor de pesquisa.</p>
-                          </>
-                        ),
-                        hasError: !!formErrors.title,
-                      },
-                      {
-                        title: "Adicionar uma sigla ao conjunto de dados",
-                        content: "Tem a opção de adicionar uma sigla ao seu conjunto de dados. Não é necessário que as letras que compõem essa sigla estejam separadas por pontos.",
-                      },
-                      {
-                        title: "Escrever uma boa descrição",
-                        content: (
-                          <>
-                            <p>A descrição resumida apresenta o seu conjunto de dados, ajudando os utilizadores a entenderem rapidamente o conteúdo e melhora a sua visibilidade nos resultados de pesquisa.</p>
-                            <ul className="list-disc pl-5 mt-2 flex flex-col gap-2">
-                              <li>A lista de ficheiros disponibilizados;</li>
-                              <li>Descrição do formato do ficheiro;</li>
-                              <li>A frequência de atualização.</li>
-                            </ul>
-                          </>
-                        ),
-                        hasError: !!formErrors.description,
-                      },
-                      {
-                        title: "Escrever uma breve descrição",
-                        content: "A descrição resumida apresenta seu conjunto de dados em uma ou duas frases. Isso ajuda os utilizadores a entenderem rapidamente o conteúdo e melhora sua visibilidade nos resultados de pesquisa.",
-                      },
-                      {
-                        title: "Selecionar  uma licença",
-                        content: "As licenças definem as regras para a reutilização. Ao escolher uma licença de reutilização, garante que o conjunto de dados publicado será reutilizado de acordo com os termos de uso que definiu.",
-                      },
-                      {
-                        title: "Escolher  a frequência de atualização",
-                        content: "A frequência de atualização refere-se à frequência com que planeia atualizar os dados publicados. Essa frequência de atualização é apenas indicativa.",
-                      },
-                      {
-                        title: "Fornecer  a cobertura de tempo",
-                        content: (
-                          <>
-                            <p>
-                              A abrangência temporal indica o período de tempo dos dados publicados.
-                            </p>
-                            <p>Por exemplo: de 2012 a 2015.</p>
-                          </>
-                        ),
-                      },
-                    ]}
+                    items={getDatasetAuxiliarItems({
+                      title: !!formErrors.title,
+                      description: !!formErrors.description,
+                    })}
                   />
                 </div>
               </aside>
