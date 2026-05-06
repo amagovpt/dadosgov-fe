@@ -27,6 +27,8 @@ import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
 import PageBanner from "@/components/PageBanner";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { formatMetricValue } from "@/utils/formatNumber";
 
 const SORT_OPTIONS: Record<string, string> = {
   relevancia: "",
@@ -64,8 +66,8 @@ function SortSelect({
   if (!mounted) {
     return (
       <div className="selectDataservice">
-        <label className="text-s-regular text-neutral-700 mb-4 block">Ordenar por :</label>
-        <div className="w-full border border-neutral-300 rounded-8 px-16 py-12 text-m-regular text-neutral-900 bg-white">
+        <label className="mb-4 block text-s-regular text-neutral-700">Ordenar por :</label>
+        <div className="w-full rounded-8 border border-neutral-300 bg-white px-16 py-12 text-m-regular text-neutral-900">
           {currentSortKey === "recentes" ? "Mais recentes" : "Relevância"}
         </div>
       </div>
@@ -292,7 +294,7 @@ export default function DataservicesClient({
   const hasActiveFilters = !!initialFilters?.q;
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters dataservice">
+    <div className="filters dataservice flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
         <PageBanner
           title="APIs"
@@ -303,7 +305,7 @@ export default function DataservicesClient({
             { label: "APIs", url: "/pages/dataservices" },
           ]}
           subtitle={
-            <p className="text-primary-100 max-w-[592px]">
+            <p className="max-w-[592px] text-primary-100">
               {total === 0
                 ? "Não existem resultados disponíveis para a sua pesquisa"
                 : `Pesquise através de ${total.toLocaleString("pt-PT")} APIs em dados.gov.pt`}
@@ -328,26 +330,26 @@ export default function DataservicesClient({
           <div className="mt-8 text-s-regular text-neutral-200">
             Exemplos: &quot;geolocalização&quot;, &quot;transportes&quot;, &quot;saúde&quot;
           </div>
-          <div className="absolute w-full mb-64 bg-white text-neutral-900 shadow-lg dropdown"></div>
+          <div className="shadow-lg dropdown absolute mb-64 w-full bg-white text-neutral-900"></div>
         </PageBanner>
 
-        <div className="container mx-auto md:gap-32 xl:gap-64 bg-white">
-          <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters">
+        <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
+          <div className="grid-filters grid md:grid-cols-3 xl:grid-cols-12">
             {/* Sidebar */}
-            <div className="xl:col-span-5 xl:block p-32 pl-0">
+            <div className="p-32 pl-0 xl:col-span-5 xl:block">
               {siteMetrics && (
                 <div>
                   <CategoryToggles siteMetrics={siteMetrics} searchQuery={initialFilters?.q} />
                 </div>
               )}
 
-              <div className="flex flex-col gap-32 mt-[36px]">
-                <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
+              <div className="mt-[36px] flex flex-col gap-32">
+                <h2 className="text-xl font-bold text-neutral-900">Filtros</h2>
                 {(Object.keys(API_TOGGLE_FILTERS) as ApiFilterKey[]).map((filterKey) => {
                   const section = API_TOGGLE_FILTERS[filterKey];
                   return (
-                    <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
-                      <h3 className="font-bold text-base text-neutral-900 mb-8">{section.title}</h3>
+                    <div key={filterKey} className="flex max-w-[592px] flex-col gap-8 pr-32">
+                      <h3 className="mb-8 text-base font-bold text-neutral-900">{section.title}</h3>
                       {section.options.map((option) => {
                         const isSelected = selectedToggleFilters[filterKey] === option.id;
                         return (
@@ -364,12 +366,12 @@ export default function DataservicesClient({
                             fullWidth={true}
                             className="w-full"
                           >
-                            <div className="flex items-center gap-12 font-bold text-sm">
+                            <div className="text-sm flex items-center gap-12 font-bold">
                               <span
                                 className={
                                   isSelected
-                                    ? "text-primary-600 font-bold"
-                                    : "text-neutral-900 font-bold"
+                                    ? "font-bold text-primary-600"
+                                    : "font-bold text-neutral-900"
                                 }
                               >
                                 {option.label}
@@ -378,7 +380,7 @@ export default function DataservicesClient({
                                 variant="neutral"
                                 appearance="outline"
                                 circular={false}
-                                className="text-xs font-medium text-neutral-500 ml-16"
+                                className="text-xs ml-16 font-medium text-neutral-500"
                               >
                                 {option.count}
                               </Pill>
@@ -391,7 +393,7 @@ export default function DataservicesClient({
                 })}
               </div>
 
-              <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">
+              <h2 className="text-xl mb-[32px] mt-[36px] font-bold text-neutral-900">
                 Filtros avançados
               </h2>
 
@@ -436,13 +438,13 @@ export default function DataservicesClient({
                         {activeCount > 0 && (
                           <button
                             onClick={() => handleClearAdvancedFilter(group.param)}
-                            className="text-xs text-primary-500 hover:text-primary-700 underline mb-4 mt-4 cursor-pointer"
+                            className="text-xs mb-4 mt-4 cursor-pointer text-primary-500 underline hover:text-primary-700"
                           >
                             Limpar {group.name.toLowerCase()}
                           </button>
                         )}
                         {group.searchable && (
-                          <div className="mb-4 mt-8 relative">
+                          <div className="relative mb-4 mt-8">
                             <InputSearch
                               label="Pesquisar"
                               hideLabel
@@ -454,7 +456,7 @@ export default function DataservicesClient({
                             />
                             <Icon
                               name="agora-solid-search"
-                              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5 pointer-events-none"
+                              className="w-5 h-5 pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform text-primary-500"
                               aria-hidden="true"
                             />
                           </div>
@@ -500,13 +502,13 @@ export default function DataservicesClient({
             </div>
 
             {/* Results Area */}
-            <div className="xl:col-span-7 mt-[36px]">
+            <div className="mt-[36px] xl:col-span-7">
               <div>
-                <div className="grid md:grid-cols-2 xl:grid-cols-12 gap-32 mb-16 items-center mt-[12px]">
-                  <span className="text-neutral-900 font-medium text-base xl:col-span-6 mt-[32px]">
+                <div className="mb-16 mt-[12px] grid items-center gap-32 md:grid-cols-2 xl:grid-cols-12">
+                  <span className="mt-[32px] text-base font-medium text-neutral-900 xl:col-span-6">
                     {total.toLocaleString("pt-PT")} Resultados
                   </span>
-                  <div className="w-full md:w-auto xl:col-span-6 flex items-end gap-16 justify-end">
+                  <div className="flex w-full items-end justify-end gap-16 md:w-auto xl:col-span-6">
                     {hasActiveFilters && (
                       <Button
                         variant="primary"
@@ -519,38 +521,25 @@ export default function DataservicesClient({
                         Limpar filtros
                       </Button>
                     )}
-                    <div className="flex-grow max-w-[240px]">
+                    <div className="max-w-[240px] flex-grow">
                       <SortSelect currentSortKey={sortDefault} onSortChange={handleSortChange} />
                     </div>
                   </div>
                 </div>
 
-                <div className="divider-neutral-200 mt-[14px] mb-24" />
+                <div className="divider-neutral-200 mb-24 mt-[14px]" />
 
-                <div className="grid xs:grid-cols-1 sm:grid-cols-2 gap-32">
+                <div className="grid gap-32 xs:grid-cols-1 sm:grid-cols-2">
                   {dataservices.length > 0 ? (
                     dataservices.map((ds) => {
-                      const formatMetric = (value: number | undefined) => {
-                        if (!value) return "0";
-                        if (value >= 1_000_000)
-                          return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
-                        if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
-                        return String(value);
-                      };
-                      const timeAgo = ds.last_modified
-                        ? formatDistanceToNow(new Date(ds.last_modified), { locale: pt })
-                            .replace("aproximadamente ", "")
-                            .replace("quase ", "")
-                            .replace("menos de ", "")
-                            .replace("cerca de ", "")
-                        : "Desconhecido";
+                      const timeAgo = formatDateToTimeAgo(ds.last_modified);
                       const dsUrl = `/pages/dataservices/preview?title=${encodeURIComponent(ds.title)}&description=${encodeURIComponent(ds.description || "")}`;
 
                       return (
                         <Link
                           key={ds.id}
                           href={dsUrl}
-                          className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
+                          className="card-general-listing flex h-full flex-col overflow-hidden rounded-[4px]"
                         >
                           <CardGeneral
                             variant="neutral-100"
@@ -568,7 +557,7 @@ export default function DataservicesClient({
                                   </span>
                                   <span
                                     style={{ fontSize: "16px", fontWeight: 300 }}
-                                    className="text-neutral-900 mt-4"
+                                    className="mt-4 text-neutral-900"
                                   >
                                     {ds.organization?.name || "Sem Organização"}
                                   </span>
@@ -578,14 +567,14 @@ export default function DataservicesClient({
                             titleText={ds.title}
                             descriptionText={
                               (
-                                <div className="flex flex-col grow">
+                                <div className="flex grow flex-col">
                                   {ds.description && (
-                                    <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
+                                    <p className="mb-16 line-clamp-3 text-m-regular text-neutral-800">
                                       {ds.description}
                                     </p>
                                   )}
                                   <div className="mt-auto">
-                                    <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
+                                    <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
                                       <div
                                         className="flex items-center gap-8"
                                         title="Visualizações"
@@ -598,7 +587,7 @@ export default function DataservicesClient({
                                           className="fill-neutral-700"
                                           aria-hidden="true"
                                         />
-                                        <span>{formatMetric(ds.metrics?.views)}</span>
+                                        <span>{formatMetricValue(ds.metrics?.views, 0)}</span>
                                       </div>
                                       <div className="flex items-center gap-8" title="Favoritos">
                                         <Icon
@@ -611,13 +600,13 @@ export default function DataservicesClient({
                                           className="fill-neutral-700"
                                           aria-hidden="true"
                                         />
-                                        <span>{formatMetric(ds.metrics?.followers)}</span>
+                                        <span>{formatMetricValue(ds.metrics?.followers, 0)}</span>
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-8 text-primary-600 mt-16">
+                                    <div className="mt-16 flex items-center gap-8 text-primary-600">
                                       <Icon
                                         name="agora-line-arrow-right-circle"
-                                        className="w-32 h-32"
+                                        className="h-32 w-32"
                                         aria-hidden="true"
                                       />
                                     </div>
@@ -637,7 +626,7 @@ export default function DataservicesClient({
                         icon={
                           <Icon
                             name="agora-line-search"
-                            className="w-12 h-12 text-primary-500 icon-xl"
+                            className="icon-xl h-12 w-12 text-primary-500"
                           />
                         }
                         title="Não encontrou o que procurava?"
@@ -647,7 +636,7 @@ export default function DataservicesClient({
                           </span>
                         }
                         description={
-                          <div className="max-w-[592px] mx-auto">
+                          <div className="mx-auto max-w-[592px]">
                             Explore a nossa lista completa de APIs de dados abertos.
                           </div>
                         }
@@ -658,7 +647,7 @@ export default function DataservicesClient({
                   )}
                 </div>
 
-                <div className="pt-64 flex justify-center pb-64 pagination-filters">
+                <div className="pagination-filters flex justify-center pb-64 pt-64">
                   <Pagination
                     currentPage={currentPage}
                     totalItems={total}

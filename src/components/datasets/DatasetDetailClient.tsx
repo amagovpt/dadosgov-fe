@@ -18,6 +18,8 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { calculateQualityScore } from "@/utils/calculateQualityScore";
+import { formatMetricValue } from "@/utils/formatNumber";
 
 interface DatasetDetailClientProps {
   slug: string;
@@ -120,17 +122,6 @@ function DescriptionWithReadMore({
   );
 }
 
-function formatMetricValue(value: number | undefined): string {
-  if (!value || value === 0) return "0";
-  if (value >= 1_000_000) {
-    return (value / 1_000_000).toLocaleString("pt-PT", { maximumFractionDigits: 1 }) + " M";
-  }
-  if (value >= 1_000) {
-    return (value / 1_000).toLocaleString("pt-PT", { maximumFractionDigits: 1 }) + " mil";
-  }
-  return value.toLocaleString("pt-PT");
-}
-
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],
   ["has_resources", "Recursos"],
@@ -142,13 +133,6 @@ const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["resources_documentation", "Documentação"],
   ["all_resources_available", "Recursos disponíveis"],
 ];
-
-function calculateQualityScore(quality?: Dataset["quality"]): number {
-  if (!quality) return 0;
-  if (quality.score > 0) return Math.round(quality.score * 100);
-  const met = QUALITY_CRITERIA.filter(([key]) => quality[key] === true).length;
-  return Math.round((met / QUALITY_CRITERIA.length) * 100);
-}
 
 function getQualityDetails(quality?: Dataset["quality"]): string[] {
   if (!quality) return [];
@@ -238,7 +222,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
     );
   }
 
-  const qualityScore = calculateQualityScore(dataset.quality);
+  const qualityScore = calculateQualityScore(QUALITY_CRITERIA, dataset.quality);
   const qualityDetails = getQualityDetails(dataset.quality);
   const qualityMissing = getQualityMissing(dataset.quality);
 
@@ -308,7 +292,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
           <div className="flex flex-col h-fit" ref={sidebarRef}>
             <div className="flex flex-col gap-16 bg-[#F2F6FF] rounded-4 p-32 mb-16">
               {dataset.organization?.logo ? (
-                <div className="w-fit h-[48px] card-article-3_2-img py-8 rounded-8 border-2 border-primary-300 flex items-center justify-center">
+                <div className="w-fit h-48 card-article-3_2-img py-8 rounded-8 border-2 border-primary-300 flex items-center justify-center">
                   <img
                     src={dataset.organization.logo}
                     alt={dataset.organization.name}
@@ -322,7 +306,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
               )}
 
               <div className="space-y-16">
-                <div className="text-neutral-900 text-m-light mb-[8px]">
+                <div className="text-neutral-900 text-m-light mb-8">
                   {dataset.organization ? (
                     <Link
                       href={`/pages/organizations/${dataset.organization.slug}`}
@@ -334,7 +318,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     "Organização Desconhecida"
                   )}
                 </div>
-                <div className="text-neutral-900 text-sm mb-[16px]">
+                <div className="text-neutral-900 text-sm mb-16">
                   <span className="text-m-semibold">Última atualização:</span>{" "}
                   {new Date(dataset.last_modified).toLocaleDateString("pt-PT", {
                     day: "numeric",
@@ -394,14 +378,14 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
             {/* Metrics */}
             <div className="grid grid-cols-2 gap-16 mb-16">
               <div className="bg-[#F2F6FF] rounded-4 p-32">
-                <div className="text-sm mb-[8px]">Visualizações</div>
-                <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
+                <div className="text-sm mb-8">Visualizações</div>
+                <div className="text-l-semibold font-bold text-neutral-900 mb-8">
                   {formatMetricValue(dataset.metrics?.views)}
                 </div>
               </div>
               <div className="bg-[#F2F6FF] rounded-4 p-32">
-                <div className="text-sm mb-[8px]">Downloads</div>
-                <div className="text-l-semibold font-bold text-neutral-900 mb-[8px]">
+                <div className="text-sm mb-8">Downloads</div>
+                <div className="text-l-semibold font-bold text-neutral-900 mb-8">
                   {formatMetricValue(dataset.metrics?.resources_downloads)}
                 </div>
               </div>

@@ -18,7 +18,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import PageBanner from "@/components/PageBanner";
-import SearchFilter from '@/components/Shared/SearchFilter';
+import SearchFilter from "@/components/Shared/SearchFilter";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { suggestTags } from "@/services/api";
 import { formatDistanceToNow } from "date-fns";
@@ -26,6 +26,7 @@ import { pt } from "date-fns/locale";
 import { Datastories } from "@/types/datastories/datastories";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getAssets } from "@/utils/getAssets";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 /*const SORT_OPTIONS: Record<string, string> = {
   recentes: "",
@@ -196,14 +197,14 @@ export default function DataStoriesClient({
     searchable: boolean;
     suggest?: boolean;
   }[] = [
-      {
-        name: "Palavras-chave",
-        param: "tag",
-        data: filterTagOptions,
-        searchable: true,
-        suggest: true,
-      },
-    ];
+    {
+      name: "Palavras-chave",
+      param: "tag",
+      data: filterTagOptions,
+      searchable: true,
+      suggest: true,
+    },
+  ];
 
   const filteredStories = stories.filter((story) => {
     const q = searchQuery.toLowerCase();
@@ -221,7 +222,10 @@ export default function DataStoriesClient({
     }
 
     // Advanced filter: tags (local state)
-    if (selectedTags.length > 0 && !selectedTags.some((t) => story.tags.tag === t)) {
+    if (
+      selectedTags.length > 0 &&
+      !selectedTags.some((t) => Object.values(story.tags).includes(t))
+    ) {
       return false;
     }
 
@@ -259,7 +263,7 @@ export default function DataStoriesClient({
   })();*/
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters datastories">
+    <div className="filters datastories flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
         <PageBanner
           title="Data Stories"
@@ -270,7 +274,7 @@ export default function DataStoriesClient({
             { label: "Data Stories", url: "/pages/datastories" },
           ]}
           subtitle={
-            <p className="text-primary-100 max-w-[592px]">
+            <p className="max-w-[592px] text-primary-100">
               {total === 0
                 ? "Não existem resultados disponíveis para a sua pesquisa"
                 : `Pesquise através de ${total} data stories em dados.gov.pt`}
@@ -289,28 +293,28 @@ export default function DataStoriesClient({
         />
 
         {/* Main Content */}
-        <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
+        <div className="container mx-auto bg-primary-50 md:gap-32 xl:gap-64">
           {/* Results count + Sort toggles */}
-          <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">
-            <div className="xl:col-span-5 flex flex-row items-end gap-24 pl-0 py-16">
+          <div className="grid-filters grid gap-x-[32px] md:grid-cols-3 xl:grid-cols-12">
+            <div className="flex flex-row items-end gap-24 py-16 pl-0 xl:col-span-5">
               <Button
                 appearance="outline"
                 variant="neutral"
                 hasIcon
                 {...(filtersOpen
                   ? {
-                    leadingIcon: "agora-line-chevron-left",
-                    leadingIconHover: "agora-solid-chevron-left",
-                  }
+                      leadingIcon: "agora-line-chevron-left",
+                      leadingIconHover: "agora-solid-chevron-left",
+                    }
                   : {
-                    trailingIcon: "agora-line-chevron-right",
-                    trailingIconHover: "agora-solid-chevron-right",
-                  })}
+                      trailingIcon: "agora-line-chevron-right",
+                      trailingIconHover: "agora-solid-chevron-right",
+                    })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
               </Button>
-              <span className="text-neutral-900 text-l-regular whitespace-nowrap">
+              <span className="whitespace-nowrap text-l-regular text-neutral-900">
                 {total.toLocaleString("pt-PT")} Resultados
               </span>
             </div>
@@ -334,18 +338,18 @@ export default function DataStoriesClient({
           <div className="divider-neutral-200 mb-24" />
 
           <div
-            className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
+            className={`grid-filters grid gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
             {filtersOpen && (
               <div className="xl:col-span-5 xl:block">
-                <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
-                  <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
+                <div className="mb-[36px] mt-[36px] flex flex-col gap-32">
+                  <h2 className="text-xl font-bold text-neutral-900">Filtros</h2>
                   {(Object.keys(TOGGLE_FILTERS) as FilterKey[]).map((filterKey) => {
                     const section = TOGGLE_FILTERS[filterKey];
                     return (
-                      <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
-                        <h3 className="font-bold text-base text-neutral-900 mb-8">
+                      <div key={filterKey} className="flex max-w-[592px] flex-col gap-8 pr-32">
+                        <h3 className="mb-8 text-base font-bold text-neutral-900">
                           {section.title}
                         </h3>
                         {section.options.map((option) => {
@@ -364,12 +368,12 @@ export default function DataStoriesClient({
                               fullWidth={true}
                               className="w-full"
                             >
-                              <div className="flex items-center gap-12 font-bold text-sm">
+                              <div className="text-sm flex items-center gap-12 font-bold">
                                 <span
                                   className={
                                     isSelected
-                                      ? "text-primary-600 font-bold"
-                                      : "text-neutral-900 font-bold"
+                                      ? "font-bold text-primary-600"
+                                      : "font-bold text-neutral-900"
                                   }
                                 >
                                   {option.label}
@@ -378,7 +382,7 @@ export default function DataStoriesClient({
                                   variant="neutral"
                                   appearance="outline"
                                   circular={false}
-                                  className="text-xs font-medium text-neutral-500 ml-16"
+                                  className="text-xs ml-16 font-medium text-neutral-500"
                                 >
                                   {option.count}
                                 </Pill>
@@ -391,7 +395,7 @@ export default function DataStoriesClient({
                   })}
                 </div>
 
-                <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">
+                <h2 className="text-xl mb-[32px] mt-[36px] font-bold text-neutral-900">
                   Filtros avançados
                 </h2>
 
@@ -403,8 +407,8 @@ export default function DataStoriesClient({
 
                     const selectedItems: { id: string; name: string }[] = group.suggest
                       ? activeValues
-                        .filter((v) => !group.data.some((d) => d.id === v))
-                        .map((v) => ({ id: v, name: v }))
+                          .filter((v) => !group.data.some((d) => d.id === v))
+                          .map((v) => ({ id: v, name: v }))
                       : [];
 
                     const allData = [...selectedItems, ...group.data];
@@ -412,8 +416,8 @@ export default function DataStoriesClient({
                     const filteredData = group.suggest
                       ? allData
                       : allData.filter((item) =>
-                        item.name.toLowerCase().includes(sq.toLowerCase())
-                      );
+                          item.name.toLowerCase().includes(sq.toLowerCase())
+                        );
 
                     const showScroll = filteredData.length > 5;
 
@@ -436,13 +440,13 @@ export default function DataStoriesClient({
                           {activeCount > 0 && (
                             <button
                               onClick={() => handleClearAdvancedFilter(group.param)}
-                              className="text-xs text-primary-500 hover:text-primary-700 underline mb-4 mt-4 cursor-pointer"
+                              className="text-xs mb-4 mt-4 cursor-pointer text-primary-500 underline hover:text-primary-700"
                             >
                               Limpar {group.name.toLowerCase()}
                             </button>
                           )}
                           {group.searchable && (
-                            <div className="mb-4 mt-8 relative">
+                            <div className="relative mb-4 mt-8">
                               <InputSearch
                                 label="Pesquisar"
                                 hideLabel
@@ -456,7 +460,7 @@ export default function DataStoriesClient({
                               />
                               <Icon
                                 name="agora-solid-search"
-                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5 pointer-events-none"
+                                className="w-5 h-5 pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform text-primary-500"
                                 aria-hidden="true"
                               />
                             </div>
@@ -492,7 +496,7 @@ export default function DataStoriesClient({
                   })}
                 </Sidebar>
 
-                <div className="mt-32 mb-64">
+                <div className="mb-64 mt-32">
                   <Button
                     variant="primary"
                     appearance="outline"
@@ -514,7 +518,7 @@ export default function DataStoriesClient({
             <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>
               <div>
                 <div
-                  className="grid agora-card-links-datasets-px0 gap-32"
+                  className="agora-card-links-datasets-px0 grid gap-32"
                   style={{
                     gridTemplateColumns: filtersOpen
                       ? "repeat(1, minmax(0, 1fr))"
@@ -523,25 +527,25 @@ export default function DataStoriesClient({
                 >
                   {pagedStories.length > 0 ? (
                     pagedStories.map((story) => {
-                      const timeAgo = story.createdAt
-                        ? formatDistanceToNow(new Date(story.createdAt), { locale: pt })
-                          .replace("aproximadamente ", "")
-                          .replace("quase ", "")
-                          .replace("menos de ", "")
-                          .replace("cerca de ", "")
-                        : "Desconhecido";
+                      const timeAgo = formatDateToTimeAgo(story.createdAt);
 
                       return (
                         <div key={story.slug} className="h-full">
                           <CardLinks
                             onClick={() => router.push(`/pages/datastories/${story.slug}`)}
-                            className="cursor-pointer text-neutral-900 h-full"
+                            className="h-full cursor-pointer text-neutral-900"
                             variant="transparent"
-                            image={{ src: story.image && story.image[0] ? getAssets(story.image[0].id) : "/card-full-image.png", alt: story.title }}
+                            image={{
+                              src:
+                                story.image && story.image[0]
+                                  ? getAssets(story.image[0].id)
+                                  : "/card-full-image.png",
+                              alt: story.title,
+                            }}
                             category={story.organizationName}
-                            title={<div className="underline text-xl-bold">{story.title}</div>}
+                            title={<div className="text-xl-bold underline">{story.title}</div>}
                             description={
-                              <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                              <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                                 {formatHtmlParagraphs(story.description)}
                               </p>
                             }
@@ -601,7 +605,7 @@ export default function DataStoriesClient({
                     <div className="col-span-full">
                       <CardNoResults
                         icon={
-                          <Icon name="agora-line-search" className="w-12 h-12 text-primary-500" />
+                          <Icon name="agora-line-search" className="h-12 w-12 text-primary-500" />
                         }
                         title="Não encontrou nenhuma data story?"
                         subtitle={
@@ -622,7 +626,7 @@ export default function DataStoriesClient({
                 </div>
 
                 {/* Pagination */}
-                <div className="pb-64 mt-8 flex justify-center">
+                <div className="mt-8 flex justify-center pb-64">
                   <Pagination
                     currentPage={currentPage}
                     totalItems={total}
