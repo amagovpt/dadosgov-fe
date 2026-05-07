@@ -57,6 +57,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { translateUploadError } from "@/lib/security/translateUploadError";
 
 const ZONE_PT_NAMES: Record<string, string> = {
   "country-group:world": "Mundo",
@@ -784,7 +785,7 @@ export default function DatasetsAdminClient({
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error uploading resources:", error.message, error.stack);
-        setApiError(`Erro ao carregar ficheiro: ${error.message}`);
+        setApiError(`Erro ao carregar ficheiro: ${translateUploadError(error.message)}`);
       } else {
         const err = error as { status?: number; data?: Record<string, unknown> };
         console.error("Error uploading resources:", err.status, err.data);
@@ -794,7 +795,7 @@ export default function DatasetsAdminClient({
             Object.entries(err.data)
               .map(([key, val]) => `${key}: ${val}`)
               .join(", ");
-          setApiError(`Erro ao carregar ficheiro: ${msg}`);
+          setApiError(`Erro ao carregar ficheiro: ${translateUploadError(msg)}`);
         } else {
           const statusHint = err.status ? ` (${err.status})` : "";
           setApiError(`Erro ao carregar ficheiro${statusHint}. Tente novamente.`);
