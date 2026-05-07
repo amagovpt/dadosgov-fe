@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import CardGeneral from "@/components/Primitives/Cards/CardGeneral";
 import SimpleCardImage from "@/components/Primitives/Cards/SimpleCardImage";
-import HeroCourses from "@/components/Courses/Hero";
+import HeroCourses from "@/components/Learn/Hero";
 import Button from "@/components/Primitives/Button";
 import apolloClient from "@/services/apollo-client";
 import { getCoursesPage } from "@/services/queries/courses/courses";
@@ -39,14 +39,14 @@ export default async function page() {
       <HeroCourses {...{
         img: {
           src: hero.image && hero.image[0].id ? getAssets(hero.image[0].id) : "/card-full-image.png",
-          alt: hero.title ?? "Curso"
+          alt: hero.title ?? "Aprender"
         },
         updatedAt: hero.updatedAt,
         title: hero.title,
         description: hero.description,
         breadcrumbItems: [
           { label: 'Início', url: '/' },
-          { label: 'Cursos', url: '/pages/courses/' },
+          { label: 'Aprender', url: '/pages/learn/' },
         ]
       }} />
 
@@ -80,7 +80,7 @@ export default async function page() {
                         },
                         isBlockedLink: true,
                         anchor: {
-                          href: `/pages/courses/mini-courses/${course.id}`,
+                          href: `/pages/learn/mini-courses/${course.id}`,
                           children: ""
                         }
                       }

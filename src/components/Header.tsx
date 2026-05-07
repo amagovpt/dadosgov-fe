@@ -418,7 +418,7 @@ export const Header = () => {
                     iconHover="agora-solid-edit"
                     title="Aprender"
                     description="Cursos e Minicursos"
-                    href="/pages/courses"
+                    href="/pages/learn"
                     onLinkClick={handleLinkClick}
                   />
                 </div>

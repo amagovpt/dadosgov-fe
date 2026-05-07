@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { Pagination } from '@/components/Pagination';
-import HeroCourses from '@/components/Courses/Hero';
+import HeroCourses from '@/components/Learn/Hero';
 import CardIllustrative from '@/components/Primitives/Cards/CardIllustrative';
 import Link from 'next/link';
 import IconAgora from '@/components/Primitives/IconAgora';
@@ -11,7 +11,7 @@ import { getMiniCoursesPages } from '@/services/queries/courses/minicourses';
 import { PageMiniCourses } from '@/services/types/courses';
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
 import { getAssets } from '@/utils/getAssets';
-import MiniCoursesSearchInput from '@/components/Courses/MiniCoursesSearchInput';
+import MiniCoursesSearchInput from '@/components/Learn/MiniCoursesSearchInput';
 
 export default async function Page({
   searchParams,
@@ -66,8 +66,8 @@ export default async function Page({
           description: hero.description,
           breadcrumbItems: [
             { label: 'Início', url: '/' },
-            { label: 'Cursos', url: '/pages/courses/' },
-            { label: 'Minicursos', url: '/pages/courses/mini-courses/' }
+            { label: 'Aprender', url: '/pages/learn/' },
+            { label: 'Minicursos', url: '/pages/learn/mini-courses/' }
           ]
         }}
       />
@@ -106,7 +106,7 @@ export default async function Page({
                       title={course.title}
                       description={formatHtmlParagraphs(course.description)}
                       mainLink={
-                        <Link href={`/pages/courses/mini-courses/${course.id}`} className="flex items-center h-full">
+                        <Link href={`/pages/learn/mini-courses/${course.id}`} className="flex items-center h-full">
                           <IconAgora name="agora-line-arrow-right-circle" className="w-24 h-24" />
                         </Link>
                       }
@@ -121,7 +121,7 @@ export default async function Page({
                   currentPage={currentPage}
                   totalItems={totalItems}
                   pageSize={PAGE_SIZE}
-                  baseUrl="/pages/courses/mini-courses"
+                  baseUrl="/pages/learn/mini-courses"
                 />
               </div>
             </div>
