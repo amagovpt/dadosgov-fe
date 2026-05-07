@@ -28,7 +28,12 @@ export function filterDataStories(
       return false;
     }
 
-    if (activeFilters.tags.length > 0 && !activeFilters.tags.some((tag) => story.tags.tag === tag)) {
+    if (
+      activeFilters.tags.length > 0 &&
+      !activeFilters.tags.some((tag) =>
+        Object.values(story.tags ?? {}).some((storyTag) => String(storyTag) === tag)
+      )
+    ) {
       return false;
     }
 
