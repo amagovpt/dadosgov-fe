@@ -186,8 +186,8 @@ export default function DataStoriesClient({
           subtitle={
             <p className="text-primary-100 max-w-[592px]">
               {total === 0
-                ? "Nao existem resultados disponiveis para a sua pesquisa"
-                : `Pesquise atraves de ${total} data stories em dados.gov.pt`}
+                ? "Não existem resultados disponíveis para a sua pesquisa"
+                : `Pesquise através de ${total} data stories em dados.gov.pt`}
             </p>
           }
         />
@@ -199,7 +199,7 @@ export default function DataStoriesClient({
           value={searchQuery}
           onChange={setSearchQuery}
           onSearch={handleSearch}
-          examplesText='Exemplos: "servicos publicos", "turismo", "territorios"'
+          examplesText='Exemplos: "serviços públicos", "turismo", "territórios"'
         />
 
         {/* Main Content */}
@@ -303,7 +303,7 @@ export default function DataStoriesClient({
                                 {formatHtmlParagraphs(story.description)}
                               </p>
                             }
-                            date={<span className="font-[300]">Publicado ha {timeAgo}</span>}
+                            date={<span className="font-[300]">Publicado há {timeAgo}</span>}
                             /*links={[
                               {
                                 href: "#",
@@ -314,7 +314,7 @@ export default function DataStoriesClient({
                                 trailingIconHover: "",
                                 trailingIconActive: "",
                                 children: story.metrics.views.toLocaleString("pt-PT"),
-                                title: "Visualizacoes",
+                                title: "Visualizações",
                                 onClick: (e: MouseEvent) => e.preventDefault(),
                                 className: "text-[#034AD8]",
                               },
@@ -361,7 +361,7 @@ export default function DataStoriesClient({
                         icon={
                           <Icon name="agora-line-search" className="w-12 h-12 text-primary-500" />
                         }
-                        title="Nao encontrou nenhuma data story?"
+                        title="Não encontrou nenhuma data story?"
                         subtitle={
                           <span className="font-bold">
                             Tente redefinir os filtros para ampliar sua busca.
