@@ -42,7 +42,7 @@ export default async function Page({
                                 hasIcon={true}
                                 trailingIcon="agora-line-arrow-right-circle"
                                 trailingIconHover="agora-solid-arrow-right-circle"
-                                href={`/pages/courses/mini-courses/${slug}/1`}
+                                href={`/pages/learn/mini-courses/${slug}/1`}
                                 className="px-24 h-48"
                             >
                                 Iniciar Curso
