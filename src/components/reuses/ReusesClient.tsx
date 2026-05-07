@@ -13,6 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
+import { useListingUrlState } from "@/hooks/useListingUrlState";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { fetchReuses } from "@/services/api";
 import {
@@ -26,7 +27,6 @@ import { pt } from "date-fns/locale";
 import PageBanner from "@/components/PageBanner";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";
-import { writeQueryParamValues } from "@/utils/filterUtils";
 
 const SORT_OPTIONS: Record<string, string> = {
   relevancia: "",
@@ -55,9 +55,9 @@ export default function ReusesClient({
 }: ReusesClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
   const queryString = searchParams.toString();
   const [listData, setListData] = useState<APIResponse<Reuse>>(initialData);
-  const activePage = Number(searchParams.get("page") || String(currentPage || 1));
   const { data: reuses, total, page_size } = listData;
   const currentQuery = searchParams.get("q") || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -93,62 +93,11 @@ export default function ReusesClient({
     };
   }, [queryString, activePage, initialData.page_size]);
 
-  const getLiveParams = useCallback(() => {
-    if (typeof window !== "undefined") {
-      return new URLSearchParams(window.location.search);
-    }
-    return new URLSearchParams(Array.from(searchParams.entries()));
-  }, [searchParams]);
-
-  const buildUrl = useCallback(
-    (overrides: Partial<ReuseFilters> & { page?: number } = {}) => {
-      const params = getLiveParams();
-
-      if ("q" in overrides) {
-        if (overrides.q) params.set("q", overrides.q);
-        else params.delete("q");
-      }
-
-      if ("type" in overrides) {
-        if (overrides.type) params.set("type", overrides.type);
-        else params.delete("type");
-      }
-
-      if ("tag" in overrides) {
-        const tag = overrides.tag;
-        const values = !tag ? [] : Array.isArray(tag) ? tag : [tag];
-        writeQueryParamValues(params, "tag", values);
-      }
-
-      if ("organization" in overrides) {
-        const organization = overrides.organization;
-        const values = !organization ? [] : Array.isArray(organization) ? organization : [organization];
-        writeQueryParamValues(params, "organization", values);
-      }
-
-      if ("sort" in overrides) {
-        if (overrides.sort) params.set("sort", overrides.sort);
-        else params.delete("sort");
-      }
-
-      if ("page" in overrides) {
-        if (overrides.page && overrides.page > 1) params.set("page", String(overrides.page));
-        else params.delete("page");
-      } else if (activePage > 1) {
-        params.set("page", String(activePage));
-      }
-
-      const qs = params.toString();
-      return `/pages/reuses${qs ? `?${qs}` : ""}`;
-    },
-    [activePage, getLiveParams]
-  );
-
   const onSearchNavigate = useCallback(
     (query: string) => {
-      router.replace(buildUrl({ q: query || undefined, page: 1 }), { scroll: false });
+      replaceWith({ q: query || undefined, page: 1 });
     },
-    [router, buildUrl]
+    [replaceWith]
   );
 
   const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
@@ -158,11 +107,9 @@ export default function ReusesClient({
 
   const handleSortChange = useCallback(
     (value: string) => {
-      router.replace(buildUrl({ sort: SORT_OPTIONS[value] || undefined, page: 1 }), {
-        scroll: false,
-      });
+      replaceWith({ sort: SORT_OPTIONS[value] || undefined, page: 1 });
     },
-    [router, buildUrl]
+    [replaceWith]
   );
 
   const sortDefault = (() => {

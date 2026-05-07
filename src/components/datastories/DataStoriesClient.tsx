@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   CardLinks,
@@ -14,6 +14,7 @@ import {
 import { Pagination } from "@/components/Pagination";
 import PageBanner from "@/components/PageBanner";
 import SearchFilter from "@/components/Shared/SearchFilter";
+import { useListingUrlState } from "@/hooks/useListingUrlState";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -52,11 +53,10 @@ export default function DataStoriesClient({
   datastories,
 }: DataStoriesClientProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
   const stories = Array.isArray(datastories) ? datastories : [];
 
-  const activePage = Number(searchParams.get("page") || String(currentPage || 1));
   const currentQuery = searchParams.get("q") || initialFilters?.q || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -65,41 +65,11 @@ export default function DataStoriesClient({
     tags: [],
   });
 
-  const getLiveParams = useCallback(() => {
-    if (typeof window !== "undefined") {
-      return new URLSearchParams(window.location.search);
-    }
-    return new URLSearchParams(Array.from(searchParams.entries()));
-  }, [searchParams]);
-
-  const buildUrl = useCallback(
-    (overrides: { q?: string | null; page?: number } = {}) => {
-      const params = getLiveParams();
-
-      if ("q" in overrides) {
-        if (overrides.q) params.set("q", overrides.q);
-        else params.delete("q");
-      }
-
-      if ("page" in overrides) {
-        if (overrides.page && overrides.page > 1) params.set("page", String(overrides.page));
-        else params.delete("page");
-      } else if (activePage > 1) {
-        params.set("page", String(activePage));
-      }
-
-      params.sort();
-      const qs = params.toString();
-      return `${pathname}${qs ? `?${qs}` : ""}`;
-    },
-    [activePage, getLiveParams, pathname]
-  );
-
   const onSearchNavigate = useCallback(
     (query: string) => {
-      router.replace(buildUrl({ q: query || null, page: 1 }), { scroll: false });
+      replaceWith({ q: query || null, page: 1 });
     },
-    [router, buildUrl]
+    [replaceWith]
   );
 
   const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
@@ -257,7 +227,7 @@ export default function DataStoriesClient({
                 onFiltersChange={setActiveFilters}
                 onClearSearch={() => {
                   setSearchQuery("");
-                  router.replace(buildUrl({ q: null, page: 1 }), { scroll: false });
+                  replaceWith({ q: null, page: 1 });
                 }}
               />
             )}

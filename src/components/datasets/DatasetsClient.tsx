@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Icon,
@@ -16,6 +16,7 @@ import { deleteDataset, fetchDatasets } from "@/services/api";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
+import { useListingUrlState } from "@/hooks/useListingUrlState";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { APIResponse, Dataset, DatasetFilters } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
@@ -51,12 +52,11 @@ export default function DatasetsClient({
   filterCounts,
 }: DatasetsClientProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
   const queryString = searchParams.toString();
   const { show, hide } = usePopupContext();
   const [listData, setListData] = useState<APIResponse<Dataset>>(initialData);
-  const activePage = Number(searchParams.get("page") || String(currentPage || 1));
   const { data: datasets, total, page_size } = listData;
 
   //TODO: Check if can be removed
@@ -101,41 +101,6 @@ export default function DatasetsClient({
 
   const currentSortKey =
     Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
-
-  const getLiveParams = useCallback(() => {
-    if (typeof window !== "undefined") {
-      return new URLSearchParams(window.location.search);
-    }
-    return new URLSearchParams(Array.from(searchParams.entries()));
-  }, [searchParams]);
-
-  const buildUrl = useCallback(
-    (overrides: { q?: string | null; sort?: string | null; page?: number } = {}) => {
-      const params = getLiveParams();
-
-      if ("q" in overrides) {
-        if (overrides.q) params.set("q", overrides.q);
-        else params.delete("q");
-      }
-
-      if ("sort" in overrides) {
-        if (overrides.sort) params.set("sort", overrides.sort);
-        else params.delete("sort");
-      }
-
-      if ("page" in overrides) {
-        if (overrides.page && overrides.page > 1) params.set("page", String(overrides.page));
-        else params.delete("page");
-      } else if (activePage > 1) {
-        params.set("page", String(activePage));
-      }
-
-      params.sort();
-      const qs = params.toString();
-      return `${pathname}${qs ? `?${qs}` : ""}`;
-    },
-    [activePage, getLiveParams, pathname]
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -193,9 +158,9 @@ export default function DatasetsClient({
 
   const onSearchNavigate = useCallback(
     (query: string) => {
-      router.replace(buildUrl({ q: query || null, page: 1 }), { scroll: false });
+      replaceWith({ q: query || null, page: 1 });
     },
-    [router, buildUrl]
+    [replaceWith]
   );
 
   const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
@@ -207,9 +172,9 @@ export default function DatasetsClient({
     (selectedKey: string) => {
       const sortValue = SORT_OPTIONS[selectedKey] || null;
       if (sortValue === (currentSort || null)) return;
-      router.replace(buildUrl({ sort: sortValue, page: 1 }), { scroll: false });
+      replaceWith({ sort: sortValue, page: 1 });
     },
-    [router, buildUrl, currentSort]
+    [currentSort, replaceWith]
   );
 
   return (
@@ -470,7 +435,12 @@ export default function DatasetsClient({
                 </div>
 
                 <div className="pb-64 mt-64 flex justify-center">
-                  <Pagination currentPage={activePage} totalItems={total} pageSize={page_size} />
+                  <Pagination
+                    currentPage={activePage}
+                    totalItems={total}
+                    pageSize={page_size}
+                    baseUrl={buildUrl()}
+                  />
                 </div>
               </div>
             </div>
