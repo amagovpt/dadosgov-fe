@@ -218,7 +218,7 @@ const SupportPage = () => {
 
             <div className="absolute w-full mb-64 bg-white text-neutral-900 shadow-lg dropdown"></div>
 
-            <div className="mt-[16px] flex flex-wrap gap-[32px]">
+            <div className="mt-16 flex flex-wrap gap-[32px]">
               <a
                 href="#"
                 target="_blank"
@@ -318,7 +318,7 @@ const SupportPage = () => {
                       .replace(/[^\w-]/g, "")}
                     className={`${category.category !== "Sobre dados específicos" ? "mt-[32px]" : ""} scroll-mt-[190px]`}
                   >
-                    <h3 className="text-[20px] font-bold text-[#021C51] mb-[16px]">
+                    <h3 className="text-[20px] font-bold text-[#021C51] mb-16">
                       {category.category}
                     </h3>
                     <div>
@@ -328,7 +328,7 @@ const SupportPage = () => {
                           <Accordion
                             key={`${currentId}-${expandedId === currentId}`}
                             headingTitle={
-                              <span className="text-[#2B363C] font-bold mr-[16px]">
+                              <span className="text-[#2B363C] font-bold mr-16">
                                 {item.question}
                               </span>
                             }
@@ -341,7 +341,7 @@ const SupportPage = () => {
                               }
                             }}
                           >
-                            <div className="py-16 mr-[16px] text-neutral-900 leading-relaxed">
+                            <div className="py-16 mr-16 text-neutral-900 leading-relaxed">
                               {"richAnswer" in item && item.richAnswer === "publicar" ? (
                                 <div className="space-y-[16px]">
                                   <div>
@@ -943,7 +943,7 @@ const SupportPage = () => {
             <div className="sidebar-index pr-64 border-l border-neutral-700">
               <ul>
                 <li
-                  className="mb-[16px] cursor-pointer"
+                  className="mb-16 cursor-pointer"
                   onClick={() => setActiveItem("Nesta página")}
                 >
                   <a
@@ -993,7 +993,7 @@ const SupportPage = () => {
 
         <div id="ajuda" className="mt-80 pt-64 border-neutral-200 scroll-mt-[190px]">
           <h2 className="text-[24px] font-bold text-[#021C51] mb-[24px]">Ajuda</h2>
-          <h3 className="text-[20px] font-[500] text-[#021C51] mb-[16px]">
+          <h3 className="text-[20px] font-[500] text-[#021C51] mb-16">
             Não encontrou o que procurava?
           </h3>
 

@@ -465,7 +465,7 @@ export default function ProfileClient() {
                       <p className="text-base font-medium text-neutral-900 mb-[8px]">
                         Chaves da API
                       </p>
-                      <p className="text-sm text-neutral-700 mb-[16px]">
+                      <p className="text-sm text-neutral-700 mb-16">
                         Gere uma chave para autenticar pedidos à API. Por motivos de segurança,
                         a chave completa só é apresentada uma vez no momento da criação —
                         guarde-a num local seguro.
@@ -690,7 +690,7 @@ export default function ProfileClient() {
                   </div>
                 </div>
 
-                <div className="flex justify-end mt-[16px]">
+                <div className="flex justify-end mt-16">
                   <Button
                     variant="primary"
                     hasIcon={true}
@@ -729,7 +729,7 @@ export default function ProfileClient() {
                 )}
                 {!isLoadingActivities && activities.length > 0 && (
                   <>
-                    <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+                    <h2 className="font-medium text-neutral-900 text-base mb-16">
                       {activityTotal} ATIVIDADES
                     </h2>
                     <Table

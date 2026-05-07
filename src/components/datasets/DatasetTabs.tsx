@@ -208,7 +208,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                 <CardNoResults
                                     position="center"
                                     icon={
-                                        <Icon name="agora-line-file" className="w-[40px] h-[40px] text-primary-500 icon-xl" />
+                                        <Icon name="agora-line-file" className="w-40 h-40 text-primary-500 icon-xl" />
                                     }
                                     title="Sem reutilizações"
                                     description="Ainda não existem reutilizações associadas a este conjunto de dados."
@@ -429,7 +429,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                 <CardNoResults
                                     position="center"
                                     icon={
-                                        <Icon name="agora-line-chat" className="w-[40px] h-[40px] text-primary-500 icon-xl" />
+                                        <Icon name="agora-line-chat" className="w-40 h-40 text-primary-500 icon-xl" />
                                     }
                                     title="Sem discussões"
                                     description="Ainda não existem discussões sobre este conjunto de dados."
@@ -607,7 +607,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                     {renderTabBody(
                         communityCount === 0 ? (
                             <div className="bg-white rounded-8 py-64 px-32 flex flex-col items-center text-center">
-                                <Icon name="agora-line-user-group" className="w-[40px] h-[40px] text-primary-500 icon-xl mb-16" />
+                                <Icon name="agora-line-user-group" className="w-40 h-40 text-primary-500 icon-xl mb-16" />
                                 <h3 className="text-primary-600 text-[2rem] leading-[3rem] mb-16" style={{ fontWeight: 300 }}>
                                     Sem recursos comunitários
                                 </h3>

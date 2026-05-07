@@ -140,7 +140,7 @@ export default function ReusesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         {filteredReuses.length} resultados
       </p>
 
@@ -275,7 +275,7 @@ export default function ReusesClient() {
               className="datasets-page__empty"
               position="center"
               icon={
-                <img src="/Icons/bar_chart.svg" alt="" className="w-[40px] h-[40px]" />
+                <img src="/Icons/bar_chart.svg" alt="" className="w-40 h-40" />
               }
               title="Sem reutilizações"
               description="Não publicou reutilizações"

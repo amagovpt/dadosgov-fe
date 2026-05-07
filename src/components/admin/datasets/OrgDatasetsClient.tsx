@@ -146,7 +146,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         {total} resultados
       </p>
 

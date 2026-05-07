@@ -350,7 +350,7 @@ export default function OrgProfileClient() {
                 </div>
               </div>
 
-              <div className="flex justify-end mt-[16px]">
+              <div className="flex justify-end mt-16">
                 <Button
                   variant="primary"
                   hasIcon

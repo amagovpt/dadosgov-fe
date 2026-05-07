@@ -54,7 +54,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
             className="max-h-[56px] w-auto object-contain"
           />
         ) : (
-          <Icon name="agora-line-database" className="h-[40px] w-[40px] text-primary-500" />
+          <Icon name="agora-line-database" className="h-40 w-40 text-primary-500" />
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-4 bg-primary-100 p-16">

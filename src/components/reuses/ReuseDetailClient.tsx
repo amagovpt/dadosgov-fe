@@ -658,7 +658,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     icon={
                       <Icon
                         name="agora-line-chat"
-                        className="icon-xl h-[40px] w-[40px] text-primary-500"
+                        className="icon-xl h-40 w-40 text-primary-500"
                       />
                     }
                     title="Ainda não há discussão."

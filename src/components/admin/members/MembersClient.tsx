@@ -577,7 +577,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
 
       {pendingRequests.length > 0 && (
         <div className="mb-[32px]">
-          <h2 className="text-neutral-900 text-base font-semibold mb-[16px]">
+          <h2 className="text-neutral-900 text-base font-semibold mb-16">
             Pedidos de adesão pendentes ({pendingRequests.length})
           </h2>
           <Table>

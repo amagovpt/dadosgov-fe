@@ -487,7 +487,7 @@ export default function ReusesFormClient({
               />
 
               {apiError && (
-                <div className="mt-[32px] mb-[16px]">
+                <div className="mt-[32px] mb-16">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
@@ -739,7 +739,7 @@ export default function ReusesFormClient({
                 />
               </div>
               {apiError && (
-                <div className="mt-[32px] mb-[16px]">
+                <div className="mt-[32px] mb-16">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
@@ -780,7 +780,7 @@ export default function ReusesFormClient({
                 </InputSelect>
 
                 {selectedDatasets.length > 0 && (
-                  <div className="flex flex-wrap gap-8 mt-[16px]">
+                  <div className="flex flex-wrap gap-8 mt-16">
                     {selectedDatasets.map((d) => (
                       <Tag
                         key={d.id}
@@ -800,7 +800,7 @@ export default function ReusesFormClient({
                 </div>
 
                 {datasetLinks.map((link, index) => (
-                  <div key={`dataset-${index}`} className="mt-[16px]">
+                  <div key={`dataset-${index}`} className="mt-16">
                     <InputText
                       label="Link para o conjunto de dados"
                       placeholder="Insira o URL aqui"
@@ -859,7 +859,7 @@ export default function ReusesFormClient({
                 </div>
 
                 {apiLinks.map((link, index) => (
-                  <div key={`api-${index}`} className="mt-[16px]">
+                  <div key={`api-${index}`} className="mt-16">
                     <InputText
                       label="Link para a API"
                       placeholder="Insira o URL aqui"
@@ -1098,7 +1098,7 @@ export default function ReusesFormClient({
               <PublicationFeedbackButton />
 
               {apiError && (
-                <div className="mt-[32px] mb-[16px]">
+                <div className="mt-[32px] mb-16">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}

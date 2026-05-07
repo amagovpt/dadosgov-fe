@@ -38,7 +38,7 @@ export default function StatisticsClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-[64px] mb-[16px]">Estatísticas</h1>
+      <h1 className="admin-page__title mt-[64px] mb-16">Estatísticas</h1>
 
       <Tabs>
         <Tab active>
@@ -136,7 +136,7 @@ export default function StatisticsClient() {
           <TabHeader>API</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              <p className="text-neutral-700 text-sm mb-[16px]">
+              <p className="text-neutral-700 text-sm mb-16">
                 0 resultados
               </p>
 
@@ -166,7 +166,7 @@ export default function StatisticsClient() {
               <CardNoResults
                 position="center"
                 icon={
-                  <img src="/Icons/reduce.svg" alt="" className="w-[40px] h-[40px]" />
+                  <img src="/Icons/reduce.svg" alt="" className="w-40 h-40" />
                 }
                 title="Sem publicações"
                 description="Ainda não publicou uma API."
@@ -191,7 +191,7 @@ export default function StatisticsClient() {
           <TabHeader>Reutilizar</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              <p className="text-neutral-700 text-sm mb-[16px]">
+              <p className="text-neutral-700 text-sm mb-16">
                 0 resultados
               </p>
 
@@ -222,7 +222,7 @@ export default function StatisticsClient() {
               <CardNoResults
                 position="center"
                 icon={
-                  <img src="/Icons/bar_chart.svg" alt="" className="w-[40px] h-[40px]" />
+                  <img src="/Icons/bar_chart.svg" alt="" className="w-40 h-40" />
                 }
                 title="Sem publicações"
                 description="Ainda não publicou uma reutilização."

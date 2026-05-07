@@ -24,17 +24,17 @@ const markdownComponents = {
     <h1 className="text-2xl-medium text-[#021C51] mb-16 leading-tight">{children}</h1>
   ),
   h2: ({ children }: any) => (
-    <h2 className="font-bold text-[16px] leading-[28px] text-[#021c51] mb-[16px] mt-[16px]">
+    <h2 className="font-bold text-m-regular leading-7 text-[#021c51] mb-16 mt-16">
       {children}
     </h2>
   ),
   h3: ({ children }: any) => (
-    <h3 className="font-bold text-[16px] leading-[28px] text-[#021c51] mb-[16px]">
+    <h3 className="font-bold text-m-regular leading-7 text-[#021c51] mb-16">
       {children}
     </h3>
   ),
   p: ({ children }: any) => (
-    <p className="text-[16px] leading-[28px] mb-[16px]">{children}</p>
+    <p className="text-m-regular leading-7 mb-16">{children}</p>
   ),
   a: ({ href, children }: any) => {
     const linkOverrides: Record<string, { href: string; text?: string }> = {
@@ -72,32 +72,32 @@ const markdownComponents = {
     );
   },
   ul: ({ children }: any) => (
-    <ul className="list-disc pl-[48px] space-y-[12px] mb-[24px] text-[16px] leading-[28px]">
+    <ul className="list-disc pl-[48px] space-y-[12px] mb-[24px] text-m-regular leading-7">
       {children}
     </ul>
   ),
   ol: ({ children }: any) => (
-    <ol className="list-decimal pl-[48px] space-y-[12px] mb-[24px] text-[16px] leading-[28px]">
+    <ol className="list-decimal pl-[48px] space-y-[12px] mb-[24px] text-m-regular leading-7">
       {children}
     </ol>
   ),
   blockquote: ({ children }: any) => (
-    <blockquote className="border-l-4 border-[#034AD8] pl-[16px] italic text-[16px] leading-[28px] mb-[16px]">
+    <blockquote className="border-l-4 border-[#034AD8] pl-[16px] italic text-m-regular leading-7 mb-16">
       {children}
     </blockquote>
   ),
   code: ({ children, className }: any) => {
     const isBlock = className?.includes("language-");
     return isBlock ? (
-      <pre className="bg-[#e1e4ea] rounded p-[16px] overflow-x-auto mb-[16px]">
-        <code className="text-[14px] leading-[24px]">{children}</code>
+      <pre className="bg-[#e1e4ea] rounded p-[16px] overflow-x-auto mb-16">
+        <code className="text-s-regular leading-6">{children}</code>
       </pre>
     ) : (
-      <code className="bg-[#e1e4ea] rounded px-[4px] py-[2px] text-[14px]">{children}</code>
+      <code className="bg-[#e1e4ea] rounded px-[4px] py-[2px] text-s-regular">{children}</code>
     );
   },
   img: ({ src, alt }: any) => (
-    <img src={src} alt={alt ?? ""} className="max-w-full h-auto mb-[16px] rounded" />
+    <img src={src} alt={alt ?? ""} className="max-w-full h-auto mb-16 rounded" />
   ),
   strong: ({ children }: any) => <strong>{children}</strong>,
   em: ({ children }: any) => <em>{children}</em>,
@@ -146,7 +146,7 @@ export function GitHubArticlePage({
                     </ReactMarkdown>
                   </div>
                 ) : (
-                  <p className="text-[16px] leading-[28px] text-[#2b363c]">
+                  <p className="text-m-regular leading-7 text-[#2b363c]">
                     Não foi possível carregar o conteúdo.
                   </p>
                 )}

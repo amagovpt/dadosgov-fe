@@ -154,7 +154,7 @@ function TransferDatasetPopupContent({
   return (
     <div className="flex flex-col gap-[16px]">
       <p>
-        <Icon name="agora-line-document" className="inline w-4 h-4 mr-[4px]" />
+        <Icon name="agora-line-document" className="inline w-4 h-4 mr-4" />
         <span className="text-primary-600">{datasetTitle}</span>
       </p>
       <p>
@@ -1890,7 +1890,7 @@ export default function DatasetsEditClient() {
           <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              <div className="flex items-end gap-[16px] mb-[16px] [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
+              <div className="flex items-end gap-[16px] mb-16 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                 <DragAndDropUploader
                   key={uploaderKey}
                   label="Ficheiros"
@@ -1914,7 +1914,7 @@ export default function DatasetsEditClient() {
                 </Button>
               </div>
 
-              <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+              <h2 className="font-medium text-neutral-900 text-base mb-16">
                 {dataset.resources.length}{" "}
                 {dataset.resources.length === 1 ? "FICHEIRO" : "FICHEIROS"}
               </h2>
@@ -2033,7 +2033,7 @@ export default function DatasetsEditClient() {
               )}
               {discussionsLoaded && discussions.length > 0 && (
                 <div>
-                  <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+                  <h2 className="font-medium text-neutral-900 text-base mb-16">
                     {discussions.length} {discussions.length === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
                   </h2>
                   <div className="space-y-[16px]">
@@ -2057,12 +2057,12 @@ export default function DatasetsEditClient() {
                           </Pill>
                         </div>
                         {disc.discussion.length > 0 && (
-                          <p className="text-neutral-900 text-sm mt-[16px]">
+                          <p className="text-neutral-900 text-sm mt-16">
                             {disc.discussion[0].content}
                           </p>
                         )}
                         {disc.discussion.length > 1 && (
-                          <div className="mt-[16px] space-y-[16px] border-t border-neutral-200 pt-[16px]">
+                          <div className="mt-16 space-y-[16px] border-t border-neutral-200 pt-[16px]">
                             {disc.discussion.slice(1).map((msg, idx) => (
                               <div key={idx} className="border-l-2 border-primary-600 pl-[24px]">
                                 <p className="text-sm text-neutral-900">
@@ -2107,7 +2107,7 @@ export default function DatasetsEditClient() {
               )}
               {activitiesLoaded && activities.length > 0 && (
                 <>
-                  <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+                  <h2 className="font-medium text-neutral-900 text-base mb-16">
                     {activities.length} ATIVIDADES
                   </h2>
                   <div className="flex flex-col gap-[12px]">

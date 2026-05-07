@@ -169,7 +169,7 @@ export default function SystemLogsClient() {
         </div>
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         Visualização do conteúdo dos ficheiros de log do servidor. Para ficheiros grandes, é
         apresentado apenas o final (até 1&nbsp;MB).
       </p>
@@ -188,7 +188,7 @@ export default function SystemLogsClient() {
         />
       ) : (
         <>
-          <div className="flex flex-wrap items-end gap-[16px] mb-[16px]">
+          <div className="flex flex-wrap items-end gap-[16px] mb-16">
             <div className="admin-search-wrapper">
               <InputSelect
                 id="log-file-select"

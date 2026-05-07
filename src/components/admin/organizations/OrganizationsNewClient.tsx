@@ -245,7 +245,7 @@ export default function OrganizationsNewClient() {
                   <span className="admin-page__divider-or-text">ou</span>
                 </div>
 
-                <div className="flex justify-center mt-[16px]">
+                <div className="flex justify-center mt-16">
                   <Button
                     variant="primary"
                     onClick={() => router.push("/pages/admin/organizations/new?step=2")}

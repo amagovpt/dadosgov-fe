@@ -1551,7 +1551,7 @@ export default function DatasetsAdminClient({
                                 hideLabel={true}
                                 hidePercentageValue={true}
                               />
-                              <span className="mt-4 block text-[14px] text-neutral-900">
+                              <span className="mt-4 block text-s-regular text-neutral-900">
                                 {qualityScore}% Qualidade dos metadados
                               </span>
                               <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">

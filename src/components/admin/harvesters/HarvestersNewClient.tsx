@@ -840,7 +840,7 @@ export default function HarvestersNewClient() {
                 />
               )}
 
-              <div className="flex justify-start mt-[16px]">
+              <div className="flex justify-start mt-16">
                 <PublicationFeedbackButton />
               </div>
 

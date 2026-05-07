@@ -137,7 +137,7 @@ export default function SystemHarvestersClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         {isLoading ? "A carregar..." : `${totalItems} resultados`}
       </p>
 

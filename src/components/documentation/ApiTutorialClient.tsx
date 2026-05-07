@@ -92,7 +92,7 @@ export default function ApiTutorialClient() {
             Documentação da API
           </h1>
 
-          <p className="text-[16px] leading-[28px] text-[#2b363c] mb-[48px] max-w-[800px]">
+          <p className="text-m-regular leading-7 text-[#2b363c] mb-48 max-w-[800px]">
             Esta página descreve o comportamento da API RESTful aberta e gratuita do dados.gov.pt.
           </p>
         </div>
@@ -101,15 +101,15 @@ export default function ApiTutorialClient() {
           <div className="container mx-auto px-4">
             <div className="max-w-[800px]">
               {/* Autenticação */}
-              <section className="mb-[48px]">
-                <h2 className="text-[20px] font-bold text-[#021C51] mb-[16px]">Autenticação</h2>
-                <p className="text-[16px] leading-[28px] text-[#2b363c] mb-[16px]">
+              <section className="mb-48">
+                <h2 className="text-[20px] font-bold text-[#021C51] mb-16">Autenticação</h2>
+                <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
                   Para poder executar operações de escrita, é necessário obter uma Chave de API
                   nas definições do seu perfil.
                 </p>
-                <p className="text-[16px] leading-[28px] text-[#2b363c]">
+                <p className="text-m-regular leading-7 text-[#2b363c]">
                   Esta chave deve ser fornecida em cada chamada no cabeçalho HTTP{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-[14px] font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
                     X-API-KEY
                   </code>
                   .
@@ -117,48 +117,48 @@ export default function ApiTutorialClient() {
               </section>
 
               {/* Autorizações */}
-              <section className="mb-[48px]">
-                <h2 className="text-[20px] font-bold text-[#021C51] mb-[16px]">Autorizações</h2>
-                <p className="text-[16px] leading-[28px] text-[#2b363c] mb-[16px]">
+              <section className="mb-48">
+                <h2 className="text-[20px] font-bold text-[#021C51] mb-16">Autorizações</h2>
+                <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
                   As chamadas à API estão sujeitas às mesmas permissões que a interface web.
                 </p>
-                <p className="text-[16px] leading-[28px] text-[#2b363c]">
+                <p className="text-m-regular leading-7 text-[#2b363c]">
                   Por exemplo, é necessário fazer parte de uma organização para modificar um dos seus
                   conjuntos de dados.
                 </p>
               </section>
 
               {/* Paginação */}
-              <section className="mb-[48px]">
-                <h2 className="text-[20px] font-bold text-[#021C51] mb-[16px]">Paginação</h2>
-                <p className="text-[16px] leading-[28px] text-[#2b363c] mb-[16px]">
+              <section className="mb-48">
+                <h2 className="text-[20px] font-bold text-[#021C51] mb-16">Paginação</h2>
+                <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
                   Alguns métodos são paginados e seguem sempre o mesmo padrão. A lista de objetos é
                   encapsulada num objeto{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-[14px] font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
                     Page
                   </code>
                   .
                 </p>
-                <p className="text-[16px] leading-[28px] text-[#2b363c] mb-[16px]">
+                <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
                   Não é necessário calcular as páginas anterior e seguinte, pois os URLs estão
                   disponíveis na resposta nos atributos{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-[14px] font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
                     previous_page
                   </code>{" "}
                   e{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-[14px] font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
                     next_page
                   </code>
                   . Estes serão definidos como{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-[14px] font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
                     null
                   </code>{" "}
                   se não existir página anterior e/ou seguinte.
                 </p>
-                <p className="text-[16px] leading-[28px] text-[#2b363c] mb-[8px]">
+                <p className="text-m-regular leading-7 text-[#2b363c] mb-[8px]">
                   <u>Exemplo</u>:
                 </p>
-                <pre className="bg-[#1e1e1e] text-[#d4d4d4] rounded-lg p-[24px] overflow-x-auto text-[14px] leading-[22px] font-mono">
+                <pre className="bg-[#1e1e1e] text-[#d4d4d4] rounded-lg p-[24px] overflow-x-auto text-s-regular leading-[22px] font-mono">
                   <code>
                     {JSON.stringify(
                       {
@@ -178,8 +178,8 @@ export default function ApiTutorialClient() {
 
               {/* Referência */}
               <section>
-                <h2 className="text-[20px] font-bold text-[#021C51] mb-[16px]">Referência</h2>
-                <p className="text-[16px] leading-[28px] text-[#2b363c] mb-[24px]">
+                <h2 className="text-[20px] font-bold text-[#021C51] mb-16">Referência</h2>
+                <p className="text-m-regular leading-7 text-[#2b363c] mb-[24px]">
                   Explore os endpoints disponíveis na documentação interativa abaixo.
                 </p>
               </section>

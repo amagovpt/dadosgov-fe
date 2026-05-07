@@ -157,7 +157,7 @@ export default function DiscussionsClient() {
             </TableBody>
           </Table>
 
-          <div className="flex items-center justify-between mt-[16px] py-[12px] border-t border-neutral-200">
+          <div className="flex items-center justify-between mt-16 py-[12px] border-t border-neutral-200">
             <div className="flex items-center gap-[8px]">
               <span className="text-sm text-neutral-600">Linhas por página</span>
               <select

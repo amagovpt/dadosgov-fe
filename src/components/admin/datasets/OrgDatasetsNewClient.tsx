@@ -88,7 +88,7 @@ export default function OrgDatasetsNewClient() {
 
       {currentStep === 1 && (
         <>
-          <h2 className="admin-page__section-title mb-[16px]">Tipo de publicação</h2>
+          <h2 className="admin-page__section-title mb-16">Tipo de publicação</h2>
 
           <StatusCard
             variant="informative"

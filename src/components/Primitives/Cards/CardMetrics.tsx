@@ -81,7 +81,7 @@ export default function CardMetrics({
                                     hideLabel={true}
                                     hidePercentageValue={true}
                                 />
-                                <span className="text-[14px] text-neutral-900 mt-4 block">
+                                <span className="text-s-regular text-neutral-900 mt-4 block">
                                     {qualityScore}% Qualidade dos metadados
                                 </span>
                             </>)}

@@ -123,7 +123,7 @@ function TransferReusePopupContent({
   return (
     <div className="flex flex-col gap-[16px]">
       <p>
-        <Icon name="agora-line-document" className="inline w-4 h-4 mr-[4px]" />
+        <Icon name="agora-line-document" className="inline w-4 h-4 mr-4" />
         <span className="text-primary-600">{reuseTitle}</span>
       </p>
       <p>
@@ -1285,7 +1285,7 @@ export default function ReusesEditClient() {
                   </InputSelect>
 
                   {selectedDatasets.length > 0 && (
-                    <div className="flex flex-wrap gap-8 mt-[16px]">
+                    <div className="flex flex-wrap gap-8 mt-16">
                       {selectedDatasets.map((d) => (
                         <Tag
                           key={d.id}
@@ -1635,7 +1635,7 @@ export default function ReusesEditClient() {
               )}
               {discussionsLoaded && discussions.length > 0 && (
                 <div>
-                  <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+                  <h2 className="font-medium text-neutral-900 text-base mb-16">
                     {discussions.length} {discussions.length === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
                   </h2>
                   <div className="space-y-[16px]">
@@ -1659,12 +1659,12 @@ export default function ReusesEditClient() {
                           </Pill>
                         </div>
                         {disc.discussion.length > 0 && (
-                          <p className="text-neutral-900 text-sm mt-[16px]">
+                          <p className="text-neutral-900 text-sm mt-16">
                             {disc.discussion[0].content}
                           </p>
                         )}
                         {disc.discussion.length > 1 && (
-                          <div className="mt-[16px] space-y-[16px] border-t border-neutral-200 pt-[16px]">
+                          <div className="mt-16 space-y-[16px] border-t border-neutral-200 pt-[16px]">
                             {disc.discussion.slice(1).map((msg, idx) => (
                               <div key={idx} className="border-l-2 border-primary-600 pl-[24px]">
                                 <p className="text-sm text-neutral-900">
@@ -1709,7 +1709,7 @@ export default function ReusesEditClient() {
               )}
               {activitiesLoaded && activities.length > 0 && (
                 <>
-                  <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+                  <h2 className="font-medium text-neutral-900 text-base mb-16">
                     {activities.length} ATIVIDADES
                   </h2>
                   <div className="flex flex-col gap-[12px]">

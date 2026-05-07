@@ -135,7 +135,7 @@ export default function OrgCommunityResourcesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         {resources.length} resultados
       </p>
 

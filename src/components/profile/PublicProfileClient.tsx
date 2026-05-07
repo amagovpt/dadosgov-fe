@@ -417,7 +417,7 @@ export default function PublicProfileClient() {
               icon={
                 <Icon
                   name="agora-line-package"
-                  className="w-[40px] h-[40px] text-primary-500 icon-xl"
+                  className="w-40 h-40 text-primary-500 icon-xl"
                 />
               }
               title="Sem subscrições"
@@ -474,7 +474,7 @@ export default function PublicProfileClient() {
               icon={
                 <Icon
                   name="agora-line-tag"
-                  className="w-[40px] h-[40px] text-primary-500 icon-xl"
+                  className="w-40 h-40 text-primary-500 icon-xl"
                 />
               }
               title="Sem acompanhamentos"
@@ -523,7 +523,7 @@ export default function PublicProfileClient() {
         ) : datasets.length === 0 ? (
           <CardNoResults
             position="center"
-            icon={<Icon name="agora-line-file" className="w-[40px] h-[40px] text-primary-500 icon-xl" />}
+            icon={<Icon name="agora-line-file" className="w-40 h-40 text-primary-500 icon-xl" />}
             title="Sem conjuntos de dados"
             description="Não publicou conjuntos de dados"
             hasAnchor={false}
@@ -612,7 +612,7 @@ export default function PublicProfileClient() {
         ) : reuses.length === 0 ? (
           <CardNoResults
             position="center"
-            icon={<img src="/Icons/bar_chart.svg" alt="" className="w-[40px] h-[40px]" />}
+            icon={<img src="/Icons/bar_chart.svg" alt="" className="w-40 h-40" />}
             title="Sem reutilizações"
             description="Não publicou reutilizações"
             hasAnchor={false}

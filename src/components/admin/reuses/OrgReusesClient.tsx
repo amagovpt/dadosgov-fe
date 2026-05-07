@@ -155,7 +155,7 @@ export default function OrgReusesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         {reuses.length} resultados
       </p>
 

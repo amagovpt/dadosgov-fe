@@ -303,7 +303,7 @@ export default function CommunityResourceFormClient({
               />
 
               {apiError && (
-                <div className="mb-[16px] mt-[32px]">
+                <div className="mb-16 mt-[32px]">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
@@ -469,7 +469,7 @@ export default function CommunityResourceFormClient({
                 </h2>
 
                 {dataset && (
-                  <div className="agora-card-links-datasets-px0 mt-[16px]">
+                  <div className="agora-card-links-datasets-px0 mt-16">
                     <CardLinks
                       onClick={() => {}}
                       className="cursor-pointer text-neutral-900"
@@ -701,7 +701,7 @@ export default function CommunityResourceFormClient({
               )}
 
               {apiError && (
-                <div className="mb-[16px] mt-[32px]">
+                <div className="mb-16 mt-[32px]">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}

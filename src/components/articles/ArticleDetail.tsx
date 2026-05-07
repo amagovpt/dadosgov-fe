@@ -95,9 +95,9 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
           <p className="text-[20px] font-normal text-[#021C51] mt-64 mb-[8px]">
             Publicado em {displayDate}
           </p>
-          <h1 className="text-[32px] font-normal text-[#021C51] mb-[16px] leading-[48px]">{post.name}</h1>
+          <h1 className="text-[32px] font-normal text-[#021C51] mb-16 leading-[48px]">{post.name}</h1>
           {post.headline && (
-            <p className="text-[16px] font-normal text-[#64718B] max-w-2xl mb-32">{post.headline}</p>
+            <p className="text-m-regular font-normal text-[#64718B] max-w-2xl mb-32">{post.headline}</p>
           )}
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
           <div className="text-[#2b363c] flex flex-col gap-[32px]">
             <div className="max-w-[592px]">
                 {/* Content */}
-                <div className="text-[16px] leading-[28px]">
+                <div className="text-m-regular leading-7">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
@@ -129,7 +129,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
                 {/* Credits */}
                 {post.credit_to && (
-                  <p className="text-[14px] text-neutral-500 mt-[16px]">
+                  <p className="text-s-regular text-neutral-500 mt-16">
                     Créditos:{" "}
                     {post.credit_url ? (
                       <a

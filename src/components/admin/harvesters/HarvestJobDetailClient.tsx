@@ -165,7 +165,7 @@ export default function HarvestJobDetailClient({
         />
       </div>
 
-      <h1 className="text-2xl font-bold text-neutral-900 mt-[16px] mb-[16px]">
+      <h1 className="text-2xl font-bold text-neutral-900 mt-16 mb-16">
         {job.id.toUpperCase()}
       </h1>
 
@@ -240,7 +240,7 @@ export default function HarvestJobDetailClient({
       </div>
 
       {/* Items table */}
-      <div className="flex items-center justify-between mb-[16px]">
+      <div className="flex items-center justify-between mb-16">
         <h2 className="text-lg font-bold text-neutral-900">
           {filteredItems.length} ITENS
         </h2>

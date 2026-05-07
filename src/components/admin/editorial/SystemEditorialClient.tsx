@@ -317,7 +317,7 @@ function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: HeroData
         value={data.buttonUrl}
         onChange={(e) => onChange({ ...data, buttonUrl: e.target.value })}
         placeholder="URL do botão"
-        className="text-sm border-orange-400 mb-[16px] w-[300px] max-w-full rounded-[6px] border bg-white px-[12px] py-[6px] text-neutral-800 placeholder-neutral-400 outline-none"
+        className="text-sm border-orange-400 mb-16 w-[300px] max-w-full rounded-[6px] border bg-white px-[12px] py-[6px] text-neutral-800 placeholder-neutral-400 outline-none"
       />
       <div className="flex items-center gap-[8px]">
         <span className="text-sm">Cor :</span>
@@ -585,7 +585,7 @@ function FeaturedDatasetsEditor({
                             hideLabel={true}
                             hidePercentageValue={true}
                           />
-                          <span className="mt-4 block text-[14px] text-neutral-900">
+                          <span className="mt-4 block text-s-regular text-neutral-900">
                             {qualityScore}% Qualidade dos metadados
                           </span>
                           <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
@@ -698,7 +698,7 @@ function FeaturedDatasetsEditor({
                     >
                       <span className="font-medium text-neutral-800">{d.title}</span>
                       {d.organization?.name && (
-                        <span className="ml-[8px] text-neutral-400">— {d.organization.name}</span>
+                        <span className="ml-8 text-neutral-400">— {d.organization.name}</span>
                       )}
                     </button>
                   </li>
@@ -1751,7 +1751,7 @@ export default function SystemEditorialClient() {
 
       {saveMessage && (
         <div
-          className={`text-sm mb-[16px] rounded-[8px] p-[12px] ${
+          className={`text-sm mb-16 rounded-[8px] p-[12px] ${
             saveMessage.type === "success"
               ? "bg-green-50 text-green-700 border-green-200 border"
               : "bg-red-50 text-red-700 border-red-200 border"
@@ -1776,7 +1776,7 @@ export default function SystemEditorialClient() {
                 }
               />
               {datasetBlocks.length > 0 && (
-                <div className="mt-[16px] flex justify-end gap-[8px] pt-[16px]">
+                <div className="mt-16 flex justify-end gap-[8px] pt-[16px]">
                   <Button appearance="outline" variant="primary" onClick={handleCancel}>
                     Cancelar
                   </Button>
@@ -1809,7 +1809,7 @@ export default function SystemEditorialClient() {
                 }
               />
               {reuseBlocks.length > 0 && (
-                <div className="mt-[16px] flex justify-end gap-[8px] pt-[16px]">
+                <div className="mt-16 flex justify-end gap-[8px] pt-[16px]">
                   <Button appearance="outline" variant="primary" onClick={handleCancel}>
                     Cancelar
                   </Button>

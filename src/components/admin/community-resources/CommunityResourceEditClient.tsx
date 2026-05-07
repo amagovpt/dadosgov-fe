@@ -411,13 +411,13 @@ export default function CommunityResourceEditClient() {
       <div className="admin-page__body">
         <div className="admin-page__form-area">
           {successMessage && (
-            <div className="mb-[16px]">
+            <div className="mb-16">
               <StatusCard variant="success" showIcon description={successMessage} />
             </div>
           )}
 
           {apiError && (
-            <div className="mb-[16px]">
+            <div className="mb-16">
               <StatusCard variant="danger" showIcon description={apiError} />
             </div>
           )}
