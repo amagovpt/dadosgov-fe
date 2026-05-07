@@ -366,6 +366,60 @@ header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-lin
   fill: var(--color-primary-600);
 }
 
+/* Ecosystem panel */
+li.ecosystem-panel-menu {
+  gap: 8px;
+}
+
+.ecosystem-panel-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+.ecosystem-custom-panel {
+  background-color: rgb(241, 243, 248);
+  box-shadow: 0px 16px 16px 0px #00000029;
+  border-top: 4px solid var(--Neutral-200, #E1E4EA);
+}
+
+li.ecosystem-panel-menu .panel-menu-link-wrapper {
+  position: relative;
+  align-self: stretch;
+}
+
+li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  height: 4px;
+  width: 100%;
+  background-color: var(--color-primary-600);
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper::after {
+  display: none;
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .children-wrapper {
+  color: inherit;
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .solid {
+  display: none;
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper .line {
+  display: block;
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"]) .unauthenticated-panel-menu>.panel-menu-link-wrapper .icon-wrapper svg {
+  fill: currentColor;
+}
+
 /* ==========================================================================
    [04] FOOTER
    ========================================================================== */
