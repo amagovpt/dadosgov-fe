@@ -39,6 +39,7 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
+import { translateUploadError } from "@/lib/security/translateUploadError";
 
 interface ReusesFormClientProps {
   currentStep: number;
@@ -310,7 +311,7 @@ export default function ReusesFormClient({
         setApiError(messages);
       } else if (err.data?.message) {
         const translated = errorMessages[err.data.message] || err.data.message;
-        setApiError(translated);
+        setApiError(translateUploadError(translated));
       } else {
         setApiError("Erro ao criar a reutilização. Tente novamente.");
       }

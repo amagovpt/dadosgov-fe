@@ -87,6 +87,7 @@ import {
   Transfer,
   TransferRequestPayload,
 } from "@/types/api";
+import { translateUploadError } from "@/lib/security/translateUploadError";
 
 // Server-side (Node.js) needs absolute URLs; client-side uses relative URLs via Next.js proxy
 const isServer = typeof window === "undefined";
@@ -106,6 +107,18 @@ function authFetch(path: string, init?: RequestInit): Promise<Response> {
     ...init,
     credentials: "include",
   });
+}
+
+/**
+ * Translate `data.message` from an upload failure response so any consumer
+ * surfaces a consistent PT-pt warning when the backend reports a security
+ * rejection. Other error messages pass through unchanged.
+ */
+function translateUploadErrorPayload(
+  data: Record<string, unknown>,
+): Record<string, unknown> {
+  if (typeof data?.message !== "string") return data;
+  return { ...data, message: translateUploadError(data.message) };
 }
 
 /**
@@ -606,7 +619,7 @@ export async function uploadOrgLogo(
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw { status: res.status, data: error };
+    throw { status: res.status, data: translateUploadErrorPayload(error) };
   }
   return await res.json();
 }
@@ -1041,7 +1054,7 @@ export async function uploadReuseImage(id: string, file: File): Promise<Reuse> {
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw { status: res.status, data: error };
+    throw { status: res.status, data: translateUploadErrorPayload(error) };
   }
   return await res.json();
 }
@@ -1735,7 +1748,7 @@ export async function uploadResource(datasetId: string, file: File): Promise<Res
     } catch {
       if (text) data = { message: text };
     }
-    throw { status: res.status, data };
+    throw { status: res.status, data: translateUploadErrorPayload(data) };
   }
   try {
     return JSON.parse(text) as Resource;
@@ -1790,7 +1803,7 @@ export async function replaceResourceFile(
     } catch {
       if (text) data = { message: text };
     }
-    throw { status: res.status, data };
+    throw { status: res.status, data: translateUploadErrorPayload(data) };
   }
   try {
     return JSON.parse(text);
@@ -2960,7 +2973,7 @@ export async function uploadAvatar(file: File): Promise<{ image: string }> {
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw { status: res.status, data: error };
+    throw { status: res.status, data: translateUploadErrorPayload(error) };
   }
   return await res.json();
 }
@@ -2975,7 +2988,7 @@ export async function uploadUserAvatar(userId: string, file: File): Promise<{ im
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw { status: res.status, data: error };
+    throw { status: res.status, data: translateUploadErrorPayload(error) };
   }
   return await res.json();
 }
@@ -3440,7 +3453,7 @@ export async function uploadCommunityResourceFile(
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw { status: res.status, data: error };
+    throw { status: res.status, data: translateUploadErrorPayload(error) };
   }
   return await res.json();
 }
