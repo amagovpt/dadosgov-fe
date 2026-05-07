@@ -14,13 +14,12 @@ import {
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { APIResponse, Reuse } from "@/types/api";
-import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";
 import { useReusesListing } from "@/hooks/useReusesListing";
 import { REUSE_SORT_LABELS } from "@/utils/reusesListingQuery";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
@@ -146,16 +145,7 @@ export default function ReusesClient({
                 >
                   {reuses.length > 0 ? (
                     reuses.map((reuse) => {
-                      const timeAgo =
-                        reuse.last_modified || reuse.created_at
-                          ? formatDistanceToNow(new Date(reuse.last_modified || reuse.created_at), {
-                              locale: pt,
-                            })
-                              .replace("aproximadamente ", "")
-                              .replace("quase ", "")
-                              .replace("menos de ", "")
-                              .replace("cerca de ", "")
-                          : "Desconhecido";
+                      const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at);
 
                       return (
                         <div key={reuse.id} className="h-full">
