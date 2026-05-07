@@ -10,12 +10,12 @@ import {
   InputText,
   InputTextArea,
   InputSelect,
-  DragAndDropUploader,
   Icon,
   StatusCard,
   Accordion,
   AccordionGroup,
 } from "@ama-pt/agora-design-system";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { suggestOrganizations, createOrganization, uploadOrgLogo } from "@/services/api";
 import type { OrganizationSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";

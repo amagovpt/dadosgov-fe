@@ -19,7 +19,6 @@ import {
   TableCell,
   Pill,
   Switch,
-  DragAndDropUploader,
   CardNoResults,
   Tabs,
   Tab,
@@ -29,6 +28,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 
 import { format } from "date-fns";
@@ -768,8 +768,7 @@ export default function DatasetsEditClient() {
     return <Dropdown.Section name="licenses">{options}</Dropdown.Section>;
   }, [licenses, loadedLicense]);
 
-  const frequencyDefaultValue =
-    loadedFrequency || (frequencies.length > 0 ? "unknown" : "");
+  const frequencyDefaultValue = loadedFrequency;
 
   const frequencyOptions = useMemo(() => {
     const options = frequencies.map((freq) => (

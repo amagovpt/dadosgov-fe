@@ -10,10 +10,10 @@ import {
   Icon,
   InputText,
   InputTextArea,
-  DragAndDropUploader,
   StatusCard,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchOrganization, updateOrganization, uploadOrgLogo, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";

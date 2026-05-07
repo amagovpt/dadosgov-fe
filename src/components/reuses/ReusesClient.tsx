@@ -49,7 +49,7 @@ export default function ReusesClient({
   const { data: reuses, total, page_size } = listData;
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters reuse">
+    <div className="filters reuse flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
         <HeroGeneral
           title="Reutilizações"
@@ -60,7 +60,7 @@ export default function ReusesClient({
             { label: "Reutilizações", url: "/pages/reuses" },
           ]}
           subtitle={
-            <p className="text-primary-100 max-w-[592px]">
+            <p className="max-w-[592px] text-primary-100">
               {total === 0
                 ? "Não existem resultados disponíveis para a sua pesquisa"
                 : `Pesquise através de ${total.toLocaleString("pt-PT")} reutilizações em dados.gov.pt`}
@@ -80,10 +80,10 @@ export default function ReusesClient({
         />
 
         {/* Main Content */}
-        <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
+        <div className="container mx-auto bg-primary-50 md:gap-32 xl:gap-64">
           {/* Results count + Sort toggles */}
-          <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">
-            <div className="xl:col-span-5 flex flex-row items-end gap-24 pl-0 py-16">
+          <div className="grid-filters grid gap-x-[32px] md:grid-cols-3 xl:grid-cols-12">
+            <div className="flex flex-row items-end gap-24 py-16 pl-0 xl:col-span-5">
               <Button
                 appearance="outline"
                 variant="neutral"
@@ -101,11 +101,11 @@ export default function ReusesClient({
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
               </Button>
-              <span className="text-neutral-900 text-l-regular whitespace-nowrap">
+              <span className="whitespace-nowrap text-l-regular text-neutral-900">
                 {total.toLocaleString("pt-PT")} Resultados
               </span>
             </div>
-            <div className="xl:col-span-7 flex items-center justify-end py-16">
+            <div className="flex items-center justify-end py-16 xl:col-span-7">
               <ToggleGroup
                 multiple={false}
                 value={sortDefault}
@@ -127,7 +127,7 @@ export default function ReusesClient({
           <div className="divider-neutral-200 mb-24" />
 
           <div
-            className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
+            className={`grid-filters grid gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
             {filtersOpen && <ReusesFilters filterCounts={filterCounts} />}
@@ -136,7 +136,7 @@ export default function ReusesClient({
             <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>
               <div>
                 <div
-                  className="grid agora-card-links-datasets-px0 gap-32"
+                  className="agora-card-links-datasets-px0 grid gap-32"
                   style={{
                     gridTemplateColumns: filtersOpen
                       ? "repeat(1, minmax(0, 1fr))"
@@ -151,17 +151,17 @@ export default function ReusesClient({
                         <div key={reuse.id} className="h-full">
                           <CardLinks
                             onClick={() => router.push(`/pages/reuses/${reuse.slug}`)}
-                            className="cursor-pointer text-neutral-900 h-full"
+                            className="h-full cursor-pointer text-neutral-900"
                             variant="transparent"
                             image={{
                               src: reuse.image_thumbnail || reuse.image || "/laptop.png",
                               alt: reuse.title,
                             }}
                             category={reuse.organization?.name || "Reutilização"}
-                            title={<div className="underline text-xl-bold">{reuse.title}</div>}
+                            title={<div className="text-xl-bold underline">{reuse.title}</div>}
                             description={
                               reuse.description ? (
-                                <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                                <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                                   {reuse.description}
                                 </p>
                               ) : undefined
@@ -222,7 +222,7 @@ export default function ReusesClient({
                     <div className="col-span-full">
                       <CardNoResults
                         icon={
-                          <Icon name="agora-line-search" className="w-12 h-12 text-primary-500" />
+                          <Icon name="agora-line-search" className="h-12 w-12 text-primary-500" />
                         }
                         title="Não encontrou nenhuma reutilização?"
                         subtitle={
@@ -243,7 +243,7 @@ export default function ReusesClient({
                 </div>
 
                 {/* Pagination */}
-                <div className="pb-64 mt-8 flex justify-center">
+                <div className="mt-8 flex justify-center pb-64">
                   <Pagination
                     currentPage={activePage}
                     totalItems={total}

@@ -14,7 +14,6 @@ import {
   TabBody,
   CardArticle,
   CardGeneral,
-  CardLinks,
   CardNoResults,
   ProgressBar,
   SearchPagination,
@@ -44,10 +43,11 @@ import DeleteDiscussionPopup from "@/components/discussions/DeleteDiscussionPopu
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 import { localizeReuseTypeId } from "@/lib/reuse-labels";
 
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
+import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 
 interface ReuseDetailClientProps {
   slug: string;
@@ -385,7 +385,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 <img
                   src={reuse.image || "/laptop.png"}
                   alt={reuse.title}
-                  className="w-full rounded-[4px]"
+                  className="w-full rounded-4"
                   style={{ height: "308px", objectFit: "contain" }}
                 />
               </div>
@@ -399,11 +399,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 subtitle={
                   <div className="mb-16 flex flex-col gap-24">
                     {reuse.organization?.logo ? (
-                      <div className="card-article-3_2-img flex h-[48px] w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
+                      <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
                         <img src={reuse.organization.logo} alt={reuse.organization.name} />
                       </div>
                     ) : (
-                      <div className="text-xs shadow-sm flex h-[56px] w-[160px] items-center justify-center rounded-8 border border-dashed border-neutral-300 bg-white font-bold uppercase tracking-wider text-neutral-400">
+                      <div className="text-xs shadow-sm flex h-56 w-[160px] items-center justify-center rounded-8 border border-dashed border-neutral-300 bg-white font-bold uppercase tracking-wider text-neutral-400">
                         {reuse.organization?.name || "Sem organização"}
                       </div>
                     )}
@@ -505,7 +505,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
                 {/* Sidebar Metadata */}
                 <aside
-                  className="flex min-w-0 flex-col gap-16 md:pt-64 xl:col-span-4 xl:block"
+                  className="flex min-w-0 flex-col gap-16 md:pt-64 xl:col-span-4"
                   ref={descSidebarRef}
                 >
                   {reuseTags.length > 0 && (
@@ -571,6 +571,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       hasIcon={true}
                       leadingIcon="agora-line-plus-circle"
                       leadingIconHover="agora-solid-plus-circle"
+                      className="self-stretch"
                       onClick={() => setShowNewDiscussion(!showNewDiscussion)}
                     >
                       Nova discussão
@@ -979,7 +980,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
       {/* Associated Datasets */}
       {datasetRefs.length > 0 && (
-        <section className="w-full py-32">
+        <section className="w-full py-64">
           <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
             <h2 className="text-xl mb-32 font-bold text-[#000032]">
               {datasetRefs.length} conjunto{datasetRefs.length !== 1 ? "s" : ""} de dados associado
@@ -994,127 +995,14 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
                   }}
                 >
-                  {paginatedDatasets.map((dataset) => {
-                    const qualityScore =
-                      dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0;
+                  {paginatedDatasets.map((dataset, index) => {
                     const timeAgo = formatDateToTimeAgo(dataset.last_modified);
-
-                    return (
-                      <Link
-                        key={dataset.id}
-                        href={`/pages/datasets/${dataset.slug}`}
-                        className="card-general-listing flex h-full flex-col overflow-hidden rounded-[4px]"
-                      >
-                        <CardGeneral
-                          variant="white"
-                          image={{
-                            src:
-                              dataset.organization?.logo || "/images/placeholders/organization.png",
-                            alt: dataset.organization?.name || "Organização",
-                            height: "56px",
-                            className: "bg-primary-100 !object-contain !h-[56px]",
-                          }}
-                          subtitleText={
-                            (
-                              <div className="flex flex-col">
-                                <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                                  {timeAgo}
-                                </span>
-                                <span
-                                  style={{ fontSize: "16px", fontWeight: 300 }}
-                                  className="mt-4 text-neutral-900"
-                                >
-                                  {dataset.organization?.name || "Sem Organização"}
-                                </span>
-                              </div>
-                            ) as unknown as string
-                          }
-                          titleText={dataset.title}
-                          descriptionText={
-                            (
-                              <div className="flex flex-col">
-                                <p className="mb-16 line-clamp-3 text-m-regular text-neutral-800">
-                                  {dataset.description}
-                                </p>
-                                <div
-                                  className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
-                                >
-                                  <ProgressBar
-                                    value={qualityScore}
-                                    max={100}
-                                    hideLabel={true}
-                                    hidePercentageValue={true}
-                                  />
-                                  <span className="mt-4 block text-[14px] text-neutral-900">
-                                    {qualityScore}% Qualidade dos metadados
-                                  </span>
-                                  <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
-                                    <div className="flex items-center gap-8" title="Visualizações">
-                                      <Icon
-                                        name="agora-solid-eye"
-                                        dimensions="xs"
-                                        className="fill-neutral-700"
-                                        aria-hidden="true"
-                                      />
-                                      <span>{formatMetricValue(dataset.metrics?.views, 1, 0)}</span>
-                                    </div>
-                                    <div className="flex items-center gap-8" title="Downloads">
-                                      <Icon
-                                        name="agora-solid-download"
-                                        dimensions="xs"
-                                        className="fill-neutral-700"
-                                        aria-hidden="true"
-                                      />
-                                      <span>
-                                        {formatMetricValue(
-                                          dataset.metrics?.resources_downloads,
-                                          1,
-                                          0
-                                        )}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-8" title="Reutilizações">
-                                      <svg
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        className="h-16 w-16 fill-neutral-700"
-                                        aria-hidden="true"
-                                      >
-                                        <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" />
-                                      </svg>
-                                      <span>{dataset.metrics?.reuses || 0}</span>
-                                    </div>
-                                    <div className="flex items-center gap-8" title="Favoritos">
-                                      <Icon
-                                        name="agora-solid-star"
-                                        dimensions="xs"
-                                        className="fill-neutral-700"
-                                        aria-hidden="true"
-                                      />
-                                      <span>
-                                        {formatMetricValue(dataset.metrics?.followers, 1, 0)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="mt-16 flex items-center gap-8 text-primary-600">
-                                    <Icon
-                                      name="agora-line-arrow-right-circle"
-                                      className="h-32 w-32"
-                                      aria-hidden="true"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ) as unknown as string
-                          }
-                          isBlockedLink={true}
-                          anchor={{
-                            href: `/pages/datasets/${dataset.slug}`,
-                          }}
-                        />
-                      </Link>
-                    );
+                    const cardProps = {
+                      ...dataset,
+                      last_modified: timeAgo,
+                      link: `/pages/datasets/${dataset.slug}`,
+                    } as CardMetricsProps;
+                    return <CardMetrics key={`dataset-${index}`} {...cardProps} />;
                   })}
                 </div>
                 {renderDatasetsPagination()}
