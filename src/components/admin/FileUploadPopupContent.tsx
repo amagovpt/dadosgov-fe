@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Icon, InputText, usePopupContext } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchAllowedExtensions } from "@/services/api";
+import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 interface FileUploadPopupContentProps {
   onConfirm: (files: File[], url: string) => void;
@@ -90,7 +91,7 @@ export default function FileUploadPopupContent({
               });
             }}
             onSecurityError={(rejections) =>
-              setSecurityErrors(rejections.map((r) => `${r.file.name}: ${r.reason}`))
+              setSecurityErrors(rejections.map(() => POISONED_FILE_WARNING))
             }
           />
         </div>

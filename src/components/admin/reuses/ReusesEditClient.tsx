@@ -26,6 +26,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
@@ -991,6 +992,7 @@ export default function ReusesEditClient() {
                           feedbackState="danger"
                           feedbackText={imageError ?? undefined}
                           onChange={handleImageUpload}
+                          onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
                         />
                       </div>
                     </div>

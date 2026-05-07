@@ -16,6 +16,7 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchOrganization, updateOrganization, uploadOrgLogo, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
+import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
@@ -344,6 +345,7 @@ export default function OrgProfileClient() {
                     feedbackState="danger"
                     feedbackText={logoError ?? undefined}
                     onChange={handleLogoUpload}
+                    onSecurityError={() => setLogoError(POISONED_FILE_WARNING)}
                   />
                 </div>
               </div>

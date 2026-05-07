@@ -39,7 +39,10 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
-import { translateUploadError } from "@/lib/security/translateUploadError";
+import {
+  POISONED_FILE_WARNING,
+  translateUploadError,
+} from "@/lib/security/translateUploadError";
 
 interface ReusesFormClientProps {
   currentStep: number;
@@ -684,6 +687,7 @@ export default function ReusesFormClient({
                           setReuseCoverImageFile(files && files.length > 0 ? files[0] : null);
                           clearError("reuseCoverImage");
                         }}
+                        onSecurityError={() => setApiError(POISONED_FILE_WARNING)}
                         hasError={false}
                         hasFeedback={false}
                       />

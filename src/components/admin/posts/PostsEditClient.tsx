@@ -24,6 +24,7 @@ import { fetchPost, updatePost, uploadPostImage, suggestTags, deletePost, unpubl
 import type { Post, PostUpdatePayload, TagSuggestion } from "@/types/api";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import dynamic from "next/dynamic";
+import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), {
   ssr: false,
@@ -559,6 +560,7 @@ export default function PostsEditClient() {
                           feedbackState="danger"
                           feedbackText={imageError ?? undefined}
                           onChange={handleImageUpload}
+                          onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
                         />
                       </div>
                       {post.image && (
