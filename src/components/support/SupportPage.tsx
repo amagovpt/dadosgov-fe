@@ -11,7 +11,7 @@ import {
   Button,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import PageBanner from "@/components/PageBanner";
+import HeroGeneral from "@/components/HeroGeneral";
 import { submitSupportContact, type SupportTopic } from "@/services/api";
 
 const FAQ_DATA = [
@@ -194,7 +194,7 @@ const SupportPage = () => {
 
   return (
     <main id="nesta-pagina" className="flex-grow bg-white pb-64">
-      <PageBanner
+      <HeroGeneral
         title={
           <>
             <span className="text-[32px] text-white font-[500] mb-[10px]">

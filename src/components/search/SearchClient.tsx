@@ -15,7 +15,7 @@ import {
   InputSearch,
 } from "@ama-pt/agora-design-system";
 
-import PageBanner from "@/components/PageBanner";
+import HeroGeneral from "@/components/HeroGeneral";
 import { Pagination } from "@/components/Pagination";
 import {
   searchDatasets,
@@ -394,7 +394,7 @@ export default function SearchClient() {
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters">
       <main className="flex-grow bg-primary-50">
-        <PageBanner
+        <HeroGeneral
           title={titleMap[activeTab]}
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
@@ -420,7 +420,7 @@ export default function SearchClient() {
             }}
             onSearchActivate={() => handleSearch()}
           />
-        </PageBanner>
+        </HeroGeneral>
 
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-white">
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters">

@@ -45,7 +45,7 @@ import {
   replyToDiscussion,
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
-
+import { formatMetricValue } from "@/utils/formatNumber";
 
 interface OrganizationTabsProps {
   organization: Organization;
@@ -118,7 +118,6 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organization.slug, datasetsPage]);
 
-
   useEffect(() => {
     async function loadReuses() {
       try {
@@ -160,7 +159,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
           id: organization.id,
         },
         ...(selectedIdentityRef.current && selectedIdentityRef.current !== "user"
-          ? { organization: selectedIdentityRef.current } : {}),
+          ? { organization: selectedIdentityRef.current }
+          : {}),
       };
       const created = await createDiscussion(payload);
       if (created) {
@@ -184,7 +184,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
       <TabBody>
         <div className="relative">
           <div
-            className="absolute inset-y-0 -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64 bg-primary-100 z-0"
+            className="absolute inset-y-0 z-0 -mx-4 bg-primary-100 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64"
             aria-hidden="true"
           />
           <div className="relative z-10">
@@ -192,7 +192,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
           </div>
         </div>
       </TabBody>
-    )
+    );
   };
 
   const renderPagination = (
@@ -226,54 +226,58 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
         <Tab>
           <TabHeader>Descrição</TabHeader>
           {renderTabBody(
-            <div className="grid xl:grid-cols-12 gap-32 mt-6">
+            <div className="mt-6 grid gap-32 xl:grid-cols-12">
               {/* Main Content */}
-              <div className="xl:col-span-8 max-w-ch">
-                <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed relative">
-                  <h2 className="font-medium text-base text-neutral-900 uppercase mb-32">Descrição</h2>
+              <div className="max-w-ch xl:col-span-8">
+                <div className="prose prose-lg relative max-w-none leading-relaxed text-neutral-700">
+                  <h2 className="mb-32 text-base font-medium uppercase text-neutral-900">
+                    Descrição
+                  </h2>
                   {organization.description ? (
                     <>
                       <div
                         ref={descContentRef}
                         className="overflow-hidden"
-                        style={!descExpanded && descOverflowing && descAvailableHeight ? { maxHeight: descAvailableHeight } : undefined}
+                        style={
+                          !descExpanded && descOverflowing && descAvailableHeight
+                            ? { maxHeight: descAvailableHeight }
+                            : undefined
+                        }
                       >
                         <div
-                          className="mb-32 text-neutral-900 [&_a]:underline [&_a]:text-primary-600"
+                          className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline"
                           dangerouslySetInnerHTML={{ __html: organization.description }}
                         />
                       </div>
                       {descOverflowing && (
                         <button
                           onClick={() => setDescExpanded(!descExpanded)}
-                          className="flex items-center gap-8 text-primary-600 cursor-pointer hover:underline mt-8"
+                          className="mt-8 flex cursor-pointer items-center gap-8 text-primary-600 hover:underline"
                         >
                           {descExpanded ? "Ler menos" : "Ler mais"}
                           {descExpanded ? (
-                            <Icon name="agora-line-arrow-up-circle" className="w-24 h-24" />
+                            <Icon name="agora-line-arrow-up-circle" className="h-24 w-24" />
                           ) : (
-                            <Icon name="agora-line-arrow-down-circle" className="w-24 h-24" />
+                            <Icon name="agora-line-arrow-down-circle" className="h-24 w-24" />
                           )}
                         </button>
                       )}
                     </>
                   ) : (
-                    <p className="text-neutral-500">
-                      Esta organização não possui descrição.
-                    </p>
+                    <p className="text-neutral-500">Esta organização não possui descrição.</p>
                   )}
                 </div>
               </div>
 
               {/* Sidebar Metadata */}
-              <aside className="xl:col-span-4 xl:block md:pt-64 flex flex-col gap-16">
-                <div className="bg-white p-32 rounded-4">
-                  <h3 className="text-sm font-bold tracking-wider mb-8">
-                    Data de criação
-                  </h3>
+              <aside className="flex flex-col gap-16 md:pt-64 xl:col-span-4 xl:block">
+                <div className="rounded-4 bg-white p-32">
+                  <h3 className="text-sm mb-8 font-bold tracking-wider">Data de criação</h3>
                   <p className="font-medium text-neutral-900">
                     {organization.created_at
-                      ? format(new Date(organization.created_at), "d 'de' MMMM 'de' yyyy", { locale: pt })
+                      ? format(new Date(organization.created_at), "d 'de' MMMM 'de' yyyy", {
+                          locale: pt,
+                        })
                       : "—"}
                   </p>
                 </div>
@@ -287,82 +291,48 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
           <TabHeader> Conjuntos de dados ({organization.metrics?.datasets || 0})</TabHeader>
           {renderTabBody(
             <div>
-              <h3 className="font-medium text-neutral-900 text-base mb-24">
-                {datasetsResponse?.total || 0} {(datasetsResponse?.total || 0) === 1 ? "CONJUNTO DE DADOS" : "CONJUNTOS DE DADOS"}
+              <h3 className="mb-24 text-base font-medium text-neutral-900">
+                {datasetsResponse?.total || 0}{" "}
+                {(datasetsResponse?.total || 0) === 1 ? "CONJUNTO DE DADOS" : "CONJUNTOS DE DADOS"}
               </h3>
               {!isLoadingDatasets && datasets.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 agora-card-links-datasets gap-32">
+                  <div className="agora-card-links-datasets grid grid-cols-1 gap-32 md:grid-cols-2">
                     {datasets.map((dataset) => (
                       <div key={dataset.id} className="h-full">
                         <CardLinks
-                          onClick={() =>
-                            router.push(`/pages/datasets/${dataset.slug}`)
-                          }
+                          onClick={() => router.push(`/pages/datasets/${dataset.slug}`)}
                           className="cursor-pointer text-neutral-900"
                           variant="white"
                           image={{
                             src:
-                              dataset.organization?.logo ||
-                              "/images/placeholders/organization.png",
-                            alt:
-                              dataset.organization?.name || "Organização sem logo",
+                              dataset.organization?.logo || "/images/placeholders/organization.png",
+                            alt: dataset.organization?.name || "Organização sem logo",
                           }}
                           category={dataset.organization?.name}
                           title={dataset.title}
                           description={
                             <div className="flex flex-col gap-12">
-                              <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                              <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                                 {dataset.description}
                               </p>
-                              <div className="flex items-center flex-wrap gap-[32px] text-xs mt-[16px] text-[#034AD8]">
-                                <div
-                                  className="flex items-center gap-8"
-                                  title="Visualizações"
-                                >
-                                  <Icon
-                                    name="agora-line-eye"
-                                    aria-hidden="true"
-                                  />
+                              <div className="text-xs mt-[16px] flex flex-wrap items-center gap-[32px] text-[#034AD8]">
+                                <div className="flex items-center gap-8" title="Visualizações">
+                                  <Icon name="agora-line-eye" aria-hidden="true" />
+                                  <span>{formatMetricValue(dataset.metrics?.views, 0)}</span>
+                                </div>
+                                <div className="flex items-center gap-8" title="Downloads">
+                                  <Icon name="agora-line-download" aria-hidden="true" />
                                   <span>
-                                    {dataset.metrics?.views
-                                      ? dataset.metrics.views >= 1000
-                                        ? `${(dataset.metrics.views / 1000).toFixed(0)} mil`
-                                        : dataset.metrics.views
-                                      : "0"}
+                                    {formatMetricValue(dataset.metrics?.resources_downloads, 0)}
                                   </span>
                                 </div>
-                                <div
-                                  className="flex items-center gap-8"
-                                  title="Downloads"
-                                >
-                                  <Icon
-                                    name="agora-line-download"
-                                    aria-hidden="true"
-                                  />
-                                  <span>
-                                    {dataset.metrics?.resources_downloads
-                                      ? dataset.metrics.resources_downloads >= 1000
-                                        ? `${(dataset.metrics.resources_downloads / 1000).toFixed(0)} mil`
-                                        : dataset.metrics.resources_downloads
-                                      : "0"}
-                                  </span>
-                                </div>
-                                <div
-                                  className="flex items-center gap-8"
-                                  title="Reutilizações"
-                                >
+                                <div className="flex items-center gap-8" title="Reutilizações">
                                   <img src="/Icons/bar_chart.svg" alt="" aria-hidden="true" />
                                   <span>{dataset.metrics?.reuses || 0}</span>
                                 </div>
-                                <div
-                                  className="flex items-center gap-8"
-                                  title="Favoritos"
-                                >
-                                  <Icon
-                                    name="agora-line-star"
-                                    aria-hidden="true"
-                                  />
+                                <div className="flex items-center gap-8" title="Favoritos">
+                                  <Icon name="agora-line-star" aria-hidden="true" />
                                   <span>{dataset.metrics?.followers || 0}</span>
                                 </div>
                               </div>
@@ -370,7 +340,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                           }
                           date={
                             <span className="font-[300]">
-                              {dataset.last_modified && !isNaN(new Date(dataset.last_modified).getTime())
+                              {dataset.last_modified &&
+                              !isNaN(new Date(dataset.last_modified).getTime())
                                 ? `Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })}`
                                 : "Data indisponível"}
                             </span>
@@ -397,7 +368,12 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               ) : (
                 <CardNoResults
                   position="center"
-                  icon={<Icon name="agora-line-file" className="w-[40px] h-[40px] text-primary-500 icon-xl" />}
+                  icon={
+                    <Icon
+                      name="agora-line-file"
+                      className="icon-xl h-[40px] w-[40px] text-primary-500"
+                    />
+                  }
                   title="Sem conjuntos de dados"
                   description="Esta organização não possui conjuntos de dados publicados."
                   hasAnchor={false}
@@ -410,38 +386,34 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
         {/* Tab 3: Reutilizações */}
         <Tab>
           <TabHeader>Reutilizações ({organization.metrics?.reuses || 0})</TabHeader>
-          
+
           {renderTabBody(
             <div>
-              <h3 className="font-medium text-neutral-900 text-base mb-16">
+              <h3 className="mb-16 text-base font-medium text-neutral-900">
                 {reuses.length} {reuses.length === 1 ? "REUTILIZAÇÃO" : "REUTILIZAÇÕES"}
               </h3>
               {!isLoadingReuses && reuses.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 agora-card-links-datasets-px0 gap-32">
+                <div className="agora-card-links-datasets-px0 grid grid-cols-1 gap-32 md:grid-cols-2">
                   {reuses.map((reuse) => (
                     <div key={reuse.id} className="h-full">
                       <CardLinks
-                        onClick={() =>
-                          router.push(`/pages/reuses/${reuse.slug}`)
-                        }
+                        onClick={() => router.push(`/pages/reuses/${reuse.slug}`)}
                         className="cursor-pointer text-neutral-900"
                         variant="transparent"
                         image={{
-                          src:
-                            reuse.image_thumbnail ||
-                            reuse.image ||
-                            "/laptop.png",
+                          src: reuse.image_thumbnail || reuse.image || "/laptop.png",
                           alt: reuse.title,
                         }}
-                        category={reuse.organization?.name || (reuse.owner ? `${reuse.owner.first_name} ${reuse.owner.last_name}`.trim() : "Reutilização")}
-                        title={
-                          <div className="underline text-xl-bold">
-                            {reuse.title}
-                          </div>
+                        category={
+                          reuse.organization?.name ||
+                          (reuse.owner
+                            ? `${reuse.owner.first_name} ${reuse.owner.last_name}`.trim()
+                            : "Reutilização")
                         }
+                        title={<div className="text-xl-bold underline">{reuse.title}</div>}
                         description={
                           reuse.description ? (
-                            <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                            <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                               {reuse.description}
                             </p>
                           ) : undefined
@@ -460,9 +432,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             trailingIcon: "",
                             trailingIconHover: "",
                             trailingIconActive: "",
-                            children:
-                              reuse.metrics?.views?.toLocaleString("pt-PT") ||
-                              "0",
+                            children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
                             title: "Visualizações",
                             onClick: (e: React.MouseEvent) => e.preventDefault(),
                             className: "text-[#034AD8]",
@@ -494,7 +464,12 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               ) : (
                 <CardNoResults
                   position="center"
-                  icon={<Icon name="agora-line-file" className="w-[40px] h-[40px] text-primary-500 icon-xl" />}
+                  icon={
+                    <Icon
+                      name="agora-line-file"
+                      className="icon-xl h-[40px] w-[40px] text-primary-500"
+                    />
+                  }
                   title="Sem reutilizações"
                   description="Nenhuma reutilização associada a esta organização."
                   hasAnchor={false}
@@ -926,10 +901,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
         <Tab>
           <TabHeader>Informações</TabHeader>
           {renderTabBody(
-            <div className="bg-white rounded-8 p-32">
+            <div className="rounded-8 bg-white p-32">
               {/* Statistics Section */}
               <div>
-                <h3 className="font-medium text-base text-neutral-900 uppercase mb-16">
+                <h3 className="mb-16 text-base font-medium uppercase text-neutral-900">
                   Estatísticas
                 </h3>
                 <div className="flex gap-24 pb-48">
@@ -954,15 +929,12 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               {/* Members Section */}
               {organization.members?.length > 0 && (
                 <div style={{ marginTop: "64px" }}>
-                  <h3 className="font-medium text-base text-neutral-900 uppercase mb-16">
+                  <h3 className="mb-16 text-base font-medium uppercase text-neutral-900">
                     Membros
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-24">
+                  <div className="grid grid-cols-1 gap-24 md:grid-cols-3">
                     {organization.members.map((member, index) => (
-                      <div
-                        key={member.user?.id || index}
-                        className="flex items-center gap-16"
-                      >
+                      <div key={member.user?.id || index} className="flex items-center gap-16">
                         <div className="flex-shrink-0">
                           <Avatar
                             avatarType={member.user?.avatar_thumbnail ? "image" : "initials"}
@@ -973,14 +945,12 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             alt={`${member.user?.first_name} ${member.user?.last_name}`}
                           />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm truncate font-bold">
                             {member.user?.first_name} {member.user?.last_name}
                           </p>
-                          <span className="text-xs font-medium text-primary-600 mt-4 block">
-                            {member.role === "admin"
-                              ? "Administrador"
-                              : "Editor"}
+                          <span className="text-xs mt-4 block font-medium text-primary-600">
+                            {member.role === "admin" ? "Administrador" : "Editor"}
                           </span>
                         </div>
                       </div>
@@ -991,46 +961,42 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
               {/* Technical Information Section */}
               <div className="mt-32">
-                <h3 className="font-medium text-base text-neutral-900 uppercase mb-16">
+                <h3 className="mb-16 text-base font-medium uppercase text-neutral-900">
                   Informações técnicas
                 </h3>
                 <div className="grid grid-cols-3 gap-24">
                   <div>
-                    <p className="font-bold text-sm mb-8">Última atualização</p>
+                    <p className="text-sm mb-8 font-bold">Última atualização</p>
                     <span className="text-sm">
                       {organization.last_modified
-                        ? format(
-                          new Date(organization.last_modified),
-                          "d 'de' MMMM 'de' yyyy",
-                          { locale: pt }
-                        )
+                        ? format(new Date(organization.last_modified), "d 'de' MMMM 'de' yyyy", {
+                            locale: pt,
+                          })
                         : "—"}
                     </span>
                   </div>
                   <div>
-                    <p className="font-bold text-sm mb-8">Identificador</p>
+                    <p className="text-sm mb-8 font-bold">Identificador</p>
                     <span className="text-sm">{organization.id}</span>
                   </div>
                   <div>
-                    <p className="font-bold text-sm mb-8">Data de criação</p>
+                    <p className="text-sm mb-8 font-bold">Data de criação</p>
                     <span className="text-sm">
                       {organization.created_at
-                        ? format(
-                          new Date(organization.created_at),
-                          "d 'de' MMMM 'de' yyyy",
-                          { locale: pt }
-                        )
+                        ? format(new Date(organization.created_at), "d 'de' MMMM 'de' yyyy", {
+                            locale: pt,
+                          })
                         : "—"}
                     </span>
                   </div>
                   {organization.url && (
                     <div>
-                      <p className="font-bold text-sm mb-8">Website</p>
+                      <p className="text-sm mb-8 font-bold">Website</p>
                       <a
                         href={organization.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary-600 hover:underline text-sm"
+                        className="text-sm text-primary-600 hover:underline"
                       >
                         {organization.url}
                       </a>
@@ -1038,12 +1004,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                   )}
                   {organization.business_number_id && (
                     <div>
-                      <p className="font-bold text-sm mb-8">
-                        NIF / Identificação fiscal
-                      </p>
-                      <span className="text-sm">
-                        {organization.business_number_id}
-                      </span>
+                      <p className="text-sm mb-8 font-bold">NIF / Identificação fiscal</p>
+                      <span className="text-sm">{organization.business_number_id}</span>
                     </div>
                   )}
                 </div>

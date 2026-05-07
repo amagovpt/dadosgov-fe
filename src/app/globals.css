@@ -140,17 +140,13 @@ header.sticky .languages-panel-menu {
   }
 }
 
-.custom-search-layout .header-search-content {
-  max-width: 40vw !important;
-}
+
 
 .search-panel-menu .panel-menu-content-children {
   overflow: visible !important;
 }
 
-.search-panel-menu .custom-search-layout {
-  display: block !important;
-}
+
 
 .search-panel-menu ul[role="listbox"] {
   display: flex !important;
@@ -338,45 +334,6 @@ header[data-submenu] .navigation-links-layout>.links>.link-wrapper:has([data-is-
   margin-top: 8px;
 }
 
-.publish-custom-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 8px;
-  width: 100%;
-  background-color: white;
-  border: 2px solid var(--color-neutral-700);
-  border-radius: 4px;
-  box-shadow: 0 0 16px rgba(0, 0, 0, 0.16);
-  z-index: 9999;
-  overflow: hidden;
-}
-
-.publish-custom-dropdown__item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 60px;
-  padding: 16px;
-  background-color: white;
-  border: none;
-  border-bottom: 2px solid var(--color-neutral-200);
-  font-size: 16px;
-  line-height: 28px;
-  color: var(--color-neutral-900);
-  cursor: pointer;
-  transition: background-color 0.15s;
-  text-align: left;
-}
-
-.publish-custom-dropdown__item:last-child {
-  border-bottom: none;
-}
-
-.publish-custom-dropdown__item:hover {
-  background-color: var(--color-primary-50);
-}
 
 /* Auth page button active state */
 header[data-auth-page][data-no-user] .unauthenticated-panel-menu>.panel-menu-link-wrapper {
@@ -462,7 +419,12 @@ ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
    [05] UI COMPONENTS
    ========================================================================== */
 
-/* 5.1 Newsletter Card */
+/* 5.1 Dropdown section-name — hide when empty (no label provided) */
+li.section-name:empty {
+  display: none;
+}
+
+/* 5.2 Newsletter Card */
 .agora-card-highlight-newsletter {
   user-select: text !important;
   overflow: visible !important;
@@ -2059,8 +2021,8 @@ div.max-w-ch,
    ========================================================================== */
 
 .rte-wrapper {
-  border: 1px solid var(--color-neutral-300, #d1d5db);
-  border-radius: 6px;
+  border: 2px solid var(--color-neutral-700);
+  border-radius: 4px;
   overflow: hidden;
 }
 
@@ -2070,7 +2032,7 @@ div.max-w-ch,
   align-items: center;
   gap: 2px;
   padding: 6px 8px;
-  border-bottom: 1px solid var(--color-neutral-300, #d1d5db);
+  border-bottom: 2px solid var(--color-neutral-700);
   background: var(--color-neutral-50, #f9fafb);
 }
 

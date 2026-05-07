@@ -46,6 +46,7 @@ export const HeaderCard = ({
         variant="neutral-100"
         iconDefault={iconDefault}
         iconHover={iconHover}
+        iconActive={iconHover}
         titleText={title}
         descriptionText={description}
         anchor={{
@@ -54,6 +55,7 @@ export const HeaderCard = ({
           hasIcon: true,
           trailingIcon: "agora-line-arrow-right-circle",
           trailingIconHover: "agora-solid-arrow-right-circle",
+          trailingIconActive: "agora-solid-arrow-right-circle",
           onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
             e.preventDefault();
             e.stopPropagation();

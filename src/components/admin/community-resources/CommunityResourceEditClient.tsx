@@ -151,7 +151,7 @@ export default function CommunityResourceEditClient() {
     try {
       const schemaUrlVal = schemaUrl.trim();
       const schemaNameVal = selectedSchemaRef.current;
-      console.log("[debug] schemaUrl:", schemaUrlVal, "schemaRef:", schemaNameVal, "loadedSchema:", loadedSchema);
+      /*console.log("[debug] schemaUrl:", schemaUrlVal, "schemaRef:", schemaNameVal, "loadedSchema:", loadedSchema);*/
       const schemaPayload = schemaUrlVal
         ? { url: schemaUrlVal }
         : schemaNameVal
@@ -283,7 +283,7 @@ export default function CommunityResourceEditClient() {
         "O checksum permite ao utilizador verificar se os dados descarregados não foram corrompidos ou alterados.",
     },
     {
-      title: "Dar um nome ao link",
+      title: "Dê um nome ao arquivo",
       hasError: !!formErrors.title,
       content: (
         <>
@@ -304,7 +304,7 @@ export default function CommunityResourceEditClient() {
       ),
     },
     {
-      title: "Publicar os tipos de ficheiros corretos",
+      title: "Publique os tipos de ficheiros corretos.",
       hasError: !!formErrors.type,
       content: (
         <>
@@ -366,7 +366,7 @@ export default function CommunityResourceEditClient() {
         "Especifique o tipo de recurso correspondente ao formato do recurso remoto (por exemplo, application/pdf, text/csv). Se necessário, utilize uma ferramenta online para detetá-lo.",
     },
     {
-      title: "Selecionar um esquema",
+      title: "Selecione um esquema",
       content:
         "É possível identificar um esquema de dados existente ao visitar o site schema.data.gouv.fr, que contém uma lista de esquemas de dados existentes.",
     },

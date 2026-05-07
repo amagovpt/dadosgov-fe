@@ -16,7 +16,7 @@ import SearchFilter from "@/components/Shared/SearchFilter";
 import { APIResponse, Reuse } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
-import PageBanner from "@/components/PageBanner";
+import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";
 import { useReusesListing } from "@/hooks/useReusesListing";
@@ -52,7 +52,7 @@ export default function ReusesClient({
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters reuse">
       <main className="flex-grow bg-primary-50">
-        <PageBanner
+        <HeroGeneral
           title="Reutilizações"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
@@ -69,7 +69,7 @@ export default function ReusesClient({
           }
         >
           <PublishDropdown darkMode={true} outline={false} />
-        </PageBanner>
+        </HeroGeneral>
 
         {/* Search Filter */}
         <SearchFilter

@@ -2,14 +2,18 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Icon, CardArticle, CardGeneral, ProgressBar } from "@ama-pt/agora-design-system";
+import { Button, Icon, CardArticle } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import { Dataset, Post, Reuse, SiteMetrics } from "@/types/api";
 import { formatDistanceToNow, format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
-import { getAssets } from "@/utils/getAssets";
+import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { Datastory } from "@/types/home";
+import { getAssets } from "@/utils/getAssets";
+import HeroGeneral from "../HeroGeneral";
+import PublishDropdown from "../admin/PublishDropdown";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -68,239 +72,136 @@ export default function HomeClient({
   const stats = siteMetrics;
 
   return (
-    <main className="flex-grow">
-      <div className="w-full homepage">
-        {/* Hero Section */}
-        <div
-          className="agora-card-highlight-newsletter"
-          style={{
-            backgroundImage: 'url("/Banner/hero-bg.png")',
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
-            backgroundPosition: "right top 40%",
-          }}
-        >
-          <div className="card-container">
-            <div className="card-content">
-              <div className="title">
-                <h1 className="container mx-auto text-white flex flex-col items-start leading-tight">
-                  <span className="xs:text-xl-bold md:text-2xl-bold xl:text-2xl-bold">
-                    Portal aberto
-                  </span>
-                  <span className="xs:text-xl-light md:text-2xl-light xl:text-2xl-light">
-                    de dados públicos portugueses
-                  </span>
-                </h1>
-              </div>
-              <div className="subtitle">
-                <div className="container mx-auto text-left">
-                  <p className="max-w-ch">
-                    Aceda, explore e reutilize dados públicos de forma transparente e acessível.
-                    Milhares de
-                    <br />
-                    conjuntos de dados ao seu dispor.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="input-container">
-              <div className="email-bar">
-                <div className="container mx-auto grid xs:grid-cols-4 md:grid-cols-8 xl:grid-cols-12 gap-32 ">
-                  <div className="xs:col-span-4 md:col-span-7 xl:col-span-7">
-                    <div
-                      className="relative inline-block publish-dropdown-wrapper publish-dropdown-hero"
-                      ref={publishDropdownWrapperRef}
+    <main className="w-full h-full">
+      <div className="w-full ">
+        <div className="w-full">
+          <HeroGeneral
+            title={
+              <h1 className="text-white flex flex-col items-start leading-tight">
+                <span className="text-2xl-bold">
+                  Portal aberto
+                </span>
+                <span className="text-2xl-regular">
+                  de dados públicos portugueses
+                </span>
+              </h1>
+            }
+            subtitle={
+              <span className="text-white text-m-regular">
+                <p className="">
+                  Aceda, explore e reutilize dados públicos de forma transparente e acessível.
+                  Milhares de conjuntos de dados ao seu dispor.
+                </p>
+              </span>
+            }
+          >
+            <PublishDropdown darkMode={true} outline={false} />
+          </HeroGeneral>
+
+          {/* Stats Section */}
+          <div className="py-64 bg-primary-900 text-white flex flex-col items-center justify-center">
+            <div className="container">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-24">
+                {/* Reutilizações */}
+                <div className="flex items-center gap-16">
+                  <div className="px-24 py-24 rounded-8 border-2 border-focus text-focus">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 15 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-24 h-24"
                     >
-                      <Button
-                        variant="primary"
-                        darkMode={true}
-                        hasIcon={true}
-                        trailingIcon={
-                          showPublishDropdown ? "agora-line-chevron-up" : "agora-line-chevron-down"
-                        }
-                        trailingIconHover={
-                          showPublishDropdown
-                            ? "agora-solid-chevron-up"
-                            : "agora-solid-chevron-down"
-                        }
-                        className="px-24 py-16 h-auto relative z-10"
-                        style={{ borderRadius: "4px" }}
-                        onClick={() => {
-                          if (!user) {
-                            router.push("/pages/login");
-                            return;
-                          }
-                          setShowPublishDropdown((v) => !v);
-                        }}
-                      >
-                        <span className="text-lg font-medium">
-                          Publicar <span className="font-bold">dados.gov.pt</span>
+                      <path
+                        d="M0 22.9091V15.2727C0 14.6702 0.479695 14.1818 1.07143 14.1818C1.66316 14.1818 2.14286 14.6702 2.14286 15.2727V22.9091C2.14286 23.5116 1.66316 24 1.07143 24C0.479695 24 0 23.5116 0 22.9091ZM6.42857 22.9091V1.09091C6.42857 0.488417 6.90827 0 7.5 0C8.09173 0 8.57143 0.488417 8.57143 1.09091V22.9091C8.57143 23.5116 8.09173 24 7.5 24C6.90827 24 6.42857 23.5116 6.42857 22.9091ZM12.8571 22.9091V9.81818C12.8571 9.21569 13.3368 8.72727 13.9286 8.72727C14.5203 8.72727 15 9.21569 15 9.81818V22.9091C15 23.5116 14.5203 24 13.9286 24C13.3368 24 12.8571 23.5116 12.8571 22.9091Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-6">
+                      <span className="text-2xl-bold">
+                        {formatStatNumber(stats?.reuses ?? 0).number}
+                      </span>
+                      {formatStatNumber(stats?.reuses ?? 0).suffix && (
+                        <span className="text-m-bold">
+                          {formatStatNumber(stats?.reuses ?? 0).suffix}
                         </span>
-                      </Button>
-                      {showPublishDropdown && (
-                        <div className="publish-custom-dropdown">
-                          {[
-                            {
-                              icon: "agora-line-layers-menu",
-                              label: "Um conjunto de dados",
-                              href: "/pages/admin/datasets/new",
-                            },
-                            {
-                              icon: null,
-                              customIcon: "/Icons/bar_chart_primary.svg",
-                              label: "Uma reutilização",
-                              href: "/pages/admin/reuses/new",
-                            },
-                            {
-                              icon: "agora-line-award",
-                              label: "Um harvester",
-                              href: "/pages/admin/harvesters/new",
-                            },
-                            {
-                              icon: "agora-line-buildings",
-                              label: "Uma organização",
-                              href: "/pages/admin/organizations/new",
-                            },
-                          ].map((item, index) => (
-                            <button
-                              key={index}
-                              className="publish-custom-dropdown__item"
-                              onClick={() => {
-                                setShowPublishDropdown(false);
-                                router.push(item.href);
-                              }}
-                            >
-                              {item.icon ? (
-                                <Icon
-                                  name={item.icon}
-                                  className="w-[24px] h-[24px] text-primary-600"
-                                />
-                              ) : (
-                                <img
-                                  src={item.customIcon}
-                                  alt=""
-                                  className="w-[24px] h-[24px]"
-                                  aria-hidden="true"
-                                />
-                              )}
-                              <span>{item.label}</span>
-                            </button>
-                          ))}
-                        </div>
+
                       )}
                     </div>
+                    <span className="text-m-regular">Reutilizações</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="py-32 bg-primary-900 text-white -mt-8 relative z-20 rounded-t-3xl shadow-top-low md:mt-0 md:border-none md:shadow-none">
-          <div className="container mx-auto px-4">
-            <div className="grid xs:grid-cols-4 lg:grid-cols-4 gap-24">
-              {/* Reutilizações */}
-              <div className="flex items-center gap-16">
-                <div className="stats-icon-square border-2 border-[#D600FF] text-[#D600FF]">
-                  <svg
-                    width="15"
-                    height="24"
-                    viewBox="0 0 15 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-[15px] h-[24px]"
-                  >
-                    <path
-                      d="M0 22.9091V15.2727C0 14.6702 0.479695 14.1818 1.07143 14.1818C1.66316 14.1818 2.14286 14.6702 2.14286 15.2727V22.9091C2.14286 23.5116 1.66316 24 1.07143 24C0.479695 24 0 23.5116 0 22.9091ZM6.42857 22.9091V1.09091C6.42857 0.488417 6.90827 0 7.5 0C8.09173 0 8.57143 0.488417 8.57143 1.09091V22.9091C8.57143 23.5116 8.09173 24 7.5 24C6.90827 24 6.42857 23.5116 6.42857 22.9091ZM12.8571 22.9091V9.81818C12.8571 9.21569 13.3368 8.72727 13.9286 8.72727C14.5203 8.72727 15 9.21569 15 9.81818V22.9091C15 23.5116 14.5203 24 13.9286 24C13.3368 24 12.8571 23.5116 12.8571 22.9091Z"
-                      fill="currentColor"
+                {/* Utilizadores */}
+                <div className="flex items-center gap-16">
+                  <div className="px-24 py-24 rounded-8 border-2 border-[#FFD700] text-[#FFD700]">
+                    <Icon
+                      name="agora-line-user-group"
+                      aria-hidden="true"
+                      className="w-24 h-24 fill-[#FFD700]"
                     />
-                  </svg>
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-baseline gap-[6px]">
-                    <span className="text-xl-bold">
-                      {formatStatNumber(stats?.reuses ?? 0).number}
-                    </span>
-                    {formatStatNumber(stats?.reuses ?? 0).suffix && (
-                      <span className="text-m-bold">
-                        {formatStatNumber(stats?.reuses ?? 0).suffix}
-                      </span>
-                    )}
                   </div>
-                  <span className="text-s-regular">Reutilizações</span>
-                </div>
-              </div>
-
-              {/* Utilizadores */}
-              <div className="flex items-center gap-16">
-                <div className="stats-icon-square border-2 border-[#FFD700] text-[#FFD700]">
-                  <Icon
-                    name="agora-line-user-group"
-                    aria-hidden="true"
-                    className="w-[24px] h-[24px]"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-baseline gap-[6px]">
-                    <span className="text-xl-bold">
-                      {formatStatNumber(stats?.users ?? 0).number}
-                    </span>
-                    {formatStatNumber(stats?.users ?? 0).suffix && (
-                      <span className="text-m-bold">
-                        {formatStatNumber(stats?.users ?? 0).suffix}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-6">
+                      <span className="text-2xl-bold">
+                        {formatStatNumber(stats?.users ?? 0).number}
                       </span>
-                    )}
+                      {formatStatNumber(stats?.users ?? 0).suffix && (
+                        <span className="text-m-bold">
+                          {formatStatNumber(stats?.users ?? 0).suffix}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-m-regular">Utilizadores</span>
                   </div>
-                  <span className="text-s-regular">Utilizadores</span>
                 </div>
-              </div>
-
-              {/* Conjuntos de dados */}
-              <div className="flex items-center gap-16">
-                <div className="stats-icon-square border-2 border-[#A6D5FF] text-[#A6D5FF]">
-                  <Icon
-                    name="agora-line-layers-menu"
-                    aria-hidden="true"
-                    className="w-[24px] h-[24px]"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-baseline gap-[6px]">
-                    <span className="text-xl-bold">
-                      {formatStatNumber(stats?.datasets ?? 0).number}
-                    </span>
-                    {formatStatNumber(stats?.datasets ?? 0).suffix && (
-                      <span className="text-m-bold">
-                        {formatStatNumber(stats?.datasets ?? 0).suffix}
+                {/* Conjuntos de dados */}
+                <div className="flex items-center gap-16">
+                  <div className="px-24 py-24 rounded-8 border-2 border-[#A6D5FF] text-[#A6D5FF]">
+                    <Icon
+                      name="agora-line-layers-menu"
+                      aria-hidden="true"
+                      className="w-24 h-24 fill-[#A6D5FF]"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-6">
+                      <span className="text-2xl-bold">
+                        {formatStatNumber(stats?.datasets ?? 0).number}
                       </span>
-                    )}
+                      {formatStatNumber(stats?.datasets ?? 0).suffix && (
+                        <span className="text-m-bold">
+                          {formatStatNumber(stats?.datasets ?? 0).suffix}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-m-regular">Conjuntos de dados</span>
                   </div>
-                  <span className="text-s-regular">Conjuntos de dados</span>
                 </div>
-              </div>
-
-              {/* Organizações */}
-              <div className="flex items-center gap-16">
-                <div className="stats-icon-square border-2 border-[#CBFF3F] text-[#CBFF3F]">
-                  <Icon
-                    name="agora-line-buildings"
-                    aria-hidden="true"
-                    className="w-[24px] h-[24px]"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-baseline gap-[6px]">
-                    <span className="text-xl-bold">
-                      {formatStatNumber(stats?.organizations ?? 0).number}
-                    </span>
-                    {formatStatNumber(stats?.organizations ?? 0).suffix && (
-                      <span className="text-m-bold">
-                        {formatStatNumber(stats?.organizations ?? 0).suffix}
+                {/* Organizações */}
+                <div className="flex items-center gap-16">
+                  <div className="px-24 py-24 rounded-8 border-2 border-[#CBFF3F] !text-[#CBFF3F]">
+                    <Icon
+                      name="agora-line-buildings"
+                      aria-hidden="true"
+                      className="w-24 h-24 fill-[#CBFF3F]"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-6">
+                      <span className="text-2xl-bold">
+                        {formatStatNumber(stats?.organizations ?? 0).number}
                       </span>
-                    )}
+                      {formatStatNumber(stats?.organizations ?? 0).suffix && (
+                        <span className="text-m-bold">
+                          {formatStatNumber(stats?.organizations ?? 0).suffix}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-m-regular">Organizações</span>
                   </div>
-                  <span className="text-s-regular">Organizações</span>
                 </div>
               </div>
             </div>
@@ -308,152 +209,23 @@ export default function HomeClient({
         </div>
 
         {/* Featured Datasets */}
-        <div className="xl:pt-64 pb-64 bg-white">
+        <div className="bg-white pb-64 xl:pt-64">
           <div className="container mx-auto px-4">
-            <h2 className="text-xl-bold mb-32 text-primary-900 ">Conjuntos de dados</h2>
+            <h2 className="mb-32 text-xl-bold text-primary-900">Conjuntos de dados</h2>
 
-            <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32">
+            <div className="grid gap-32 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
               {latestDatasets.length > 0 ? (
-                latestDatasets.map((dataset) => {
-                  const qualityScore =
-                    dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0;
-                  const formatMetric = (value: number | undefined) => {
-                    if (!value) return "0";
-                    if (value >= 1_000_000)
-                      return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
-                    if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
-                    return String(value);
-                  };
-                  const timeAgo = dataset.last_modified
-                    ? formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
-                      .replace("aproximadamente ", "")
-                      .replace("quase ", "")
-                      .replace("menos de ", "")
-                      .replace("cerca de ", "")
-                    : "Desconhecido";
-
-                  return (
-                    <Link
-                      key={dataset.id}
-                      href={`/pages/datasets/${dataset.slug}`}
-                      className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
-                    >
-                      <CardGeneral
-                        variant="neutral-100"
-                        image={{
-                          src:
-                            dataset.organization?.logo || "/images/placeholders/organization.png",
-                          alt: dataset.organization?.name || "Organização",
-                          height: "56px",
-                          className: "bg-primary-100 !object-contain !h-[56px]",
-                        }}
-                        subtitleText={
-                          (
-                            <div className="flex flex-col">
-                              <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                                {timeAgo}
-                              </span>
-                              <span
-                                style={{ fontSize: "16px", fontWeight: 300 }}
-                                className="text-neutral-900 mt-4"
-                              >
-                                {dataset.organization?.name || "Sem Organização"}
-                              </span>
-                            </div>
-                          ) as unknown as string
-                        }
-                        titleText={dataset.title}
-                        descriptionText={
-                          (
-                            <div className="flex flex-col grow">
-                              <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
-                                {dataset.description}
-                              </p>
-                              <div
-                                className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
-                              >
-                                <ProgressBar
-                                  value={qualityScore}
-                                  max={100}
-                                  hideLabel={true}
-                                  hidePercentageValue={true}
-                                />
-                                <span className="text-[14px] text-neutral-900 mt-4 block">
-                                  {qualityScore}% Qualidade dos metadados
-                                </span>
-                                <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
-                                  <div className="flex items-center gap-8" title="Visualizações">
-                                    <Icon
-                                      name={
-                                        dataset.metrics?.views
-                                          ? "agora-solid-eye"
-                                          : "agora-line-eye"
-                                      }
-                                      dimensions="xs"
-                                      className="fill-neutral-700"
-                                      aria-hidden="true"
-                                    />
-                                    <span>{formatMetric(dataset.metrics?.views)}</span>
-                                  </div>
-                                  <div className="flex items-center gap-8" title="Downloads">
-                                    <Icon
-                                      name={
-                                        dataset.metrics?.resources_downloads
-                                          ? "agora-solid-download"
-                                          : "agora-line-download"
-                                      }
-                                      dimensions="xs"
-                                      className="fill-neutral-700"
-                                      aria-hidden="true"
-                                    />
-                                    <span>
-                                      {formatMetric(dataset.metrics?.resources_downloads)}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-8" title="Reutilizações">
-                                    <img
-                                      src="/Icons/bar_chart.svg"
-                                      className="w-16 h-16"
-                                      alt=""
-                                      aria-hidden="true"
-                                    />
-                                    <span>{dataset.metrics?.reuses || 0}</span>
-                                  </div>
-                                  <div className="flex items-center gap-8" title="Favoritos">
-                                    <Icon
-                                      name={
-                                        dataset.metrics?.followers
-                                          ? "agora-solid-star"
-                                          : "agora-line-star"
-                                      }
-                                      dimensions="xs"
-                                      className="fill-neutral-700"
-                                      aria-hidden="true"
-                                    />
-                                    <span>{formatMetric(dataset.metrics?.followers)}</span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-8 text-primary-600 mt-16">
-                                  <Icon
-                                    name="agora-line-arrow-right-circle"
-                                    className="w-32 h-32"
-                                    aria-hidden="true"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ) as unknown as string
-                        }
-                        isBlockedLink={true}
-                        anchor={{
-                          href: `/pages/datasets/${dataset.slug}`,
-                        }}
-                      />
-                    </Link>
-                  );
+                latestDatasets.map((dataset, index) => {
+                  const timeAgo = formatDateToTimeAgo(dataset.last_modified);
+                  const cardProps = {
+                    ...dataset,
+                    last_modified: timeAgo,
+                    link: `/pages/datasets/${dataset.slug}`,
+                  } as CardMetricsProps;
+                  return <CardMetrics key={`featured-dataset-${index}`} {...cardProps} />;
                 })
               ) : (
-                <div className="xl:col-span-3 text-center py-32 text-neutral-500">
+                <div className="py-32 text-center text-neutral-500 xl:col-span-3">
                   Nenhum conjunto de dados encontrado.
                 </div>
               )}
@@ -476,72 +248,75 @@ export default function HomeClient({
         </div>
 
         {/* Data Stories */}
-        <div className="xl:py-64 bg-primary-900">
+        <div className="bg-primary-900 xl:py-64">
           <div className="container mx-auto px-4">
             <h2 className="text-xl-bold text-white">Data Stories</h2>
-            <p className="mt-16 mb-32 max-w-3xl text-white">
+            <p className="mb-32 mt-16 max-w-3xl text-white">
               Histórias contadas com dados abertos — análises e visualizações sobre temas de
               interesse público.
             </p>
-            {datastories && datastories.length > 0 ? (<>
-              <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32 storytellings">
-                {datastories.map((story) => (
-                  <CardArticle
-                    key={story.slug}
-                    variant="indented"
-                    image={{
-                      src: story.image && story.image[0] ? getAssets(story.image[0].id) : "/card-full-image.png",
-                      alt: story.title,
-                    }}
-                    subtitle={
-                      story.createdAt
-                        ? `Publicado a ${format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt })}`
-                        : ""
-                    }
-                    title={story.title}
-                    mainAnchor={{
-                      href: `/pages/datastories/${story.slug}`,
-                    }}
-                    blockedLink={true}
-                  />
-                ))}
-              </div>
-              <div className="mt-32">
-                <Link href="/pages/datastories">
-                  <Button
-                    variant="primary"
-                    appearance="link"
-                    hasIcon={true}
-                    trailingIcon="agora-line-arrow-right-circle"
-                    trailingIconHover="agora-solid-arrow-right-circle"
-                    className="p-0! h-auto icon-white"
-                    darkMode={false}
-                  >
-                    <span className="text-white">Ver todas as Data Stories</span>
-                  </Button>
-                </Link>
-              </div>
-            </>
+            {datastories && datastories.length > 0 ? (
+              <>
+                <div className="storytellings grid gap-32 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
+                  {datastories.map((story) => (
+                    <CardArticle
+                      key={story.slug}
+                      variant="indented"
+                      image={{
+                        src:
+                          story.image && story.image[0]
+                            ? getAssets(story.image[0].id)
+                            : "/card-full-image.png",
+                        alt: story.title,
+                      }}
+                      subtitle={
+                        story.createdAt
+                          ? `Publicado a ${format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt })}`
+                          : ""
+                      }
+                      title={story.title}
+                      mainAnchor={{
+                        href: `/pages/datastories/${story.slug}`,
+                      }}
+                      blockedLink={true}
+                    />
+                  ))}
+                </div>
+                <div className="mt-32">
+                  <Link href="/pages/datastories">
+                    <Button
+                      variant="primary"
+                      appearance="link"
+                      hasIcon={true}
+                      trailingIcon="agora-line-arrow-right-circle"
+                      trailingIconHover="agora-solid-arrow-right-circle"
+                      className="p-0! icon-white h-auto"
+                      darkMode={false}
+                    >
+                      <span className="text-white">Ver todas as Data Stories</span>
+                    </Button>
+                  </Link>
+                </div>
+              </>
             ) : (
-              <div className="xl:col-span-3 text-center py-32 text-neutral-500">
+              <div className="py-32 text-center text-neutral-500 xl:col-span-3">
                 Nenhum Data Story encontrado.
               </div>
             )}
           </div>
         </div>
 
-
         {/* Latest News */}
-        <div className="xl:py-64 bg-white latest-news-section">
+        <div className="latest-news-section bg-white xl:py-64">
           <div className="container mx-auto px-4">
-            <h2 className="text-xl-bold mb-32 text-primary-900">Últimas novidades</h2>
-            <div className="grid xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-32">
+            <h2 className="mb-32 text-xl-bold text-primary-900">Últimas novidades</h2>
+            <div className="grid gap-32 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
               {posts.length > 0 ? (
                 posts.map((post) => (
                   <div key={post.id} className="latest-news-card-wrapper h-full">
                     <CardArticle
                       image={{
-                        src: post.image_thumbnail || post.image || "",
+                        src: post.image_thumbnail || post.image || undefined,
                         alt: post.name,
                       }}
                       subtitle={
@@ -570,7 +345,7 @@ export default function HomeClient({
                   </div>
                 ))
               ) : (
-                <div className="xl:col-span-3 text-center py-32 text-neutral-500">
+                <div className="py-32 text-center text-neutral-500 xl:col-span-3">
                   Nenhuma novidade encontrada.
                 </div>
               )}
@@ -593,10 +368,10 @@ export default function HomeClient({
         </div>
 
         {/* Utilizado diariamente por */}
-        <div className="xl:pb-64 bg-white">
+        <div className="bg-white xl:pb-64">
           <div className="container mx-auto px-4">
-            <h2 className="text-xl-bold mb-32 text-primary-900">Utilizado diariamente por:</h2>
-            <div className="flex flex-col mt-32">
+            <h2 className="mb-32 text-xl-bold text-primary-900">Utilizado diariamente por:</h2>
+            <div className="mt-32 flex flex-col">
               <div className="flex flex-wrap items-center justify-between gap-x-32">
                 {Array(5)
                   .fill("arte_black.svg")
@@ -610,7 +385,7 @@ export default function HomeClient({
                     </div>
                   ))}
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-x-32 mt-32">
+              <div className="mt-32 flex flex-wrap items-center justify-between gap-x-32">
                 {Array(5)
                   .fill("arte_black.svg")
                   .map((logo, i) => (

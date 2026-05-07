@@ -30,6 +30,9 @@ async function performLogin(page: Page, email: string, password: string) {
   await passwordInput.scrollIntoViewIfNeeded();
   await passwordInput.fill(password);
 
+  const termsCheckbox = main.getByRole("checkbox", { name: /aceito os termos/i }).first();
+  await termsCheckbox.check();
+
   const submitBtn = main.locator("form button[type='submit']").first();
   await submitBtn.scrollIntoViewIfNeeded();
   await submitBtn.click();
