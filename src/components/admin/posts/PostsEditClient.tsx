@@ -9,7 +9,6 @@ import {
   DropdownOption,
   InputText,
   InputTextArea,
-  DragAndDropUploader,
   RadioButton,
   Icon,
   StatusCard,
@@ -20,6 +19,7 @@ import {
   Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchPost, updatePost, uploadPostImage, suggestTags, deletePost, unpublishPost, publishPost } from "@/services/api";
 import type { Post, PostUpdatePayload, TagSuggestion } from "@/types/api";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";

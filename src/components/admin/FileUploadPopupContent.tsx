@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, DragAndDropUploader, Icon, InputText, usePopupContext } from "@ama-pt/agora-design-system";
+import { Button, Icon, InputText, usePopupContext } from "@ama-pt/agora-design-system";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchAllowedExtensions } from "@/services/api";
 
 interface FileUploadPopupContentProps {
