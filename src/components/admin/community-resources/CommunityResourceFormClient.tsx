@@ -29,6 +29,7 @@ import { useAuth } from "@/context/AuthContext";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { formatMetricValue } from "@/utils/formatNumber";
+import { translateUploadError } from "@/lib/security/translateUploadError";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -150,13 +151,17 @@ export default function CommunityResourceFormClient({
       if (error?.status === 401) {
         setApiError("Sessão expirada. Faça login novamente.");
       } else {
-        const detail =
-          error?.data && Object.keys(error.data).length > 0
-            ? JSON.stringify(error.data)
-            : err instanceof Error
-              ? err.message
-              : "Erro desconhecido";
-        setApiError(`Erro ao criar recurso comunitário: ${detail}`);
+        const backendMessage =
+          error?.data && typeof error.data.message === "string"
+            ? error.data.message
+            : error?.data && Object.keys(error.data).length > 0
+              ? JSON.stringify(error.data)
+              : err instanceof Error
+                ? err.message
+                : "Erro desconhecido";
+        setApiError(
+          `Erro ao criar recurso comunitário: ${translateUploadError(backendMessage)}`,
+        );
       }
     } finally {
       setIsSubmitting(false);

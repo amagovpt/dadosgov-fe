@@ -458,7 +458,7 @@ function ResourceEditPopupContent({
       const apiErr = err as { status?: number; data?: Record<string, unknown> };
       console.error("Error replacing file:", apiErr.status, apiErr.data);
       const msg = apiErr.data?.message
-        ? String(apiErr.data.message)
+        ? translateUploadError(String(apiErr.data.message))
         : `Erro ao substituir o ficheiro (${apiErr.status || "desconhecido"}).`;
       setError(msg);
     } finally {
