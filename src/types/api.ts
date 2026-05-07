@@ -353,8 +353,8 @@ export interface ReuseSuggestion {
 export interface ReuseFilters {
   q?: string;
   type?: string;
-  tag?: string;
-  organization?: string;
+  tag?: string | string[];
+  organization?: string | string[];
   owner?: string;
   dataset?: string;
   sort?: string;
@@ -722,6 +722,7 @@ export interface DatasetFilters {
   tag?: string | string[];
   license?: string | string[];
   format?: string | string[];
+  frequency?: string | string[];
   schema?: string;
   geozone?: string;
   granularity?: string;

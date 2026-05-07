@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Icon,
@@ -13,8 +13,7 @@ import { deleteDataset } from "@/services/api";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
-import { APIResponse, Dataset, DatasetFilters, SiteMetrics } from "@/types/api";
+import { APIResponse, Dataset } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
@@ -23,40 +22,38 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import Button from "../Primitives/Button";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { DATASET_SORT_LABELS } from "@/utils/datasetsListingQuery";
+import { useDatasetsListing } from "@/hooks/useDatasetsListing";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
   currentPage: number;
-  siteMetrics?: SiteMetrics;
-  initialFilters?: DatasetFilters;
   filterCounts?: Record<string, number>;
 }
-
-const SORT_OPTIONS: Record<string, string> = {
-  relevancia: "",
-  criacao: "-created",
-  antigo: "created",
-  subscritores: "-followers",
-};
-
-const SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  criacao: "Mais recente",
-  antigo: "Mais antigo",
-  subscritores: "Subscritores",
-};
 
 export default function DatasetsClient({
   initialData,
   currentPage,
-  siteMetrics,
-  initialFilters = {},
   filterCounts,
 }: DatasetsClientProps) {
-  const router = useRouter();
   const { show, hide } = usePopupContext();
-  const { data: datasets, total, page_size } = initialData;
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const {
+    activePage,
+    buildUrl,
+    handleSearch,
+    handleSortChange,
+    listData,
+    searchQuery,
+    setSearchQuery,
+    sortDefault,
+  } = useDatasetsListing({ initialData, currentPage });
+
+  const { data: datasets, total, page_size } = listData;
+
+  // TODO: Keep this while delete action is not wired to the cards UI.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDeleteDataset = (dataset: { id: string; title: string }) => {
     show(
       <div className="flex flex-col gap-[16px]">
@@ -77,7 +74,6 @@ export default function DatasetsClient({
               try {
                 await deleteDataset(dataset.id);
                 hide();
-                router.refresh();
               } catch {
                 hide();
               }
@@ -91,85 +87,6 @@ export default function DatasetsClient({
     );
   };
 
-  const currentQuery = initialFilters.q || "";
-  const currentSort = initialFilters.sort || "";
-  const [filtersOpen, setFiltersOpen] = React.useState(false);
-
-  const currentSortKey =
-    Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
-
-  const buildUrl = React.useCallback(
-    (overrides: Record<string, string | null>) => {
-      const params = new URLSearchParams();
-      if (initialFilters.q) params.set("q", initialFilters.q);
-      if (initialFilters.sort) params.set("sort", initialFilters.sort);
-      if (initialFilters.tag) {
-        const tags = Array.isArray(initialFilters.tag) ? initialFilters.tag : [initialFilters.tag];
-        tags.forEach((t) => params.append("tag", t));
-      }
-      if (initialFilters.license) {
-        const licenses = Array.isArray(initialFilters.license)
-          ? initialFilters.license
-          : [initialFilters.license];
-        licenses.forEach((l) => params.append("license", l));
-      }
-      if (initialFilters.format) {
-        const formats = Array.isArray(initialFilters.format)
-          ? initialFilters.format
-          : [initialFilters.format];
-        formats.forEach((f) => params.append("format", f));
-      }
-      if (initialFilters.organization) {
-        const orgs = Array.isArray(initialFilters.organization)
-          ? initialFilters.organization
-          : [initialFilters.organization];
-        orgs.forEach((o) => params.append("organization", o));
-      }
-      if (initialFilters.badge) {
-        const badges = Array.isArray(initialFilters.badge)
-          ? initialFilters.badge
-          : [initialFilters.badge];
-        badges.forEach((b) => params.append("badge", b));
-      }
-      if (initialFilters.schema) params.set("schema", initialFilters.schema);
-      if (initialFilters.geozone) params.set("geozone", initialFilters.geozone);
-      if (initialFilters.granularity) params.set("granularity", initialFilters.granularity);
-      if (initialFilters.featured) params.set("featured", "true");
-      for (const [key, value] of Object.entries(overrides)) {
-        if (value) {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
-      }
-      params.set("page", "1");
-      const qs = params.toString();
-      return `/pages/datasets${qs ? `?${qs}` : ""}`;
-    },
-    [initialFilters]
-  );
-
-  const onSearchNavigate = React.useCallback(
-    (query: string) => {
-      router.replace(buildUrl({ q: query || null }), { scroll: false });
-    },
-    [router, buildUrl]
-  );
-
-  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
-    currentQuery,
-    onSearchNavigate,
-  });
-
-  const handleSort = React.useCallback(
-    (selectedKey: string) => {
-      const sortValue = SORT_OPTIONS[selectedKey] || null;
-      if (sortValue === (currentSort || null)) return;
-      router.replace(buildUrl({ sort: sortValue }), { scroll: false });
-    },
-    [router, buildUrl, currentSort]
-  );
-
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters dataset">
       <main className="flex-grow bg-primary-50">
@@ -177,7 +94,6 @@ export default function DatasetsClient({
           title="Conjuntos de dados"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
-          //containerClassName="dataset"
           breadcrumbItems={[
             { label: "Home", url: "/" },
             { label: "Conjuntos de dados", url: "/pages/datasets" },
@@ -204,7 +120,7 @@ export default function DatasetsClient({
 
         {/* Main Content */}
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
-          {/* Results count + Sort toggles — full width, aligned with grid */}
+          {/* Results count + Sort toggles */}
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">
             <div className="xl:col-span-5 flex flex-row items-end gap-24 pl-0 py-16">
               <Button
@@ -213,13 +129,13 @@ export default function DatasetsClient({
                 hasIcon
                 {...(filtersOpen
                   ? {
-                    leadingIcon: "agora-line-chevron-left",
-                    leadingIconHover: "agora-solid-chevron-left",
-                  }
+                      leadingIcon: "agora-line-chevron-left",
+                      leadingIconHover: "agora-solid-chevron-left",
+                    }
                   : {
-                    trailingIcon: "agora-line-chevron-right",
-                    trailingIconHover: "agora-solid-chevron-right",
-                  })}
+                      trailingIcon: "agora-line-chevron-right",
+                      trailingIconHover: "agora-solid-chevron-right",
+                    })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
@@ -231,15 +147,15 @@ export default function DatasetsClient({
             <div className="xl:col-span-7 flex items-center justify-end py-16">
               <ToggleGroup
                 multiple={false}
-                value={currentSortKey}
+                value={sortDefault}
                 onChange={(val) => {
                   const selected = val.length > 0 ? val[0] : "relevancia";
-                  if (selected !== currentSortKey) {
-                    handleSort(selected);
+                  if (selected !== sortDefault) {
+                    handleSortChange(selected);
                   }
                 }}
               >
-                {Object.entries(SORT_LABELS).map(([key, label]) => (
+                {Object.entries(DATASET_SORT_LABELS).map(([key, label]) => (
                   <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                     {label}
                   </Toggle>
@@ -307,8 +223,14 @@ export default function DatasetsClient({
                   )}
                 </div>
 
+                {/* Pagination */}
                 <div className="pb-64 mt-64 flex justify-center">
-                  <Pagination currentPage={currentPage} totalItems={total} pageSize={page_size} />
+                  <Pagination
+                    currentPage={activePage}
+                    totalItems={total}
+                    pageSize={page_size}
+                    baseUrl={buildUrl()}
+                  />
                 </div>
               </div>
             </div>
@@ -318,4 +240,3 @@ export default function DatasetsClient({
     </div>
   );
 }
-

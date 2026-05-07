@@ -1,378 +1,52 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   CardLinks,
-  InputSearch,
   Button,
-  InputSelect,
-  DropdownSection,
-  DropdownOption,
   Icon,
   CardNoResults,
   Toggle,
   ToggleGroup,
-  Pill,
-  Sidebar,
-  SidebarItem,
-  Checkbox,
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
-import { fetchOrganizations, suggestTags } from "@/services/api";
-import {
-  APIResponse,
-  Organization,
-  Reuse,
-  ReuseFilters,
-  ReuseType,
-  SiteMetrics,
-} from "@/types/api";
-import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
-
+import { APIResponse, Reuse } from "@/types/api";
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { localizeReuseType } from "@/lib/reuse-labels";
+import { ReusesFilters } from "@/components/reuses/ReusesFilters";
+import { useReusesListing } from "@/hooks/useReusesListing";
+import { REUSE_SORT_LABELS } from "@/utils/reusesListingQuery";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
-
-const SORT_OPTIONS: Record<string, string> = {
-  relevancia: "",
-  recentes: "-last_modified",
-  antigos: "last_modified",
-  subscritores: "-followers",
-};
-
-const SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  recentes: "Mais recente",
-  antigos: "Mais antigo",
-  subscritores: "Subscritores",
-};
-
-function TypeSelect({
-  currentType,
-  reuseTypes,
-  onTypeChange,
-}: {
-  currentType: string;
-  reuseTypes: ReuseType[];
-  onTypeChange: (value: string) => void;
-}) {
-  const [mounted, setMounted] = React.useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const selectRef = React.useRef<any>(null);
-  const lastValue = React.useRef(currentType);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  React.useEffect(() => {
-    if (!mounted) return;
-    const interval = setInterval(() => {
-      const selected = selectRef.current?.selectedOptions?.[0]?.value;
-      if (selected !== undefined && selected !== lastValue.current) {
-        lastValue.current = selected;
-        onTypeChange(selected);
-      }
-    }, 150);
-    return () => clearInterval(interval);
-  }, [mounted, onTypeChange]);
-
-  if (!mounted) {
-    const match = reuseTypes.find((rt) => rt.id === currentType);
-    const label = match ? localizeReuseType(match) : "Todos os tipos";
-    return (
-      <div>
-        <label className="mb-4 block text-s-regular text-neutral-700">Tipo:</label>
-        <div className="w-full rounded-8 border border-neutral-300 bg-white px-16 py-12 text-m-regular text-neutral-900">
-          {label}
-        </div>
-      </div>
-    );
-  }
-
-  // Cast to accept mixed children (static + mapped elements)
-  const FlexDropdownSection = DropdownSection as React.FC<
-    Omit<React.ComponentProps<typeof DropdownSection>, "children"> & { children: React.ReactNode }
-  >;
-
-  return (
-    <InputSelect label="Tipo:" id="filter-type" ref={selectRef}>
-      <FlexDropdownSection name="types">
-        <DropdownOption value="" selected={!currentType}>
-          Todos os tipos
-        </DropdownOption>
-        {reuseTypes.map((rt) => (
-          <DropdownOption key={rt.id} value={rt.id} selected={currentType === rt.id}>
-            {localizeReuseType(rt)}
-          </DropdownOption>
-        ))}
-      </FlexDropdownSection>
-    </InputSelect>
-  );
-}
-
-const REUSE_TOGGLE_FILTERS = {
-  atualizacao: {
-    title: "Data da atualização",
-    options: [
-      { id: "all", label: "Todos" },
-      { id: "30_days", label: "Os últimos 30 dias" },
-      { id: "12_months", label: "Os últimos 12 meses" },
-      { id: "3_years", label: "Os últimos 3 anos" },
-    ],
-  },
-};
-
-const DATE_RANGE_MAP: Record<string, () => string> = {
-  "30_days": () => {
-    const d = new Date();
-    d.setDate(d.getDate() - 30);
-    return d.toISOString().slice(0, 10);
-  },
-  "12_months": () => {
-    const d = new Date();
-    d.setFullYear(d.getFullYear() - 1);
-    return d.toISOString().slice(0, 10);
-  },
-  "3_years": () => {
-    const d = new Date();
-    d.setFullYear(d.getFullYear() - 3);
-    return d.toISOString().slice(0, 10);
-  },
-};
-
-function detectAtualizacaoFromParams(filters?: ReuseFilters): string {
-  const since = filters?.modified_since;
-  if (!since) return "all";
-  const diffDays = Math.round((Date.now() - new Date(since).getTime()) / 86400000);
-  if (diffDays <= 31) return "30_days";
-  if (diffDays <= 366) return "12_months";
-  if (diffDays <= 1096) return "3_years";
-  return "all";
-}
-
-function formatCount(n: number): string {
-  if (n >= 1000) {
-    const k = n / 1000;
-    return k % 1 === 0 ? `${k} mil` : `${k.toFixed(1).replace(".", ",")} mil`;
-  }
-  return n.toLocaleString("pt-PT");
-}
-
-type ReuseFilterKey = keyof typeof REUSE_TOGGLE_FILTERS;
 
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
   currentPage: number;
-  initialFilters?: ReuseFilters;
-  reuseTypes?: ReuseType[];
-  siteMetrics?: SiteMetrics;
   filterCounts?: Record<string, number>;
 }
 
 export default function ReusesClient({
   initialData,
   currentPage,
-  initialFilters,
-  reuseTypes = [],
-  siteMetrics,
   filterCounts = {},
 }: ReusesClientProps) {
   const router = useRouter();
-  const { data: reuses, total, page_size } = initialData;
-  const currentQuery = initialFilters?.q || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Toggle filters state
-  const [selectedToggleFilters, setSelectedToggleFilters] = useState<
-    Record<ReuseFilterKey, string>
-  >({
-    atualizacao: detectAtualizacaoFromParams(initialFilters),
-  });
+  const {
+    activePage,
+    buildUrl,
+    handleSearch,
+    handleSortChange,
+    listData,
+    searchQuery,
+    setSearchQuery,
+    sortDefault,
+  } = useReusesListing({ initialData, currentPage });
 
-  const handleToggleFilterChange = (filterKey: ReuseFilterKey, optionId: string) => {
-    setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
-
-    if (filterKey === "atualizacao") {
-      const params = new URLSearchParams(
-        typeof window !== "undefined" ? window.location.search : ""
-      );
-      params.delete("modified_since");
-      if (optionId !== "all" && DATE_RANGE_MAP[optionId]) {
-        params.set("modified_since", DATE_RANGE_MAP[optionId]());
-      }
-      params.set("page", "1");
-      router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
-    }
-  };
-
-  // Advanced filters state
-  const [filterOrgs, setFilterOrgs] = useState<Organization[]>([]);
-  const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
-  const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
-  const [isFiltersLoading, setIsFiltersLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadFilterData() {
-      try {
-        const orgsRes = await fetchOrganizations(1, 100, { sort: "-datasets" });
-        setFilterOrgs(orgsRes.data);
-      } catch (error) {
-        console.error("Failed to load filter data", error);
-      } finally {
-        setIsFiltersLoading(false);
-      }
-    }
-    loadFilterData();
-  }, []);
-
-  const handleTagSearch = useCallback(async (q: string) => {
-    if (q.length < 2) {
-      setFilterTagOptions([]);
-      return;
-    }
-    try {
-      const results = await suggestTags(q);
-      setFilterTagOptions(results.map((t) => ({ id: t.text, name: t.text })));
-    } catch {
-      setFilterTagOptions([]);
-    }
-  }, []);
-
-  const handleAdvancedFilterChange = (paramName: string, value: string) => {
-    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
-    const currentValues = params.getAll(paramName);
-    if (currentValues.includes(value)) {
-      params.delete(paramName);
-      currentValues.filter((v) => v !== value).forEach((v) => params.append(paramName, v));
-    } else {
-      params.append(paramName, value);
-    }
-    params.set("page", "1");
-    router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
-  };
-
-  const handleClearAdvancedFilter = (paramName: string) => {
-    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
-    params.delete(paramName);
-    params.set("page", "1");
-    router.replace(`/pages/reuses?${params.toString()}`, { scroll: false });
-  };
-
-  const handleFilterSearchChange = (groupName: string, value: string) => {
-    setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-    if (groupName === "Temático") handleTagSearch(value);
-  };
-
-  const getActiveValues = (paramName: string) => {
-    if (typeof window === "undefined") return [];
-    return new URLSearchParams(window.location.search).getAll(paramName);
-  };
-
-  const advancedFilterGroups: {
-    name: string;
-    param: string;
-    data: { id: string; name: string }[];
-    searchable: boolean;
-    suggest?: boolean;
-  }[] = [
-    {
-      name: "Organizações",
-      param: "organization",
-      data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
-      searchable: true,
-    },
-    {
-      name: "Palavras-chave",
-      param: "tag",
-      data: filterTagOptions,
-      searchable: true,
-      suggest: true,
-    },
-  ];
-
-  const buildUrl = useCallback(
-    (overrides: Partial<ReuseFilters> & { page?: number } = {}) => {
-      const params = new URLSearchParams();
-      const q = overrides.q ?? initialFilters?.q;
-      const type = overrides.type ?? initialFilters?.type;
-      const tag = overrides.tag ?? initialFilters?.tag;
-      const organization = overrides.organization ?? initialFilters?.organization;
-      const sort = "sort" in overrides ? overrides.sort : initialFilters?.sort;
-      const page = overrides.page ?? currentPage;
-
-      if (q) params.set("q", q);
-      if (type) params.set("type", type);
-      if (tag) params.set("tag", tag);
-      if (organization) params.set("organization", organization);
-      if (sort) params.set("sort", sort);
-      if (page > 1) params.set("page", String(page));
-
-      const qs = params.toString();
-      return `/pages/reuses${qs ? `?${qs}` : ""}`;
-    },
-    [initialFilters, currentPage]
-  );
-
-  const onSearchNavigate = useCallback(
-    (query: string) => {
-      router.replace(buildUrl({ q: query, page: 1 }), { scroll: false });
-    },
-    [router, buildUrl]
-  );
-
-  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
-    currentQuery,
-    onSearchNavigate,
-  });
-
-  const handleSortChange = useCallback(
-    (value: string) => {
-      router.replace(buildUrl({ sort: SORT_OPTIONS[value] || undefined, page: 1 }), {
-        scroll: false,
-      });
-    },
-    [router, buildUrl]
-  );
-
-  const handleTypeFilter = useCallback(
-    (typeId: string) => {
-      router.replace(
-        buildUrl({
-          type: typeId === initialFilters?.type ? undefined : typeId,
-          page: 1,
-        }),
-        { scroll: false }
-      );
-    },
-    [router, buildUrl, initialFilters?.type]
-  );
-
-  const handleClearFilters = useCallback(() => {
-    router.replace("/pages/reuses", { scroll: false });
-  }, [router]);
-
-  const sortDefault = (() => {
-    const reverseMap: Record<string, string> = {
-      "-last_modified": "recentes",
-      last_modified: "antigos",
-      "-followers": "subscritores",
-    };
-    return reverseMap[initialFilters?.sort || ""] || "relevancia";
-  })();
-
-  const hasActiveFilters = !!(
-    initialFilters?.q ||
-    initialFilters?.type ||
-    initialFilters?.tag ||
-    initialFilters?.organization
-  );
+  const { data: reuses, total, page_size } = listData;
 
   return (
     <div className="filters reuse flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
@@ -442,7 +116,7 @@ export default function ReusesClient({
                   }
                 }}
               >
-                {Object.entries(SORT_LABELS).map(([key, label]) => (
+                {Object.entries(REUSE_SORT_LABELS).map(([key, label]) => (
                   <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                     {label}
                   </Toggle>
@@ -456,181 +130,7 @@ export default function ReusesClient({
             className={`grid-filters grid gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
-            {filtersOpen && (
-              <div className="xl:col-span-5 xl:block">
-                <div className="mb-[36px] mt-[36px] flex flex-col gap-32">
-                  <h2 className="text-xl font-bold text-neutral-900">Filtros</h2>
-                  {(Object.keys(REUSE_TOGGLE_FILTERS) as ReuseFilterKey[]).map((filterKey) => {
-                    const section = REUSE_TOGGLE_FILTERS[filterKey];
-                    return (
-                      <div key={filterKey} className="flex max-w-[592px] flex-col gap-8 pr-32">
-                        <h3 className="mb-8 text-base font-bold text-neutral-900">
-                          {section.title}
-                        </h3>
-                        {section.options.map((option) => {
-                          const isSelected = selectedToggleFilters[filterKey] === option.id;
-                          return (
-                            <Toggle
-                              key={option.id}
-                              id={`reuse-filter-${filterKey}-${option.id}`}
-                              name={`reuse-filter-${filterKey}`}
-                              value={option.id}
-                              appearance="icon"
-                              variant="primary"
-                              checked={isSelected}
-                              onChange={() => handleToggleFilterChange(filterKey, option.id)}
-                              iconOnly={false}
-                              fullWidth={true}
-                              className="w-full"
-                            >
-                              <div className="text-sm flex items-center gap-12 font-bold">
-                                <span
-                                  className={
-                                    isSelected
-                                      ? "font-bold text-primary-600"
-                                      : "font-bold text-neutral-900"
-                                  }
-                                >
-                                  {option.label}
-                                </span>
-                                {filterCounts[`${filterKey}_${option.id}`] !== undefined && (
-                                  <Pill
-                                    variant="neutral"
-                                    appearance="outline"
-                                    circular={false}
-                                    className="text-xs ml-16 font-medium text-neutral-500"
-                                  >
-                                    {formatCount(filterCounts[`${filterKey}_${option.id}`])}
-                                  </Pill>
-                                )}
-                              </div>
-                            </Toggle>
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <h2 className="text-xl mb-[32px] mt-[36px] font-bold text-neutral-900">
-                  Filtros avançados
-                </h2>
-
-                <Sidebar variant="filter" className="font-bold">
-                  {advancedFilterGroups.map((group, index) => {
-                    const sq = filterSearchQueries[group.name] || "";
-                    const activeValues = getActiveValues(group.param);
-                    const activeCount = activeValues.length;
-
-                    const selectedItems: { id: string; name: string }[] = group.suggest
-                      ? activeValues
-                          .filter((v) => !group.data.some((d) => d.id === v))
-                          .map((v) => ({ id: v, name: v }))
-                      : [];
-
-                    const allData = [...selectedItems, ...group.data];
-
-                    const filteredData = group.suggest
-                      ? allData
-                      : allData.filter((item) =>
-                          item.name.toLowerCase().includes(sq.toLowerCase())
-                        );
-
-                    const showScroll = filteredData.length > 5;
-
-                    return (
-                      <SidebarItem
-                        key={index}
-                        variant="filter"
-                        item={{
-                          children: <span className="font-bold">{group.name}</span>,
-                          hasIcon: true,
-                          collapsedIconTrailing: "agora-line-minus-circle",
-                          collapsedIconHoverTrailing: "agora-solid-minus-circle",
-                          expandedIconTrailing: "agora-line-plus-circle",
-                          expandedIconHoverTrailing: "agora-solid-plus-circle",
-                        }}
-                        hasPill={activeCount > 0}
-                        pillValue={activeCount}
-                      >
-                        <div>
-                          {activeCount > 0 && (
-                            <button
-                              onClick={() => handleClearAdvancedFilter(group.param)}
-                              className="text-xs mb-4 mt-4 cursor-pointer text-primary-500 underline hover:text-primary-700"
-                            >
-                              Limpar {group.name.toLowerCase()}
-                            </button>
-                          )}
-                          {group.searchable && (
-                            <div className="relative mb-4 mt-8">
-                              <InputSearch
-                                label="Pesquisar"
-                                hideLabel
-                                placeholder={
-                                  group.suggest ? "Escreva para pesquisar..." : "Pesquisar"
-                                }
-                                value={sq}
-                                onChange={(e) =>
-                                  handleFilterSearchChange(group.name, e.target.value)
-                                }
-                              />
-                              <Icon
-                                name="agora-solid-search"
-                                className="w-5 h-5 pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform text-primary-500"
-                                aria-hidden="true"
-                              />
-                            </div>
-                          )}
-                          <div
-                            className={`flex flex-col gap-2 ${
-                              showScroll ? "max-h-[225px] overflow-y-auto" : ""
-                            }`}
-                          >
-                            {isFiltersLoading && !group.suggest ? null : filteredData.length > 0 ? (
-                              filteredData.map((item) => (
-                                <Checkbox
-                                  key={item.id}
-                                  label={item.name}
-                                  className="font-bold"
-                                  value={item.id}
-                                  name={group.param}
-                                  checked={activeValues.includes(item.id)}
-                                  onChange={() => handleAdvancedFilterChange(group.param, item.id)}
-                                />
-                              ))
-                            ) : group.suggest && sq.length < 2 ? (
-                              activeCount > 0 ? null : (
-                                <p className="text-sm text-neutral-900">
-                                  Escreva pelo menos 2 caracteres...
-                                </p>
-                              )
-                            ) : (
-                              <p className="text-sm text-neutral-500">Sem resultados</p>
-                            )}
-                          </div>
-                        </div>
-                      </SidebarItem>
-                    );
-                  })}
-                </Sidebar>
-
-                <div className="mt-32">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => {
-                      setSelectedToggleFilters({
-                        atualizacao: "all",
-                      });
-                      router.replace("/pages/reuses", { scroll: false });
-                    }}
-                  >
-                    Limpar filtros
-                  </Button>
-                </div>
-              </div>
-            )}
+            {filtersOpen && <ReusesFilters filterCounts={filterCounts} />}
 
             {/* Results Area */}
             <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>
@@ -678,7 +178,7 @@ export default function ReusesClient({
                                 trailingIconActive: "",
                                 children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
                                 title: "Visualizações",
-                                onClick: (e: React.MouseEvent) => e.preventDefault(),
+                                onClick: (e: MouseEvent) => e.preventDefault(),
                                 className: "text-[#034AD8]",
                               },
                               {
@@ -691,7 +191,7 @@ export default function ReusesClient({
                                 trailingIconActive: "",
                                 children: `${reuse.datasets?.length || 0} datasets`,
                                 title: "Datasets",
-                                onClick: (e: React.MouseEvent) => e.preventDefault(),
+                                onClick: (e: MouseEvent) => e.preventDefault(),
                                 className: "text-[#034AD8]",
                               },
                               {
@@ -704,7 +204,7 @@ export default function ReusesClient({
                                 trailingIconActive: "",
                                 children: reuse.metrics?.followers || 0,
                                 title: "Favoritos",
-                                onClick: (e: React.MouseEvent) => e.preventDefault(),
+                                onClick: (e: MouseEvent) => e.preventDefault(),
                                 className: "text-[#034AD8]",
                               },
                             ]}
@@ -745,7 +245,7 @@ export default function ReusesClient({
                 {/* Pagination */}
                 <div className="mt-8 flex justify-center pb-64">
                   <Pagination
-                    currentPage={currentPage}
+                    currentPage={activePage}
                     totalItems={total}
                     pageSize={page_size}
                     baseUrl={buildUrl()}

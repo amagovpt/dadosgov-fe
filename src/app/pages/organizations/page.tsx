@@ -1,4 +1,4 @@
-import { fetchOrganizations, fetchSiteInfo, fetchOrgBadges } from '@/services/api';
+import { fetchOrganizations, fetchOrgBadges } from '@/services/api';
 import OrganizationsClient from '@/components/organizations/OrganizationsClient';
 import { OrganizationFilters } from '@/types/api';
 import { Metadata } from 'next';
@@ -30,21 +30,27 @@ export default async function OrganizationsPage({
         apiFilters.sort = '-last_modified';
     }
 
-    const [initialData, siteInfo, orgBadges] = await Promise.all([
+    const [initialData, orgBadges, allOrganizations] = await Promise.all([
         fetchOrganizations(page, 20, apiFilters),
-        fetchSiteInfo(),
         fetchOrgBadges(),
+        fetchOrganizations(1, 100, { sort: "-datasets" }),
     ]);
+
+    const badgeKeys = Object.keys(orgBadges);
+    const badgeCountResponses = await Promise.all(
+        badgeKeys.map((badge) => fetchOrganizations(1, 1, { badge }))
+    );
+    const orgBadgeCounts = Object.fromEntries(
+        badgeKeys.map((badge, index) => [badge, badgeCountResponses[index].total])
+    ) as Record<string, number>;
 
     return (
         <OrganizationsClient
             initialData={initialData}
             currentPage={page}
-            siteMetrics={siteInfo.metrics}
             orgBadges={orgBadges}
-            orgBadgeCounts={{}}
-            initialFilters={filters}
-            allOrganizations={[]}
+            orgBadgeCounts={orgBadgeCounts}
+            allOrganizations={allOrganizations.data}
         />
     );
 }

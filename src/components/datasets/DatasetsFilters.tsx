@@ -1,18 +1,33 @@
 "use client";
 
-import React from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Sidebar, SidebarItem, Checkbox, InputSearch, Icon, Toggle, Pill, Button } from "@ama-pt/agora-design-system";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@ama-pt/agora-design-system";
 import {
-  fetchOrganizations,
-  fetchLicenses,
   fetchFrequencies,
   fetchGranularities,
+  fetchLicenses,
+  fetchOrganizations,
   suggestFormats,
-  suggestTags,
   suggestSpatialZones,
+  suggestTags,
 } from "@/services/api";
-import { Organization, License, Frequency, Granularity } from "@/types/api";
+import { Frequency, Granularity, License, Organization } from "@/types/api";
+import {
+  AdvancedFilterGroup,
+  AdvancedFiltersSidebar,
+} from "@/components/filters/AdvancedFiltersSidebar";
+import {
+  ToggleFilterSection,
+  ToggleFilterSections,
+} from "@/components/filters/ToggleFilterSections";
+import {
+  formatCompactCount,
+  readQueryParamValues,
+  toggleSelection,
+  uniqueStrings,
+  writeQueryParamValues,
+} from "@/utils/filterUtils";
 
 interface FilterOption {
   id: string;
@@ -49,14 +64,6 @@ const DATASET_TOGGLE_FILTERS = {
   },
 };
 
-function formatCount(n: number): string {
-  if (n >= 1000) {
-    const k = n / 1000;
-    return k % 1 === 0 ? `${k} mil` : `${k.toFixed(1).replace(".", ",")} mil`;
-  }
-  return n.toLocaleString("pt-PT");
-}
-
 type ToggleFilterKey = keyof typeof DATASET_TOGGLE_FILTERS;
 
 const FORMAT_GROUP_MAP: Record<string, string[]> = {
@@ -68,15 +75,18 @@ const FORMAT_GROUP_MAP: Record<string, string[]> = {
 
 const DATE_RANGE_MAP: Record<string, () => string> = {
   "30_days": () => {
-    const d = new Date(); d.setDate(d.getDate() - 30);
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
     return d.toISOString().slice(0, 10);
   },
   "12_months": () => {
-    const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 1);
     return d.toISOString().slice(0, 10);
   },
   "3_years": () => {
-    const d = new Date(); d.setFullYear(d.getFullYear() - 3);
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 3);
     return d.toISOString().slice(0, 10);
   },
 };
@@ -86,7 +96,7 @@ function detectAtualizacaoFromParams(params: URLSearchParams): string {
   if (!since) return "all";
   const now = new Date();
   const sinceDate = new Date(since);
-  const diffDays = Math.round((now.getTime() - sinceDate.getTime()) / (86400000));
+  const diffDays = Math.round((now.getTime() - sinceDate.getTime()) / 86400000);
   if (diffDays <= 31) return "30_days";
   if (diffDays <= 366) return "12_months";
   if (diffDays <= 1096) return "3_years";
@@ -105,7 +115,7 @@ function detectFormatoFromParams(params: URLSearchParams): string {
 }
 
 function detectRotuloFromParams(params: URLSearchParams): string {
-  const tags = params.getAll("tag");
+  const tags = readQueryParamValues(params, "tag", { splitComma: true });
   if (tags.includes("hvd")) return "high_value";
   return "all";
 }
@@ -118,66 +128,56 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
+  const paramsRef = useRef(queryString);
+  const filterCounts = serverCounts || {};
 
-  const [selectedToggleFilters, setSelectedToggleFilters] = React.useState<Record<ToggleFilterKey, string>>(() => ({
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [licenses, setLicenses] = useState<License[]>([]);
+  const [frequencies, setFrequencies] = useState<Frequency[]>([]);
+  const [granularities, setGranularities] = useState<Granularity[]>([]);
+  const [tagOptions, setTagOptions] = useState<FilterOption[]>([]);
+  const [formatOptions, setFormatOptions] = useState<FilterOption[]>([]);
+  const [zoneOptions, setZoneOptions] = useState<FilterOption[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
+  const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<ToggleFilterKey, string>>(() => ({
     formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
     atualizacao: detectAtualizacaoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
     rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
   }));
 
-  const handleToggleFilterChange = (filterKey: ToggleFilterKey, optionId: string) => {
-    setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
+  const getWorkingParams = useCallback(() => new URLSearchParams(paramsRef.current), []);
 
-    const current = new URLSearchParams(Array.from(searchParams.entries()));
+  const navigateWithParams = useCallback(
+    (params: URLSearchParams) => {
+      params.set("page", "1");
+      const search = params.toString();
+      paramsRef.current = search;
+      router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
+    },
+    [pathname, router]
+  );
 
-    if (filterKey === "formato") {
-      current.delete("format");
-      if (optionId !== "all" && optionId !== "other") {
-        const formats = FORMAT_GROUP_MAP[optionId];
-        if (formats) {
-          formats.forEach((f) => current.append("format", f));
-        }
-      }
-    } else if (filterKey === "atualizacao") {
-      current.delete("modified_since");
-      if (optionId !== "all" && DATE_RANGE_MAP[optionId]) {
-        current.set("modified_since", DATE_RANGE_MAP[optionId]());
-      }
-    } else if (filterKey === "rotulo") {
-      const tags = current.getAll("tag").filter((t) => t !== "hvd");
-      current.delete("tag");
-      tags.forEach((t) => current.append("tag", t));
-      if (optionId === "high_value") {
-        current.append("tag", "hvd");
-      }
-    }
+  useEffect(() => {
+    paramsRef.current = queryString;
+    const current = new URLSearchParams(queryString);
+    setSelectedToggleFilters({
+      formato: detectFormatoFromParams(current),
+      atualizacao: detectAtualizacaoFromParams(current),
+      rotulo: detectRotuloFromParams(current),
+    });
+  }, [queryString]);
 
-    current.set("page", "1");
-    const search = current.toString();
-    router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
-  };
-
-  const [organizations, setOrganizations] = React.useState<Organization[]>([]);
-  const [licenses, setLicenses] = React.useState<License[]>([]);
-  const [frequencies, setFrequencies] = React.useState<Frequency[]>([]);
-  const [granularities, setGranularities] = React.useState<Granularity[]>([]);
-  const [tagOptions, setTagOptions] = React.useState<FilterOption[]>([]);
-  const [formatOptions, setFormatOptions] = React.useState<FilterOption[]>([]);
-  const [zoneOptions, setZoneOptions] = React.useState<FilterOption[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [searchQueries, setSearchQueries] = React.useState<Record<string, string>>({});
-  const filterCounts = serverCounts || {};
-
-  React.useEffect(() => {
+  useEffect(() => {
     async function loadFilterData() {
       try {
-        const [orgsRes, licensesRes, frequenciesRes, granularitiesRes] =
-          await Promise.all([
-            fetchOrganizations(1, 100, { sort: "-datasets" }),
-            fetchLicenses(),
-            fetchFrequencies(),
-            fetchGranularities(),
-          ]);
+        const [orgsRes, licensesRes, frequenciesRes, granularitiesRes] = await Promise.all([
+          fetchOrganizations(1, 100, { sort: "-datasets" }),
+          fetchLicenses(),
+          fetchFrequencies(),
+          fetchGranularities(),
+        ]);
         setOrganizations(orgsRes.data);
         setLicenses(licensesRes);
         setFrequencies(frequenciesRes);
@@ -191,285 +191,214 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
     loadFilterData();
   }, []);
 
-  const handleTagSearch = React.useCallback(async (query: string) => {
+  const handleToggleFilterChange = useCallback(
+    (filterKey: ToggleFilterKey, optionId: string) => {
+      setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
+      const current = getWorkingParams();
+
+      if (filterKey === "formato") {
+        current.delete("format");
+        if (optionId !== "all" && optionId !== "other") {
+          const formats = FORMAT_GROUP_MAP[optionId];
+          if (formats) formats.forEach((format) => current.append("format", format));
+        }
+      } else if (filterKey === "atualizacao") {
+        current.delete("modified_since");
+        if (optionId !== "all" && DATE_RANGE_MAP[optionId]) {
+          current.set("modified_since", DATE_RANGE_MAP[optionId]());
+        }
+      } else if (filterKey === "rotulo") {
+        const tags = readQueryParamValues(current, "tag", { splitComma: true }).filter(
+          (tag) => tag !== "hvd"
+        );
+        if (optionId === "high_value") {
+          tags.push("hvd");
+        }
+        writeQueryParamValues(current, "tag", uniqueStrings(tags));
+      }
+
+      navigateWithParams(current);
+    },
+    [getWorkingParams, navigateWithParams]
+  );
+
+  const handleTagSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setTagOptions([]);
       return;
     }
     try {
       const results = await suggestTags(query);
-      setTagOptions(results.map((t) => ({ id: t.text, name: t.text })));
+      setTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
     } catch {
       setTagOptions([]);
     }
   }, []);
 
-  const handleFormatSearch = React.useCallback(async (query: string) => {
+  const handleFormatSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setFormatOptions([]);
       return;
     }
     try {
       const results = await suggestFormats(query);
-      setFormatOptions(results.map((f) => ({ id: f.text, name: f.text })));
+      setFormatOptions(results.map((format) => ({ id: format.text, name: format.text })));
     } catch {
       setFormatOptions([]);
     }
   }, []);
 
-  const handleZoneSearch = React.useCallback(async (query: string) => {
+  const handleZoneSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
       setZoneOptions([]);
       return;
     }
     try {
       const results = await suggestSpatialZones(query);
-      setZoneOptions(results.map((z) => ({ id: z.id, name: z.name })));
+      setZoneOptions(results.map((zone) => ({ id: zone.id, name: zone.name })));
     } catch {
       setZoneOptions([]);
     }
   }, []);
 
-  const handleFilterChange = (paramName: string, value: string) => {
-    const current = new URLSearchParams(Array.from(searchParams.entries()));
-    const currentValues = current.getAll(paramName);
-
-    if (currentValues.includes(value)) {
-      current.delete(paramName);
-      currentValues.filter((v) => v !== value).forEach((v) => current.append(paramName, v));
-    } else {
-      current.append(paramName, value);
-    }
-
-    current.set("page", "1");
-    const search = current.toString();
-    router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
-  };
-
-  const handleClearFilter = (paramName: string) => {
-    const current = new URLSearchParams(Array.from(searchParams.entries()));
-    current.delete(paramName);
-    current.set("page", "1");
-    const search = current.toString();
-    router.replace(`${pathname}${search ? `?${search}` : ""}`, { scroll: false });
-  };
-
-  const handleSearchChange = (groupName: string, value: string) => {
-    setSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-
-    if (groupName === "Palavras-chave") handleTagSearch(value);
-    if (groupName === "Formatos") handleFormatSearch(value);
-    if (groupName === "Cobertura Espacial") handleZoneSearch(value);
-  };
-
-  const getActiveValues = (paramName: string) => searchParams.getAll(paramName);
-
-  const filterGroups: {
-    name: string;
-    param: string;
-    data: FilterOption[];
-    searchable: boolean;
-    suggest?: boolean;
-  }[] = [
-    {
-      name: "Organizações",
-      param: "organization",
-      data: organizations.map((o) => ({ id: o.id, name: o.name })),
-      searchable: true,
+  const handleFilterChange = useCallback(
+    (paramName: string, value: string) => {
+      const current = getWorkingParams();
+      const currentValues = readQueryParamValues(current, paramName, {
+        splitComma: paramName === "tag",
+      });
+      const nextValues = uniqueStrings(toggleSelection(currentValues, value));
+      writeQueryParamValues(current, paramName, nextValues);
+      navigateWithParams(current);
     },
-    {
-      name: "Palavras-chave",
-      param: "tag",
-      data: tagOptions,
-      searchable: true,
-      suggest: true,
+    [getWorkingParams, navigateWithParams]
+  );
+
+  const handleSearchChange = useCallback(
+    (groupName: string, value: string) => {
+      setSearchQueries((prev) => ({ ...prev, [groupName]: value }));
+      if (groupName === "Palavras-chave") handleTagSearch(value);
+      if (groupName === "Formatos") handleFormatSearch(value);
+      if (groupName === "Cobertura Espacial") handleZoneSearch(value);
     },
-    {
-      name: "Formatos",
-      param: "format",
-      data: formatOptions,
-      searchable: true,
-      suggest: true,
+    [handleFormatSearch, handleTagSearch, handleZoneSearch]
+  );
+
+  const getActiveValues = useCallback(
+    (paramName: string) => {
+      const current = new URLSearchParams(Array.from(searchParams.entries()));
+      return readQueryParamValues(current, paramName, { splitComma: paramName === "tag" });
     },
-    {
-      name: "Licenças",
-      param: "license",
-      data: licenses.map((l) => ({ id: l.id, name: l.title })),
-      searchable: true,
-    },
-    {
-      name: "Frequência",
-      param: "frequency",
-      data: frequencies.map((f) => ({ id: f.id, name: f.label })),
-      searchable: true,
-    },
-    {
-      name: "Cobertura Espacial",
-      param: "geozone",
-      data: zoneOptions,
-      searchable: true,
-      suggest: true,
-    },
-    {
-      name: "Granularidade Espacial",
-      param: "granularity",
-      data: granularities.map((g) => ({ id: g.id, name: g.name })),
-      searchable: true,
-    },
-  ];
+    [searchParams]
+  );
+
+  const toggleSections = useMemo<ToggleFilterSection[]>(
+    () =>
+      (Object.keys(DATASET_TOGGLE_FILTERS) as ToggleFilterKey[]).map((filterKey) => ({
+        key: filterKey,
+        title: DATASET_TOGGLE_FILTERS[filterKey].title,
+        options: DATASET_TOGGLE_FILTERS[filterKey].options.map((option) => ({
+          id: option.id,
+          label: option.label,
+          description: option.description,
+          count:
+            filterCounts[`${filterKey}_${option.id}`] !== undefined
+              ? formatCompactCount(filterCounts[`${filterKey}_${option.id}`])
+              : undefined,
+        })),
+      })),
+    [filterCounts]
+  );
+
+  const advancedFilterGroups = useMemo<AdvancedFilterGroup[]>(
+    () => [
+      {
+        name: "Organizações",
+        param: "organization",
+        data: organizations.map((organization) => ({ id: organization.id, name: organization.name })),
+        searchable: true,
+      },
+      {
+        name: "Palavras-chave",
+        param: "tag",
+        data: tagOptions,
+        searchable: true,
+        suggest: true,
+        searchPlaceholder: "Escreva para pesquisar...",
+        minCharsMessage: "Escreva pelo menos 2 caracteres...",
+        emptyMessage: "Nenhum resultado encontrado.",
+      },
+      {
+        name: "Formatos",
+        param: "format",
+        data: formatOptions,
+        searchable: true,
+        suggest: true,
+        searchPlaceholder: "Escreva para pesquisar...",
+        minCharsMessage: "Escreva pelo menos 2 caracteres...",
+        emptyMessage: "Nenhum resultado encontrado.",
+      },
+      {
+        name: "Licenças",
+        param: "license",
+        data: licenses.map((license) => ({ id: license.id, name: license.title })),
+        searchable: true,
+      },
+      {
+        name: "Frequência",
+        param: "frequency",
+        data: frequencies.map((frequency) => ({ id: frequency.id, name: frequency.label })),
+        searchable: true,
+      },
+      {
+        name: "Cobertura Espacial",
+        param: "geozone",
+        data: zoneOptions,
+        searchable: true,
+        suggest: true,
+        searchPlaceholder: "Escreva para pesquisar...",
+        minCharsMessage: "Escreva pelo menos 2 caracteres...",
+        emptyMessage: "Nenhum resultado encontrado.",
+      },
+      {
+        name: "Granularidade Espacial",
+        param: "granularity",
+        data: granularities.map((granularity) => ({ id: granularity.id, name: granularity.name })),
+        searchable: true,
+      },
+    ],
+    [organizations, tagOptions, formatOptions, licenses, frequencies, zoneOptions, granularities]
+  );
 
   return (
     <div className="h-full">
-      <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
-        <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
-        {(Object.keys(DATASET_TOGGLE_FILTERS) as ToggleFilterKey[]).map((filterKey) => {
-          const section = DATASET_TOGGLE_FILTERS[filterKey];
-          return (
-            <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
-              <h3 className="font-bold text-base text-neutral-900 mb-8">
-                {section.title}
-              </h3>
-              {section.options.map((option) => {
-                const isSelected = selectedToggleFilters[filterKey] === option.id;
-                return (
-                  <Toggle
-                    key={option.id}
-                    id={`ds-filter-${filterKey}-${option.id}`}
-                    name={`ds-filter-${filterKey}`}
-                    value={option.id}
-                    appearance="icon"
-                    variant="primary"
-                    checked={isSelected}
-                    onChange={() => handleToggleFilterChange(filterKey, option.id)}
-                    iconOnly={false}
-                    fullWidth={true}
-                    className="w-full"
-                  >
-                    <div className="flex items-center gap-12 font-bold text-sm">
-                      <span
-                        className={
-                          isSelected
-                            ? "text-primary-600 font-bold"
-                            : "text-neutral-900 font-bold"
-                        }
-                      >
-                        {option.label}
-                      </span>
-                      {"description" in option && option.description && (
-                        <span className="text-neutral-900 text-xs font-normal ml-8">
-                          {option.description}
-                        </span>
-                      )}
-                      {filterCounts[`${filterKey}_${option.id}`] !== undefined && (
-                        <Pill
-                          variant="neutral"
-                          appearance="outline"
-                          circular={false}
-                          className="text-xs font-medium text-neutral-500 ml-16"
-                        >
-                          {formatCount(filterCounts[`${filterKey}_${option.id}`])}
-                        </Pill>
-                      )}
-                    </div>
-                  </Toggle>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
+      <ToggleFilterSections
+        sections={toggleSections}
+        selectedValues={selectedToggleFilters}
+        onChange={(sectionKey, optionId) =>
+          handleToggleFilterChange(sectionKey as ToggleFilterKey, optionId)
+        }
+        idPrefix="ds-filter"
+      />
 
       <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">Filtros avançados</h2>
 
-      <Sidebar variant="filter" className="font-bold">
-        {filterGroups.map((group, index) => {
-          const searchQuery = searchQueries[group.name] || "";
-          const activeValues = getActiveValues(group.param);
-          const activeCount = activeValues.length;
-
-          // For suggest filters, merge selected values (from URL) with search results
-          const selectedItems: FilterOption[] = group.suggest
-            ? activeValues
-                .filter((v) => !group.data.some((d) => d.id === v))
-                .map((v) => ({ id: v, name: v }))
-            : [];
-
-          const allData = [...selectedItems, ...group.data];
-
-          const filteredData = group.suggest
-            ? allData
-            : allData.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-
-          const showSearch = group.searchable;
-          const showScroll = filteredData.length > 5;
-
-          return (
-            <SidebarItem
-              key={index}
-              variant="filter"
-              item={{
-                children: <span className="font-bold">{group.name}</span>,
-                hasIcon: true,
-                collapsedIconTrailing: "agora-line-minus-circle",
-                collapsedIconHoverTrailing: "agora-solid-minus-circle",
-                expandedIconTrailing: "agora-line-plus-circle",
-                expandedIconHoverTrailing: "agora-solid-plus-circle",
-              }}
-              hasPill={activeCount > 0}
-              pillValue={activeCount}
-            >
-              <div>
-{/* Limpar individual removido — usar "Limpar filtros" global */}
-                {showSearch && (
-                  <div className="mb-4 mt-8 relative">
-                    <InputSearch
-                      label="Pesquisar"
-                      hideLabel
-                      placeholder={group.suggest ? "Escreva para pesquisar..." : "Pesquisar"}
-                      value={searchQuery}
-                      onChange={(e) => handleSearchChange(group.name, e.target.value)}
-                    />
-                    <Icon
-                      name="agora-solid-search"
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5 pointer-events-none"
-                      aria-hidden="true"
-                    />
-                  </div>
-                )}
-                <div
-                  className={`flex flex-col gap-2 ${showScroll ? "max-h-[225px] overflow-y-auto" : ""}`}
-                >
-                  {isLoading && !group.suggest && filteredData.length === 0 ? null : filteredData.length > 0 ? (
-                    filteredData.map((item) => (
-                      <Checkbox
-                        key={item.id}
-                        label={item.name}
-                        className="font-bold"
-                        value={item.id}
-                        name={group.param}
-                        checked={activeValues.includes(item.id)}
-                        onChange={() => handleFilterChange(group.param, item.id)}
-                      />
-                    ))
-                  ) : group.suggest && searchQuery.length < 2 ? (
-                    activeCount > 0 ? null : (
-                      <p className="text-sm text-neutral-900">Escreva pelo menos 2 caracteres...</p>
-                    )
-                  ) : (
-                    <p className="text-sm text-neutral-900">Nenhum resultado encontrado.</p>
-                  )}
-                </div>
-              </div>
-            </SidebarItem>
-          );
-        })}
-      </Sidebar>
+      <AdvancedFiltersSidebar
+        groups={advancedFilterGroups}
+        searchQueries={searchQueries}
+        getActiveValues={getActiveValues}
+        onToggleValue={handleFilterChange}
+        onSearchChange={handleSearchChange}
+        checkboxIdPrefix="dataset"
+        isLoading={isLoading}
+      />
 
       <div className="mt-32">
         <Button
           variant="primary"
           appearance="outline"
           onClick={() => {
+            paramsRef.current = "";
             setSelectedToggleFilters({
               formato: "all",
               atualizacao: "all",

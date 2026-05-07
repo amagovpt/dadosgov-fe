@@ -347,6 +347,7 @@ export async function fetchDatasets(
         ["tag", filters.tag],
         ["license", filters.license],
         ["format", filters.format],
+        ["frequency", filters.frequency],
         ["badge", filters.badge],
         ["organization", filters.organization],
       ];
@@ -361,7 +362,13 @@ export async function fetchDatasets(
     }
 
     const url = `${API_BASE_URL}/datasets/?${params.toString()}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, {
+      cache: "no-store",
+      // Keep front-office listings public/consistent between SSR and CSR.
+      // Without this, browser fetches may include session cookies and return
+      // different totals than the server-rendered first paint.
+      credentials: "omit",
+    });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch datasets: ${res.statusText}`);
@@ -411,6 +418,7 @@ export async function fetchAdminDatasets(
         ["tag", filters.tag],
         ["license", filters.license],
         ["format", filters.format],
+        ["frequency", filters.frequency],
         ["badge", filters.badge],
         ["organization", filters.organization],
       ];
@@ -445,7 +453,6 @@ export async function fetchAdminDatasets(
     };
   }
 }
-
 export async function fetchDataset(slug: string): Promise<Dataset> {
   try {
     const res = await fetch(`${API_AUTH_URL}/datasets/${slug}/`, {
@@ -495,6 +502,7 @@ export async function fetchOrganizations(
     const url = `${API_BASE_URL}/organizations/?${params.toString()}`;
     const res = await fetch(url, {
       cache: "no-store",
+      credentials: "omit",
     });
 
     if (!res.ok) {
@@ -944,16 +952,30 @@ export async function fetchReuses(
     if (filters) {
       if (filters.q) params.set("q", filters.q);
       if (filters.type) params.set("type", filters.type);
-      if (filters.tag) params.set("tag", filters.tag);
-      if (filters.organization) params.set("organization", filters.organization);
       if (filters.owner) params.set("owner", filters.owner);
       if (filters.dataset) params.set("dataset", filters.dataset);
       if (filters.sort) params.set("sort", filters.sort);
       if (filters.modified_since) params.set("modified_since", filters.modified_since);
+
+      const arrayParams: [string, string | string[] | undefined][] = [
+        ["tag", filters.tag],
+        ["organization", filters.organization],
+      ];
+      for (const [key, value] of arrayParams) {
+        if (!value) continue;
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.set(key, value);
+        }
+      }
     }
 
     const url = `${API_BASE_URL}/reuses/?${params.toString()}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, {
+      cache: "no-store",
+      credentials: "omit",
+    });
 
     if (!res.ok) {
       return empty;

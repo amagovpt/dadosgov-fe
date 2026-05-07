@@ -1,4 +1,4 @@
-import { fetchDatasets, fetchSiteInfo } from '@/services/api';
+import { fetchDatasets } from '@/services/api';
 import { DatasetFilters } from '@/types/api';
 import DatasetsClient from '@/components/datasets/DatasetsClient';
 
@@ -17,6 +17,7 @@ export default async function Page({
   if (resolved?.tag) filters.tag = resolved.tag;
   if (resolved?.license) filters.license = resolved.license;
   if (resolved?.format) filters.format = resolved.format;
+  if (resolved?.frequency) filters.frequency = resolved.frequency;
   if (resolved?.schema) filters.schema = String(resolved.schema);
   if (resolved?.geozone) filters.geozone = String(resolved.geozone);
   if (resolved?.granularity) filters.granularity = String(resolved.granularity);
@@ -38,12 +39,11 @@ export default async function Page({
   const d3y = new Date(now.getFullYear() - 3, now.getMonth(), now.getDate()).toISOString().slice(0, 10);
 
   const [
-    initialData, siteInfo,
+    initialData,
     totalRes, tabularRes, structuredRes, geoRes, docsRes,
     hvdRes, d30Res, d12mRes, d3yRes,
   ] = await Promise.all([
     fetchDatasets(page, 20, apiFilters),
-    fetchSiteInfo(),
     fetchDatasets(1, 1),
     fetchDatasets(1, 1, { format: ["csv", "xls", "xlsx", "ods", "parquet", "tsv"] }),
     fetchDatasets(1, 1, { format: ["json", "rdf", "xml", "sql", "ndjson", "jsonl"] }),
@@ -73,8 +73,6 @@ export default async function Page({
     <DatasetsClient
       initialData={initialData}
       currentPage={page}
-      siteMetrics={siteInfo.metrics}
-      initialFilters={filters}
       filterCounts={filterCounts}
     />
   );

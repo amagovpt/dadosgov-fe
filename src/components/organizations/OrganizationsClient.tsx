@@ -1,18 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Icon, ToggleGroup, Toggle, CardNoResults } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import { OrganizationsFilters } from "./OrganizationsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import {
   APIResponse,
   OrgBadges,
   Organization,
-  OrganizationFilters,
-  SiteMetrics,
 } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDistanceToNow } from "date-fns";
@@ -21,101 +18,38 @@ import { pt } from "date-fns/locale";
 import HeroGeneral from "@/components/HeroGeneral";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { useOrganizationsListing } from "@/hooks/useOrganizationsListing";
+import { ORGANIZATION_SORT_LABELS } from "@/utils/organizationsListingQuery";
 
 interface OrganizationsClientProps {
   initialData: APIResponse<Organization>;
   currentPage: number;
-  siteMetrics: SiteMetrics;
   orgBadges: OrgBadges;
   orgBadgeCounts: Record<string, number>;
-  initialFilters: OrganizationFilters;
   allOrganizations?: Organization[];
 }
-
-const SORT_OPTIONS: Record<string, string> = {
-  relevancia: "",
-  mais_dados: "-datasets",
-  mais_reutilizacoes: "-reuses",
-  subscritores: "-followers",
-};
-
-const SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  mais_dados: "Mais dados",
-  mais_reutilizacoes: "Mais reutilizações",
-  subscritores: "Subscritores",
-};
 
 export default function OrganizationsClient({
   initialData,
   currentPage,
-  siteMetrics,
   orgBadges,
   orgBadgeCounts,
-  initialFilters,
   allOrganizations,
 }: OrganizationsClientProps) {
-  const router = useRouter();
-  const { data: organizations, total, page_size } = initialData;
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const currentQuery = initialFilters.q || "";
-  const currentSort = initialFilters.sort || "";
-  const [filtersOpen, setFiltersOpen] = React.useState(false);
+  const {
+    activePage,
+    buildUrl,
+    handleSearch,
+    handleSortChange,
+    listData,
+    searchQuery,
+    setSearchQuery,
+    sortDefault,
+  } = useOrganizationsListing({ initialData, currentPage });
 
-  const currentSortKey =
-    Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
-
-  const buildUrl = React.useCallback(
-    (overrides: Record<string, string | null>) => {
-      const params = new URLSearchParams();
-      if (initialFilters.q) params.set("q", initialFilters.q);
-      if (initialFilters.badge) {
-        const badges = Array.isArray(initialFilters.badge)
-          ? initialFilters.badge
-          : [initialFilters.badge];
-        badges.forEach((b) => params.append("badge", b));
-      }
-      if (initialFilters.organization) {
-        const orgs = Array.isArray(initialFilters.organization)
-          ? initialFilters.organization
-          : [initialFilters.organization];
-        orgs.forEach((o) => params.append("organization", o));
-      }
-      if (initialFilters.sort) params.set("sort", initialFilters.sort);
-      for (const [key, value] of Object.entries(overrides)) {
-        if (value) {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
-      }
-      params.set("page", "1");
-      const qs = params.toString();
-      return `/pages/organizations${qs ? `?${qs}` : ""}`;
-    },
-    [initialFilters]
-  );
-
-  const onSearchNavigate = React.useCallback(
-    (query: string) => {
-      router.replace(buildUrl({ q: query || null }), { scroll: false });
-    },
-    [router, buildUrl]
-  );
-
-  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
-    currentQuery,
-    onSearchNavigate,
-  });
-
-  const handleSort = React.useCallback(
-    (selectedKey: string) => {
-      const sortValue = SORT_OPTIONS[selectedKey] || null;
-      if (sortValue === (currentSort || null)) return;
-      router.replace(buildUrl({ sort: sortValue }), { scroll: false });
-    },
-    [router, buildUrl, currentSort]
-  );
+  const { data: organizations, total, page_size } = listData;
 
   return (
     <div className="filters organization flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
@@ -124,7 +58,6 @@ export default function OrganizationsClient({
           title="Organizações"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
-          //containerClassName="dataset"
           breadcrumbItems={[
             { label: "Home", url: "/" },
             { label: "Organizações", url: "/pages/organizations" },
@@ -178,15 +111,15 @@ export default function OrganizationsClient({
             <div className="flex items-center justify-end py-16 xl:col-span-7">
               <ToggleGroup
                 multiple={false}
-                value={currentSortKey}
+                value={sortDefault}
                 onChange={(val) => {
                   const selected = val.length > 0 ? val[0] : "relevancia";
-                  if (selected !== currentSortKey) {
-                    handleSort(selected);
+                  if (selected !== sortDefault) {
+                    handleSortChange(selected);
                   }
                 }}
               >
-                {Object.entries(SORT_LABELS).map(([key, label]) => (
+                {Object.entries(ORGANIZATION_SORT_LABELS).map(([key, label]) => (
                   <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                     {label}
                   </Toggle>
@@ -203,10 +136,8 @@ export default function OrganizationsClient({
             {filtersOpen && (
               <div className="xl:col-span-5 xl:block">
                 <OrganizationsFilters
-                  siteMetrics={siteMetrics}
                   orgBadges={orgBadges}
                   orgBadgeCounts={orgBadgeCounts}
-                  initialFilters={initialFilters}
                   allOrganizations={allOrganizations}
                 />
               </div>
@@ -263,10 +194,10 @@ export default function OrganizationsClient({
 
                 <div className="mt-8 flex justify-center pb-64">
                   <Pagination
-                    currentPage={currentPage}
+                    currentPage={activePage}
                     totalItems={total}
                     pageSize={page_size}
-                    baseUrl="/pages/organizations"
+                    baseUrl={buildUrl()}
                   />
                 </div>
               </div>
