@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   CardLinks,
@@ -35,6 +35,8 @@ const SORT_LABELS: Record<string, string> = {
   visualizados: "Mais visualizados",
 }; */
 
+const PAGE_SIZE = 12;
+
 const daysAgo = (dateStr: string, days: number) =>
   (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24) <= days;
 
@@ -50,28 +52,47 @@ export default function DataStoriesClient({
   datastories,
 }: DataStoriesClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const stories = Array.isArray(datastories) ? datastories : [];
+
+  const activePage = Number(searchParams.get("page") || String(currentPage || 1));
+  const currentQuery = searchParams.get("q") || initialFilters?.q || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const currentQuery = initialFilters?.q || "";
 
   const [activeFilters, setActiveFilters] = useState<DataStoriesFilterState>({
     toggles: { temas: "all", atualizacao: "all" },
     tags: [],
   });
 
+  const getLiveParams = useCallback(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search);
+    }
+    return new URLSearchParams(Array.from(searchParams.entries()));
+  }, [searchParams]);
+
   const buildUrl = useCallback(
     (overrides: { q?: string | null; page?: number } = {}) => {
-      const params = new URLSearchParams();
-      const q = "q" in overrides ? overrides.q : initialFilters?.q;
-      const page = overrides.page ?? currentPage;
+      const params = getLiveParams();
 
-      if (q) params.set("q", q);
-      if (page > 1) params.set("page", String(page));
+      if ("q" in overrides) {
+        if (overrides.q) params.set("q", overrides.q);
+        else params.delete("q");
+      }
 
+      if ("page" in overrides) {
+        if (overrides.page && overrides.page > 1) params.set("page", String(overrides.page));
+        else params.delete("page");
+      } else if (activePage > 1) {
+        params.set("page", String(activePage));
+      }
+
+      params.sort();
       const qs = params.toString();
-      return `/pages/datastories${qs ? `?${qs}` : ""}`;
+      return `${pathname}${qs ? `?${qs}` : ""}`;
     },
-    [initialFilters, currentPage]
+    [activePage, getLiveParams, pathname]
   );
 
   const onSearchNavigate = useCallback(
@@ -88,47 +109,58 @@ export default function DataStoriesClient({
 
   // const [currentSortKey, setCurrentSortKey] = useState("recentes");
 
-  const filteredStories = stories.filter((story) => {
-    const q = searchQuery.toLowerCase();
-    if (
-      q &&
-      !story.title.toLowerCase().includes(q) &&
-      !story.description.toLowerCase().includes(q)
-    ) {
-      return false;
-    }
+  const filteredStories = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
 
-    if (activeFilters.toggles.temas !== "all" && story.theme !== activeFilters.toggles.temas) {
-      return false;
-    }
+    return stories.filter((story) => {
+      if (
+        q &&
+        !story.title.toLowerCase().includes(q) &&
+        !story.description.toLowerCase().includes(q)
+      ) {
+        return false;
+      }
 
-    if (
-      activeFilters.tags.length > 0 &&
-      !activeFilters.tags.some((tag) => story.tags.tag === tag)
-    ) {
-      return false;
-    }
+      if (activeFilters.toggles.temas !== "all" && story.theme !== activeFilters.toggles.temas) {
+        return false;
+      }
 
-    if (activeFilters.toggles.atualizacao === "30_days" && !daysAgo(story.createdAt, 30)) {
-      return false;
-    }
-    if (activeFilters.toggles.atualizacao === "12_months" && !daysAgo(story.createdAt, 365)) {
-      return false;
-    }
-    if (activeFilters.toggles.atualizacao === "3_years" && !daysAgo(story.createdAt, 365 * 3)) {
-      return false;
-    }
+      if (
+        activeFilters.tags.length > 0 &&
+        !activeFilters.tags.some((tag) => story.tags.tag === tag)
+      ) {
+        return false;
+      }
 
-    return true;
-  });
+      if (activeFilters.toggles.atualizacao === "30_days" && !daysAgo(story.createdAt, 30)) {
+        return false;
+      }
+      if (activeFilters.toggles.atualizacao === "12_months" && !daysAgo(story.createdAt, 365)) {
+        return false;
+      }
+      if (activeFilters.toggles.atualizacao === "3_years" && !daysAgo(story.createdAt, 365 * 3)) {
+        return false;
+      }
 
-  const sortedStories = [...filteredStories].sort((a, b) => {
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+      return true;
+    });
+  }, [activeFilters, searchQuery, stories]);
+
+  const sortedStories = useMemo(
+    () =>
+      [...filteredStories].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ),
+    [filteredStories]
+  );
 
   const total = sortedStories.length;
-  const pageSize = 12;
-  const pagedStories = sortedStories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const pagedStories = useMemo(
+    () => sortedStories.slice((activePage - 1) * PAGE_SIZE, activePage * PAGE_SIZE),
+    [activePage, sortedStories]
+  );
+
   // const sortValue = SORT_OPTIONS[currentSortKey] || "";
 
   /* const handleSortChange = useCallback((value: string) => {
@@ -154,8 +186,8 @@ export default function DataStoriesClient({
           subtitle={
             <p className="text-primary-100 max-w-[592px]">
               {total === 0
-                ? "Não existem resultados disponíveis para a sua pesquisa"
-                : `Pesquise através de ${total} data stories em dados.gov.pt`}
+                ? "Nao existem resultados disponiveis para a sua pesquisa"
+                : `Pesquise atraves de ${total} data stories em dados.gov.pt`}
             </p>
           }
         />
@@ -167,7 +199,7 @@ export default function DataStoriesClient({
           value={searchQuery}
           onChange={setSearchQuery}
           onSearch={handleSearch}
-          examplesText='Exemplos: "serviços públicos", "turismo", "territórios"'
+          examplesText='Exemplos: "servicos publicos", "turismo", "territorios"'
         />
 
         {/* Main Content */}
@@ -225,7 +257,7 @@ export default function DataStoriesClient({
                 onFiltersChange={setActiveFilters}
                 onClearSearch={() => {
                   setSearchQuery("");
-                  router.replace("/pages/datastories", { scroll: false });
+                  router.replace(buildUrl({ q: null, page: 1 }), { scroll: false });
                 }}
               />
             )}
@@ -271,7 +303,7 @@ export default function DataStoriesClient({
                                 {formatHtmlParagraphs(story.description)}
                               </p>
                             }
-                            date={<span className="font-[300]">Publicado há {timeAgo}</span>}
+                            date={<span className="font-[300]">Publicado ha {timeAgo}</span>}
                             /*links={[
                               {
                                 href: "#",
@@ -282,7 +314,7 @@ export default function DataStoriesClient({
                                 trailingIconHover: "",
                                 trailingIconActive: "",
                                 children: story.metrics.views.toLocaleString("pt-PT"),
-                                title: "Visualizações",
+                                title: "Visualizacoes",
                                 onClick: (e: MouseEvent) => e.preventDefault(),
                                 className: "text-[#034AD8]",
                               },
@@ -329,7 +361,7 @@ export default function DataStoriesClient({
                         icon={
                           <Icon name="agora-line-search" className="w-12 h-12 text-primary-500" />
                         }
-                        title="Não encontrou nenhuma data story?"
+                        title="Nao encontrou nenhuma data story?"
                         subtitle={
                           <span className="font-bold">
                             Tente redefinir os filtros para ampliar sua busca.
@@ -350,9 +382,9 @@ export default function DataStoriesClient({
                 {/* Pagination */}
                 <div className="pb-64 mt-8 flex justify-center">
                   <Pagination
-                    currentPage={currentPage}
+                    currentPage={activePage}
                     totalItems={total}
-                    pageSize={pageSize}
+                    pageSize={PAGE_SIZE}
                     baseUrl={buildUrl()}
                   />
                 </div>

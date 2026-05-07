@@ -80,18 +80,31 @@ export default function OrganizationsClient({
   }, [searchParams]);
 
   const buildUrl = useCallback(
-    (overrides: Record<string, string | null>) => {
+    (overrides: { q?: string | null; sort?: string | null; page?: number } = {}) => {
       const params = getLiveParams();
-      for (const [key, value] of Object.entries(overrides)) {
-        if (value) params.set(key, value);
-        else params.delete(key);
+
+      if ("q" in overrides) {
+        if (overrides.q) params.set("q", overrides.q);
+        else params.delete("q");
       }
-      params.delete("page");
+
+      if ("sort" in overrides) {
+        if (overrides.sort) params.set("sort", overrides.sort);
+        else params.delete("sort");
+      }
+
+      if ("page" in overrides) {
+        if (overrides.page && overrides.page > 1) params.set("page", String(overrides.page));
+        else params.delete("page");
+      } else if (activePage > 1) {
+        params.set("page", String(activePage));
+      }
+
       params.sort();
       const qs = params.toString();
       return `${pathname}${qs ? `?${qs}` : ""}`;
     },
-    [getLiveParams, pathname]
+    [activePage, getLiveParams, pathname]
   );
 
   useEffect(() => {
@@ -128,7 +141,7 @@ export default function OrganizationsClient({
 
   const onSearchNavigate = useCallback(
     (query: string) => {
-      router.replace(buildUrl({ q: query || null }), { scroll: false });
+      router.replace(buildUrl({ q: query || null, page: 1 }), { scroll: false });
     },
     [router, buildUrl]
   );
@@ -142,7 +155,7 @@ export default function OrganizationsClient({
     (selectedKey: string) => {
       const sortValue = SORT_OPTIONS[selectedKey] || null;
       if (sortValue === (currentSort || null)) return;
-      router.replace(buildUrl({ sort: sortValue }), { scroll: false });
+      router.replace(buildUrl({ sort: sortValue, page: 1 }), { scroll: false });
     },
     [router, buildUrl, currentSort]
   );
