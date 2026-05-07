@@ -113,8 +113,7 @@ export default function FileUploadPopupContent({
               <Icon name="agora-solid-alert-triangle" dimensions="s" aria-hidden={true} />
             </span>
             <p className="feedback-text feedback-text-light">
-              Ficheiro bloqueado por segurança:{" "}
-              {securityErrors.join("; ")}
+              O ficheiro contém código malicioso ou scripts não autorizados que comprometem a segurança do sistema.
             </p>
           </div>
         )}
