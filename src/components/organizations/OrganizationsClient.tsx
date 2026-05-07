@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -61,25 +61,25 @@ export default function OrganizationsClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
-  const [listData, setListData] = React.useState<APIResponse<Organization>>(initialData);
+  const [listData, setListData] = useState<APIResponse<Organization>>(initialData);
   const activePage = Number(searchParams.get("page") || String(currentPage || 1));
   const { data: organizations, total, page_size } = listData;
 
   const currentQuery = searchParams.get("q") || "";
   const currentSort = searchParams.get("sort") || "";
-  const [filtersOpen, setFiltersOpen] = React.useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const currentSortKey =
     Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
 
-  const getLiveParams = React.useCallback(() => {
+  const getLiveParams = useCallback(() => {
     if (typeof window !== "undefined") {
       return new URLSearchParams(window.location.search);
     }
     return new URLSearchParams(Array.from(searchParams.entries()));
   }, [searchParams]);
 
-  const buildUrl = React.useCallback(
+  const buildUrl = useCallback(
     (overrides: Record<string, string | null>) => {
       const params = getLiveParams();
       for (const [key, value] of Object.entries(overrides)) {
@@ -94,7 +94,7 @@ export default function OrganizationsClient({
     [getLiveParams, pathname]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     let cancelled = false;
 
     async function loadOrganizationsFromUrl() {
@@ -126,7 +126,7 @@ export default function OrganizationsClient({
     };
   }, [queryString, activePage, initialData.page_size]);
 
-  const onSearchNavigate = React.useCallback(
+  const onSearchNavigate = useCallback(
     (query: string) => {
       router.replace(buildUrl({ q: query || null }), { scroll: false });
     },
@@ -138,7 +138,7 @@ export default function OrganizationsClient({
     onSearchNavigate,
   });
 
-  const handleSort = React.useCallback(
+  const handleSort = useCallback(
     (selectedKey: string) => {
       const sortValue = SORT_OPTIONS[selectedKey] || null;
       if (sortValue === (currentSort || null)) return;

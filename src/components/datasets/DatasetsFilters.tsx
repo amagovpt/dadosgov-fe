@@ -21,6 +21,13 @@ import {
   ToggleFilterSection,
   ToggleFilterSections,
 } from "@/components/filters/ToggleFilterSections";
+import {
+  formatCompactCount,
+  readQueryParamValues,
+  toggleSelection,
+  uniqueStrings,
+  writeQueryParamValues,
+} from "@/utils/filterUtils";
 
 interface FilterOption {
   id: string;
@@ -84,14 +91,6 @@ const DATE_RANGE_MAP: Record<string, () => string> = {
   },
 };
 
-function formatCount(n: number): string {
-  if (n >= 1000) {
-    const k = n / 1000;
-    return k % 1 === 0 ? `${k} mil` : `${k.toFixed(1).replace(".", ",")} mil`;
-  }
-  return n.toLocaleString("pt-PT");
-}
-
 function detectAtualizacaoFromParams(params: URLSearchParams): string {
   const since = params.get("modified_since");
   if (!since) return "all";
@@ -116,11 +115,7 @@ function detectFormatoFromParams(params: URLSearchParams): string {
 }
 
 function detectRotuloFromParams(params: URLSearchParams): string {
-  const tags = params
-    .getAll("tag")
-    .flatMap((value) => value.split(","))
-    .map((value) => value.trim())
-    .filter(Boolean);
+  const tags = readQueryParamValues(params, "tag", { splitComma: true });
   if (tags.includes("hvd")) return "high_value";
   return "all";
 }
@@ -153,22 +148,6 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   }));
 
   const getWorkingParams = useCallback(() => new URLSearchParams(paramsRef.current), []);
-
-  const readParamValues = useCallback((params: URLSearchParams, paramName: string) => {
-    const values = params.getAll(paramName);
-    if (paramName === "tag") {
-      return values
-        .flatMap((value) => value.split(","))
-        .map((value) => value.trim())
-        .filter(Boolean);
-    }
-    return values;
-  }, []);
-
-  const writeParamValues = useCallback((params: URLSearchParams, paramName: string, values: string[]) => {
-    params.delete(paramName);
-    values.forEach((value) => params.append(paramName, value));
-  }, []);
 
   const navigateWithParams = useCallback(
     (params: URLSearchParams) => {
@@ -229,16 +208,18 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
           current.set("modified_since", DATE_RANGE_MAP[optionId]());
         }
       } else if (filterKey === "rotulo") {
-        const tags = readParamValues(current, "tag").filter((tag) => tag !== "hvd");
+        const tags = readQueryParamValues(current, "tag", { splitComma: true }).filter(
+          (tag) => tag !== "hvd"
+        );
         if (optionId === "high_value") {
           tags.push("hvd");
         }
-        writeParamValues(current, "tag", Array.from(new Set(tags)));
+        writeQueryParamValues(current, "tag", uniqueStrings(tags));
       }
 
       navigateWithParams(current);
     },
-    [getWorkingParams, navigateWithParams, readParamValues, writeParamValues]
+    [getWorkingParams, navigateWithParams]
   );
 
   const handleTagSearch = useCallback(async (query: string) => {
@@ -283,14 +264,14 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   const handleFilterChange = useCallback(
     (paramName: string, value: string) => {
       const current = getWorkingParams();
-      const currentValues = readParamValues(current, paramName);
-      const nextValues = currentValues.includes(value)
-        ? currentValues.filter((entry) => entry !== value)
-        : [...currentValues, value];
-      writeParamValues(current, paramName, Array.from(new Set(nextValues)));
+      const currentValues = readQueryParamValues(current, paramName, {
+        splitComma: paramName === "tag",
+      });
+      const nextValues = uniqueStrings(toggleSelection(currentValues, value));
+      writeQueryParamValues(current, paramName, nextValues);
       navigateWithParams(current);
     },
-    [getWorkingParams, navigateWithParams, readParamValues, writeParamValues]
+    [getWorkingParams, navigateWithParams]
   );
 
   const handleSearchChange = useCallback(
@@ -306,9 +287,9 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
   const getActiveValues = useCallback(
     (paramName: string) => {
       const current = new URLSearchParams(Array.from(searchParams.entries()));
-      return readParamValues(current, paramName);
+      return readQueryParamValues(current, paramName, { splitComma: paramName === "tag" });
     },
-    [readParamValues, searchParams]
+    [searchParams]
   );
 
   const toggleSections = useMemo<ToggleFilterSection[]>(
@@ -322,7 +303,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
           description: option.description,
           count:
             filterCounts[`${filterKey}_${option.id}`] !== undefined
-              ? formatCount(filterCounts[`${filterKey}_${option.id}`])
+              ? formatCompactCount(filterCounts[`${filterKey}_${option.id}`])
               : undefined,
         })),
       })),

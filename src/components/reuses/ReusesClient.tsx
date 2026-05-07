@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo, type MouseEvent } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState, useCallback, useEffect, type MouseEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   CardLinks,
@@ -14,10 +14,9 @@ import {
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
-import { fetchOrganizations, fetchReuses, suggestTags } from "@/services/api";
+import { fetchReuses } from "@/services/api";
 import {
   APIResponse,
-  Organization,
   Reuse,
   ReuseFilters,
 } from "@/types/api";
@@ -26,14 +25,8 @@ import { pt } from "date-fns/locale";
 
 import PageBanner from "@/components/PageBanner";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import {
-  AdvancedFilterGroup,
-  AdvancedFiltersSidebar,
-} from "@/components/filters/AdvancedFiltersSidebar";
-import {
-  ToggleFilterSection,
-  ToggleFilterSections,
-} from "@/components/filters/ToggleFilterSections";
+import { ReusesFilters } from "@/components/reuses/ReusesFilters";
+import { writeQueryParamValues } from "@/utils/filterUtils";
 
 const SORT_OPTIONS: Record<string, string> = {
   relevancia: "",
@@ -49,53 +42,6 @@ const SORT_LABELS: Record<string, string> = {
   subscritores: "Subscritores",
 };
 
-const REUSE_TOGGLE_FILTERS = {
-  atualizacao: {
-    title: "Data da atualização",
-    options: [
-      { id: "all", label: "Todos" },
-      { id: "30_days", label: "Os últimos 30 dias" },
-      { id: "12_months", label: "Os últimos 12 meses" },
-      { id: "3_years", label: "Os últimos 3 anos" },
-    ],
-  },
-};
-
-const DATE_RANGE_MAP: Record<string, () => string> = {
-  "30_days": () => {
-    const d = new Date(); d.setDate(d.getDate() - 30);
-    return d.toISOString().slice(0, 10);
-  },
-  "12_months": () => {
-    const d = new Date(); d.setFullYear(d.getFullYear() - 1);
-    return d.toISOString().slice(0, 10);
-  },
-  "3_years": () => {
-    const d = new Date(); d.setFullYear(d.getFullYear() - 3);
-    return d.toISOString().slice(0, 10);
-  },
-};
-
-function detectAtualizacaoFromParams(filters?: ReuseFilters): string {
-  const since = filters?.modified_since;
-  if (!since) return "all";
-  const diffDays = Math.round((Date.now() - new Date(since).getTime()) / 86400000);
-  if (diffDays <= 31) return "30_days";
-  if (diffDays <= 366) return "12_months";
-  if (diffDays <= 1096) return "3_years";
-  return "all";
-}
-
-function formatCount(n: number): string {
-  if (n >= 1000) {
-    const k = n / 1000;
-    return k % 1 === 0 ? `${k} mil` : `${k.toFixed(1).replace(".", ",")} mil`;
-  }
-  return n.toLocaleString("pt-PT");
-}
-
-type ReuseFilterKey = keyof typeof REUSE_TOGGLE_FILTERS;
-
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
   currentPage: number;
@@ -108,7 +54,6 @@ export default function ReusesClient({
   filterCounts = {},
 }: ReusesClientProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
   const [listData, setListData] = useState<APIResponse<Reuse>>(initialData);
@@ -116,24 +61,6 @@ export default function ReusesClient({
   const { data: reuses, total, page_size } = listData;
   const currentQuery = searchParams.get("q") || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
-
-  // Toggle filters state
-  const [selectedToggleFilters, setSelectedToggleFilters] = useState<
-    Record<ReuseFilterKey, string>
-  >({
-    atualizacao: detectAtualizacaoFromParams({
-      modified_since: searchParams.get("modified_since") || undefined,
-    }),
-  });
-
-  useEffect(() => {
-    const params = new URLSearchParams(queryString);
-    const modifiedSince = params.get("modified_since") || undefined;
-    setSelectedToggleFilters((prev) => ({
-      ...prev,
-      atualizacao: detectAtualizacaoFromParams({ modified_since: modifiedSince }),
-    }));
-  }, [queryString]);
 
   useEffect(() => {
     let cancelled = false;
@@ -166,139 +93,12 @@ export default function ReusesClient({
     };
   }, [queryString, activePage, initialData.page_size]);
 
-  const navigateWithParams = useCallback((params: URLSearchParams) => {
-    // First page is implicit; keep URLs clean and stable.
-    params.delete("page");
-    params.sort();
-    const nextUrl = `${pathname}${params.size > 0 ? `?${params.toString()}` : ""}`;
-    router.replace(nextUrl, { scroll: false });
-  }, [pathname, router]);
-
   const getLiveParams = useCallback(() => {
     if (typeof window !== "undefined") {
       return new URLSearchParams(window.location.search);
     }
     return new URLSearchParams(Array.from(searchParams.entries()));
   }, [searchParams]);
-
-  const handleToggleFilterChange = (filterKey: ReuseFilterKey, optionId: string) => {
-    setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
-
-    if (filterKey === "atualizacao") {
-      const params = getLiveParams();
-      params.delete("modified_since");
-      if (optionId !== "all" && DATE_RANGE_MAP[optionId]) {
-        params.set("modified_since", DATE_RANGE_MAP[optionId]());
-      }
-      navigateWithParams(params);
-    }
-  };
-
-  // Advanced filters state
-  const [filterOrgs, setFilterOrgs] = useState<Organization[]>([]);
-  const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
-  const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
-  const [isFiltersLoading, setIsFiltersLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadFilterData() {
-      try {
-        const orgsRes = await fetchOrganizations(1, 100, { sort: "-datasets" });
-        setFilterOrgs(orgsRes.data);
-      } catch (error) {
-        console.error("Failed to load filter data", error);
-      } finally {
-        setIsFiltersLoading(false);
-      }
-    }
-    loadFilterData();
-  }, []);
-
-  const handleTagSearch = useCallback(async (q: string) => {
-    if (q.length < 2) {
-      setFilterTagOptions([]);
-      return;
-    }
-    try {
-      const results = await suggestTags(q);
-      setFilterTagOptions(results.map((t) => ({ id: t.text, name: t.text })));
-    } catch {
-      setFilterTagOptions([]);
-    }
-  }, []);
-
-  const handleAdvancedFilterChange = (paramName: string, value: string) => {
-    const params = getLiveParams();
-    const currentValues = params.getAll(paramName);
-
-    // Read actual current state from URL at click time to avoid stale render state.
-    const isCurrentlyChecked = currentValues.includes(value);
-
-    if (isCurrentlyChecked) {
-      params.delete(paramName);
-      currentValues.filter((v) => v !== value).forEach((v) => params.append(paramName, v));
-    } else {
-      params.append(paramName, value);
-    }
-    navigateWithParams(params);
-  };
-
-  const handleClearAdvancedFilter = (paramName: string) => {
-    const params = getLiveParams();
-    params.delete(paramName);
-    navigateWithParams(params);
-  };
-
-  const handleFilterSearchChange = (groupName: string, value: string) => {
-    setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-    if (groupName === "Palavras-chave") handleTagSearch(value);
-  };
-
-  const getActiveValues = (paramName: string) => {
-    return searchParams.getAll(paramName);
-  };
-
-  const toggleSections = useMemo<ToggleFilterSection[]>(
-    () => [
-      {
-        key: "atualizacao",
-        title: REUSE_TOGGLE_FILTERS.atualizacao.title,
-        options: REUSE_TOGGLE_FILTERS.atualizacao.options.map((option) => ({
-          id: option.id,
-          label: option.label,
-          count:
-            filterCounts[`atualizacao_${option.id}`] !== undefined
-              ? formatCount(filterCounts[`atualizacao_${option.id}`])
-              : undefined,
-        })),
-      },
-    ],
-    [filterCounts]
-  );
-
-  const advancedFilterGroups = useMemo<AdvancedFilterGroup[]>(
-    () => [
-      {
-        name: "Organizações",
-        param: "organization",
-        data: filterOrgs.map((organization) => ({ id: organization.id, name: organization.name })),
-        searchable: true,
-        searchPlaceholder: "Pesquisar",
-        emptyMessage: "Sem resultados",
-      },
-      {
-        name: "Palavras-chave",
-        param: "tag",
-        data: filterTagOptions,
-        searchable: true,
-        suggest: true,
-        searchPlaceholder: "Escreva para pesquisar...",
-        minCharsMessage: "Escreva pelo menos 2 caracteres...",
-        emptyMessage: "Sem resultados",
-      },
-    ],
-    [filterOrgs, filterTagOptions]
-  );
 
   const buildUrl = useCallback(
     (overrides: Partial<ReuseFilters> & { page?: number } = {}) => {
@@ -315,24 +115,15 @@ export default function ReusesClient({
       }
 
       if ("tag" in overrides) {
-        params.delete("tag");
         const tag = overrides.tag;
-        if (tag) {
-          if (Array.isArray(tag)) tag.forEach((value) => params.append("tag", value));
-          else params.append("tag", tag);
-        }
+        const values = !tag ? [] : Array.isArray(tag) ? tag : [tag];
+        writeQueryParamValues(params, "tag", values);
       }
 
       if ("organization" in overrides) {
-        params.delete("organization");
         const organization = overrides.organization;
-        if (organization) {
-          if (Array.isArray(organization)) {
-            organization.forEach((value) => params.append("organization", value));
-          } else {
-            params.append("organization", organization);
-          }
-        }
+        const values = !organization ? [] : Array.isArray(organization) ? organization : [organization];
+        writeQueryParamValues(params, "organization", values);
       }
 
       if ("sort" in overrides) {
@@ -466,47 +257,7 @@ export default function ReusesClient({
           >
             {/* Sidebar */}
             {filtersOpen && (
-              <div className="xl:col-span-5 xl:block">
-                <ToggleFilterSections
-                  sections={toggleSections}
-                  selectedValues={selectedToggleFilters}
-                  onChange={(sectionKey, optionId) =>
-                    handleToggleFilterChange(sectionKey as ReuseFilterKey, optionId)
-                  }
-                  idPrefix="reuse-filter"
-                />
-
-                <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">
-                  Filtros avançados
-                </h2>
-
-                <AdvancedFiltersSidebar
-                  groups={advancedFilterGroups}
-                  searchQueries={filterSearchQueries}
-                  getActiveValues={getActiveValues}
-                  onToggleValue={handleAdvancedFilterChange}
-                  onSearchChange={handleFilterSearchChange}
-                  onClearGroup={handleClearAdvancedFilter}
-                  showClearActions={true}
-                  checkboxIdPrefix="reuse"
-                  isLoading={isFiltersLoading}
-                />
-
-                <div className="mt-32">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => {
-                      setSelectedToggleFilters({
-                        atualizacao: "all",
-                      });
-                      router.replace("/pages/reuses", { scroll: false });
-                    }}
-                  >
-                    Limpar filtros
-                  </Button>
-                </div>
-              </div>
+              <ReusesFilters filterCounts={filterCounts} />
             )}
 
             {/* Results Area */}
@@ -645,6 +396,3 @@ export default function ReusesClient({
     </div>
   );
 }
-
-
-

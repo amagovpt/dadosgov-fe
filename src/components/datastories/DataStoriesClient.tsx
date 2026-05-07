@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, type MouseEvent } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -8,28 +8,24 @@ import {
   Button,
   Icon,
   CardNoResults,
-  //ToggleGroup,
+  // ToggleGroup,
+  // Toggle,
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import PageBanner from "@/components/PageBanner";
-import SearchFilter from '@/components/Shared/SearchFilter';
+import SearchFilter from "@/components/Shared/SearchFilter";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
-import { suggestTags } from "@/services/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Datastories } from "@/types/datastories/datastories";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getAssets } from "@/utils/getAssets";
 import {
-  AdvancedFilterGroup,
-  AdvancedFiltersSidebar,
-} from "@/components/filters/AdvancedFiltersSidebar";
-import {
-  ToggleFilterSection,
-  ToggleFilterSections,
-} from "@/components/filters/ToggleFilterSections";
+  DataStoriesFilterState,
+  DataStoriesFilters,
+} from "@/components/datastories/DataStoriesFilters";
 
-/*const SORT_OPTIONS: Record<string, string> = {
+/* const SORT_OPTIONS: Record<string, string> = {
   recentes: "",
   visualizados: "-views",
 };
@@ -37,11 +33,10 @@ import {
 const SORT_LABELS: Record<string, string> = {
   recentes: "Mais recentes",
   visualizados: "Mais visualizados",
-};*/
+}; */
 
-const now = new Date();
 const daysAgo = (dateStr: string, days: number) =>
-  (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24) <= days;
+  (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24) <= days;
 
 interface DataStoriesClientProps {
   currentPage: number;
@@ -55,59 +50,14 @@ export default function DataStoriesClient({
   datastories,
 }: DataStoriesClientProps) {
   const router = useRouter();
-
   const stories = Array.isArray(datastories) ? datastories : [];
-
-  const atualizacaoOptions = [
-    {
-      id: "all",
-      label: "Todos",
-      count: String(stories.length),
-    },
-    {
-      id: "30_days",
-      label: "Os últimos 30 dias",
-      count: String(stories.filter((s) => daysAgo(s.createdAt, 30)).length),
-    },
-    {
-      id: "12_months",
-      label: "Os últimos 12 meses",
-      count: String(stories.filter((s) => daysAgo(s.createdAt, 365)).length),
-    },
-    {
-      id: "3_years",
-      label: "Os últimos 3 anos",
-      count: String(stories.filter((s) => daysAgo(s.createdAt, 365 * 3)).length),
-    },
-  ];
-
-  const TOGGLE_FILTERS = {
-    temas: {
-      title: "Temas",
-      options: stories.reduce(
-        (acc, story) => {
-          if (!acc.some((option) => option.id === story.theme)) {
-            acc.push({
-              id: story.theme,
-              label: story.organizationName,
-              count: String(stories.filter((s) => s.theme === story.theme).length),
-            });
-          }
-          return acc;
-        },
-        [] as { id: string; label: string; count: string }[]
-      ),
-    },
-    atualizacao: {
-      title: "Data da atualização",
-      options: atualizacaoOptions,
-    },
-  };
-
-  type FilterKey = keyof typeof TOGGLE_FILTERS;
-
   const [filtersOpen, setFiltersOpen] = useState(false);
   const currentQuery = initialFilters?.q || "";
+
+  const [activeFilters, setActiveFilters] = useState<DataStoriesFilterState>({
+    toggles: { temas: "all", atualizacao: "all" },
+    tags: [],
+  });
 
   const buildUrl = useCallback(
     (overrides: { q?: string | null; page?: number } = {}) => {
@@ -136,90 +86,7 @@ export default function DataStoriesClient({
     onSearchNavigate,
   });
 
-  const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<FilterKey, string>>({
-    temas: "all",
-    atualizacao: "all",
-  });
-  //const [currentSortKey, setCurrentSortKey] = useState("recentes");
-
-  const handleToggleFilterChange = (filterKey: FilterKey, optionId: string) => {
-    setSelectedToggleFilters((prev) => ({
-      ...prev,
-      [filterKey]: prev[filterKey] === optionId ? "all" : optionId,
-    }));
-  };
-
-  // Advanced filters state
-  const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
-  const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  const handleTagSearch = useCallback(async (q: string) => {
-    if (q.length < 2) {
-      setFilterTagOptions([]);
-      return;
-    }
-    try {
-      const results = await suggestTags(q);
-      setFilterTagOptions(results.map((t) => ({ id: t.text, name: t.text })));
-    } catch {
-      setFilterTagOptions([]);
-    }
-  }, []);
-
-  const handleAdvancedFilterChange = (paramName: string, value: string) => {
-    if (paramName === "tag") {
-      setSelectedTags((prev) =>
-        prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-      );
-    }
-  };
-
-  const handleClearAdvancedFilter = (paramName: string) => {
-    if (paramName === "tag") {
-      setSelectedTags([]);
-    }
-  };
-
-  const handleFilterSearchChange = (groupName: string, value: string) => {
-    setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-    if (groupName === "Palavras-chave") handleTagSearch(value);
-  };
-
-  const getActiveValues = (paramName: string) => {
-    if (paramName === "tag") return selectedTags;
-    return [];
-  };
-
-  const toggleSections: ToggleFilterSection[] = [
-    {
-      key: "temas",
-      title: TOGGLE_FILTERS.temas.title,
-      options: [{ id: "all", label: "Todos", count: stories.length }, ...TOGGLE_FILTERS.temas.options],
-    },
-    {
-      key: "atualizacao",
-      title: TOGGLE_FILTERS.atualizacao.title,
-      options: TOGGLE_FILTERS.atualizacao.options.map((option) => ({
-        id: option.id,
-        label: option.label,
-        count: option.count,
-      })),
-    },
-  ];
-
-  const advancedFilterGroups: AdvancedFilterGroup[] = [
-    {
-      name: "Palavras-chave",
-      param: "tag",
-      data: filterTagOptions,
-      searchable: true,
-      suggest: true,
-      searchPlaceholder: "Escreva para pesquisar...",
-      minCharsMessage: "Escreva pelo menos 2 caracteres...",
-      emptyMessage: "Sem resultados",
-    },
-  ];
+  // const [currentSortKey, setCurrentSortKey] = useState("recentes");
 
   const filteredStories = stories.filter((story) => {
     const q = searchQuery.toLowerCase();
@@ -231,48 +98,47 @@ export default function DataStoriesClient({
       return false;
     }
 
-    // Toggle filter: temas
-    if (selectedToggleFilters.temas !== "all" && story.theme !== selectedToggleFilters.temas) {
+    if (activeFilters.toggles.temas !== "all" && story.theme !== activeFilters.toggles.temas) {
       return false;
     }
 
-    // Advanced filter: tags (local state)
-    if (selectedTags.length > 0 && !selectedTags.some((t) => story.tags.tag === t)) {
+    if (
+      activeFilters.tags.length > 0 &&
+      !activeFilters.tags.some((tag) => story.tags.tag === tag)
+    ) {
       return false;
     }
 
-    // Filtro de atualização
-    if (selectedToggleFilters.atualizacao === "30_days" && !daysAgo(story.createdAt, 30)) {
+    if (activeFilters.toggles.atualizacao === "30_days" && !daysAgo(story.createdAt, 30)) {
       return false;
     }
-    if (selectedToggleFilters.atualizacao === "12_months" && !daysAgo(story.createdAt, 365)) {
+    if (activeFilters.toggles.atualizacao === "12_months" && !daysAgo(story.createdAt, 365)) {
       return false;
     }
-    if (selectedToggleFilters.atualizacao === "3_years" && !daysAgo(story.createdAt, 365 * 3)) {
+    if (activeFilters.toggles.atualizacao === "3_years" && !daysAgo(story.createdAt, 365 * 3)) {
       return false;
     }
 
     return true;
   });
 
-  //const sortValue = SORT_OPTIONS[currentSortKey] || "";
   const sortedStories = [...filteredStories].sort((a, b) => {
-    //if (sortValue === "-views") return (b.metrics.views || 0) - (a.metrics.views || 0);
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   const total = sortedStories.length;
   const pageSize = 12;
   const pagedStories = sortedStories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  // const sortValue = SORT_OPTIONS[currentSortKey] || "";
 
-  /*const handleSortChange = useCallback((value: string) => {
+  /* const handleSortChange = useCallback((value: string) => {
     setCurrentSortKey(value);
-  }, []);*/
+  }, []); */
 
-  /*const sortDefault = (() => {
+  /* const sortDefault = (() => {
     const reverseMap: Record<string, string> = { "-views": "visualizados" };
     return reverseMap[initialFilters?.sort || ""] || "recentes";
-  })();*/
+  })(); */
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters datastories">
@@ -315,13 +181,13 @@ export default function DataStoriesClient({
                 hasIcon
                 {...(filtersOpen
                   ? {
-                    leadingIcon: "agora-line-chevron-left",
-                    leadingIconHover: "agora-solid-chevron-left",
-                  }
+                      leadingIcon: "agora-line-chevron-left",
+                      leadingIconHover: "agora-solid-chevron-left",
+                    }
                   : {
-                    trailingIcon: "agora-line-chevron-right",
-                    trailingIconHover: "agora-solid-chevron-right",
-                  })}
+                      trailingIcon: "agora-line-chevron-right",
+                      trailingIconHover: "agora-solid-chevron-right",
+                    })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
@@ -330,7 +196,7 @@ export default function DataStoriesClient({
                 {total.toLocaleString("pt-PT")} Resultados
               </span>
             </div>
-            {/*<div className="xl:col-span-7 flex items-center justify-end py-16">
+            {/* <div className="xl:col-span-7 flex items-center justify-end py-16">
               <ToggleGroup
                 multiple={false}
                 value={currentSortKey}
@@ -345,7 +211,7 @@ export default function DataStoriesClient({
                   </Toggle>
                 ))}
               </ToggleGroup>
-            </div>*/}
+            </div> */}
           </div>
           <div className="divider-neutral-200 mb-24" />
 
@@ -354,47 +220,14 @@ export default function DataStoriesClient({
           >
             {/* Sidebar */}
             {filtersOpen && (
-              <div className="xl:col-span-5 xl:block">
-                <ToggleFilterSections
-                  sections={toggleSections}
-                  selectedValues={selectedToggleFilters}
-                  onChange={(sectionKey, optionId) =>
-                    handleToggleFilterChange(sectionKey as FilterKey, optionId)
-                  }
-                  idPrefix="datastory-filter"
-                />
-
-                <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">
-                  Filtros avançados
-                </h2>
-
-                <AdvancedFiltersSidebar
-                  groups={advancedFilterGroups}
-                  searchQueries={filterSearchQueries}
-                  getActiveValues={getActiveValues}
-                  onToggleValue={handleAdvancedFilterChange}
-                  onSearchChange={handleFilterSearchChange}
-                  onClearGroup={handleClearAdvancedFilter}
-                  showClearActions={true}
-                  checkboxIdPrefix="datastory"
-                />
-
-                <div className="mt-32 mb-64">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => {
-                      setSelectedToggleFilters({ temas: "all", atualizacao: "all" });
-                      setSearchQuery("");
-                      //setCurrentSortKey("recentes");
-                      setSelectedTags([]);
-                      router.push("/pages/datastories");
-                    }}
-                  >
-                    Limpar filtros
-                  </Button>
-                </div>
-              </div>
+              <DataStoriesFilters
+                stories={stories}
+                onFiltersChange={setActiveFilters}
+                onClearSearch={() => {
+                  setSearchQuery("");
+                  router.replace("/pages/datastories", { scroll: false });
+                }}
+              />
             )}
 
             {/* Results Area */}
@@ -412,10 +245,10 @@ export default function DataStoriesClient({
                     pagedStories.map((story) => {
                       const timeAgo = story.createdAt
                         ? formatDistanceToNow(new Date(story.createdAt), { locale: pt })
-                          .replace("aproximadamente ", "")
-                          .replace("quase ", "")
-                          .replace("menos de ", "")
-                          .replace("cerca de ", "")
+                            .replace("aproximadamente ", "")
+                            .replace("quase ", "")
+                            .replace("menos de ", "")
+                            .replace("cerca de ", "")
                         : "Desconhecido";
 
                       return (
@@ -424,7 +257,13 @@ export default function DataStoriesClient({
                             onClick={() => router.push(`/pages/datastories/${story.slug}`)}
                             className="cursor-pointer text-neutral-900 h-full"
                             variant="transparent"
-                            image={{ src: story.image && story.image[0] ? getAssets(story.image[0].id) : "/card-full-image.png", alt: story.title }}
+                            image={{
+                              src:
+                                story.image && story.image[0]
+                                  ? getAssets(story.image[0].id)
+                                  : "/card-full-image.png",
+                              alt: story.title,
+                            }}
                             category={story.organizationName}
                             title={<div className="underline text-xl-bold">{story.title}</div>}
                             description={

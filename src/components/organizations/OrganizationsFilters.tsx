@@ -12,6 +12,11 @@ import {
   ToggleFilterSection,
   ToggleFilterSections,
 } from "@/components/filters/ToggleFilterSections";
+import {
+  readQueryParamValues,
+  toggleSelection,
+  writeQueryParamValues,
+} from "@/utils/filterUtils";
 
 const ORG_TYPE_OPTIONS = [
   { id: "all", label: "Todos", badge: "" },
@@ -78,10 +83,8 @@ export const OrganizationsFilters = ({
       const badges = updates.badges ?? currentBadges;
       const orgs = updates.orgs ?? currentOrgs;
 
-      newParams.delete("badge");
-      newParams.delete("organization");
-      badges.forEach((badge) => newParams.append("badge", badge));
-      orgs.forEach((org) => newParams.append("organization", org));
+      writeQueryParamValues(newParams, "badge", badges);
+      writeQueryParamValues(newParams, "organization", orgs);
       navigateWithParams(newParams);
     },
     [getWorkingParams, navigateWithParams]
@@ -96,10 +99,9 @@ export const OrganizationsFilters = ({
 
   const toggleBadge = useCallback(
     (kind: string) => {
-      const currentBadges = getWorkingParams().getAll("badge");
-      const next = currentBadges.includes(kind)
-        ? currentBadges.filter((badge) => badge !== kind)
-        : [...currentBadges, kind];
+      const params = getWorkingParams();
+      const currentBadges = readQueryParamValues(params, "badge");
+      const next = toggleSelection(currentBadges, kind);
       updateFilters({ badges: next });
     },
     [getWorkingParams, updateFilters]
@@ -107,10 +109,9 @@ export const OrganizationsFilters = ({
 
   const toggleOrg = useCallback(
     (id: string) => {
-      const currentOrgs = getWorkingParams().getAll("organization");
-      const next = currentOrgs.includes(id)
-        ? currentOrgs.filter((org) => org !== id)
-        : [...currentOrgs, id];
+      const params = getWorkingParams();
+      const currentOrgs = readQueryParamValues(params, "organization");
+      const next = toggleSelection(currentOrgs, id);
       updateFilters({ orgs: next });
     },
     [getWorkingParams, updateFilters]

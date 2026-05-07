@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -55,7 +55,7 @@ export default function DatasetsClient({
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
   const { show, hide } = usePopupContext();
-  const [listData, setListData] = React.useState<APIResponse<Dataset>>(initialData);
+  const [listData, setListData] = useState<APIResponse<Dataset>>(initialData);
   const activePage = Number(searchParams.get("page") || String(currentPage || 1));
   const { data: datasets, total, page_size } = listData;
 
@@ -97,19 +97,19 @@ export default function DatasetsClient({
 
   const currentQuery = searchParams.get("q") || "";
   const currentSort = searchParams.get("sort") || "";
-  const [filtersOpen, setFiltersOpen] = React.useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const currentSortKey =
     Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
 
-  const getLiveParams = React.useCallback(() => {
+  const getLiveParams = useCallback(() => {
     if (typeof window !== "undefined") {
       return new URLSearchParams(window.location.search);
     }
     return new URLSearchParams(Array.from(searchParams.entries()));
   }, [searchParams]);
 
-  const buildUrl = React.useCallback(
+  const buildUrl = useCallback(
     (overrides: Record<string, string | null>) => {
       const params = getLiveParams();
       for (const [key, value] of Object.entries(overrides)) {
@@ -178,7 +178,7 @@ export default function DatasetsClient({
     };
   }, [queryString, activePage, initialData.page_size]);
 
-  const onSearchNavigate = React.useCallback(
+  const onSearchNavigate = useCallback(
     (query: string) => {
       router.replace(buildUrl({ q: query || null }), { scroll: false });
     },
@@ -190,7 +190,7 @@ export default function DatasetsClient({
     onSearchNavigate,
   });
 
-  const handleSort = React.useCallback(
+  const handleSort = useCallback(
     (selectedKey: string) => {
       const sortValue = SORT_OPTIONS[selectedKey] || null;
       if (sortValue === (currentSort || null)) return;
@@ -467,4 +467,3 @@ export default function DatasetsClient({
     </div>
   );
 }
-
