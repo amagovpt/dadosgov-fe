@@ -69,6 +69,18 @@ test.describe("Backoffice - Form Validation", () => {
     // we wire deterministic error messages into the suite.
   });
 
+  test("FV-09: Dataset step 2 frequency dropdown is empty by default (no 'Desconhecida' pre-selected)", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/me/datasets/new/?step=2");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    const trigger = page.locator("#agora-input-select-dataset-frequency-control").first();
+    await expect(trigger).toBeVisible({ timeout: 10000 });
+    await expect(trigger).not.toContainText(/desconhecida/i);
+  });
+
   test.skip("FV-07: URL field rejects malformed input", async () => {
     // Wired into individual wizard step coverage.
   });

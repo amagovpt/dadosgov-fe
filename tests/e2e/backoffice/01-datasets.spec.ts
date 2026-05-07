@@ -282,4 +282,65 @@ test.describe("Backoffice - Datasets CRUD", () => {
       // Destructive — archives and would cascade into the public suite.
     }
   );
+
+  test("DS-21: Wizard step 2 frequency dropdown shows placeholder, not pre-selected 'Desconhecida'", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/me/datasets/new/?step=2");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    // The Agora InputSelect trigger button shows the selected label or the
+    // placeholder when nothing is selected.
+    const trigger = page.locator("#agora-input-select-dataset-frequency-control").first();
+    await expect(trigger).toBeVisible({ timeout: 10000 });
+    await expect(trigger).not.toContainText(/desconhecida/i);
+  });
+
+  test("DS-22: Edit page frequency dropdown shows placeholder when dataset has no saved frequency", async ({
+    page,
+  }) => {
+    await page.goto(
+      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+    );
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(3000);
+
+    // If the seeded dataset has no frequency saved, the trigger must NOT show
+    // "Desconhecida" as a forced default.
+    const trigger = page.locator("#agora-input-select-edit-frequency-control").first();
+    if ((await trigger.count()) === 0) return; // Frequency field absent on this dataset
+    await expect(trigger).toBeVisible({ timeout: 10000 });
+    await expect(trigger).not.toContainText(/desconhecida/i);
+  });
+
+  test("DS-23: Wizard step 2 'Pontos de contacto *' section appears after selecting an org producer", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/me/datasets/new/?step=2");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    // Open the producer dropdown and select the first non-user option (an org).
+    const producerTrigger = page.locator("#agora-input-select-dataset-producer-control").first();
+    await expect(producerTrigger).toBeVisible({ timeout: 10000 });
+    await producerTrigger.click();
+    await page.waitForTimeout(700);
+
+    const popupId = await producerTrigger.getAttribute("aria-controls");
+    if (!popupId) return; // Dropdown did not open
+    const options = page.locator(`#${popupId} [role="option"]`);
+    const count = await options.count();
+    if (count === 0) return; // No org options available for this user
+
+    // Prefer an org option (skip the "user" identity option).
+    const orgOption = options.filter({ hasNotText: /^(Eu|Utilizador|Pessoal)/i }).first();
+    const targetOption = (await orgOption.count()) > 0 ? orgOption : options.first();
+    await targetOption.click();
+    await page.waitForTimeout(1000);
+
+    // The contact points section must now be visible with the required marker.
+    const heading = page.getByText(/Pontos de contacto \*/i).first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
+  });
 });
