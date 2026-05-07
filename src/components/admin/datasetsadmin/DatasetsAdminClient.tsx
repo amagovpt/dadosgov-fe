@@ -180,13 +180,8 @@ export default function DatasetsAdminClient({
     createdDataset?.organization?.id ||
     (createdDataset ? "user" : "");
   const licenseDefaultValue =
-    selectedLicenseRef.current ||
-    createdDataset?.license ||
-    (licenses.length > 0 ? "notspecified" : "");
-  const frequencyDefaultValue =
-    selectedFrequencyRef.current ||
-    createdDataset?.frequency ||
-    (frequencies.length > 0 ? "unknown" : "");
+    selectedLicenseRef.current || createdDataset?.license || (licenses.length > 0 ? "notspecified" : "");
+  const frequencyDefaultValue = selectedFrequencyRef.current || createdDataset?.frequency || "";
   const keywordsDefaultValue =
     selectedKeywordsValue || selectedKeywordsRef.current || (createdDataset?.tags?.join(",") ?? "");
   const selectedKeywords = keywordsDefaultValue
@@ -1105,9 +1100,18 @@ export default function DatasetsAdminClient({
 
                 {selectedProducer && selectedProducer !== "user" && (
                   <>
-                    <h2 className="admin-page__section-title">Pontos de contacto</h2>
+                    <h2 className="admin-page__section-title">
+                      Pontos de contacto *
+                    </h2>
 
                     <div className="admin-page__fields-group">
+                      {formErrors.contactDrafts && (
+                        <StatusCard
+                          variant="danger"
+                          showIcon
+                          description="É obrigatório adicionar pelo menos um ponto de contacto."
+                        />
+                      )}
                       {orgContactPoints.length > 0 && (
                         <div className="flex flex-col gap-2">
                           {orgContactPoints.map((cp) => (

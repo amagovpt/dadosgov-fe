@@ -768,8 +768,7 @@ export default function DatasetsEditClient() {
     return <Dropdown.Section name="licenses">{options}</Dropdown.Section>;
   }, [licenses, loadedLicense]);
 
-  const frequencyDefaultValue =
-    loadedFrequency || (frequencies.length > 0 ? "unknown" : "");
+  const frequencyDefaultValue = loadedFrequency;
 
   const frequencyOptions = useMemo(() => {
     const options = frequencies.map((freq) => (

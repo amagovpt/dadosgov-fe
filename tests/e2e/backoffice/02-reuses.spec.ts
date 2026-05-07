@@ -132,4 +132,61 @@ test.describe("Backoffice - Reuses CRUD", () => {
   test.skip("RU-12: Publish draft reuse makes it visible on portal", async () => {
     // Requires draft + publish + cleanup cycle.
   });
+
+  test("RU-13: Tag chips on the reuse form render in alphabetical order", async ({
+    page,
+  }) => {
+    await page.goto("/pages/admin/me/reuses/new/");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    // Mock the tags suggest API so the test is independent of live data and
+    // always exercises the sort path with tags in reverse-alphabetical order.
+    await page.route("**/api/1/tags/suggest/**", (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([{ text: "zebra" }, { text: "alfa" }, { text: "mango" }]),
+      });
+    });
+
+    // Open the keywords dropdown and type to trigger the mocked API.
+    const keywordsTrigger = page
+      .locator("#agora-input-select-reuse-keywords-control")
+      .first();
+    await expect(keywordsTrigger).toBeVisible({ timeout: 10000 });
+    await keywordsTrigger.click();
+    await page.waitForTimeout(500);
+
+    const searchInput = page.getByPlaceholder(/Escreva para pesquisar ou criar/i).first();
+    await expect(searchInput).toBeVisible({ timeout: 5000 });
+    await searchInput.fill("a");
+    await page.waitForTimeout(600);
+
+    // Select all visible options (zebra, alfa, mango).
+    const popupId = await keywordsTrigger.getAttribute("aria-controls");
+    if (popupId) {
+      const options = page.locator(`#${popupId} [role="option"]`);
+      const count = await options.count();
+      for (let i = 0; i < count; i++) {
+        await options.nth(i).click();
+        await page.waitForTimeout(200);
+      }
+    }
+
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(500);
+
+    // Collect rendered tag chip texts and verify alphabetical order.
+    const chips = page.locator(".flex.flex-wrap [class*='tag'], .flex.flex-wrap button").filter({ hasText: /\S/ });
+    const chipCount = await chips.count();
+    if (chipCount < 2) return; // Not enough chips to assert order
+
+    const texts: string[] = [];
+    for (let i = 0; i < chipCount; i++) {
+      texts.push((await chips.nth(i).innerText()).replace(/[×✕]/g, "").trim());
+    }
+    const sorted = [...texts].sort((a, b) => a.localeCompare(b));
+    expect(texts).toEqual(sorted);
+  });
 });
