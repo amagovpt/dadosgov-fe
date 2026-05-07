@@ -81,6 +81,7 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
+import { translateUploadError } from "@/lib/security/translateUploadError";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -1132,9 +1133,9 @@ export default function DatasetsEditClient() {
           Object.entries(err.data)
             .map(([k, v]) => `${k}: ${flattenValue(v)}`)
             .join(", ");
-        setFileUploadError(`Erro ao carregar ficheiro(s): ${msg}`);
+        setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(msg)}`);
       } else if (err.message) {
-        setFileUploadError(`Erro ao carregar ficheiro(s): ${err.message}`);
+        setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(err.message)}`);
       } else {
         const statusHint = err.status ? ` (HTTP ${err.status})` : "";
         setFileUploadError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
