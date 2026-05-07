@@ -1,17 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
   Button,
   Icon,
-  Tag,
   Breadcrumb,
   Pill,
-  ProgressBar,
   CardArticle,
   InputTextArea,
   StatusCard,
@@ -188,7 +185,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
       {requestError && <StatusCard variant="danger" showIcon description={requestError} />}
 
       {showRequestForm && (
-        <div className="rounded-lg container flex flex-col gap-[16px] bg-neutral-50 p-[24px]">
+        <div className="rounded-lg container flex flex-col gap-16 bg-neutral-50 p-24">
           <h3 className="text-base font-semibold text-primary-900">
             Pedir adesão a {organization.name}
           </h3>
@@ -202,7 +199,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
               setRequestComment(e.target.value)
             }
           />
-          <div className="flex gap-[12px]">
+          <div className="flex gap-16">
             <Button
               appearance="outline"
               variant="neutral"
@@ -246,16 +243,16 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 {organization.description || "Esta organização não possui descrição."}
               </p>
               <div className="mt-8">
-                <h3 className="text-xl mb-[16px] font-bold text-primary-900">
+                <h3 className="text-xl mb-16 font-bold text-primary-900">
                   Observações preliminares
                 </h3>
-                <p className="mb-[16px] max-w-[592px] text-neutral-900">
+                <p className="mb-16 max-w-[592px] text-neutral-900">
                   Informações adicionais sobre o papel desta organização na gestão e publicação de
                   dados abertos.
                 </p>
               </div>
               <div className="mt-8">
-                <h3 className="text-xl mb-[16px] font-bold text-primary-900">
+                <h3 className="text-xl mb-16 font-bold text-primary-900">
                   Sobre a organização
                 </h3>
                 <p className="max-w-[592px] text-neutral-900">
@@ -278,17 +275,17 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
 
               {/* Static sections to mirror dataset page as requested (copy) */}
               <div className="mt-8">
-                <h3 className="text-xl mb-[16px] font-bold text-primary-900">
+                <h3 className="text-xl mb-16 font-bold text-primary-900">
                   Observações preliminares
                 </h3>
-                <p className="mb-[16px] max-w-[592px] text-neutral-900">
+                <p className="mb-16 max-w-[592px] text-neutral-900">
                   Informações adicionais sobre o papel desta organização na gestão e publicação de
                   dados abertos.
                 </p>
               </div>
 
               <div className="mt-8">
-                <h3 className="text-xl mb-[16px] font-bold text-primary-900">
+                <h3 className="text-xl mb-16 font-bold text-primary-900">
                   Sobre a organização
                 </h3>
                 <p className="max-w-[592px] text-neutral-900">
@@ -323,7 +320,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
               subtitle={
                 <div className="flex flex-col gap-16">
                   {organization.logo ? (
-                    <div className="card-article-3_2-img flex h-[48px] w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
+                    <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
                       <img
                         src={organization.logo}
                         alt={organization.name}
@@ -335,12 +332,12 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                       <Icon name="agora-line-building" className="h-6 w-6" />
                     </div>
                   )}
-                  <div className="mb-[8px] text-m-light text-neutral-900">Organização</div>
+                  <div className="mb-8 text-m-light text-neutral-900">Organização</div>
                 </div>
               }
             >
               <div className="space-y-16">
-                <div className="text-sm mb-[16px] text-neutral-900">
+                <div className="text-sm mb-16 text-neutral-900">
                   <span className="text-m-semibold">Última atualização:</span>{" "}
                   {new Date(organization.last_modified).toLocaleDateString("pt-PT", {
                     day: "numeric",
@@ -359,11 +356,11 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             {/* Metrics Box */}
             <div className="mb-16 grid grid-cols-2 gap-16">
               <div className="rounded-4 bg-[#F2F6FF] p-32">
-                <div className="text-sm mb-[8px]">Visualizações</div>
-                <div className="mb-[8px] text-l-semibold font-bold text-neutral-900">
+                <div className="text-sm mb-8">Visualizações</div>
+                <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(organization.metrics?.views)}
                 </div>
-                <div className="gap-1 mb-[8px] flex items-center">
+                <div className="gap-1 mb-8 flex items-center">
                   <Pill appearance="outline" variant="success" className="h-auto">
                     +{formatMetricValue(organization.metrics?.views, 2)} total
                   </Pill>
@@ -378,11 +375,11 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 </div>
               </div>
               <div className="rounded-4 bg-[#F2F6FF] p-32">
-                <div className="text-sm mb-[8px]">Seguidores</div>
-                <div className="mb-[8px] text-l-semibold font-bold text-neutral-900">
+                <div className="text-sm mb-8">Seguidores</div>
+                <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(organization.metrics?.followers)}
                 </div>
-                <div className="gap-1 mb-[8px] flex items-center">
+                <div className="gap-1 mb-8 flex items-center">
                   <Pill appearance="outline" variant="success" className="h-auto">
                     +{formatMetricValue(organization.metrics?.followers, 2)} total
                   </Pill>
@@ -401,7 +398,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             {/* Quality Box (Copying from dataset page)
               <div className="bg-[#F2F6FF] rounded-4 p-32 mb-16">
                 <div className="flex justify-between items-end mb-4">
-                  <h3 className="text-l-semibold font-bold text-neutral-900 mb-[8px]">Qualidade dos metadados</h3>
+                  <h3 className="text-l-semibold font-bold text-neutral-900 mb-8">Qualidade dos metadados</h3>
                 </div>
                 <div className="quality-progress-success">
                   <ProgressBar value={100} />
@@ -410,7 +407,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                   100% de conformidade média
                 </div>
                 <div className="flex justify-start items-center text-sm text-primary-600 mt-[24px]">
-                  <Icon name="agora-line-info-mark" className="w-24 h-24 cursor-pointer mr-[8px] fill-primary-600" />
+                  <Icon name="agora-line-info-mark" className="w-24 h-24 cursor-pointer mr-8 fill-primary-600" />
                   <a href="#" className="hover:underline font-medium">Saiba mais sobre este indicador</a>
                 </div>
               </div> */}
@@ -418,12 +415,12 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
         </div>
       </div>
 
-      {/* <div className="bg-primary-100 p-32 rounded-lg mb-[8px]">
+      {/* <div className="bg-primary-100 p-32 rounded-lg mb-8">
           <h3 className="text-l-semibold font-bold text-neutral-900 mb-24 max-w-[592px]">
             Está à procura do preço de venda de um imóvel ou terreno?
           </h3>
           <div className="flex flex-col gap-4">
-            <p className="font-semibold mb-[16px]">
+            <p className="font-semibold mb-16">
               O aplicativo "Dados de Valorização de Terrenos (DVF)" permite acessar informações claras sobre imóveis vendidos a partir do banco de dados da Direção Geral de Finanças Públicas.
             </p>
             <a href="#" className="text-xs text-primary-600 hover:underline inline-flex items-center gap-8 mr-4 max-w-[592px]">

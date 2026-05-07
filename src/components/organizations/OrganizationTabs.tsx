@@ -313,10 +313,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                           title={dataset.title}
                           description={
                             <div className="flex flex-col gap-12">
-                              <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
+                              <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                                 {dataset.description}
                               </p>
-                              <div className="text-xs mt-[16px] flex flex-wrap items-center gap-[32px] text-[#034AD8]">
+                              <div className="text-xs mt-16 flex flex-wrap items-center gap-32 text-[#034AD8]">
                                 <div className="flex items-center gap-8" title="Visualizações">
                                   <Icon name="agora-line-eye" aria-hidden="true" />
                                   <span>{formatMetricValue(dataset.metrics?.views, 0)}</span>
@@ -328,7 +328,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-8" title="Reutilizações">
-                                  <img src="/Icons/bar_chart.svg" alt="" aria-hidden="true" />
+                                  <div className="icon-bar-chart-blue" />
                                   <span>{dataset.metrics?.reuses || 0}</span>
                                 </div>
                                 <div className="flex items-center gap-8" title="Favoritos">
@@ -369,10 +369,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                 <CardNoResults
                   position="center"
                   icon={
-                    <Icon
-                      name="agora-line-file"
-                      className="icon-xl h-[40px] w-[40px] text-primary-500"
-                    />
+                    <Icon name="agora-line-file" className="icon-xl h-40 w-40 text-primary-500" />
                   }
                   title="Sem conjuntos de dados"
                   description="Esta organização não possui conjuntos de dados publicados."
@@ -413,7 +410,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                         title={<div className="text-xl-bold underline">{reuse.title}</div>}
                         description={
                           reuse.description ? (
-                            <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
+                            <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                               {reuse.description}
                             </p>
                           ) : undefined
@@ -465,10 +462,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                 <CardNoResults
                   position="center"
                   icon={
-                    <Icon
-                      name="agora-line-file"
-                      className="icon-xl h-[40px] w-[40px] text-primary-500"
-                    />
+                    <Icon name="agora-line-file" className="icon-xl h-40 w-40 text-primary-500" />
                   }
                   title="Sem reutilizações"
                   description="Nenhuma reutilização associada a esta organização."
@@ -620,7 +614,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                   icon={
                     <Icon
                       name="agora-line-chat"
-                      className="w-[40px] h-[40px] text-primary-500 icon-xl"
+                      className="w-40 h-40 text-primary-500 icon-xl"
                     />
                   }
                   title="Sem discussões"
