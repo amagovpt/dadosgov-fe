@@ -19,6 +19,7 @@ export default function FileUploadPopupContent({
   const [localUrl, setLocalUrl] = useState("");
   const [urlError, setUrlError] = useState(false);
   const [extensionErrors, setExtensionErrors] = useState<string[]>([]);
+  const [securityErrors, setSecurityErrors] = useState<string[]>([]);
   const [allowedExtensions, setAllowedExtensions] = useState<string[] | null>(initialExtensions);
 
   useEffect(() => {
@@ -82,11 +83,15 @@ export default function FileUploadPopupContent({
               if (picked.length === 0) return;
               const { valid, invalid } = validateFiles(picked);
               setExtensionErrors(invalid);
+              setSecurityErrors([]);
               setPendingFiles((prev) => {
                 const names = new Set(prev.map((f) => f.name));
                 return [...prev, ...valid.filter((f) => !names.has(f.name))];
               });
             }}
+            onSecurityError={(rejections) =>
+              setSecurityErrors(rejections.map((r) => `${r.file.name}: ${r.reason}`))
+            }
           />
         </div>
         {extensionErrors.length > 0 && (
@@ -99,6 +104,17 @@ export default function FileUploadPopupContent({
               {extensionErrors.length === 1
                 ? `"${extensionErrors[0]}" não foi adicionado.`
                 : `Os seguintes ficheiros não foram adicionados: ${extensionErrors.join(", ")}`}
+            </p>
+          </div>
+        )}
+        {securityErrors.length > 0 && (
+          <div className="feedback">
+            <span className="feedback-icon-wrapper feedback-icon-wrapper-danger">
+              <Icon name="agora-solid-alert-triangle" dimensions="s" aria-hidden={true} />
+            </span>
+            <p className="feedback-text feedback-text-light">
+              Ficheiro bloqueado por segurança:{" "}
+              {securityErrors.join("; ")}
             </p>
           </div>
         )}
