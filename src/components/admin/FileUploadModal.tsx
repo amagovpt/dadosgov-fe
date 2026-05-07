@@ -5,6 +5,7 @@ import {
   Button,
   DropdownOption,
   DropdownSection,
+  Icon,
   InputText,
   InputTextArea,
   StatusCard,
@@ -31,6 +32,7 @@ interface FileUploadModalProps {
   resourceMetadata: Record<string, PendingResourceMeta>;
   onEditMeta: (key: string, meta: PendingResourceMeta, newUrl?: string) => void;
   onFileReplace: (index: number, file: File) => void;
+  allowedExtensions?: string[] | null;
 }
 
 function DeleteConfirmContent({ name, onConfirm }: { name: string; onConfirm: () => void }) {
@@ -81,7 +83,13 @@ function ResourceEditPendingPopupContent({
   const { hide } = usePopupContext();
   const replaceFileInputRef = useRef<HTMLInputElement>(null);
   const defaultType = initialMeta.resourceType || (resourceTypes[0]?.id ?? "main");
-  const [title, setTitle] = useState(initialMeta.title || name);
+  const extMatch = !isUrl ? name.match(/(\.[^.]+)$/) : null;
+  const fileExt = extMatch ? extMatch[1] : "";
+  const baseName = fileExt ? name.slice(0, -fileExt.length) : name;
+  const [title, setTitle] = useState(() => {
+    const t = initialMeta.title || name;
+    return !isUrl && fileExt && t === name ? baseName : t;
+  });
   const resourceTypeRef = useRef(defaultType);
   const [description, setDescription] = useState(initialMeta.description || "");
   const [url, setUrl] = useState(isUrl ? name : "");
@@ -105,13 +113,20 @@ function ResourceEditPendingPopupContent({
   return (
     <div className="flex flex-col gap-[16px]" style={{ minHeight: "40vh" }}>
       <div className="flex-1 flex flex-col gap-[16px]">
-        <InputText
-          label="Título *"
-          placeholder="Título do recurso"
-          id="pending-res-title"
-          value={title}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-        />
+        <div className="flex items-end gap-2">
+          <div className="flex-1 min-w-0">
+            <InputText
+              label="Título *"
+              placeholder="Título do recurso"
+              id="pending-res-title"
+              value={title}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+            />
+          </div>
+          {!isUrl && fileExt && (
+            <span className="text-neutral-900 text-sm font-medium pb-[13px] shrink-0">{fileExt}</span>
+          )}
+        </div>
 
         <IsolatedSelect
           label="Tipo *"
@@ -201,7 +216,13 @@ function ResourceItem({
   onRemove: () => void;
 }) {
   const { show } = usePopupContext();
-  const displayName = currentMeta.title || name;
+  const extMatch = !isUrl ? name.match(/(\.[^.]+)$/) : null;
+  const fileExt = extMatch ? extMatch[1] : "";
+  const baseDisplayName = currentMeta.title || name;
+  const displayName =
+    !isUrl && fileExt && !baseDisplayName.toLowerCase().endsWith(fileExt.toLowerCase())
+      ? baseDisplayName + fileExt
+      : baseDisplayName;
 
   const handleEdit = () => {
     show(
@@ -228,7 +249,7 @@ function ResourceItem({
   return (
     <div className="file-item">
       <div className="file-info">
-        <span className="name">{displayName}</span>
+        <span className="name">{isUrl ? name : displayName}</span>
         {size && <span className="size">{size}</span>}
       </div>
       <div className="actions">
@@ -332,6 +353,7 @@ export default function FileUploadModal({
   resourceMetadata,
   onEditMeta,
   onFileReplace,
+  allowedExtensions = null,
 }: FileUploadModalProps) {
   const { show } = usePopupContext();
   const hasSelection = uploadedFiles.length > 0 || resourceUrls.length > 0;
@@ -340,6 +362,7 @@ export default function FileUploadModal({
     show(
       <FileUploadPopupContent
         key={Date.now()}
+        allowedExtensions={allowedExtensions}
         onConfirm={(newFiles, url) => {
           if (newFiles.length > 0) {
             const existingNames = new Set(uploadedFiles.map((f) => f.name));
@@ -372,7 +395,12 @@ export default function FileUploadModal({
       </Button>
 
       {hasError && !hasSelection && (
-        <span className="text-danger-500 text-sm">Campo obrigatório</span>
+        <div className="feedback">
+          <span className="feedback-icon-wrapper feedback-icon-wrapper-danger">
+            <Icon name="agora-solid-alert-triangle" dimensions="s" aria-hidden={true} />
+          </span>
+          <p className="feedback-text feedback-text-light">Campo obrigatório</p>
+        </div>
       )}
 
       {hasSelection && (

@@ -82,6 +82,10 @@ import {
   HarvestSourceCreatePayload,
   HarvestSourceUpdatePayload,
   HomepageData,
+  SystemLogContent,
+  SystemLogFile,
+  Transfer,
+  TransferRequestPayload,
 } from "@/types/api";
 
 // Server-side (Node.js) needs absolute URLs; client-side uses relative URLs via Next.js proxy
@@ -1851,6 +1855,17 @@ export async function fetchActivity(
       next_page: null,
       previous_page: null,
     };
+  }
+}
+
+export async function fetchAllowedExtensions(): Promise<string[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/datasets/extensions/`, { next: { revalidate: 3600 } });
+    if (!res.ok) throw new Error(`Failed to fetch allowed extensions: ${res.statusText}`);
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching allowed extensions:", error);
+    return [];
   }
 }
 
@@ -3792,5 +3807,65 @@ export async function submitSupportContact(payload: {
       // ignore — keep generic message
     }
     throw new Error(detail || `Failed to submit support form: ${res.statusText}`);
+  }
+}
+
+export async function requestTransfer(payload: TransferRequestPayload): Promise<Transfer> {
+  const res = await fetch(`${API_AUTH_URL}/transfer/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const data = await res.json();
+      detail = data?.message
+        ? data.message
+        : data?.errors
+          ? JSON.stringify(data.errors)
+          : "";
+    } catch {
+      // ignore — keep generic message
+    }
+    throw new Error(detail || `Failed to request transfer: ${res.statusText}`);
+  }
+  return await res.json();
+}
+
+/**
+ * Fetch the list of available host log files (admin only).
+ */
+export async function fetchSystemLogs(): Promise<SystemLogFile[]> {
+  try {
+    const res = await authFetch("/site/logs/", { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch logs: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching system logs:", error);
+    return [];
+  }
+}
+
+/**
+ * Fetch the content of a single host log file (admin only). Backend tails to ~1MB.
+ */
+export async function fetchSystemLogContent(
+  filename: string
+): Promise<SystemLogContent | null> {
+  try {
+    const res = await authFetch(`/site/logs/${encodeURIComponent(filename)}/`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch log content: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching system log content:", error);
+    return null;
   }
 }

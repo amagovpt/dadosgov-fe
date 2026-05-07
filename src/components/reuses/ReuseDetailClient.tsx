@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Breadcrumb,
   Button,
@@ -14,7 +14,6 @@ import {
   TabBody,
   CardArticle,
   CardGeneral,
-  CardLinks,
   CardNoResults,
   ProgressBar,
   SearchPagination,
@@ -25,18 +24,30 @@ import {
   DropdownSection,
   DropdownOption,
   usePopupContext,
-} from '@ama-pt/agora-design-system';
-import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from '@/types/api';
-import { fetchDataset, fetchReuse, fetchDiscussions, createDiscussion, replyToDiscussion, followEntity, unfollowEntity, isFollowing } from '@/services/api';
-import { useAuth } from '@/context/AuthContext';
-import IsolatedSelect from '@/components/admin/IsolatedSelect';
-import EditDiscussionPopup from '@/components/discussions/EditDiscussionPopup';
-import DeleteDiscussionPopup from '@/components/discussions/DeleteDiscussionPopup';
-import { TagsCollapse } from '@/components/Shared/TagsCollapse';
-import { localizeReuseTypeId } from '@/lib/reuse-labels';
+} from "@ama-pt/agora-design-system";
+import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from "@/types/api";
+import {
+  fetchDataset,
+  fetchReuse,
+  fetchDiscussions,
+  createDiscussion,
+  replyToDiscussion,
+  followEntity,
+  unfollowEntity,
+  isFollowing,
+} from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";
+import DeleteDiscussionPopup from "@/components/discussions/DeleteDiscussionPopup";
+import { TagsCollapse } from "@/components/Shared/TagsCollapse";
+import { localizeReuseTypeId } from "@/lib/reuse-labels";
 
-import { format, formatDistanceToNow } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { format } from "date-fns";
+import { pt } from "date-fns/locale";
+import { formatMetricValue } from "@/utils/formatNumber";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
+import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 
 interface ReuseDetailClientProps {
   slug: string;
@@ -51,10 +62,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
     user &&
     (isAdmin ||
       (reuse?.owner && reuse.owner.id === user.id) ||
-      (reuse?.organization &&
-        user.organizations?.some(
-          (org) => org.id === reuse.organization?.id,
-        ))),
+      (reuse?.organization && user.organizations?.some((org) => org.id === reuse.organization?.id)))
   );
 
   const { show, hide } = usePopupContext();
@@ -64,13 +72,13 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [discussionCount, setDiscussionCount] = useState(0);
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
-  const [newDiscTitle, setNewDiscTitle] = useState('');
-  const [newDiscMessage, setNewDiscMessage] = useState('');
-  const selectedIdentityRef = useRef('');
+  const [newDiscTitle, setNewDiscTitle] = useState("");
+  const [newDiscMessage, setNewDiscMessage] = useState("");
+  const selectedIdentityRef = useRef("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyMessage, setReplyMessage] = useState('');
-  const replyIdentityRef = useRef('');
+  const [replyMessage, setReplyMessage] = useState("");
+  const replyIdentityRef = useRef("");
   const [isReplying, setIsReplying] = useState(false);
 
   const [isFavorite, setIsFavorite] = useState(false);
@@ -125,22 +133,23 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
         title: newDiscTitle.trim(),
         comment: newDiscMessage.trim(),
         subject: {
-          class: 'Reuse',
+          class: "Reuse",
           id: reuse.id,
         },
-        ...(selectedIdentityRef.current && selectedIdentityRef.current !== 'user'
-          ? { organization: selectedIdentityRef.current } : {}),
+        ...(selectedIdentityRef.current && selectedIdentityRef.current !== "user"
+          ? { organization: selectedIdentityRef.current }
+          : {}),
       };
       const created = await createDiscussion(payload);
       if (created) {
         setDiscussions((prev) => [created, ...prev]);
         setDiscussionCount((prev) => prev + 1);
-        setNewDiscTitle('');
-        setNewDiscMessage('');
+        setNewDiscTitle("");
+        setNewDiscMessage("");
         setShowNewDiscussion(false);
       }
     } catch (error) {
-      console.error('Error creating discussion:', error);
+      console.error("Error creating discussion:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -198,12 +207,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
     async function loadDatasets() {
       try {
-        const slugs = datasetRefs.map((d) =>
-          d.uri.split('/').filter(Boolean).pop() || d.id
-        );
-        const results = await Promise.all(
-          slugs.map((s) => fetchDataset(s).catch(() => null))
-        );
+        const slugs = datasetRefs.map((d) => d.uri.split("/").filter(Boolean).pop() || d.id);
+        const results = await Promise.all(slugs.map((s) => fetchDataset(s).catch(() => null)));
         setFullDatasets(results.filter((d): d is Dataset => d !== null));
       } catch {
         setFullDatasets([]);
@@ -230,11 +235,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   }, [reuse]);
 
   if (isLoadingReuse) {
-    return <p className="text-neutral-900 text-base p-32">A carregar...</p>;
+    return <p className="p-32 text-base text-neutral-900">A carregar...</p>;
   }
 
   if (!reuse) {
-    return <p className="text-neutral-900 text-base p-32">Reutilização não encontrada.</p>;
+    return <p className="p-32 text-base text-neutral-900">Reutilização não encontrada.</p>;
   }
 
   const formatDate = (dateString: string) => {
@@ -272,23 +277,26 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
     <TabBody>
       <div className="relative">
         <div
-          className="absolute inset-y-0 -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64 bg-neutral-50 z-0 "
+          className="absolute inset-y-0 z-0 -mx-4 bg-neutral-50 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64"
           aria-hidden="true"
         />
-        <div className="relative z-10 ">
+        <div className="relative z-10">
           <div className="container mx-auto">{content}</div>
         </div>
       </div>
     </TabBody>
   );
 
-  const renderSetDropdown = user && user.organizations ? [{ value: 'user', label: `${user.first_name} ${user.last_name} (utilizador)` }, ...user.organizations.map((org) => ({ value: org.id, label: org.name }))] : [];
-
-
-
+  const renderSetDropdown =
+    user && user.organizations
+      ? [
+          { value: "user", label: `${user.first_name} ${user.last_name} (utilizador)` },
+          ...user.organizations.map((org) => ({ value: org.id, label: org.name })),
+        ]
+      : [];
 
   return (
-    <div className="flex flex-col justify-center items-center w-full">
+    <div className="flex w-full flex-col items-center justify-center">
       {/* Hero Section */}
       <section className="container bg-white text-neutral-900">
         <div className="w-full">
@@ -298,8 +306,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               <Breadcrumb
                 darkMode={false}
                 items={[
-                  { label: 'Home', url: '/' },
-                  { label: 'Reutilizações', url: '/pages/reuses' },
+                  { label: "Home", url: "/" },
+                  { label: "Reutilizações", url: "/pages/reuses" },
                   {
                     label: reuse.title,
                     url: `/pages/reuses/${reuse.slug || reuse.id}`,
@@ -326,7 +334,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   hasIcon={true}
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-line-external-link"
-                  onClick={() => window.open(reuse.url, '_blank')}
+                  onClick={() => window.open(reuse.url, "_blank")}
                 >
                   Veja reutilização
                 </Button>
@@ -370,42 +378,39 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
           )}
 
           {/* Hero Content */}
-          <div className="grid xl:grid-cols-12 gap-32 mt-6 mb-24">
+          <div className="mb-24 mt-6 grid gap-32 xl:grid-cols-12">
             {/* Image Column */}
             <div className="xl:col-span-8">
-              <div className=" w-full">
+              <div className="w-full">
                 <img
-                  src={reuse.image || '/laptop.png'}
+                  src={reuse.image || "/laptop.png"}
                   alt={reuse.title}
-                  className="w-full rounded-[4px]"
-                  style={{ height: '308px', objectFit: 'contain' }}
+                  className="w-full rounded-4"
+                  style={{ height: "308px", objectFit: "contain" }}
                 />
               </div>
             </div>
 
             {/* Card Column */}
-            <div className="xl:col-span-4 card-article-3_2">
+            <div className="card-article-3_2 xl:col-span-4">
               <CardArticle
-                className="bg-[#F2F6FF]! border-none shadow-none [&_.container-body]:p-32 [&_.container-body]:flex [&_.container-body]:flex-col"
+                className="bg-[#F2F6FF]! border-none shadow-none [&_.container-body]:flex [&_.container-body]:flex-col [&_.container-body]:p-32"
                 title={reuse.title}
                 subtitle={
-                  <div className="flex flex-col gap-24 mb-16">
+                  <div className="mb-16 flex flex-col gap-24">
                     {reuse.organization?.logo ? (
-                      <div className="w-fit h-[48px] card-article-3_2-img py-8 rounded-8 border-2 border-primary-300 flex items-center justify-center">
-                        <img
-                          src={reuse.organization.logo}
-                          alt={reuse.organization.name}
-                        />
+                      <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
+                        <img src={reuse.organization.logo} alt={reuse.organization.name} />
                       </div>
                     ) : (
-                      <div className="w-[160px] h-[56px] bg-white rounded-8 border border-dashed border-neutral-300 flex items-center justify-center text-neutral-400 text-xs font-bold uppercase tracking-wider shadow-sm">
-                        {reuse.organization?.name || 'Sem organização'}
+                      <div className="text-xs shadow-sm flex h-56 w-[160px] items-center justify-center rounded-8 border border-dashed border-neutral-300 bg-white font-bold uppercase tracking-wider text-neutral-400">
+                        {reuse.organization?.name || "Sem organização"}
                       </div>
                     )}
                     {reuse.organization && (
                       <Link
                         href={`/pages/organizations/${reuse.organization.slug}`}
-                        className="text-sm font-medium underline text-primary-600 hover:text-primary-800"
+                        className="text-sm font-medium text-primary-600 underline hover:text-primary-800"
                       >
                         {reuse.organization.name}
                       </Link>
@@ -413,33 +418,28 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   </div>
                 }
               >
-                <div className="flex flex-col gap-24 h-full">
-                  <div className="flex items-center flex-wrap gap-16 text-[15px]">
+                <div className="flex h-full flex-col gap-24">
+                  <div className="flex flex-wrap items-center gap-16 text-[15px]">
                     <span className="font-semibold text-neutral-900">
-                      {localizeReuseTypeId(reuse.type) || 'Aplicação'}
+                      {localizeReuseTypeId(reuse.type) || "Aplicação"}
                     </span>
                     <div className="flex items-center gap-8">
                       <Icon
                         name="agora-line-eye"
-                        className="w-20 h-20 fill-[var(--color-neutral-900)]"
+                        className="h-20 w-20 fill-[var(--color-neutral-900)]"
                       />
                       <span className="text-neutral-900">
-                        {reuse.metrics?.views
-                          ? reuse.metrics.views >= 1000
-                            ? (reuse.metrics.views / 1000).toFixed(0) + ' mil'
-                            : reuse.metrics.views
-                          : '0'}
+                        {formatMetricValue(reuse.metrics?.views, 0)}
                       </span>
                     </div>
                     <div className="flex items-center gap-8">
                       <Icon
                         name="agora-line-layers-menu"
-                        className="w-20 h-20 fill-[var(--color-neutral-900)]"
+                        className="h-20 w-20 fill-[var(--color-neutral-900)]"
                       />
                       <span className="text-neutral-900">{datasetRefs.length}</span>
                     </div>
                   </div>
-
                 </div>
               </CardArticle>
             </div>
@@ -453,39 +453,50 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
           <Tab>
             <TabHeader>Descrição</TabHeader>
             {renderTabBody(
-              <div className="grid xl:grid-cols-12 gap-32 mt-6">
+              <div className="mt-6 grid gap-32 xl:grid-cols-12">
                 {/* Main Content */}
-                <div className="xl:col-span-8 max-w-ch">
-                  <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed relative">
+                <div className="max-w-ch xl:col-span-8">
+                  <div className="prose prose-lg relative max-w-none leading-relaxed text-neutral-700">
                     <div ref={descTitleRef}>
-                      <h2 className="font-medium text-base text-neutral-900 uppercase mb-32">Descrição</h2>
+                      <h2 className="mb-32 text-base font-medium uppercase text-neutral-900">
+                        Descrição
+                      </h2>
                     </div>
                     {/* Hidden measure element */}
-                    <div ref={descMeasureRef} className="absolute invisible pointer-events-none" style={{ top: 0, left: 0, right: 0 }} aria-hidden="true">
+                    <div
+                      ref={descMeasureRef}
+                      className="pointer-events-none invisible absolute"
+                      style={{ top: 0, left: 0, right: 0 }}
+                      aria-hidden="true"
+                    >
                       <div
-                        className="mb-32 text-neutral-900 [&_a]:underline [&_a]:text-primary-600"
+                        className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline"
                         dangerouslySetInnerHTML={{ __html: reuse.description }}
                       />
                     </div>
                     <div
                       className="overflow-hidden"
-                      style={!descExpanded && descOverflowing && descAvailableHeight ? { maxHeight: descAvailableHeight } : undefined}
+                      style={
+                        !descExpanded && descOverflowing && descAvailableHeight
+                          ? { maxHeight: descAvailableHeight }
+                          : undefined
+                      }
                     >
                       <div
-                        className="mb-32 text-neutral-900 [&_a]:underline [&_a]:text-primary-600"
+                        className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline"
                         dangerouslySetInnerHTML={{ __html: reuse.description }}
                       />
                     </div>
                     {descOverflowing && (
                       <button
                         onClick={() => setDescExpanded(!descExpanded)}
-                        className="flex items-center gap-8 text-primary-600 cursor-pointer hover:underline mt-8"
+                        className="mt-8 flex cursor-pointer items-center gap-8 text-primary-600 hover:underline"
                       >
                         {descExpanded ? "Ler menos" : "Ler mais"}
                         {descExpanded ? (
-                          <Icon name="agora-line-arrow-up-circle" className="w-24 h-24" />
+                          <Icon name="agora-line-arrow-up-circle" className="h-24 w-24" />
                         ) : (
-                          <Icon name="agora-line-arrow-down-circle" className="w-24 h-24" />
+                          <Icon name="agora-line-arrow-down-circle" className="h-24 w-24" />
                         )}
                       </button>
                     )}
@@ -493,9 +504,12 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 </div>
 
                 {/* Sidebar Metadata */}
-                <aside className="xl:col-span-4 xl:block md:pt-64 flex flex-col gap-16 min-w-0" ref={descSidebarRef}>
+                <aside
+                  className="flex min-w-0 flex-col gap-16 md:pt-64 xl:col-span-4"
+                  ref={descSidebarRef}
+                >
                   {reuseTags.length > 0 && (
-                    <div className="bg-white p-32 rounded-4 min-w-0">
+                    <div className="min-w-0 rounded-4 bg-white p-32">
                       <TagsCollapse
                         tags={reuseTags}
                         title="Etiquetas"
@@ -504,24 +518,17 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     </div>
                   )}
 
-                  <div className="bg-white p-32 rounded-4">
-                    <h3 className="text-sm font-bold tracking-wider mb-8">
-                      Última atualização
-                    </h3>
+                  <div className="rounded-4 bg-white p-32">
+                    <h3 className="text-sm mb-8 font-bold tracking-wider">Última atualização</h3>
                     <p className="font-medium text-neutral-900">
                       {formatDate(reuse.last_modified)}
                     </p>
                   </div>
 
-                  <div className="bg-white p-32 rounded-4">
-                    <h3 className="text-sm font-bold tracking-wider mb-8">
-                      Data de criação
-                    </h3>
-                    <p className="font-medium text-neutral-900">
-                      {formatDate(reuse.created_at)}
-                    </p>
+                  <div className="rounded-4 bg-white p-32">
+                    <h3 className="text-sm mb-8 font-bold tracking-wider">Data de criação</h3>
+                    <p className="font-medium text-neutral-900">{formatDate(reuse.created_at)}</p>
                   </div>
-
                 </aside>
               </div>
             )}
@@ -536,13 +543,20 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     showIcon
                     description={
                       <span>
-                        A sua questão não é sobre a reutilização? <Link href="https://dados.gov.pt/pt/" className="underline text-primary-600" target="_blank">Visite o nosso fórum.</Link>
+                        A sua questão não é sobre a reutilização?{" "}
+                        <Link
+                          href="https://dados.gov.pt/pt/"
+                          className="text-primary-600 underline"
+                          target="_blank"
+                        >
+                          Visite o nosso fórum.
+                        </Link>
                       </span>
                     }
                   />
                 </div>
-                <div className="flex items-center justify-between mb-24">
-                  <h3 className="font-medium text-neutral-900 text-base">
+                <div className="mb-24 flex items-center justify-between">
+                  <h3 className="text-base font-medium text-neutral-900">
                     {discussionCount} {discussionCount === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
                   </h3>
                   <div className="flex items-center gap-24">
@@ -557,6 +571,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       hasIcon={true}
                       leadingIcon="agora-line-plus-circle"
                       leadingIconHover="agora-solid-plus-circle"
+                      className="self-stretch"
                       onClick={() => setShowNewDiscussion(!showNewDiscussion)}
                     >
                       Nova discussão
@@ -564,115 +579,393 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   </div>
                 </div>
                 {showNewDiscussion && (
-                  <div className="bg-white rounded-8 p-32 mb-24">
-                    <div className="flex justify-between items-center mb-16">
-                      <h3 className="font-bold text-neutral-900 text-base">Nova discussão</h3>
-                      <Button variant="primary" appearance="outline" hasIcon leadingIcon="agora-line-x" leadingIconHover="agora-solid-x" onClick={() => setShowNewDiscussion(false)}>
+                  <div className="mb-24 rounded-8 bg-white p-32">
+                    <div className="mb-16 flex items-center justify-between">
+                      <h3 className="text-base font-bold text-neutral-900">Nova discussão</h3>
+                      <Button
+                        variant="primary"
+                        appearance="outline"
+                        hasIcon
+                        leadingIcon="agora-line-x"
+                        leadingIconHover="agora-solid-x"
+                        onClick={() => setShowNewDiscussion(false)}
+                      >
                         Fechar
                       </Button>
                     </div>
-                    <p className="text-sm text-neutral-900 mb-16">
-                      Os campos marcados com um asterisco (<span className="text-red-500">*</span>) são obrigatórios.
+                    <p className="text-sm mb-16 text-neutral-900">
+                      Os campos marcados com um asterisco (<span className="text-red-500">*</span>)
+                      são obrigatórios.
                     </p>
                     {user?.organizations && user.organizations.length > 0 && (
                       <div className="mb-24">
-                        <span className="block text-sm font-medium text-neutral-900 mb-8">
+                        <span className="text-sm mb-8 block font-medium text-neutral-900">
                           Escolha a identidade com a qual deseja publicar esta mensagem.
                         </span>
-                        <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id="discussion-identity-reuse" onChangeRef={selectedIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
+                        <IsolatedSelect
+                          label=""
+                          hideLabel
+                          placeholder="Para pesquisar..."
+                          id="discussion-identity-reuse"
+                          onChangeRef={selectedIdentityRef}
+                          searchable
+                          searchInputPlaceholder="Para pesquisar..."
+                          searchNoResultsText="Sem resultados"
+                        >
                           <DropdownSection name="identity">
                             {renderSetDropdown.map((option) => (
-                              <DropdownOption key={option.value} value={option.value}>{option.label}</DropdownOption>
+                              <DropdownOption key={option.value} value={option.value}>
+                                {option.label}
+                              </DropdownOption>
                             ))}
                           </DropdownSection>
                         </IsolatedSelect>
                       </div>
                     )}
                     <div className="mb-24">
-                      <InputText label="Título *" value={newDiscTitle} onChange={(e) => setNewDiscTitle(e.target.value)} required />
+                      <InputText
+                        label="Título *"
+                        value={newDiscTitle}
+                        onChange={(e) => setNewDiscTitle(e.target.value)}
+                        required
+                      />
                     </div>
                     <div className="mb-24">
-                      <InputTextArea label="Mensagem *" value={newDiscMessage} onChange={(e) => setNewDiscMessage(e.target.value)} rows={4} placeholder="Mantenha a cordialidade e postura construtiva. Não partilhe informações pessoais." required />
+                      <InputTextArea
+                        label="Mensagem *"
+                        value={newDiscMessage}
+                        onChange={(e) => setNewDiscMessage(e.target.value)}
+                        rows={4}
+                        placeholder="Mantenha a cordialidade e postura construtiva. Não partilhe informações pessoais."
+                        required
+                      />
                     </div>
                     <div className="flex justify-end">
-                      <Button variant="primary" appearance="solid" onClick={handleCreateDiscussion} disabled={isSubmitting || !newDiscTitle.trim() || !newDiscMessage.trim()}>
-                        {isSubmitting ? 'A enviar...' : 'Enviar'}
+                      <Button
+                        variant="primary"
+                        appearance="solid"
+                        onClick={handleCreateDiscussion}
+                        disabled={isSubmitting || !newDiscTitle.trim() || !newDiscMessage.trim()}
+                      >
+                        {isSubmitting ? "A enviar..." : "Enviar"}
                       </Button>
                     </div>
                   </div>
                 )}
                 {discussionCount === 0 ? (
-                  <CardNoResults position="center" icon={<Icon name="agora-line-chat" className="w-[40px] h-[40px] text-primary-500 icon-xl" />} title="Ainda não há discussão." description="" hasAnchor={false} />
+                  <CardNoResults
+                    position="center"
+                    icon={
+                      <Icon
+                        name="agora-line-chat"
+                        className="icon-xl h-[40px] w-[40px] text-primary-500"
+                      />
+                    }
+                    title="Ainda não há discussão."
+                    description=""
+                    hasAnchor={false}
+                  />
                 ) : (
                   <div className="flex flex-col gap-32">
                     {discussions.map((disc) => (
-                      <div key={disc.id} className="bg-white rounded-8 p-32">
-                        <div className="flex justify-between items-start">
+                      <div key={disc.id} className="rounded-8 bg-white p-32">
+                        <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h4 className="font-bold text-neutral-900 text-base">{disc.title}</h4>
-                            <p className="text-sm text-neutral-900 mt-4">
-                              <span className="text-primary-600 font-medium">{disc.user.first_name} {disc.user.last_name}</span>
-                              {' — Publicado em '}
-                              {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                            <h4 className="text-base font-bold text-neutral-900">{disc.title}</h4>
+                            <p className="text-sm mt-4 text-neutral-900">
+                              <span className="font-medium text-primary-600">
+                                {disc.user.first_name} {disc.user.last_name}
+                              </span>
+                              {" — Publicado em "}
+                              {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", {
+                                locale: pt,
+                              })}
                             </p>
                           </div>
                           <div className="flex gap-8">
-                            <Button variant="primary" appearance="outline" hasIcon iconOnly leadingIcon="agora-line-edit" leadingIconHover="agora-solid-edit" aria-label="Editar discussão" onClick={() => show(<EditDiscussionPopup discussion={disc} commentIndex={0} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />, { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
-                            <Button variant="danger" appearance="solid" hasIcon iconOnly leadingIcon="agora-line-trash" leadingIconHover="agora-solid-trash" aria-label="Eliminar discussão" onClick={() => show(<DeleteDiscussionPopup discussion={disc} commentIndex={0} onDeleted={() => { setDiscussions((prev) => prev.filter((d) => d.id !== disc.id)); setDiscussionCount((prev) => prev - 1); }} />, { title: "Tem certeza de que deseja eliminar esta discussão?", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
+                            <Button
+                              variant="primary"
+                              appearance="outline"
+                              hasIcon
+                              iconOnly
+                              leadingIcon="agora-line-edit"
+                              leadingIconHover="agora-solid-edit"
+                              aria-label="Editar discussão"
+                              onClick={() =>
+                                show(
+                                  <EditDiscussionPopup
+                                    discussion={disc}
+                                    commentIndex={0}
+                                    onUpdated={(updated) =>
+                                      setDiscussions((prev) =>
+                                        prev.map((d) => (d.id === updated.id ? updated : d))
+                                      )
+                                    }
+                                  />,
+                                  {
+                                    title: "Editar a mensagem",
+                                    closeAriaLabel: "Fechar",
+                                    dimensions: "m",
+                                  }
+                                )
+                              }
+                            >
+                              {" "}
+                            </Button>
+                            <Button
+                              variant="danger"
+                              appearance="solid"
+                              hasIcon
+                              iconOnly
+                              leadingIcon="agora-line-trash"
+                              leadingIconHover="agora-solid-trash"
+                              aria-label="Eliminar discussão"
+                              onClick={() =>
+                                show(
+                                  <DeleteDiscussionPopup
+                                    discussion={disc}
+                                    commentIndex={0}
+                                    onDeleted={() => {
+                                      setDiscussions((prev) =>
+                                        prev.filter((d) => d.id !== disc.id)
+                                      );
+                                      setDiscussionCount((prev) => prev - 1);
+                                    }}
+                                  />,
+                                  {
+                                    title: "Tem certeza de que deseja eliminar esta discussão?",
+                                    closeAriaLabel: "Fechar",
+                                    dimensions: "m",
+                                  }
+                                )
+                              }
+                            >
+                              {" "}
+                            </Button>
                           </div>
                         </div>
                         {disc.discussion.length > 0 && (
-                          <p className="text-neutral-900 text-sm mt-16 mb-16">{disc.discussion[0].content}</p>
+                          <p className="text-sm mb-16 mt-16 text-neutral-900">
+                            {disc.discussion[0].content}
+                          </p>
                         )}
                         {disc.discussion.length > 1 && (
                           <div className="mt-16 space-y-16 border-t border-neutral-200 pt-16">
                             {disc.discussion.slice(1).map((msg, idx) => (
-                              <div key={idx} className="border-l-2 border-primary-600" style={{ paddingLeft: "24px" }}>
-                                <div className="flex justify-between items-start">
+                              <div
+                                key={idx}
+                                className="border-l-2 border-primary-600"
+                                style={{ paddingLeft: "24px" }}
+                              >
+                                <div className="flex items-start justify-between">
                                   <p className="text-sm text-neutral-900">
-                                    <span className="text-primary-600 font-medium">{msg.posted_by.first_name} {msg.posted_by.last_name}</span>
-                                    {' — '}
-                                    {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", { locale: pt })}
+                                    <span className="font-medium text-primary-600">
+                                      {msg.posted_by.first_name} {msg.posted_by.last_name}
+                                    </span>
+                                    {" — "}
+                                    {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", {
+                                      locale: pt,
+                                    })}
                                   </p>
                                   <div className="flex gap-8">
-                                    <Button variant="primary" appearance="outline" hasIcon iconOnly leadingIcon="agora-line-edit" leadingIconHover="agora-solid-edit" aria-label="Editar comentário" onClick={() => show(<EditDiscussionPopup discussion={disc} commentIndex={idx + 1} onUpdated={(updated) => setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))} />, { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
-                                    <Button variant="danger" appearance="solid" hasIcon iconOnly leadingIcon="agora-line-trash" leadingIconHover="agora-solid-trash" aria-label="Eliminar comentário" onClick={() => show(<DeleteDiscussionPopup discussion={disc} commentIndex={idx + 1} onDeleted={() => setDiscussions((prev) => prev.map((d) => d.id === disc.id ? { ...d, discussion: d.discussion.filter((_, i) => i !== idx + 1) } : d))} />, { title: "Tem certeza de que deseja apagar esta mensagem?", closeAriaLabel: "Fechar", dimensions: "m" })}>{" "}</Button>
+                                    <Button
+                                      variant="primary"
+                                      appearance="outline"
+                                      hasIcon
+                                      iconOnly
+                                      leadingIcon="agora-line-edit"
+                                      leadingIconHover="agora-solid-edit"
+                                      aria-label="Editar comentário"
+                                      onClick={() =>
+                                        show(
+                                          <EditDiscussionPopup
+                                            discussion={disc}
+                                            commentIndex={idx + 1}
+                                            onUpdated={(updated) =>
+                                              setDiscussions((prev) =>
+                                                prev.map((d) => (d.id === updated.id ? updated : d))
+                                              )
+                                            }
+                                          />,
+                                          {
+                                            title: "Editar a mensagem",
+                                            closeAriaLabel: "Fechar",
+                                            dimensions: "m",
+                                          }
+                                        )
+                                      }
+                                    >
+                                      {" "}
+                                    </Button>
+                                    <Button
+                                      variant="danger"
+                                      appearance="solid"
+                                      hasIcon
+                                      iconOnly
+                                      leadingIcon="agora-line-trash"
+                                      leadingIconHover="agora-solid-trash"
+                                      aria-label="Eliminar comentário"
+                                      onClick={() =>
+                                        show(
+                                          <DeleteDiscussionPopup
+                                            discussion={disc}
+                                            commentIndex={idx + 1}
+                                            onDeleted={() =>
+                                              setDiscussions((prev) =>
+                                                prev.map((d) =>
+                                                  d.id === disc.id
+                                                    ? {
+                                                        ...d,
+                                                        discussion: d.discussion.filter(
+                                                          (_, i) => i !== idx + 1
+                                                        ),
+                                                      }
+                                                    : d
+                                                )
+                                              )
+                                            }
+                                          />,
+                                          {
+                                            title:
+                                              "Tem certeza de que deseja apagar esta mensagem?",
+                                            closeAriaLabel: "Fechar",
+                                            dimensions: "m",
+                                          }
+                                        )
+                                      }
+                                    >
+                                      {" "}
+                                    </Button>
                                   </div>
                                 </div>
-                                <p className="text-neutral-900 text-sm mt-4">{msg.content}</p>
+                                <p className="text-sm mt-4 text-neutral-900">{msg.content}</p>
                               </div>
                             ))}
                           </div>
                         )}
                         {replyingTo === disc.id ? (
                           <div className="mt-48 border-t border-neutral-200 pt-32">
-                            <div className="flex justify-between items-center mb-24">
-                              <h4 className="font-bold text-neutral-900 text-sm uppercase">Responder</h4>
-                              <Button variant="primary" appearance="outline" hasIcon leadingIcon="agora-line-x" leadingIconHover="agora-solid-x" onClick={() => { setReplyingTo(null); setReplyMessage(''); }}>Fechar</Button>
+                            <div className="mb-24 flex items-center justify-between">
+                              <h4 className="text-sm font-bold uppercase text-neutral-900">
+                                Responder
+                              </h4>
+                              <Button
+                                variant="primary"
+                                appearance="outline"
+                                hasIcon
+                                leadingIcon="agora-line-x"
+                                leadingIconHover="agora-solid-x"
+                                onClick={() => {
+                                  setReplyingTo(null);
+                                  setReplyMessage("");
+                                }}
+                              >
+                                Fechar
+                              </Button>
                             </div>
                             {user?.organizations && user.organizations.length > 0 && (
                               <div className="mb-16">
-                                <span className="block text-sm font-medium text-neutral-900 mb-8">Escolha a identidade com a qual deseja publicar esta mensagem.</span>
-                                <IsolatedSelect label="" hideLabel placeholder="Para pesquisar..." id={`reply-identity-${disc.id}`} onChangeRef={replyIdentityRef} searchable searchInputPlaceholder="Para pesquisar..." searchNoResultsText="Sem resultados">
+                                <span className="text-sm mb-8 block font-medium text-neutral-900">
+                                  Escolha a identidade com a qual deseja publicar esta mensagem.
+                                </span>
+                                <IsolatedSelect
+                                  label=""
+                                  hideLabel
+                                  placeholder="Para pesquisar..."
+                                  id={`reply-identity-${disc.id}`}
+                                  onChangeRef={replyIdentityRef}
+                                  searchable
+                                  searchInputPlaceholder="Para pesquisar..."
+                                  searchNoResultsText="Sem resultados"
+                                >
                                   <DropdownSection name="identity">
                                     {renderSetDropdown.map((option) => (
-                                      <DropdownOption key={option.value} value={option.value}>{option.label}</DropdownOption>
+                                      <DropdownOption key={option.value} value={option.value}>
+                                        {option.label}
+                                      </DropdownOption>
                                     ))}
                                   </DropdownSection>
                                 </IsolatedSelect>
                               </div>
                             )}
                             <div className="mb-16">
-                              <InputTextArea label="Mensagem" value={replyMessage} onChange={(e) => setReplyMessage(e.target.value)} rows={3} placeholder="Mantenha a cordialidade e postura construtiva. Não partilhe informações pessoais." />
+                              <InputTextArea
+                                label="Mensagem"
+                                value={replyMessage}
+                                onChange={(e) => setReplyMessage(e.target.value)}
+                                rows={3}
+                                placeholder="Mantenha a cordialidade e postura construtiva. Não partilhe informações pessoais."
+                              />
                             </div>
                             <div className="flex justify-end gap-16">
-                              <Button variant="primary" appearance="outline" disabled={isReplying || !replyMessage.trim()} onClick={async () => { setIsReplying(true); const org = replyIdentityRef.current && replyIdentityRef.current !== 'user' ? replyIdentityRef.current : undefined; const updated = await replyToDiscussion(disc.id, replyMessage.trim(), { organization: org, close: true }); if (updated) { setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d))); setReplyingTo(null); setReplyMessage(''); } setIsReplying(false); }}>Responder e fechar</Button>
-                              <Button variant="primary" appearance="solid" disabled={isReplying || !replyMessage.trim()} onClick={async () => { setIsReplying(true); const org = replyIdentityRef.current && replyIdentityRef.current !== 'user' ? replyIdentityRef.current : undefined; const updated = await replyToDiscussion(disc.id, replyMessage.trim(), { organization: org }); if (updated) { setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d))); setReplyingTo(null); setReplyMessage(''); } setIsReplying(false); }}>Responder</Button>
+                              <Button
+                                variant="primary"
+                                appearance="outline"
+                                disabled={isReplying || !replyMessage.trim()}
+                                onClick={async () => {
+                                  setIsReplying(true);
+                                  const org =
+                                    replyIdentityRef.current && replyIdentityRef.current !== "user"
+                                      ? replyIdentityRef.current
+                                      : undefined;
+                                  const updated = await replyToDiscussion(
+                                    disc.id,
+                                    replyMessage.trim(),
+                                    { organization: org, close: true }
+                                  );
+                                  if (updated) {
+                                    setDiscussions((prev) =>
+                                      prev.map((d) => (d.id === updated.id ? updated : d))
+                                    );
+                                    setReplyingTo(null);
+                                    setReplyMessage("");
+                                  }
+                                  setIsReplying(false);
+                                }}
+                              >
+                                Responder e fechar
+                              </Button>
+                              <Button
+                                variant="primary"
+                                appearance="solid"
+                                disabled={isReplying || !replyMessage.trim()}
+                                onClick={async () => {
+                                  setIsReplying(true);
+                                  const org =
+                                    replyIdentityRef.current && replyIdentityRef.current !== "user"
+                                      ? replyIdentityRef.current
+                                      : undefined;
+                                  const updated = await replyToDiscussion(
+                                    disc.id,
+                                    replyMessage.trim(),
+                                    { organization: org }
+                                  );
+                                  if (updated) {
+                                    setDiscussions((prev) =>
+                                      prev.map((d) => (d.id === updated.id ? updated : d))
+                                    );
+                                    setReplyingTo(null);
+                                    setReplyMessage("");
+                                  }
+                                  setIsReplying(false);
+                                }}
+                              >
+                                Responder
+                              </Button>
                             </div>
                           </div>
                         ) : (
                           <div className="flex justify-end" style={{ marginTop: "32px" }}>
-                            <Button variant="primary" appearance="outline" onClick={() => { setReplyingTo(disc.id); setReplyMessage(''); }}>Responder</Button>
+                            <Button
+                              variant="primary"
+                              appearance="outline"
+                              onClick={() => {
+                                setReplyingTo(disc.id);
+                                setReplyMessage("");
+                              }}
+                            >
+                              Responder
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -687,11 +980,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
       {/* Associated Datasets */}
       {datasetRefs.length > 0 && (
-        <section className="w-full py-32">
-          <div className="container mx-auto md:gap-32 xl:gap-64 bg-white">
-            <h2 className="text-xl font-bold text-[#000032] mb-32">
-              {datasetRefs.length} conjunto{datasetRefs.length !== 1 ? 's' : ''} de dados
-              associado{datasetRefs.length !== 1 ? 's' : ''}
+        <section className="w-full py-64">
+          <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
+            <h2 className="text-xl mb-32 font-bold text-[#000032]">
+              {datasetRefs.length} conjunto{datasetRefs.length !== 1 ? "s" : ""} de dados associado
+              {datasetRefs.length !== 1 ? "s" : ""}
             </h2>
             {!isLoadingDatasets && fullDatasets.length > 0 ? (
               <>
@@ -702,135 +995,14 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
                   }}
                 >
-                  {paginatedDatasets.map((dataset) => {
-                    const qualityScore =
-                      dataset.quality?.score != null
-                        ? Math.round(dataset.quality.score * 100)
-                        : 0;
-                    const formatMetric = (value: number | undefined) => {
-                      if (!value) return "0";
-                      if (value >= 1_000_000)
-                        return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
-                      if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
-                      return String(value);
-                    };
-                    const timeAgo = dataset.last_modified
-                      ? formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
-                        .replace("aproximadamente ", "")
-                        .replace("quase ", "")
-                        .replace("menos de ", "")
-                        .replace("cerca de ", "")
-                      : "Desconhecido";
-
-                    return (
-                      <Link
-                        key={dataset.id}
-                        href={`/pages/datasets/${dataset.slug}`}
-                        className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
-                      >
-                        <CardGeneral
-                          variant="white"
-                          image={{
-                            src:
-                              dataset.organization?.logo ||
-                              "/images/placeholders/organization.png",
-                            alt: dataset.organization?.name || "Organização",
-                            height: "56px",
-                            className: "bg-primary-100 !object-contain !h-[56px]",
-                          }}
-                          subtitleText={
-                            (
-                              <div className="flex flex-col">
-                                <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                                  {timeAgo}
-                                </span>
-                                <span
-                                  style={{ fontSize: "16px", fontWeight: 300 }}
-                                  className="text-neutral-900 mt-4"
-                                >
-                                  {dataset.organization?.name || "Sem Organização"}
-                                </span>
-                              </div>
-                            ) as unknown as string
-                          }
-                          titleText={dataset.title}
-                          descriptionText={
-                            (
-                              <div className="flex flex-col">
-                                <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
-                                  {dataset.description}
-                                </p>
-                                <div
-                                  className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
-                                >
-                                  <ProgressBar
-                                    value={qualityScore}
-                                    max={100}
-                                    hideLabel={true}
-                                    hidePercentageValue={true}
-                                  />
-                                  <span className="text-[14px] text-neutral-900 mt-4 block">
-                                    {qualityScore}% Qualidade dos metadados
-                                  </span>
-                                  <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
-                                    <div className="flex items-center gap-8" title="Visualizações">
-                                      <Icon
-                                        name="agora-solid-eye"
-                                        dimensions="xs"
-                                        className="fill-neutral-700"
-                                        aria-hidden="true"
-                                      />
-                                      <span>{formatMetric(dataset.metrics?.views)}</span>
-                                    </div>
-                                    <div className="flex items-center gap-8" title="Downloads">
-                                      <Icon
-                                        name="agora-solid-download"
-                                        dimensions="xs"
-                                        className="fill-neutral-700"
-                                        aria-hidden="true"
-                                      />
-                                      <span>{formatMetric(dataset.metrics?.resources_downloads)}</span>
-                                    </div>
-                                    <div className="flex items-center gap-8" title="Reutilizações">
-                                      <svg
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        className="w-16 h-16 fill-neutral-700"
-                                        aria-hidden="true"
-                                      >
-                                        <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" />
-                                      </svg>
-                                      <span>{dataset.metrics?.reuses || 0}</span>
-                                    </div>
-                                    <div className="flex items-center gap-8" title="Favoritos">
-                                      <Icon
-                                        name="agora-solid-star"
-                                        dimensions="xs"
-                                        className="fill-neutral-700"
-                                        aria-hidden="true"
-                                      />
-                                      <span>{formatMetric(dataset.metrics?.followers)}</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-8 text-primary-600 mt-16">
-                                    <Icon
-                                      name="agora-line-arrow-right-circle"
-                                      className="w-32 h-32"
-                                      aria-hidden="true"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ) as unknown as string
-                          }
-                          isBlockedLink={true}
-                          anchor={{
-                            href: `/pages/datasets/${dataset.slug}`,
-                          }}
-                        />
-                      </Link>
-                    );
+                  {paginatedDatasets.map((dataset, index) => {
+                    const timeAgo = formatDateToTimeAgo(dataset.last_modified);
+                    const cardProps = {
+                      ...dataset,
+                      last_modified: timeAgo,
+                      link: `/pages/datasets/${dataset.slug}`,
+                    } as CardMetricsProps;
+                    return <CardMetrics key={`dataset-${index}`} {...cardProps} />;
                   })}
                 </div>
                 {renderDatasetsPagination()}

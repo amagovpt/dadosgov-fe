@@ -34,9 +34,10 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
-import PageBanner from "@/components/PageBanner";
+import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { localizeReuseType } from "@/lib/reuse-labels";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 const SORT_OPTIONS: Record<string, string> = {
   relevancia: "",
@@ -87,8 +88,8 @@ function TypeSelect({
     const label = match ? localizeReuseType(match) : "Todos os tipos";
     return (
       <div>
-        <label className="text-s-regular text-neutral-700 mb-4 block">Tipo:</label>
-        <div className="w-full border border-neutral-300 rounded-8 px-16 py-12 text-m-regular text-neutral-900 bg-white">
+        <label className="mb-4 block text-s-regular text-neutral-700">Tipo:</label>
+        <div className="w-full rounded-8 border border-neutral-300 bg-white px-16 py-12 text-m-regular text-neutral-900">
           {label}
         </div>
       </div>
@@ -130,15 +131,18 @@ const REUSE_TOGGLE_FILTERS = {
 
 const DATE_RANGE_MAP: Record<string, () => string> = {
   "30_days": () => {
-    const d = new Date(); d.setDate(d.getDate() - 30);
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
     return d.toISOString().slice(0, 10);
   },
   "12_months": () => {
-    const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 1);
     return d.toISOString().slice(0, 10);
   },
   "3_years": () => {
-    const d = new Date(); d.setFullYear(d.getFullYear() - 3);
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 3);
     return d.toISOString().slice(0, 10);
   },
 };
@@ -278,20 +282,20 @@ export default function ReusesClient({
     searchable: boolean;
     suggest?: boolean;
   }[] = [
-      {
-        name: "Organizações",
-        param: "organization",
-        data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
-        searchable: true,
-      },
-      {
-        name: "Palavras-chave",
-        param: "tag",
-        data: filterTagOptions,
-        searchable: true,
-        suggest: true,
-      },
-    ];
+    {
+      name: "Organizações",
+      param: "organization",
+      data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
+      searchable: true,
+    },
+    {
+      name: "Palavras-chave",
+      param: "tag",
+      data: filterTagOptions,
+      searchable: true,
+      suggest: true,
+    },
+  ];
 
   const buildUrl = useCallback(
     (overrides: Partial<ReuseFilters> & { page?: number } = {}) => {
@@ -371,9 +375,9 @@ export default function ReusesClient({
   );
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters reuse">
+    <div className="filters reuse flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
-        <PageBanner
+        <HeroGeneral
           title="Reutilizações"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
@@ -382,7 +386,7 @@ export default function ReusesClient({
             { label: "Reutilizações", url: "/pages/reuses" },
           ]}
           subtitle={
-            <p className="text-primary-100 max-w-[592px]">
+            <p className="max-w-[592px] text-primary-100">
               {total === 0
                 ? "Não existem resultados disponíveis para a sua pesquisa"
                 : `Pesquise através de ${total.toLocaleString("pt-PT")} reutilizações em dados.gov.pt`}
@@ -390,7 +394,7 @@ export default function ReusesClient({
           }
         >
           <PublishDropdown darkMode={true} outline={false} />
-        </PageBanner>
+        </HeroGeneral>
 
         {/* Search Filter */}
         <SearchFilter
@@ -402,32 +406,32 @@ export default function ReusesClient({
         />
 
         {/* Main Content */}
-        <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
+        <div className="container mx-auto bg-primary-50 md:gap-32 xl:gap-64">
           {/* Results count + Sort toggles */}
-          <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">
-            <div className="xl:col-span-5 flex flex-row items-end gap-24 pl-0 py-16">
+          <div className="grid-filters grid gap-x-[32px] md:grid-cols-3 xl:grid-cols-12">
+            <div className="flex flex-row items-end gap-24 py-16 pl-0 xl:col-span-5">
               <Button
                 appearance="outline"
                 variant="neutral"
                 hasIcon
                 {...(filtersOpen
                   ? {
-                    leadingIcon: "agora-line-chevron-left",
-                    leadingIconHover: "agora-solid-chevron-left",
-                  }
+                      leadingIcon: "agora-line-chevron-left",
+                      leadingIconHover: "agora-solid-chevron-left",
+                    }
                   : {
-                    trailingIcon: "agora-line-chevron-right",
-                    trailingIconHover: "agora-solid-chevron-right",
-                  })}
+                      trailingIcon: "agora-line-chevron-right",
+                      trailingIconHover: "agora-solid-chevron-right",
+                    })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
               </Button>
-              <span className="text-neutral-900 text-l-regular whitespace-nowrap">
+              <span className="whitespace-nowrap text-l-regular text-neutral-900">
                 {total.toLocaleString("pt-PT")} Resultados
               </span>
             </div>
-            <div className="xl:col-span-7 flex items-center justify-end py-16">
+            <div className="flex items-center justify-end py-16 xl:col-span-7">
               <ToggleGroup
                 multiple={false}
                 value={sortDefault}
@@ -449,18 +453,18 @@ export default function ReusesClient({
           <div className="divider-neutral-200 mb-24" />
 
           <div
-            className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
+            className={`grid-filters grid gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
             {filtersOpen && (
               <div className="xl:col-span-5 xl:block">
-                <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
-                  <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
+                <div className="mb-[36px] mt-[36px] flex flex-col gap-32">
+                  <h2 className="text-xl font-bold text-neutral-900">Filtros</h2>
                   {(Object.keys(REUSE_TOGGLE_FILTERS) as ReuseFilterKey[]).map((filterKey) => {
                     const section = REUSE_TOGGLE_FILTERS[filterKey];
                     return (
-                      <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
-                        <h3 className="font-bold text-base text-neutral-900 mb-8">
+                      <div key={filterKey} className="flex max-w-[592px] flex-col gap-8 pr-32">
+                        <h3 className="mb-8 text-base font-bold text-neutral-900">
                           {section.title}
                         </h3>
                         {section.options.map((option) => {
@@ -479,12 +483,12 @@ export default function ReusesClient({
                               fullWidth={true}
                               className="w-full"
                             >
-                              <div className="flex items-center gap-12 font-bold text-sm">
+                              <div className="text-sm flex items-center gap-12 font-bold">
                                 <span
                                   className={
                                     isSelected
-                                      ? "text-primary-600 font-bold"
-                                      : "text-neutral-900 font-bold"
+                                      ? "font-bold text-primary-600"
+                                      : "font-bold text-neutral-900"
                                   }
                                 >
                                   {option.label}
@@ -494,7 +498,7 @@ export default function ReusesClient({
                                     variant="neutral"
                                     appearance="outline"
                                     circular={false}
-                                    className="text-xs font-medium text-neutral-500 ml-16"
+                                    className="text-xs ml-16 font-medium text-neutral-500"
                                   >
                                     {formatCount(filterCounts[`${filterKey}_${option.id}`])}
                                   </Pill>
@@ -508,7 +512,7 @@ export default function ReusesClient({
                   })}
                 </div>
 
-                <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">
+                <h2 className="text-xl mb-[32px] mt-[36px] font-bold text-neutral-900">
                   Filtros avançados
                 </h2>
 
@@ -520,8 +524,8 @@ export default function ReusesClient({
 
                     const selectedItems: { id: string; name: string }[] = group.suggest
                       ? activeValues
-                        .filter((v) => !group.data.some((d) => d.id === v))
-                        .map((v) => ({ id: v, name: v }))
+                          .filter((v) => !group.data.some((d) => d.id === v))
+                          .map((v) => ({ id: v, name: v }))
                       : [];
 
                     const allData = [...selectedItems, ...group.data];
@@ -529,8 +533,8 @@ export default function ReusesClient({
                     const filteredData = group.suggest
                       ? allData
                       : allData.filter((item) =>
-                        item.name.toLowerCase().includes(sq.toLowerCase())
-                      );
+                          item.name.toLowerCase().includes(sq.toLowerCase())
+                        );
 
                     const showScroll = filteredData.length > 5;
 
@@ -553,13 +557,13 @@ export default function ReusesClient({
                           {activeCount > 0 && (
                             <button
                               onClick={() => handleClearAdvancedFilter(group.param)}
-                              className="text-xs text-primary-500 hover:text-primary-700 underline mb-4 mt-4 cursor-pointer"
+                              className="text-xs mb-4 mt-4 cursor-pointer text-primary-500 underline hover:text-primary-700"
                             >
                               Limpar {group.name.toLowerCase()}
                             </button>
                           )}
                           {group.searchable && (
-                            <div className="mb-4 mt-8 relative">
+                            <div className="relative mb-4 mt-8">
                               <InputSearch
                                 label="Pesquisar"
                                 hideLabel
@@ -573,14 +577,15 @@ export default function ReusesClient({
                               />
                               <Icon
                                 name="agora-solid-search"
-                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5 pointer-events-none"
+                                className="w-5 h-5 pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform text-primary-500"
                                 aria-hidden="true"
                               />
                             </div>
                           )}
                           <div
-                            className={`flex flex-col gap-2 ${showScroll ? "max-h-[225px] overflow-y-auto" : ""
-                              }`}
+                            className={`flex flex-col gap-2 ${
+                              showScroll ? "max-h-[225px] overflow-y-auto" : ""
+                            }`}
                           >
                             {isFiltersLoading && !group.suggest ? null : filteredData.length > 0 ? (
                               filteredData.map((item) => (
@@ -631,7 +636,7 @@ export default function ReusesClient({
             <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>
               <div>
                 <div
-                  className="grid agora-card-links-datasets-px0 gap-32"
+                  className="agora-card-links-datasets-px0 grid gap-32"
                   style={{
                     gridTemplateColumns: filtersOpen
                       ? "repeat(1, minmax(0, 1fr))"
@@ -640,32 +645,23 @@ export default function ReusesClient({
                 >
                   {reuses.length > 0 ? (
                     reuses.map((reuse) => {
-                      const timeAgo =
-                        reuse.last_modified || reuse.created_at
-                          ? formatDistanceToNow(new Date(reuse.last_modified || reuse.created_at), {
-                            locale: pt,
-                          })
-                            .replace("aproximadamente ", "")
-                            .replace("quase ", "")
-                            .replace("menos de ", "")
-                            .replace("cerca de ", "")
-                          : "Desconhecido";
+                      const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at);
 
                       return (
                         <div key={reuse.id} className="h-full">
                           <CardLinks
                             onClick={() => router.push(`/pages/reuses/${reuse.slug}`)}
-                            className="cursor-pointer text-neutral-900 h-full"
+                            className="h-full cursor-pointer text-neutral-900"
                             variant="transparent"
                             image={{
                               src: reuse.image_thumbnail || reuse.image || "/laptop.png",
                               alt: reuse.title,
                             }}
                             category={reuse.organization?.name || "Reutilização"}
-                            title={<div className="underline text-xl-bold">{reuse.title}</div>}
+                            title={<div className="text-xl-bold underline">{reuse.title}</div>}
                             description={
                               reuse.description ? (
-                                <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                                <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                                   {reuse.description}
                                 </p>
                               ) : undefined
@@ -726,7 +722,7 @@ export default function ReusesClient({
                     <div className="col-span-full">
                       <CardNoResults
                         icon={
-                          <Icon name="agora-line-search" className="w-12 h-12 text-primary-500" />
+                          <Icon name="agora-line-search" className="h-12 w-12 text-primary-500" />
                         }
                         title="Não encontrou nenhuma reutilização?"
                         subtitle={
@@ -747,7 +743,7 @@ export default function ReusesClient({
                 </div>
 
                 {/* Pagination */}
-                <div className="pb-64 mt-8 flex justify-center">
+                <div className="mt-8 flex justify-center pb-64">
                   <Pagination
                     currentPage={currentPage}
                     totalItems={total}

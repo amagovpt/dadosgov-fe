@@ -28,6 +28,7 @@ import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import { formatMetricValue } from "@/utils/formatNumber";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -175,7 +176,7 @@ export default function CommunityResourceFormClient({
         <>
           Recomenda-se escolher um título que informe claramente qualquer usuário sobre o conteúdo
           do arquivo. Algumas práticas a serem evitadas:
-          <ul className="list-disc pl-16 mt-8">
+          <ul className="mt-8 list-disc pl-16">
             <li>atribuir um título muito genérico (por exemplo, &quot;list.csv&quot;);</li>
             <li>Dar um título muito longo dificultaria a manipulação do arquivo;</li>
             <li>
@@ -195,7 +196,7 @@ export default function CommunityResourceFormClient({
       content: (
         <>
           Você pode escolher entre os seguintes tipos:
-          <ul className="list-disc pl-16 mt-8">
+          <ul className="mt-8 list-disc pl-16">
             <li>Ficheiros principais</li>
             <li>Documentação</li>
             <li>Atualizar</li>
@@ -213,7 +214,7 @@ export default function CommunityResourceFormClient({
         <>
           A descrição de um arquivo facilita a reutilização de dados. Ela inclui, entre outras
           coisas:
-          <ul className="list-disc pl-16 mt-8">
+          <ul className="mt-8 list-disc pl-16">
             <li>uma descrição geral do conjunto de dados;</li>
             <li>uma descrição do método de produção de dados;</li>
             <li>uma descrição do modelo de dados;</li>
@@ -294,13 +295,13 @@ export default function CommunityResourceFormClient({
               />
 
               {apiError && (
-                <div className="mt-[32px] mb-[16px]">
+                <div className="mb-[16px] mt-[32px]">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
 
               <form className="admin-page__form">
-                <p className="text-neutral-900 text-base leading-7 pt-32">
+                <p className="pt-32 text-base leading-7 text-neutral-900">
                   Os campos marcados com um asterisco ( * ) são obrigatórios.
                 </p>
 
@@ -323,7 +324,7 @@ export default function CommunityResourceFormClient({
                   </p>
                   <a href="/pages/admin/organizations/new" className="admin-page__org-card-link">
                     Crie ou integre uma organização em dados.gov.pt
-                    <Icon name="agora-line-arrow-right-circle" className="w-[24px] h-[24px]" />
+                    <Icon name="agora-line-arrow-right-circle" className="h-[24px] w-[24px]" />
                   </a>
                 </div>
 
@@ -331,7 +332,7 @@ export default function CommunityResourceFormClient({
                 <h2 className="admin-page__section-title">Ficheiro ou link</h2>
 
                 <div className="admin-page__fields-group">
-                  <div className="[&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
+                  <div className="[&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
                     <DragAndDropUploader
                       label="Ficheiros"
                       dragAndDropLabel="Arraste e largue o ficheiro aqui"
@@ -472,10 +473,10 @@ export default function CommunityResourceFormClient({
                       title={dataset.title}
                       description={
                         <div className="flex flex-col gap-12">
-                          <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                          <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                             {dataset.description}
                           </p>
-                          <div className="flex flex-wrap gap-8 items-center mt-[8px]">
+                          <div className="mt-[8px] flex flex-wrap items-center gap-8">
                             <span className="text-sm font-medium text-neutral-900">
                               Metadados:{" "}
                               {dataset.quality?.score != null
@@ -484,30 +485,15 @@ export default function CommunityResourceFormClient({
                               %
                             </span>
                           </div>
-                          <div className="flex items-center flex-wrap gap-[32px] text-xs mt-[32px] text-[#034AD8] mb-[32px]">
+                          <div className="text-xs mb-[32px] mt-[32px] flex flex-wrap items-center gap-[32px] text-[#034AD8]">
                             <div className="flex items-center gap-8" title="Visualizações">
                               <Icon name="agora-line-eye" className="" aria-hidden="true" />
-                              <span>
-                                {dataset.metrics?.views
-                                  ? dataset.metrics.views >= 1000000
-                                    ? (dataset.metrics.views / 1000000)
-                                        .toFixed(1)
-                                        .replace(".", ",") + " M"
-                                    : dataset.metrics.views >= 1000
-                                      ? (dataset.metrics.views / 1000).toFixed(0) + " mil"
-                                      : dataset.metrics.views
-                                  : "0"}
-                              </span>
+                              <span>{formatMetricValue(dataset.metrics?.views)}</span>
                             </div>
                             <div className="flex items-center gap-8" title="Downloads">
                               <Icon name="agora-line-download" className="" aria-hidden="true" />
                               <span>
-                                {dataset.metrics?.resources_downloads
-                                  ? dataset.metrics.resources_downloads >= 1000
-                                    ? (dataset.metrics.resources_downloads / 1000).toFixed(0) +
-                                      " mil"
-                                    : dataset.metrics.resources_downloads
-                                  : "0"}
+                                {formatMetricValue(dataset.metrics?.resources_downloads, 0)}
                               </span>
                             </div>
                             <div className="flex items-center gap-8" title="Reutilizações">
@@ -526,13 +512,7 @@ export default function CommunityResourceFormClient({
                                 alt=""
                                 aria-hidden="true"
                               />
-                              <span>
-                                {dataset.metrics?.followers
-                                  ? dataset.metrics.followers >= 1000
-                                    ? (dataset.metrics.followers / 1000).toFixed(0) + " mil"
-                                    : dataset.metrics.followers
-                                  : "0"}
-                              </span>
+                              <span>{formatMetricValue(dataset.metrics?.followers, 0)}</span>
                             </div>
                           </div>
                         </div>
@@ -550,7 +530,7 @@ export default function CommunityResourceFormClient({
                       blockedLink={true}
                     />
                     {!datasetId && (
-                      <div className="flex justify-end mt-[8px]">
+                      <div className="mt-[8px] flex justify-end">
                         <Button
                           appearance="solid"
                           variant="danger"
@@ -648,9 +628,9 @@ export default function CommunityResourceFormClient({
                     category={
                       createdResource.format ? createdResource.format.toUpperCase() : "Recurso"
                     }
-                    title={<div className="underline text-xl-bold">{createdResource.title}</div>}
+                    title={<div className="text-xl-bold underline">{createdResource.title}</div>}
                     description={
-                      <div className="flex flex-col gap-4 mt-[8px] pb-[32px]">
+                      <div className="mt-[8px] flex flex-col gap-4 pb-[32px]">
                         <p className="text-sm text-neutral-900">
                           Atualizado hoje
                           {createdResource.format
@@ -671,8 +651,8 @@ export default function CommunityResourceFormClient({
                             : ""}
                         </p>
                         {createdResource.url && (
-                          <p className="flex items-center gap-8 text-sm text-neutral-900 mt-8">
-                            <Icon name="agora-line-map-pin" className="w-[16px] h-[16px]" />
+                          <p className="text-sm mt-8 flex items-center gap-8 text-neutral-900">
+                            <Icon name="agora-line-map-pin" className="h-[16px] w-[16px]" />
                             Localização:{" "}
                             {(() => {
                               try {
@@ -684,8 +664,8 @@ export default function CommunityResourceFormClient({
                           </p>
                         )}
                         {createdResource.checksum && (
-                          <p className="flex items-center gap-8 text-sm text-neutral-900 mt-8">
-                            <Icon name="agora-line-code" className="w-[16px] h-[16px]" />
+                          <p className="text-sm mt-8 flex items-center gap-8 text-neutral-900">
+                            <Icon name="agora-line-code" className="h-[16px] w-[16px]" />
                             Soma de verificação: {createdResource.checksum.value}
                           </p>
                         )}
@@ -694,7 +674,7 @@ export default function CommunityResourceFormClient({
                     date={<span className="font-[300]">Atualizado hoje</span>}
                     blockedLink={true}
                   />
-                  <div className="admin-page__actions flex justify-end gap-[18px] mt-[8px]">
+                  <div className="admin-page__actions mt-[8px] flex justify-end gap-[18px]">
                     {createdResource.dataset?.page && (
                       <Button
                         appearance="link"
@@ -712,7 +692,7 @@ export default function CommunityResourceFormClient({
               )}
 
               {apiError && (
-                <div className="mt-[32px] mb-[16px]">
+                <div className="mb-[16px] mt-[32px]">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
@@ -725,7 +705,7 @@ export default function CommunityResourceFormClient({
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
+                <Icon name="agora-line-question-mark" className="h-[24px] w-[24px]" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />

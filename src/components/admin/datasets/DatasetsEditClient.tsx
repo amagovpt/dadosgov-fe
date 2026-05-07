@@ -50,7 +50,11 @@ import {
   suggestTags,
   fetchActivity,
   fetchDiscussions,
+  requestTransfer,
 } from "@/services/api";
+import RecipientSelect, {
+  type RecipientSelection,
+} from "@/components/admin/RecipientSelect";
 import {
   Dataset,
   License,
@@ -72,7 +76,9 @@ const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEd
   loading: () => <p>A carregar editor...</p>,
 });
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import IsolatedInput from "@/components/admin/IsolatedInput";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 
@@ -112,18 +118,40 @@ function translateActivityLabel(label: string): string {
 
 function TransferDatasetPopupContent({
   datasetTitle,
-  onClose,
+  onConfirm,
 }: {
   datasetTitle: string;
-  onClose: () => void;
+  onConfirm: (recipient: RecipientSelection, comment: string) => Promise<void>;
 }) {
+  const [recipient, setRecipient] = useState<RecipientSelection | null>(null);
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showRecipientError, setShowRecipientError] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!recipient) {
+      setShowRecipientError(true);
+      return;
+    }
+    setShowRecipientError(false);
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    try {
+      await onConfirm(recipient, comment.trim());
+      // Parent is responsible for hide() on success.
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : null;
+      setErrorMessage(msg || "Erro ao pedir a transferência do conjunto de dados.");
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-[16px]">
       <p>
         <Icon name="agora-line-document" className="inline w-4 h-4 mr-[4px]" />
-        <a href="#" className="text-primary-600 underline">
-          {datasetTitle}
-        </a>
+        <span className="text-primary-600">{datasetTitle}</span>
       </p>
       <p>
         <strong>Esta ação é irreversível.</strong>&nbsp; Vai deixar de gerir este conjunto de dados
@@ -131,13 +159,27 @@ function TransferDatasetPopupContent({
 
       <div className="flex flex-col gap-[8px]">
         <label className="text-primary-900 text-base font-medium leading-7">
-          Organização ou utilizador
+          Organização ou utilizador <span className="text-danger-600">*</span>
         </label>
-        <InputText
+        <RecipientSelect
+          id="transfer-dataset-recipient"
           placeholder="Selecione a identidade para a qual pretende transferir o conjunto de dados..."
-          id="transfer-search"
-          label=""
+          onChange={(selection) => {
+            setRecipient(selection);
+            if (selection) setShowRecipientError(false);
+          }}
+          hasError={showRecipientError}
+          errorFeedbackText="Selecione um utilizador ou organização"
         />
+        {recipient && (
+          <p className="text-sm text-neutral-700">
+            Destinatário selecionado:{" "}
+            <strong className="text-primary-900">{recipient.label}</strong>{" "}
+            <span className="text-neutral-500">
+              ({recipient.class === "User" ? "utilizador" : "organização"})
+            </span>
+          </p>
+        )}
       </div>
 
       <div className="admin-page__org-card flex flex-col items-center gap-[16px] bg-neutral-50 rounded-lg p-8 text-center">
@@ -159,8 +201,21 @@ function TransferDatasetPopupContent({
 
       <div className="flex flex-col gap-[8px]">
         <label className="text-primary-900 text-base font-medium leading-7">Comentário</label>
-        <InputTextArea placeholder="" id="transfer-comment" label="" rows={3} />
+        <InputTextArea
+          placeholder="Mensagem opcional para o destinatário..."
+          id="transfer-dataset-comment"
+          label=""
+          rows={3}
+          value={comment}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setComment(e.target.value)
+          }
+        />
       </div>
+
+      {errorMessage && (
+        <p className="text-danger-600 text-sm">{errorMessage}</p>
+      )}
 
       <div className="flex justify-end gap-16 pt-16">
         <Button
@@ -169,9 +224,10 @@ function TransferDatasetPopupContent({
           hasIcon
           leadingIcon="agora-line-plane"
           leadingIconHover="agora-solid-plane"
-          onClick={onClose}
+          onClick={handleConfirm}
+          disabled={isSubmitting}
         >
-          Transferir o conjunto de dados
+          {isSubmitting ? "A transferir..." : "Transferir o conjunto de dados"}
         </Button>
       </div>
     </div>
@@ -577,6 +633,8 @@ export default function DatasetsEditClient() {
   const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
 
   // Loaded default values for IsolatedSelect (needed because data arrives async after mount)
+  const [loadedTitle, setLoadedTitle] = useState("");
+  const [loadedAcronym, setLoadedAcronym] = useState("");
   const [loadedLicense, setLoadedLicense] = useState("");
   const [loadedFrequency, setLoadedFrequency] = useState("");
   const [loadedKeywords, setLoadedKeywords] = useState("");
@@ -608,6 +666,8 @@ export default function DatasetsEditClient() {
         setDataset(ds);
         setTitle(ds.title);
         setAcronym(ds.acronym || "");
+        setLoadedTitle(ds.title);
+        setLoadedAcronym(ds.acronym || "");
         setDescription(ds.description);
         setShortDescription(ds.description_short || "");
         setFeatured(ds.featured || false);
@@ -632,7 +692,7 @@ export default function DatasetsEditClient() {
             if (!iso) return "";
             const d = new Date(iso);
             if (isNaN(d.getTime())) return iso;
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+            return `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${d.getUTCFullYear()}`;
           };
           setTemporalStart(toDateOnly(ds.temporal_coverage.start || ""));
           setTemporalEnd(toDateOnly(ds.temporal_coverage.end || ""));
@@ -859,21 +919,35 @@ export default function DatasetsEditClient() {
     return <Dropdown.Section name="spatial-granularity">{options}</Dropdown.Section>;
   }, [granularities, loadedSpatialGranularity]);
 
-  const clearError = (field: string) => {
-    if (formErrors[field]) {
-      setFormErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  };
+  const clearError = useCallback((field: string) => {
+    setFormErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }, []);
+
+  const handleTitleChange = useCallback(
+    (value: string) => {
+      setTitle(value);
+      if (value.trim()) clearError("title");
+    },
+    [clearError]
+  );
 
   const handleSaveMetadata = async () => {
     if (!dataset) return;
     const errors: Record<string, boolean> = {};
     if (!title.trim()) errors.title = true;
     if (!description.trim()) errors.description = true;
+    if (temporalStart && temporalEnd) {
+      const [startDd, startMm, startYyyy] = temporalStart.split("/");
+      const [endDd, endMm, endYyyy] = temporalEnd.split("/");
+      const startDate = new Date(`${startYyyy}-${startMm}-${startDd}`);
+      const endDate = new Date(`${endYyyy}-${endMm}-${endDd}`);
+      if (endDate <= startDate) errors.temporalEnd = true;
+    }
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       requestAnimationFrame(() => {
@@ -906,8 +980,18 @@ export default function DatasetsEditClient() {
         frequency: selectedFrequencyRef.current || undefined,
         temporal_coverage: temporalStart
           ? {
-              start: new Date(temporalStart).toISOString(),
-              ...(temporalEnd ? { end: new Date(temporalEnd).toISOString() } : {}),
+              start: (() => {
+                const [dd, mm, yyyy] = temporalStart.split("/");
+                return new Date(`${yyyy}-${mm}-${dd}T00:00:00.000Z`).toISOString();
+              })(),
+              ...(temporalEnd
+                ? {
+                    end: (() => {
+                      const [dd, mm, yyyy] = temporalEnd.split("/");
+                      return new Date(`${yyyy}-${mm}-${dd}T00:00:00.000Z`).toISOString();
+                    })(),
+                  }
+                : {}),
             }
           : undefined,
         ...(granularity || zones
@@ -962,6 +1046,25 @@ export default function DatasetsEditClient() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleTransferDataset = async (
+    recipient: RecipientSelection,
+    comment: string,
+  ) => {
+    if (!dataset) throw new Error("Conjunto de dados não carregado.");
+    setApiError(null);
+    setApiSuccess(null);
+    await requestTransfer({
+      subject: { class: "Dataset", id: dataset.id },
+      recipient: { class: recipient.class, id: recipient.id },
+      comment: comment || undefined,
+    });
+    hide();
+    setApiSuccess(
+      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
+    );
+    setTimeout(() => setApiSuccess(null), 15000);
   };
 
   const handleUnarchiveDataset = async () => {
@@ -1213,23 +1316,18 @@ export default function DatasetsEditClient() {
         />
       </div>
 
-      <div
-        className="admin-page__header"
-        style={{ flexDirection: "column", alignItems: "flex-start" }}
-      >
-        <div className="flex justify-end w-full">
-          <Button
-            variant="primary"
-            appearance="outline"
-            onClick={() => window.open(`/pages/datasets/${dataset.slug}`, "_blank")}
-          >
-            <span className="admin-edit-info__btn-content">
-              <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
-              Ver página pública
-            </span>
-          </Button>
-        </div>
+      <div className="admin-page__header">
         <h1 className="admin-page__title">{dataset.title}</h1>
+        <Button
+          variant="primary"
+          appearance="outline"
+          onClick={() => window.open(`/pages/datasets/${dataset.slug}`, "_blank")}
+        >
+          <span className="admin-edit-info__btn-content">
+            <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
+            Ver página pública
+          </span>
+        </Button>
       </div>
 
       {apiError && (
@@ -1394,29 +1492,23 @@ export default function DatasetsEditClient() {
                     Descrição
                   </h2>
                   <div className="admin-page__fields-group">
-                    <InputText
+                    <IsolatedInput
                       label="Título*"
                       placeholder="Insira o título aqui"
                       id="edit-title"
-                      value={title}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setTitle(e.target.value);
-                        if (e.target.value.trim()) clearError("title");
-                      }}
+                      defaultValue={loadedTitle}
+                      onChange={handleTitleChange}
                       hasError={!!formErrors.title}
                       hasFeedback={!!formErrors.title}
                       feedbackState="danger"
                       errorFeedbackText="Campo obrigatório"
                     />
-                    <InputText
+                    <IsolatedInput
                       label="Sigla"
                       placeholder="Insira a sigla aqui"
                       id="edit-acronym"
-                      required={false}
-                      value={acronym}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setAcronym(e.target.value)
-                      }
+                      defaultValue={loadedAcronym}
+                      onChange={setAcronym}
                     />
                     <div className="flex flex-col gap-[8px]">
                       <span className="text-primary-900 text-base font-medium leading-7">
@@ -1567,6 +1659,8 @@ export default function DatasetsEditClient() {
                         label="Data de fim"
                         id="edit-date-end"
                         defaultValue={temporalEnd}
+                        hasError={!!formErrors.temporalEnd}
+                        errorFeedbackText="A data de fim tem de ser posterior à data de início"
                         dayInputPlaceholder="dd"
                         monthInputPlaceholder="mm"
                         yearInputPlaceholder="aaaa"
@@ -1667,6 +1761,7 @@ export default function DatasetsEditClient() {
                   </div>
 
                   <div className="dataset-edit-danger-actions">
+                    {/* Transfer dataset section hidden — keep for future use
                     <StatusCard
                       variant="informative"
                       showIcon
@@ -1684,7 +1779,7 @@ export default function DatasetsEditClient() {
                               show(
                                 <TransferDatasetPopupContent
                                   datasetTitle={dataset.title}
-                                  onClose={hide}
+                                  onConfirm={handleTransferDataset}
                                 />,
                                 {
                                   title: "Transfira o conjunto de dados",
@@ -1699,6 +1794,7 @@ export default function DatasetsEditClient() {
                         </>
                       }
                     />
+                    */}
                     <StatusCard
                       variant="warning"
                       showIcon
@@ -1774,59 +1870,10 @@ export default function DatasetsEditClient() {
                     <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                   </div>
                   <AuxiliarList
-                    items={[
-                      {
-                        title: "Dar o nome ao conjunto de dados",
-                        content: (
-                          <>
-                            <p>O título do seu conjunto de dados deve ser o mais preciso e específico possível.</p>
-                            <p>Deve também corresponder ao vocabulário utilizado pelos utilizadores que, na maioria das vezes, procuram dados através do motor de pesquisa.</p>
-                          </>
-                        ),
-                        hasError: !!formErrors.title,
-                      },
-                      {
-                        title: "Adicionar uma sigla ao conjunto de dados",
-                        content: "Tem a opção de adicionar uma sigla ao seu conjunto de dados. Não é necessário que as letras que compõem essa sigla estejam separadas por pontos.",
-                      },
-                      {
-                        title: "Escrever uma boa descrição",
-                        content: (
-                          <>
-                            <p>A descrição resumida apresenta o seu conjunto de dados, ajudando os utilizadores a entenderem rapidamente o conteúdo e melhora a sua visibilidade nos resultados de pesquisa.</p>
-                            <ul className="list-disc pl-5 mt-2 flex flex-col gap-2">
-                              <li>A lista de ficheiros disponibilizados;</li>
-                              <li>Descrição do formato do ficheiro;</li>
-                              <li>A frequência de atualização.</li>
-                            </ul>
-                          </>
-                        ),
-                        hasError: !!formErrors.description,
-                      },
-                      {
-                        title: "Escrever uma breve descrição",
-                        content: "A descrição resumida apresenta seu conjunto de dados em uma ou duas frases. Isso ajuda os utilizadores a entenderem rapidamente o conteúdo e melhora sua visibilidade nos resultados de pesquisa.",
-                      },
-                      {
-                        title: "Selecionar  uma licença",
-                        content: "As licenças definem as regras para a reutilização. Ao escolher uma licença de reutilização, garante que o conjunto de dados publicado será reutilizado de acordo com os termos de uso que definiu.",
-                      },
-                      {
-                        title: "Escolher  a frequência de atualização",
-                        content: "A frequência de atualização refere-se à frequência com que planeia atualizar os dados publicados. Essa frequência de atualização é apenas indicativa.",
-                      },
-                      {
-                        title: "Fornecer  a cobertura de tempo",
-                        content: (
-                          <>
-                            <p>
-                              A abrangência temporal indica o período de tempo dos dados publicados.
-                            </p>
-                            <p>Por exemplo: de 2012 a 2015.</p>
-                          </>
-                        ),
-                      },
-                    ]}
+                    items={getDatasetAuxiliarItems({
+                      title: !!formErrors.title,
+                      description: !!formErrors.description,
+                    })}
                   />
                 </div>
               </aside>

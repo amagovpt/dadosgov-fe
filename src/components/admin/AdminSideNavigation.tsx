@@ -110,6 +110,10 @@ const navGroups: NavGroup[] = [
         label: "Editorial",
         href: "/pages/admin/system/editorial",
       },
+      {
+        label: "Logs",
+        href: "/pages/admin/system/logs",
+      },
     ],
   },
 ];
