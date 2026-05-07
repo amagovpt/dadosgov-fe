@@ -24,7 +24,7 @@ export function parseReusesFilters(params: URLSearchParams): ReuseFilters {
   const tags = params.getAll("tag");
   const organizations = params.getAll("organization");
 
-  return {
+  const filters: ReuseFilters = {
     ...(params.get("q") && { q: params.get("q") as string }),
     ...(params.get("type") && { type: params.get("type") as string }),
     ...(params.get("sort") && { sort: params.get("sort") as string }),
@@ -36,6 +36,12 @@ export function parseReusesFilters(params: URLSearchParams): ReuseFilters {
       organization: organizations.length === 1 ? organizations[0] : organizations,
     }),
   };
+
+  if (!filters.sort && !filters.q) {
+    filters.sort = "-last_modified";
+  }
+
+  return filters;
 }
 
 export function getReuseSortDefault(sortParam: string | null): string {
