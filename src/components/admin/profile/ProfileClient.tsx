@@ -29,7 +29,6 @@ import {
   Icon,
   InputText,
   InputTextArea,
-  DragAndDropUploader,
   StatusCard,
   Table,
   TableHeader,
@@ -43,6 +42,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
 
 const activityLabels: Record<string, string> = {

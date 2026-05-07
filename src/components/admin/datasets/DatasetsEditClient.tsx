@@ -19,7 +19,6 @@ import {
   TableCell,
   Pill,
   Switch,
-  DragAndDropUploader,
   CardNoResults,
   Tabs,
   Tab,
@@ -29,6 +28,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 
 import { format } from "date-fns";

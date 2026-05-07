@@ -12,10 +12,10 @@ import {
   InputSelect,
   DropdownSection,
   DropdownOption,
-  DragAndDropUploader,
   CardLinks,
   Tag,
 } from "@ama-pt/agora-design-system";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import {
   createReuse,
   updateReuse,

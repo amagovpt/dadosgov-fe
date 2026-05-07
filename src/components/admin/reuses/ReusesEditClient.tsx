@@ -18,7 +18,6 @@ import {
   Switch,
   CardNoResults,
   CardLinks,
-  DragAndDropUploader,
   Tabs,
   Tab,
   TabHeader,
@@ -26,6 +25,7 @@ import {
   Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {

@@ -12,9 +12,9 @@ import {
   DropdownOption,
   Icon,
   StatusCard,
-  DragAndDropUploader,
   CardLinks,
 } from "@ama-pt/agora-design-system";
+import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import {
   createCommunityResource,
   uploadCommunityResourceFile,
