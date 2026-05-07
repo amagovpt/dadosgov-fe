@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect, type MouseEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, type MouseEvent } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   CardLinks,
@@ -13,34 +13,14 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { useListingUrlState } from "@/hooks/useListingUrlState";
-import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
-import { fetchReuses } from "@/services/api";
-import {
-  APIResponse,
-  Reuse,
-  ReuseFilters,
-} from "@/types/api";
+import { APIResponse, Reuse } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
-
 import PageBanner from "@/components/PageBanner";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";
-
-const SORT_OPTIONS: Record<string, string> = {
-  relevancia: "",
-  recentes: "-last_modified",
-  antigos: "last_modified",
-  subscritores: "-followers",
-};
-
-const SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  recentes: "Mais recente",
-  antigos: "Mais antigo",
-  subscritores: "Subscritores",
-};
+import { useReusesListing } from "@/hooks/useReusesListing";
+import { REUSE_SORT_LABELS } from "@/utils/reusesListingQuery";
 
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
@@ -54,72 +34,20 @@ export default function ReusesClient({
   filterCounts = {},
 }: ReusesClientProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
-  const queryString = searchParams.toString();
-  const [listData, setListData] = useState<APIResponse<Reuse>>(initialData);
-  const { data: reuses, total, page_size } = listData;
-  const currentQuery = searchParams.get("q") || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
+  const {
+    activePage,
+    buildUrl,
+    handleSearch,
+    handleSortChange,
+    listData,
+    searchQuery,
+    setSearchQuery,
+    sortDefault,
+  } = useReusesListing({ initialData, currentPage });
 
-    async function loadReusesFromUrl() {
-      const params = new URLSearchParams(queryString);
-      const tags = params.getAll("tag");
-      const organizations = params.getAll("organization");
-
-      const filters: ReuseFilters = {
-        ...(params.get("q") && { q: params.get("q") as string }),
-        ...(params.get("type") && { type: params.get("type") as string }),
-        ...(params.get("sort") && { sort: params.get("sort") as string }),
-        ...(params.get("modified_since") && {
-          modified_since: params.get("modified_since") as string,
-        }),
-        ...(tags.length > 0 && { tag: tags.length === 1 ? tags[0] : tags }),
-        ...(organizations.length > 0 && {
-          organization: organizations.length === 1 ? organizations[0] : organizations,
-        }),
-      };
-
-      const next = await fetchReuses(activePage, initialData.page_size || 12, filters);
-      if (!cancelled) setListData(next);
-    }
-
-    loadReusesFromUrl();
-    return () => {
-      cancelled = true;
-    };
-  }, [queryString, activePage, initialData.page_size]);
-
-  const onSearchNavigate = useCallback(
-    (query: string) => {
-      replaceWith({ q: query || undefined, page: 1 });
-    },
-    [replaceWith]
-  );
-
-  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
-    currentQuery,
-    onSearchNavigate,
-  });
-
-  const handleSortChange = useCallback(
-    (value: string) => {
-      replaceWith({ sort: SORT_OPTIONS[value] || undefined, page: 1 });
-    },
-    [replaceWith]
-  );
-
-  const sortDefault = (() => {
-    const reverseMap: Record<string, string> = {
-      "-last_modified": "recentes",
-      last_modified: "antigos",
-      "-followers": "subscritores",
-    };
-    return reverseMap[searchParams.get("sort") || ""] || "relevancia";
-  })();
+  const { data: reuses, total, page_size } = listData;
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters reuse">
@@ -163,13 +91,13 @@ export default function ReusesClient({
                 hasIcon
                 {...(filtersOpen
                   ? {
-                    leadingIcon: "agora-line-chevron-left",
-                    leadingIconHover: "agora-solid-chevron-left",
-                  }
+                      leadingIcon: "agora-line-chevron-left",
+                      leadingIconHover: "agora-solid-chevron-left",
+                    }
                   : {
-                    trailingIcon: "agora-line-chevron-right",
-                    trailingIconHover: "agora-solid-chevron-right",
-                  })}
+                      trailingIcon: "agora-line-chevron-right",
+                      trailingIconHover: "agora-solid-chevron-right",
+                    })}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
                 {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
@@ -189,7 +117,7 @@ export default function ReusesClient({
                   }
                 }}
               >
-                {Object.entries(SORT_LABELS).map(([key, label]) => (
+                {Object.entries(REUSE_SORT_LABELS).map(([key, label]) => (
                   <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                     {label}
                   </Toggle>
@@ -203,9 +131,7 @@ export default function ReusesClient({
             className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
-            {filtersOpen && (
-              <ReusesFilters filterCounts={filterCounts} />
-            )}
+            {filtersOpen && <ReusesFilters filterCounts={filterCounts} />}
 
             {/* Results Area */}
             <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>
@@ -223,12 +149,12 @@ export default function ReusesClient({
                       const timeAgo =
                         reuse.last_modified || reuse.created_at
                           ? formatDistanceToNow(new Date(reuse.last_modified || reuse.created_at), {
-                            locale: pt,
-                          })
-                            .replace("aproximadamente ", "")
-                            .replace("quase ", "")
-                            .replace("menos de ", "")
-                            .replace("cerca de ", "")
+                              locale: pt,
+                            })
+                              .replace("aproximadamente ", "")
+                              .replace("quase ", "")
+                              .replace("menos de ", "")
+                              .replace("cerca de ", "")
                           : "Desconhecido";
 
                       return (

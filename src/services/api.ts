@@ -345,7 +345,13 @@ export async function fetchDatasets(
     }
 
     const url = `${API_BASE_URL}/datasets/?${params.toString()}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, {
+      cache: "no-store",
+      // Keep front-office listings public/consistent between SSR and CSR.
+      // Without this, browser fetches may include session cookies and return
+      // different totals than the server-rendered first paint.
+      credentials: "omit",
+    });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch datasets: ${res.statusText}`);
@@ -479,6 +485,7 @@ export async function fetchOrganizations(
     const url = `${API_BASE_URL}/organizations/?${params.toString()}`;
     const res = await fetch(url, {
       cache: "no-store",
+      credentials: "omit",
     });
 
     if (!res.ok) {
@@ -948,7 +955,10 @@ export async function fetchReuses(
     }
 
     const url = `${API_BASE_URL}/reuses/?${params.toString()}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, {
+      cache: "no-store",
+      credentials: "omit",
+    });
 
     if (!res.ok) {
       return empty;

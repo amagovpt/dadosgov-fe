@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   CardLinks,
@@ -14,17 +14,15 @@ import {
 import { Pagination } from "@/components/Pagination";
 import PageBanner from "@/components/PageBanner";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { useListingUrlState } from "@/hooks/useListingUrlState";
-import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Datastories } from "@/types/datastories/datastories";
+import { DataStoriesFilterState } from "@/types/datastories/filters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getAssets } from "@/utils/getAssets";
-import {
-  DataStoriesFilterState,
-  DataStoriesFilters,
-} from "@/components/datastories/DataStoriesFilters";
+import { DataStoriesFilters } from "@/components/datastories/DataStoriesFilters";
+import { DATA_STORIES_PAGE_SIZE } from "@/utils/dataStoriesListingQuery";
+import { useDataStoriesListing } from "@/hooks/useDataStoriesListing";
 
 /* const SORT_OPTIONS: Record<string, string> = {
   recentes: "",
@@ -35,11 +33,6 @@ const SORT_LABELS: Record<string, string> = {
   recentes: "Mais recentes",
   visualizados: "Mais visualizados",
 }; */
-
-const PAGE_SIZE = 12;
-
-const daysAgo = (dateStr: string, days: number) =>
-  (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24) <= days;
 
 interface DataStoriesClientProps {
   currentPage: number;
@@ -53,90 +46,34 @@ export default function DataStoriesClient({
   datastories,
 }: DataStoriesClientProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
   const stories = Array.isArray(datastories) ? datastories : [];
-
-  const currentQuery = searchParams.get("q") || initialFilters?.q || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
-
   const [activeFilters, setActiveFilters] = useState<DataStoriesFilterState>({
     toggles: { temas: "all", atualizacao: "all" },
     tags: [],
   });
 
-  const onSearchNavigate = useCallback(
-    (query: string) => {
-      replaceWith({ q: query || null, page: 1 });
-    },
-    [replaceWith]
-  );
-
-  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
-    currentQuery,
-    onSearchNavigate,
+  const {
+    activePage,
+    buildUrl,
+    handleSearch,
+    pagedStories,
+    replaceWith,
+    searchQuery,
+    setSearchQuery,
+    total,
+  } = useDataStoriesListing({
+    currentPage,
+    initialQuery: initialFilters?.q,
+    stories,
+    activeFilters,
   });
 
   // const [currentSortKey, setCurrentSortKey] = useState("recentes");
-
-  const filteredStories = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-
-    return stories.filter((story) => {
-      if (
-        q &&
-        !story.title.toLowerCase().includes(q) &&
-        !story.description.toLowerCase().includes(q)
-      ) {
-        return false;
-      }
-
-      if (activeFilters.toggles.temas !== "all" && story.theme !== activeFilters.toggles.temas) {
-        return false;
-      }
-
-      if (
-        activeFilters.tags.length > 0 &&
-        !activeFilters.tags.some((tag) => story.tags.tag === tag)
-      ) {
-        return false;
-      }
-
-      if (activeFilters.toggles.atualizacao === "30_days" && !daysAgo(story.createdAt, 30)) {
-        return false;
-      }
-      if (activeFilters.toggles.atualizacao === "12_months" && !daysAgo(story.createdAt, 365)) {
-        return false;
-      }
-      if (activeFilters.toggles.atualizacao === "3_years" && !daysAgo(story.createdAt, 365 * 3)) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [activeFilters, searchQuery, stories]);
-
-  const sortedStories = useMemo(
-    () =>
-      [...filteredStories].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ),
-    [filteredStories]
-  );
-
-  const total = sortedStories.length;
-
-  const pagedStories = useMemo(
-    () => sortedStories.slice((activePage - 1) * PAGE_SIZE, activePage * PAGE_SIZE),
-    [activePage, sortedStories]
-  );
-
   // const sortValue = SORT_OPTIONS[currentSortKey] || "";
-
   /* const handleSortChange = useCallback((value: string) => {
     setCurrentSortKey(value);
   }, []); */
-
   /* const sortDefault = (() => {
     const reverseMap: Record<string, string> = { "-views": "visualizados" };
     return reverseMap[initialFilters?.sort || ""] || "recentes";
@@ -354,7 +291,7 @@ export default function DataStoriesClient({
                   <Pagination
                     currentPage={activePage}
                     totalItems={total}
-                    pageSize={PAGE_SIZE}
+                    pageSize={DATA_STORIES_PAGE_SIZE}
                     baseUrl={buildUrl()}
                   />
                 </div>

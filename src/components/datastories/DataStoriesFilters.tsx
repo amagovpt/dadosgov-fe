@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@ama-pt/agora-design-system";
 import { suggestTags } from "@/services/api";
 import { Datastories } from "@/types/datastories/datastories";
+import { DataStoriesFilterState, DataStoriesToggleState } from "@/types/datastories/filters";
 import {
   AdvancedFilterGroup,
   AdvancedFiltersSidebar,
@@ -16,16 +17,6 @@ import { toggleSelection } from "@/utils/filterUtils";
 
 const daysAgo = (dateStr: string, days: number) =>
   (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24) <= days;
-
-interface DataStoriesToggleState {
-  temas: string;
-  atualizacao: string;
-}
-
-export interface DataStoriesFilterState {
-  toggles: DataStoriesToggleState;
-  tags: string[];
-}
 
 interface DataStoriesFiltersProps {
   stories: Datastories;

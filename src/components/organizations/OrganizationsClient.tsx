@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import {
   Button,
@@ -14,20 +13,17 @@ import {
 import { Pagination } from "@/components/Pagination";
 import { OrganizationsFilters } from "./OrganizationsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { useListingUrlState } from "@/hooks/useListingUrlState";
-import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
-import { fetchOrganizations } from "@/services/api";
 import {
   APIResponse,
   OrgBadges,
   Organization,
-  OrganizationFilters,
 } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
-
 import PageBanner from "@/components/PageBanner";
+import { useOrganizationsListing } from "@/hooks/useOrganizationsListing";
+import { ORGANIZATION_SORT_LABELS } from "@/utils/organizationsListingQuery";
 
 interface OrganizationsClientProps {
   initialData: APIResponse<Organization>;
@@ -37,20 +33,6 @@ interface OrganizationsClientProps {
   allOrganizations?: Organization[];
 }
 
-const SORT_OPTIONS: Record<string, string> = {
-  relevancia: "",
-  mais_dados: "-datasets",
-  mais_reutilizacoes: "-reuses",
-  subscritores: "-followers",
-};
-
-const SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  mais_dados: "Mais dados",
-  mais_reutilizacoes: "Mais reutilizações",
-  subscritores: "Subscritores",
-};
-
 export default function OrganizationsClient({
   initialData,
   currentPage,
@@ -58,71 +40,20 @@ export default function OrganizationsClient({
   orgBadgeCounts,
   allOrganizations,
 }: OrganizationsClientProps) {
-  const searchParams = useSearchParams();
-  const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
-  const queryString = searchParams.toString();
-  const [listData, setListData] = useState<APIResponse<Organization>>(initialData);
-  const { data: organizations, total, page_size } = listData;
-
-  const currentQuery = searchParams.get("q") || "";
-  const currentSort = searchParams.get("sort") || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const currentSortKey =
-    Object.entries(SORT_OPTIONS).find(([, v]) => v === currentSort)?.[0] || "relevancia";
+  const {
+    activePage,
+    buildUrl,
+    handleSearch,
+    handleSortChange,
+    listData,
+    searchQuery,
+    setSearchQuery,
+    sortDefault,
+  } = useOrganizationsListing({ initialData, currentPage });
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadOrganizationsFromUrl() {
-      const params = new URLSearchParams(queryString);
-      const badges = params.getAll("badge");
-      const organizationsFilter = params.getAll("organization");
-
-      const filters: OrganizationFilters = {
-        ...(params.get("q") && { q: params.get("q") as string }),
-        ...(params.get("sort") && { sort: params.get("sort") as string }),
-        ...(badges.length > 0 && { badge: badges.length === 1 ? badges[0] : badges }),
-        ...(organizationsFilter.length > 0 && {
-          organization:
-            organizationsFilter.length === 1 ? organizationsFilter[0] : organizationsFilter,
-        }),
-      };
-
-      if (!filters.sort && !filters.q) {
-        filters.sort = "-last_modified";
-      }
-
-      const next = await fetchOrganizations(activePage, initialData.page_size || 20, filters);
-      if (!cancelled) setListData(next);
-    }
-
-    loadOrganizationsFromUrl();
-    return () => {
-      cancelled = true;
-    };
-  }, [queryString, activePage, initialData.page_size]);
-
-  const onSearchNavigate = useCallback(
-    (query: string) => {
-      replaceWith({ q: query || null, page: 1 });
-    },
-    [replaceWith]
-  );
-
-  const { searchQuery, setSearchQuery, handleSearch } = useSearchFilterUrlSync({
-    currentQuery,
-    onSearchNavigate,
-  });
-
-  const handleSort = useCallback(
-    (selectedKey: string) => {
-      const sortValue = SORT_OPTIONS[selectedKey] || null;
-      if (sortValue === (currentSort || null)) return;
-      replaceWith({ sort: sortValue, page: 1 });
-    },
-    [currentSort, replaceWith]
-  );
+  const { data: organizations, total, page_size } = listData;
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters organization">
@@ -131,7 +62,6 @@ export default function OrganizationsClient({
           title="Organizações"
           backgroundImageUrl="/Banner/hero-bg.png"
           backgroundPosition="center right"
-          //containerClassName="dataset"
           breadcrumbItems={[
             { label: "Home", url: "/" },
             { label: "Organizações", url: "/pages/organizations" },
@@ -185,15 +115,15 @@ export default function OrganizationsClient({
             <div className="xl:col-span-7 flex items-center justify-end py-16">
               <ToggleGroup
                 multiple={false}
-                value={currentSortKey}
+                value={sortDefault}
                 onChange={(val) => {
                   const selected = val.length > 0 ? val[0] : "relevancia";
-                  if (selected !== currentSortKey) {
-                    handleSort(selected);
+                  if (selected !== sortDefault) {
+                    handleSortChange(selected);
                   }
                 }}
               >
-                {Object.entries(SORT_LABELS).map(([key, label]) => (
+                {Object.entries(ORGANIZATION_SORT_LABELS).map(([key, label]) => (
                   <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                     {label}
                   </Toggle>
@@ -286,10 +216,7 @@ export default function OrganizationsClient({
                                   )}
                                   <div className="mt-auto">
                                     <div className="flex items-center flex-wrap gap-8 text-xs mt-12 text-neutral-700">
-                                      <div
-                                        className="flex items-center gap-8"
-                                        title="Visualizações"
-                                      >
+                                      <div className="flex items-center gap-8" title="Visualizações">
                                         <Icon
                                           name="agora-solid-eye"
                                           dimensions="xs"
@@ -308,7 +235,13 @@ export default function OrganizationsClient({
                                         <span>{org.metrics?.datasets || 0}</span>
                                       </div>
                                       <div className="flex items-center gap-8" title="Reutilizações">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" className="w-16 h-16 fill-neutral-700" aria-hidden="true">
+                                        <svg
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          className="w-16 h-16 fill-neutral-700"
+                                          aria-hidden="true"
+                                        >
                                           <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" />
                                         </svg>
                                         <span>{org.metrics?.reuses || 0}</span>
@@ -366,6 +299,7 @@ export default function OrganizationsClient({
                   )}
                 </div>
 
+                {/* Pagination */}
                 <div className="pb-64 mt-8 flex justify-center">
                   <Pagination
                     currentPage={activePage}
