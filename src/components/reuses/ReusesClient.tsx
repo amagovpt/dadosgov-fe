@@ -1,20 +1,15 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo, type MouseEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   CardLinks,
-  InputSearch,
   Button,
   Icon,
   CardNoResults,
   Toggle,
   ToggleGroup,
-  Pill,
-  Sidebar,
-  SidebarItem,
-  Checkbox,
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
@@ -31,6 +26,14 @@ import { pt } from "date-fns/locale";
 
 import PageBanner from "@/components/PageBanner";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import {
+  AdvancedFilterGroup,
+  AdvancedFiltersSidebar,
+} from "@/components/filters/AdvancedFiltersSidebar";
+import {
+  ToggleFilterSection,
+  ToggleFilterSections,
+} from "@/components/filters/ToggleFilterSections";
 
 const SORT_OPTIONS: Record<string, string> = {
   relevancia: "",
@@ -255,18 +258,33 @@ export default function ReusesClient({
     return searchParams.getAll(paramName);
   };
 
-  const advancedFilterGroups: {
-    name: string;
-    param: string;
-    data: { id: string; name: string }[];
-    searchable: boolean;
-    suggest?: boolean;
-  }[] = [
+  const toggleSections = useMemo<ToggleFilterSection[]>(
+    () => [
+      {
+        key: "atualizacao",
+        title: REUSE_TOGGLE_FILTERS.atualizacao.title,
+        options: REUSE_TOGGLE_FILTERS.atualizacao.options.map((option) => ({
+          id: option.id,
+          label: option.label,
+          count:
+            filterCounts[`atualizacao_${option.id}`] !== undefined
+              ? formatCount(filterCounts[`atualizacao_${option.id}`])
+              : undefined,
+        })),
+      },
+    ],
+    [filterCounts]
+  );
+
+  const advancedFilterGroups = useMemo<AdvancedFilterGroup[]>(
+    () => [
       {
         name: "Organizações",
         param: "organization",
-        data: filterOrgs.map((o) => ({ id: o.id, name: o.name })),
+        data: filterOrgs.map((organization) => ({ id: organization.id, name: organization.name })),
         searchable: true,
+        searchPlaceholder: "Pesquisar",
+        emptyMessage: "Sem resultados",
       },
       {
         name: "Palavras-chave",
@@ -274,8 +292,13 @@ export default function ReusesClient({
         data: filterTagOptions,
         searchable: true,
         suggest: true,
+        searchPlaceholder: "Escreva para pesquisar...",
+        minCharsMessage: "Escreva pelo menos 2 caracteres...",
+        emptyMessage: "Sem resultados",
       },
-    ];
+    ],
+    [filterOrgs, filterTagOptions]
+  );
 
   const buildUrl = useCallback(
     (overrides: Partial<ReuseFilters> & { page?: number } = {}) => {
@@ -444,165 +467,30 @@ export default function ReusesClient({
             {/* Sidebar */}
             {filtersOpen && (
               <div className="xl:col-span-5 xl:block">
-                <div className="flex flex-col gap-32 mt-[36px] mb-[36px]">
-                  <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
-                  {(Object.keys(REUSE_TOGGLE_FILTERS) as ReuseFilterKey[]).map((filterKey) => {
-                    const section = REUSE_TOGGLE_FILTERS[filterKey];
-                    return (
-                      <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
-                        <h3 className="font-bold text-base text-neutral-900 mb-8">
-                          {section.title}
-                        </h3>
-                        {section.options.map((option) => {
-                          const isSelected = selectedToggleFilters[filterKey] === option.id;
-                          return (
-                            <Toggle
-                              key={option.id}
-                              id={`reuse-filter-${filterKey}-${option.id}`}
-                              name={`reuse-filter-${filterKey}`}
-                              value={option.id}
-                              appearance="icon"
-                              variant="primary"
-                              checked={isSelected}
-                              onChange={() => handleToggleFilterChange(filterKey, option.id)}
-                              iconOnly={false}
-                              fullWidth={true}
-                              className="w-full"
-                            >
-                              <div className="flex items-center gap-12 font-bold text-sm">
-                                <span
-                                  className={
-                                    isSelected
-                                      ? "text-primary-600 font-bold"
-                                      : "text-neutral-900 font-bold"
-                                  }
-                                >
-                                  {option.label}
-                                </span>
-                                {filterCounts[`${filterKey}_${option.id}`] !== undefined && (
-                                  <Pill
-                                    variant="neutral"
-                                    appearance="outline"
-                                    circular={false}
-                                    className="text-xs font-medium text-neutral-500 ml-16"
-                                  >
-                                    {formatCount(filterCounts[`${filterKey}_${option.id}`])}
-                                  </Pill>
-                                )}
-                              </div>
-                            </Toggle>
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
+                <ToggleFilterSections
+                  sections={toggleSections}
+                  selectedValues={selectedToggleFilters}
+                  onChange={(sectionKey, optionId) =>
+                    handleToggleFilterChange(sectionKey as ReuseFilterKey, optionId)
+                  }
+                  idPrefix="reuse-filter"
+                />
 
                 <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">
                   Filtros avançados
                 </h2>
 
-                <Sidebar variant="filter" className="font-bold">
-                  {advancedFilterGroups.map((group, index) => {
-                    const sq = filterSearchQueries[group.name] || "";
-                    const activeValues = getActiveValues(group.param);
-                    const activeCount = activeValues.length;
-
-                    const selectedItems: { id: string; name: string }[] = group.suggest
-                      ? activeValues
-                        .filter((v) => !group.data.some((d) => d.id === v))
-                        .map((v) => ({ id: v, name: v }))
-                      : [];
-
-                    const allData = [...selectedItems, ...group.data];
-                    const uniqueData = Array.from(
-                      new Map(allData.map((item) => [item.id, item])).values()
-                    );
-
-                    const filteredData = group.suggest
-                      ? uniqueData
-                      : uniqueData.filter((item) =>
-                        item.name.toLowerCase().includes(sq.toLowerCase())
-                      );
-
-                    const showScroll = filteredData.length > 5;
-
-                    return (
-                      <SidebarItem
-                        key={index}
-                        variant="filter"
-                        item={{
-                          children: <span className="font-bold">{group.name}</span>,
-                          hasIcon: true,
-                          collapsedIconTrailing: "agora-line-minus-circle",
-                          collapsedIconHoverTrailing: "agora-solid-minus-circle",
-                          expandedIconTrailing: "agora-line-plus-circle",
-                          expandedIconHoverTrailing: "agora-solid-plus-circle",
-                        }}
-                        hasPill={activeCount > 0}
-                        pillValue={activeCount}
-                      >
-                        <div>
-                          {activeCount > 0 && (
-                            <button
-                              onClick={() => handleClearAdvancedFilter(group.param)}
-                              className="text-xs text-primary-500 hover:text-primary-700 underline mb-4 mt-4 cursor-pointer"
-                            >
-                              Limpar {group.name.toLowerCase()}
-                            </button>
-                          )}
-                          {group.searchable && (
-                            <div className="mb-4 mt-8 relative">
-                              <InputSearch
-                                label="Pesquisar"
-                                hideLabel
-                                placeholder={
-                                  group.suggest ? "Escreva para pesquisar..." : "Pesquisar"
-                                }
-                                value={sq}
-                                onChange={(e) =>
-                                  handleFilterSearchChange(group.name, e.target.value)
-                                }
-                              />
-                              <Icon
-                                name="agora-solid-search"
-                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5 pointer-events-none"
-                                aria-hidden="true"
-                              />
-                            </div>
-                          )}
-                          <div
-                            className={`flex flex-col gap-2 ${showScroll ? "max-h-[225px] overflow-y-auto" : ""
-                              }`}
-                          >
-                            {isFiltersLoading && !group.suggest ? null : filteredData.length > 0 ? (
-                              filteredData.map((item) => (
-                                <Checkbox
-                                  key={item.id}
-                                  id={`reuse-${group.param}-${encodeURIComponent(item.id)}`}
-                                  label={item.name}
-                                  className="font-bold"
-                                  value={item.id}
-                                  name={group.param}
-                                  checked={activeValues.includes(item.id)}
-                                  onChange={() => handleAdvancedFilterChange(group.param, item.id)}
-                                />
-                              ))
-                            ) : group.suggest && sq.length < 2 ? (
-                              activeCount > 0 ? null : (
-                                <p className="text-sm text-neutral-900">
-                                  Escreva pelo menos 2 caracteres...
-                                </p>
-                              )
-                            ) : (
-                              <p className="text-sm text-neutral-500">Sem resultados</p>
-                            )}
-                          </div>
-                        </div>
-                      </SidebarItem>
-                    );
-                  })}
-                </Sidebar>
+                <AdvancedFiltersSidebar
+                  groups={advancedFilterGroups}
+                  searchQueries={filterSearchQueries}
+                  getActiveValues={getActiveValues}
+                  onToggleValue={handleAdvancedFilterChange}
+                  onSearchChange={handleFilterSearchChange}
+                  onClearGroup={handleClearAdvancedFilter}
+                  showClearActions={true}
+                  checkboxIdPrefix="reuse"
+                  isLoading={isFiltersLoading}
+                />
 
                 <div className="mt-32">
                   <Button
@@ -676,7 +564,7 @@ export default function ReusesClient({
                                 trailingIconActive: "",
                                 children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
                                 title: "Visualizações",
-                                onClick: (e: React.MouseEvent) => e.preventDefault(),
+                                onClick: (e: MouseEvent) => e.preventDefault(),
                                 className: "text-[#034AD8]",
                               },
                               {
@@ -689,7 +577,7 @@ export default function ReusesClient({
                                 trailingIconActive: "",
                                 children: `${reuse.datasets?.length || 0} datasets`,
                                 title: "Datasets",
-                                onClick: (e: React.MouseEvent) => e.preventDefault(),
+                                onClick: (e: MouseEvent) => e.preventDefault(),
                                 className: "text-[#034AD8]",
                               },
                               {
@@ -702,7 +590,7 @@ export default function ReusesClient({
                                 trailingIconActive: "",
                                 children: reuse.metrics?.followers || 0,
                                 title: "Favoritos",
-                                onClick: (e: React.MouseEvent) => e.preventDefault(),
+                                onClick: (e: MouseEvent) => e.preventDefault(),
                                 className: "text-[#034AD8]",
                               },
                             ]}
@@ -757,3 +645,6 @@ export default function ReusesClient({
     </div>
   );
 }
+
+
+
