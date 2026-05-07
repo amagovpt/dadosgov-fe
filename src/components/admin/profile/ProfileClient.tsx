@@ -44,6 +44,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
+import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -454,6 +455,7 @@ export default function ProfileClient() {
                         feedbackState="danger"
                         feedbackText={avatarError ?? undefined}
                         onChange={handleAvatarChange}
+                        onSecurityError={() => setAvatarError(POISONED_FILE_WARNING)}
                       />
                     </div>
                   </div>

@@ -20,6 +20,7 @@ import { suggestOrganizations, createOrganization, uploadOrgLogo } from "@/servi
 import type { OrganizationSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 export default function OrganizationsNewClient() {
   const searchParams = useSearchParams();
@@ -370,6 +371,7 @@ export default function OrganizationsNewClient() {
                         setOrgLogoPreview(null);
                       }
                     }}
+                    onSecurityError={() => setOrgLogoError(POISONED_FILE_WARNING)}
                   />
                   {orgLogoPreview && (
                     <div className="mt-[12px]">

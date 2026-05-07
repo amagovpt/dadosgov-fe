@@ -81,7 +81,10 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
-import { translateUploadError } from "@/lib/security/translateUploadError";
+import {
+  POISONED_FILE_WARNING,
+  translateUploadError,
+} from "@/lib/security/translateUploadError";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -1905,6 +1908,7 @@ export default function DatasetsEditClient() {
                   feedbackText={fileUploadError ?? undefined}
                   multiple
                   onChange={handleFileUpload}
+                  onSecurityError={() => setFileUploadError(POISONED_FILE_WARNING)}
                 />
                 <Button appearance="outline" variant="primary" className="mb-[32px]">
                   Reordene os ficheiros

@@ -29,7 +29,10 @@ import { useAuth } from "@/context/AuthContext";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { formatMetricValue } from "@/utils/formatNumber";
-import { translateUploadError } from "@/lib/security/translateUploadError";
+import {
+  POISONED_FILE_WARNING,
+  translateUploadError,
+} from "@/lib/security/translateUploadError";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -366,6 +369,7 @@ export default function CommunityResourceFormClient({
                         setFile(selected);
                         if (selected) clearError("resourceUrl");
                       }}
+                      onSecurityError={() => setFileError(POISONED_FILE_WARNING)}
                     />
                   </div>
 
