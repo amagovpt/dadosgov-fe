@@ -18,6 +18,7 @@ import type { TagSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import type { PostCreatePayload } from "@/types/api";
+import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 export default function PostsNewClient() {
   const searchParams = useSearchParams();
@@ -408,6 +409,7 @@ export default function PostsNewClient() {
                       feedbackState="danger"
                       feedbackText={imageError ?? undefined}
                       onChange={handleImageChange}
+                      onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
                     />
                   </div>
                 </div>
