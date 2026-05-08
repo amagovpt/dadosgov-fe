@@ -38,13 +38,13 @@ export default function StatisticsClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-[64px] mb-[16px]">Estatísticas</h1>
+      <h1 className="admin-page__title mt-64 mb-16">Estatísticas</h1>
 
       <Tabs>
         <Tab active>
           <TabHeader>Utilizador</TabHeader>
           <TabBody>
-            <div className="flex gap-[24px] mt-[48px]">
+            <div className="flex gap-24 mt-48">
               <div className="flex-1">
                 <CardFrame label="0">
                   <p className="text-neutral-700 text-base">Conjuntos de dados</p>
@@ -68,8 +68,8 @@ export default function StatisticsClient() {
         <Tab>
           <TabHeader>Conjuntos de dados</TabHeader>
           <TabBody>
-            <div className="mt-[24px]">
-              <div className="flex items-end gap-[16px] mb-[24px]">
+            <div className="mt-24">
+              <div className="flex items-end gap-16 mb-24">
                 <div className="admin-search-wrapper">
                   <InputSearchBar hasVoiceActionButton={false}
                     label="Pesquisar"
@@ -95,19 +95,19 @@ export default function StatisticsClient() {
                   <TableRow>
                     <TableHeaderCell>TÍTULO DO CONJUNTO DE DADOS</TableHeaderCell>
                     <TableHeaderCell sortType="date" sortOrder="none">
-                      <Icon name="agora-line-chat" className="w-[16px] h-[16px]" />
+                      <Icon name="agora-line-chat" className="w-16 h-16" />
                     </TableHeaderCell>
                     <TableHeaderCell sortType="date" sortOrder="none">
-                      <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
+                      <Icon name="agora-line-eye" className="w-16 h-16" />
                     </TableHeaderCell>
                     <TableHeaderCell sortType="date" sortOrder="none">
-                      <Icon name="agora-line-download" className="w-[16px] h-[16px]" />
+                      <Icon name="agora-line-download" className="w-16 h-16" />
                     </TableHeaderCell>
                     <TableHeaderCell sortType="date" sortOrder="none">
-                      <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="w-[16px] h-[16px]" />
+                      <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="w-16 h-16" />
                     </TableHeaderCell>
                     <TableHeaderCell sortType="date" sortOrder="none">
-                      <Icon name="agora-line-star" className="w-[16px] h-[16px]" />
+                      <Icon name="agora-line-star" className="w-16 h-16" />
                     </TableHeaderCell>
                     <TableHeaderCell>{""}</TableHeaderCell>
                   </TableRow>
@@ -123,7 +123,7 @@ export default function StatisticsClient() {
                     <TableCell headerLabel="Tendências">0</TableCell>
                     <TableCell headerLabel="Favoritos">0</TableCell>
                     <TableCell headerLabel="Exportar">
-                      <Icon name="agora-line-download" className="w-[16px] h-[16px]" />
+                      <Icon name="agora-line-download" className="w-16 h-16" />
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -135,12 +135,12 @@ export default function StatisticsClient() {
         <Tab>
           <TabHeader>API</TabHeader>
           <TabBody>
-            <div className="mt-[24px]">
-              <p className="text-neutral-700 text-sm mb-[16px]">
+            <div className="mt-24">
+              <p className="text-neutral-700 text-sm mb-16">
                 0 resultados
               </p>
 
-              <div className="flex items-end gap-[16px] mb-[24px]">
+              <div className="flex items-end gap-16 mb-24">
                 <div className="admin-search-wrapper">
                   <InputSearchBar hasVoiceActionButton={false}
                     label="Pesquisar"
@@ -166,7 +166,7 @@ export default function StatisticsClient() {
               <CardNoResults
                 position="center"
                 icon={
-                  <img src="/Icons/reduce.svg" alt="" className="w-[40px] h-[40px]" />
+                  <img src="/Icons/reduce.svg" alt="" className="w-40 h-40" />
                 }
                 title="Sem publicações"
                 description="Ainda não publicou uma API."
@@ -190,12 +190,12 @@ export default function StatisticsClient() {
         <Tab>
           <TabHeader>Reutilizar</TabHeader>
           <TabBody>
-            <div className="mt-[24px]">
-              <p className="text-neutral-700 text-sm mb-[16px]">
+            <div className="mt-24">
+              <p className="text-neutral-700 text-sm mb-16">
                 0 resultados
               </p>
 
-              <div className="flex items-end gap-[16px] mb-[24px]">
+              <div className="flex items-end gap-16 mb-24">
                 <div className="admin-search-wrapper">
                   <InputSearchBar hasVoiceActionButton={false}
                     label="Pesquisar"
@@ -222,7 +222,7 @@ export default function StatisticsClient() {
               <CardNoResults
                 position="center"
                 icon={
-                  <img src="/Icons/bar_chart.svg" alt="" className="w-[40px] h-[40px]" />
+                  <img src="/Icons/bar_chart.svg" alt="" className="w-40 h-40" />
                 }
                 title="Sem publicações"
                 description="Ainda não publicou uma reutilização."

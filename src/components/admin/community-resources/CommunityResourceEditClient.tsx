@@ -411,13 +411,13 @@ export default function CommunityResourceEditClient() {
       <div className="admin-page__body">
         <div className="admin-page__form-area">
           {successMessage && (
-            <div className="mb-[16px]">
+            <div className="mb-16">
               <StatusCard variant="success" showIcon description={successMessage} />
             </div>
           )}
 
           {apiError && (
-            <div className="mb-[16px]">
+            <div className="mb-16">
               <StatusCard variant="danger" showIcon description={apiError} />
             </div>
           )}
@@ -448,7 +448,7 @@ export default function CommunityResourceEditClient() {
             </div>
 
             {/* SOMA DE VERIFICACAO */}
-            <div className="flex flex-col items-start gap-[12px]">
+            <div className="flex flex-col items-start gap-12">
               <h2 className="admin-page__section-title mb-0">Selo de verificação</h2>
               {showChecksum ? (
                 <Button
@@ -698,7 +698,7 @@ export default function CommunityResourceEditClient() {
         <aside className="admin-page__auxiliar">
           <div className="admin-page__auxiliar-inner">
             <div className="admin-page__auxiliar-header">
-              <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
+              <Icon name="agora-line-question-mark" className="w-24 h-24" />
               <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
             </div>
             <AuxiliarList items={auxiliarItems} />

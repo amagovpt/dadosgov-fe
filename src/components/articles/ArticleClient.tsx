@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useSyncExternalStore, useRef, useState } from "react";
 import Link from "next/link";
 import {
   CardGeneral,
@@ -10,6 +9,7 @@ import {
   DropdownSection,
   DropdownOption,
   Icon,
+  InputSelectRef,
 } from "@ama-pt/agora-design-system";
 import HeroGeneral from "@/components/HeroGeneral";
 import { Pagination } from "@/components/Pagination";
@@ -34,13 +34,14 @@ function SortSelect({
   currentSortKey: string;
   onSortChange: (value: string) => void;
 }) {
-  const [mounted, setMounted] = useState(false);
-  const selectRef = useRef<any>(null);
+  const selectRef = useRef<InputSelectRef>(null);
   const lastValue = useRef(currentSortKey);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => { },
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
     if (!mounted) return;
@@ -93,7 +94,6 @@ function SortSelect({
 }
 
 export default function ArticleClient({ currentPage }: { currentPage: number }) {
-  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -137,122 +137,116 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters article">
-      <main className="grow bg-primary-50">
-        <HeroGeneral
-          title="Últimas novidades"
-          backgroundImageUrl="/Banner/hero-bg.png"
-          backgroundPosition="center right"
-          breadcrumbItems={[
-            { label: "Home", url: "/" },
-            { label: "Últimas novidades", url: "/pages/posts" },
-          ]}
-        >
-          <InputSearchBar
-            label="O que procura nas novidades?"
-            placeholder="Pesquisar artigos, notícias, webinars..."
-            id="articles-search"
-            hasVoiceActionButton={false}
-            voiceActionAltText="Pesquisar por voz"
-            searchActionAltText="Pesquisar"
-            darkMode={true}
-            minLength={1}
-            value={searchInput}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
-            onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter") handleSearch(); }}
-            onSearchActivate={() => handleSearch()}
-          />
-          <div className="mt-8 text-s-regular text-neutral-200">
-            Exemplos: &quot;webinar&quot;, &quot;estudos&quot;, &quot;eventos&quot;
-          </div>
-        </HeroGeneral>
-
-        <div className="container mx-auto md:gap-32 xl:gap-64">
-          <div className="pt-32 pb-64">
-            <div className="grid md:grid-cols-2 xl:grid-cols-12 gap-32 mb-16 items-center mt-[12px]">
-              <span className="text-neutral-900 font-medium text-base xl:col-span-7 mt-[32px]">
-                {isLoading ? "A carregar..." : `${total} Resultados`}
-              </span>
-              <div className="w-full md:w-auto xl:col-span-5 flex items-end gap-16 justify-end">
-                <div className="grow max-w-[240px]">
-                  <SortSelect currentSortKey={sortKey} onSortChange={setSortKey} />
-                </div>
+    <main className="w-full flex justify-center items-center flex-col bg-primary-50">
+      <HeroGeneral
+        title="Últimas novidades"
+        backgroundImageUrl="/Banner/hero-bg.png"
+        breadcrumbItems={[
+          { label: "Home", url: "/" },
+          { label: "Últimas novidades", url: "/pages/posts" },
+        ]}
+      >
+        <InputSearchBar
+          label="O que procura nas novidades?"
+          placeholder="Pesquisar artigos, notícias, webinars..."
+          id="articles-search"
+          hasVoiceActionButton={false}
+          voiceActionAltText="Pesquisar por voz"
+          searchActionAltText="Pesquisar"
+          darkMode={true}
+          minLength={1}
+          value={searchInput}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
+          onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter") handleSearch(); }}
+          onSearchActivate={() => handleSearch()}
+        />
+        <div className="mt-8 text-s-regular text-neutral-200">
+          Exemplos: &quot;webinar&quot;, &quot;estudos&quot;, &quot;eventos&quot;
+        </div>
+      </HeroGeneral>
+      <div className="container flex flex-col gap-32 justify-center items-center py-32">
+        <div className="w-full flex items-center justify-end flex-col ">
+          <div className="w-full flex items-end gap-16">
+            <span className="text-neutral-900 font-medium text-base w-full">
+              {isLoading ? "A carregar..." : `${total} Resultados`}
+            </span>
+            <div className="w-full flex items-end gap-16 justify-end">
+              <div className=" max-w-256">
+                <SortSelect currentSortKey={sortKey} onSortChange={setSortKey} />
               </div>
             </div>
+          </div>
 
-            <div className="divider-neutral-200 mt-[14px] mb-24" />
-
-            {isLoading ? null : posts.length === 0 ? (
-              <div className="flex justify-center py-64">
-                <span className="text-neutral-600">Nenhum artigo encontrado.</span>
-              </div>
-            ) : (
-              <div className="grid xs:grid-cols-1 sm:grid-cols-2 gap-32">
-                {posts.map((post) => {
-                  return (
-                    <Link
-                      key={post.id}
-                      href={`/pages/posts/${post.slug}`}
-                      className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
-                    >
-                      <CardGeneral
-                        variant="neutral-100"
-                        image={{
-                          src: post.image_thumbnail || post.image || "/laptop.png",
-                          alt: post.name,
-                          height: "56px",
-                          className: "bg-primary-100 !object-contain !h-[56px]",
-                        }}
-                        subtitleText={
-                          (
-                            <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                              {formatPostDate(post)}
-                            </span>
-                          ) as unknown as string
-                        }
-                        titleText={post.name}
-                        descriptionText={
-                          (
-                            <div className="flex flex-col grow">
-                              {post.headline && (
-                                <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
-                                  {post.headline}
-                                </p>
-                              )}
-                              <div className="mt-auto">
-                                <div className="flex items-center gap-8 text-primary-600 mt-16">
-                                  <Icon
-                                    name="agora-line-arrow-right-circle"
-                                    className="w-32 h-32"
-                                    aria-hidden="true"
-                                  />
-                                </div>
+          <div className="divider-neutral-200 mt-12 mb-24" />
+          {isLoading ? null : posts.length === 0 ? (
+            <div className="flex justify-center py-64">
+              <span className="text-neutral-600">Nenhum artigo encontrado.</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
+              {posts.map((post) => {
+                return (
+                  <Link
+                    key={post.id}
+                    href={`/pages/posts/${post.slug}`}
+                    className="card-general-listing rounded-4 overflow-hidden h-full flex flex-col"
+                  >
+                    <CardGeneral
+                      variant="neutral-100"
+                      image={{
+                        src: post.image_thumbnail || post.image || "/laptop.png",
+                        alt: post.name,
+                        height: "56px",
+                        className: "bg-primary-100 !object-contain !h-56",
+                      }}
+                      subtitleText={
+                        (
+                          <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                            {formatPostDate(post)}
+                          </span>
+                        ) as unknown as string
+                      }
+                      titleText={post.name}
+                      descriptionText={
+                        (
+                          <div className="flex flex-col grow">
+                            {post.headline && (
+                              <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
+                                {post.headline}
+                              </p>
+                            )}
+                            <div className="mt-auto">
+                              <div className="flex items-center gap-8 text-primary-600 mt-16">
+                                <Icon
+                                  name="agora-line-arrow-right-circle"
+                                  className="w-32 h-32"
+                                  aria-hidden="true"
+                                />
                               </div>
                             </div>
-                          ) as unknown as string
-                        }
-                        isBlockedLink={true}
-                        anchor={{
-                          href: `/pages/posts/${post.slug}`,
-                        }}
-                      />
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-
-            <div className="pb-64 mt-8 flex justify-center">
-              <Pagination
-                currentPage={currentPage}
-                totalItems={total}
-                pageSize={PAGE_SIZE}
-                baseUrl="/pages/posts"
-              />
+                          </div>
+                        ) as unknown as string
+                      }
+                      isBlockedLink={true}
+                      anchor={{
+                        href: `/pages/posts/${post.slug}`,
+                      }}
+                    />
+                  </Link>
+                );
+              })}
             </div>
-          </div>
+          )}
         </div>
-      </main>
-    </div>
+        <div className="flex justify-center">
+          <Pagination
+            currentPage={currentPage}
+            totalItems={total}
+            pageSize={PAGE_SIZE}
+            baseUrl="/pages/posts"
+          />
+        </div>
+      </div>
+    </main>
   );
 }

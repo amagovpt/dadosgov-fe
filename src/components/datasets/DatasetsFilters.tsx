@@ -366,7 +366,7 @@ export const DatasetsFilters = ({
         idPrefix="ds-filter"
       />
 
-      <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">Filtros avançados</h2>
+      <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">Filtros avançados</h2>
 
       <AdvancedFiltersSidebar
         groups={advancedFilterGroups}

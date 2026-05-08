@@ -284,7 +284,7 @@ export default function PostsNewClient() {
                   errorFeedbackText="Campo obrigatório"
                 />
 
-                <div className="flex flex-col gap-[8px]">
+                <div className="flex flex-col gap-8">
                   <span className="text-primary-900 text-base font-medium leading-7">
                     Tipo de artigo
                   </span>
@@ -306,7 +306,7 @@ export default function PostsNewClient() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-[8px]">
+                <div className="flex flex-col gap-8">
                   <span className="text-primary-900 text-base font-medium leading-7">
                     Tipo de conteúdo
                   </span>

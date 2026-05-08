@@ -3,6 +3,7 @@
 import { CardGeneral, ProgressBar } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import Icon from "../../Primitives/Icon";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 export type CardMetricsProps = {
     link: string;
@@ -47,7 +48,7 @@ export default function CardMetrics({
     return (
         <Link
             href={link}
-            className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
+            className="card-general-listing rounded-4 overflow-hidden h-full flex flex-col"
         >
             <CardGeneral
                 variant="white"
@@ -67,10 +68,14 @@ export default function CardMetrics({
                         </span>
                     </div>
                 }
-                titleText={title}
+                titleText={
+                    <span className="title-text line-clamp-4">
+                        {title}
+                    </span>
+                }
                 descriptionText={
                     <div className="flex flex-col grow">
-                        <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">{description}</p>
+                        <span className="text-m-regular text-neutral-800 line-clamp-3 mb-16">{formatHtmlParagraphs(description)}</span>
                         <div
                             className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
                         >
@@ -81,7 +86,7 @@ export default function CardMetrics({
                                     hideLabel={true}
                                     hidePercentageValue={true}
                                 />
-                                <span className="text-[14px] text-neutral-900 mt-4 block">
+                                <span className="text-s-regular text-neutral-900 mt-4 block">
                                     {qualityScore}% Qualidade dos metadados
                                 </span>
                             </>)}

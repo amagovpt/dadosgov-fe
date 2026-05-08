@@ -19,7 +19,7 @@ import { logout } from "@/services/api";
 
 function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p className="font-bold">Esta ação é irreversível.</p>
       <p>
         Todo o conteúdo publicado em seu nome permanecerá online, nos mesmos URLs, mas de forma

@@ -37,6 +37,9 @@ import {
   DiscussionCreatePayload,
   APIResponse,
 } from "@/types/api";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 import {
   fetchOrgDatasets,
   fetchOrgReuses,
@@ -244,10 +247,14 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             : undefined
                         }
                       >
-                        <div
-                          className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline"
-                          dangerouslySetInnerHTML={{ __html: organization.description }}
-                        />
+                        <div className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[rehypeSanitize]}
+                          >
+                            {organization.description}
+                          </ReactMarkdown>
+                        </div>
                       </div>
                       {descOverflowing && (
                         <button

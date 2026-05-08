@@ -33,9 +33,9 @@ function DeleteUserPopupContent({
   onConfirm: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>Esta ação é irreversível.</p>
-      <div className="flex justify-end gap-[16px] pt-[16px]">
+      <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
           Cancelar
         </Button>
@@ -233,7 +233,7 @@ export default function UserProfileClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-[64px] mb-[32px]">Perfil</h1>
+      <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
 
       <div className="profile-card">
         <Avatar
@@ -261,7 +261,7 @@ export default function UserProfileClient() {
             )}
           </div>
 
-          <div className="absolute top-[32px] right-[32px]">
+          <div className="absolute top-32 right-32">
             <Button
               variant="primary"
               appearance="outline"
@@ -277,13 +277,13 @@ export default function UserProfileClient() {
         </div>
       </div>
 
-      <div className="mt-[32px]">
+      <div className="mt-32">
         <Tabs>
           <Tab active>
             <TabHeader>Perfil</TabHeader>
             <TabBody>
               <div
-                className="admin-page__form mt-[24px]"
+                className="admin-page__form mt-24"
                 style={{
                   maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))",
                 }}
@@ -333,11 +333,11 @@ export default function UserProfileClient() {
                   />
 
                   {isAdmin && (
-                  <div className="flex flex-col gap-[12px]">
+                  <div className="flex flex-col gap-12">
                     <span className="text-primary-900 text-base font-medium leading-7">
                       Perfil <span className="text-danger-600">*</span>
                     </span>
-                    <div className="flex gap-[24px]">
+                    <div className="flex gap-24">
                       {[
                         { value: "admin", label: "Administrador" },
                         { value: "editor", label: "Editor" },
@@ -348,18 +348,18 @@ export default function UserProfileClient() {
                           role="radio"
                           aria-checked={role === value}
                           onClick={() => setRole(value)}
-                          className="flex items-start gap-[8px] bg-transparent border-0 cursor-pointer p-0 min-h-[44px]"
+                          className="flex items-start gap-8 bg-transparent border-0 cursor-pointer p-0 min-h-[44px]"
                         >
                           <div className="p-[10px]">
                             <div
-                              className={`flex min-h-[24px] min-w-[24px] items-center justify-center rounded-full ${
+                              className={`flex min-h-24 min-w-24 items-center justify-center rounded-full ${
                                 role === value
-                                  ? "border-[6px] border-primary-600 bg-primary-600"
+                                  ? "border-6 border-primary-600 bg-primary-600"
                                   : "border-2 border-neutral-900"
                               }`}
                             >
                               {role === value && (
-                                <span className="block h-[12px] w-[12px] rounded-full bg-white" />
+                                <span className="block h-12 w-12 rounded-full bg-white" />
                               )}
                             </div>
                           </div>
@@ -416,7 +416,7 @@ export default function UserProfileClient() {
                   )}
                 </div>
 
-                <div className="flex justify-end mt-[16px]">
+                <div className="flex justify-end mt-16">
                   <Button
                     variant="primary"
                     hasIcon={true}
@@ -500,7 +500,7 @@ export default function UserProfileClient() {
           <Tab>
             <TabHeader>Atividades</TabHeader>
             <TabBody>
-              <div className="mt-[24px]">
+              <div className="mt-24">
                 {isLoadingActivities ? (
                   <p className="text-neutral-900 text-base">A carregar atividades...</p>
                 ) : activities.length === 0 ? (
@@ -597,7 +597,7 @@ export default function UserProfileClient() {
           <Tab>
             <TabHeader>Subscrições</TabHeader>
             <TabBody>
-              <div className="mt-[24px]">
+              <div className="mt-24">
                 {isLoadingSubscriptions ? (
                   <p className="text-neutral-900 text-base">A carregar subscrições...</p>
                 ) : subscriptions.length === 0 ? (
@@ -639,7 +639,7 @@ export default function UserProfileClient() {
                             avatarType={subAvatar ? "image" : "initials"}
                             srcPath={(subAvatar || initials) as unknown as undefined}
                             alt={subName}
-                            className="w-[48px] h-[48px]"
+                            className="w-48 h-48"
                           />
                           <span className="text-neutral-900 text-base font-medium">{subName}</span>
                         </div>
@@ -664,7 +664,7 @@ export default function UserProfileClient() {
           <Tab>
             <TabHeader>Acompanhamentos</TabHeader>
             <TabBody>
-              <div className="mt-[24px]">
+              <div className="mt-24">
                 <CardNoResults
                   className="datasets-page__empty"
                   position="center"

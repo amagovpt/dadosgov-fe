@@ -81,6 +81,7 @@ import {
   HarvestSource,
   HarvestSourceCreatePayload,
   HarvestSourceUpdatePayload,
+  HarvestValidationPayload,
   HomepageData,
   SystemLogContent,
   SystemLogFile,
@@ -3590,7 +3591,7 @@ export async function unscheduleHarvester(id: string): Promise<void> {
 }
 
 export async function triggerHarvest(id: string): Promise<HarvestJob> {
-  const res = await fetch(`${API_AUTH_URL}/harvest/sources/${id}/jobs/`, {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/jobs/`, {
     method: "POST",
     credentials: "include",
   });
@@ -3643,13 +3644,41 @@ export async function fetchHarvestJob(
 }
 
 export async function validateHarvestSource(
-  id: string
-): Promise<Record<string, unknown>> {
-  const res = await fetch(`${API_AUTH_URL}/harvest/sources/${id}/validation/`, {
-    cache: "no-store",
+  id: string,
+  comment?: string
+): Promise<HarvestSource> {
+  const payload: HarvestValidationPayload = { state: "accepted" };
+  if (comment) payload.comment = comment;
+
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/validate/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     credentials: "include",
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`Failed to validate harvest source: ${res.statusText}`);
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+  return await res.json();
+}
+
+export async function rejectHarvestSource(
+  id: string,
+  comment: string
+): Promise<HarvestSource> {
+  const payload: HarvestValidationPayload = { state: "refused", comment };
+
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/validate/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
   return await res.json();
 }
 
