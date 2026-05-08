@@ -1,14 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { fetchReuses } from "@/services/api";
 import { APIResponse, Reuse } from "@/types/api";
 import { useListingUrlState } from "@/hooks/useListingUrlState";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import {
   getReuseSortDefault,
-  parseReusesFilters,
   REUSE_SORT_OPTIONS,
 } from "@/utils/reusesListingQuery";
 
@@ -19,39 +17,11 @@ interface UseReusesListingArgs {
 
 export function useReusesListing({ initialData, currentPage }: UseReusesListingArgs) {
   const searchParams = useSearchParams();
-  const queryString = searchParams.toString();
   const currentQuery = searchParams.get("q") || "";
   const currentSort = searchParams.get("sort");
 
   const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
-  const [listData, setListData] = useState<APIResponse<Reuse>>(initialData);
-  const hasHydratedRef = useRef(false);
-  const lastRequestKeyRef = useRef<string>("");
-
-  useEffect(() => {
-    const requestKey = `${activePage}|${initialData.page_size || 12}|${queryString}`;
-    if (!hasHydratedRef.current) {
-      hasHydratedRef.current = true;
-      lastRequestKeyRef.current = requestKey;
-      return;
-    }
-    if (lastRequestKeyRef.current === requestKey) return;
-    lastRequestKeyRef.current = requestKey;
-
-    let cancelled = false;
-
-    async function loadReusesFromUrl() {
-      const params = new URLSearchParams(queryString);
-      const filters = parseReusesFilters(params);
-      const next = await fetchReuses(activePage, initialData.page_size || 12, filters);
-      if (!cancelled) setListData(next);
-    }
-
-    loadReusesFromUrl();
-    return () => {
-      cancelled = true;
-    };
-  }, [activePage, initialData.page_size, queryString]);
+  const listData: APIResponse<Reuse> = initialData;
 
   const onSearchNavigate = useCallback(
     (query: string) => {
