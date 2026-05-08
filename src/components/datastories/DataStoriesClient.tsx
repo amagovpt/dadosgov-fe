@@ -78,7 +78,6 @@ export default function DataStoriesClient({
         onSearch={handleSearch}
         examplesText='Exemplos: "serviços públicos", "turismo", "territórios"'
       />
-
       {/* Main Content */}
       <div className="container flex flex-col gap-24 justify-center items-center py-32">
         {/* Results count + Sort toggles */}
@@ -107,7 +106,6 @@ export default function DataStoriesClient({
           </div>
         </div>
         <div className="divider-neutral-200 mb-24" />
-
         <div
           className={`grid gap-32 ${filtersOpen ? "grid-cols-12" : ""}`}
         >
@@ -126,12 +124,11 @@ export default function DataStoriesClient({
           {/* Results Area */}
           <div className={filtersOpen ? "col-span-8" : "col-span-full"}>
             <div
-              className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-2")}
+              className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2")}
             >
               {pagedStories.length > 0 ? (
                 pagedStories.map((story) => {
                   const timeAgo = formatDateToTimeAgo(story.createdAt);
-
                   return (
                     <div key={story.slug} className="h-full">
                       <CardLinks

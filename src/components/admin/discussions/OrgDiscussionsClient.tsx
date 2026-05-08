@@ -142,7 +142,7 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
         </div>
       ) : (
         <>
-          <p className="text-neutral-700 text-sm font-semibold uppercase mb-[24px]">
+          <p className="text-neutral-700 text-sm font-semibold uppercase mb-24">
             {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
           </p>
 

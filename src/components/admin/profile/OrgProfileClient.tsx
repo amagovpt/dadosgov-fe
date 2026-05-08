@@ -29,9 +29,9 @@ function DeleteOrgPopupContent({
   onConfirm: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>Esta ação é irreversível.</p>
-      <div className="flex justify-end gap-[16px] pt-[16px]">
+      <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
           Cancelar
         </Button>
@@ -209,7 +209,7 @@ export default function OrgProfileClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-[64px] mb-[32px]">
+      <h1 className="admin-page__title mt-64 mb-32">
         Perfil da organização
       </h1>
 
@@ -236,16 +236,16 @@ export default function OrgProfileClient() {
                   {org.acronym}
                 </p>
               )}
-              <div className="flex items-center gap-[16px] text-neutral-900 text-sm">
-                <span className="flex items-center gap-[4px]">
-                  <Icon name="agora-line-user-group" className="w-[16px] h-[16px]" />
+              <div className="flex items-center gap-16 text-neutral-900 text-sm">
+                <span className="flex items-center gap-4">
+                  <Icon name="agora-line-user-group" className="w-16 h-16" />
                   {org.metrics.members} membros
                 </span>
-                <span className="flex items-center gap-[4px]">
-                  <Icon name="agora-line-layers-menu" className="w-[16px] h-[16px]" />
+                <span className="flex items-center gap-4">
+                  <Icon name="agora-line-layers-menu" className="w-16 h-16" />
                   {org.metrics.datasets} conjuntos de dados
                 </span>
-                <span className="flex items-center gap-[4px]">
+                <span className="flex items-center gap-4">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="text-primary-500">
                     <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" fill="currentColor" />
                   </svg>
@@ -257,7 +257,7 @@ export default function OrgProfileClient() {
         </div>
       )}
 
-      <div className="admin-page__body mt-[32px]">
+      <div className="admin-page__body mt-32">
         <div className="admin-page__form-area">
           <div className="admin-page__form">
             <h2 className="admin-page__section-title hidden">EDITAR ORGANIZAÇÃO</h2>
@@ -350,7 +350,7 @@ export default function OrgProfileClient() {
                 </div>
               </div>
 
-              <div className="flex justify-end mt-[16px]">
+              <div className="flex justify-end mt-16">
                 <Button
                   variant="primary"
                   hasIcon

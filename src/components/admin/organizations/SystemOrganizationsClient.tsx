@@ -27,9 +27,9 @@ function DeleteOrgPopupContent({
   onConfirm: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>Esta ação é irreversível.</p>
-      <div className="flex justify-end gap-[16px] pt-[16px]">
+      <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
           Cancelar
         </Button>
@@ -164,11 +164,11 @@ export default function SystemOrganizationsClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         {totalItems} resultados
       </p>
 
-      <div className="flex items-end gap-[16px] mb-[24px]">
+      <div className="flex items-end gap-16 mb-24">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -249,7 +249,7 @@ export default function SystemOrganizationsClient() {
                   {org.members?.length ?? 0}
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-[8px]">
+                  <div className="flex gap-8">
                     <a href={`/pages/organizations/${org.slug}`}>
                       <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                     </a>

@@ -380,7 +380,7 @@ export default function HomeClient({
                       <img
                         src={`/Logos/${logo}`}
                         alt={`Logo ${logo.replace(".svg", "")}`}
-                        className="h-[32px] w-auto object-contain"
+                        className="h-32 w-auto object-contain"
                       />
                     </div>
                   ))}
@@ -393,7 +393,7 @@ export default function HomeClient({
                       <img
                         src={`/Logos/${logo}`}
                         alt={`Logo ${logo.replace(".svg", "")}`}
-                        className="h-[32px] w-auto object-contain"
+                        className="h-32 w-auto object-contain"
                       />
                     </div>
                   ))}

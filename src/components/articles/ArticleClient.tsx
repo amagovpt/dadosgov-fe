@@ -164,7 +164,6 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
           Exemplos: &quot;webinar&quot;, &quot;estudos&quot;, &quot;eventos&quot;
         </div>
       </HeroGeneral>
-
       <div className="container flex flex-col gap-32 justify-center items-center py-32">
         <div className="w-full flex items-center justify-end flex-col ">
           <div className="w-full flex items-end gap-16">
@@ -179,7 +178,6 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
           </div>
 
           <div className="divider-neutral-200 mt-12 mb-24" />
-
           {isLoading ? null : posts.length === 0 ? (
             <div className="flex justify-center py-64">
               <span className="text-neutral-600">Nenhum artigo encontrado.</span>
@@ -191,7 +189,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
                   <Link
                     key={post.id}
                     href={`/pages/posts/${post.slug}`}
-                    className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
+                    className="card-general-listing rounded-4 overflow-hidden h-full flex flex-col"
                   >
                     <CardGeneral
                       variant="neutral-100"
@@ -199,7 +197,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
                         src: post.image_thumbnail || post.image || "/laptop.png",
                         alt: post.name,
                         height: "56px",
-                        className: "bg-primary-100 !object-contain !h-[56px]",
+                        className: "bg-primary-100 !object-contain !h-56",
                       }}
                       subtitleText={
                         (

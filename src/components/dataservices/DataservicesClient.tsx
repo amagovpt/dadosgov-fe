@@ -388,7 +388,7 @@ export default function DataservicesClient({
                 })}
               </div>
 
-              <h2 className="text-xl mb-[32px] mt-[36px] font-bold text-neutral-900">
+              <h2 className="text-xl mb-32 mt-[36px] font-bold text-neutral-900">
                 Filtros avançados
               </h2>
 
@@ -499,8 +499,8 @@ export default function DataservicesClient({
             {/* Results Area */}
             <div className="mt-[36px] xl:col-span-7">
               <div>
-                <div className="mb-16 mt-[12px] grid items-center gap-32 md:grid-cols-2 xl:grid-cols-12">
-                  <span className="mt-[32px] text-base font-medium text-neutral-900 xl:col-span-6">
+                <div className="mb-16 mt-12 grid items-center gap-32 md:grid-cols-2 xl:grid-cols-12">
+                  <span className="mt-32 text-base font-medium text-neutral-900 xl:col-span-6">
                     {total.toLocaleString("pt-PT")} Resultados
                   </span>
                   <div className="flex w-full items-end justify-end gap-16 md:w-auto xl:col-span-6">
@@ -534,7 +534,7 @@ export default function DataservicesClient({
                         <Link
                           key={ds.id}
                           href={dsUrl}
-                          className="card-general-listing flex h-full flex-col overflow-hidden rounded-[4px]"
+                          className="card-general-listing flex h-full flex-col overflow-hidden rounded-4"
                         >
                           <CardGeneral
                             variant="neutral-100"

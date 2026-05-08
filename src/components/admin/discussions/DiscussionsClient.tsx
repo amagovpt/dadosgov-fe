@@ -96,7 +96,7 @@ export default function DiscussionsClient() {
         </div>
       ) : (
         <>
-          <p className="text-neutral-700 text-sm font-semibold uppercase mb-[24px]">
+          <p className="text-neutral-700 text-sm font-semibold uppercase mb-24">
             {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
           </p>
 
@@ -121,17 +121,17 @@ export default function DiscussionsClient() {
                     <span className="font-medium">{discussion.title}</span>
                   </TableCell>
                   <TableCell headerLabel="Autor">
-                    <div className="flex items-center gap-[8px]">
+                    <div className="flex items-center gap-8">
                       {discussion.user?.avatar_thumbnail ? (
                         <img
                           src={discussion.user.avatar_thumbnail}
                           alt={`${discussion.user.first_name} ${discussion.user.last_name}`}
-                          className="w-[24px] h-[24px] rounded-full"
+                          className="w-24 h-24 rounded-full"
                         />
                       ) : (
                         <Icon
                           name="agora-line-user"
-                          className="w-[24px] h-[24px]"
+                          className="w-24 h-24"
                         />
                       )}
                       <span>
@@ -157,27 +157,27 @@ export default function DiscussionsClient() {
             </TableBody>
           </Table>
 
-          <div className="flex items-center justify-between mt-[16px] py-[12px] border-t border-neutral-200">
-            <div className="flex items-center gap-[8px]">
+          <div className="flex items-center justify-between mt-16 py-12 border-t border-neutral-200">
+            <div className="flex items-center gap-8">
               <span className="text-sm text-neutral-600">Linhas por página</span>
               <select
                 value={itemsPerPage}
                 onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                className="border border-neutral-300 rounded px-[8px] py-[4px] text-sm"
+                className="border border-neutral-300 rounded px-8 py-4 text-sm"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
               </select>
             </div>
-            <div className="flex items-center gap-[8px]">
+            <div className="flex items-center gap-8">
               <span className="text-sm text-neutral-600">
                 {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, discussions.length)} de {discussions.length}
               </span>
-              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-[4px] text-primary-600 disabled:text-neutral-300" aria-label="Página anterior">
+              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-4 text-primary-600 disabled:text-neutral-300" aria-label="Página anterior">
                 <Icon name="agora-line-arrow-left" className="w-[20px] h-[20px]" />
               </button>
-              <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-[4px] text-primary-600 disabled:text-neutral-300" aria-label="Próxima página">
+              <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-4 text-primary-600 disabled:text-neutral-300" aria-label="Próxima página">
                 <Icon name="agora-line-arrow-right" className="w-[20px] h-[20px]" />
               </button>
             </div>

@@ -31,7 +31,7 @@ export default function StatusDot({
   children,
 }: StatusDotProps) {
   return (
-    <span className="flex items-center gap-[8px] text-sm text-neutral-900">
+    <span className="flex items-center gap-8 text-sm text-neutral-900">
       <span
         className="inline-block w-[10px] h-[10px] rounded-full flex-shrink-0"
         style={{ backgroundColor: VARIANT_COLORS[variant] }}

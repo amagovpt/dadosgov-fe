@@ -57,7 +57,7 @@ export default function DatasetsClient({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDeleteDataset = (dataset: { id: string; title: string }) => {
     show(
-      <div className="flex flex-col gap-[16px]">
+      <div className="flex flex-col gap-16">
         <p>
           Essa ação é irreversível.{" "}
           <span className="text-red-600">Tem a certeza que quer eliminar este conjunto de dados?</span>
@@ -115,7 +115,6 @@ export default function DatasetsClient({
         onChange={setSearchQuery}
         onSearch={handleSearch}
       />
-
       {/* Main Content */}
       <div className="container flex flex-col gap-24 justify-center items-center py-32">
         {/* Results count + Sort toggles */}
@@ -162,7 +161,6 @@ export default function DatasetsClient({
           </div>
         </div>
         <div className="w-full divider-neutral-200 mb-24" />
-
         <div
           className={twJoin("grid gap-32", filtersOpen ? "grid-cols-12" : "")}
         >

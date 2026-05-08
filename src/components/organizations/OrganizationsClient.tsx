@@ -79,7 +79,6 @@ export default function OrganizationsClient({
         onChange={setSearchQuery}
         onSearch={handleSearch}
       />
-
       {/* Main Content */}
       <div className="container flex flex-col gap-24 justify-center items-center py-32">
         {/* Results count + Sort toggles */}
@@ -126,7 +125,6 @@ export default function OrganizationsClient({
           </div>
         </div>
         <div className="divider-neutral-200 mb-24" />
-
         <div
           className={twJoin("grid gap-32", filtersOpen ? "grid-cols-12" : "")}
         >

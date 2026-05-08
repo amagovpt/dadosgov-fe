@@ -88,7 +88,7 @@ export default function OrgDatasetsNewClient() {
 
       {currentStep === 1 && (
         <>
-          <h2 className="admin-page__section-title mb-[16px]">Tipo de publicação</h2>
+          <h2 className="admin-page__section-title mb-16">Tipo de publicação</h2>
 
           <StatusCard
             variant="informative"
@@ -96,7 +96,7 @@ export default function OrgDatasetsNewClient() {
             description="Se desejar realizar testes, utilize demo.dados.gov.pt"
           />
 
-          <div className="datasets-new-page__cards mb-[32px]" style={{ maxWidth: "50%" }}>
+          <div className="datasets-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
             <CardAction
               variant="neutral-100"
               titleText="Publique um conjunto de dados"
