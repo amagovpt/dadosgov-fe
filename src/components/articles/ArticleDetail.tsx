@@ -107,12 +107,12 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
           <div className="text-[#2b363c] flex flex-col gap-32">
             <div className="max-w-[592px]">
                 {/* Content */}
-                <div className="text-m-regular leading-7">
+                <div className="markdown-container text-m-regular leading-7">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
                   >
-                    {post.content}
+                    {post.content.replace(/\n&nbsp;\s*\n/g, "\n\n")}
                   </ReactMarkdown>
                 </div>
 
