@@ -1,15 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { fetchDatasets } from "@/services/api";
 import { APIResponse, Dataset } from "@/types/api";
 import { useListingUrlState } from "@/hooks/useListingUrlState";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import {
   DATASET_SORT_OPTIONS,
   getDatasetSortDefault,
-  parseDatasetsFilters,
 } from "@/utils/datasetsListingQuery";
 
 interface UseDatasetsListingArgs {
@@ -19,28 +17,11 @@ interface UseDatasetsListingArgs {
 
 export function useDatasetsListing({ initialData, currentPage }: UseDatasetsListingArgs) {
   const searchParams = useSearchParams();
-  const queryString = searchParams.toString();
   const currentQuery = searchParams.get("q") || "";
   const currentSort = searchParams.get("sort");
 
   const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
-  const [listData, setListData] = useState<APIResponse<Dataset>>(initialData);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadDatasetsFromUrl() {
-      const params = new URLSearchParams(queryString);
-      const filters = parseDatasetsFilters(params);
-      const next = await fetchDatasets(activePage, initialData.page_size || 20, filters);
-      if (!cancelled) setListData(next);
-    }
-
-    loadDatasetsFromUrl();
-    return () => {
-      cancelled = true;
-    };
-  }, [activePage, initialData.page_size, queryString]);
+  const listData: APIResponse<Dataset> = initialData;
 
   const onSearchNavigate = useCallback(
     (query: string) => {

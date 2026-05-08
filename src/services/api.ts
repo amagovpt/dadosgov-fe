@@ -136,9 +136,14 @@ export async function fetchCsrfToken(): Promise<string> {
  * Perform login using the frontend route handler proxy
  */
 export async function login(formData: FormData): Promise<{ message: string; redirect?: string }> {
+  const params = new URLSearchParams();
+  for (const [key, value] of formData.entries()) {
+    params.append(key, typeof value === "string" ? value : value.name);
+  }
+
   const res = await fetch("/login", {
     method: "POST",
-    body: new URLSearchParams(formData as any),
+    body: params,
   });
 
   const data = await res.json();
@@ -365,10 +370,6 @@ export async function fetchDatasets(
     const url = `${API_BASE_URL}/datasets/?${params.toString()}`;
     const res = await fetch(url, {
       cache: "no-store",
-      // Keep front-office listings public/consistent between SSR and CSR.
-      // Without this, browser fetches may include session cookies and return
-      // different totals than the server-rendered first paint.
-      credentials: "omit",
     });
 
     if (!res.ok) {
@@ -503,7 +504,6 @@ export async function fetchOrganizations(
     const url = `${API_BASE_URL}/organizations/?${params.toString()}`;
     const res = await fetch(url, {
       cache: "no-store",
-      credentials: "omit",
     });
 
     if (!res.ok) {
@@ -975,7 +975,6 @@ export async function fetchReuses(
     const url = `${API_BASE_URL}/reuses/?${params.toString()}`;
     const res = await fetch(url, {
       cache: "no-store",
-      credentials: "omit",
     });
 
     if (!res.ok) {
@@ -2531,8 +2530,11 @@ export async function fetchSpatialZonesByIds(ids: string[]): Promise<SpatialZone
       { cache: "no-store" }
     );
     if (!res.ok) throw new Error(`Failed to fetch spatial zones: ${res.statusText}`);
-    const geojson = await res.json() as {
-      features?: Array<{ id: string; properties: { name: string; code: string; uri?: string; level?: any } }>;
+    const geojson = (await res.json()) as {
+      features?: Array<{
+        id: string;
+        properties: { name: string; code: string; uri?: string; level?: unknown };
+      }>;
     };
     return (geojson.features ?? []).map((f) => ({
       id: f.id,
@@ -2540,7 +2542,7 @@ export async function fetchSpatialZonesByIds(ids: string[]): Promise<SpatialZone
       code: f.properties.code,
       uri: f.properties.uri ?? "",
       // Some backends include a level reference; keep it flexible (could be id or object)
-      level: (f.properties as any).level ?? "",
+      level: f.properties.level ?? "",
     })) as SpatialZone[];
   } catch (error) {
     console.error("Error fetching spatial zones by ids:", error);

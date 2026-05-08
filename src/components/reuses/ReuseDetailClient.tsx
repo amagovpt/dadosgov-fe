@@ -204,7 +204,6 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
   useEffect(() => {
     if (!reuse || datasetRefs.length === 0) {
-      setIsLoadingDatasets(false);
       return;
     }
 

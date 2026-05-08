@@ -870,21 +870,13 @@ export default function DatasetsEditClient() {
       return [...kept, ...additions];
     });
   }, []);
-  const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
-  useEffect(() => {
+  const selectedZoneObjects = useMemo<SpatialZone[]>(() => {
     const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
     const ids = effective.split(",").filter(Boolean);
-    if (ids.length === 0) {
-      setSelectedZoneObjects([]);
-      return;
-    }
-    setSelectedZoneObjects((prev) => {
-      const map = new Map(prev.map((z) => [z.id, z]));
-      allSpatialZones.forEach((z) => {
-        if (!map.has(z.id)) map.set(z.id, z);
-      });
-      return ids.map((id) => map.get(id)).filter(Boolean) as SpatialZone[];
-    });
+    if (ids.length === 0) return [];
+
+    const zoneMap = new Map(allSpatialZones.map((z) => [z.id, z]));
+    return ids.map((id) => zoneMap.get(id)).filter((z): z is SpatialZone => Boolean(z));
   }, [selectedSpatialZonesValue, loadedSpatialZones, allSpatialZones]);
 
   const spatialCoverageOptions = useMemo(() => {
