@@ -20,6 +20,7 @@ import { ReusesFilters } from "@/components/reuses/ReusesFilters";
 import { useReusesListing } from "@/hooks/useReusesListing";
 import { REUSE_SORT_LABELS } from "@/utils/reusesListingQuery";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { twJoin } from "tailwind-merge";
 
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
@@ -128,24 +129,22 @@ export default function ReusesClient({
           </div>
           <div className="divider-neutral-200 mb-24" />
 
-          <div
-            className={`grid-filters grid gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
-          >
+          <div className={twJoin("grid gap-32", filtersOpen ? "grid-cols-12" : "")}>
             {/* Sidebar */}
             {filtersOpen && (
-              <ReusesFilters filterCounts={filterCounts} allOrganizations={allOrganizations} />
+              <div className="col-span-12 xl:col-span-4">
+                <ReusesFilters filterCounts={filterCounts} allOrganizations={allOrganizations} />
+              </div>
             )}
 
             {/* Results Area */}
-            <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>
+            <div className={filtersOpen ? "col-span-12 xl:col-span-8" : "col-span-full"}>
               <div>
                 <div
-                  className="agora-card-links-datasets-px0 grid gap-32"
-                  style={{
-                    gridTemplateColumns: filtersOpen
-                      ? "repeat(1, minmax(0, 1fr))"
-                      : "repeat(2, minmax(0, 1fr))",
-                  }}
+                  className={twJoin(
+                    "agora-card-links-datasets-px0 grid gap-32",
+                    filtersOpen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+                  )}
                 >
                   {reuses.length > 0 ? (
                     reuses.map((reuse) => {

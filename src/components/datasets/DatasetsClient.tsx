@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Icon,
   ToggleGroup,
@@ -14,8 +13,6 @@ import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { APIResponse, Dataset, Frequency, Granularity, License, Organization } from "@/types/api";
-import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
 
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -24,6 +21,7 @@ import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { DATASET_SORT_LABELS } from "@/utils/datasetsListingQuery";
 import { useDatasetsListing } from "@/hooks/useDatasetsListing";
+import { twJoin } from "tailwind-merge";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -173,12 +171,10 @@ export default function DatasetsClient({
           </div>
           <div className="divider-neutral-200 mb-24" />
 
-          <div
-            className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
-          >
+          <div className={twJoin("grid gap-32", filtersOpen ? "grid-cols-12" : "")}>
             {/* Sidebar */}
             {filtersOpen && (
-              <div className="xl:col-span-5 xl:block">
+              <div className="col-span-12 xl:col-span-4">
                 <DatasetsFilters
                   filterCounts={filterCounts}
                   allOrganizations={allOrganizations}
@@ -190,16 +186,15 @@ export default function DatasetsClient({
             )}
 
             {/* Results Area */}
-            <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>
+            <div className={filtersOpen ? "col-span-12 xl:col-span-8" : "col-span-full"}>
               <div>
                 <div
-                  className="gap-32"
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: filtersOpen
-                      ? "repeat(2, minmax(0, 1fr))"
-                      : "repeat(3, minmax(0, 1fr))",
-                  }}
+                  className={twJoin(
+                    "grid gap-32",
+                    filtersOpen
+                      ? "grid-cols-1 lg:grid-cols-2"
+                      : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+                  )}
                 >
                   {datasets.length > 0 ? (
                     datasets.map((dataset, index) => {
