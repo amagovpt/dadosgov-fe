@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@ama-pt/agora-design-system";
-import { fetchOrganizations, suggestTags } from "@/services/api";
+import { suggestTags } from "@/services/api";
 import { Organization } from "@/types/api";
 import {
   AdvancedFilterGroup,
@@ -64,23 +64,26 @@ type ReuseFilterKey = keyof typeof REUSE_TOGGLE_FILTERS;
 
 interface ReusesFiltersProps {
   filterCounts?: Record<string, number>;
+  allOrganizations?: Organization[];
 }
 
-export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
+export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: ReusesFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
   const paramsRef = useRef(queryString);
 
-  const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<ReuseFilterKey, string>>({
-    atualizacao: detectAtualizacaoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
-  });
-
-  const [filterOrgs, setFilterOrgs] = useState<Organization[]>([]);
   const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
   const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
-  const [isFiltersLoading, setIsFiltersLoading] = useState(true);
+  const selectedToggleFilters = useMemo<Record<ReuseFilterKey, string>>(
+    () => ({
+      atualizacao: detectAtualizacaoFromParams(
+        new URLSearchParams(Array.from(searchParams.entries()))
+      ),
+    }),
+    [searchParams]
+  );
 
   const getWorkingParams = useCallback(() => new URLSearchParams(paramsRef.current), []);
 
@@ -97,25 +100,7 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
 
   useEffect(() => {
     paramsRef.current = queryString;
-    const current = new URLSearchParams(queryString);
-    setSelectedToggleFilters({
-      atualizacao: detectAtualizacaoFromParams(current),
-    });
   }, [queryString]);
-
-  useEffect(() => {
-    async function loadFilterData() {
-      try {
-        const orgsRes = await fetchOrganizations(1, 100, { sort: "-datasets" });
-        setFilterOrgs(orgsRes.data);
-      } catch (error) {
-        console.error("Failed to load filter data", error);
-      } finally {
-        setIsFiltersLoading(false);
-      }
-    }
-    loadFilterData();
-  }, []);
 
   const handleTagSearch = useCallback(async (query: string) => {
     if (query.length < 2) {
@@ -133,7 +118,6 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
   const handleToggleFilterChange = useCallback(
     (filterKey: string, optionId: string) => {
       const typedKey = filterKey as ReuseFilterKey;
-      setSelectedToggleFilters((prev) => ({ ...prev, [typedKey]: optionId }));
 
       if (typedKey === "atualizacao") {
         const current = getWorkingParams();
@@ -206,7 +190,7 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
       {
         name: "Organizações",
         param: "organization",
-        data: filterOrgs.map((organization) => ({ id: organization.id, name: organization.name })),
+        data: allOrganizations.map((organization) => ({ id: organization.id, name: organization.name })),
         searchable: true,
         searchPlaceholder: "Pesquisar",
         emptyMessage: "Sem resultados",
@@ -222,7 +206,7 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
         emptyMessage: "Sem resultados",
       },
     ],
-    [filterOrgs, filterTagOptions]
+    [allOrganizations, filterTagOptions]
   );
 
   return (
@@ -247,7 +231,6 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
         onClearGroup={handleClearAdvancedFilter}
         showClearActions={true}
         checkboxIdPrefix="reuse"
-        isLoading={isFiltersLoading}
       />
 
       <div className="mt-32">
@@ -256,7 +239,6 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
           appearance="outline"
           onClick={() => {
             paramsRef.current = "";
-            setSelectedToggleFilters({ atualizacao: "all" });
             router.replace("/pages/reuses", { scroll: false });
           }}
         >

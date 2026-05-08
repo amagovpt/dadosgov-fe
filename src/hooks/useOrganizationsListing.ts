@@ -1,15 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { fetchOrganizations } from "@/services/api";
 import { APIResponse, Organization } from "@/types/api";
 import { useListingUrlState } from "@/hooks/useListingUrlState";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import {
   getOrganizationSortDefault,
   ORGANIZATION_SORT_OPTIONS,
-  parseOrganizationsFilters,
 } from "@/utils/organizationsListingQuery";
 
 interface UseOrganizationsListingArgs {
@@ -22,28 +20,11 @@ export function useOrganizationsListing({
   currentPage,
 }: UseOrganizationsListingArgs) {
   const searchParams = useSearchParams();
-  const queryString = searchParams.toString();
   const currentQuery = searchParams.get("q") || "";
   const currentSort = searchParams.get("sort");
 
   const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
-  const [listData, setListData] = useState<APIResponse<Organization>>(initialData);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadOrganizationsFromUrl() {
-      const params = new URLSearchParams(queryString);
-      const filters = parseOrganizationsFilters(params);
-      const next = await fetchOrganizations(activePage, initialData.page_size || 20, filters);
-      if (!cancelled) setListData(next);
-    }
-
-    loadOrganizationsFromUrl();
-    return () => {
-      cancelled = true;
-    };
-  }, [activePage, initialData.page_size, queryString]);
+  const listData: APIResponse<Organization> = initialData;
 
   const onSearchNavigate = useCallback(
     (query: string) => {

@@ -1,4 +1,10 @@
-import { fetchDatasets } from '@/services/api';
+import {
+  fetchDatasets,
+  fetchFrequencies,
+  fetchGranularities,
+  fetchLicenses,
+  fetchOrganizations,
+} from '@/services/api';
 import { DatasetFilters } from '@/types/api';
 import DatasetsClient from '@/components/datasets/DatasetsClient';
 
@@ -41,7 +47,7 @@ export default async function Page({
   const [
     initialData,
     totalRes, tabularRes, structuredRes, geoRes, docsRes,
-    hvdRes, d30Res, d12mRes, d3yRes,
+    hvdRes, d30Res, d12mRes, d3yRes, allOrganizations, allLicenses, allFrequencies, allGranularities,
   ] = await Promise.all([
     fetchDatasets(page, 20, apiFilters),
     fetchDatasets(1, 1),
@@ -53,6 +59,10 @@ export default async function Page({
     fetchDatasets(1, 1, { modified_since: d30 }),
     fetchDatasets(1, 1, { modified_since: d12m }),
     fetchDatasets(1, 1, { modified_since: d3y }),
+    fetchOrganizations(1, 100, { sort: "-datasets" }),
+    fetchLicenses(),
+    fetchFrequencies(),
+    fetchGranularities(),
   ]);
 
   const filterCounts: Record<string, number> = {
@@ -74,6 +84,10 @@ export default async function Page({
       initialData={initialData}
       currentPage={page}
       filterCounts={filterCounts}
+      allOrganizations={allOrganizations.data}
+      allLicenses={allLicenses}
+      allFrequencies={allFrequencies}
+      allGranularities={allGranularities}
     />
   );
 }

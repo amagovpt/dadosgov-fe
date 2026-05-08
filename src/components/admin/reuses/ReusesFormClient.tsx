@@ -62,6 +62,7 @@ export default function ReusesFormClient({
   const selectedKeywordsRef = useRef("");
   const [reuseName, setReuseName] = useState("");
   const [reuseLink, setReuseLink] = useState("");
+  const [reuseLinkInvalid, setReuseLinkInvalid] = useState(false);
   const [reuseDescription, setReuseDescription] = useState("");
   const [reuseCoverImageFile, setReuseCoverImageFile] = useState<File | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
@@ -241,10 +242,26 @@ export default function ReusesFormClient({
     }
   }, [tags, tagSearch]);
 
+  const isValidUrl = (value: string): boolean => {
+    const trimmed = value.trim();
+    if (!trimmed) return false;
+    const normalized = trimmed.match(/^https?:\/\//) ? trimmed : `https://${trimmed}`;
+    try {
+      new URL(normalized);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleStep1Next = async () => {
     const errors: Record<string, boolean> = {};
     if (!reuseName.trim()) errors.reuseName = true;
     if (!reuseLink.trim()) errors.reuseLink = true;
+    if (reuseLink.trim() && !isValidUrl(reuseLink)) {
+      setReuseLinkInvalid(true);
+      return;
+    }
     if (!selectedReuseTypeRef.current) errors.reuseType = true;
     if (!selectedReuseTopicRef.current) errors.reuseTopic = true;
     if (!reuseDescription.trim()) errors.reuseDescription = true;
@@ -561,17 +578,29 @@ export default function ReusesFormClient({
                     id="reuse-link"
                     value={reuseLink}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setReuseLink(e.target.value);
-                      if (e.target.value.trim()) {
+                      const val = e.target.value;
+                      setReuseLink(val);
+                      if (val.trim()) {
                         clearError("reuseLink");
-                        clearError("reuseLinkInvalid");
+                        setReuseLinkInvalid(!isValidUrl(val));
+                      } else {
+                        setReuseLinkInvalid(false);
                       }
                     }}
-                    hasError={!!formErrors.reuseLink}
-                    hasFeedback={!!formErrors.reuseLink}
+                    hasError={!!formErrors.reuseLink || reuseLinkInvalid}
+                    hasFeedback={!!formErrors.reuseLink || reuseLinkInvalid}
                     feedbackState="danger"
-                    errorFeedbackText="Campo obrigatório"
+                    errorFeedbackText={reuseLinkInvalid ? "URL inválido" : "Campo obrigatório"}
                   />
+                  {reuseLinkInvalid && (
+                    <div className="mt-8">
+                      <StatusCard
+                        variant="danger"
+                        showIcon
+                        description="O URL inserido é inválido. Por favor, insira um endereço válido (ex: https://exemplo.pt)."
+                      />
+                    </div>
+                  )}
                   <IsolatedSelect
                     label="Tipo *"
                     placeholder="Selecione um tipo..."
@@ -712,7 +741,7 @@ export default function ReusesFormClient({
                     trailingIcon="agora-line-arrow-right-circle"
                     trailingIconHover="agora-solid-arrow-right-circle"
                     onClick={handleStep1Next}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || reuseLinkInvalid}
                   >
                     {isSubmitting ? "A criar..." : "Seguinte"}
                   </Button>

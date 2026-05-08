@@ -85,23 +85,79 @@ const CopyButton = ({ text }: { text: string }) => {
 export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
   if (!dataset) return null;
   const tags = dataset.tags ?? [];
+  const contactPoints = dataset.contact_points ?? [];
 
-  const hasInfo = dataset.tags?.length > 0 || dataset.id || dataset.license;
-  const hasTemporal = dataset.created_at || dataset.frequency || dataset.last_modified;
-  const hasSpatial = dataset.spatial?.zones?.length || dataset.spatial?.granularity;
-  const hasExtras = Boolean(dataset.page || (dataset.contact_points && dataset.contact_points.length > 0));
-  const harvestData = dataset.extras?.["harvest:domain"]
+  const hasInfo = Boolean(tags.length > 0 || dataset.id || dataset.license);
+  const hasTemporal = Boolean(dataset.created_at || dataset.frequency || dataset.last_modified);
+  const hasSpatial = Boolean(dataset.spatial?.zones?.length || dataset.spatial?.granularity);
+  const hasExtras = Boolean(dataset.page || contactPoints.length > 0);
+  const harvestData: Record<string, unknown> | null = dataset.extras?.["harvest:domain"]
     ? Object.entries(dataset.extras)
         .filter(([key]) => key.startsWith("harvest:"))
-        .reduce(
-          (acc, [key, value]) => {
-            acc[key.replace("harvest:", "")] = value;
-            return acc;
-          },
-          {} as Record<string, unknown>
-        )
-    : dataset.harvest;
+        .reduce<Record<string, unknown>>((acc, [key, value]) => {
+          acc[key.replace("harvest:", "")] = value;
+          return acc;
+        }, {})
+    : dataset.harvest ?? null;
   const hasHarvest = Boolean(harvestData && Object.keys(harvestData).length > 0);
+  type AccordionElement = React.ReactElement<React.ComponentProps<typeof Accordion>, typeof Accordion>;
+  const accordionItems: AccordionElement[] = [];
+
+  if (hasExtras) {
+    accordionItems.push(
+      <Accordion key="extras" headingTitle="Extras" headingLevel="h3">
+        <div className="grid grid-cols-3 gap-24 p-16">
+          {dataset.page && (
+            <div>
+              <p className="font-bold text-neutral-900 text-sm mb-8">links</p>
+              <span className="text-neutral-900 text-sm break-all">{dataset.page}</span>
+            </div>
+          )}
+          <div>
+            <p className="font-bold text-neutral-900 text-sm mb-8">contact</p>
+            <span className="text-neutral-900 text-sm break-all">
+              {contactPoints.length > 0
+                ? contactPoints.map((cp) => cp.email || cp.name).join(", ")
+                : "NÃ£o disponÃ­vel"}
+            </span>
+          </div>
+        </div>
+      </Accordion>
+    );
+  }
+
+  if (hasHarvest) {
+    accordionItems.push(
+      <Accordion key="harvest" headingTitle="Harvest" headingLevel="h3">
+        <div className="grid grid-cols-3 gap-x-24 gap-y-24 p-16">
+          {[
+            "backend",
+            "created_at",
+            "modified_at",
+            "remote_url",
+            "uri",
+            "dct_identifier",
+            "archived_at",
+            "archived",
+            "domain",
+            "last_update",
+            "remote_id",
+            "source_id",
+          ].map((key) => {
+            const value = harvestData?.[key];
+            return (
+              <div key={key}>
+                <p className="font-bold text-neutral-900 text-sm mb-8">{key}</p>
+                <span className="text-neutral-900 text-sm break-all">
+                  {value === null || value === undefined ? "None" : String(value)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </Accordion>
+    );
+  }
 
   return (
     <div className="bg-white rounded-8 p-32">
@@ -207,61 +263,11 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
       {/* EXTRAS & HARVEST */}
       {(hasExtras || hasHarvest) && (
         <div className="mt-32 pt-24">
-          <AccordionGroup>
-            {hasExtras && (
-              (<Accordion headingTitle="Extras" headingLevel="h3">
-                <div className="grid grid-cols-3 gap-24 p-16">
-                  {dataset.page && (
-                    <div>
-                      <p className="font-bold text-neutral-900 text-sm mb-8">links</p>
-                      <span className="text-neutral-900 text-sm break-all">{dataset.page}</span>
-                    </div>
-                  )}
-                  <div>
-                    <p className="font-bold text-neutral-900 text-sm mb-8">contact</p>
-                    <span className="text-neutral-900 text-sm break-all">
-                      {dataset.contact_points && dataset.contact_points.length > 0
-                        ? dataset.contact_points.map((cp) => cp.email || cp.name).join(", ")
-                        : "Não disponível"}
-                    </span>
-                  </div>
-                </div>
-              </Accordion>) as any
-            )}
-            {hasHarvest && (
-              (<Accordion headingTitle="Harvest" headingLevel="h3">
-                <div className="grid grid-cols-3 gap-x-24 gap-y-24 p-16">
-                  {[
-                    "backend",
-                    "created_at",
-                    "modified_at",
-                    "remote_url",
-                    "uri",
-                    "dct_identifier",
-                    "archived_at",
-                    "archived",
-                    "domain",
-                    "last_update",
-                    "remote_id",
-                    "source_id",
-                  ].map((key) => {
-                    const value = harvestData?.[key];
-                    return (
-                      <div key={key}>
-                        <p className="font-bold text-neutral-900 text-sm mb-8">{key}</p>
-                        <span className="text-neutral-900 text-sm break-all">
-                          {value === null || value === undefined ? "None" : String(value)}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Accordion>) as any
-            )}
-          </AccordionGroup>
+          <AccordionGroup>{accordionItems}</AccordionGroup>
         </div>
       )}
 
     </div>
   );
 };
+

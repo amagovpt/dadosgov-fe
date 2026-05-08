@@ -81,6 +81,7 @@ import {
   HarvestSource,
   HarvestSourceCreatePayload,
   HarvestSourceUpdatePayload,
+  HarvestValidationPayload,
   HomepageData,
   SystemLogContent,
   SystemLogFile,
@@ -135,9 +136,14 @@ export async function fetchCsrfToken(): Promise<string> {
  * Perform login using the frontend route handler proxy
  */
 export async function login(formData: FormData): Promise<{ message: string; redirect?: string }> {
+  const params = new URLSearchParams();
+  for (const [key, value] of formData.entries()) {
+    params.append(key, typeof value === "string" ? value : value.name);
+  }
+
   const res = await fetch("/login", {
     method: "POST",
-    body: new URLSearchParams(formData as any),
+    body: params,
   });
 
   const data = await res.json();
@@ -364,10 +370,6 @@ export async function fetchDatasets(
     const url = `${API_BASE_URL}/datasets/?${params.toString()}`;
     const res = await fetch(url, {
       cache: "no-store",
-      // Keep front-office listings public/consistent between SSR and CSR.
-      // Without this, browser fetches may include session cookies and return
-      // different totals than the server-rendered first paint.
-      credentials: "omit",
     });
 
     if (!res.ok) {
@@ -502,7 +504,6 @@ export async function fetchOrganizations(
     const url = `${API_BASE_URL}/organizations/?${params.toString()}`;
     const res = await fetch(url, {
       cache: "no-store",
-      credentials: "omit",
     });
 
     if (!res.ok) {
@@ -974,7 +975,6 @@ export async function fetchReuses(
     const url = `${API_BASE_URL}/reuses/?${params.toString()}`;
     const res = await fetch(url, {
       cache: "no-store",
-      credentials: "omit",
     });
 
     if (!res.ok) {
@@ -2530,8 +2530,11 @@ export async function fetchSpatialZonesByIds(ids: string[]): Promise<SpatialZone
       { cache: "no-store" }
     );
     if (!res.ok) throw new Error(`Failed to fetch spatial zones: ${res.statusText}`);
-    const geojson = await res.json() as {
-      features?: Array<{ id: string; properties: { name: string; code: string; uri?: string; level?: any } }>;
+    const geojson = (await res.json()) as {
+      features?: Array<{
+        id: string;
+        properties: { name: string; code: string; uri?: string; level?: unknown };
+      }>;
     };
     return (geojson.features ?? []).map((f) => ({
       id: f.id,
@@ -2539,7 +2542,7 @@ export async function fetchSpatialZonesByIds(ids: string[]): Promise<SpatialZone
       code: f.properties.code,
       uri: f.properties.uri ?? "",
       // Some backends include a level reference; keep it flexible (could be id or object)
-      level: (f.properties as any).level ?? "",
+      level: f.properties.level ?? "",
     })) as SpatialZone[];
   } catch (error) {
     console.error("Error fetching spatial zones by ids:", error);
@@ -3588,7 +3591,7 @@ export async function unscheduleHarvester(id: string): Promise<void> {
 }
 
 export async function triggerHarvest(id: string): Promise<HarvestJob> {
-  const res = await fetch(`${API_AUTH_URL}/harvest/sources/${id}/jobs/`, {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/jobs/`, {
     method: "POST",
     credentials: "include",
   });
@@ -3641,13 +3644,41 @@ export async function fetchHarvestJob(
 }
 
 export async function validateHarvestSource(
-  id: string
-): Promise<Record<string, unknown>> {
-  const res = await fetch(`${API_AUTH_URL}/harvest/sources/${id}/validation/`, {
-    cache: "no-store",
+  id: string,
+  comment?: string
+): Promise<HarvestSource> {
+  const payload: HarvestValidationPayload = { state: "accepted" };
+  if (comment) payload.comment = comment;
+
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/validate/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     credentials: "include",
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`Failed to validate harvest source: ${res.statusText}`);
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+  return await res.json();
+}
+
+export async function rejectHarvestSource(
+  id: string,
+  comment: string
+): Promise<HarvestSource> {
+  const payload: HarvestValidationPayload = { state: "refused", comment };
+
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/validate/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
   return await res.json();
 }
 
