@@ -73,14 +73,18 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
   const queryString = searchParams.toString();
   const paramsRef = useRef(queryString);
 
-  const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<ReuseFilterKey, string>>({
-    atualizacao: detectAtualizacaoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
-  });
-
   const [filterOrgs, setFilterOrgs] = useState<Organization[]>([]);
   const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
   const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
   const [isFiltersLoading, setIsFiltersLoading] = useState(true);
+  const selectedToggleFilters = useMemo<Record<ReuseFilterKey, string>>(
+    () => ({
+      atualizacao: detectAtualizacaoFromParams(
+        new URLSearchParams(Array.from(searchParams.entries()))
+      ),
+    }),
+    [searchParams]
+  );
 
   const getWorkingParams = useCallback(() => new URLSearchParams(paramsRef.current), []);
 
@@ -97,10 +101,6 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
 
   useEffect(() => {
     paramsRef.current = queryString;
-    const current = new URLSearchParams(queryString);
-    setSelectedToggleFilters({
-      atualizacao: detectAtualizacaoFromParams(current),
-    });
   }, [queryString]);
 
   useEffect(() => {
@@ -133,7 +133,6 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
   const handleToggleFilterChange = useCallback(
     (filterKey: string, optionId: string) => {
       const typedKey = filterKey as ReuseFilterKey;
-      setSelectedToggleFilters((prev) => ({ ...prev, [typedKey]: optionId }));
 
       if (typedKey === "atualizacao") {
         const current = getWorkingParams();
@@ -256,7 +255,6 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
           appearance="outline"
           onClick={() => {
             paramsRef.current = "";
-            setSelectedToggleFilters({ atualizacao: "all" });
             router.replace("/pages/reuses", { scroll: false });
           }}
         >
