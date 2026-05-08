@@ -21,7 +21,7 @@ export default function SearchFilter({
   examplesText = 'Exemplos: "educação", "saúde pública", "ambiente"',
 }: SearchFilterProps) {
   return (
-    <div className="container mx-auto pt-32 pb-16 px-4">
+    <div className="container">
       <div className="max-w-[592px]">
         <InputSearch
           label="Pesquisar"

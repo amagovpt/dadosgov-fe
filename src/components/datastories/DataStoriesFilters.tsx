@@ -173,7 +173,7 @@ export function DataStoriesFilters({
   );
 
   return (
-    <div className="xl:col-span-5 xl:block">
+    <div className="col-span-4">
       <ToggleFilterSections
         sections={toggleSections}
         selectedValues={selectedToggleFilters}

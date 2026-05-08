@@ -180,19 +180,10 @@ export default function SearchClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(pageParam);
 
-  useEffect(() => {
-    if (tabParam && TYPES.some((t) => t.type === tabParam)) {
-      setActiveTab(tabParam);
-    }
-  }, [tabParam]);
-
-  useEffect(() => {
-    setCurrentPage(pageParam);
-  }, [pageParam]);
-
-  useEffect(() => {
-    setSearchInput(query);
-  }, [query]);
+  const activeTabValue = tabParam && TYPES.some((t) => t.type === tabParam) ? tabParam : activeTab;
+  if (activeTabValue !== activeTab) setActiveTab(activeTabValue);
+  if (pageParam !== currentPage) setCurrentPage(pageParam);
+  if (query !== searchInput) setSearchInput(query);
 
   useEffect(() => {
     if (!query) return;
@@ -397,7 +388,6 @@ export default function SearchClient() {
         <HeroGeneral
           title={titleMap[activeTab]}
           backgroundImageUrl="/Banner/hero-bg.png"
-          backgroundPosition="center right"
           breadcrumbItems={[
             { label: "Home", url: "/" },
             { label: "Pesquisa", url: "/pages/search" },
