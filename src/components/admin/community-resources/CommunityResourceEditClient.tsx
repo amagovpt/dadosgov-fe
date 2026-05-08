@@ -698,7 +698,7 @@ export default function CommunityResourceEditClient() {
         <aside className="admin-page__auxiliar">
           <div className="admin-page__auxiliar-inner">
             <div className="admin-page__auxiliar-header">
-              <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
+              <Icon name="agora-line-question-mark" className="w-24 h-24" />
               <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
             </div>
             <AuxiliarList items={auxiliarItems} />

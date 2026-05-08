@@ -303,7 +303,7 @@ export default function CommunityResourceFormClient({
               />
 
               {apiError && (
-                <div className="mb-16 mt-[32px]">
+                <div className="mb-16 mt-32">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
@@ -332,7 +332,7 @@ export default function CommunityResourceFormClient({
                   </p>
                   <a href="/pages/admin/organizations/new" className="admin-page__org-card-link">
                     Crie ou integre uma organização em dados.gov.pt
-                    <Icon name="agora-line-arrow-right-circle" className="h-[24px] w-[24px]" />
+                    <Icon name="agora-line-arrow-right-circle" className="h-24 w-24" />
                   </a>
                 </div>
 
@@ -482,10 +482,10 @@ export default function CommunityResourceFormClient({
                       title={dataset.title}
                       description={
                         <div className="flex flex-col gap-12">
-                          <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
+                          <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                             {dataset.description}
                           </p>
-                          <div className="mt-[8px] flex flex-wrap items-center gap-8">
+                          <div className="mt-8 flex flex-wrap items-center gap-8">
                             <span className="text-sm font-medium text-neutral-900">
                               Metadados:{" "}
                               {dataset.quality?.score != null
@@ -494,7 +494,7 @@ export default function CommunityResourceFormClient({
                               %
                             </span>
                           </div>
-                          <div className="text-xs mb-[32px] mt-[32px] flex flex-wrap items-center gap-32 text-[#034AD8]">
+                          <div className="text-xs mb-32 mt-32 flex flex-wrap items-center gap-32 text-[#034AD8]">
                             <div className="flex items-center gap-8" title="Visualizações">
                               <Icon name="agora-line-eye" className="" aria-hidden="true" />
                               <span>{formatMetricValue(dataset.metrics?.views)}</span>
@@ -539,7 +539,7 @@ export default function CommunityResourceFormClient({
                       blockedLink={true}
                     />
                     {!datasetId && (
-                      <div className="mt-[8px] flex justify-end">
+                      <div className="mt-8 flex justify-end">
                         <Button
                           appearance="solid"
                           variant="danger"
@@ -639,7 +639,7 @@ export default function CommunityResourceFormClient({
                     }
                     title={<div className="text-xl-bold underline">{createdResource.title}</div>}
                     description={
-                      <div className="mt-[8px] flex flex-col gap-4 pb-32">
+                      <div className="mt-8 flex flex-col gap-4 pb-32">
                         <p className="text-sm text-neutral-900">
                           Atualizado hoje
                           {createdResource.format
@@ -661,7 +661,7 @@ export default function CommunityResourceFormClient({
                         </p>
                         {createdResource.url && (
                           <p className="text-sm mt-8 flex items-center gap-8 text-neutral-900">
-                            <Icon name="agora-line-map-pin" className="h-[16px] w-[16px]" />
+                            <Icon name="agora-line-map-pin" className="h-16 w-16" />
                             Localização:{" "}
                             {(() => {
                               try {
@@ -674,7 +674,7 @@ export default function CommunityResourceFormClient({
                         )}
                         {createdResource.checksum && (
                           <p className="text-sm mt-8 flex items-center gap-8 text-neutral-900">
-                            <Icon name="agora-line-code" className="h-[16px] w-[16px]" />
+                            <Icon name="agora-line-code" className="h-16 w-16" />
                             Soma de verificação: {createdResource.checksum.value}
                           </p>
                         )}
@@ -683,7 +683,7 @@ export default function CommunityResourceFormClient({
                     date={<span className="font-[300]">Atualizado hoje</span>}
                     blockedLink={true}
                   />
-                  <div className="admin-page__actions mt-[8px] flex justify-end gap-[18px]">
+                  <div className="admin-page__actions mt-8 flex justify-end gap-[18px]">
                     {createdResource.dataset?.page && (
                       <Button
                         appearance="link"
@@ -701,7 +701,7 @@ export default function CommunityResourceFormClient({
               )}
 
               {apiError && (
-                <div className="mb-16 mt-[32px]">
+                <div className="mb-16 mt-32">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
@@ -714,7 +714,7 @@ export default function CommunityResourceFormClient({
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="h-[24px] w-[24px]" />
+                <Icon name="agora-line-question-mark" className="h-24 w-24" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />

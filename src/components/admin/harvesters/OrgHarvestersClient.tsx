@@ -204,7 +204,7 @@ export default function OrgHarvestersClient() {
         {harvesters.length} resultados
       </p>
 
-      <div className="flex items-end gap-16 mb-[24px]">
+      <div className="flex items-end gap-16 mb-24">
         <div className="admin-search-wrapper">
           <InputSearchBar hasVoiceActionButton={false}
             label="Pesquisar"
@@ -234,7 +234,7 @@ export default function OrgHarvestersClient() {
       </div>
 
       {statusFilter === "accepted" && (
-        <div className="mb-[24px]">
+        <div className="mb-24">
           <StatusCard
             variant="informative"
             showIcon

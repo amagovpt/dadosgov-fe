@@ -374,12 +374,12 @@ export default function OrganizationsNewClient() {
                     onSecurityError={() => setOrgLogoError(POISONED_FILE_WARNING)}
                   />
                   {orgLogoPreview && (
-                    <div className="mt-[12px]">
-                      <p className="text-sm text-neutral-600 mb-[8px]">Pré-visualização:</p>
+                    <div className="mt-12">
+                      <p className="text-sm text-neutral-600 mb-8">Pré-visualização:</p>
                       <img
                         src={orgLogoPreview}
                         alt="Pré-visualização do logotipo"
-                        className="max-h-[120px] max-w-[240px] object-contain border border-neutral-200 rounded-[8px] p-[8px]"
+                        className="max-h-[120px] max-w-[240px] object-contain border border-neutral-200 rounded-8 p-8"
                       />
                     </div>
                   )}
@@ -445,7 +445,7 @@ export default function OrganizationsNewClient() {
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
+                <Icon name="agora-line-question-mark" className="w-24 h-24" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />

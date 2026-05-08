@@ -96,7 +96,7 @@ export default function DiscussionsClient() {
         </div>
       ) : (
         <>
-          <p className="text-neutral-700 text-sm font-semibold uppercase mb-[24px]">
+          <p className="text-neutral-700 text-sm font-semibold uppercase mb-24">
             {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
           </p>
 
@@ -126,12 +126,12 @@ export default function DiscussionsClient() {
                         <img
                           src={discussion.user.avatar_thumbnail}
                           alt={`${discussion.user.first_name} ${discussion.user.last_name}`}
-                          className="w-[24px] h-[24px] rounded-full"
+                          className="w-24 h-24 rounded-full"
                         />
                       ) : (
                         <Icon
                           name="agora-line-user"
-                          className="w-[24px] h-[24px]"
+                          className="w-24 h-24"
                         />
                       )}
                       <span>
@@ -157,7 +157,7 @@ export default function DiscussionsClient() {
             </TableBody>
           </Table>
 
-          <div className="flex items-center justify-between mt-16 py-[12px] border-t border-neutral-200">
+          <div className="flex items-center justify-between mt-16 py-12 border-t border-neutral-200">
             <div className="flex items-center gap-8">
               <span className="text-sm text-neutral-600">Linhas por página</span>
               <select
@@ -174,10 +174,10 @@ export default function DiscussionsClient() {
               <span className="text-sm text-neutral-600">
                 {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, discussions.length)} de {discussions.length}
               </span>
-              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-[4px] text-primary-600 disabled:text-neutral-300" aria-label="Página anterior">
+              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-4 text-primary-600 disabled:text-neutral-300" aria-label="Página anterior">
                 <Icon name="agora-line-arrow-left" className="w-[20px] h-[20px]" />
               </button>
-              <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-[4px] text-primary-600 disabled:text-neutral-300" aria-label="Próxima página">
+              <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-4 text-primary-600 disabled:text-neutral-300" aria-label="Próxima página">
                 <Icon name="agora-line-arrow-right" className="w-[20px] h-[20px]" />
               </button>
             </div>

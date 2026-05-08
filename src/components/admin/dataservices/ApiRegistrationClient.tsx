@@ -279,7 +279,7 @@ export default function ApiRegistrationClient({
                     Crie ou integre uma organização em dados.gov.pt
                     <Icon
                       name="agora-line-arrow-right-circle"
-                      className="w-[24px] h-[24px]"
+                      className="w-24 h-24"
                     />
                   </a>
                 </div>
@@ -479,7 +479,7 @@ export default function ApiRegistrationClient({
                         errorFeedbackText={datasetLinkErrors[index]}
                       />
                       {link.url.trim() && (
-                        <div className="flex justify-end mt-[8px]">
+                        <div className="flex justify-end mt-8">
                           <Button
                             appearance="link"
                             variant="danger"
@@ -585,7 +585,7 @@ export default function ApiRegistrationClient({
               <div className="admin-page__auxiliar-header">
                 <Icon
                   name="agora-line-question-mark"
-                  className="w-[24px] h-[24px]"
+                  className="w-24 h-24"
                 />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>

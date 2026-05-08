@@ -164,7 +164,7 @@ function ResourceEditPendingPopupContent({
         )}
       </div>
 
-      <div className="flex justify-between pt-[8px]">
+      <div className="flex justify-between pt-8">
         <Button appearance="outline" variant="primary" onClick={hide}>
           Cancelar
         </Button>

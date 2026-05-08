@@ -623,7 +623,7 @@ export const Header = () => {
                   {ecosystemCol1.map((item) => (
                     <li key={item.href}>
                       <a href={item.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-8 py-8 group">
-                        <div className="shrink-0 w-[32px] h-[32px] rounded-full flex items-center justify-center" style={{ backgroundColor: item.bgColor }}>
+                        <div className="shrink-0 w-32 h-32 rounded-full flex items-center justify-center" style={{ backgroundColor: item.bgColor }}>
                           <div className="relative w-[20px] h-[20px]">
                             <NextImage src={item.logo} alt={item.label} fill className="object-contain" />
                           </div>
@@ -637,7 +637,7 @@ export const Header = () => {
                   {ecosystemCol2.map((item) => (
                     <li key={item.href}>
                       <a href={item.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-8 py-8 group">
-                        <div className="shrink-0 w-[32px] h-[32px] rounded-full flex items-center justify-center" style={{ backgroundColor: item.bgColor }}>
+                        <div className="shrink-0 w-32 h-32 rounded-full flex items-center justify-center" style={{ backgroundColor: item.bgColor }}>
                           <div className="relative w-[20px] h-[20px]">
                             <NextImage src={item.logo} alt={item.label} fill className="object-contain" />
                           </div>

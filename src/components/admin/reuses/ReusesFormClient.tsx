@@ -487,7 +487,7 @@ export default function ReusesFormClient({
               />
 
               {apiError && (
-                <div className="mt-[32px] mb-16">
+                <div className="mt-32 mb-16">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
@@ -532,7 +532,7 @@ export default function ReusesFormClient({
                       Crie ou integre uma organização em dados.gov.pt
                       <Icon
                         name="agora-line-arrow-right-circle"
-                        className="w-[24px] h-[24px]"
+                        className="w-24 h-24"
                       />
                     </a>
                   </div>
@@ -724,14 +724,14 @@ export default function ReusesFormClient({
           {/* Step 2: Vinculando conjuntos de dados e APIs */}
           {currentStep === 2 && (
             <>
-              <div className="mb-[24px]">
+              <div className="mb-24">
                 <StatusCard
                   variant="informative"
                   showIcon
                   description="É importante associar todos os conjuntos de dados, pois ajuda a compreender as referências cruzadas e a melhorar a visibilidade da sua reutilização. Escolha uma das formas de associar os conjuntos de dados: ou publicados neste portal; ou em alternativa indicar links para conjuntos de dados publicados noutros portais."
                 />
               </div>
-              <div className="mb-[24px]">
+              <div className="mb-24">
                 <StatusCard
                   variant="warning"
                   showIcon
@@ -739,7 +739,7 @@ export default function ReusesFormClient({
                 />
               </div>
               {apiError && (
-                <div className="mt-[32px] mb-16">
+                <div className="mt-32 mb-16">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
@@ -815,7 +815,7 @@ export default function ReusesFormClient({
                       errorFeedbackText={datasetLinkErrors[index]}
                     />
                     {link.url.trim() && (
-                      <div className="flex justify-end mt-[24px]">
+                      <div className="flex justify-end mt-24">
                         <Button
                           appearance="solid"
                           variant="danger"
@@ -846,7 +846,7 @@ export default function ReusesFormClient({
 
                 {/* APIs - oculto temporariamente */}
                 {false && (<>
-                <div className="mt-[32px]">
+                <div className="mt-32">
                   <InputSelect
                     label="Pesquisar uma API"
                     placeholder="Pesquise uma API..."
@@ -874,7 +874,7 @@ export default function ReusesFormClient({
                       errorFeedbackText={apiLinkErrors[index]}
                     />
                     {link.url.trim() && (
-                      <div className="flex justify-end mt-[8px]">
+                      <div className="flex justify-end mt-8">
                         <Button
                           appearance="link"
                           variant="danger"
@@ -994,7 +994,7 @@ export default function ReusesFormClient({
           {/* Step 3: Finalizar a publicação */}
           {currentStep === 3 && (
             <>
-              <div className="mb-[24px]">
+              <div className="mb-24">
                 <StatusCard
                   variant="success"
                   showIcon
@@ -1020,7 +1020,7 @@ export default function ReusesFormClient({
                   category={createdReuse?.organization?.name || (createdReuse?.owner ? `${createdReuse.owner.first_name} ${createdReuse.owner.last_name}`.trim() : "Reutilização")}
                   title={<div className="underline text-xl-bold">{reuseName || "Sem título"}</div>}
                   description={
-                    <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                    <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
                       {reuseDescription || ""}
                     </p>
                   }
@@ -1098,7 +1098,7 @@ export default function ReusesFormClient({
               <PublicationFeedbackButton />
 
               {apiError && (
-                <div className="mt-[32px] mb-16">
+                <div className="mt-32 mb-16">
                   <StatusCard variant="danger" showIcon description={apiError} />
                 </div>
               )}
@@ -1135,7 +1135,7 @@ export default function ReusesFormClient({
               <div className="admin-page__auxiliar-header">
                 <Icon
                   name="agora-line-question-mark"
-                  className="w-[24px] h-[24px]"
+                  className="w-24 h-24"
                 />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>

@@ -40,7 +40,7 @@ export function GitHubMarkdownPage({
     <div className="flex flex-col bg-white min-h-screen font-sans">
       <main className="flex-grow pt-32 pb-64">
         <div className="container mx-auto px-4">
-          <div className="pt-32 mb-[64px]">
+          <div className="pt-32 mb-64">
             <Breadcrumb items={breadcrumbItems} />
           </div>
         </div>
@@ -90,12 +90,12 @@ export function GitHubMarkdownPage({
                         );
                       },
                       ul: ({ children }) => (
-                        <ul className="list-disc pl-48 space-y-[12px] mb-[24px] text-m-regular leading-7">
+                        <ul className="list-disc pl-48 space-y-12 mb-24 text-m-regular leading-7">
                           {children}
                         </ul>
                       ),
                       ol: ({ children }) => (
-                        <ol className="list-decimal pl-48 space-y-[12px] mb-[24px] text-m-regular leading-7">
+                        <ol className="list-decimal pl-48 space-y-12 mb-24 text-m-regular leading-7">
                           {children}
                         </ol>
                       ),
@@ -107,7 +107,7 @@ export function GitHubMarkdownPage({
                       code: ({ children, className }) => {
                         const isBlock = className?.includes("language-");
                         return isBlock ? (
-                          <pre className="bg-[#e1e4ea] rounded p-[16px] overflow-x-auto mb-16">
+                          <pre className="bg-[#e1e4ea] rounded p-16 overflow-x-auto mb-16">
                             <code className="text-s-regular leading-6">{children}</code>
                           </pre>
                         ) : (
@@ -132,7 +132,7 @@ export function GitHubMarkdownPage({
                   </ReactMarkdown>
 
                   <div className="pt-32">
-                    <h2 className="text-[32px] font-medium text-[#021C51] mb-16 leading-tight">
+                    <h2 className="text-32 font-medium text-[#021C51] mb-16 leading-tight">
                       Ações
                     </h2>
                     <Link

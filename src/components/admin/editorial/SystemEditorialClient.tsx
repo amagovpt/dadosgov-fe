@@ -232,11 +232,11 @@ function BlockPicker({ onSelect }: { onSelect: (type: BlockType) => void }) {
       </Button>
 
       {isOpen && (
-        <div className="shadow-lg absolute left-1/2 z-20 mt-4 w-[320px] -translate-x-1/2 rounded-[8px] border border-neutral-200 bg-white">
+        <div className="shadow-lg absolute left-1/2 z-20 mt-4 w-[320px] -translate-x-1/2 rounded-8 border border-neutral-200 bg-white">
           <ul role="menu">
             {Object.entries(categories).map(([category, blocks]) => (
               <li key={category}>
-                <p className="text-xs px-16 pb-4 pt-[12px] font-bold uppercase tracking-wide text-neutral-900">
+                <p className="text-xs px-16 pb-4 pt-12 font-bold uppercase tracking-wide text-neutral-900">
                   {category}
                 </p>
                 <ul>
@@ -286,13 +286,13 @@ function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: HeroData
   const colorBg = HERO_COLORS.find((c) => c.value === data.color)?.bg ?? "bg-primary-900";
 
   return (
-    <div className={`${colorBg} rounded-[8px] p-[32px] text-white`}>
+    <div className={`${colorBg} rounded-8 p-32 text-white`}>
       <input
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
         placeholder="Título"
-        className="text-2xl mb-[8px] w-full border-none bg-transparent font-bold placeholder-white/60 outline-none"
+        className="text-2xl mb-8 w-full border-none bg-transparent font-bold placeholder-white/60 outline-none"
       />
       <input
         type="text"
@@ -301,8 +301,8 @@ function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: HeroData
         placeholder="Adicione uma descrição"
         className="text-sm mb-[20px] w-full border-none bg-transparent placeholder-white/60 outline-none"
       />
-      <div className="mb-[8px]">
-        <span className="text-sm inline-block rounded-[6px] border border-white/30 bg-white px-16 py-8 font-medium text-primary-900">
+      <div className="mb-8">
+        <span className="text-sm inline-block rounded-6 border border-white/30 bg-white px-16 py-8 font-medium text-primary-900">
           <input
             type="text"
             value={data.buttonLabel}
@@ -317,7 +317,7 @@ function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: HeroData
         value={data.buttonUrl}
         onChange={(e) => onChange({ ...data, buttonUrl: e.target.value })}
         placeholder="URL do botão"
-        className="text-sm border-orange-400 mb-16 w-[300px] max-w-full rounded-[6px] border bg-white px-[12px] py-6 text-neutral-800 placeholder-neutral-400 outline-none"
+        className="text-sm border-orange-400 mb-16 w-[300px] max-w-full rounded-6 border bg-white px-12 py-6 text-neutral-800 placeholder-neutral-400 outline-none"
       />
       <div className="flex items-center gap-8">
         <span className="text-sm">Cor :</span>
@@ -360,13 +360,13 @@ function AccordionEditor({
   };
 
   return (
-    <div className="rounded-[8px] bg-white py-24">
+    <div className="rounded-8 bg-white py-24">
       <input
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
         placeholder="Os meus acordeões"
-        className="text-xl mb-[4px] w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
+        className="text-xl mb-4 w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
       <input
         type="text"
@@ -379,7 +379,7 @@ function AccordionEditor({
       <div className="flex flex-col">
         {data.items.map((item, index) => (
           <div key={index} className="border-b border-neutral-200">
-            <div className="flex items-center justify-between py-[12px]">
+            <div className="flex items-center justify-between py-12">
               <div className="flex flex-1 items-center gap-8">
                 <input
                   type="text"
@@ -393,30 +393,30 @@ function AccordionEditor({
                 <button
                   type="button"
                   onClick={() => removeItem(index)}
-                  className="rounded hover:bg-red-100 text-red-600 p-[4px]"
+                  className="rounded hover:bg-red-100 text-red-600 p-4"
                 >
                   <Icon name="agora-line-trash" className="h-[14px] w-[14px]" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                  className="rounded p-[4px] text-neutral-500 hover:bg-neutral-100"
+                  className="rounded p-4 text-neutral-500 hover:bg-neutral-100"
                 >
                   <Icon
                     name={openIndex === index ? "agora-line-chevron-up" : "agora-line-chevron-down"}
-                    className="h-[16px] w-[16px]"
+                    className="h-16 w-16"
                   />
                 </button>
               </div>
             </div>
             {openIndex === index && (
-              <div className="pb-[12px]">
+              <div className="pb-12">
                 <textarea
                   value={item.content}
                   onChange={(e) => updateItem(index, "content", e.target.value)}
                   placeholder="Conteúdo do item..."
                   rows={3}
-                  className="text-sm w-full resize-y rounded-[6px] border border-neutral-200 px-[12px] py-8 text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
+                  className="text-sm w-full resize-y rounded-6 border border-neutral-200 px-12 py-8 text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
                 />
               </div>
             )}
@@ -427,7 +427,7 @@ function AccordionEditor({
       <button
         type="button"
         onClick={addItem}
-        className="text-xs mt-[12px] inline-flex items-center gap-4 font-medium text-primary-600 hover:text-primary-800"
+        className="text-xs mt-12 inline-flex items-center gap-4 font-medium text-primary-600 hover:text-primary-800"
       >
         <Icon name="agora-line-plus-circle" className="h-[14px] w-[14px]" />
         Adicionar item
@@ -513,13 +513,13 @@ function FeaturedDatasetsEditor({
   };
 
   return (
-    <div className="rounded-[8px] bg-white py-24">
+    <div className="rounded-8 bg-white py-24">
       <input
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
         placeholder="Os meus conjuntos de dados"
-        className="text-xl mb-[4px] w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
+        className="text-xl mb-4 w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
       <input
         type="text"
@@ -545,7 +545,7 @@ function FeaturedDatasetsEditor({
 
           return (
             <div key={id} className="relative">
-              <div className="card-general-listing flex h-full flex-col overflow-hidden rounded-[4px]">
+              <div className="card-general-listing flex h-full flex-col overflow-hidden rounded-4">
                 <CardGeneral
                   variant="white"
                   image={{
@@ -649,7 +649,7 @@ function FeaturedDatasetsEditor({
               <button
                 type="button"
                 onClick={() => handleRemoveDataset(index)}
-                className="rounded group absolute right-[8px] top-[8px] z-10 p-[4px]"
+                className="rounded group absolute right-8 top-8 z-10 p-4"
                 title="Remover"
               >
                 <Icon
@@ -669,32 +669,32 @@ function FeaturedDatasetsEditor({
           <button
             type="button"
             onClick={() => setShowSearch(true)}
-            className="flex min-h-[200px] flex-col items-center justify-center rounded-[8px] border-2 border-dashed border-neutral-300 text-neutral-900 transition-colors hover:border-neutral-400"
+            className="flex min-h-[200px] flex-col items-center justify-center rounded-8 border-2 border-dashed border-neutral-300 text-neutral-900 transition-colors hover:border-neutral-400"
           >
-            <Icon name="agora-line-plus-circle" className="mb-[4px] h-[20px] w-[20px]" />
+            <Icon name="agora-line-plus-circle" className="mb-4 h-[20px] w-[20px]" />
             <span className="text-xs">Adicionar um conjunto de dados</span>
           </button>
         )}
 
         {showSearch && (
-          <div ref={searchContainerRef} className="relative mt-[8px] w-full">
+          <div ref={searchContainerRef} className="relative mt-8 w-full">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Pesquisar conjunto de dados..."
-              className="text-sm w-full rounded-[8px] border border-neutral-300 px-[12px] py-[10px] outline-none focus:border-primary-500"
+              className="text-sm w-full rounded-8 border border-neutral-300 px-12 py-[10px] outline-none focus:border-primary-500"
               autoFocus
             />
             {isSearching && <p className="text-xs mt-4 text-neutral-400">A pesquisar...</p>}
             {searchResults.length > 0 && (
-              <ul className="shadow-lg absolute z-10 mt-4 max-h-[240px] w-full overflow-y-auto rounded-[8px] border border-neutral-200 bg-white">
+              <ul className="shadow-lg absolute z-10 mt-4 max-h-[240px] w-full overflow-y-auto rounded-8 border border-neutral-200 bg-white">
                 {searchResults.map((d) => (
                   <li key={d.id}>
                     <button
                       type="button"
                       onClick={() => handleSelectDataset(d)}
-                      className="text-sm w-full px-[12px] py-8 text-left transition-colors hover:bg-neutral-50"
+                      className="text-sm w-full px-12 py-8 text-left transition-colors hover:bg-neutral-50"
                     >
                       <span className="font-medium text-neutral-800">{d.title}</span>
                       {d.organization?.name && (
@@ -803,13 +803,13 @@ function FeaturedReusesEditor({
   };
 
   return (
-    <div className="rounded-[8px] bg-white py-24">
+    <div className="rounded-8 bg-white py-24">
       <input
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
         placeholder="As minhas reutilizações"
-        className="text-xl mb-[4px] w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
+        className="text-xl mb-4 w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
       <input
         type="text"
@@ -839,7 +839,7 @@ function FeaturedReusesEditor({
 
           return (
             <div key={id} className="relative">
-              <div className="card-general-listing flex h-full flex-col overflow-hidden rounded-[4px]">
+              <div className="card-general-listing flex h-full flex-col overflow-hidden rounded-4">
                 <CardGeneral
                   variant="white"
                   image={{
@@ -912,7 +912,7 @@ function FeaturedReusesEditor({
               <button
                 type="button"
                 onClick={() => handleRemoveReuse(index)}
-                className="rounded group absolute right-[8px] top-[8px] z-10 p-[4px]"
+                className="rounded group absolute right-8 top-8 z-10 p-4"
                 title="Remover"
               >
                 <Icon
@@ -932,32 +932,32 @@ function FeaturedReusesEditor({
           <button
             type="button"
             onClick={() => setShowSearch(true)}
-            className="flex min-h-[200px] flex-col items-center justify-center rounded-[8px] border-2 border-dashed border-neutral-300 text-neutral-900 transition-colors hover:border-neutral-400"
+            className="flex min-h-[200px] flex-col items-center justify-center rounded-8 border-2 border-dashed border-neutral-300 text-neutral-900 transition-colors hover:border-neutral-400"
           >
-            <Icon name="agora-line-plus-circle" className="mb-[4px] h-[20px] w-[20px]" />
+            <Icon name="agora-line-plus-circle" className="mb-4 h-[20px] w-[20px]" />
             <span className="text-xs">Adicione uma reutilização</span>
           </button>
         )}
 
         {showSearch && (
-          <div ref={searchContainerRef} className="relative mt-[8px] w-full">
+          <div ref={searchContainerRef} className="relative mt-8 w-full">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Pesquisar reutilização..."
-              className="text-sm w-full rounded-[8px] border border-neutral-300 px-[12px] py-[10px] outline-none focus:border-primary-500"
+              className="text-sm w-full rounded-8 border border-neutral-300 px-12 py-[10px] outline-none focus:border-primary-500"
               autoFocus
             />
             {isSearching && <p className="text-xs mt-4 text-neutral-400">A pesquisar...</p>}
             {searchResults.length > 0 && (
-              <ul className="shadow-lg absolute z-10 mt-4 max-h-[240px] w-full overflow-y-auto rounded-[8px] border border-neutral-200 bg-white">
+              <ul className="shadow-lg absolute z-10 mt-4 max-h-[240px] w-full overflow-y-auto rounded-8 border border-neutral-200 bg-white">
                 {searchResults.map((r) => (
                   <li key={r.id}>
                     <button
                       type="button"
                       onClick={() => handleSelectReuse(r)}
-                      className="text-sm w-full px-[12px] py-8 text-left transition-colors hover:bg-neutral-50"
+                      className="text-sm w-full px-12 py-8 text-left transition-colors hover:bg-neutral-50"
                     >
                       <span className="font-medium text-neutral-800">{r.title}</span>
                     </button>
@@ -1003,13 +1003,13 @@ function FeaturedLinksEditor({
   };
 
   return (
-    <div className="rounded-[8px] bg-white py-24">
+    <div className="rounded-8 bg-white py-24">
       <input
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
         placeholder="Os meus links"
-        className="text-xl mb-[4px] w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
+        className="text-xl mb-4 w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
       <input
         type="text"
@@ -1032,7 +1032,7 @@ function FeaturedLinksEditor({
                     paragraphs: data.paragraphs.filter((_, i) => i !== index),
                   })
                 }
-                className="rounded hover:bg-red-100 hover:text-red-600 mt-[2px] p-[4px] text-neutral-400"
+                className="rounded hover:bg-red-100 hover:text-red-600 mt-[2px] p-4 text-neutral-400"
               >
                 <Icon name="agora-line-trash" className="h-[14px] w-[14px]" />
               </button>
@@ -1068,8 +1068,8 @@ function FeaturedLinksEditor({
             Adicionar um link
           </button>
 
-          <div className="mt-[8px]">
-            <span className="text-sm inline-block rounded-[6px] bg-primary-900 px-16 py-8 font-medium text-white">
+          <div className="mt-8">
+            <span className="text-sm inline-block rounded-6 bg-primary-900 px-16 py-8 font-medium text-white">
               <input
                 type="text"
                 value={data.buttonLabel}
@@ -1084,7 +1084,7 @@ function FeaturedLinksEditor({
                 value={data.buttonUrl}
                 onChange={(e) => onChange({ ...data, buttonUrl: e.target.value })}
                 placeholder="URL do botão"
-                className="text-sm border-orange-400 w-[250px] max-w-full rounded-[6px] border px-[12px] py-6 placeholder-neutral-400 outline-none"
+                className="text-sm border-orange-400 w-[250px] max-w-full rounded-6 border px-12 py-6 placeholder-neutral-400 outline-none"
               />
             </div>
           </div>
@@ -1111,7 +1111,7 @@ function FeaturedLinksEditor({
                     />
                     <Icon
                       name="agora-line-external-link"
-                      className="h-[16px] w-[16px] text-primary-900"
+                      className="h-16 w-16 text-primary-900"
                     />
                   </div>
                   <div className="mt-[2px] flex items-center gap-4">
@@ -1136,7 +1136,7 @@ function FeaturedLinksEditor({
                         onChange({ ...data, links });
                       }}
                       placeholder="URL"
-                      className="text-sm rounded-[4px] border border-neutral-300 px-8 py-4 text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
+                      className="text-sm rounded-4 border border-neutral-300 px-8 py-4 text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
                     />
                   </div>
                 </div>
@@ -1168,10 +1168,10 @@ function MarkdownEditor({
   onChange: (d: MarkdownData) => void;
 }) {
   return (
-    <div className="rounded-[8px] bg-white py-24">
-      <div className="overflow-hidden rounded-[8px] border border-neutral-200">
+    <div className="rounded-8 bg-white py-24">
+      <div className="overflow-hidden rounded-8 border border-neutral-200">
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-[12px] py-8">
+        <div className="flex flex-wrap items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-12 py-8">
           {[
             { icon: "agora-line-refresh", title: "Desfazer" },
             { icon: "agora-line-refresh", title: "Refazer" },
@@ -1180,9 +1180,9 @@ function MarkdownEditor({
               key={i}
               type="button"
               title={btn.title}
-              className="rounded p-[6px] text-neutral-600 hover:bg-neutral-200"
+              className="rounded p-6 text-neutral-600 hover:bg-neutral-200"
             >
-              <Icon name={btn.icon} className="h-[16px] w-[16px]" />
+              <Icon name={btn.icon} className="h-16 w-16" />
             </button>
           ))}
           <span className="mx-4 h-[20px] w-[1px] bg-neutral-300" />
@@ -1191,7 +1191,7 @@ function MarkdownEditor({
               key={label}
               type="button"
               title={label === "B" ? "Negrito" : "Itálico"}
-              className="rounded text-sm w-[28px] p-[6px] text-center font-bold text-neutral-600 hover:bg-neutral-200"
+              className="rounded text-sm w-[28px] p-6 text-center font-bold text-neutral-600 hover:bg-neutral-200"
             >
               {label}
             </button>
@@ -1201,7 +1201,7 @@ function MarkdownEditor({
               key={label}
               type="button"
               title={`Cabeçalho ${label}`}
-              className="rounded text-xs w-[28px] p-[6px] text-center font-medium text-neutral-500 hover:bg-neutral-200"
+              className="rounded text-xs w-[28px] p-6 text-center font-medium text-neutral-500 hover:bg-neutral-200"
             >
               {label}
             </button>
@@ -1215,9 +1215,9 @@ function MarkdownEditor({
               key={i}
               type="button"
               title={btn.title}
-              className="rounded p-[6px] text-neutral-600 hover:bg-neutral-200"
+              className="rounded p-6 text-neutral-600 hover:bg-neutral-200"
             >
-              <Icon name={btn.icon} className="h-[16px] w-[16px]" />
+              <Icon name={btn.icon} className="h-16 w-16" />
             </button>
           ))}
           <span className="mx-4 h-[20px] w-[1px] bg-neutral-300" />
@@ -1230,9 +1230,9 @@ function MarkdownEditor({
               key={i}
               type="button"
               title={btn.title}
-              className="rounded p-[6px] text-neutral-600 hover:bg-neutral-200"
+              className="rounded p-6 text-neutral-600 hover:bg-neutral-200"
             >
-              <Icon name={btn.icon} className="h-[16px] w-[16px]" />
+              <Icon name={btn.icon} className="h-16 w-16" />
             </button>
           ))}
         </div>
@@ -1243,7 +1243,7 @@ function MarkdownEditor({
           onChange={(e) => onChange({ content: e.target.value })}
           placeholder="Escreva aqui o conteúdo..."
           rows={8}
-          className="text-sm w-full resize-y border-none px-16 py-[12px] text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
+          className="text-sm w-full resize-y border-none px-16 py-12 text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
         />
 
         <div className="h-[3px] bg-primary-500" />
@@ -1386,33 +1386,33 @@ function BlockWrapper({
           type="button"
           onClick={onMoveUp}
           disabled={index === 0}
-          className="rounded p-[4px] text-neutral-500 hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+          className="rounded p-4 text-neutral-500 hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
           title="Mover para cima"
         >
-          <Icon name="agora-line-chevron-up" className="h-[16px] w-[16px]" />
+          <Icon name="agora-line-chevron-up" className="h-16 w-16" />
         </button>
         <button
           type="button"
           onClick={onMoveDown}
           disabled={index === total - 1}
-          className="rounded p-[4px] text-neutral-500 hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
+          className="rounded p-4 text-neutral-500 hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-30"
           title="Mover para baixo"
         >
-          <Icon name="agora-line-chevron-down" className="h-[16px] w-[16px]" />
+          <Icon name="agora-line-chevron-down" className="h-16 w-16" />
         </button>
         <button
           type="button"
           onClick={handleRemove}
-          className="rounded group p-[4px]"
+          className="rounded group p-4"
           title="Remover bloco"
         >
           <Icon
             name="agora-line-trash"
-            className="block h-[16px] w-[16px] !fill-[var(--color-danger-600)] group-hover:hidden"
+            className="block h-16 w-16 !fill-[var(--color-danger-600)] group-hover:hidden"
           />
           <Icon
             name="agora-solid-trash"
-            className="hidden h-[16px] w-[16px] !fill-[var(--color-danger-600)] group-hover:block"
+            className="hidden h-16 w-16 !fill-[var(--color-danger-600)] group-hover:block"
           />
         </button>
       </div>
@@ -1682,7 +1682,7 @@ export default function SystemEditorialClient() {
             ]}
           />
         </div>
-        <div className="mb-[24px] flex items-center justify-between">
+        <div className="mb-24 flex items-center justify-between">
           <h1 className="admin-page__title">Editorial</h1>
           <div className="flex items-center gap-8">
             <Button
@@ -1722,7 +1722,7 @@ export default function SystemEditorialClient() {
         />
       </div>
 
-      <div className="mb-[24px] flex items-center justify-between">
+      <div className="mb-24 flex items-center justify-between">
         <h1 className="admin-page__title">Editorial</h1>
         <div className="flex items-center gap-8">
           <a href="/" target="_blank" rel="noopener noreferrer">
@@ -1751,7 +1751,7 @@ export default function SystemEditorialClient() {
 
       {saveMessage && (
         <div
-          className={`text-sm mb-16 rounded-[8px] p-[12px] ${
+          className={`text-sm mb-16 rounded-8 p-12 ${
             saveMessage.type === "success"
               ? "bg-green-50 text-green-700 border-green-200 border"
               : "bg-red-50 text-red-700 border-red-200 border"

@@ -72,12 +72,12 @@ const markdownComponents = {
     );
   },
   ul: ({ children }: any) => (
-    <ul className="list-disc pl-48 space-y-[12px] mb-[24px] text-m-regular leading-7">
+    <ul className="list-disc pl-48 space-y-12 mb-24 text-m-regular leading-7">
       {children}
     </ul>
   ),
   ol: ({ children }: any) => (
-    <ol className="list-decimal pl-48 space-y-[12px] mb-[24px] text-m-regular leading-7">
+    <ol className="list-decimal pl-48 space-y-12 mb-24 text-m-regular leading-7">
       {children}
     </ol>
   ),
@@ -89,7 +89,7 @@ const markdownComponents = {
   code: ({ children, className }: any) => {
     const isBlock = className?.includes("language-");
     return isBlock ? (
-      <pre className="bg-[#e1e4ea] rounded p-[16px] overflow-x-auto mb-16">
+      <pre className="bg-[#e1e4ea] rounded p-16 overflow-x-auto mb-16">
         <code className="text-s-regular leading-6">{children}</code>
       </pre>
     ) : (
@@ -124,7 +124,7 @@ export function GitHubArticlePage({
       <main className="flex-grow pt-32">
         <div className="container mx-auto px-4">
           {/* Breadcrumbs */}
-          <div className="pt-32 mb-[64px]">
+          <div className="pt-32 mb-64">
             <Breadcrumb items={breadcrumbItems} />
           </div>
 
@@ -152,7 +152,7 @@ export function GitHubArticlePage({
                 )}
 
                 <div className="max-w-[592px] pt-32">
-                  <h1 className="text-[32px] font-medium text-[#021C51] mb-16 leading-tight max-w-[800px]">
+                  <h1 className="text-32 font-medium text-[#021C51] mb-16 leading-tight max-w-[800px]">
                     Ações
                   </h1>
                   <Link

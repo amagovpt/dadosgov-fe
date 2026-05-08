@@ -372,7 +372,7 @@ export default function PostsEditClient() {
             onClick={() => window.open(`/pages/posts/${post.slug}`, "_blank")}
           >
             <span className="admin-edit-info__btn-content">
-              <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
+              <Icon name="agora-line-eye" className="w-16 h-16" />
               Veja a página do artigo
             </span>
           </Button>
@@ -396,7 +396,7 @@ export default function PostsEditClient() {
           <TabBody>
             <div className="admin-page__body">
               <div className="admin-page__form-area">
-                <form className="admin-page__form mt-[24px]">
+                <form className="admin-page__form mt-24">
                   <p className="text-neutral-900 text-base leading-7">
                     Campos precedidos por uma estrela (*) são obrigatórios.
                   </p>
@@ -681,7 +681,7 @@ export default function PostsEditClient() {
           <TabBody>
             <div className="admin-page__body">
               <div className="admin-page__form-area">
-                <form className="admin-page__form mt-[24px]">
+                <form className="admin-page__form mt-24">
                   <div className="admin-page__fields-group">
                     <div className="flex flex-col gap-8">
                       <span className="text-primary-900 text-base font-medium leading-7">

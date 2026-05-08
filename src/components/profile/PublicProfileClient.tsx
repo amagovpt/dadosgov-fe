@@ -185,7 +185,7 @@ export default function PublicProfileClient() {
     : "U";
 
   return (
-    <div className="container mx-auto mb-[64px]">
+    <div className="container mx-auto mb-64">
       <div className="admin-page__breadcrumb">
         <Breadcrumb
           items={[
@@ -195,7 +195,7 @@ export default function PublicProfileClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-[64px] mb-[32px]">Perfil</h1>
+      <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
 
       {/* Profile Card */}
       <div className="profile-card">
@@ -258,7 +258,7 @@ export default function PublicProfileClient() {
           </div>
 
           {isOwnProfile && (
-            <div className="absolute top-[32px] right-[32px]">
+            <div className="absolute top-32 right-32">
               <Button
                 variant="primary"
                 appearance="solid"
@@ -276,7 +276,7 @@ export default function PublicProfileClient() {
 
       {/* Biography Section */}
       {(displayUser as UserPublic)?.about && (
-        <div className="mt-[32px]">
+        <div className="mt-32">
           <p className="font-medium text-neutral-900 text-base uppercase mb-8">Biografia</p>
           <p className="text-neutral-900 text-base leading-7">{(displayUser as UserPublic).about}</p>
         </div>
@@ -310,7 +310,7 @@ export default function PublicProfileClient() {
                   }
                   description={
                     org.description ? (
-                      <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                      <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
                         {org.description}
                       </p>
                     ) : undefined
@@ -445,7 +445,7 @@ export default function PublicProfileClient() {
                         (subAvatar || subInitials) as unknown as undefined
                       }
                       alt={subName}
-                      className="w-[48px] h-[48px]"
+                      className="w-48 h-48"
                     />
                     <span className="text-neutral-900 text-base font-medium">
                       {subName}
@@ -499,7 +499,7 @@ export default function PublicProfileClient() {
                           followerInitials) as unknown as undefined
                       }
                       alt={followerName}
-                      className="w-[48px] h-[48px]"
+                      className="w-48 h-48"
                     />
                     <span className="text-neutral-900 text-base font-medium">
                       {followerName}
@@ -633,7 +633,7 @@ export default function PublicProfileClient() {
                   title={<div className="underline text-xl-bold">{reuse.title}</div>}
                   description={
                     reuse.description ? (
-                      <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                      <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
                         {reuse.description}
                       </p>
                     ) : undefined

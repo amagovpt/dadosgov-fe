@@ -227,11 +227,11 @@ export default function SystemLogsClient() {
           </div>
 
           {content && (
-            <div className="flex flex-wrap items-center gap-x-[20px] gap-y-[8px] mb-[12px] px-16 py-[12px] rounded-[8px] border border-neutral-200 bg-accent-light text-sm text-brand-blue-secondary">
+            <div className="flex flex-wrap items-center gap-x-[20px] gap-y-8 mb-12 px-16 py-12 rounded-8 border border-neutral-200 bg-accent-light text-sm text-brand-blue-secondary">
               <span className="inline-flex items-center gap-6">
                 <Icon
                   name="agora-line-file"
-                  className="w-[16px] h-[16px] text-brand-blue-primary"
+                  className="w-16 h-16 text-brand-blue-primary"
                 />
                 <span className="text-neutral-700 font-medium">Ficheiro:</span>
                 <span className="font-semibold break-all">{content.name}</span>
@@ -243,7 +243,7 @@ export default function SystemLogsClient() {
               <span className="inline-flex items-center gap-6">
                 <Icon
                   name="agora-line-document"
-                  className="w-[16px] h-[16px] text-brand-blue-primary"
+                  className="w-16 h-16 text-brand-blue-primary"
                 />
                 <span className="text-neutral-700 font-medium">Tamanho:</span>
                 <span className="font-semibold">{formatBytes(content.size)}</span>
@@ -255,7 +255,7 @@ export default function SystemLogsClient() {
               <span className="inline-flex items-center gap-6">
                 <Icon
                   name="agora-line-clock"
-                  className="w-[16px] h-[16px] text-brand-blue-primary"
+                  className="w-16 h-16 text-brand-blue-primary"
                 />
                 <span className="text-neutral-700 font-medium">Modificado:</span>
                 <span className="font-semibold">{formatDateTime(content.modified)}</span>
@@ -272,7 +272,7 @@ export default function SystemLogsClient() {
           )}
 
           {error && (
-            <div className="mb-[12px]">
+            <div className="mb-12">
               <StatusCard variant="danger" showIcon description={error} />
             </div>
           )}
@@ -281,7 +281,7 @@ export default function SystemLogsClient() {
             ref={viewerRef}
             aria-label="Conteúdo do ficheiro de log"
             tabIndex={0}
-            className="block w-full min-h-[320px] max-h-[calc(100vh-360px)] overflow-auto py-16 rounded-[8px] border border-neutral-300 bg-brand-blue-secondary text-neutral-100 font-mono text-[12.5px] leading-[1.55] whitespace-pre"
+            className="block w-full min-h-[320px] max-h-[calc(100vh-360px)] overflow-auto py-16 rounded-8 border border-neutral-300 bg-brand-blue-secondary text-neutral-100 font-mono text-[12.5px] leading-[1.55] whitespace-pre"
           >
             {isLoadingContent && !content ? (
               <span className="block px-16 italic text-neutral-400">

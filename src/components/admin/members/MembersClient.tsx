@@ -576,7 +576,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       </div>
 
       {pendingRequests.length > 0 && (
-        <div className="mb-[32px]">
+        <div className="mb-32">
           <h2 className="text-neutral-900 text-base font-semibold mb-16">
             Pedidos de adesão pendentes ({pendingRequests.length})
           </h2>
@@ -598,12 +598,12 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                         <img
                           src={request.user.avatar_thumbnail}
                           alt={`${request.user.first_name} ${request.user.last_name}`}
-                          className="w-[32px] h-[32px] rounded-full"
+                          className="w-32 h-32 rounded-full"
                         />
                       ) : (
                         <Icon
                           name="agora-line-user"
-                          className="w-[32px] h-[32px]"
+                          className="w-32 h-32"
                         />
                       )}
                       <a
@@ -649,7 +649,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-[24px]">
+      <div className="flex items-center justify-between mb-24">
         <p className="text-neutral-700 text-sm font-semibold uppercase">
           {members.length} {members.length === 1 ? "membro" : "membros"}
         </p>
@@ -727,12 +727,12 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                     <img
                       src={member.user.avatar_thumbnail}
                       alt={`${member.user.first_name} ${member.user.last_name}`}
-                      className="w-[32px] h-[32px] rounded-full"
+                      className="w-32 h-32 rounded-full"
                     />
                   ) : (
                     <Icon
                       name="agora-line-user"
-                      className="w-[32px] h-[32px]"
+                      className="w-32 h-32"
                     />
                   )}
                   <div>

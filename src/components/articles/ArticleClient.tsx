@@ -169,8 +169,8 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
 
         <div className="container mx-auto md:gap-32 xl:gap-64">
           <div className="pt-32 pb-64">
-            <div className="grid md:grid-cols-2 xl:grid-cols-12 gap-32 mb-16 items-center mt-[12px]">
-              <span className="text-neutral-900 font-medium text-base xl:col-span-7 mt-[32px]">
+            <div className="grid md:grid-cols-2 xl:grid-cols-12 gap-32 mb-16 items-center mt-12">
+              <span className="text-neutral-900 font-medium text-base xl:col-span-7 mt-32">
                 {isLoading ? "A carregar..." : `${total} Resultados`}
               </span>
               <div className="w-full md:w-auto xl:col-span-5 flex items-end gap-16 justify-end">
@@ -193,7 +193,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
                     <Link
                       key={post.id}
                       href={`/pages/posts/${post.slug}`}
-                      className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
+                      className="card-general-listing rounded-4 overflow-hidden h-full flex flex-col"
                     >
                       <CardGeneral
                         variant="neutral-100"

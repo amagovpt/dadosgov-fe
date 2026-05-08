@@ -209,7 +209,7 @@ export default function OrgProfileClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-[64px] mb-[32px]">
+      <h1 className="admin-page__title mt-64 mb-32">
         Perfil da organização
       </h1>
 
@@ -238,11 +238,11 @@ export default function OrgProfileClient() {
               )}
               <div className="flex items-center gap-16 text-neutral-900 text-sm">
                 <span className="flex items-center gap-4">
-                  <Icon name="agora-line-user-group" className="w-[16px] h-[16px]" />
+                  <Icon name="agora-line-user-group" className="w-16 h-16" />
                   {org.metrics.members} membros
                 </span>
                 <span className="flex items-center gap-4">
-                  <Icon name="agora-line-layers-menu" className="w-[16px] h-[16px]" />
+                  <Icon name="agora-line-layers-menu" className="w-16 h-16" />
                   {org.metrics.datasets} conjuntos de dados
                 </span>
                 <span className="flex items-center gap-4">
@@ -257,7 +257,7 @@ export default function OrgProfileClient() {
         </div>
       )}
 
-      <div className="admin-page__body mt-[32px]">
+      <div className="admin-page__body mt-32">
         <div className="admin-page__form-area">
           <div className="admin-page__form">
             <h2 className="admin-page__section-title hidden">EDITAR ORGANIZAÇÃO</h2>

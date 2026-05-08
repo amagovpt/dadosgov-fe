@@ -79,7 +79,7 @@ export default function ApiTutorialClient() {
     <div className="flex flex-col bg-white min-h-screen font-sans">
       <main className="flex-grow pt-32 pb-64">
         <div className="container mx-auto px-4">
-          <div className="pt-32 mb-[64px]">
+          <div className="pt-32 mb-64">
             <Breadcrumb
               items={[
                 { label: "Início", url: "/" },
@@ -88,7 +88,7 @@ export default function ApiTutorialClient() {
             />
           </div>
 
-          <h1 className="text-2xl-medium text-[#021C51] mb-[32px] leading-tight max-w-[800px]">
+          <h1 className="text-2xl-medium text-[#021C51] mb-32 leading-tight max-w-[800px]">
             Documentação da API
           </h1>
 
@@ -109,7 +109,7 @@ export default function ApiTutorialClient() {
                 </p>
                 <p className="text-m-regular leading-7 text-[#2b363c]">
                   Esta chave deve ser fornecida em cada chamada no cabeçalho HTTP{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
                     X-API-KEY
                   </code>
                   .
@@ -134,7 +134,7 @@ export default function ApiTutorialClient() {
                 <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
                   Alguns métodos são paginados e seguem sempre o mesmo padrão. A lista de objetos é
                   encapsulada num objeto{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
                     Page
                   </code>
                   .
@@ -142,23 +142,23 @@ export default function ApiTutorialClient() {
                 <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
                   Não é necessário calcular as páginas anterior e seguinte, pois os URLs estão
                   disponíveis na resposta nos atributos{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
                     previous_page
                   </code>{" "}
                   e{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
                     next_page
                   </code>
                   . Estes serão definidos como{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
                     null
                   </code>{" "}
                   se não existir página anterior e/ou seguinte.
                 </p>
-                <p className="text-m-regular leading-7 text-[#2b363c] mb-[8px]">
+                <p className="text-m-regular leading-7 text-[#2b363c] mb-8">
                   <u>Exemplo</u>:
                 </p>
-                <pre className="bg-[#1e1e1e] text-[#d4d4d4] rounded-lg p-[24px] overflow-x-auto text-s-regular leading-[22px] font-mono">
+                <pre className="bg-[#1e1e1e] text-[#d4d4d4] rounded-lg p-24 overflow-x-auto text-s-regular leading-[22px] font-mono">
                   <code>
                     {JSON.stringify(
                       {
@@ -179,7 +179,7 @@ export default function ApiTutorialClient() {
               {/* Referência */}
               <section>
                 <h2 className="text-[20px] font-bold text-[#021C51] mb-16">Referência</h2>
-                <p className="text-m-regular leading-7 text-[#2b363c] mb-[24px]">
+                <p className="text-m-regular leading-7 text-[#2b363c] mb-24">
                   Explore os endpoints disponíveis na documentação interativa abaixo.
                 </p>
               </section>
@@ -188,7 +188,7 @@ export default function ApiTutorialClient() {
             {/* Swagger UI */}
             <div
               ref={swaggerRef}
-              className="swagger-ui-container bg-white rounded-lg shadow-sm p-[16px]"
+              className="swagger-ui-container bg-white rounded-lg shadow-sm p-16"
             />
           </div>
         </div>

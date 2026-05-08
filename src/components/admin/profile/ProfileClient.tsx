@@ -313,7 +313,7 @@ export default function ProfileClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-[64px] mb-[32px]">Perfil</h1>
+      <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
 
       <div className="profile-card">
         <Avatar
@@ -343,7 +343,7 @@ export default function ProfileClient() {
             )}
           </div>
 
-          <div className="absolute top-[32px] right-[32px]">
+          <div className="absolute top-32 right-32">
             <Button
               variant="primary"
               appearance="outline"
@@ -360,13 +360,13 @@ export default function ProfileClient() {
       </div>
 
       {/* Tabs */}
-      <div className="mt-[32px]">
+      <div className="mt-32">
         <Tabs>
           <Tab active>
             <TabHeader>Perfil</TabHeader>
             <TabBody>
               <div
-                className="admin-page__form mt-[24px]"
+                className="admin-page__form mt-24"
                 style={{
                   maxWidth:
                     "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))",
@@ -462,7 +462,7 @@ export default function ProfileClient() {
 
                   <div className="flex flex-col gap-16">
                     <div>
-                      <p className="text-base font-medium text-neutral-900 mb-[8px]">
+                      <p className="text-base font-medium text-neutral-900 mb-8">
                         Chaves da API
                       </p>
                       <p className="text-sm text-neutral-700 mb-16">
@@ -508,7 +508,7 @@ export default function ProfileClient() {
                               apresentada.
                             </p>
                             <div className="flex items-center gap-8">
-                              <code className="flex-1 bg-neutral-50 border border-neutral-300 rounded-[4px] px-[12px] py-8 text-xs break-all">
+                              <code className="flex-1 bg-neutral-50 border border-neutral-300 rounded-4 px-12 py-8 text-xs break-all">
                                 {newToken}
                               </code>
                               <Button
@@ -534,11 +534,11 @@ export default function ProfileClient() {
                         <p className="text-sm font-medium text-neutral-900">
                           Chaves activas ({apiTokens.length})
                         </p>
-                        <div className="flex flex-col divide-y divide-neutral-200 border border-neutral-200 rounded-[4px]">
+                        <div className="flex flex-col divide-y divide-neutral-200 border border-neutral-200 rounded-4">
                           {apiTokens.map((token) => (
                             <div
                               key={token.id}
-                              className="flex items-center justify-between gap-16 px-16 py-[12px]"
+                              className="flex items-center justify-between gap-16 px-16 py-12"
                             >
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-8">
@@ -708,7 +708,7 @@ export default function ProfileClient() {
           <Tab>
             <TabHeader>Atividades</TabHeader>
             <TabBody>
-              <div className="mt-[24px]">
+              <div className="mt-24">
                 {isLoadingActivities && (
                   <p className="text-neutral-700 text-sm">A carregar...</p>
                 )}
@@ -804,7 +804,7 @@ export default function ProfileClient() {
           <Tab>
             <TabHeader>Subscrições</TabHeader>
             <TabBody>
-              <div className="mt-[24px]">
+              <div className="mt-24">
                 {isLoadingSubscriptions ? (
                   <p className="text-neutral-900 text-base">A carregar subscrições...</p>
                 ) : subscriptions.length === 0 ? (
@@ -847,7 +847,7 @@ export default function ProfileClient() {
                             avatarType={subAvatar ? "image" : "initials"}
                             srcPath={(subAvatar || initials) as unknown as undefined}
                             alt={subName}
-                            className="w-[48px] h-[48px]"
+                            className="w-48 h-48"
                           />
                           <span className="text-neutral-900 text-base font-medium">{subName}</span>
                         </div>
@@ -868,7 +868,7 @@ export default function ProfileClient() {
           <Tab>
             <TabHeader>Acompanhamentos</TabHeader>
             <TabBody>
-              <div className="mt-[24px]">
+              <div className="mt-24">
                 <CardNoResults
                   className="datasets-page__empty"
                   position="center"

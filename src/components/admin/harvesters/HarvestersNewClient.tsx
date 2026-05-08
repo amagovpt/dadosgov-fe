@@ -234,7 +234,7 @@ export default function HarvestersNewClient() {
           <p className="auxiliar-list__content !p-0">
             A criação de um harvester de dados deve ser feita em nome de uma organização e requer permissões de administrador.
           </p>
-          <p className="auxiliar-list__content !p-0 mt-[8px]">
+          <p className="auxiliar-list__content !p-0 mt-8">
             Selecione uma organização da qual seja administrador. Se a sua organização ainda não
             existir, terá de a criar primeiro através deste{" "}
             <a
@@ -440,7 +440,7 @@ export default function HarvestersNewClient() {
                       {filters.map((filter, index) => (
                         <div
                           key={index}
-                          className={`mt-[8px] pb-16 mb-[8px] ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
+                          className={`mt-8 pb-16 mb-8 ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
                         >
                           <div className="flex items-center gap-8">
                             <IsolatedSelect
@@ -462,7 +462,7 @@ export default function HarvestersNewClient() {
                               {filterTypeSelectOptions}
                             </IsolatedSelect>
                           </div>
-                          <div className="flex items-center gap-8 mt-[8px]">
+                          <div className="flex items-center gap-8 mt-8">
                             <div className="flex-1">
                               <InputText
                                 label=""
@@ -530,7 +530,7 @@ export default function HarvestersNewClient() {
                           <p className="text-primary-900 text-base font-medium leading-7">
                             Prefixo de URL remoto
                           </p>
-                          <div className="flex items-center gap-8 mt-[8px]">
+                          <div className="flex items-center gap-8 mt-8">
                             <div className="flex-1">
                               <InputText
                                 label=""
@@ -583,7 +583,7 @@ export default function HarvestersNewClient() {
                           <p className="text-primary-900 text-base font-medium leading-7">
                             Prefixo de URL remoto
                           </p>
-                          <div className="flex items-center gap-8 mt-[8px]">
+                          <div className="flex items-center gap-8 mt-8">
                             <div className="flex-1">
                               <InputText
                                 label=""
@@ -664,9 +664,9 @@ export default function HarvestersNewClient() {
                 />
               )}
 
-              <div className="flex flex-col gap-8 mb-[24px]">
+              <div className="flex flex-col gap-8 mb-24">
                 <p className="text-neutral-900 text-sm flex items-center gap-6">
-                  <Icon name="agora-line-calendar" className="w-[16px] h-[16px]" />
+                  <Icon name="agora-line-calendar" className="w-16 h-16" />
                   Iniciado em:{" "}
                   {previewJob?.started
                     ? new Date(previewJob.started).toLocaleString("pt-PT", {
@@ -681,7 +681,7 @@ export default function HarvestersNewClient() {
                       : "—"}
                 </p>
                 <p className="text-neutral-900 text-sm flex items-center gap-6">
-                  <Icon name="agora-line-calendar" className="w-[16px] h-[16px]" />
+                  <Icon name="agora-line-calendar" className="w-16 h-16" />
                   Terminado em:{" "}
                   {previewJob?.ended
                     ? new Date(previewJob.ended).toLocaleString("pt-PT", {
@@ -726,19 +726,19 @@ export default function HarvestersNewClient() {
                 <p className="text-neutral-900 text-sm flex items-center gap-12">
                   Elementos:
                   <span className="flex items-center gap-4">
-                    <Icon name="agora-line-check" className="w-[16px] h-[16px]" />{" "}
+                    <Icon name="agora-line-check" className="w-16 h-16" />{" "}
                     {previewJob?.items.filter((i) => i.status === "done").length ?? 0}
                   </span>
                   <span className="flex items-center gap-4">
-                    <Icon name="agora-line-alert-triangle" className="w-[16px] h-[16px]" />{" "}
+                    <Icon name="agora-line-alert-triangle" className="w-16 h-16" />{" "}
                     {previewJob?.items.filter((i) => i.status === "failed").length ?? 0}
                   </span>
                   <span className="flex items-center gap-4">
-                    <Icon name="agora-line-info-mark" className="w-[16px] h-[16px]" />{" "}
+                    <Icon name="agora-line-info-mark" className="w-16 h-16" />{" "}
                     {previewJob?.items.filter((i) => i.status === "skipped").length ?? 0}
                   </span>
                   <span className="flex items-center gap-4">
-                    <Icon name="agora-line-x" className="w-[16px] h-[16px]" />{" "}
+                    <Icon name="agora-line-x" className="w-16 h-16" />{" "}
                     {previewJob?.items.filter(
                       (i) => i.status === "pending" || i.status === "started"
                     ).length ?? 0}
@@ -776,7 +776,7 @@ export default function HarvestersNewClient() {
                 <p className="text-neutral-700 text-sm">Nenhum erro encontrado.</p>
               ) : null}
 
-              <p className="text-neutral-700 text-sm font-semibold uppercase mt-[24px]">
+              <p className="text-neutral-700 text-sm font-semibold uppercase mt-24">
                 {previewJob?.items.length ?? 0} itens
               </p>
 
@@ -878,7 +878,7 @@ export default function HarvestersNewClient() {
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
+                <Icon name="agora-line-question-mark" className="w-24 h-24" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />

@@ -245,7 +245,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                 title={<div className="underline text-xl-bold">{reuse.title}</div>}
                                                 description={
                                                     reuse.description ? (
-                                                        <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-[8px] max-w-[592px]">
+                                                        <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
                                                             {reuse.description}
                                                         </p>
                                                     ) : undefined

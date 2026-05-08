@@ -47,7 +47,7 @@ export default function CardMetrics({
     return (
         <Link
             href={link}
-            className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
+            className="card-general-listing rounded-4 overflow-hidden h-full flex flex-col"
         >
             <CardGeneral
                 variant="white"

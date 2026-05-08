@@ -159,7 +159,7 @@ export default function OrgReusesClient() {
         {reuses.length} resultados
       </p>
 
-      <div className="flex items-end gap-16 mb-[24px]">
+      <div className="flex items-end gap-16 mb-24">
         <div className="admin-search-wrapper">
           <InputSearchBar hasVoiceActionButton={false}
             label="Pesquisar"

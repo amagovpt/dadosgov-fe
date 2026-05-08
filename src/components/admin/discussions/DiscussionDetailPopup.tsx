@@ -44,7 +44,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex overflow-hidden rounded-[4px] border-2 border-transparent bg-primary-100 transition-colors hover:border-primary-500"
+      className="flex overflow-hidden rounded-4 border-2 border-transparent bg-primary-100 transition-colors hover:border-primary-500"
     >
       <div className="flex w-[120px] shrink-0 items-center justify-center bg-primary-100 p-16">
         {logo ? (
@@ -108,7 +108,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
       <div className="flex shrink-0 items-center bg-primary-100 pr-16">
         <Icon
           name="agora-line-arrow-right-circle"
-          className="h-[32px] w-[32px] text-primary-600"
+          className="h-32 w-32 text-primary-600"
           aria-hidden="true"
         />
       </div>

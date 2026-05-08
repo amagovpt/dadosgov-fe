@@ -371,7 +371,7 @@ function ResourceDetailPopupContent({
           </tbody>
         </table>
       </div>
-      <div className="flex justify-between pt-[8px]">
+      <div className="flex justify-between pt-8">
         <Button appearance="outline" variant="primary" onClick={onClose}>
           Cancelar
         </Button>
@@ -551,7 +551,7 @@ function ResourceEditPopupContent({
         )}
       </div>
 
-      <div className="flex justify-between pt-[8px]">
+      <div className="flex justify-between pt-8">
         <Button appearance="outline" variant="primary" onClick={onCancel}>
           Cancelar
         </Button>
@@ -1328,7 +1328,7 @@ export default function DatasetsEditClient() {
           onClick={() => window.open(`/pages/datasets/${dataset.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
-            <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
+            <Icon name="agora-line-eye" className="w-16 h-16" />
             Ver página pública
           </span>
         </Button>
@@ -1751,7 +1751,7 @@ export default function DatasetsEditClient() {
                     </IsolatedSelect>
                   </div>
 
-                  <div className="admin-page__actions flex justify-end mt-[24px]">
+                  <div className="admin-page__actions flex justify-end mt-24">
                     <Button
                       variant="primary"
                       hasIcon
@@ -1870,7 +1870,7 @@ export default function DatasetsEditClient() {
               <aside className="admin-page__auxiliar">
                 <div className="admin-page__auxiliar-inner">
                   <div className="admin-page__auxiliar-header">
-                    <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
+                    <Icon name="agora-line-question-mark" className="w-24 h-24" />
                     <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                   </div>
                   <AuxiliarList
@@ -1889,7 +1889,7 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
           <TabBody>
-            <div className="mt-[24px]">
+            <div className="mt-24">
               <div className="flex items-end gap-16 mb-16 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                 <DragAndDropUploader
                   key={uploaderKey}
@@ -1909,7 +1909,7 @@ export default function DatasetsEditClient() {
                   onChange={handleFileUpload}
                   onSecurityError={() => setFileUploadError(POISONED_FILE_WARNING)}
                 />
-                <Button appearance="outline" variant="primary" className="mb-[32px]">
+                <Button appearance="outline" variant="primary" className="mb-32">
                   Reordene os ficheiros
                 </Button>
               </div>
@@ -2018,7 +2018,7 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Discussões ({discussionsTotal ?? 0})</TabHeader>
           <TabBody>
-            <div className="mt-[24px]">
+            <div className="mt-24">
               {discussionsLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
               {discussionsLoaded && discussions.length === 0 && (
                 <CardNoResults
@@ -2036,9 +2036,9 @@ export default function DatasetsEditClient() {
                   <h2 className="font-medium text-neutral-900 text-base mb-16">
                     {discussions.length} {discussions.length === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
                   </h2>
-                  <div className="space-y-[16px]">
+                  <div className="space-y-16">
                     {discussions.map((disc) => (
-                      <div key={disc.id} className="bg-white rounded-[8px] p-[32px]">
+                      <div key={disc.id} className="bg-white rounded-8 p-32">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h4 className="font-bold text-neutral-900 text-base">{disc.title}</h4>
@@ -2062,7 +2062,7 @@ export default function DatasetsEditClient() {
                           </p>
                         )}
                         {disc.discussion.length > 1 && (
-                          <div className="mt-16 space-y-[16px] border-t border-neutral-200 pt-16">
+                          <div className="mt-16 space-y-16 border-t border-neutral-200 pt-16">
                             {disc.discussion.slice(1).map((msg, idx) => (
                               <div key={idx} className="border-l-2 border-primary-600 pl-24">
                                 <p className="text-sm text-neutral-900">
@@ -2092,7 +2092,7 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Atividades</TabHeader>
           <TabBody>
-            <div className="mt-[24px]">
+            <div className="mt-24">
               {activitiesLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
               {activitiesLoaded && activities.length === 0 && (
                 <CardNoResults
@@ -2114,7 +2114,7 @@ export default function DatasetsEditClient() {
                     {activities.map((activity, index) => (
                       <div
                         key={index}
-                        className="flex items-start gap-12 p-[12px] bg-neutral-50 rounded-lg"
+                        className="flex items-start gap-12 p-12 bg-neutral-50 rounded-lg"
                       >
                         <Avatar
                           avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}

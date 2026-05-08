@@ -170,9 +170,9 @@ export default function HarvestJobDetailClient({
       </h1>
 
       {/* Metadata */}
-      <div className="flex flex-col gap-8 text-sm text-neutral-800 mb-[24px]">
+      <div className="flex flex-col gap-8 text-sm text-neutral-800 mb-24">
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-calendar" className="w-[16px] h-[16px]" />
+          <Icon name="agora-line-calendar" className="w-16 h-16" />
           <span>
             <strong>Começou em:</strong>{" "}
             {job.started
@@ -187,7 +187,7 @@ export default function HarvestJobDetailClient({
           </span>
         </div>
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-calendar" className="w-[16px] h-[16px]" />
+          <Icon name="agora-line-calendar" className="w-16 h-16" />
           <span>
             <strong>Terminou em:</strong>{" "}
             {job.ended
@@ -202,7 +202,7 @@ export default function HarvestJobDetailClient({
           </span>
         </div>
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-info-mark" className="w-[16px] h-[16px]" />
+          <Icon name="agora-line-info-mark" className="w-16 h-16" />
           <span>
             <strong>Status:</strong>{" "}
             <span
@@ -219,7 +219,7 @@ export default function HarvestJobDetailClient({
           </span>
         </div>
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-info-mark" className="w-[16px] h-[16px]" />
+          <Icon name="agora-line-info-mark" className="w-16 h-16" />
           <span>
             <strong>Elementos:</strong>{" "}
             <Icon name="agora-line-check" className="w-[14px] h-[14px] inline" />{" "}
@@ -306,7 +306,7 @@ export default function HarvestJobDetailClient({
               <TableHeaderCell>Link dados.gov.pt</TableHeaderCell>
               <TableHeaderCell>Link fonte</TableHeaderCell>
               <TableHeaderCell>
-                <Icon name="agora-line-alert-triangle" className="w-[16px] h-[16px]" />
+                <Icon name="agora-line-alert-triangle" className="w-16 h-16" />
               </TableHeaderCell>
             </TableRow>
           </TableHeader>

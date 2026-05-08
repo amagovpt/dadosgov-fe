@@ -92,10 +92,10 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
         {/* Title Section */}
         <div>
-          <p className="text-[20px] font-normal text-[#021C51] mt-64 mb-[8px]">
+          <p className="text-[20px] font-normal text-[#021C51] mt-64 mb-8">
             Publicado em {displayDate}
           </p>
-          <h1 className="text-[32px] font-normal text-[#021C51] mb-16 leading-[48px]">{post.name}</h1>
+          <h1 className="text-32 font-normal text-[#021C51] mb-16 leading-[48px]">{post.name}</h1>
           {post.headline && (
             <p className="text-m-regular font-normal text-[#64718B] max-w-2xl mb-32">{post.headline}</p>
           )}
@@ -118,7 +118,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
                 {/* Article Image */}
                 {post.image && (
-                  <div className="mt-[32px] rounded overflow-hidden bg-neutral-100">
+                  <div className="mt-32 rounded overflow-hidden bg-neutral-100">
                     <img
                       src={post.image}
                       alt={post.name}
