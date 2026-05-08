@@ -257,10 +257,18 @@ export async function GET(request: NextRequest) {
     // validation on HTTPS, so we keep the original URL and use undici's
     // connect options.
     const { Agent } = await import("undici");
+    // undici >= 7 expects the lookup callback in the array form
+    // `cb(err, [{address, family}])`, not the legacy node:net
+    // `cb(err, address, family)` shape. Wrong signature would surface as a
+    // generic "Invalid IP address: undefined" when the dispatcher tries to
+    // connect, which we hit during smoke tests against undici 7.25.
     const agent = new Agent({
       connect: {
-        lookup: (_host: string, _options: unknown, cb: (err: Error | null, address: string, family: 4 | 6) => void) =>
-          cb(null, resolved.ip, resolved.family),
+        lookup: (
+          _host: string,
+          _options: unknown,
+          cb: (err: Error | null, addresses: { address: string; family: 4 | 6 }[]) => void,
+        ) => cb(null, [{ address: resolved.ip, family: resolved.family }]),
       },
     });
     res = await fetch(target, {
