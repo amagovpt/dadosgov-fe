@@ -1,4 +1,4 @@
-import { fetchReuses } from '@/services/api';
+import { fetchOrganizations, fetchReuses } from '@/services/api';
 import ReusesClient from '@/components/reuses/ReusesClient';
 import { ReuseFilters } from '@/types/api';
 import { Metadata } from 'next';
@@ -44,12 +44,13 @@ export default async function ReusesPage({
     const d12m = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString().slice(0, 10);
     const d3y = new Date(now.getFullYear() - 3, now.getMonth(), now.getDate()).toISOString().slice(0, 10);
 
-    const [initialData, totalRes, d30Res, d12mRes, d3yRes] = await Promise.all([
+    const [initialData, totalRes, d30Res, d12mRes, d3yRes, allOrganizations] = await Promise.all([
         fetchReuses(page, 12, apiFilters),
         fetchReuses(1, 1),
         fetchReuses(1, 1, { modified_since: d30 }),
         fetchReuses(1, 1, { modified_since: d12m }),
         fetchReuses(1, 1, { modified_since: d3y }),
+        fetchOrganizations(1, 100, { sort: "-datasets" }),
     ]);
 
     const filterCounts: Record<string, number> = {
@@ -64,6 +65,7 @@ export default async function ReusesPage({
             initialData={initialData}
             currentPage={page}
             filterCounts={filterCounts}
+            allOrganizations={allOrganizations.data}
         />
     );
 }

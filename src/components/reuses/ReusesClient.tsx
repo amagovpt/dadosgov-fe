@@ -13,7 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { APIResponse, Reuse } from "@/types/api";
+import { APIResponse, Organization, Reuse } from "@/types/api";
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";
@@ -25,12 +25,14 @@ interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
   currentPage: number;
   filterCounts?: Record<string, number>;
+  allOrganizations?: Organization[];
 }
 
 export default function ReusesClient({
   initialData,
   currentPage,
   filterCounts = {},
+  allOrganizations = [],
 }: ReusesClientProps) {
   const router = useRouter();
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -130,7 +132,9 @@ export default function ReusesClient({
             className={`grid-filters grid gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
-            {filtersOpen && <ReusesFilters filterCounts={filterCounts} />}
+            {filtersOpen && (
+              <ReusesFilters filterCounts={filterCounts} allOrganizations={allOrganizations} />
+            )}
 
             {/* Results Area */}
             <div className={filtersOpen ? "xl:col-span-7" : "col-span-full"}>

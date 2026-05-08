@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { fetchOrganizations } from "@/services/api";
 import { APIResponse, Organization } from "@/types/api";
@@ -28,8 +28,19 @@ export function useOrganizationsListing({
 
   const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
   const [listData, setListData] = useState<APIResponse<Organization>>(initialData);
+  const hasHydratedRef = useRef(false);
+  const lastRequestKeyRef = useRef<string>("");
 
   useEffect(() => {
+    const requestKey = `${activePage}|${initialData.page_size || 20}|${queryString}`;
+    if (!hasHydratedRef.current) {
+      hasHydratedRef.current = true;
+      lastRequestKeyRef.current = requestKey;
+      return;
+    }
+    if (lastRequestKeyRef.current === requestKey) return;
+    lastRequestKeyRef.current = requestKey;
+
     let cancelled = false;
 
     async function loadOrganizationsFromUrl() {

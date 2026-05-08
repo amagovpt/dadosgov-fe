@@ -4,10 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@ama-pt/agora-design-system";
 import {
-  fetchFrequencies,
-  fetchGranularities,
-  fetchLicenses,
-  fetchOrganizations,
   suggestFormats,
   suggestSpatialZones,
   suggestTags,
@@ -122,30 +118,40 @@ function detectRotuloFromParams(params: URLSearchParams): string {
 
 interface DatasetsFiltersProps {
   filterCounts?: Record<string, number>;
+  allOrganizations?: Organization[];
+  allLicenses?: License[];
+  allFrequencies?: Frequency[];
+  allGranularities?: Granularity[];
 }
 
-export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersProps) => {
+export const DatasetsFilters = ({
+  filterCounts: serverCounts,
+  allOrganizations = [],
+  allLicenses = [],
+  allFrequencies = [],
+  allGranularities = [],
+}: DatasetsFiltersProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
   const paramsRef = useRef(queryString);
-  const filterCounts = serverCounts || {};
+  const filterCounts = useMemo(() => serverCounts ?? {}, [serverCounts]);
 
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [licenses, setLicenses] = useState<License[]>([]);
-  const [frequencies, setFrequencies] = useState<Frequency[]>([]);
-  const [granularities, setGranularities] = useState<Granularity[]>([]);
   const [tagOptions, setTagOptions] = useState<FilterOption[]>([]);
   const [formatOptions, setFormatOptions] = useState<FilterOption[]>([]);
   const [zoneOptions, setZoneOptions] = useState<FilterOption[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
-  const [selectedToggleFilters, setSelectedToggleFilters] = useState<Record<ToggleFilterKey, string>>(() => ({
-    formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
-    atualizacao: detectAtualizacaoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
-    rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
-  }));
+  const selectedToggleFilters = useMemo<Record<ToggleFilterKey, string>>(
+    () => ({
+      formato: detectFormatoFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
+      atualizacao: detectAtualizacaoFromParams(
+        new URLSearchParams(Array.from(searchParams.entries()))
+      ),
+      rotulo: detectRotuloFromParams(new URLSearchParams(Array.from(searchParams.entries()))),
+    }),
+    [searchParams]
+  );
 
   const getWorkingParams = useCallback(() => new URLSearchParams(paramsRef.current), []);
 
@@ -161,39 +167,10 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
 
   useEffect(() => {
     paramsRef.current = queryString;
-    const current = new URLSearchParams(queryString);
-    setSelectedToggleFilters({
-      formato: detectFormatoFromParams(current),
-      atualizacao: detectAtualizacaoFromParams(current),
-      rotulo: detectRotuloFromParams(current),
-    });
   }, [queryString]);
-
-  useEffect(() => {
-    async function loadFilterData() {
-      try {
-        const [orgsRes, licensesRes, frequenciesRes, granularitiesRes] = await Promise.all([
-          fetchOrganizations(1, 100, { sort: "-datasets" }),
-          fetchLicenses(),
-          fetchFrequencies(),
-          fetchGranularities(),
-        ]);
-        setOrganizations(orgsRes.data);
-        setLicenses(licensesRes);
-        setFrequencies(frequenciesRes);
-        setGranularities(granularitiesRes);
-      } catch (error) {
-        console.error("Failed to load filter data", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadFilterData();
-  }, []);
 
   const handleToggleFilterChange = useCallback(
     (filterKey: ToggleFilterKey, optionId: string) => {
-      setSelectedToggleFilters((prev) => ({ ...prev, [filterKey]: optionId }));
       const current = getWorkingParams();
 
       if (filterKey === "formato") {
@@ -315,7 +292,7 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
       {
         name: "Organizações",
         param: "organization",
-        data: organizations.map((organization) => ({ id: organization.id, name: organization.name })),
+        data: allOrganizations.map((organization) => ({ id: organization.id, name: organization.name })),
         searchable: true,
       },
       {
@@ -341,13 +318,13 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
       {
         name: "Licenças",
         param: "license",
-        data: licenses.map((license) => ({ id: license.id, name: license.title })),
+        data: allLicenses.map((license) => ({ id: license.id, name: license.title })),
         searchable: true,
       },
       {
         name: "Frequência",
         param: "frequency",
-        data: frequencies.map((frequency) => ({ id: frequency.id, name: frequency.label })),
+        data: allFrequencies.map((frequency) => ({ id: frequency.id, name: frequency.label })),
         searchable: true,
       },
       {
@@ -363,11 +340,19 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
       {
         name: "Granularidade Espacial",
         param: "granularity",
-        data: granularities.map((granularity) => ({ id: granularity.id, name: granularity.name })),
+        data: allGranularities.map((granularity) => ({ id: granularity.id, name: granularity.name })),
         searchable: true,
       },
     ],
-    [organizations, tagOptions, formatOptions, licenses, frequencies, zoneOptions, granularities]
+    [
+      allOrganizations,
+      tagOptions,
+      formatOptions,
+      allLicenses,
+      allFrequencies,
+      zoneOptions,
+      allGranularities,
+    ]
   );
 
   return (
@@ -390,7 +375,6 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
         onToggleValue={handleFilterChange}
         onSearchChange={handleSearchChange}
         checkboxIdPrefix="dataset"
-        isLoading={isLoading}
       />
 
       <div className="mt-32">
@@ -399,11 +383,6 @@ export const DatasetsFilters = ({ filterCounts: serverCounts }: DatasetsFiltersP
           appearance="outline"
           onClick={() => {
             paramsRef.current = "";
-            setSelectedToggleFilters({
-              formato: "all",
-              atualizacao: "all",
-              rotulo: "all",
-            });
             router.replace("/pages/datasets", { scroll: false });
           }}
         >

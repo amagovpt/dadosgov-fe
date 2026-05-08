@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { fetchReuses } from "@/services/api";
 import { APIResponse, Reuse } from "@/types/api";
@@ -25,8 +25,19 @@ export function useReusesListing({ initialData, currentPage }: UseReusesListingA
 
   const { buildUrl, replaceWith, activePage } = useListingUrlState(currentPage);
   const [listData, setListData] = useState<APIResponse<Reuse>>(initialData);
+  const hasHydratedRef = useRef(false);
+  const lastRequestKeyRef = useRef<string>("");
 
   useEffect(() => {
+    const requestKey = `${activePage}|${initialData.page_size || 12}|${queryString}`;
+    if (!hasHydratedRef.current) {
+      hasHydratedRef.current = true;
+      lastRequestKeyRef.current = requestKey;
+      return;
+    }
+    if (lastRequestKeyRef.current === requestKey) return;
+    lastRequestKeyRef.current = requestKey;
+
     let cancelled = false;
 
     async function loadReusesFromUrl() {

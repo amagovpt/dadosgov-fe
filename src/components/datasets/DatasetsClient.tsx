@@ -13,7 +13,7 @@ import { deleteDataset } from "@/services/api";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { APIResponse, Dataset } from "@/types/api";
+import { APIResponse, Dataset, Frequency, Granularity, License, Organization } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 
@@ -29,12 +29,20 @@ interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
   currentPage: number;
   filterCounts?: Record<string, number>;
+  allOrganizations?: Organization[];
+  allLicenses?: License[];
+  allFrequencies?: Frequency[];
+  allGranularities?: Granularity[];
 }
 
 export default function DatasetsClient({
   initialData,
   currentPage,
   filterCounts,
+  allOrganizations = [],
+  allLicenses = [],
+  allFrequencies = [],
+  allGranularities = [],
 }: DatasetsClientProps) {
   const { show, hide } = usePopupContext();
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -171,7 +179,13 @@ export default function DatasetsClient({
             {/* Sidebar */}
             {filtersOpen && (
               <div className="xl:col-span-5 xl:block">
-                <DatasetsFilters filterCounts={filterCounts} />
+                <DatasetsFilters
+                  filterCounts={filterCounts}
+                  allOrganizations={allOrganizations}
+                  allLicenses={allLicenses}
+                  allFrequencies={allFrequencies}
+                  allGranularities={allGranularities}
+                />
               </div>
             )}
 
