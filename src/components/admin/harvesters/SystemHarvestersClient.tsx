@@ -17,11 +17,21 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  usePopupContext,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchHarvesters } from "@/services/api";
+import {
+  fetchHarvesters,
+  rejectHarvestSource,
+  validateHarvestSource,
+} from "@/services/api";
 import type { HarvestSource } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import {
+  ApproveHarvesterPopupContent,
+  RejectHarvesterPopupContent,
+} from "@/components/admin/harvesters/HarvesterValidationPopups";
+import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
 
 const VALIDATION_STATUS: Record<
@@ -71,8 +81,88 @@ export default function SystemHarvestersClient() {
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [feedback, setFeedback] = useState<
+    { variant: "success" | "danger"; message: string } | null
+  >(null);
   const router = useRouter();
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { isAdmin } = useAuth();
+  const { show, hide } = usePopupContext();
+
+  const applyValidationUpdate = useCallback((updated: HarvestSource) => {
+    setHarvesters((prev) =>
+      prev.map((h) =>
+        h.id === updated.id
+          ? { ...h, validation: updated.validation ?? h.validation }
+          : h
+      )
+    );
+  }, []);
+
+  const handleApprove = useCallback(
+    async (harvester: HarvestSource, comment: string) => {
+      const updated = await validateHarvestSource(
+        harvester.id,
+        comment || undefined
+      );
+      applyValidationUpdate(updated);
+      hide();
+      setFeedback({
+        variant: "success",
+        message: `Harvester "${harvester.name}" aprovado.`,
+      });
+    },
+    [applyValidationUpdate, hide]
+  );
+
+  const handleReject = useCallback(
+    async (harvester: HarvestSource, comment: string) => {
+      const updated = await rejectHarvestSource(harvester.id, comment);
+      applyValidationUpdate(updated);
+      hide();
+      setFeedback({
+        variant: "success",
+        message: `Harvester "${harvester.name}" rejeitado.`,
+      });
+    },
+    [applyValidationUpdate, hide]
+  );
+
+  const openApprovePopup = useCallback(
+    (harvester: HarvestSource) => {
+      show(
+        <ApproveHarvesterPopupContent
+          harvester={harvester}
+          onClose={hide}
+          onConfirm={(c) => handleApprove(harvester, c)}
+        />,
+        {
+          title: "Aprovar harvester",
+          closeAriaLabel: "Fechar",
+          dimensions: "m",
+        }
+      );
+    },
+    [show, hide, handleApprove]
+  );
+
+  const openRejectPopup = useCallback(
+    (harvester: HarvestSource) => {
+      show(
+        <RejectHarvesterPopupContent
+          harvester={harvester}
+          onClose={hide}
+          onConfirm={(c) => handleReject(harvester, c)}
+        />,
+        {
+          title: "Rejeitar harvester",
+          closeAriaLabel: "Fechar",
+          dimensions: "m",
+        }
+      );
+    },
+    [show, hide, handleReject]
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -187,6 +277,16 @@ export default function SystemHarvestersClient() {
         </div>
       )}
 
+      {feedback && (
+        <div className="mb-[24px]">
+          <StatusCard
+            variant={feedback.variant}
+            showIcon
+            description={feedback.message}
+          />
+        </div>
+      )}
+
       {isLoading ? (
         <p className="text-neutral-700 text-sm">A carregar...</p>
       ) : filtered.length > 0 ? (
@@ -263,15 +363,50 @@ export default function SystemHarvestersClient() {
                     0
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <a
-                      href={`/pages/admin/harvesters/${harvester.id}?tab=config`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Icon
-                        name="agora-line-edit"
-                        className="w-[20px] h-[20px]"
-                      />
-                    </a>
+                    <div className="flex items-center gap-[12px]">
+                      {isAdmin &&
+                        harvester.validation?.state === "pending" && (
+                          <>
+                            <button
+                              type="button"
+                              aria-label={`Aprovar harvester ${harvester.name}`}
+                              title="Aprovar harvester"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openApprovePopup(harvester);
+                              }}
+                            >
+                              <Icon
+                                name="agora-line-check-circle"
+                                className="w-[20px] h-[20px] text-success-600"
+                              />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label={`Rejeitar harvester ${harvester.name}`}
+                              title="Rejeitar harvester"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openRejectPopup(harvester);
+                              }}
+                            >
+                              <Icon
+                                name="agora-line-x-circle"
+                                className="w-[20px] h-[20px] text-danger-600"
+                              />
+                            </button>
+                          </>
+                        )}
+                      <a
+                        href={`/pages/admin/harvesters/${harvester.id}?tab=config`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Icon
+                          name="agora-line-edit"
+                          className="w-[20px] h-[20px]"
+                        />
+                      </a>
+                    </div>
                   </TableCell>
                 </TableRow>
               );

@@ -39,7 +39,13 @@ import {
   unscheduleHarvester,
   previewHarvestSource,
   deleteHarvester,
+  rejectHarvestSource,
+  validateHarvestSource,
 } from "@/services/api";
+import {
+  ApproveHarvesterPopupContent,
+  RejectHarvesterPopupContent,
+} from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
 import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/types/api";
 
@@ -105,7 +111,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const router = useRouter();
   const searchParams = useSearchParams();
   const isConfigTab = searchParams.get("tab") === "config";
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { show, hide } = usePopupContext();
   const [source, setSource] = useState<HarvestSource | null>(null);
   const [jobs, setJobs] = useState<HarvestJob[]>([]);
@@ -319,6 +325,48 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     }
   };
 
+  const handleApproveSource = async (comment: string) => {
+    if (!source) return;
+    const updated = await validateHarvestSource(source.id, comment || undefined);
+    setSource((prev) =>
+      prev ? { ...prev, validation: updated.validation ?? prev.validation } : prev
+    );
+    hide();
+  };
+
+  const handleRejectSource = async (comment: string) => {
+    if (!source) return;
+    const updated = await rejectHarvestSource(source.id, comment);
+    setSource((prev) =>
+      prev ? { ...prev, validation: updated.validation ?? prev.validation } : prev
+    );
+    hide();
+  };
+
+  const openApproveSourcePopup = () => {
+    if (!source) return;
+    show(
+      <ApproveHarvesterPopupContent
+        harvester={source}
+        onClose={hide}
+        onConfirm={handleApproveSource}
+      />,
+      { title: "Aprovar harvester", closeAriaLabel: "Fechar", dimensions: "m" }
+    );
+  };
+
+  const openRejectSourcePopup = () => {
+    if (!source) return;
+    show(
+      <RejectHarvesterPopupContent
+        harvester={source}
+        onClose={hide}
+        onConfirm={handleRejectSource}
+      />,
+      { title: "Rejeitar harvester", closeAriaLabel: "Fechar", dimensions: "m" }
+    );
+  };
+
   const producerOptions = useMemo(
     () => (
       <DropdownSection name="identity">
@@ -444,16 +492,50 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
       {/* Validation pending banner */}
       {validationState === "pending" && (
         <div className="bg-neutral-100 rounded p-24 flex flex-col gap-8 mb-24" style={{ maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))" }}>
-          <p className="text-sm font-bold text-neutral-900">
-            O seu harvester foi criado e está a aguardar validação da equipa de administração do portal.
-          </p>
-          <p className="text-sm text-neutral-700">
-            Informe-nos através do formulário de contacto abaixo se deseja que validemos o seu harvester. Será notificado da aprovação (ou rejeição).
-          </p>
-          <a href="#" className="flex items-center gap-8 text-sm text-primary-600">
-            Solicitar validação do harvester
-            <Icon name="agora-line-arrow-right-circle" className="w-[20px] h-[20px]" />
-          </a>
+          {isAdmin ? (
+            <>
+              <p className="text-sm font-bold text-neutral-900">
+                Este harvester aguarda validação da equipa de administração.
+              </p>
+              <p className="text-sm text-neutral-700">
+                Aprove para o agendar e iniciar a primeira execução, ou rejeite indicando o motivo. O proprietário será notificado.
+              </p>
+              <div className="flex items-center gap-16 pt-8">
+                <Button
+                  variant="primary"
+                  onClick={openApproveSourcePopup}
+                  hasIcon
+                  leadingIcon="agora-line-check-circle"
+                  leadingIconHover="agora-solid-check-circle"
+                >
+                  Aprovar harvester
+                </Button>
+                <Button
+                  appearance="outline"
+                  variant="danger"
+                  onClick={openRejectSourcePopup}
+                  hasIcon
+                  leadingIcon="agora-line-x-circle"
+                  leadingIconHover="agora-solid-x-circle"
+                >
+                  Rejeitar harvester
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-bold text-neutral-900">
+                O seu harvester foi criado e está a aguardar validação da equipa de administração do portal.
+              </p>
+              <p className="text-sm text-neutral-700">
+                Informe-nos através do formulário de contacto abaixo se deseja que validemos o seu harvester. Será notificado da aprovação (ou rejeição).
+              </p>
+              <a href="#" className="flex items-center gap-8 text-sm text-primary-600">
+                Solicitar validação do harvester
+                <Icon name="agora-line-arrow-right-circle" className="w-[20px] h-[20px]" />
+              </a>
+            </>
+          )}
         </div>
       )}
 
