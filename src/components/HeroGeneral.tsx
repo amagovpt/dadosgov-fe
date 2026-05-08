@@ -10,6 +10,7 @@ interface HeroGeneralProps {
   children?: React.ReactNode;
   variant?: 'dark' | 'light';
   backgroundImageUrl?: string;
+  backgroundPosition?: string;
   image?: {
     src: string;
     alt: string;
@@ -25,6 +26,7 @@ export default function HeroGeneral({
   children,
   variant = 'dark',
   backgroundImageUrl = "/Banner/hero-bg.png",
+  backgroundPosition = "right top 10%",
   image,
   className = '',
 }: HeroGeneralProps) {
@@ -37,7 +39,7 @@ export default function HeroGeneral({
         backgroundImage: `url("${backgroundImageUrl}")`,
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
-        backgroundPosition: "right top 10%",
+        backgroundPosition,
       }}
     >
       <div className='w-full flex flex-col items-center justify-center bg-gradient-to-r from-secondary-900 via-secondary-900/[64%] to-secondary-900/[24%]'>
