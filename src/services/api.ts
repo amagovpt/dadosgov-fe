@@ -3588,7 +3588,7 @@ export async function unscheduleHarvester(id: string): Promise<void> {
 }
 
 export async function triggerHarvest(id: string): Promise<HarvestJob> {
-  const res = await fetch(`${API_AUTH_URL}/harvest/sources/${id}/jobs/`, {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/jobs/`, {
     method: "POST",
     credentials: "include",
   });
