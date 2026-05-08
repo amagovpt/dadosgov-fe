@@ -1,4 +1,3 @@
-"use client";
 
 import { GitHubArticlePage } from "./GitHubArticlePage";
 

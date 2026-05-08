@@ -1,5 +1,3 @@
-"use client";
-
 import { GitHubArticlePage } from "./GitHubArticlePage";
 
 export default function ReuseFaqClient({ initialContent }: { initialContent?: string }) {

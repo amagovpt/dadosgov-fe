@@ -176,16 +176,8 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
 
     const renderTabBody = (content: React.ReactNode) => (
         <TabBody>
-            <div className="relative">
-                <div
-                    className="absolute inset-y-0 -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64 bg-primary-100 z-0"
-                    aria-hidden="true"
-                />
-                <div className="relative z-10">
-                    <div className="container mx-auto max-w-5xl">
-                        {content}
-                    </div>
-                </div>
+            <div className="container">
+                {content}
             </div>
         </TabBody>
     );
@@ -272,7 +264,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                         children: reuse.metrics?.views?.toLocaleString('pt-PT') || '0',
                                                         title: 'Visualizações',
                                                         onClick: (e: React.MouseEvent) => e.preventDefault(),
-                                                        className: 'text-[#034AD8]',
+                                                        className: 'text-primary-700',
                                                     },
                                                     {
                                                         href: '#',
@@ -285,7 +277,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                         children: `${reuse.datasets?.length || 0} datasets`,
                                                         title: 'Datasets',
                                                         onClick: (e: React.MouseEvent) => e.preventDefault(),
-                                                        className: 'text-[#034AD8]',
+                                                        className: 'text-primary-700',
                                                     },
                                                     {
                                                         href: '#',
@@ -298,7 +290,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                         children: reuse.metrics?.followers || 0,
                                                         title: 'Favoritos',
                                                         onClick: (e: React.MouseEvent) => e.preventDefault(),
-                                                        className: 'text-[#034AD8]',
+                                                        className: 'text-primary-700',
                                                     },
                                                 ]}
                                                 mainLink={
@@ -528,7 +520,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                                         {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", { locale: pt })}
                                                                     </p>
                                                                 </div>
-                                                                <div className="flex gap-[18px]">
+                                                                <div className="flex gap-16">
                                                                     {msg.permissions.edit && (
                                                                         <Button
                                                                             variant="primary"

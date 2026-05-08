@@ -290,109 +290,109 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
       <div className="flex-1 min-w-0">
         <FlexTabs>
           {isTabular && !isLoading && !error && tabularData && (
-          <Tab>
-            <TabHeader>Pré-visualização</TabHeader>
-            <TabBody>
-              <div className="py-16">
-                {isLoading ? (
-                  <p className="text-neutral-900 text-sm">A carregar pré-visualização...</p>
-                ) : error || !tabularData ? (
-                  <p className="text-neutral-900 text-sm">
-                    {error || "Pré-visualização não disponível para este recurso."}
-                  </p>
-                ) : (
-                  <div className="space-y-16">
-                    <div className="bg-primary-100 rounded-8 p-24 flex items-center gap-16" style={{ marginBottom: "24px" }}>
-                      <div className="flex-1">
-                        <p className="font-bold text-neutral-900 text-sm">
-                          Explore os dados em detalhes.
-                        </p>
-                        <p className="text-neutral-900 text-xs mt-4">
-                          Utilize esta ferramenta para obter uma visão geral dos dados, aprender
-                          mais sobre as diferentes colunas ou realizar filtros e classificações.
-                        </p>
+            <Tab>
+              <TabHeader>Pré-visualização</TabHeader>
+              <TabBody>
+                <div className="py-16">
+                  {isLoading ? (
+                    <p className="text-neutral-900 text-sm">A carregar pré-visualização...</p>
+                  ) : error || !tabularData ? (
+                    <p className="text-neutral-900 text-sm">
+                      {error || "Pré-visualização não disponível para este recurso."}
+                    </p>
+                  ) : (
+                    <div className="space-y-16">
+                      <div className="bg-primary-100 rounded-8 p-24 flex items-center gap-16" style={{ marginBottom: "24px" }}>
+                        <div className="flex-1">
+                          <p className="font-bold text-neutral-900 text-sm">
+                            Explore os dados em detalhes.
+                          </p>
+                          <p className="text-neutral-900 text-xs mt-4">
+                            Utilize esta ferramenta para obter uma visão geral dos dados, aprender
+                            mais sobre as diferentes colunas ou realizar filtros e classificações.
+                          </p>
+                        </div>
+                        <Button
+                          variant="primary"
+                          appearance="outline"
+                          hasIcon={true}
+                          trailingIcon="agora-line-external-link"
+                          trailingIconHover="agora-solid-external-link"
+                          onClick={() => window.open(resource.url, '_blank')}
+                        >
+                          Explore os dados
+                        </Button>
                       </div>
-                      <Button
-                        variant="primary"
-                        appearance="outline"
-                        hasIcon={true}
-                        trailingIcon="agora-line-external-link"
-                        trailingIconHover="agora-solid-external-link"
-                        onClick={() => window.open(resource.url, '_blank')}
-                      >
-                        Explore os dados
-                      </Button>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <Table desktopLayout="table">
-                        <TableHeader>
-                          <TableRow>
-                            {tabularData.headers.map((header, i) => (
-                              <TableHeaderCell key={i} sortType="string">
-                                {header}
-                              </TableHeaderCell>
-                            ))}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {tabularData.rows.map((row, i) => (
-                            <TableRow key={i}>
-                              {row.map((cell, j) => (
-                                <TableCell
-                                  key={j}
-                                  headerLabel={tabularData.headers[j] || ""}
-                                >
-                                  {cell}
-                                </TableCell>
+                      <div className="overflow-x-auto">
+                        <Table desktopLayout="table">
+                          <TableHeader>
+                            <TableRow>
+                              {tabularData.headers.map((header, i) => (
+                                <TableHeaderCell key={i} sortType="string">
+                                  {header}
+                                </TableHeaderCell>
                               ))}
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
-                      Última atualização da pré-visualização:{" "}
-                      {tabularData.lastModified
-                        ? new Date(tabularData.lastModified).toLocaleDateString("pt-PT", {
+                          </TableHeader>
+                          <TableBody>
+                            {tabularData.rows.map((row, i) => (
+                              <TableRow key={i}>
+                                {row.map((cell, j) => (
+                                  <TableCell
+                                    key={j}
+                                    headerLabel={tabularData.headers[j] || ""}
+                                  >
+                                    {cell}
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
+                        Última atualização da pré-visualização:{" "}
+                        {tabularData.lastModified
+                          ? new Date(tabularData.lastModified).toLocaleDateString("pt-PT", {
                             day: "numeric",
                             month: "long",
                             year: "numeric",
                           })
-                        : formatDate(resource.last_modified || resource.created_at)}{" "}
-                      — {tabularData.totalCols} colunas — {tabularData.totalRows} linhas
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabBody>
-          </Tab>
+                          : formatDate(resource.last_modified || resource.created_at)}{" "}
+                        — {tabularData.totalCols} colunas — {tabularData.totalRows} linhas
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </TabBody>
+            </Tab>
           )}
           {isTabular && !isLoading && !error && tabularData && (
-          <Tab>
-            <TabHeader>Estrutura de dados</TabHeader>
-            <TabBody>
-              <div className="py-16">
-                {isLoading ? (
-                  <p className="text-neutral-900 text-sm">A carregar estrutura...</p>
-                ) : error || !tabularData ? (
-                  <p className="text-neutral-900 text-sm">
-                    {error || "Estrutura de dados não disponível para este recurso."}
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-24">
-                    {tabularData.columns.map((col, i) => (
-                      <div key={i}>
-                        <p className="text-sm font-bold text-neutral-900 mb-4">{col.name}</p>
-                        <span className="inline-block bg-neutral-100 text-neutral-900 text-xs px-8 py-4 rounded">
-                          {col.type}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TabBody>
-          </Tab>
+            <Tab>
+              <TabHeader>Estrutura de dados</TabHeader>
+              <TabBody>
+                <div className="py-16">
+                  {isLoading ? (
+                    <p className="text-neutral-900 text-sm">A carregar estrutura...</p>
+                  ) : error || !tabularData ? (
+                    <p className="text-neutral-900 text-sm">
+                      {error || "Estrutura de dados não disponível para este recurso."}
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-24">
+                      {tabularData.columns.map((col, i) => (
+                        <div key={i}>
+                          <p className="text-sm font-bold text-neutral-900 mb-4">{col.name}</p>
+                          <span className="inline-block bg-neutral-100 text-neutral-900 text-xs px-8 py-4 rounded">
+                            {col.type}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </TabBody>
+            </Tab>
           )}
           <Tab>
             <TabHeader>Metadados</TabHeader>
@@ -544,7 +544,7 @@ const ResourceCard: React.FC<{
   isOrganization?: boolean;
 }> = ({ resource, isExpanded, onToggle, authorName, authorUrl, isOrganization }) => {
   return (
-    <div className="bg-white flex flex-col mx-[136px] mt-16">
+    <div className="bg-white flex flex-col border-b-1 border-neutral-200">
       <div className="flex flex-col gap-16 p-32">
         <h4 className="text-base font-bold text-neutral-900 inline-flex items-center gap-8">
           {resource.title}
@@ -627,7 +627,6 @@ const ResourceCard: React.FC<{
           <ResourceExpandedContent resource={resource} />
         </div>
       )}
-      <div className="h-px w-full bg-neutral-200" />
     </div>
   );
 };
@@ -672,14 +671,15 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
             {principalFiles.length}{" "}
             {principalFiles.length === 1 ? "FICHEIRO PRINCIPAL" : "FICHEIROS PRINCIPAIS"}
           </h3>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-16">
             {principalFiles.map((resource) => (
-              <ResourceCard
-                key={resource.id}
-                resource={resource}
-                isExpanded={expandedId === resource.id}
-                onToggle={() => handleToggle(resource.id)}
-              />
+              <div key={resource.id} className="px-128">
+                <ResourceCard
+                  resource={resource}
+                  isExpanded={expandedId === resource.id}
+                  onToggle={() => handleToggle(resource.id)}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -690,33 +690,37 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
           <h3 className="font-medium text-neutral-900 text-base">
             {documentationFiles.length} DOCUMENTAÇÃO
           </h3>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-16">
             {documentationFiles.map((resource) => (
-              <ResourceCard
-                key={resource.id}
-                resource={resource}
-                isExpanded={expandedId === resource.id}
-                onToggle={() => handleToggle(resource.id)}
-              />
+              <div key={resource.id} className="px-128">
+
+                <ResourceCard
+                  key={resource.id}
+                  resource={resource}
+                  isExpanded={expandedId === resource.id}
+                  onToggle={() => handleToggle(resource.id)}
+                />
+              </div>
             ))}
           </div>
         </div>
       )}
 
       {communityResources && communityResources.length > 0 && (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-16">
           {communityResources.map((cr) => {
             const author = getAuthorInfo(cr);
             return (
-              <ResourceCard
-                key={cr.id}
-                resource={cr as unknown as Resource}
-                isExpanded={expandedId === cr.id}
-                onToggle={() => handleToggle(cr.id)}
-                authorName={author?.name}
-                authorUrl={author?.url}
-                isOrganization={author?.isOrg}
-              />
+              <div key={cr.id} className="px-128">
+                <ResourceCard
+                  resource={cr as unknown as Resource}
+                  isExpanded={expandedId === cr.id}
+                  onToggle={() => handleToggle(cr.id)}
+                  authorName={author?.name}
+                  authorUrl={author?.url}
+                  isOrganization={author?.isOrg}
+                />
+              </div>
             );
           })}
         </div>

@@ -14,8 +14,6 @@ import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import { APIResponse, Dataset } from "@/types/api";
-import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
 
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
