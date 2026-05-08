@@ -967,6 +967,13 @@ export interface HarvestSourceValidation {
   comment: string | null;
 }
 
+export type HarvestValidationDecision = "accepted" | "refused";
+
+export interface HarvestValidationPayload {
+  state: HarvestValidationDecision;
+  comment?: string;
+}
+
 export interface HarvestPreviewJob {
   id: string;
   status:
