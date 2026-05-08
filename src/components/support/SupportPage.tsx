@@ -208,7 +208,6 @@ const SupportPage = () => {
           { label: "Ajuda e contactos", url: "#" },
         ]}
         backgroundImageUrl="/Banner/hero-bg.png"
-        backgroundPosition="inherit"
         subtitle={
           <>
             <label className="block text-[20px] font-bold text-white mt-48">

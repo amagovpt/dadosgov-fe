@@ -906,11 +906,6 @@ li.section-name:empty {
   gap: 16px !important;
 }
 
-/* 5.9 Pagination */
-.grid-filters {
-  gap: 104px;
-  background-color: var(--color-primary-50);
-}
 
 .agora-card-no-results .main-content {
   background: white;

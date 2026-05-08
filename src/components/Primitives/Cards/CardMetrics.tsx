@@ -3,6 +3,7 @@
 import { CardGeneral, ProgressBar } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import Icon from "../../Primitives/Icon";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 export type CardMetricsProps = {
     link: string;
@@ -67,10 +68,14 @@ export default function CardMetrics({
                         </span>
                     </div>
                 }
-                titleText={title}
+                titleText={
+                    <span className="title-text line-clamp-4">
+                        {title}
+                    </span>
+                }
                 descriptionText={
                     <div className="flex flex-col grow">
-                        <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">{description}</p>
+                        <span className="text-m-regular text-neutral-800 line-clamp-3 mb-16">{formatHtmlParagraphs(description)}</span>
                         <div
                             className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
                         >

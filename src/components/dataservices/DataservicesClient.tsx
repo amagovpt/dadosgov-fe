@@ -295,8 +295,6 @@ export default function DataservicesClient({
       <main className="flex-grow bg-primary-50">
         <HeroGeneral
           title="APIs"
-          backgroundImageUrl="/Banner/hero-bg.png"
-          backgroundPosition="center right"
           breadcrumbItems={[
             { label: "Home", url: "/" },
             { label: "APIs", url: "/pages/dataservices" },

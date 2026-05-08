@@ -10,7 +10,6 @@ interface HeroGeneralProps {
   children?: React.ReactNode;
   variant?: 'dark' | 'light';
   backgroundImageUrl?: string;
-  backgroundPosition?: string;
   image?: {
     src: string;
     alt: string;
@@ -33,7 +32,7 @@ export default function HeroGeneral({
 
   return (
     <div
-      className={` ${!className.includes('bg-') ? (isLight ? 'bg-accent-light' : 'bg-primary-900') : ''} ${className}`}
+      className={`w-full ${!className.includes('bg-') ? (isLight ? 'bg-accent-light' : 'bg-primary-900') : ''} ${className}`}
       style={isLight || className.includes('bg-white') ? {} : {
         backgroundImage: `url("${backgroundImageUrl}")`,
         backgroundRepeat: "no-repeat",
