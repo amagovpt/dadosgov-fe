@@ -43,6 +43,9 @@ import DeleteDiscussionPopup from "@/components/discussions/DeleteDiscussionPopu
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 import { localizeReuseTypeId } from "@/lib/reuse-labels";
 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { formatMetricValue } from "@/utils/formatNumber";
@@ -469,10 +472,14 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       style={{ top: 0, left: 0, right: 0 }}
                       aria-hidden="true"
                     >
-                      <div
-                        className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline"
-                        dangerouslySetInnerHTML={{ __html: reuse.description }}
-                      />
+                      <div className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeSanitize]}
+                        >
+                          {reuse.description}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                     <div
                       className="overflow-hidden"
@@ -482,10 +489,14 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                           : undefined
                       }
                     >
-                      <div
-                        className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline"
-                        dangerouslySetInnerHTML={{ __html: reuse.description }}
-                      />
+                      <div className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeSanitize]}
+                        >
+                          {reuse.description}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                     {descOverflowing && (
                       <button
