@@ -141,8 +141,15 @@ const nextConfig: NextConfig = {
           source: "/s/:path*",
           destination: `${BACKEND_URL}/s/:path*`,
         },
-        // API routes — must be in beforeFiles to avoid redirect loops
-        // when Flask returns 308 trailing-slash redirects
+        // SECURITY (TICKET-60 / VULN-2079): every `/api/*` route in Next.js
+        // is shadowed by the rewrite to the Flask backend below. Do NOT add
+        // Next.js handlers under `/api/` — they would be unreachable here,
+        // but if this rewrite ever changes they would suddenly be exposed
+        // (and likely diverged from the backend equivalent). The CSV proxy
+        // lives at `/internal-api/proxy-csv` for that reason.
+        //
+        // Must be in beforeFiles to avoid redirect loops when Flask returns
+        // 308 trailing-slash redirects.
         {
           source: "/api/:path*",
           destination: `${BACKEND_URL}/api/:path*`,
