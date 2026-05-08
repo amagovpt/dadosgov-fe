@@ -3648,7 +3648,7 @@ export async function validateHarvestSource(
   const payload: HarvestValidationPayload = { state: "accepted" };
   if (comment) payload.comment = comment;
 
-  const res = await fetch(`${API_AUTH_URL}/harvest/sources/${id}/validate/`, {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/validate/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -3667,7 +3667,7 @@ export async function rejectHarvestSource(
 ): Promise<HarvestSource> {
   const payload: HarvestValidationPayload = { state: "refused", comment };
 
-  const res = await fetch(`${API_AUTH_URL}/harvest/sources/${id}/validate/`, {
+  const res = await fetch(`${API_AUTH_URL}/harvest/source/${id}/validate/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
