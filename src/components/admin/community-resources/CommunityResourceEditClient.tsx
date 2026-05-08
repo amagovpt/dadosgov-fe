@@ -448,7 +448,7 @@ export default function CommunityResourceEditClient() {
             </div>
 
             {/* SOMA DE VERIFICACAO */}
-            <div className="flex flex-col items-start gap-[12px]">
+            <div className="flex flex-col items-start gap-12">
               <h2 className="admin-page__section-title mb-0">Selo de verificação</h2>
               {showChecksum ? (
                 <Button

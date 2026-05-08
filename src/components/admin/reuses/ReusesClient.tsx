@@ -144,7 +144,7 @@ export default function ReusesClient() {
         {filteredReuses.length} resultados
       </p>
 
-      <div className="flex items-end gap-[16px] mb-[24px]">
+      <div className="flex items-end gap-16 mb-[24px]">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -254,7 +254,7 @@ export default function ReusesClient() {
                     {reuse.datasets?.length ?? 0}
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-[8px]">
+                    <div className="flex gap-8">
                       <a href={`/pages/reuses/${reuse.slug}`}>
                         <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                       </a>

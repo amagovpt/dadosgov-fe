@@ -56,7 +56,7 @@ export default function DatasetsClient({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDeleteDataset = (dataset: { id: string; title: string }) => {
     show(
-      <div className="flex flex-col gap-[16px]">
+      <div className="flex flex-col gap-16">
         <p>
           Essa ação é irreversível.{" "}
           <span className="text-red-600">Tem a certeza que quer eliminar este conjunto de dados?</span>

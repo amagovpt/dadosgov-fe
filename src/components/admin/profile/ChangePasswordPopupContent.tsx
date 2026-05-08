@@ -55,7 +55,7 @@ export function ChangePasswordPopupContent() {
   };
 
   return (
-    <div className="flex flex-col gap-[24px]">
+    <div className="flex flex-col gap-24">
       {success ? (
         <StatusCard variant="success" showIcon description="Senha alterada com sucesso." />
       ) : (
@@ -101,7 +101,7 @@ export function ChangePasswordPopupContent() {
             }
           />
 
-          <div className="flex gap-[16px]">
+          <div className="flex gap-16">
             <Button appearance="outline" variant="neutral" onClick={() => hide()}>
               Cancelar
             </Button>

@@ -39,7 +39,7 @@ function DeletePostPopupContent({
   onConfirm: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>Essa ação não pode ser desfeita.</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
@@ -425,7 +425,7 @@ export default function PostsEditClient() {
                       }
                     />
 
-                    <div className="flex flex-col gap-[8px]">
+                    <div className="flex flex-col gap-8">
                       <span className="text-primary-900 text-base font-medium leading-7">
                         Tipo de Item
                       </span>
@@ -447,7 +447,7 @@ export default function PostsEditClient() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-[8px]">
+                    <div className="flex flex-col gap-8">
                       <span className="text-primary-900 text-base font-medium leading-7">
                         Tipo de conteúdo
                       </span>
@@ -683,7 +683,7 @@ export default function PostsEditClient() {
               <div className="admin-page__form-area">
                 <form className="admin-page__form mt-[24px]">
                   <div className="admin-page__fields-group">
-                    <div className="flex flex-col gap-[8px]">
+                    <div className="flex flex-col gap-8">
                       <span className="text-primary-900 text-base font-medium leading-7">
                         Conteúdo *
                       </span>

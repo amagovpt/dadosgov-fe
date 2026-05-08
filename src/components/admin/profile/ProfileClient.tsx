@@ -460,7 +460,7 @@ export default function ProfileClient() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-[16px]">
+                  <div className="flex flex-col gap-16">
                     <div>
                       <p className="text-base font-medium text-neutral-900 mb-[8px]">
                         Chaves da API
@@ -472,7 +472,7 @@ export default function ProfileClient() {
                       </p>
                     </div>
 
-                    <div className="flex items-end gap-[16px]">
+                    <div className="flex items-end gap-16">
                       <div className="flex-1">
                         <InputText
                           label="Nome da nova chave (opcional)"
@@ -502,13 +502,13 @@ export default function ProfileClient() {
                         variant="warning"
                         showIcon
                         description={
-                          <div className="flex flex-col gap-[8px]">
+                          <div className="flex flex-col gap-8">
                             <p>
                               <strong>Copie esta chave agora.</strong> Não voltará a ser
                               apresentada.
                             </p>
-                            <div className="flex items-center gap-[8px]">
-                              <code className="flex-1 bg-neutral-50 border border-neutral-300 rounded-[4px] px-[12px] py-[8px] text-xs break-all">
+                            <div className="flex items-center gap-8">
+                              <code className="flex-1 bg-neutral-50 border border-neutral-300 rounded-[4px] px-[12px] py-8 text-xs break-all">
                                 {newToken}
                               </code>
                               <Button
@@ -530,7 +530,7 @@ export default function ProfileClient() {
                     )}
 
                     {apiTokens.length > 0 ? (
-                      <div className="flex flex-col gap-[8px]">
+                      <div className="flex flex-col gap-8">
                         <p className="text-sm font-medium text-neutral-900">
                           Chaves activas ({apiTokens.length})
                         </p>
@@ -538,10 +538,10 @@ export default function ProfileClient() {
                           {apiTokens.map((token) => (
                             <div
                               key={token.id}
-                              className="flex items-center justify-between gap-[16px] px-[16px] py-[12px]"
+                              className="flex items-center justify-between gap-16 px-16 py-[12px]"
                             >
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-[8px]">
+                                <div className="flex items-center gap-8">
                                   <code className="text-sm font-mono text-neutral-900">
                                     {token.token_prefix}…
                                   </code>
@@ -551,7 +551,7 @@ export default function ProfileClient() {
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-xs text-neutral-700 mt-[4px]">
+                                <p className="text-xs text-neutral-700 mt-4">
                                   Criada em{" "}
                                   {format(new Date(token.created_at), "dd/MM/yyyy", {
                                     locale: pt,
@@ -594,7 +594,7 @@ export default function ProfileClient() {
                     />
                   )}
 
-                  <div className="flex items-end gap-[16px]">
+                  <div className="flex items-end gap-16">
                     <div className="flex-1">
                       {isEditingEmail ? (
                         <InputText
@@ -619,7 +619,7 @@ export default function ProfileClient() {
                     {!samlLogin && (
                       <>
                         {isEditingEmail ? (
-                          <div className="flex gap-[8px]">
+                          <div className="flex gap-8">
                             <Button
                               appearance="outline"
                               variant="primary"
@@ -659,7 +659,7 @@ export default function ProfileClient() {
                     )}
                   </div>
 
-                  <div className="flex items-end gap-[16px]">
+                  <div className="flex items-end gap-16">
                     <div className="flex-1">
                       <InputText
                         label="Senha"
@@ -761,7 +761,7 @@ export default function ProfileClient() {
                         {activities.map((activity, index) => (
                           <TableRow key={index}>
                             <TableCell headerLabel="Utilizador">
-                              <div className="flex items-center gap-[8px]">
+                              <div className="flex items-center gap-8">
                                 <Avatar
                                   avatarType={
                                     activity.actor?.avatar_thumbnail ? "image" : "initials"

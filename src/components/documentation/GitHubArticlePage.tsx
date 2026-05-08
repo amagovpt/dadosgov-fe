@@ -72,17 +72,17 @@ const markdownComponents = {
     );
   },
   ul: ({ children }: any) => (
-    <ul className="list-disc pl-[48px] space-y-[12px] mb-[24px] text-m-regular leading-7">
+    <ul className="list-disc pl-48 space-y-[12px] mb-[24px] text-m-regular leading-7">
       {children}
     </ul>
   ),
   ol: ({ children }: any) => (
-    <ol className="list-decimal pl-[48px] space-y-[12px] mb-[24px] text-m-regular leading-7">
+    <ol className="list-decimal pl-48 space-y-[12px] mb-[24px] text-m-regular leading-7">
       {children}
     </ol>
   ),
   blockquote: ({ children }: any) => (
-    <blockquote className="border-l-4 border-[#034AD8] pl-[16px] italic text-m-regular leading-7 mb-16">
+    <blockquote className="border-l-4 border-[#034AD8] pl-16 italic text-m-regular leading-7 mb-16">
       {children}
     </blockquote>
   ),
@@ -93,7 +93,7 @@ const markdownComponents = {
         <code className="text-s-regular leading-6">{children}</code>
       </pre>
     ) : (
-      <code className="bg-[#e1e4ea] rounded px-[4px] py-[2px] text-s-regular">{children}</code>
+      <code className="bg-[#e1e4ea] rounded px-4 py-2 text-s-regular">{children}</code>
     );
   },
   img: ({ src, alt }: any) => (
@@ -124,17 +124,17 @@ export function GitHubArticlePage({
       <main className="flex-grow pt-32">
         <div className="container mx-auto px-4">
           {/* Breadcrumbs */}
-          <div className="pt-[32px] mb-[64px]">
+          <div className="pt-32 mb-[64px]">
             <Breadcrumb items={breadcrumbItems} />
           </div>
 
         </div>
 
-        <div className="bg-[#F7F8FA] pt-[64px] pb-[38px] pl-[112px] pr-[112px]">
+        <div className="bg-[#F7F8FA] pt-64 pb-[38px] pl-[112px] pr-[112px]">
           <div className="container mx-auto px-4">
             {/* Main Content */}
             <div>
-              <div className="text-[#2b363c] flex flex-col gap-[32px]">
+              <div className="text-[#2b363c] flex flex-col gap-32">
                 {cleanContent ? (
                   <div className="max-w-[592px]">
                     <ReactMarkdown
@@ -151,7 +151,7 @@ export function GitHubArticlePage({
                   </p>
                 )}
 
-                <div className="max-w-[592px] pt-[32px]">
+                <div className="max-w-[592px] pt-32">
                   <h1 className="text-[32px] font-medium text-[#021C51] mb-16 leading-tight max-w-[800px]">
                     Ações
                   </h1>

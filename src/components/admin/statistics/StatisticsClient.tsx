@@ -44,7 +44,7 @@ export default function StatisticsClient() {
         <Tab active>
           <TabHeader>Utilizador</TabHeader>
           <TabBody>
-            <div className="flex gap-[24px] mt-[48px]">
+            <div className="flex gap-24 mt-48">
               <div className="flex-1">
                 <CardFrame label="0">
                   <p className="text-neutral-700 text-base">Conjuntos de dados</p>
@@ -69,7 +69,7 @@ export default function StatisticsClient() {
           <TabHeader>Conjuntos de dados</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              <div className="flex items-end gap-[16px] mb-[24px]">
+              <div className="flex items-end gap-16 mb-[24px]">
                 <div className="admin-search-wrapper">
                   <InputSearchBar hasVoiceActionButton={false}
                     label="Pesquisar"
@@ -140,7 +140,7 @@ export default function StatisticsClient() {
                 0 resultados
               </p>
 
-              <div className="flex items-end gap-[16px] mb-[24px]">
+              <div className="flex items-end gap-16 mb-[24px]">
                 <div className="admin-search-wrapper">
                   <InputSearchBar hasVoiceActionButton={false}
                     label="Pesquisar"
@@ -195,7 +195,7 @@ export default function StatisticsClient() {
                 0 resultados
               </p>
 
-              <div className="flex items-end gap-[16px] mb-[24px]">
+              <div className="flex items-end gap-16 mb-[24px]">
                 <div className="admin-search-wrapper">
                   <InputSearchBar hasVoiceActionButton={false}
                     label="Pesquisar"

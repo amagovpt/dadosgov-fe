@@ -121,7 +121,7 @@ export default function DiscussionsClient() {
                     <span className="font-medium">{discussion.title}</span>
                   </TableCell>
                   <TableCell headerLabel="Autor">
-                    <div className="flex items-center gap-[8px]">
+                    <div className="flex items-center gap-8">
                       {discussion.user?.avatar_thumbnail ? (
                         <img
                           src={discussion.user.avatar_thumbnail}
@@ -158,19 +158,19 @@ export default function DiscussionsClient() {
           </Table>
 
           <div className="flex items-center justify-between mt-16 py-[12px] border-t border-neutral-200">
-            <div className="flex items-center gap-[8px]">
+            <div className="flex items-center gap-8">
               <span className="text-sm text-neutral-600">Linhas por página</span>
               <select
                 value={itemsPerPage}
                 onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                className="border border-neutral-300 rounded px-[8px] py-[4px] text-sm"
+                className="border border-neutral-300 rounded px-8 py-4 text-sm"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
               </select>
             </div>
-            <div className="flex items-center gap-[8px]">
+            <div className="flex items-center gap-8">
               <span className="text-sm text-neutral-600">
                 {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, discussions.length)} de {discussions.length}
               </span>

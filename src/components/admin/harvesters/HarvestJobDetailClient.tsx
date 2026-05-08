@@ -244,7 +244,7 @@ export default function HarvestJobDetailClient({
         <h2 className="text-lg font-bold text-neutral-900">
           {filteredItems.length} ITENS
         </h2>
-        <div className="flex items-end gap-[16px]">
+        <div className="flex items-end gap-16">
           <div className="admin-search-wrapper">
             <InputSearchBar
               hasVoiceActionButton={false}

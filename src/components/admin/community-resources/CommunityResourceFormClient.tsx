@@ -494,7 +494,7 @@ export default function CommunityResourceFormClient({
                               %
                             </span>
                           </div>
-                          <div className="text-xs mb-[32px] mt-[32px] flex flex-wrap items-center gap-[32px] text-[#034AD8]">
+                          <div className="text-xs mb-[32px] mt-[32px] flex flex-wrap items-center gap-32 text-[#034AD8]">
                             <div className="flex items-center gap-8" title="Visualizações">
                               <Icon name="agora-line-eye" className="" aria-hidden="true" />
                               <span>{formatMetricValue(dataset.metrics?.views)}</span>
@@ -639,7 +639,7 @@ export default function CommunityResourceFormClient({
                     }
                     title={<div className="text-xl-bold underline">{createdResource.title}</div>}
                     description={
-                      <div className="mt-[8px] flex flex-col gap-4 pb-[32px]">
+                      <div className="mt-[8px] flex flex-col gap-4 pb-32">
                         <p className="text-sm text-neutral-900">
                           Atualizado hoje
                           {createdResource.format

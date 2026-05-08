@@ -33,9 +33,9 @@ function DeleteUserPopupContent({
   onConfirm: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>Esta ação é irreversível.</p>
-      <div className="flex justify-end gap-[16px] pt-[16px]">
+      <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
           Cancelar
         </Button>
@@ -333,11 +333,11 @@ export default function UserProfileClient() {
                   />
 
                   {isAdmin && (
-                  <div className="flex flex-col gap-[12px]">
+                  <div className="flex flex-col gap-12">
                     <span className="text-primary-900 text-base font-medium leading-7">
                       Perfil <span className="text-danger-600">*</span>
                     </span>
-                    <div className="flex gap-[24px]">
+                    <div className="flex gap-24">
                       {[
                         { value: "admin", label: "Administrador" },
                         { value: "editor", label: "Editor" },
@@ -348,7 +348,7 @@ export default function UserProfileClient() {
                           role="radio"
                           aria-checked={role === value}
                           onClick={() => setRole(value)}
-                          className="flex items-start gap-[8px] bg-transparent border-0 cursor-pointer p-0 min-h-[44px]"
+                          className="flex items-start gap-8 bg-transparent border-0 cursor-pointer p-0 min-h-[44px]"
                         >
                           <div className="p-[10px]">
                             <div

@@ -139,7 +139,7 @@ export default function OrgCommunityResourcesClient() {
         {resources.length} resultados
       </p>
 
-      <div className="flex items-end gap-[16px] mb-[24px]">
+      <div className="flex items-end gap-16 mb-[24px]">
         <div className="admin-search-wrapper">
           <InputSearchBar hasVoiceActionButton={false}
             label="Pesquisar"
@@ -230,7 +230,7 @@ export default function OrgCommunityResourcesClient() {
                     </div>
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-[8px]">
+                    <div className="flex gap-8">
                       <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                       <a href={`/pages/admin/community-resources/edit?resource_id=${resource.id}`}>
                         <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />

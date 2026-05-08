@@ -152,7 +152,7 @@ export default function SystemPostsClient() {
         {totalItems} resultados
       </p>
 
-      <div className="flex items-end gap-[16px] mb-[24px]">
+      <div className="flex items-end gap-16 mb-[24px]">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -287,7 +287,7 @@ export default function SystemPostsClient() {
                   {formatDate(post.last_modified)}
                 </TableCell>
                 <TableCell headerLabel="Ação">
-                  <div className="flex gap-[8px]">
+                  <div className="flex gap-8">
                     <a href={`/pages/posts/${post.slug}`}>
                       <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                     </a>

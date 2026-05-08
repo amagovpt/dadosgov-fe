@@ -150,7 +150,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         {total} resultados
       </p>
 
-      <div className="flex items-end gap-[16px] mb-[24px]">
+      <div className="flex items-end gap-16 mb-[24px]">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -284,7 +284,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   </div>
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-[8px]">
+                  <div className="flex gap-8">
                     <a href={`/pages/datasets/${dataset.slug}`}>
                       <Icon
                         name="agora-line-eye"

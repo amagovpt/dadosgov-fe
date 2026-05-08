@@ -121,7 +121,7 @@ export default function SystemTopicsClient() {
                   {topic.reuses_count ?? 0}
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-[8px]">
+                  <div className="flex gap-8">
                     <a href={`/pages/themes/${topic.slug}`}>
                       <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                     </a>

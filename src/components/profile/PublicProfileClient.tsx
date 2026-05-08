@@ -284,7 +284,7 @@ export default function PublicProfileClient() {
 
       {/* Organizations Section */}
       {displayUser?.organizations && displayUser.organizations.length > 0 && (
-        <div className="mt-[48px]">
+        <div className="mt-48">
           <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
             {displayUser.organizations.length}{" "}
             {displayUser.organizations.length === 1 ? "Organização" : "Organizações"}
@@ -403,7 +403,7 @@ export default function PublicProfileClient() {
 
       {/* Subscrições Section (quem eu sigo) */}
       {showSubscriptions && (
-        <div className="mt-[48px]">
+        <div className="mt-48">
           <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
             {subscriptionsTotal}{" "}
             {subscriptionsTotal === 1 ? "Subscrição" : "Subscrições"}
@@ -460,7 +460,7 @@ export default function PublicProfileClient() {
 
       {/* Acompanhamentos Section (quem me segue) */}
       {showFollowers && (
-        <div className="mt-[48px]">
+        <div className="mt-48">
           <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
             {followersTotal}{" "}
             {followersTotal === 1 ? "Acompanhamento" : "Acompanhamentos"}
@@ -513,7 +513,7 @@ export default function PublicProfileClient() {
       )}
 
       {/* Datasets Section */}
-      <div className="mt-[48px]">
+      <div className="mt-48">
         <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
           {datasets.length} {datasets.length === 1 ? "Conjunto de dados" : "Conjuntos de dados"}
         </h2>
@@ -602,7 +602,7 @@ export default function PublicProfileClient() {
       </div>
 
       {/* Reuses Section */}
-      <div className="mt-[48px]">
+      <div className="mt-48">
         <h2 className="font-medium text-neutral-900 text-base uppercase mb-24">
           {reuses.length} {reuses.length === 1 ? "Reutilização" : "Reutilizações"}
         </h2>

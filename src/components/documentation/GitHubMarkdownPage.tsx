@@ -40,16 +40,16 @@ export function GitHubMarkdownPage({
     <div className="flex flex-col bg-white min-h-screen font-sans">
       <main className="flex-grow pt-32 pb-64">
         <div className="container mx-auto px-4">
-          <div className="pt-[32px] mb-[64px]">
+          <div className="pt-32 mb-[64px]">
             <Breadcrumb items={breadcrumbItems} />
           </div>
         </div>
 
-        <div className="bg-[#F7F8FA] pt-[64px] pb-[38px] pl-[112px] pr-[112px]">
+        <div className="bg-[#F7F8FA] pt-64 pb-[38px] pl-[112px] pr-[112px]">
           <div className="container mx-auto px-4">
             <div className="max-w-[592px]">
               {cleanContent ? (
-                <div className="text-[#2b363c] flex flex-col gap-[16px]">
+                <div className="text-[#2b363c] flex flex-col gap-16">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
@@ -90,17 +90,17 @@ export function GitHubMarkdownPage({
                         );
                       },
                       ul: ({ children }) => (
-                        <ul className="list-disc pl-[48px] space-y-[12px] mb-[24px] text-m-regular leading-7">
+                        <ul className="list-disc pl-48 space-y-[12px] mb-[24px] text-m-regular leading-7">
                           {children}
                         </ul>
                       ),
                       ol: ({ children }) => (
-                        <ol className="list-decimal pl-[48px] space-y-[12px] mb-[24px] text-m-regular leading-7">
+                        <ol className="list-decimal pl-48 space-y-[12px] mb-[24px] text-m-regular leading-7">
                           {children}
                         </ol>
                       ),
                       blockquote: ({ children }) => (
-                        <blockquote className="border-l-4 border-[#034AD8] pl-[16px] italic text-m-regular leading-7 mb-16">
+                        <blockquote className="border-l-4 border-[#034AD8] pl-16 italic text-m-regular leading-7 mb-16">
                           {children}
                         </blockquote>
                       ),
@@ -111,7 +111,7 @@ export function GitHubMarkdownPage({
                             <code className="text-s-regular leading-6">{children}</code>
                           </pre>
                         ) : (
-                          <code className="bg-[#e1e4ea] rounded px-[4px] py-[2px] text-s-regular">
+                          <code className="bg-[#e1e4ea] rounded px-4 py-2 text-s-regular">
                             {children}
                           </code>
                         );
@@ -131,7 +131,7 @@ export function GitHubMarkdownPage({
                     {cleanContent}
                   </ReactMarkdown>
 
-                  <div className="pt-[32px]">
+                  <div className="pt-32">
                     <h2 className="text-[32px] font-medium text-[#021C51] mb-16 leading-tight">
                       Ações
                     </h2>

@@ -121,7 +121,7 @@ function TransferReusePopupContent({
   };
 
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>
         <Icon name="agora-line-document" className="inline w-4 h-4 mr-4" />
         <span className="text-primary-600">{reuseTitle}</span>
@@ -131,7 +131,7 @@ function TransferReusePopupContent({
         Poderá deixar de conseguir gerir esta reutilização.
       </p>
 
-      <div className="flex flex-col gap-[8px]">
+      <div className="flex flex-col gap-8">
         <label className="text-primary-900 text-base font-medium leading-7">
           Organização ou utilizador <span className="text-danger-600">*</span>
         </label>
@@ -156,7 +156,7 @@ function TransferReusePopupContent({
         )}
       </div>
 
-      <div className="admin-page__org-card flex flex-col items-center gap-[16px] bg-neutral-50 rounded-lg p-8 text-center">
+      <div className="admin-page__org-card flex flex-col items-center gap-16 bg-neutral-50 rounded-lg p-8 text-center">
         <h3 className="text-primary-900 text-lg font-bold leading-7">
           Não pertence a uma organização.
         </h3>
@@ -173,7 +173,7 @@ function TransferReusePopupContent({
         </Link>
       </div>
 
-      <div className="flex flex-col gap-[8px]">
+      <div className="flex flex-col gap-8">
         <label className="text-primary-900 text-base font-medium leading-7">
           Comentário
         </label>
@@ -218,7 +218,7 @@ function DeleteReusePopupContent({
   onConfirm: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>Esta ação é irreversível. Tem a certeza que quer eliminar esta reutilização?</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
@@ -1166,7 +1166,7 @@ export default function ReusesEditClient() {
                                 Metadados: {dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0}%
                               </span>
                             </div>
-                            <div className="flex items-center flex-wrap gap-[32px] text-xs mt-[32px] text-[#034AD8] mb-[32px]">
+                            <div className="flex items-center flex-wrap gap-32 text-xs mt-[32px] text-[#034AD8] mb-[32px]">
                               <div className="flex items-center gap-8" title="Visualizações">
                                 <Icon name="agora-line-eye" className="" aria-hidden="true" />
                                 <span>
@@ -1644,7 +1644,7 @@ export default function ReusesEditClient() {
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h4 className="font-bold text-neutral-900 text-base">{disc.title}</h4>
-                            <p className="text-sm text-neutral-900 mt-[4px]">
+                            <p className="text-sm text-neutral-900 mt-4">
                               <span className="text-primary-600 font-medium">
                                 {disc.user.first_name} {disc.user.last_name}
                               </span>
@@ -1664,9 +1664,9 @@ export default function ReusesEditClient() {
                           </p>
                         )}
                         {disc.discussion.length > 1 && (
-                          <div className="mt-16 space-y-[16px] border-t border-neutral-200 pt-[16px]">
+                          <div className="mt-16 space-y-[16px] border-t border-neutral-200 pt-16">
                             {disc.discussion.slice(1).map((msg, idx) => (
-                              <div key={idx} className="border-l-2 border-primary-600 pl-[24px]">
+                              <div key={idx} className="border-l-2 border-primary-600 pl-24">
                                 <p className="text-sm text-neutral-900">
                                   <span className="text-primary-600 font-medium">
                                     {msg.posted_by.first_name} {msg.posted_by.last_name}
@@ -1674,7 +1674,7 @@ export default function ReusesEditClient() {
                                   {" — "}
                                   {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", { locale: pt })}
                                 </p>
-                                <p className="text-neutral-900 text-sm mt-[4px]">
+                                <p className="text-neutral-900 text-sm mt-4">
                                   {msg.content}
                                 </p>
                               </div>
@@ -1712,11 +1712,11 @@ export default function ReusesEditClient() {
                   <h2 className="font-medium text-neutral-900 text-base mb-16">
                     {activities.length} ATIVIDADES
                   </h2>
-                  <div className="flex flex-col gap-[12px]">
+                  <div className="flex flex-col gap-12">
                     {activities.map((activity, index) => (
                       <div
                         key={index}
-                        className="flex items-start gap-[12px] p-[12px] bg-neutral-50 rounded-lg"
+                        className="flex items-start gap-12 p-[12px] bg-neutral-50 rounded-lg"
                       >
                         <Avatar
                           avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
@@ -1736,7 +1736,7 @@ export default function ReusesEditClient() {
                             </a>{" "}
                             {translateActivityLabel(activity.label)}
                           </p>
-                          <p className="text-xs text-neutral-600 mt-[4px]">
+                          <p className="text-xs text-neutral-600 mt-4">
                             {new Date(activity.created_at).toLocaleDateString("pt-PT", {
                               day: "2-digit",
                               month: "2-digit",

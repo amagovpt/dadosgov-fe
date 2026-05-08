@@ -376,7 +376,7 @@ export default function ApiRegistrationClient({
                 <h2 className="admin-page__section-title">Acesso</h2>
 
                 <div className="admin-page__fields-group">
-                  <div className="flex flex-col gap-[8px]">
+                  <div className="flex flex-col gap-8">
                     <span className="text-primary-900 text-base font-medium leading-7">
                       Tipo de acesso
                     </span>

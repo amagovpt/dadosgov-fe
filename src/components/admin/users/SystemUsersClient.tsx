@@ -125,7 +125,7 @@ export default function SystemUsersClient() {
         {totalItems} resultados
       </p>
 
-      <div className="flex items-end gap-[16px] mb-[24px]">
+      <div className="flex items-end gap-16 mb-[24px]">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -229,7 +229,7 @@ export default function SystemUsersClient() {
                       {user.first_name} {user.last_name}
                     </a>
                     {user.email && (
-                      <div className="text-sm text-neutral-900 flex items-center gap-[4px]">
+                      <div className="text-sm text-neutral-900 flex items-center gap-4">
                         <Icon name="agora-line-mail" className="w-[14px] h-[14px]" />
                         {user.email}
                       </div>
@@ -252,7 +252,7 @@ export default function SystemUsersClient() {
                   {getUserProfile(user)}
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-[8px]">
+                  <div className="flex gap-8">
                     <a href={`/pages/users/${user.slug}`}>
                       <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                     </a>

@@ -944,7 +944,7 @@ export default function DatasetsAdminClient({
               </div>
 
               {(!user?.organizations || user.organizations.length === 0) && (
-                <div className="admin-page__org-card rounded-lg mt-[24px] flex flex-col items-center gap-[16px] bg-neutral-50 p-8 text-center">
+                <div className="admin-page__org-card rounded-lg mt-[24px] flex flex-col items-center gap-16 bg-neutral-50 p-8 text-center">
                   <h3 className="text-lg font-bold leading-7 text-primary-900">
                     Não pertence a uma organização.
                   </h3>

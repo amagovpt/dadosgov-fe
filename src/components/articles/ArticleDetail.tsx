@@ -102,9 +102,9 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
         </div>
       </div>
 
-      <div className="bg-[#F7F8FA] pt-[64px] pb-[38px]">
+      <div className="bg-[#F7F8FA] pt-64 pb-[38px]">
         <div className="container mx-auto">
-          <div className="text-[#2b363c] flex flex-col gap-[32px]">
+          <div className="text-[#2b363c] flex flex-col gap-32">
             <div className="max-w-[592px]">
                 {/* Content */}
                 <div className="text-m-regular leading-7">
@@ -148,7 +148,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
                 {/* Tags */}
                 {post.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-8 pt-[32px]">
+                  <div className="flex flex-wrap gap-8 pt-32">
                     {post.tags.map((tag) => (
                       <span
                         key={tag}

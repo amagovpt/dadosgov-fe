@@ -133,7 +133,7 @@ export default function DataservicesClient() {
         {filteredApis.length} resultados
       </p>
 
-      <div className="flex items-end gap-[16px] mb-[24px]">
+      <div className="flex items-end gap-16 mb-[24px]">
         <div className="admin-search-wrapper">
           <InputSearchBar hasVoiceActionButton={false}
             label="Pesquisar"
@@ -232,7 +232,7 @@ export default function DataservicesClient() {
                   </span>
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-[8px]">
+                  <div className="flex gap-8">
                     <a href={`/pages/dataservices/${api.slug}`}>
                       <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                     </a>

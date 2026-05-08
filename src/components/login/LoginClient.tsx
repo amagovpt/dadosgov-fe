@@ -405,7 +405,7 @@ function LoginContent() {
                             disponível para a qualquer cidadã/o da UE.
                           </p>
                         </div>
-                        <div className="shrink-0 flex items-center gap-[32px]">
+                        <div className="shrink-0 flex items-center gap-32">
                           <NextImage
                             src="/eidas.svg"
                             alt="eIDAS"
@@ -431,7 +431,7 @@ function LoginContent() {
                           Descubra como criar conta
                         </button>
                       </div>
-                      <div className="w-full h-[2px] bg-neutral-400 my-[32px]"></div>
+                      <div className="w-full h-[2px] bg-neutral-400 my-32"></div>
                       <p className="text-sm text-neutral-900">
                         Precisa <strong>fornecer documentos</strong> que foram emitidos por uma entidade
                         pública de <strong>outro Estado-Membro</strong> da UE? Agora já é possível
@@ -496,7 +496,7 @@ function LoginContent() {
                           <Icon name="agora-solid-social-security" className="w-24 h-24" />
                         </div>
                       </div>
-                      <div className="w-full h-[2px] bg-neutral-400 my-[32px]"></div>
+                      <div className="w-full h-[2px] bg-neutral-400 my-32"></div>
                       <div className="flex flex-col gap-32">
                         {migrationRequired ? (
                           <>
@@ -650,7 +650,7 @@ function LoginContent() {
             </Tabs>
 
             {/* Status card aligned with tab content */}
-            <div className="grid xl:grid-cols-12 gap-[32px] mt-32">
+            <div className="grid xl:grid-cols-12 gap-32 mt-32">
               <div className="xl:col-span-3" />
               <div className="xl:col-span-9 xl:col-start-4">
                 <StatusCard

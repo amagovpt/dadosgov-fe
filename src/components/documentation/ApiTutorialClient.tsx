@@ -79,7 +79,7 @@ export default function ApiTutorialClient() {
     <div className="flex flex-col bg-white min-h-screen font-sans">
       <main className="flex-grow pt-32 pb-64">
         <div className="container mx-auto px-4">
-          <div className="pt-[32px] mb-[64px]">
+          <div className="pt-32 mb-[64px]">
             <Breadcrumb
               items={[
                 { label: "Início", url: "/" },
@@ -97,7 +97,7 @@ export default function ApiTutorialClient() {
           </p>
         </div>
 
-        <div className="bg-[#F7F8FA] pt-[64px] pb-[64px]">
+        <div className="bg-[#F7F8FA] pt-64 pb-64">
           <div className="container mx-auto px-4">
             <div className="max-w-[800px]">
               {/* Autenticação */}
@@ -109,7 +109,7 @@ export default function ApiTutorialClient() {
                 </p>
                 <p className="text-m-regular leading-7 text-[#2b363c]">
                   Esta chave deve ser fornecida em cada chamada no cabeçalho HTTP{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
                     X-API-KEY
                   </code>
                   .
@@ -134,7 +134,7 @@ export default function ApiTutorialClient() {
                 <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
                   Alguns métodos são paginados e seguem sempre o mesmo padrão. A lista de objetos é
                   encapsulada num objeto{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
                     Page
                   </code>
                   .
@@ -142,15 +142,15 @@ export default function ApiTutorialClient() {
                 <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
                   Não é necessário calcular as páginas anterior e seguinte, pois os URLs estão
                   disponíveis na resposta nos atributos{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
                     previous_page
                   </code>{" "}
                   e{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
                     next_page
                   </code>
                   . Estes serão definidos como{" "}
-                  <code className="bg-[#e1e4ea] rounded px-[6px] py-[2px] text-s-regular font-mono">
+                  <code className="bg-[#e1e4ea] rounded px-[6px] py-2 text-s-regular font-mono">
                     null
                   </code>{" "}
                   se não existir página anterior e/ou seguinte.

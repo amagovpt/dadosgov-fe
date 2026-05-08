@@ -83,7 +83,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
         <Tab active>
           <TabHeader>Organização</TabHeader>
           <TabBody>
-            <div className="mt-[48px]">
+            <div className="mt-48">
               <div className="flex justify-end mb-[24px]">
                 <Button
                   variant="neutral"
@@ -95,7 +95,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   Estatísticas agregadas
                 </Button>
               </div>
-              <div className="flex gap-[24px] mb-[24px]">
+              <div className="flex gap-24 mb-[24px]">
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.datasets ?? 0)}>
                     <p className="text-neutral-700 text-base">Conjuntos de dados</p>
@@ -112,7 +112,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   </CardFrame>
                 </div>
               </div>
-              <div className="flex gap-[24px]">
+              <div className="flex gap-24">
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.views ?? 0)}>
                     <p className="text-neutral-700 text-base">Visitas ao conjunto de dados</p>
@@ -141,7 +141,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
           <TabHeader>Conjuntos de dados</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              <div className="flex items-end gap-[16px] mb-[24px]">
+              <div className="flex items-end gap-16 mb-[24px]">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
@@ -196,7 +196,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
           <TabHeader>API</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              <div className="flex items-end gap-[16px] mb-[24px]">
+              <div className="flex items-end gap-16 mb-[24px]">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
@@ -242,7 +242,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
           <TabHeader>Reutilizações</TabHeader>
           <TabBody>
             <div className="mt-[24px]">
-              <div className="flex items-end gap-[16px] mb-[24px]">
+              <div className="flex items-end gap-16 mb-[24px]">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}

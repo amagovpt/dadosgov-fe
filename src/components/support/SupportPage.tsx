@@ -211,14 +211,14 @@ const SupportPage = () => {
         backgroundPosition="inherit"
         subtitle={
           <>
-            <label className="block text-[20px] font-bold text-white mt-[48px]">
+            <label className="block text-[20px] font-bold text-white mt-48">
               Antes de nos contactar, consulte o fórum e os nossos guias:
               <br />a sua questão poderá já estar respondida nesses pontos de suporte!
             </label>
 
             <div className="absolute w-full mb-64 bg-white text-neutral-900 shadow-lg dropdown"></div>
 
-            <div className="mt-16 flex flex-wrap gap-[32px]">
+            <div className="mt-16 flex flex-wrap gap-32">
               <a
                 href="#"
                 target="_blank"
