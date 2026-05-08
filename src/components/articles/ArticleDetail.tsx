@@ -92,22 +92,22 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
         {/* Title Section */}
         <div>
-          <p className="text-[20px] font-normal text-[#021C51] mt-64 mb-[8px]">
+          <p className="text-[20px] font-normal text-[#021C51] mt-64 mb-8">
             Publicado em {displayDate}
           </p>
-          <h1 className="text-[32px] font-normal text-[#021C51] mb-[16px] leading-[48px]">{post.name}</h1>
+          <h1 className="text-32 font-normal text-[#021C51] mb-16 leading-[48px]">{post.name}</h1>
           {post.headline && (
-            <p className="text-[16px] font-normal text-[#64718B] max-w-2xl mb-32">{post.headline}</p>
+            <p className="text-m-regular font-normal text-[#64718B] max-w-2xl mb-32">{post.headline}</p>
           )}
         </div>
       </div>
 
-      <div className="bg-[#F7F8FA] pt-[64px] pb-[38px]">
+      <div className="bg-[#F7F8FA] pt-64 pb-[38px]">
         <div className="container mx-auto">
-          <div className="text-[#2b363c] flex flex-col gap-[32px]">
+          <div className="text-[#2b363c] flex flex-col gap-32">
             <div className="max-w-[592px]">
                 {/* Content */}
-                <div className="text-[16px] leading-[28px]">
+                <div className="text-m-regular leading-7">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
@@ -118,7 +118,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
                 {/* Article Image */}
                 {post.image && (
-                  <div className="mt-[32px] rounded overflow-hidden bg-neutral-100">
+                  <div className="mt-32 rounded overflow-hidden bg-neutral-100">
                     <img
                       src={post.image}
                       alt={post.name}
@@ -129,7 +129,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
                 {/* Credits */}
                 {post.credit_to && (
-                  <p className="text-[14px] text-neutral-500 mt-[16px]">
+                  <p className="text-s-regular text-neutral-500 mt-16">
                     Créditos:{" "}
                     {post.credit_url ? (
                       <a
@@ -148,7 +148,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
                 {/* Tags */}
                 {post.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-8 pt-[32px]">
+                  <div className="flex flex-wrap gap-8 pt-32">
                     {post.tags.map((tag) => (
                       <span
                         key={tag}

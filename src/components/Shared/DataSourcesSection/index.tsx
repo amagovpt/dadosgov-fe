@@ -25,7 +25,7 @@ export default function DataSourcesSection({
         <InfoBlock.Root>
           <InfoBlock.Content className="grid grid-cols-1 xl:grid-sols-2 gap-64 ">
             <div className="w-full flex flex-col gap-32">
-              <InfoBlock.Header className="gap-[8px]">
+              <InfoBlock.Header className="gap-8">
                 <InfoBlock.Title
                   titleLevel="h2"
                   title={title}

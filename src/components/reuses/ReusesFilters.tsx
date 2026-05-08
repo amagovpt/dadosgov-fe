@@ -226,7 +226,7 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
   );
 
   return (
-    <div className="xl:col-span-5 xl:block">
+    <div className="col-span-4">
       <ToggleFilterSections
         sections={toggleSections}
         selectedValues={selectedToggleFilters}
@@ -234,7 +234,7 @@ export function ReusesFilters({ filterCounts = {} }: ReusesFiltersProps) {
         idPrefix="reuse-filter"
       />
 
-      <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-[32px]">
+      <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">
         Filtros avançados
       </h2>
 

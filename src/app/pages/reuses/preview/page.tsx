@@ -24,7 +24,7 @@ function ReusePreviewContent() {
           />
         </div>
 
-        <div className="flex justify-end items-center gap-[16px] ">
+        <div className="flex justify-end items-center gap-16 ">
           <Pill variant="warning">Rascunho</Pill>
           <Button
             variant="primary"

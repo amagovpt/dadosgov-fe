@@ -151,7 +151,7 @@ export default function SystemLogsClient() {
 
       <div className="admin-page__header">
         <h1 className="admin-page__title">Logs</h1>
-        <div className="flex items-center gap-[8px]">
+        <div className="flex items-center gap-8">
           <Button
             variant="primary"
             appearance="outline"
@@ -169,7 +169,7 @@ export default function SystemLogsClient() {
         </div>
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         Visualização do conteúdo dos ficheiros de log do servidor. Para ficheiros grandes, é
         apresentado apenas o final (até 1&nbsp;MB).
       </p>
@@ -188,7 +188,7 @@ export default function SystemLogsClient() {
         />
       ) : (
         <>
-          <div className="flex flex-wrap items-end gap-[16px] mb-[16px]">
+          <div className="flex flex-wrap items-end gap-16 mb-16">
             <div className="admin-search-wrapper">
               <InputSelect
                 id="log-file-select"
@@ -227,11 +227,11 @@ export default function SystemLogsClient() {
           </div>
 
           {content && (
-            <div className="flex flex-wrap items-center gap-x-[20px] gap-y-[8px] mb-[12px] px-[16px] py-[12px] rounded-[8px] border border-neutral-200 bg-accent-light text-sm text-brand-blue-secondary">
-              <span className="inline-flex items-center gap-[6px]">
+            <div className="flex flex-wrap items-center gap-x-[20px] gap-y-8 mb-12 px-16 py-12 rounded-8 border border-neutral-200 bg-accent-light text-sm text-brand-blue-secondary">
+              <span className="inline-flex items-center gap-6">
                 <Icon
                   name="agora-line-file"
-                  className="w-[16px] h-[16px] text-brand-blue-primary"
+                  className="w-16 h-16 text-brand-blue-primary"
                 />
                 <span className="text-neutral-700 font-medium">Ficheiro:</span>
                 <span className="font-semibold break-all">{content.name}</span>
@@ -240,10 +240,10 @@ export default function SystemLogsClient() {
                 className="hidden sm:block w-px h-[18px] bg-neutral-300"
                 aria-hidden="true"
               />
-              <span className="inline-flex items-center gap-[6px]">
+              <span className="inline-flex items-center gap-6">
                 <Icon
                   name="agora-line-document"
-                  className="w-[16px] h-[16px] text-brand-blue-primary"
+                  className="w-16 h-16 text-brand-blue-primary"
                 />
                 <span className="text-neutral-700 font-medium">Tamanho:</span>
                 <span className="font-semibold">{formatBytes(content.size)}</span>
@@ -252,10 +252,10 @@ export default function SystemLogsClient() {
                 className="hidden sm:block w-px h-[18px] bg-neutral-300"
                 aria-hidden="true"
               />
-              <span className="inline-flex items-center gap-[6px]">
+              <span className="inline-flex items-center gap-6">
                 <Icon
                   name="agora-line-clock"
-                  className="w-[16px] h-[16px] text-brand-blue-primary"
+                  className="w-16 h-16 text-brand-blue-primary"
                 />
                 <span className="text-neutral-700 font-medium">Modificado:</span>
                 <span className="font-semibold">{formatDateTime(content.modified)}</span>
@@ -272,7 +272,7 @@ export default function SystemLogsClient() {
           )}
 
           {error && (
-            <div className="mb-[12px]">
+            <div className="mb-12">
               <StatusCard variant="danger" showIcon description={error} />
             </div>
           )}
@@ -281,14 +281,14 @@ export default function SystemLogsClient() {
             ref={viewerRef}
             aria-label="Conteúdo do ficheiro de log"
             tabIndex={0}
-            className="block w-full min-h-[320px] max-h-[calc(100vh-360px)] overflow-auto py-[16px] rounded-[8px] border border-neutral-300 bg-brand-blue-secondary text-neutral-100 font-mono text-[12.5px] leading-[1.55] whitespace-pre"
+            className="block w-full min-h-[320px] max-h-[calc(100vh-360px)] overflow-auto py-16 rounded-8 border border-neutral-300 bg-brand-blue-secondary text-neutral-100 font-mono text-[12.5px] leading-[1.55] whitespace-pre"
           >
             {isLoadingContent && !content ? (
-              <span className="block px-[16px] italic text-neutral-400">
+              <span className="block px-16 italic text-neutral-400">
                 A carregar conteúdo...
               </span>
             ) : !content || lines.length === 0 ? (
-              <span className="block px-[16px] italic text-neutral-400">Ficheiro vazio.</span>
+              <span className="block px-16 italic text-neutral-400">Ficheiro vazio.</span>
             ) : (
               lines.map((line, idx) => {
                 const severity = lineSeverity(line);
@@ -301,7 +301,7 @@ export default function SystemLogsClient() {
                         ? "text-sky-300"
                         : "text-neutral-100";
                 return (
-                  <span key={idx} className="flex gap-[16px] px-[16px] hover:bg-white/5">
+                  <span key={idx} className="flex gap-16 px-16 hover:bg-white/5">
                     <span className="flex-shrink-0 w-[56px] text-right text-neutral-500 select-none">
                       {idx + 1}
                     </span>

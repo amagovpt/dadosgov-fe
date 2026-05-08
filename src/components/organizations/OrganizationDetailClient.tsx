@@ -406,7 +406,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 <div className="text-xs text-neutral-500 mt-8">
                   100% de conformidade média
                 </div>
-                <div className="flex justify-start items-center text-sm text-primary-600 mt-[24px]">
+                <div className="flex justify-start items-center text-sm text-primary-600 mt-24">
                   <Icon name="agora-line-info-mark" className="w-24 h-24 cursor-pointer mr-8 fill-primary-600" />
                   <a href="#" className="hover:underline font-medium">Saiba mais sobre este indicador</a>
                 </div>

@@ -87,7 +87,7 @@ function DeleteHarvesterPopupContent({
   onConfirm: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>Esta ação é irreversível. Tem a certeza que quer eliminar este harvester?</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
@@ -460,28 +460,28 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
       </div>
 
       {/* Metadata info */}
-      <div className="flex flex-col gap-8 text-sm text-neutral-800 mb-[24px]">
+      <div className="flex flex-col gap-8 text-sm text-neutral-800 mb-24">
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-info-mark" className="w-[16px] h-[16px]" />
+          <Icon name="agora-line-info-mark" className="w-16 h-16" />
           <span>
             <strong>Implementação:</strong> {source.backend}
           </span>
         </div>
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-globe" className="w-[16px] h-[16px]" />
+          <Icon name="agora-line-globe" className="w-16 h-16" />
           <span>
             <strong>URL:</strong>{" "}
             <code className="text-xs" title={source.url}>{source.url.length > 100 ? `${source.url.slice(0, 100)}...` : source.url}</code>
           </span>
         </div>
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-calendar" className="w-[16px] h-[16px]" />
+          <Icon name="agora-line-calendar" className="w-16 h-16" />
           <span>
             <strong>Planeamento:</strong> {source.schedule || "Não aplicável"}
           </span>
         </div>
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-check-circle" className="w-[16px] h-[16px]" />
+          <Icon name="agora-line-check-circle" className="w-16 h-16" />
           <span>
             <strong>Estado :</strong>{" "}
             <Pill variant={validationInfo.variant}>{validationInfo.label}</Pill>
@@ -491,7 +491,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
       {/* Validation pending banner */}
       {validationState === "pending" && (
-        <div className="bg-neutral-100 rounded p-[24px] flex flex-col gap-8 mb-[24px]" style={{ maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))" }}>
+        <div className="bg-neutral-100 rounded p-24 flex flex-col gap-8 mb-24" style={{ maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))" }}>
           {isAdmin ? (
             <>
               <p className="text-sm font-bold text-neutral-900">
@@ -586,16 +586,16 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                     <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
                     <TableHeaderCell>API</TableHeaderCell>
                     <TableHeaderCell>
-                      <Icon name="agora-line-check" className="w-[16px] h-[16px]" />
+                      <Icon name="agora-line-check" className="w-16 h-16" />
                     </TableHeaderCell>
                     <TableHeaderCell>
-                      <Icon name="agora-line-eye-off" className="w-[16px] h-[16px]" />
+                      <Icon name="agora-line-eye-off" className="w-16 h-16" />
                     </TableHeaderCell>
                     <TableHeaderCell>
-                      <img src="/Icons/box.svg" alt="Arquivados" className="w-[24px] h-[24px]" />
+                      <img src="/Icons/box.svg" alt="Arquivados" className="w-24 h-24" />
                     </TableHeaderCell>
                     <TableHeaderCell>
-                      <Icon name="agora-line-x" className="w-[16px] h-[16px]" />
+                      <Icon name="agora-line-x" className="w-16 h-16" />
                     </TableHeaderCell>
                   </TableRow>
                 </TableHeader>
@@ -767,9 +767,9 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                         {filters.map((filter, index) => (
                           <div
                             key={index}
-                            className={`mt-[8px] pb-[16px] mb-[8px] ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
+                            className={`mt-8 pb-16 mb-8 ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
                           >
-                            <div className="flex items-center gap-[8px]">
+                            <div className="flex items-center gap-8">
                               <InputSelect
                                 key={`filter-mode-select-${index}`}
                                 label="Modo"
@@ -804,7 +804,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                                 </DropdownSection>
                               </InputSelect>
                             </div>
-                            <div className="flex items-center gap-[8px] mt-[8px]">
+                            <div className="flex items-center gap-8 mt-8">
                               <div className="flex-1">
                                 <InputText
                                   key={`filter-value-${index}`}
@@ -846,7 +846,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                       </div>
                     )}
 
-                    <div className="flex gap-[48px]">
+                    <div className="flex gap-48">
                       <Switch
                         label="Ativado"
                         checked={isEnabled}
@@ -882,7 +882,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                     <p className="text-sm text-red-600 text-right">{saveError}</p>
                   )}
 
-                  <div className="admin-page__actions flex justify-end gap-[16px]">
+                  <div className="admin-page__actions flex justify-end gap-16">
                     <Button
                       appearance="outline"
                       variant="primary"
@@ -906,7 +906,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
                   {/* Preview results */}
                   {(isPreviewing || previewJob || previewError) && (
-                    <div className="mt-[24px] flex flex-col gap-[12px]">
+                    <div className="mt-24 flex flex-col gap-12">
                       <h2 className="admin-page__section-title">Resultado da pré-visualização</h2>
 
                       {isPreviewing && (
@@ -927,9 +927,9 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
                       {previewJob && (
                         <>
-                          <div className="flex flex-col gap-[6px] text-sm text-neutral-800">
-                            <p className="flex items-center gap-[8px]">
-                              <Icon name="agora-line-calendar" className="w-[16px] h-[16px]" />
+                          <div className="flex flex-col gap-6 text-sm text-neutral-800">
+                            <p className="flex items-center gap-8">
+                              <Icon name="agora-line-calendar" className="w-16 h-16" />
                               <span>
                                 <strong>Iniciado em:</strong>{" "}
                                 {previewJob.started
@@ -940,8 +940,8 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                                   : "—"}
                               </span>
                             </p>
-                            <p className="flex items-center gap-[8px]">
-                              <Icon name="agora-line-calendar" className="w-[16px] h-[16px]" />
+                            <p className="flex items-center gap-8">
+                              <Icon name="agora-line-calendar" className="w-16 h-16" />
                               <span>
                                 <strong>Terminado em:</strong>{" "}
                                 {previewJob.ended
@@ -952,7 +952,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                                   : "—"}
                               </span>
                             </p>
-                            <p className="flex items-center gap-[8px]">
+                            <p className="flex items-center gap-8">
                               <strong>Estado:</strong>
                               <Pill
                                 variant={
@@ -972,18 +972,18 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                                       : "Em processamento"}
                               </Pill>
                             </p>
-                            <p className="flex items-center gap-[12px]">
+                            <p className="flex items-center gap-12">
                               <strong>Elementos:</strong>
-                              <span className="flex items-center gap-[4px]">
-                                <Icon name="agora-line-check" className="w-[16px] h-[16px]" />
+                              <span className="flex items-center gap-4">
+                                <Icon name="agora-line-check" className="w-16 h-16" />
                                 {previewJob.items.filter((i) => i.status === "done").length}
                               </span>
-                              <span className="flex items-center gap-[4px]">
-                                <Icon name="agora-line-alert-triangle" className="w-[16px] h-[16px]" />
+                              <span className="flex items-center gap-4">
+                                <Icon name="agora-line-alert-triangle" className="w-16 h-16" />
                                 {previewJob.items.filter((i) => i.status === "failed").length}
                               </span>
-                              <span className="flex items-center gap-[4px]">
-                                <Icon name="agora-line-info-mark" className="w-[16px] h-[16px]" />
+                              <span className="flex items-center gap-4">
+                                <Icon name="agora-line-info-mark" className="w-16 h-16" />
                                 {previewJob.items.filter((i) => i.status === "skipped").length}
                               </span>
                               ({previewJob.items.length} no total)
@@ -991,7 +991,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                           </div>
 
                           {previewJob.errors.length > 0 && (
-                            <div className="flex flex-col gap-[8px]">
+                            <div className="flex flex-col gap-8">
                               <p className="text-sm font-semibold text-neutral-900">Erros</p>
                               {previewJob.errors.map((error, i) => (
                                 <StatusCard
@@ -1052,7 +1052,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
               <aside className="admin-page__auxiliar">
                 <div className="admin-page__auxiliar-inner">
                   <div className="admin-page__auxiliar-header">
-                    <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
+                    <Icon name="agora-line-question-mark" className="w-24 h-24" />
                     <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                   </div>
                   <AuxiliarList items={auxiliarItems} />

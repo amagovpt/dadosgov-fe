@@ -279,7 +279,7 @@ export default function ApiRegistrationClient({
                     Crie ou integre uma organização em dados.gov.pt
                     <Icon
                       name="agora-line-arrow-right-circle"
-                      className="w-[24px] h-[24px]"
+                      className="w-24 h-24"
                     />
                   </a>
                 </div>
@@ -376,7 +376,7 @@ export default function ApiRegistrationClient({
                 <h2 className="admin-page__section-title">Acesso</h2>
 
                 <div className="admin-page__fields-group">
-                  <div className="flex flex-col gap-[8px]">
+                  <div className="flex flex-col gap-8">
                     <span className="text-primary-900 text-base font-medium leading-7">
                       Tipo de acesso
                     </span>
@@ -463,7 +463,7 @@ export default function ApiRegistrationClient({
                 </InputSelect>
 
                 {datasetLinks.map((link, index) => (
-                  <div key={index} className="mt-[16px]">
+                  <div key={index} className="mt-16">
                     <div>
                       <InputText
                         label="Link para o conjunto de dados"
@@ -479,7 +479,7 @@ export default function ApiRegistrationClient({
                         errorFeedbackText={datasetLinkErrors[index]}
                       />
                       {link.url.trim() && (
-                        <div className="flex justify-end mt-[8px]">
+                        <div className="flex justify-end mt-8">
                           <Button
                             appearance="link"
                             variant="danger"
@@ -585,7 +585,7 @@ export default function ApiRegistrationClient({
               <div className="admin-page__auxiliar-header">
                 <Icon
                   name="agora-line-question-mark"
-                  className="w-[24px] h-[24px]"
+                  className="w-24 h-24"
                 />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>

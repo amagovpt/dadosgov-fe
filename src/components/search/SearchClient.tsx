@@ -180,19 +180,10 @@ export default function SearchClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(pageParam);
 
-  useEffect(() => {
-    if (tabParam && TYPES.some((t) => t.type === tabParam)) {
-      setActiveTab(tabParam);
-    }
-  }, [tabParam]);
-
-  useEffect(() => {
-    setCurrentPage(pageParam);
-  }, [pageParam]);
-
-  useEffect(() => {
-    setSearchInput(query);
-  }, [query]);
+  const activeTabValue = tabParam && TYPES.some((t) => t.type === tabParam) ? tabParam : activeTab;
+  if (activeTabValue !== activeTab) setActiveTab(activeTabValue);
+  if (pageParam !== currentPage) setCurrentPage(pageParam);
+  if (query !== searchInput) setSearchInput(query);
 
   useEffect(() => {
     if (!query) return;
@@ -397,7 +388,6 @@ export default function SearchClient() {
         <HeroGeneral
           title={titleMap[activeTab]}
           backgroundImageUrl="/Banner/hero-bg.png"
-          backgroundPosition="center right"
           breadcrumbItems={[
             { label: "Home", url: "/" },
             { label: "Pesquisa", url: "/pages/search" },
@@ -426,7 +416,7 @@ export default function SearchClient() {
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters">
             {/* Sidebar */}
             <div className="xl:col-span-4 xl:block p-32 pl-0">
-              <div className="mb-64 pr-32 max-w-[592px] flex flex-col gap-16 mt-[32px]">
+              <div className="mb-64 pr-32 max-w-[592px] flex flex-col gap-16 mt-32">
                 <h2 className="font-bold text-xl text-neutral-900 mb-16">Tipo</h2>
                 {TYPES.map((item) => {
                   const isActive = item.type === activeTab;

@@ -17,7 +17,7 @@ export default function DatastoryDetails({ breadcrumbItems, datastory }: Datasto
   return (
     <main className="flex flex-col">
       <Section className="bg-primary-900 flex items-center justify-center ">
-        <InfoBlock.Root className="py-[96px]">
+        <InfoBlock.Root className="py-96">
           <InfoBlock.Header>
             <Breadcrumb items={breadcrumbItems} darkMode />
             <InfoBlock.Title
@@ -60,7 +60,7 @@ export default function DatastoryDetails({ breadcrumbItems, datastory }: Datasto
 
       {datastory.sections.map((section, index) => (
         <Section
-          className={"flex flex-col items-center justify-center gap-[64px] bg-white"}
+          className={"flex flex-col items-center justify-center gap-64 bg-white"}
           key={index}
         >
           <InfoBlock.Root className={"pt-64 gap-64"}>
@@ -76,7 +76,7 @@ export default function DatastoryDetails({ breadcrumbItems, datastory }: Datasto
               />
             </InfoBlock.Header>
           </InfoBlock.Root>
-          <div className="w-full flex flex-col items-center justify-center gap-[128px] pt-[32px]  bg-primary-100">
+          <div className="w-full flex flex-col items-center justify-center gap-128 pt-32  bg-primary-100">
             <div className="container -mb-[54px]">
               <InfoBlock.IFrame
                 src={section.iframeSource}

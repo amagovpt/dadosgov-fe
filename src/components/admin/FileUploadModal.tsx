@@ -111,8 +111,8 @@ function ResourceEditPendingPopupContent({
   };
 
   return (
-    <div className="flex flex-col gap-[16px]" style={{ minHeight: "40vh" }}>
-      <div className="flex-1 flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16" style={{ minHeight: "40vh" }}>
+      <div className="flex-1 flex flex-col gap-16">
         <div className="flex items-end gap-2">
           <div className="flex-1 min-w-0">
             <InputText
@@ -164,11 +164,11 @@ function ResourceEditPendingPopupContent({
         )}
       </div>
 
-      <div className="flex justify-between pt-[8px]">
+      <div className="flex justify-between pt-8">
         <Button appearance="outline" variant="primary" onClick={hide}>
           Cancelar
         </Button>
-        <div className="flex gap-[8px]">
+        <div className="flex gap-8">
           {!isUrl && onReplaceFile && (
             <>
               <input ref={replaceFileInputRef} type="file" className="hidden" onChange={handleReplaceFile} />
@@ -379,7 +379,7 @@ export default function FileUploadModal({
   };
 
   return (
-    <div className="flex flex-col gap-[8px]">
+    <div className="flex flex-col gap-8">
       <span className="text-primary-900 text-base font-medium leading-7">Ficheiros</span>
 
       <Button

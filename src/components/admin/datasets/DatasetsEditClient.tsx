@@ -152,16 +152,16 @@ function TransferDatasetPopupContent({
   };
 
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>
-        <Icon name="agora-line-document" className="inline w-4 h-4 mr-[4px]" />
+        <Icon name="agora-line-document" className="inline w-4 h-4 mr-4" />
         <span className="text-primary-600">{datasetTitle}</span>
       </p>
       <p>
         <strong>Esta ação é irreversível.</strong>&nbsp; Vai deixar de gerir este conjunto de dados
       </p>
 
-      <div className="flex flex-col gap-[8px]">
+      <div className="flex flex-col gap-8">
         <label className="text-primary-900 text-base font-medium leading-7">
           Organização ou utilizador <span className="text-danger-600">*</span>
         </label>
@@ -186,7 +186,7 @@ function TransferDatasetPopupContent({
         )}
       </div>
 
-      <div className="admin-page__org-card flex flex-col items-center gap-[16px] bg-neutral-50 rounded-lg p-8 text-center">
+      <div className="admin-page__org-card flex flex-col items-center gap-16 bg-neutral-50 rounded-lg p-8 text-center">
         <h3 className="text-primary-900 text-lg font-bold leading-7">
           Não pertence a uma organização.
         </h3>
@@ -203,7 +203,7 @@ function TransferDatasetPopupContent({
         </Link>
       </div>
 
-      <div className="flex flex-col gap-[8px]">
+      <div className="flex flex-col gap-8">
         <label className="text-primary-900 text-base font-medium leading-7">Comentário</label>
         <InputTextArea
           placeholder="Mensagem opcional para o destinatário..."
@@ -246,7 +246,7 @@ function DeleteDatasetPopupContent({
   onConfirm: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="flex flex-col gap-16">
       <p>Essa ação é irreversível. Tem a certeza que quer eliminar este conjunto de dados?</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
@@ -292,24 +292,24 @@ function ResourceDetailPopupContent({
       : "Este recurso encontra-se nos nossos servidores";
 
   return (
-    <div className="flex flex-col gap-[16px]" style={{ minHeight: "60vh" }}>
+    <div className="flex flex-col gap-16" style={{ minHeight: "60vh" }}>
       {resource.description && <p className="text-neutral-700 text-sm">{resource.description}</p>}
       <div className="flex-1 overflow-y-auto">
         <table className="text-sm w-full">
           <tbody>
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">Tipo</td>
-              <td className="py-[4px]">{typeLabel}</td>
+              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Tipo</td>
+              <td className="py-4">{typeLabel}</td>
             </tr>
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
                 Localização
               </td>
-              <td className="py-[4px]">{location}</td>
+              <td className="py-4">{location}</td>
             </tr>
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">URL</td>
-              <td className="py-[4px] break-all">
+              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">URL</td>
+              <td className="py-4 break-all">
                 <a
                   href={resource.url}
                   target="_blank"
@@ -321,46 +321,46 @@ function ResourceDetailPopupContent({
               </td>
             </tr>
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
                 Formato
               </td>
-              <td className="py-[4px]">{resource.format || "-"}</td>
+              <td className="py-4">{resource.format || "-"}</td>
             </tr>
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
                 Mime Type
               </td>
-              <td className="py-[4px]">{resource.mime || "-"}</td>
+              <td className="py-4">{resource.mime || "-"}</td>
             </tr>
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
                 Tamanho
               </td>
-              <td className="py-[4px]">{formatSize(resource.filesize)}</td>
+              <td className="py-4">{formatSize(resource.filesize)}</td>
             </tr>
             {resource.checksum && (
               <tr>
-                <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+                <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
                   {resource.checksum.type}
                 </td>
-                <td className="py-[4px] break-all font-mono text-xs">{resource.checksum.value}</td>
+                <td className="py-4 break-all font-mono text-xs">{resource.checksum.value}</td>
               </tr>
             )}
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
                 Criado em
               </td>
-              <td className="py-[4px]">
+              <td className="py-4">
                 {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy HH:mm", {
                   locale: pt,
                 })}
               </td>
             </tr>
             <tr>
-              <td className="font-semibold pr-[16px] py-[4px] align-top whitespace-nowrap">
+              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
                 Modificado em
               </td>
-              <td className="py-[4px]">
+              <td className="py-4">
                 {format(
                   new Date(resource.last_modified || resource.created_at),
                   "d 'de' MMMM 'de' yyyy HH:mm",
@@ -371,11 +371,11 @@ function ResourceDetailPopupContent({
           </tbody>
         </table>
       </div>
-      <div className="flex justify-between pt-[8px]">
+      <div className="flex justify-between pt-8">
         <Button appearance="outline" variant="primary" onClick={onClose}>
           Cancelar
         </Button>
-        <div className="flex gap-[8px]">
+        <div className="flex gap-8">
           <Button
             variant="danger"
             hasIcon
@@ -470,10 +470,10 @@ function ResourceEditPopupContent({
   };
 
   return (
-    <div className="flex flex-col gap-[16px]" style={{ minHeight: "60vh" }}>
+    <div className="flex flex-col gap-16" style={{ minHeight: "60vh" }}>
       {error && <StatusCard variant="danger" description={error} />}
 
-      <div className="flex-1 overflow-y-auto flex flex-col gap-[16px]">
+      <div className="flex-1 overflow-y-auto flex flex-col gap-16">
         <InputText
           label="Título *"
           placeholder="Título do recurso"
@@ -515,7 +515,7 @@ function ResourceEditPopupContent({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setResourceUrl(e.target.value)}
         />
 
-        <div className="grid grid-cols-2 gap-[16px]">
+        <div className="grid grid-cols-2 gap-16">
           <InputText
             label="Tamanho"
             placeholder="Tamanho em bytes"
@@ -541,9 +541,9 @@ function ResourceEditPopupContent({
         />
 
         {resource.checksum && (
-          <div className="flex items-center gap-[8px]">
+          <div className="flex items-center gap-8">
             <span className="text-sm font-semibold">Soma de verificação</span>
-            <span className="bg-neutral-100 rounded px-[8px] py-[2px] text-xs font-mono">
+            <span className="bg-neutral-100 rounded px-8 py-2 text-xs font-mono">
               {resource.checksum.type}
             </span>
             <span className="text-xs font-mono break-all">{resource.checksum.value}</span>
@@ -551,11 +551,11 @@ function ResourceEditPopupContent({
         )}
       </div>
 
-      <div className="flex justify-between pt-[8px]">
+      <div className="flex justify-between pt-8">
         <Button appearance="outline" variant="primary" onClick={onCancel}>
           Cancelar
         </Button>
-        <div className="flex gap-[8px]">
+        <div className="flex gap-8">
           <input
             ref={replaceFileInputRef}
             type="file"
@@ -1328,19 +1328,19 @@ export default function DatasetsEditClient() {
           onClick={() => window.open(`/pages/datasets/${dataset.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
-            <Icon name="agora-line-eye" className="w-[16px] h-[16px]" />
+            <Icon name="agora-line-eye" className="w-16 h-16" />
             Ver página pública
           </span>
         </Button>
       </div>
 
       {apiError && (
-        <div className="my-[24px]">
+        <div className="my-24">
           <StatusCard variant="danger" showIcon description={apiError} />
         </div>
       )}
       {apiSuccess && (
-        <div className="my-[24px]">
+        <div className="my-24">
           <StatusCard variant="success" showIcon description={apiSuccess} />
         </div>
       )}
@@ -1514,7 +1514,7 @@ export default function DatasetsEditClient() {
                       defaultValue={loadedAcronym}
                       onChange={setAcronym}
                     />
-                    <div className="flex flex-col gap-[8px]">
+                    <div className="flex flex-col gap-8">
                       <span className="text-primary-900 text-base font-medium leading-7">
                         Descrição *
                       </span>
@@ -1751,7 +1751,7 @@ export default function DatasetsEditClient() {
                     </IsolatedSelect>
                   </div>
 
-                  <div className="admin-page__actions flex justify-end mt-[24px]">
+                  <div className="admin-page__actions flex justify-end mt-24">
                     <Button
                       variant="primary"
                       hasIcon
@@ -1870,7 +1870,7 @@ export default function DatasetsEditClient() {
               <aside className="admin-page__auxiliar">
                 <div className="admin-page__auxiliar-inner">
                   <div className="admin-page__auxiliar-header">
-                    <Icon name="agora-line-question-mark" className="w-[24px] h-[24px]" />
+                    <Icon name="agora-line-question-mark" className="w-24 h-24" />
                     <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                   </div>
                   <AuxiliarList
@@ -1889,8 +1889,8 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
           <TabBody>
-            <div className="mt-[24px]">
-              <div className="flex items-end gap-[16px] mb-[16px] [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
+            <div className="mt-24">
+              <div className="flex items-end gap-16 mb-16 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                 <DragAndDropUploader
                   key={uploaderKey}
                   label="Ficheiros"
@@ -1909,12 +1909,12 @@ export default function DatasetsEditClient() {
                   onChange={handleFileUpload}
                   onSecurityError={() => setFileUploadError(POISONED_FILE_WARNING)}
                 />
-                <Button appearance="outline" variant="primary" className="mb-[32px]">
+                <Button appearance="outline" variant="primary" className="mb-32">
                   Reordene os ficheiros
                 </Button>
               </div>
 
-              <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+              <h2 className="font-medium text-neutral-900 text-base mb-16">
                 {dataset.resources.length}{" "}
                 {dataset.resources.length === 1 ? "FICHEIRO" : "FICHEIROS"}
               </h2>
@@ -1980,7 +1980,7 @@ export default function DatasetsEditClient() {
                           )}
                         </TableCell>
                         <TableCell headerLabel="Ação">
-                          <div className="flex items-center gap-[8px]">
+                          <div className="flex items-center gap-8">
                             <button
                               className="text-primary-500 hover:text-primary-700"
                               title="Ver detalhes"
@@ -2018,7 +2018,7 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Discussões ({discussionsTotal ?? 0})</TabHeader>
           <TabBody>
-            <div className="mt-[24px]">
+            <div className="mt-24">
               {discussionsLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
               {discussionsLoaded && discussions.length === 0 && (
                 <CardNoResults
@@ -2033,16 +2033,16 @@ export default function DatasetsEditClient() {
               )}
               {discussionsLoaded && discussions.length > 0 && (
                 <div>
-                  <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+                  <h2 className="font-medium text-neutral-900 text-base mb-16">
                     {discussions.length} {discussions.length === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
                   </h2>
-                  <div className="space-y-[16px]">
+                  <div className="space-y-16">
                     {discussions.map((disc) => (
-                      <div key={disc.id} className="bg-white rounded-[8px] p-[32px]">
+                      <div key={disc.id} className="bg-white rounded-8 p-32">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h4 className="font-bold text-neutral-900 text-base">{disc.title}</h4>
-                            <p className="text-sm text-neutral-900 mt-[4px]">
+                            <p className="text-sm text-neutral-900 mt-4">
                               <span className="text-primary-600 font-medium">
                                 {disc.user.first_name} {disc.user.last_name}
                               </span>
@@ -2057,14 +2057,14 @@ export default function DatasetsEditClient() {
                           </Pill>
                         </div>
                         {disc.discussion.length > 0 && (
-                          <p className="text-neutral-900 text-sm mt-[16px]">
+                          <p className="text-neutral-900 text-sm mt-16">
                             {disc.discussion[0].content}
                           </p>
                         )}
                         {disc.discussion.length > 1 && (
-                          <div className="mt-[16px] space-y-[16px] border-t border-neutral-200 pt-[16px]">
+                          <div className="mt-16 space-y-16 border-t border-neutral-200 pt-16">
                             {disc.discussion.slice(1).map((msg, idx) => (
-                              <div key={idx} className="border-l-2 border-primary-600 pl-[24px]">
+                              <div key={idx} className="border-l-2 border-primary-600 pl-24">
                                 <p className="text-sm text-neutral-900">
                                   <span className="text-primary-600 font-medium">
                                     {msg.posted_by.first_name} {msg.posted_by.last_name}
@@ -2074,7 +2074,7 @@ export default function DatasetsEditClient() {
                                     locale: pt,
                                   })}
                                 </p>
-                                <p className="text-neutral-900 text-sm mt-[4px]">{msg.content}</p>
+                                <p className="text-neutral-900 text-sm mt-4">{msg.content}</p>
                               </div>
                             ))}
                           </div>
@@ -2092,7 +2092,7 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Atividades</TabHeader>
           <TabBody>
-            <div className="mt-[24px]">
+            <div className="mt-24">
               {activitiesLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
               {activitiesLoaded && activities.length === 0 && (
                 <CardNoResults
@@ -2107,14 +2107,14 @@ export default function DatasetsEditClient() {
               )}
               {activitiesLoaded && activities.length > 0 && (
                 <>
-                  <h2 className="font-medium text-neutral-900 text-base mb-[16px]">
+                  <h2 className="font-medium text-neutral-900 text-base mb-16">
                     {activities.length} ATIVIDADES
                   </h2>
-                  <div className="flex flex-col gap-[12px]">
+                  <div className="flex flex-col gap-12">
                     {activities.map((activity, index) => (
                       <div
                         key={index}
-                        className="flex items-start gap-[12px] p-[12px] bg-neutral-50 rounded-lg"
+                        className="flex items-start gap-12 p-12 bg-neutral-50 rounded-lg"
                       >
                         <Avatar
                           avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
@@ -2134,7 +2134,7 @@ export default function DatasetsEditClient() {
                             </a>{" "}
                             {translateActivityLabel(activity.label)}
                           </p>
-                          <p className="text-xs text-neutral-600 mt-[4px]">
+                          <p className="text-xs text-neutral-600 mt-4">
                             {new Date(activity.created_at).toLocaleDateString("pt-PT", {
                               day: "2-digit",
                               month: "2-digit",

@@ -92,7 +92,7 @@ export default async function Page({
             {/* Results Area */}
             <div className="col-span-12 ">
               <div className="flex justify-end mb-16">
-                <span className="text-[14px] text-neutral-500 font-medium tracking-tight">
+                <span className="text-s-regular text-neutral-500 font-medium tracking-tight">
                   {paginatedCourses.length} de {totalItems} resultados
                 </span>
               </div>

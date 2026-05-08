@@ -227,11 +227,11 @@ export default function SystemHarvestersClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         {isLoading ? "A carregar..." : `${totalItems} resultados`}
       </p>
 
-      <div className="flex items-end gap-[16px] mb-[24px]">
+      <div className="flex items-end gap-16 mb-24">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -268,7 +268,7 @@ export default function SystemHarvestersClient() {
       </div>
 
       {statusFilter === "accepted" && (
-        <div className="mb-[24px]">
+        <div className="mb-24">
           <StatusCard
             variant="informative"
             showIcon
