@@ -78,7 +78,7 @@ export default function DatasetsNewClient() {
 
       {currentStep === 1 && (
         <>
-          <div className="datasets-new-page__cards mb-[32px]" style={{ maxWidth: "50%" }}>
+          <div className="datasets-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
             <CardAction
               variant="neutral-100"
               titleText="Publique um conjunto de dados"

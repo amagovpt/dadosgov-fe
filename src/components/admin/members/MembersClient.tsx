@@ -160,7 +160,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
   }, []);
 
   return (
-    <div className="flex flex-col gap-[24px]">
+    <div className="flex flex-col gap-24">
       {hasPendingInvite && (
         <StatusCard
           variant="informative"
@@ -168,7 +168,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
           description="Este utilizador já foi convidado para esta organização. O convite encontra-se pendente de aceitação."
         />
       )}
-      <div className="flex flex-col gap-[4px]">
+      <div className="flex flex-col gap-4">
         <span className="text-primary-900 text-base font-medium leading-7">
           Utilizador <span className="text-danger-600">*</span>
         </span>
@@ -193,11 +193,11 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
         </IsolatedSelect>
       </div>
 
-      <div className="flex flex-col gap-[12px]">
+      <div className="flex flex-col gap-12">
         <span className="text-primary-900 text-base font-medium leading-7">
           Papel do membro <span className="text-danger-600">*</span>
         </span>
-        <div className="flex gap-[24px]">
+        <div className="flex gap-24">
           <RadioButton
             id={`role-admin-${openKey}`}
             name={`role-${openKey}`}
@@ -221,7 +221,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
         <p className="text-sm text-danger-600">{addError}</p>
       )}
 
-      <div className="flex gap-[16px]">
+      <div className="flex gap-16">
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
         </Button>
@@ -265,11 +265,11 @@ function RemoveMemberPopupContent({
   };
 
   return (
-    <div className="flex flex-col gap-[24px]">
+    <div className="flex flex-col gap-24">
       <p className="text-neutral-900">
         Tem a certeza que deseja eliminar este membro?
       </p>
-      <div className="flex gap-[16px]">
+      <div className="flex gap-16">
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
         </Button>
@@ -315,7 +315,7 @@ function EditRolePopupContent({
   };
 
   return (
-    <div className="flex flex-col gap-[24px]">
+    <div className="flex flex-col gap-24">
       <p className="text-neutral-900">
         Alterar o papel de{" "}
         <strong>
@@ -323,9 +323,9 @@ function EditRolePopupContent({
         </strong>
       </p>
 
-      <div className="flex flex-col gap-[12px]">
+      <div className="flex flex-col gap-12">
         <span className="text-primary-900 text-base font-medium leading-7">Papel do membro</span>
-        <div className="flex gap-[16px]">
+        <div className="flex gap-16">
           <RadioButton
             id="role-admin"
             name={`role-${openKey}`}
@@ -345,7 +345,7 @@ function EditRolePopupContent({
         </div>
       </div>
 
-      <div className="flex gap-[16px]">
+      <div className="flex gap-16">
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
         </Button>
@@ -392,7 +392,7 @@ function RefuseMembershipPopupContent({
   };
 
   return (
-    <div className="flex flex-col gap-[24px]">
+    <div className="flex flex-col gap-24">
       <p className="text-neutral-900">
         Recusar o pedido de adesão de{" "}
         <strong>
@@ -410,7 +410,7 @@ function RefuseMembershipPopupContent({
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setComment(e.target.value)}
       />
 
-      <div className="flex gap-[16px]">
+      <div className="flex gap-16">
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
         </Button>
@@ -576,8 +576,8 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       </div>
 
       {pendingRequests.length > 0 && (
-        <div className="mb-[32px]">
-          <h2 className="text-neutral-900 text-base font-semibold mb-[16px]">
+        <div className="mb-32">
+          <h2 className="text-neutral-900 text-base font-semibold mb-16">
             Pedidos de adesão pendentes ({pendingRequests.length})
           </h2>
           <Table>
@@ -593,17 +593,17 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
               {pendingRequests.map((request) => (
                 <TableRow key={request.id}>
                   <TableCell headerLabel="Utilizador">
-                    <div className="flex items-center gap-[8px]">
+                    <div className="flex items-center gap-8">
                       {request.user.avatar_thumbnail ? (
                         <img
                           src={request.user.avatar_thumbnail}
                           alt={`${request.user.first_name} ${request.user.last_name}`}
-                          className="w-[32px] h-[32px] rounded-full"
+                          className="w-32 h-32 rounded-full"
                         />
                       ) : (
                         <Icon
                           name="agora-line-user"
-                          className="w-[32px] h-[32px]"
+                          className="w-32 h-32"
                         />
                       )}
                       <a
@@ -621,7 +621,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                     {formatDate(request.created)}
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-[8px]">
+                    <div className="flex gap-8">
                       <Button
                         variant="primary"
                         appearance="link"
@@ -649,7 +649,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-[24px]">
+      <div className="flex items-center justify-between mb-24">
         <p className="text-neutral-700 text-sm font-semibold uppercase">
           {members.length} {members.length === 1 ? "membro" : "membros"}
         </p>
@@ -722,17 +722,17 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
           {paginatedMembers.map((member) => (
             <TableRow key={member.user.id}>
               <TableCell headerLabel="Membros">
-                <div className="flex items-center gap-[8px]">
+                <div className="flex items-center gap-8">
                   {member.user.avatar_thumbnail ? (
                     <img
                       src={member.user.avatar_thumbnail}
                       alt={`${member.user.first_name} ${member.user.last_name}`}
-                      className="w-[32px] h-[32px] rounded-full"
+                      className="w-32 h-32 rounded-full"
                     />
                   ) : (
                     <Icon
                       name="agora-line-user"
-                      className="w-[32px] h-[32px]"
+                      className="w-32 h-32"
                     />
                   )}
                   <div>
@@ -754,7 +754,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                 {formatDate(member.since)}
               </TableCell>
               <TableCell headerLabel="Ações">
-                <div className="flex gap-[8px]">
+                <div className="flex gap-8">
                   <button
                     onClick={() => {
                       const nextKey = editMemberOpenKey + 1;

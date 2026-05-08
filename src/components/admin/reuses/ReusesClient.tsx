@@ -140,11 +140,11 @@ export default function ReusesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-[16px]">
+      <p className="text-neutral-700 text-sm mb-16">
         {filteredReuses.length} resultados
       </p>
 
-      <div className="flex items-end gap-[16px] mb-[24px]">
+      <div className="flex items-end gap-16 mb-24">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -254,7 +254,7 @@ export default function ReusesClient() {
                     {reuse.datasets?.length ?? 0}
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-[8px]">
+                    <div className="flex gap-8">
                       <a href={`/pages/reuses/${reuse.slug}`}>
                         <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                       </a>
@@ -275,7 +275,7 @@ export default function ReusesClient() {
               className="datasets-page__empty"
               position="center"
               icon={
-                <img src="/Icons/bar_chart.svg" alt="" className="w-[40px] h-[40px]" />
+                <img src="/Icons/bar_chart.svg" alt="" className="w-40 h-40" />
               }
               title="Sem reutilizações"
               description="Não publicou reutilizações"

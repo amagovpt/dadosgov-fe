@@ -197,10 +197,10 @@ const SupportPage = () => {
       <HeroGeneral
         title={
           <>
-            <span className="text-[32px] text-white font-[500] mb-[10px]">
+            <span className="text-32 text-white font-[500] mb-[10px]">
               Bem-vindo à página de suporte da
             </span>
-            <span className="text-[32px] text-white font-[500]">portal dados.gov.pt</span>
+            <span className="text-32 text-white font-[500]">portal dados.gov.pt</span>
           </>
         }
         breadcrumbItems={[
@@ -211,14 +211,14 @@ const SupportPage = () => {
         backgroundPosition="inherit"
         subtitle={
           <>
-            <label className="block text-[20px] font-bold text-white mt-[48px]">
+            <label className="block text-[20px] font-bold text-white mt-48">
               Antes de nos contactar, consulte o fórum e os nossos guias:
               <br />a sua questão poderá já estar respondida nesses pontos de suporte!
             </label>
 
             <div className="absolute w-full mb-64 bg-white text-neutral-900 shadow-lg dropdown"></div>
 
-            <div className="mt-[16px] flex flex-wrap gap-[32px]">
+            <div className="mt-16 flex flex-wrap gap-32">
               <a
                 href="#"
                 target="_blank"
@@ -303,8 +303,8 @@ const SupportPage = () => {
           <div className="xl:col-span-8 xl:block max-w-ch">
             {/* FAQ Section */}
             <div id="faq" className="max-w-4xl mx-auto scroll-mt-[190px]">
-              <p className="text-sm text-neutral-700 mb-[32px]">Conteúdos atualizado a 23.2.2026</p>
-              <h2 className="text-xl-semibold mb-[32px] text-primary-900">Perguntas frequentes</h2>
+              <p className="text-sm text-neutral-700 mb-32">Conteúdos atualizado a 23.2.2026</p>
+              <h2 className="text-xl-semibold mb-32 text-primary-900">Perguntas frequentes</h2>
 
               <div className="space-y-48">
                 {FAQ_DATA.map((category, idx) => (
@@ -316,9 +316,9 @@ const SupportPage = () => {
                       .replace(/[\u0300-\u036f]/g, "")
                       .replace(/\s+/g, "-")
                       .replace(/[^\w-]/g, "")}
-                    className={`${category.category !== "Sobre dados específicos" ? "mt-[32px]" : ""} scroll-mt-[190px]`}
+                    className={`${category.category !== "Sobre dados específicos" ? "mt-32" : ""} scroll-mt-[190px]`}
                   >
-                    <h3 className="text-[20px] font-bold text-[#021C51] mb-[16px]">
+                    <h3 className="text-[20px] font-bold text-[#021C51] mb-16">
                       {category.category}
                     </h3>
                     <div>
@@ -328,7 +328,7 @@ const SupportPage = () => {
                           <Accordion
                             key={`${currentId}-${expandedId === currentId}`}
                             headingTitle={
-                              <span className="text-[#2B363C] font-bold mr-[16px]">
+                              <span className="text-[#2B363C] font-bold mr-16">
                                 {item.question}
                               </span>
                             }
@@ -341,9 +341,9 @@ const SupportPage = () => {
                               }
                             }}
                           >
-                            <div className="py-16 mr-[16px] text-neutral-900 leading-relaxed">
+                            <div className="py-16 mr-16 text-neutral-900 leading-relaxed">
                               {"richAnswer" in item && item.richAnswer === "publicar" ? (
-                                <div className="space-y-[16px]">
+                                <div className="space-y-16">
                                   <div>
                                     <p className="font-bold">Informação oficial sobre publicação</p>
                                     <p>Página &ldquo;Publicar Dados&rdquo; no portal português:</p>
@@ -412,7 +412,7 @@ const SupportPage = () => {
                                   </div>
                                 </div>
                               ) : "richAnswer" in item && item.richAnswer === "usar-dados" ? (
-                                <div className="space-y-[16px]">
+                                <div className="space-y-16">
                                   <div>
                                     <p className="font-bold">Pesquisa de dados aberta do portal</p>
                                     <p>
@@ -502,7 +502,7 @@ const SupportPage = () => {
                                   </div>
                                 </div>
                               ) : "richAnswer" in item && item.richAnswer === "apis" ? (
-                                <div className="space-y-[16px]">
+                                <div className="space-y-16">
                                   <div>
                                     <p className="font-bold">Documentação da API</p>
                                     <p>
@@ -560,7 +560,7 @@ const SupportPage = () => {
                                   </div>
                                 </div>
                               ) : "richAnswer" in item && item.richAnswer === "legais" ? (
-                                <div className="space-y-[16px]">
+                                <div className="space-y-16">
                                   <div>
                                     <p className="font-bold">Proteção de Dados Pessoais / RGPD</p>
                                     <p>
@@ -607,7 +607,7 @@ const SupportPage = () => {
                                 </div>
                               ) : "richAnswer" in item &&
                                 item.richAnswer === "problemas-tecnicos" ? (
-                                <div className="space-y-[16px]">
+                                <div className="space-y-16">
                                   <div>
                                     <p className="font-bold">
                                       Erros de login / publicação / upload / pesquisa / comentários
@@ -663,7 +663,7 @@ const SupportPage = () => {
                                   </div>
                                 </div>
                               ) : "richAnswer" in item && item.richAnswer === "pedidos-dados" ? (
-                                <div className="space-y-[16px]">
+                                <div className="space-y-16">
                                   <div>
                                     <p className="font-bold">Sugerir conjunto de dados</p>
                                     <p>Formulário de sugestão no portal</p>
@@ -754,7 +754,7 @@ const SupportPage = () => {
                                   </div>
                                 </div>
                               ) : "richAnswer" in item && item.richAnswer === "outros" ? (
-                                <div className="space-y-[16px]">
+                                <div className="space-y-16">
                                   <div>
                                     <p className="font-bold">Dar feedback ao portal</p>
                                     <p>Formulário de feedback</p>
@@ -773,7 +773,7 @@ const SupportPage = () => {
                                   </div>
                                 </div>
                               ) : "richAnswer" in item && item.richAnswer ? (
-                                <div className="space-y-[16px]">
+                                <div className="space-y-16">
                                   <div>
                                     <p className="font-bold">Estatísticas oficiais</p>
                                     <p>
@@ -943,7 +943,7 @@ const SupportPage = () => {
             <div className="sidebar-index pr-64 border-l border-neutral-700">
               <ul>
                 <li
-                  className="mb-[16px] cursor-pointer"
+                  className="mb-16 cursor-pointer"
                   onClick={() => setActiveItem("Nesta página")}
                 >
                   <a
@@ -964,7 +964,7 @@ const SupportPage = () => {
                   return (
                     <li
                       key={slug}
-                      className="mb-[8px] cursor-pointer"
+                      className="mb-8 cursor-pointer"
                       onClick={() => setActiveItem(category.category)}
                     >
                       <a
@@ -992,8 +992,8 @@ const SupportPage = () => {
         </div>
 
         <div id="ajuda" className="mt-80 pt-64 border-neutral-200 scroll-mt-[190px]">
-          <h2 className="text-[24px] font-bold text-[#021C51] mb-[24px]">Ajuda</h2>
-          <h3 className="text-[20px] font-[500] text-[#021C51] mb-[16px]">
+          <h2 className="text-24 font-bold text-[#021C51] mb-24">Ajuda</h2>
+          <h3 className="text-[20px] font-[500] text-[#021C51] mb-16">
             Não encontrou o que procurava?
           </h3>
 
@@ -1038,8 +1038,8 @@ const SupportPage = () => {
           </ToggleGroup>
 
           {selectedToggle && (
-            <div className="mt-[32px] max-w-2xl">
-              <h3 className="text-[20px] font-bold text-[#021C51] mb-[24px]">
+            <div className="mt-32 max-w-2xl">
+              <h3 className="text-[20px] font-bold text-[#021C51] mb-24">
                 {TOGGLE_TITLE_MAP[selectedToggle]}
               </h3>
 
@@ -1119,7 +1119,7 @@ const SupportPage = () => {
           )}
 
           {successMessage && (
-            <div className="mt-[32px] max-w-2xl">
+            <div className="mt-32 max-w-2xl">
               <StatusCard variant="success" description={successMessage} />
             </div>
           )}

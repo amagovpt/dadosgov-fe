@@ -426,7 +426,7 @@ export default function SearchClient() {
           <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters">
             {/* Sidebar */}
             <div className="xl:col-span-4 xl:block p-32 pl-0">
-              <div className="mb-64 pr-32 max-w-[592px] flex flex-col gap-16 mt-[32px]">
+              <div className="mb-64 pr-32 max-w-[592px] flex flex-col gap-16 mt-32">
                 <h2 className="font-bold text-xl text-neutral-900 mb-16">Tipo</h2>
                 {TYPES.map((item) => {
                   const isActive = item.type === activeTab;

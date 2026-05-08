@@ -47,7 +47,7 @@ export default function CardMetrics({
     return (
         <Link
             href={link}
-            className="card-general-listing rounded-[4px] overflow-hidden h-full flex flex-col"
+            className="card-general-listing rounded-4 overflow-hidden h-full flex flex-col"
         >
             <CardGeneral
                 variant="white"
@@ -81,7 +81,7 @@ export default function CardMetrics({
                                     hideLabel={true}
                                     hidePercentageValue={true}
                                 />
-                                <span className="text-[14px] text-neutral-900 mt-4 block">
+                                <span className="text-s-regular text-neutral-900 mt-4 block">
                                     {qualityScore}% Qualidade dos metadados
                                 </span>
                             </>)}

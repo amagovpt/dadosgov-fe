@@ -85,7 +85,7 @@ export default function OrganizationsClient({
         {/* Main Content */}
         <div className="container mx-auto bg-primary-50 md:gap-32 xl:gap-64">
           {/* Results count + Sort toggles */}
-          <div className="grid-filters grid gap-x-[32px] md:grid-cols-3 xl:grid-cols-12">
+          <div className="grid-filters grid gap-x-32 md:grid-cols-3 xl:grid-cols-12">
             <div className="flex flex-row items-end gap-24 py-16 pl-0 xl:col-span-5">
               <Button
                 appearance="outline"
@@ -130,7 +130,7 @@ export default function OrganizationsClient({
           <div className="divider-neutral-200 mb-24" />
 
           <div
-            className={`grid-filters grid gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
+            className={`grid-filters grid gap-x-32 ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
             {filtersOpen && (

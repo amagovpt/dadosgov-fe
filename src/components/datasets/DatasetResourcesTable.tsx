@@ -686,7 +686,7 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
       )}
 
       {documentationFiles.length > 0 && (
-        <div className="space-y-16 mt-[16px] mb-[16px]">
+        <div className="space-y-16 mt-16 mb-16">
           <h3 className="font-medium text-neutral-900 text-base">
             {documentationFiles.length} DOCUMENTAÇÃO
           </h3>

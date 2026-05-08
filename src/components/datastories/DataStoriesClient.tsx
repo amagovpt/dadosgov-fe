@@ -84,7 +84,7 @@ export default function DataStoriesClient({
         {/* Main Content */}
         <div className="container mx-auto bg-primary-50 md:gap-32 xl:gap-64">
           {/* Results count + Sort toggles */}
-          <div className="grid-filters grid gap-x-[32px] md:grid-cols-3 xl:grid-cols-12">
+          <div className="grid-filters grid gap-x-32 md:grid-cols-3 xl:grid-cols-12">
             <div className="flex flex-row items-end gap-24 py-16 pl-0 xl:col-span-5">
               <Button
                 appearance="outline"
@@ -111,7 +111,7 @@ export default function DataStoriesClient({
           <div className="divider-neutral-200 mb-24" />
 
           <div
-            className={`grid-filters grid gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
+            className={`grid-filters grid gap-x-32 ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
             {filtersOpen && (
@@ -156,7 +156,7 @@ export default function DataStoriesClient({
                             category={story.organizationName}
                             title={<div className="text-xl-bold underline">{story.title}</div>}
                             description={
-                              <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
+                              <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                                 {formatHtmlParagraphs(story.description)}
                               </p>
                             }

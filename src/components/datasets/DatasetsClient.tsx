@@ -56,7 +56,7 @@ export default function DatasetsClient({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDeleteDataset = (dataset: { id: string; title: string }) => {
     show(
-      <div className="flex flex-col gap-[16px]">
+      <div className="flex flex-col gap-16">
         <p>
           Essa ação é irreversível.{" "}
           <span className="text-red-600">Tem a certeza que quer eliminar este conjunto de dados?</span>
@@ -121,7 +121,7 @@ export default function DatasetsClient({
         {/* Main Content */}
         <div className="container mx-auto md:gap-32 xl:gap-64 bg-primary-50">
           {/* Results count + Sort toggles */}
-          <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-[32px]">
+          <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters gap-x-32">
             <div className="xl:col-span-5 flex flex-row items-end gap-24 pl-0 py-16">
               <Button
                 appearance="outline"
@@ -166,7 +166,7 @@ export default function DatasetsClient({
           <div className="divider-neutral-200 mb-24" />
 
           <div
-            className={`grid grid-filters gap-x-[32px] ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
+            className={`grid grid-filters gap-x-32 ${filtersOpen ? "md:grid-cols-3 xl:grid-cols-12" : ""}`}
           >
             {/* Sidebar */}
             {filtersOpen && (

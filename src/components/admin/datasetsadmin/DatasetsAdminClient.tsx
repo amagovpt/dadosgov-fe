@@ -944,7 +944,7 @@ export default function DatasetsAdminClient({
               </div>
 
               {(!user?.organizations || user.organizations.length === 0) && (
-                <div className="admin-page__org-card rounded-lg mt-[24px] flex flex-col items-center gap-[16px] bg-neutral-50 p-8 text-center">
+                <div className="admin-page__org-card rounded-lg mt-24 flex flex-col items-center gap-16 bg-neutral-50 p-8 text-center">
                   <h3 className="text-lg font-bold leading-7 text-primary-900">
                     Não pertence a uma organização.
                   </h3>
@@ -1508,7 +1508,7 @@ export default function DatasetsAdminClient({
                 return (
                   <Link
                     href={href}
-                    className="card-general-listing flex flex-col overflow-hidden rounded-[4px]"
+                    className="card-general-listing flex flex-col overflow-hidden rounded-4"
                   >
                     <CardGeneral
                       variant="neutral-100"
@@ -1551,7 +1551,7 @@ export default function DatasetsAdminClient({
                                 hideLabel={true}
                                 hidePercentageValue={true}
                               />
-                              <span className="mt-4 block text-[14px] text-neutral-900">
+                              <span className="mt-4 block text-s-regular text-neutral-900">
                                 {qualityScore}% Qualidade dos metadados
                               </span>
                               <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
@@ -1648,7 +1648,7 @@ export default function DatasetsAdminClient({
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="h-[24px] w-[24px]" />
+                <Icon name="agora-line-question-mark" className="h-24 w-24" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />

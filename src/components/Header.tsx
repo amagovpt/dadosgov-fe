@@ -606,10 +606,10 @@ export const Header = () => {
       )}
       {ecosystemPanelNode && ecosystemOpen && createPortal(
         <div className="ecosystem-custom-panel">
-          <div className="w-full px-[112px] py-[64px] flex flex-row">
+          <div className="w-full px-[112px] py-64 flex flex-row">
             <div className="w-[2px] bg-primary-600 self-stretch shrink-0" />
-            <div className="flex flex-col gap-[32px] pl-[32px] flex-1">
-              <div className="flex flex-row gap-[32px] items-start">
+            <div className="flex flex-col gap-32 pl-32 flex-1">
+              <div className="flex flex-row gap-32 items-start">
                 <div className="w-[347px] shrink-0">
                   <p className="font-medium text-primary-900" style={{ fontSize: "24px", lineHeight: "36px" }}>Ecossistema</p>
                   <p className="font-bold text-primary-900" style={{ fontSize: "24px", lineHeight: "36px" }}>ARTE</p>
@@ -618,12 +618,12 @@ export const Header = () => {
                   Agência para a Reforma Tecnológica do Estado, para a simplificação e digitalização da Administração Pública
                 </p>
               </div>
-              <div className="flex flex-row gap-[32px]">
-                <ul className="flex flex-col gap-[8px]">
+              <div className="flex flex-row gap-32">
+                <ul className="flex flex-col gap-8">
                   {ecosystemCol1.map((item) => (
                     <li key={item.href}>
-                      <a href={item.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-[8px] py-[8px] group">
-                        <div className="shrink-0 w-[32px] h-[32px] rounded-full flex items-center justify-center" style={{ backgroundColor: item.bgColor }}>
+                      <a href={item.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-8 py-8 group">
+                        <div className="shrink-0 w-32 h-32 rounded-full flex items-center justify-center" style={{ backgroundColor: item.bgColor }}>
                           <div className="relative w-[20px] h-[20px]">
                             <NextImage src={item.logo} alt={item.label} fill className="object-contain" />
                           </div>
@@ -633,11 +633,11 @@ export const Header = () => {
                     </li>
                   ))}
                 </ul>
-                <ul className="flex flex-col gap-[8px]">
+                <ul className="flex flex-col gap-8">
                   {ecosystemCol2.map((item) => (
                     <li key={item.href}>
-                      <a href={item.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-[8px] py-[8px] group">
-                        <div className="shrink-0 w-[32px] h-[32px] rounded-full flex items-center justify-center" style={{ backgroundColor: item.bgColor }}>
+                      <a href={item.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-8 py-8 group">
+                        <div className="shrink-0 w-32 h-32 rounded-full flex items-center justify-center" style={{ backgroundColor: item.bgColor }}>
                           <div className="relative w-[20px] h-[20px]">
                             <NextImage src={item.logo} alt={item.label} fill className="object-contain" />
                           </div>
@@ -649,7 +649,7 @@ export const Header = () => {
                 </ul>
               </div>
               <div className="h-[1px] bg-primary-600" />
-              <div className="flex flex-row gap-[32px]">
+              <div className="flex flex-row gap-32">
                 {artePortals.map((link) => (
                   <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="text-base text-primary-600 underline hover:text-primary-800">
                     {link.label}
