@@ -18,6 +18,8 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { formatMetricValue } from "@/utils/formatNumber";
 
@@ -86,6 +88,7 @@ function DescriptionWithReadMore({
         <div className="text-neutral-900 text-m-light  markdown-container">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw, rehypeSanitize]}
           >
             {text}
           </ReactMarkdown>
@@ -100,6 +103,7 @@ function DescriptionWithReadMore({
         <div className="text-neutral-900 text-m-light  markdown-container">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw, rehypeSanitize]}
           >
             {text}
           </ReactMarkdown>

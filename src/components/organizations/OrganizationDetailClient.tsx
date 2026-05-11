@@ -18,6 +18,10 @@ import { OrganizationTabs } from "./OrganizationTabs";
 import { useAuth } from "@/context/AuthContext";
 import { requestMembership, followEntity, unfollowEntity, isFollowing } from "@/services/api";
 import { formatMetricValue } from "@/utils/formatNumber";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 
 interface OrganizationDetailClientProps {
   organization: Organization;
@@ -239,9 +243,18 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
               style={{ top: 0, left: 0, right: 0 }}
               aria-hidden="true"
             >
-              <p className="max-w-[592px] text-m-light text-neutral-900">
-                {organization.description || "Esta organização não possui descrição."}
-              </p>
+              <div className="markdown-container max-w-[592px] text-m-light text-neutral-900">
+                {organization.description ? (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                  >
+                    {organization.description}
+                  </ReactMarkdown>
+                ) : (
+                  <p>Esta organização não possui descrição.</p>
+                )}
+              </div>
               <div className="mt-8">
                 <h3 className="text-xl mb-16 font-bold text-primary-900">
                   Observações preliminares
@@ -269,9 +282,18 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                   : undefined
               }
             >
-              <p className="max-w-[592px] text-m-light text-neutral-900">
-                {organization.description || "Esta organização não possui descrição."}
-              </p>
+              <div className="markdown-container max-w-[592px] text-m-light text-neutral-900">
+                {organization.description ? (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                  >
+                    {organization.description}
+                  </ReactMarkdown>
+                ) : (
+                  <p>Esta organização não possui descrição.</p>
+                )}
+              </div>
 
               {/* Static sections to mirror dataset page as requested (copy) */}
               <div className="mt-8">
