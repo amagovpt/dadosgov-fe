@@ -17,11 +17,14 @@ export default function DatasetsNewClient() {
   const { displayName } = useCurrentUser();
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
-  const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
+  const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(
+    searchParams.get("datasetId")
+  );
   const [sessionKey, setSessionKey] = useState(0);
 
-  const buildStepUrl = (step: number) => {
-    return `/pages/admin/datasets/new?step=${step}`;
+  const buildStepUrl = (step: number, id?: string | null) => {
+    const base = `/pages/admin/datasets/new?step=${step}`;
+    return id ? `${base}&datasetId=${id}` : base;
   };
   const totalSegments = 12;
   const displayStep = currentStep;
@@ -152,11 +155,11 @@ export default function DatasetsNewClient() {
           key={sessionKey}
           currentStep={currentStep}
           datasetId={createdDatasetId}
-          onNextStep={() => router.push(buildStepUrl(currentStep + 1))}
-          onPreviousStep={() => router.push(buildStepUrl(currentStep - 1))}
+          onNextStep={() => router.push(buildStepUrl(currentStep + 1, createdDatasetId))}
+          onPreviousStep={() => router.push(buildStepUrl(currentStep - 1, createdDatasetId))}
           onDatasetCreated={(id) => {
             setCreatedDatasetId(id);
-            router.push(buildStepUrl(currentStep + 1));
+            router.push(buildStepUrl(currentStep + 1, id));
           }}
           onComplete={() => router.push("/pages/admin/me/datasets")}
         />

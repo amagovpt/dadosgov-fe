@@ -3935,3 +3935,22 @@ export async function fetchSystemLogContent(
     return null;
   }
 }
+
+/**
+ * Check if a URL is publicly reachable. Returns true if reachable, false if not.
+ * If the backend check itself fails (network error, timeout), defaults to true
+ * so that a backend outage doesn't block form submissions.
+ */
+export async function checkUrlReachable(url: string): Promise<boolean> {
+  try {
+    const res = await authFetch(`/site/check_url/?url=${encodeURIComponent(url)}`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!res.ok) return true;
+    const data = await res.json();
+    return data.reachable !== false;
+  } catch {
+    return true;
+  }
+}
