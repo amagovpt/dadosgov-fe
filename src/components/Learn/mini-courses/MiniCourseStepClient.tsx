@@ -130,7 +130,7 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
                       <div className={twJoin("flex gap-16", getImagePositionClass(currentStep.imagePosition ?? "left"))}>
                         <div className="flex-1 flex flex-col gap-8">
                           {currentStep.title && (
-                            <h2 className={twMerge("text-l-bold text-neutral-900", isLastStep ? "!text-xl-bold text-brand-blue-secondary whitespace-break-spaces" : "")}>
+                            <h2 className={twMerge("text-neutral-900", isLastStep ? "!text-xl-bold text-brand-blue-secondary whitespace-break-spaces" : "text-l-bold")}>
                               {currentStep.title.replace('! ', `! \n`)}
                             </h2>
                           )}
