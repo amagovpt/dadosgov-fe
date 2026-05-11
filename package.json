@@ -12,6 +12,9 @@
     "test:e2e": "playwright test --project=frontend-public --reporter=html",
     "test:e2e:backoffice": "playwright test --project=backoffice --reporter=html",
     "test:e2e:all": "playwright test --project=frontend-public --project=backoffice --reporter=html",
+    "test:e2e:vulns": "playwright test --project=frontend-vulnerabilities --reporter=html",
+    "test:e2e:vulns:headed": "playwright test --project=frontend-vulnerabilities --headed",
+    "test:e2e:vulns:ui": "playwright test --project=frontend-vulnerabilities --ui",
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
