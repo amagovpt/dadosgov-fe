@@ -90,12 +90,9 @@ const DATE_RANGE_MAP: Record<string, () => string> = {
 function detectAtualizacaoFromParams(params: URLSearchParams): string {
   const since = params.get("modified_since");
   if (!since) return "all";
-  const now = new Date();
-  const sinceDate = new Date(since);
-  const diffDays = Math.round((now.getTime() - sinceDate.getTime()) / 86400000);
-  if (diffDays <= 31) return "30_days";
-  if (diffDays <= 366) return "12_months";
-  if (diffDays <= 1096) return "3_years";
+  if (since === DATE_RANGE_MAP["30_days"]()) return "30_days";
+  if (since === DATE_RANGE_MAP["12_months"]()) return "12_months";
+  if (since === DATE_RANGE_MAP["3_years"]()) return "3_years";
   return "all";
 }
 
