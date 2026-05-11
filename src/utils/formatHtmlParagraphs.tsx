@@ -1,4 +1,4 @@
-import { Typograph } from "@/components/Generics/Typograph";
+import { Typograph } from "@/components/Shared/Generics/Typograph";
 import * as cheerio from "cheerio";
 import type { AnyNode } from "domhandler";
 import React from "react";
