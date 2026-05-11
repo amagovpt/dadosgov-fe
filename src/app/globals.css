@@ -2257,5 +2257,6 @@ div.max-w-ch,
 }
 
 .markdown-container p {
+  margin-top: 10px !important;
   margin-bottom: 1em !important;
 }

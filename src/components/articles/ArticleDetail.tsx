@@ -106,19 +106,9 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
         <div className="container mx-auto">
           <div className="text-[#2b363c] flex flex-col gap-32">
             <div className="max-w-[592px]">
-                {/* Content */}
-                <div className="text-m-regular leading-7">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
-                  >
-                    {post.content}
-                  </ReactMarkdown>
-                </div>
-
                 {/* Article Image */}
                 {post.image && (
-                  <div className="mt-32 rounded overflow-hidden bg-neutral-100">
+                  <div className="mb-32 rounded overflow-hidden bg-neutral-100">
                     <img
                       src={post.image}
                       alt={post.name}
@@ -126,6 +116,16 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
                     />
                   </div>
                 )}
+
+                {/* Content */}
+                <div className="markdown-container text-m-regular leading-7">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw]}
+                  >
+                    {post.content.replace(/\n&nbsp;\s*\n/g, "\n\n")}
+                  </ReactMarkdown>
+                </div>
 
                 {/* Credits */}
                 {post.credit_to && (
