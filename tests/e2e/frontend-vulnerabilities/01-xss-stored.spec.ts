@@ -113,16 +113,31 @@ test.describe("Stored XSS — public detail pages (VULN-2075 / VULN-2076)", () =
     // strips the handler attribute at render time), the rendered HTML should
     // also not contain attack-shaped substrings. A regression that
     // re-enables raw HTML rendering would surface here.
+    //
+    // Scope of the check: only the rendered DOM that the user sees. We strip
+    // out `<script>` and `<noscript>` blocks before scanning because:
+    //   • Next.js App Router unconditionally injects framework `<script>`
+    //     blocks (streaming runtime `$RC(...)`, `__next_f.push(...)`) — those
+    //     are always present and would create a permanent `<script>` false
+    //     positive.
+    //   • The React Server Components hydration payload encodes the raw
+    //     Client Component props (including `description`) as JSON-escaped
+    //     strings inside a `<script>` block. Those characters are inert data
+    //     (never parsed as HTML), so matching them there is also a false
+    //     positive. What matters is the DOM the browser actually renders.
     const { xss_organization } = loadFixtures();
     await page.goto(`/pages/organizations/${xss_organization.slug}`);
     await page.waitForLoadState("networkidle");
 
-    const html = await page.content();
+    const rawHtml = await page.content();
+    const html = rawHtml
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, "")
+      .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript\s*>/gi, "");
     const forbidden = ["onerror=", "onload=", "javascript:", "<script>", "srcdoc="];
     const hits = forbidden.filter((needle) => html.toLowerCase().includes(needle));
     expect(
       hits,
-      `dangerous markup leaked into DOM: ${hits.join(", ")}. ` +
+      `dangerous markup leaked into rendered DOM: ${hits.join(", ")}. ` +
         "If this fails, check that the description renderer pipes through rehype-sanitize.",
     ).toEqual([]);
   });

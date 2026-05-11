@@ -39,6 +39,7 @@ import {
 } from "@/types/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import {
   fetchOrgDatasets,
@@ -49,6 +50,7 @@ import {
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { formatMetricValue } from "@/utils/formatNumber";
+import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 
 interface OrganizationTabsProps {
   organization: Organization;
@@ -250,7 +252,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                         <div className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline">
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeSanitize]}
+                            rehypePlugins={[rehypeRaw, rehypeSanitize]}
                           >
                             {organization.description}
                           </ReactMarkdown>
@@ -317,11 +319,11 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             alt: dataset.organization?.name || "Organização sem logo",
                           }}
                           category={dataset.organization?.name}
-                          title={dataset.title}
+                          title={sanitizeUserMarkdown(dataset.title)}
                           description={
                             <div className="flex flex-col gap-12">
                               <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
-                                {dataset.description}
+                                {sanitizeUserMarkdown(dataset.description)}
                               </p>
                               <div className="text-xs mt-16 flex flex-wrap items-center gap-32 text-[#034AD8]">
                                 <div className="flex items-center gap-8" title="Visualizações">
@@ -355,7 +357,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                           }
                           mainLink={
                             <Link href={`/pages/datasets/${dataset.slug}`}>
-                              <span className="underline">{dataset.title}</span>
+                              <span className="underline">{sanitizeUserMarkdown(dataset.title)}</span>
                             </Link>
                           }
                           blockedLink={true}
@@ -406,7 +408,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                         variant="transparent"
                         image={{
                           src: reuse.image_thumbnail || reuse.image || "/laptop.png",
-                          alt: reuse.title,
+                          alt: sanitizeUserMarkdown(reuse.title),
                         }}
                         category={
                           reuse.organization?.name ||
@@ -414,11 +416,15 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             ? `${reuse.owner.first_name} ${reuse.owner.last_name}`.trim()
                             : "Reutilização")
                         }
-                        title={<div className="text-xl-bold underline">{reuse.title}</div>}
+                        title={
+                          <div className="text-xl-bold underline">
+                            {sanitizeUserMarkdown(reuse.title)}
+                          </div>
+                        }
                         description={
                           reuse.description ? (
                             <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
-                              {reuse.description}
+                              {sanitizeUserMarkdown(reuse.description)}
                             </p>
                           ) : undefined
                         }
@@ -457,7 +463,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                         ]}
                         mainLink={
                           <Link href={`/pages/reuses/${reuse.slug}`}>
-                            <span className="underline">{reuse.title}</span>
+                            <span className="underline">{sanitizeUserMarkdown(reuse.title)}</span>
                           </Link>
                         }
                         blockedLink={true}
