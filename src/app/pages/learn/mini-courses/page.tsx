@@ -1,17 +1,12 @@
 export const dynamic = "force-dynamic";
-
-import { Pagination } from '@/components/Pagination';
 import HeroCourses from '@/components/Learn/Hero';
-import CardIllustrative from '@/components/Primitives/Cards/CardIllustrative';
-import Link from 'next/link';
-import IconAgora from '@/components/Primitives/IconAgora';
 import apolloClient from '@/services/apollo-client';
 import { flattenData } from '@/utils/flattenObject';
 import { getMiniCoursesPages } from '@/services/queries/courses/minicourses';
 import { PageMiniCourses } from '@/services/types/courses';
-import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
 import { getAssets } from '@/utils/getAssets';
 import MiniCoursesSearchInput from '@/components/Learn/MiniCoursesSearchInput';
+import MiniCoursesResult from '@/components/Learn/mini-courses/MiniCoursesResult';
 
 export default async function Page({
   searchParams,
@@ -38,6 +33,7 @@ export default async function Page({
   const { hero, minicursos } = flattenData(data?.findPageMinicursosSingleton?.data || {}) as unknown as PageMiniCourses;
 
 
+  const PAGE_SIZE = 4;
   const searchQuery = q?.trim().toLowerCase() ?? "";
   const filteredCourses = searchQuery
     ? minicursos.filter(
@@ -47,11 +43,6 @@ export default async function Page({
     )
     : minicursos;
 
-  const PAGE_SIZE = 4;
-
-  const totalItems = filteredCourses.length;
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const paginatedCourses = filteredCourses.slice(start, start + PAGE_SIZE);
 
   return (
     <main className=" flex flex-col gap-32">
@@ -90,41 +81,8 @@ export default async function Page({
             </div>
 
             {/* Results Area */}
-            <div className="col-span-12 ">
-              <div className="flex justify-end mb-16">
-                <span className="text-s-regular text-neutral-500 font-medium tracking-tight">
-                  {paginatedCourses.length} de {totalItems} resultados
-                </span>
-              </div>
-              {paginatedCourses.length > 0 && (
-                <div className="flex flex-col gap-24 mini-courses-cards">
-                  {paginatedCourses.map((course) => (
-                    <CardIllustrative
-                      key={course.id}
-                      variant="primary-100"
-                      isCardHorizontal
-                      title={course.title}
-                      description={formatHtmlParagraphs(course.description)}
-                      mainLink={
-                        <Link href={`/pages/learn/mini-courses/${course.id}`} className="flex items-center h-full">
-                          <IconAgora name="agora-line-arrow-right-circle" className="w-24 h-24" />
-                        </Link>
-                      }
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Pagination */}
-              <div className="mt-64 flex justify-center pb-64 mini-courses-pagination">
-                <Pagination
-                  currentPage={currentPage}
-                  totalItems={totalItems}
-                  pageSize={PAGE_SIZE}
-                  baseUrl="/pages/learn/mini-courses"
-                />
-              </div>
-            </div>
+            <MiniCoursesResult filteredCourses={filteredCourses} currentPage={currentPage} PAGE_SIZE={PAGE_SIZE} />
+            
           </div>
         </div>
       </div>
