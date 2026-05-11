@@ -201,7 +201,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
                       }}
                       subtitleText={
                         (
-                          <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                          <span className="text-m-regular text-neutral-900">
                             {formatPostDate(post)}
                           </span>
                         ) as unknown as string
