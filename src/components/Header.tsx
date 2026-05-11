@@ -238,7 +238,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-sticky" data-submenu={submenu ?? undefined} data-auth-page={isAuthPage || undefined} data-no-user={!user || undefined} onClickCapture={handleHeaderClickCapture}>
+      <header className="sticky top-0 z-sticky [&_.custom-search-layout]:!m-0 [&_.custom-search-layout]:!mx-auto " data-submenu={submenu ?? undefined} data-auth-page={isAuthPage || undefined} data-no-user={!user || undefined} onClickCapture={handleHeaderClickCapture}>
         <AgoraHeader ref={headerRef} maxNavigationItems={6}>
           <Brand>
             <Logo>

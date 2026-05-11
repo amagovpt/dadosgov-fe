@@ -148,7 +148,7 @@ export default function SearchDropdown({
   };
 
   return (
-    <div ref={wrapperRef} className="relative" style={{ zIndex: 40 }}>
+    <div ref={wrapperRef} className="relative w-full py-64">
       <InputSearchBar
         label={label}
         placeholder={placeholder}
