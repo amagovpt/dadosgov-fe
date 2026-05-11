@@ -87,8 +87,8 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
           sections {
             ${locale} {
               section {
-                description
                 title
+                description
                 iframeSource
               }
             }
@@ -129,9 +129,6 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
   if (!datastory) {
     return {} as Datastory;
   }
-
-  console.log("----------------- datastory", datastory);
-  console.log("----------------- flattenData(datastory)", flattenData(datastory));
 
   return flattenData(datastory) as Datastory;
 }
