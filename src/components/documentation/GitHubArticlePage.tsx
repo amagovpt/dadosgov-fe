@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
 import { githubPagesConfig } from "@/config/site";
 
+
 interface BreadcrumbItem {
   label: string;
   url: string;
@@ -88,7 +89,7 @@ const markdownComponents = {
     );
   },
   img: ({ src, alt }: any) => (
-    <img src={src} alt={alt ?? ""} className="rounded mb-16 h-auto max-w-full" />
+    <img src={src} alt={alt ?? ""} className="max-w-full h-auto mb-[16px] rounded" />
   ),
   strong: ({ children }: any) => <strong>{children}</strong>,
   em: ({ children }: any) => <em>{children}</em>,
@@ -115,16 +116,16 @@ export function GitHubArticlePage({
       <main className="flex-grow pt-32">
         <div className="container mx-auto px-4">
           {/* Breadcrumbs */}
-          <div className="mb-64 pt-32">
+          <div className="pt-[32px] mb-[64px]">
             <Breadcrumb items={breadcrumbItems} />
           </div>
         </div>
 
-        <div className="bg-[#F7F8FA] px-112 pb-[38px] pt-64">
+        <div className="bg-[#F7F8FA] pt-[64px] pb-[38px] pl-[112px] pr-[112px]">
           <div className="container mx-auto px-4">
             {/* Main Content */}
             <div>
-              <div className="flex flex-col gap-32 text-[#2b363c]">
+              <div className="text-[#2b363c] flex flex-col gap-[32px]">
                 {cleanContent ? (
                   <div className="max-w-[592px]">
                     <ReactMarkdown
@@ -142,7 +143,7 @@ export function GitHubArticlePage({
                 )}
 
                 <div className="max-w-[592px] pt-[32px]">
-                  <h1 className="mb-16 max-w-[800px] text-[32px] font-medium leading-tight text-[#021C51]">
+                  <h1 className="text-[32px] font-medium text-[#021C51] mb-16 leading-tight max-w-[800px]">
                     Ações
                   </h1>
                   <Link
