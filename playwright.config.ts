@@ -50,6 +50,25 @@ export default defineConfig({
       use: { browserName: "chromium" },
     },
     {
+      // Vulnerability regression suite. Runs against the dev stack
+      // (port 3000) and depends on `auth-setup` so the authenticated specs
+      // (04-xss-backend, 05-rate-limit) inherit the admin session cookies
+      // — udata's /api/1 blueprint is `csrf.exempt`, so a session cookie
+      // is all that's needed for POST/DELETE.
+      // Run alone via:
+      //   npx playwright test --project=frontend-vulnerabilities
+      //   npm run test:e2e:vulns
+      // Anonymous specs (01-xss-stored on the seeded fixtures, 02-headers,
+      // 03-ssrf) ignore the storage state and still work.
+      name: "frontend-vulnerabilities",
+      testDir: "./tests/e2e/frontend-vulnerabilities",
+      dependencies: ["auth-setup"],
+      use: {
+        browserName: "chromium",
+        storageState: "tests/.auth/admin.json",
+      },
+    },
+    {
       name: "auth-setup",
       testMatch: /auth\.setup\.ts/,
     },
