@@ -51,7 +51,7 @@ import {
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import FileUploadModal, { PendingResourceMeta } from "@/components/admin/FileUploadModal";
+import FileUploadModal, { PendingResourceMeta, PendingResourceTable } from "@/components/admin/FileUploadModal";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
@@ -88,40 +88,12 @@ export default function DatasetsAdminClient({
   onDatasetCreated,
   onComplete,
 }: DatasetsAdminClientProps) {
-  const isValidHttpsUrl = (value: string): boolean => {
-    try {
-      const parsed = new URL(value);
-      if (parsed.protocol !== "https:") return false;
-      if (!parsed.hostname) return false;
-
-      const hostname = parsed.hostname.toLowerCase();
-      const isIpv4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(hostname);
-
-      const labels = hostname.split(".");
-      const hasValidDomainShape = labels.length >= 2;
-      const hasValidLabels = labels.every(
-        (label) =>
-          label.length > 0 &&
-          !label.startsWith("-") &&
-          !label.endsWith("-") &&
-          /^[a-z0-9-]+$/i.test(label)
-      );
-      const tld = labels[labels.length - 1] || "";
-      const hasValidTld = /^([a-z]{2,}|xn--[a-z0-9-]{2,})$/i.test(tld);
-
-      return isIpv4 || (hasValidDomainShape && hasValidLabels && hasValidTld);
-    } catch {
-      return false;
-    }
-  };
-
   const router = useRouter();
   const { user } = useAuth();
 
   // Form state
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [showFileError, setShowFileError] = useState(false);
-  const [showInvalidUrlError, setShowInvalidUrlError] = useState(false);
   const [datasetTitle, setDatasetTitle] = useState("");
   const [datasetAcronym, setDatasetAcronym] = useState("");
   const [datasetDescription, setDatasetDescription] = useState("");
@@ -738,71 +710,88 @@ export default function DatasetsAdminClient({
     const trimmedUrls = resourceUrls.map((u) => u.trim()).filter(Boolean);
     const hasFiles = uploadedFiles.length > 0;
     const hasUrls = trimmedUrls.length > 0;
-    const invalidUrl = trimmedUrls.find((u) => !isValidHttpsUrl(u));
 
     if (!hasFiles && !hasUrls) {
       setShowFileError(true);
-      setShowInvalidUrlError(false);
       return;
     }
 
-    if (invalidUrl) {
-      setShowInvalidUrlError(true);
-      setShowFileError(false);
-      return;
-    }
-    if (!createdDataset) {
-      setApiError(
-        "Erro: o conjunto de dados não foi criado. Volte ao passo anterior e preencha o formulário."
-      );
-      return;
-    }
-
+    setShowFileError(false);
     setApiError(null);
     setIsSubmitting(true);
+
+    let dataset = createdDataset;
+    if (!dataset) {
+      if (!datasetId) {
+        setApiError(
+          "Erro: o conjunto de dados não foi criado. Volte ao passo anterior e preencha o formulário."
+        );
+        setIsSubmitting(false);
+        return;
+      }
+      try {
+        dataset = await fetchDataset(datasetId);
+        setCreatedDataset(dataset);
+      } catch {
+        setApiError("Erro ao carregar o conjunto de dados. Tente novamente.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
     try {
       if (hasFiles) {
         for (const file of uploadedFiles) {
           const meta = resourceMetadata[`file-${file.name}`];
-          const resource = await uploadResource(createdDataset.id, file);
+          const resource = await uploadResource(dataset.id, file);
           if (meta) {
-            await updateResource(createdDataset.id, resource.id, {
+            await updateResource(dataset.id, resource.id, {
               title: meta.title || file.name,
               type: meta.resourceType || "main",
               description: meta.description || undefined,
+              format: meta.format || undefined,
+              mime: meta.mime || undefined,
+              filesize: meta.filesize ? Number(meta.filesize) : undefined,
             });
           }
         }
       }
       for (const url of trimmedUrls) {
         const meta = resourceMetadata[`url-${url}`];
-        await createResource(createdDataset.id, {
+        await createResource(dataset.id, {
           title: meta?.title || url,
           type: meta?.resourceType || "main",
           description: meta?.description || undefined,
           url,
           filetype: "remote",
-          format: "",
+          format: meta?.format || undefined,
+          mime: meta?.mime || undefined,
+          filesize: meta?.filesize ? Number(meta.filesize) : undefined,
         });
       }
       onNextStep();
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error uploading resources:", error.message, error.stack);
-        setApiError(`Erro ao carregar ficheiro: ${translateUploadError(error.message)}`);
+        setApiError(`Erro ao guardar recurso: ${translateUploadError(error.message)}`);
       } else {
         const err = error as { status?: number; data?: Record<string, unknown> };
         console.error("Error uploading resources:", err.status, err.data);
         if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
+          const flattenValue = (val: unknown): string => {
+            if (Array.isArray(val)) return val.map(flattenValue).join("; ");
+            if (val && typeof val === "object")
+              return Object.values(val as Record<string, unknown>).map(flattenValue).join("; ");
+            return String(val);
+          };
           const msg =
             (err.data.message as string) ||
             Object.entries(err.data)
-              .map(([key, val]) => `${key}: ${val}`)
+              .map(([key, val]) => `${key}: ${flattenValue(val)}`)
               .join(", ");
-          setApiError(`Erro ao carregar ficheiro: ${translateUploadError(msg)}`);
+          setApiError(`Erro ao guardar recurso: ${translateUploadError(msg)}`);
         } else {
           const statusHint = err.status ? ` (${err.status})` : "";
-          setApiError(`Erro ao carregar ficheiro${statusHint}. Tente novamente.`);
+          setApiError(`Erro ao guardar recurso${statusHint}. Tente novamente.`);
         }
       }
     } finally {
@@ -1429,38 +1418,36 @@ export default function DatasetsAdminClient({
                   hasError={showFileError}
                   onFilesChange={(files) => {
                     setUploadedFiles(files);
-                    if (files.length > 0) {
-                      setShowFileError(false);
-                      setShowInvalidUrlError(false);
-                    }
+                    if (files.length > 0) setShowFileError(false);
                   }}
                   onUrlAdd={(url) => {
                     setResourceUrls((prev) => {
                       if (prev.includes(url)) return prev;
                       return [...prev, url];
                     });
-                    if (isValidHttpsUrl(url.trim())) {
-                      setShowFileError(false);
-                      setShowInvalidUrlError(false);
-                    }
+                    setShowFileError(false);
                   }}
-                  onUrlRemove={(url) => {
-                    setResourceUrls((prev) => prev.filter((u) => u !== url));
-                  }}
-                  onFileReplace={(index, file) => {
-                    const updated = [...uploadedFiles];
-                    updated[index] = file;
-                    setUploadedFiles(updated);
-                  }}
-                  resourceTypes={resourceTypes}
-                  resourceMetadata={resourceMetadata}
-                  onEditMeta={handleEditMeta}
                   allowedExtensions={allowedExtensions}
                 />
-                {showInvalidUrlError && (
-                  <span className="text-sm text-danger-500">
-                    Formato de URL inválido. Insira um URL https:// com domínio válido.
-                  </span>
+                {(uploadedFiles.length > 0 || resourceUrls.length > 0) && (
+                  <PendingResourceTable
+                    files={uploadedFiles}
+                    urls={resourceUrls}
+                    onFileReplace={(index, file) => {
+                      const updated = [...uploadedFiles];
+                      updated[index] = file;
+                      setUploadedFiles(updated);
+                    }}
+                    onFileRemove={(index) =>
+                      setUploadedFiles(uploadedFiles.filter((_, i) => i !== index))
+                    }
+                    onUrlRemove={(url) =>
+                      setResourceUrls((prev) => prev.filter((u) => u !== url))
+                    }
+                    resourceTypes={resourceTypes}
+                    resourceMetadata={resourceMetadata}
+                    onEditMeta={handleEditMeta}
+                  />
                 )}
 
                 <div className="admin-page__actions">
@@ -1672,6 +1659,7 @@ export default function DatasetsAdminClient({
           </aside>
         )}
       </div>
+
     </>
   );
 }

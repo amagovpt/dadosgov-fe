@@ -51,6 +51,7 @@ import {
   fetchActivity,
   fetchDiscussions,
   requestTransfer,
+  checkUrlReachable,
 } from "@/services/api";
 import RecipientSelect, {
   type RecipientSelection,
@@ -320,24 +321,28 @@ function ResourceDetailPopupContent({
                 </a>
               </td>
             </tr>
-            <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                Formato
-              </td>
-              <td className="py-4">{resource.format || "-"}</td>
-            </tr>
-            <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                Mime Type
-              </td>
-              <td className="py-4">{resource.mime || "-"}</td>
-            </tr>
-            <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                Tamanho
-              </td>
-              <td className="py-4">{formatSize(resource.filesize)}</td>
-            </tr>
+            {resource.filetype !== "remote" && (
+              <>
+                <tr>
+                  <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
+                    Formato
+                  </td>
+                  <td className="py-4">{resource.format || "-"}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
+                    Mime Type
+                  </td>
+                  <td className="py-4">{resource.mime || "-"}</td>
+                </tr>
+                <tr>
+                  <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
+                    Tamanho
+                  </td>
+                  <td className="py-4">{formatSize(resource.filesize)}</td>
+                </tr>
+              </>
+            )}
             {resource.checksum && (
               <tr>
                 <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
@@ -423,11 +428,54 @@ function ResourceEditPopupContent({
   const replaceFileInputRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isReplacing, setIsReplacing] = useState(false);
+  const [isCheckingUrl, setIsCheckingUrl] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
+
+  const isValidHttpsUrl = (value: string): boolean => {
+    try {
+      const parsed = new URL(value);
+      if (parsed.protocol !== "https:") return false;
+      if (!parsed.hostname) return false;
+      const hostname = parsed.hostname.toLowerCase();
+      const isIpv4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(
+        hostname
+      );
+      const labels = hostname.split(".");
+      const hasValidDomainShape = labels.length >= 2;
+      const hasValidLabels = labels.every(
+        (label) =>
+          label.length > 0 &&
+          !label.startsWith("-") &&
+          !label.endsWith("-") &&
+          /^[a-z0-9-]+$/i.test(label)
+      );
+      const tld = labels[labels.length - 1] || "";
+      const hasValidTld = /^([a-z]{2,}|xn--[a-z0-9-]{2,})$/i.test(tld);
+      return isIpv4 || (hasValidDomainShape && hasValidLabels && hasValidTld);
+    } catch {
+      return false;
+    }
+  };
 
   const handleSave = async () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (!title.trim()) return;
+    const trimmedUrl = resourceUrl.trim();
+    if (trimmedUrl) {
+      if (!isValidHttpsUrl(trimmedUrl)) {
+        setUrlError("Insira um URL válido, começando com https://");
+        return;
+      }
+      setIsCheckingUrl(true);
+      const reachable = await checkUrlReachable(trimmedUrl);
+      setIsCheckingUrl(false);
+      if (!reachable) {
+        setUrlError("URL não acessível. Verifique se o endereço está correto e acessível publicamente.");
+        return;
+      }
+    }
+    setUrlError(null);
     setIsSaving(true);
     setError(null);
     try {
@@ -512,33 +560,48 @@ function ResourceEditPopupContent({
           placeholder="URL do recurso"
           id="res-edit-url"
           value={resourceUrl}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setResourceUrl(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setResourceUrl(e.target.value);
+            if (urlError) setUrlError(null);
+          }}
+          hasError={!!urlError}
+          hasFeedback={!!urlError}
+          feedbackText={urlError ?? ""}
         />
 
-        <div className="grid grid-cols-2 gap-16">
-          <InputText
-            label="Tamanho"
-            placeholder="Tamanho em bytes"
-            id="res-edit-filesize"
-            value={filesize}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilesize(e.target.value)}
-          />
-          <InputText
-            label="Formato *"
-            placeholder="csv, json, xlsx..."
-            id="res-edit-format"
-            value={resourceFormat}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setResourceFormat(e.target.value)}
-          />
-        </div>
+        {resource.filetype !== "remote" && (
+          <>
+            <div className="grid grid-cols-2 gap-16">
+              <InputText
+                label="Tamanho"
+                placeholder="Tamanho em bytes"
+                id="res-edit-filesize"
+                value={filesize}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilesize(e.target.value)}
+                disabled
+              />
+              <InputText
+                label="Formato"
+                placeholder="csv, json, xlsx..."
+                id="res-edit-format"
+                value={resourceFormat}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setResourceFormat(e.target.value)
+                }
+                disabled
+              />
+            </div>
 
-        <InputText
-          label="Mime Type"
-          placeholder="application/json, text/csv..."
-          id="res-edit-mime"
-          value={mime}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMime(e.target.value)}
-        />
+            <InputText
+              label="Mime Type"
+              placeholder="application/json, text/csv..."
+              id="res-edit-mime"
+              value={mime}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMime(e.target.value)}
+              disabled
+            />
+          </>
+        )}
 
         {resource.checksum && (
           <div className="flex items-center gap-8">
@@ -577,9 +640,9 @@ function ResourceEditPopupContent({
             trailingIcon="agora-line-check-circle"
             trailingIconHover="agora-solid-check-circle"
             onClick={handleSave}
-            disabled={isSaving || !title.trim()}
+            disabled={isSaving || isCheckingUrl || !title.trim()}
           >
-            {isSaving ? "A guardar..." : "Guardar"}
+            {isCheckingUrl ? "A verificar URL..." : isSaving ? "A guardar..." : "Guardar"}
           </Button>
         </div>
       </div>
