@@ -33,6 +33,9 @@ export function getMiniCoursesPages(locale: string = "pt") {
                             description {
                                 ${locale}
                             }
+                            updatedAt {
+                                iv
+                            }
                         }
                     }
                 }
