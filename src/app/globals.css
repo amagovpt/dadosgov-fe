@@ -1810,6 +1810,7 @@ body:has(.admin-wrapper) > div > header.sticky {
   margin-left: 0;
   margin-right: 0;
   background-color: transparent;
+  outline: none;
 }
 
 .admin-page .tab-panel-content::before,
