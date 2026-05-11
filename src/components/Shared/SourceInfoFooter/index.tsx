@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Typograph } from "../Generics/Typograph";
+import { Typograph } from "@/components/Shared/Generics/Typograph";
 import dayjs from "dayjs";
 import { Anchor } from "@ama-pt/agora-design-system";
 import { twMerge } from "tailwind-merge";

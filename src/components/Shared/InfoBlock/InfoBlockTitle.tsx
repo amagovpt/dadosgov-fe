@@ -1,6 +1,6 @@
 "use client";
 import { twJoin } from "tailwind-merge";
-import { Typograph } from "../Generics/Typograph";
+import { Typograph } from "@/components/Shared/Generics/Typograph";
 
 export interface InfoBlockTitleProps {
   title?: string;
