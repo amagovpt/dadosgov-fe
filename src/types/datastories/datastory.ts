@@ -29,10 +29,15 @@ export type DatastoryHero = {
   dateReference: DateReference;
 };
 
+type Iframe = {
+  source: string;
+  classNames: string;
+}
+
 export type DatastorySection = {
   title: string;
   description: string;
-  iframeSource: string;
+  iframe: Iframe[];
 };
 
 type Source = {

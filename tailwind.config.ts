@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import { AgoraTailwindConfig } from "@ama-pt/agora-design-system";
+import { tailwindSafelist } from "./tailwind-safelist";
 
 const TailwindConfig: Config = {
   content: [
@@ -45,7 +46,10 @@ const TailwindConfig: Config = {
     },
   },
   plugins: AgoraTailwindConfig.plugins,
-  safelist: AgoraTailwindConfig.safelist,
+  safelist: [
+    ...AgoraTailwindConfig.safelist,
+    ...tailwindSafelist,
+  ],
   corePlugins: {
     preflight: false,
   },

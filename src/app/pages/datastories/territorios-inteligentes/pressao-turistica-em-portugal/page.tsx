@@ -29,7 +29,7 @@ export default async function DataStoryDetailPage({
 }) {
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "Início", url: "/" },
-    { label: "Datastories", url: "/pages/datastories" },
+    { label: "Data Stories", url: "/pages/datastories" },
     { label: "Territórios Inteligentes: Pressão turística em Portugal", url: "/pages/datastories/territorios-inteligentes/pressao-turistica-em-portugal" },
   ];
 
