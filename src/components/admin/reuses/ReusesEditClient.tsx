@@ -16,12 +16,10 @@ import {
   StatusCard,
   Pill,
   CardNoResults,
-  CardLinks,
   Tabs,
   Tab,
   TabHeader,
   TabBody,
-  Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
@@ -46,11 +44,11 @@ import {
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
-import { formatDistanceToNow } from "date-fns";
 import RecipientSelect, {
   type RecipientSelection,
 } from "@/components/admin/RecipientSelect";
 import ReusesEditMetadataTab from "@/components/admin/reuses/ReusesEditMetadataTab";
+import ReusesEditDatasetsTab from "@/components/admin/reuses/ReusesEditDatasetsTab";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -580,6 +578,112 @@ export default function ReusesEditClient() {
     );
   };
 
+  const handleDatasetSelectChange = (selectedIds: string[]) => {
+    const selectedIdsSet = new Set(selectedIds);
+    const pool: Dataset[] = [
+      ...selectedDatasets,
+      ...datasetSearchResults,
+      ...myDatasets,
+    ];
+    const seen = new Set<string>();
+    const next: Dataset[] = [];
+    for (const dataset of pool) {
+      if (selectedIdsSet.has(dataset.id) && !seen.has(dataset.id)) {
+        seen.add(dataset.id);
+        next.push(dataset);
+      }
+    }
+    setSelectedDatasets(next);
+  };
+
+  const handleRemoveSelectedDataset = (datasetId: string) => {
+    setSelectedDatasets((prev) => prev.filter((dataset) => dataset.id !== datasetId));
+  };
+
+  const handleDatasetLinkChange = (index: number, value: string) => {
+    const nextLinks = [...datasetLinks];
+    nextLinks[index] = { url: value };
+    setDatasetLinks(nextLinks);
+    if (value.trim()) {
+      setDatasetLinkErrors((prev) => {
+        const nextErrors = { ...prev };
+        delete nextErrors[index];
+        return nextErrors;
+      });
+    }
+  };
+
+  const handleRemoveDatasetLink = (index: number) => {
+    const nextLinks = datasetLinks.filter((_, currentIndex) => currentIndex !== index);
+    setDatasetLinks(nextLinks.length > 0 ? nextLinks : [{ url: "" }]);
+  };
+
+  const handleAddDatasetLink = () => {
+    const lastIndex = datasetLinks.length - 1;
+    if (!datasetLinks[lastIndex].url.trim()) {
+      setDatasetLinkErrors((prev) => ({
+        ...prev,
+        [lastIndex]: "Campo obrigatÃ³rio",
+      }));
+      return;
+    }
+    setDatasetLinks([...datasetLinks, { url: "" }]);
+  };
+
+  const handleSaveDatasetAssociations = async () => {
+    if (!reuse) return;
+    const remoteUrls = datasetLinks
+      .map((link) => link.url.trim())
+      .filter(Boolean);
+    const hasLocal = selectedDatasets.length > 0;
+    const hasRemote = remoteUrls.length > 0;
+
+    if (hasLocal && hasRemote) {
+      setApiError(
+        "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas nÃ£o as duas opÃ§Ãµes na mesma reutilizaÃ§Ã£o.",
+      );
+      return;
+    }
+    if (!hasLocal && !hasRemote) return;
+
+    setDatasetLinkErrors({});
+    setIsSubmitting(true);
+    setApiError(null);
+    try {
+      for (const dataset of selectedDatasets) {
+        await linkDatasetToReuse(reuse.id, dataset.id);
+      }
+      if (hasRemote) {
+        const existing = (reuse.extras?.remote_datasets as string[]) || [];
+        const mergedRemote = Array.from(new Set([...existing, ...remoteUrls]));
+        await updateReuse(reuse.id, {
+          extras: {
+            ...(reuse.extras || {}),
+            remote_datasets: mergedRemote,
+          },
+        });
+      }
+      const updated = await fetchReuse(reuseId);
+      setReuse(updated);
+      setDatasetLinks([{ url: "" }]);
+      setSelectedDatasets([]);
+      setApiSuccess("Conjuntos de dados associados com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch (error: unknown) {
+      const err = error as { data?: Record<string, unknown> };
+      if (err.data && typeof err.data === "object") {
+        const messages = Object.entries(err.data)
+          .map(([key, val]) => `${key}: ${val}`)
+          .join(", ");
+        setApiError(messages);
+      } else {
+        setApiError("Erro ao associar conjuntos de dados.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSaveMetadata = async () => {
     if (!reuse) return;
     const errors: Record<string, boolean> = {};
@@ -853,317 +957,24 @@ export default function ReusesEditClient() {
         <Tab>
           <TabHeader>Conjuntos de dados ({reuse.datasets?.length || 0})</TabHeader>
           <TabBody>
-            <div className="admin-page__body mt-24">
-              <div className="admin-page__form-area">
-                {associatedDatasets.length > 0 && (
-                  <div className="agora-card-links-datasets-px0 mb-24">
-                    {associatedDatasets.map((dataset) => (
-                      <CardLinks
-                        key={dataset.id}
-                        onClick={() => { }}
-                        className="cursor-pointer text-neutral-900"
-                        variant="transparent"
-                        image={{
-                          src: dataset.organization?.logo || "/images/placeholders/organization.png",
-                          alt: dataset.organization?.name || "Organização sem logo",
-                        }}
-                        category={dataset.organization?.name}
-                        title={dataset.title}
-                        description={
-                          <div className="flex flex-col gap-12">
-                            <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
-                              {dataset.description}
-                            </p>
-                            <div className="flex flex-wrap gap-8 items-center mt-8">
-                              <span className="text-sm font-medium text-neutral-900">
-                                Metadados: {dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0}%
-                              </span>
-                            </div>
-                            <div className="flex items-center flex-wrap gap-32 text-xs mt-32 text-[#034AD8] mb-32">
-                              <div className="flex items-center gap-8" title="Visualizações">
-                                <Icon name="agora-line-eye" className="" aria-hidden="true" />
-                                <span>
-                                  {dataset.metrics?.views
-                                    ? dataset.metrics.views >= 1000
-                                      ? (dataset.metrics.views / 1000).toFixed(0) + " mil"
-                                      : dataset.metrics.views
-                                    : "0"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Downloads">
-                                <Icon name="agora-line-download" className="" aria-hidden="true" />
-                                <span>
-                                  {dataset.metrics?.resources_downloads
-                                    ? dataset.metrics.resources_downloads >= 1000
-                                      ? (dataset.metrics.resources_downloads / 1000).toFixed(0) + " mil"
-                                      : dataset.metrics.resources_downloads
-                                    : "0"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Reutilizações">
-                                <img src="/Icons/bar_chart_primary.svg" className="" alt="" aria-hidden="true" />
-                                <span>{dataset.metrics?.reuses || 0}</span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Favoritos">
-                                <img src="/Icons/favorite.svg" className="" alt="" aria-hidden="true" />
-                                <span>{dataset.metrics?.followers || 0}</span>
-                              </div>
-                            </div>
-                          </div>
-                        }
-                        date={
-                          <span className="font-[300]">
-                            {`Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
-                          </span>
-                        }
-                        mainLink={
-                          <Link href={`/pages/datasets/${dataset.slug}`}>
-                            <span className="underline">{dataset.title}</span>
-                          </Link>
-                        }
-                        blockedLink={true}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <form
-                  className="admin-page__form"
-                  onSubmit={(e) => e.preventDefault()}
-                >
-                  <div className="mb-24">
-                    <StatusCard
-                      variant="warning"
-                      showIcon
-                      description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
-                    />
-                  </div>
-
-                  <InputSelect
-                    label="Pesquisar um conjunto de dados"
-                    placeholder="Selecione conjuntos de dados..."
-                    id="edit-dataset-search"
-                    type="checkbox"
-                    searchable
-                    searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
-                    searchNoResultsText="Nenhum resultado encontrado"
-                    onSearchInputChange={setDatasetSearch}
-                    onChange={(options) => {
-                      const selectedIds = new Set(options.map((o) => o.value as string));
-                      const pool: Dataset[] = [
-                        ...selectedDatasets,
-                        ...datasetSearchResults,
-                        ...myDatasets,
-                      ];
-                      const seen = new Set<string>();
-                      const next: Dataset[] = [];
-                      for (const d of pool) {
-                        if (selectedIds.has(d.id) && !seen.has(d.id)) {
-                          seen.add(d.id);
-                          next.push(d);
-                        }
-                      }
-                      setSelectedDatasets(next);
-                    }}
-                  >
-                    <DropdownSection name="datasets">
-                      {(() => {
-                        const combined: Dataset[] = [
-                          ...selectedDatasets,
-                          ...datasetSearchResults,
-                          ...myDatasets,
-                        ];
-                        const associatedIds = new Set(
-                          associatedDatasets.map((d) => d.id),
-                        );
-                        const seen = new Set<string>();
-                        return combined
-                          .filter((d) => {
-                            if (seen.has(d.id)) return false;
-                            if (associatedIds.has(d.id)) return false;
-                            seen.add(d.id);
-                            return true;
-                          })
-                          .map((d) => (
-                            <DropdownOption
-                              key={d.id}
-                              value={d.id}
-                              selected={selectedDatasets.some((s) => s.id === d.id)}
-                            >
-                              {d.title}
-                            </DropdownOption>
-                          ));
-                      })()}
-                    </DropdownSection>
-                  </InputSelect>
-
-                  {selectedDatasets.length > 0 && (
-                    <div className="flex flex-wrap gap-8 mt-16">
-                      {selectedDatasets.map((d) => (
-                        <Tag
-                          key={d.id}
-                          aria-label={`Remover ${d.title}`}
-                          onClick={() => {
-                            setSelectedDatasets((prev) =>
-                              prev.filter((x) => x.id !== d.id),
-                            );
-                          }}
-                        >
-                          {d.title}
-                        </Tag>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="admin-page__divider-or">
-                    <span className="admin-page__divider-or-text">ou</span>
-                  </div>
-
-                  {datasetLinks.map((link, index) => (
-                    <div key={`dataset-${index}`}>
-                      <InputText
-                        label="Link para o conjunto de dados"
-                        placeholder="Insira o URL aqui"
-                        id={`edit-dataset-url-${index}`}
-                        value={link.url}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const newLinks = [...datasetLinks];
-                          newLinks[index] = { url: e.target.value };
-                          setDatasetLinks(newLinks);
-                          if (e.target.value.trim()) {
-                            setDatasetLinkErrors((prev) => {
-                              const next = { ...prev };
-                              delete next[index];
-                              return next;
-                            });
-                          }
-                        }}
-                        hasError={!!datasetLinkErrors[index]}
-                        hasFeedback={!!datasetLinkErrors[index]}
-                        feedbackState="danger"
-                        errorFeedbackText={datasetLinkErrors[index]}
-                      />
-                      {link.url.trim() && (
-                        <div className="flex justify-end mt-24">
-                          <Button
-                            appearance="solid"
-                            variant="danger"
-                            hasIcon
-                            leadingIcon="agora-line-trash"
-                            leadingIconHover="agora-solid-trash"
-                            onClick={() => {
-                              const newLinks = datasetLinks.filter((_, i) => i !== index);
-                              setDatasetLinks(newLinks.length > 0 ? newLinks : [{ url: "" }]);
-                            }}
-                          >
-                            Eliminar
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  <div className="flex justify-end">
-                    <Button
-                      appearance="outline"
-                      variant="primary"
-                      hasIcon
-                      leadingIcon="agora-line-plus-circle"
-                      leadingIconHover="agora-solid-plus-circle"
-                      onClick={() => {
-                        const lastIndex = datasetLinks.length - 1;
-                        if (!datasetLinks[lastIndex].url.trim()) {
-                          setDatasetLinkErrors((prev) => ({
-                            ...prev,
-                            [lastIndex]: "Campo obrigatório",
-                          }));
-                          return;
-                        }
-                        setDatasetLinks([...datasetLinks, { url: "" }]);
-                      }}
-                    >
-                      Adicionar
-                    </Button>
-                  </div>
-
-                  <div className="admin-page__actions flex justify-end gap-[18px]">
-                    <Button
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-check-circle"
-                      trailingIconHover="agora-solid-check-circle"
-                      onClick={async () => {
-                        if (!reuse) return;
-                        const remoteUrls = datasetLinks
-                          .map((l) => l.url.trim())
-                          .filter(Boolean);
-                        const hasLocal = selectedDatasets.length > 0;
-                        const hasRemote = remoteUrls.length > 0;
-
-                        // Mutual exclusion: portal datasets OR remote URLs.
-                        if (hasLocal && hasRemote) {
-                          setApiError(
-                            "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
-                          );
-                          return;
-                        }
-                        if (!hasLocal && !hasRemote) return;
-
-                        setDatasetLinkErrors({});
-                        setIsSubmitting(true);
-                        setApiError(null);
-                        try {
-                          for (const dataset of selectedDatasets) {
-                            await linkDatasetToReuse(reuse.id, dataset.id);
-                          }
-                          if (hasRemote) {
-                            const existing =
-                              (reuse.extras?.remote_datasets as string[]) || [];
-                            const mergedRemote = Array.from(
-                              new Set([...existing, ...remoteUrls]),
-                            );
-                            await updateReuse(reuse.id, {
-                              extras: {
-                                ...(reuse.extras || {}),
-                                remote_datasets: mergedRemote,
-                              },
-                            });
-                          }
-                          const updated = await fetchReuse(reuseId);
-                          setReuse(updated);
-                          setDatasetLinks([{ url: "" }]);
-                          setSelectedDatasets([]);
-                          setApiSuccess("Conjuntos de dados associados com sucesso.");
-                          setTimeout(() => setApiSuccess(null), 10000);
-                        } catch (error: unknown) {
-                          const err = error as { data?: Record<string, unknown> };
-                          if (err.data && typeof err.data === "object") {
-                            const messages = Object.entries(err.data)
-                              .map(([key, val]) => `${key}: ${val}`)
-                              .join(", ");
-                            setApiError(messages);
-                          } else {
-                            setApiError("Erro ao associar conjuntos de dados.");
-                          }
-                        } finally {
-                          setIsSubmitting(false);
-                        }
-                      }}
-                      disabled={
-                        isSubmitting ||
-                        (selectedDatasets.length === 0 &&
-                          !datasetLinks.some((l) => l.url.trim()))
-                      }
-                    >
-                      {isSubmitting ? "A guardar..." : "Guardar"}
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </div>
+            <ReusesEditDatasetsTab
+              associatedDatasets={associatedDatasets}
+              selectedDatasets={selectedDatasets}
+              datasetSearchResults={datasetSearchResults}
+              myDatasets={myDatasets}
+              datasetLinks={datasetLinks}
+              datasetLinkErrors={datasetLinkErrors}
+              isSubmitting={isSubmitting}
+              onDatasetSearchChange={setDatasetSearch}
+              onDatasetSelectChange={handleDatasetSelectChange}
+              onRemoveSelectedDataset={handleRemoveSelectedDataset}
+              onDatasetLinkChange={handleDatasetLinkChange}
+              onRemoveDatasetLink={handleRemoveDatasetLink}
+              onAddDatasetLink={handleAddDatasetLink}
+              onSave={handleSaveDatasetAssociations}
+            />
           </TabBody>
         </Tab>
-
         {/* API Tab */}
         <Tab>
           <TabHeader>API ({reuse.dataservices?.length || 0})</TabHeader>
@@ -1471,4 +1282,5 @@ export default function ReusesEditClient() {
     </div>
   );
 }
+
 
