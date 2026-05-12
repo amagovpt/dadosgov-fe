@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
 import { githubPagesConfig } from "@/config/site";
@@ -52,7 +53,7 @@ export function GitHubMarkdownPage({
                 <div className="text-[#2b363c] flex flex-col gap-16">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
+                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
                     components={{
                       h1: ({ children }) => (
                         <h1 className="text-2xl-medium text-[#021C51] mb-16 leading-tight">
