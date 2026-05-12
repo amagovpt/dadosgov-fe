@@ -541,7 +541,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
       {/* Tabs */}
       <Tabs>
-        <Tab active={isConfigTab ? undefined : true}>
+        <Tab active={!isConfigTab}>
           <TabHeader>Trabalhos</TabHeader>
           <TabBody>
             {jobs.length === 0 ? (
@@ -678,7 +678,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           </TabBody>
         </Tab>
 
-        <Tab active={isConfigTab ? true : undefined}>
+        <Tab active={isConfigTab}>
           <TabHeader>Configuração</TabHeader>
           <TabBody>
             <div className="admin-page__body">
