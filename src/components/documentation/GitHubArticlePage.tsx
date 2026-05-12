@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
 import { githubPagesConfig } from "@/config/site";
@@ -130,7 +131,7 @@ export function GitHubArticlePage({
                   <div className="max-w-[592px]">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
+                      rehypePlugins={[rehypeRaw, rehypeSanitize]}
                       components={markdownComponents}
                     >
                       {cleanContent}
