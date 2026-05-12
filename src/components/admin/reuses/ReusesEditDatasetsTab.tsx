@@ -81,7 +81,7 @@ export default function ReusesEditDatasetsTab({
                   src:
                     dataset.organization?.logo ||
                     "/images/placeholders/organization.png",
-                  alt: dataset.organization?.name || "OrganizaÃ§Ã£o sem logo",
+                  alt: dataset.organization?.name || "Organização sem logo",
                 }}
                 category={dataset.organization?.name}
                 title={dataset.title}
@@ -100,7 +100,7 @@ export default function ReusesEditDatasetsTab({
                       </span>
                     </div>
                     <div className="flex items-center flex-wrap gap-32 text-xs mt-32 text-[#034AD8] mb-32">
-                      <div className="flex items-center gap-8" title="VisualizaÃ§Ãµes">
+                      <div className="flex items-center gap-8" title="Visualizações">
                         <Icon name="agora-line-eye" aria-hidden="true" />
                         <span>
                           {dataset.metrics?.views
@@ -120,7 +120,7 @@ export default function ReusesEditDatasetsTab({
                             : "0"}
                         </span>
                       </div>
-                      <div className="flex items-center gap-8" title="ReutilizaÃ§Ãµes">
+                      <div className="flex items-center gap-8" title="Reutilizações">
                         <img src="/Icons/bar_chart_primary.svg" alt="" aria-hidden="true" />
                         <span>{dataset.metrics?.reuses || 0}</span>
                       </div>
@@ -133,7 +133,7 @@ export default function ReusesEditDatasetsTab({
                 }
                 date={
                   <span className="font-[300]">
-                    {`Atualizado hÃ¡ ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
+                    {`Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
                   </span>
                 }
                 mainLink={
@@ -152,7 +152,7 @@ export default function ReusesEditDatasetsTab({
             <StatusCard
               variant="warning"
               showIcon
-              description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas nÃ£o as duas opÃ§Ãµes na mesma reutilizaÃ§Ã£o."
+              description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
             />
           </div>
 

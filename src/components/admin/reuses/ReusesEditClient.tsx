@@ -623,7 +623,7 @@ export default function ReusesEditClient() {
     if (!datasetLinks[lastIndex].url.trim()) {
       setDatasetLinkErrors((prev) => ({
         ...prev,
-        [lastIndex]: "Campo obrigatÃ³rio",
+        [lastIndex]: "Campo obrigatório",
       }));
       return;
     }
@@ -640,7 +640,7 @@ export default function ReusesEditClient() {
 
     if (hasLocal && hasRemote) {
       setApiError(
-        "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas nÃ£o as duas opÃ§Ãµes na mesma reutilizaÃ§Ã£o.",
+        "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
       );
       return;
     }
