@@ -3003,6 +3003,16 @@ export async function uploadAvatar(file: File): Promise<{ image: string }> {
   return await res.json();
 }
 
+export async function deleteAvatar(): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/me/avatar/`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    throw { status: res.status };
+  }
+}
+
 export async function uploadUserAvatar(userId: string, file: File): Promise<{ image: string }> {
   const formData = new FormData();
   formData.append("file", file);

@@ -1171,37 +1171,33 @@ body:has(.admin-wrapper) > div > header.sticky {
   color: var(--color-primary-500);
   border-color: transparent;
   margin: 8px 0;
-  font-size: 16px;
-}
-
-.admin-header[style*="--admin-avatar-url"] .authenticated-panel-menu > .agora-btn {
-  background-image: var(--admin-avatar-url);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: transparent;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.admin-header[style*="--admin-avatar-url"] .authenticated-panel-menu > .agora-btn .icon {
-  display: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .admin-header .authenticated-panel-menu > .agora-btn .children-wrapper {
-  color: var(--color-primary-500);
-}
-
-/* Initials avatar when no image */
-.admin-header[style*="--admin-initials"] .authenticated-panel-menu > .agora-btn .icon {
-  display: none;
-}
-
-.admin-header[style*="--admin-initials"] .authenticated-panel-menu > .agora-btn::before {
-  content: var(--admin-initials);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-600);
   font-size: 16px;
   font-weight: 600;
-  color: var(--color-primary-600);
+  line-height: 1;
+}
+
+/* Image avatar */
+.admin-header .authenticated-panel-menu > .agora-btn img.icon {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Icon avatar (fallback) */
+.admin-header .authenticated-panel-menu > .agora-btn svg.icon {
+  fill: var(--color-primary-500);
 }
 
 /* 7.2 Side Navigation */
@@ -1977,49 +1973,41 @@ body:has(.admin-wrapper) > div > header.sticky {
   overflow: visible !important;
 }
 
-.profile-card__avatar {
+.profile-card__avatar-container {
   flex-shrink: 0;
   width: 104px;
   height: 104px;
-}
-
-.profile-card__avatar.agora-avatar {
-  width: 104px;
-  min-width: 104px;
-  height: 104px;
-  min-height: 104px;
-}
-
-.profile-card__avatar.agora-avatar .avatar.avatar-image {
-  width: 104px;
-  min-width: 104px;
-  height: 104px;
-  min-height: 104px;
   border-radius: 50%;
   overflow: hidden;
-}
-
-.profile-card__avatar.agora-avatar .avatar.avatar-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.profile-card__avatar.agora-avatar .avatar.avatar-icon {
-  width: 48px;
-  height: 48px;
-}
-
-.profile-card__avatar .avatar.avatar-initials {
-  font-size: 2rem;
+  background-color: var(--color-primary-500);
+  outline: 3px solid var(--color-primary-500);
 }
 
 .profile-card__avatar-img {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
   object-fit: cover;
+  display: block;
+}
+
+/* Agora Avatar (initials/icon) inside the container */
+.profile-card__avatar-container .agora-avatar-container,
+.profile-card__avatar-container .agora-avatar {
+  width: 104px;
+  height: 104px;
+  min-width: 104px;
+  min-height: 104px;
+  border-radius: 50%;
+}
+
+.profile-card__avatar-container .avatar.avatar-initials {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.profile-card__avatar-container .avatar.avatar-icon {
+  width: 48px;
+  height: 48px;
 }
 
 .profile-card__body {
