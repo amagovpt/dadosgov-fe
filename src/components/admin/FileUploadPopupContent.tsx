@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Icon, InputText, usePopupContext } from "@ama-pt/agora-design-system";
+import { Button, Icon, usePopupContext } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchAllowedExtensions } from "@/services/api";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 interface FileUploadPopupContentProps {
-  onConfirm: (files: File[], url: string) => void;
+  onConfirm: (files: File[]) => void;
   allowedExtensions?: string[] | null;
 }
 
@@ -17,8 +17,6 @@ export default function FileUploadPopupContent({
 }: FileUploadPopupContentProps) {
   const { hide } = usePopupContext();
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
-  const [localUrl, setLocalUrl] = useState("");
-  const [urlError, setUrlError] = useState(false);
   const [extensionErrors, setExtensionErrors] = useState<string[]>([]);
   const [securityErrors, setSecurityErrors] = useState<string[]>([]);
   const [allowedExtensions, setAllowedExtensions] = useState<string[] | null>(initialExtensions);
@@ -27,14 +25,6 @@ export default function FileUploadPopupContent({
     if (allowedExtensions !== null) return;
     fetchAllowedExtensions().then((exts) => setAllowedExtensions(exts));
   }, []);
-
-  const isValidUrl = (url: string) => {
-    try {
-      return new URL(url).protocol === "https:";
-    } catch {
-      return false;
-    }
-  };
 
   const getExtension = (filename: string) =>
     filename.includes(".") ? filename.split(".").pop()!.toLowerCase() : "";
@@ -56,14 +46,10 @@ export default function FileUploadPopupContent({
   };
 
   const handleConfirm = () => {
-    if (extensionErrors.length > 0 && pendingFiles.length === 0 && !localUrl.trim()) {
+    if (extensionErrors.length > 0 && pendingFiles.length === 0) {
       return;
     }
-    if (localUrl && !isValidUrl(localUrl)) {
-      setUrlError(true);
-      return;
-    }
-    onConfirm(pendingFiles, localUrl);
+    onConfirm(pendingFiles);
     hide();
   };
 
@@ -118,33 +104,6 @@ export default function FileUploadPopupContent({
             </p>
           </div>
         )}
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="flex-1 border-t border-neutral-300" />
-        <span className="text-neutral-500 text-sm px-3">ou</span>
-        <div className="flex-1 border-t border-neutral-300" />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <h2 className="text-primary-900 font-semibold text-sm">Adicionar um link</h2>
-        <InputText
-          label="Link exato para o ficheiro"
-          placeholder="https://"
-          id="modal-resource-url"
-          value={localUrl}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setLocalUrl(e.target.value);
-            setUrlError(false);
-          }}
-          hasError={urlError}
-          errorFeedbackText="Insira um URL válido, começando com https://"
-          {...(!urlError && {
-            feedbackState: "info",
-            hasFeedback: true,
-            feedbackText: "Insira um URL válido, começando com https://",
-          })}
-        />
       </div>
 
       <div className="flex justify-end gap-[18px]">

@@ -156,4 +156,38 @@ test.describe("Datasets Listing", () => {
     await expect(results.first()).toBeVisible({ timeout: 15000 });
     expect(await results.count()).toBeGreaterThan(0);
   });
+
+  test("DL-14: Date filter sets modified_since in URL", async ({ page }) => {
+    await openFiltersPanel(page);
+
+    const toggle = page.locator("#ds-filter-atualizacao-30_days");
+    await expect(toggle).toBeVisible({ timeout: 10000 });
+    await toggle.click();
+
+    await page.waitForURL(/modified_since=/, { timeout: 10000 });
+    expect(page.url()).toMatch(/modified_since=/);
+  });
+
+  test("DL-15: Date filter roundtrip — 3-year range is correctly detected from URL", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    const toggle3yr = page.locator("#ds-filter-atualizacao-3_years");
+    await expect(toggle3yr).toBeVisible({ timeout: 10000 });
+    await toggle3yr.click();
+    await page.waitForURL(/modified_since=/, { timeout: 10000 });
+
+    // Navigate to the resulting URL directly to simulate a reload/bookmark.
+    // The old day-counting code failed here when leap years pushed diffDays
+    // past the <= 1096 boundary, returning "all" instead of "3_years".
+    const urlWithFilter = page.url();
+    await page.goto(urlWithFilter);
+    await page.waitForLoadState("networkidle");
+
+    await openFiltersPanel(page);
+
+    const toggle3yrAfter = page.locator("#ds-filter-atualizacao-3_years");
+    await expect(toggle3yrAfter).toBeChecked({ timeout: 10000 });
+  });
 });

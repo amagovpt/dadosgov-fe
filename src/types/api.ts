@@ -223,7 +223,9 @@ export interface ResourceCreatePayload {
   type: string;
   url: string;
   filetype: string;
-  format: string;
+  format?: string;
+  mime?: string;
+  filesize?: number;
 }
 
 export interface ResourceUpdatePayload {

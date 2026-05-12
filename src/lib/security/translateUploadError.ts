@@ -26,5 +26,11 @@ export function translateUploadError(message: string | null | undefined): string
   if (SECURITY_REJECTION_MARKERS.some((marker) => lower.includes(marker))) {
     return POISONED_FILE_WARNING;
   }
+  if (lower.includes("invalid url")) {
+    const urlMatch = message.match(/"([^"]+)"/);
+    return urlMatch
+      ? `URL inválido: "${urlMatch[1]}"`
+      : "URL inválido.";
+  }
   return message;
 }
