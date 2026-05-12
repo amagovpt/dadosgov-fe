@@ -24,7 +24,7 @@ type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
 type SortOrder = "ascending" | "descending" | "none";
 
 const SORT_FIELD_MAP: Record<SortField, string> = {
-  name: "last_name",
+  name: "first_name",
   created_at: "created",
   datasets: "datasets",
   reuses: "reuses",
@@ -94,9 +94,21 @@ export default function SystemUsersClient() {
     }, 400);
   };
 
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
+  const handleSort = (field: SortField) => (_newOrder: SortOrder) => {
+    if (field === "name") {
+      if (sortField !== "name") {
+        setSortField("name");
+        setSortOrder("descending");
+      } else if (sortOrder === "descending") {
+        setSortOrder("ascending");
+      } else {
+        setSortField(null);
+        setSortOrder("none");
+      }
+    } else {
+      setSortField(_newOrder === "none" ? null : field);
+      setSortOrder(_newOrder);
+    }
     setCurrentPage(1);
   };
 
