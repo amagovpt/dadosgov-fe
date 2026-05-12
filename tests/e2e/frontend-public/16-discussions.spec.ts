@@ -102,4 +102,45 @@ test.describe("Discussions on Dataset Detail", () => {
       .catch(() => false);
     expect(disabled || readonly).toBeTruthy();
   });
+
+  test("DI-10: Discussion message text is contained — no horizontal overflow and overflow-wrap:anywhere applied", async ({
+    page,
+  }) => {
+    // Locate the active tab panel.
+    const panel = page.locator('[role="tabpanel"]').filter({ hasText: /Discussões/i }).first();
+    await expect(panel).toBeAttached({ timeout: 10000 });
+
+    // If there are no discussions, the fix has nothing to break — pass.
+    const paragraphs = panel.locator("p");
+    if ((await paragraphs.count()) === 0) return;
+
+    // 1. Every <p> that holds message content must have overflow-wrap: anywhere.
+    const badOverflowWrap = await panel.evaluate((panelEl) => {
+      const ps = Array.from(panelEl.querySelectorAll("p"));
+      return ps
+        .filter((p) => {
+          const ow = window.getComputedStyle(p).overflowWrap;
+          // "anywhere" is the expected value; "break-word" is also acceptable.
+          return ow !== "anywhere" && ow !== "break-word";
+        })
+        .map((p) => ({ text: p.textContent?.slice(0, 60), overflowWrap: window.getComputedStyle(p).overflowWrap }));
+    });
+    expect(
+      badOverflowWrap,
+      `Some <p> elements inside the discussion panel are missing overflow-wrap:anywhere — found: ${JSON.stringify(badOverflowWrap)}`
+    ).toHaveLength(0);
+
+    // 2. No discussion card container should have horizontal scroll overflow.
+    const overflowingCards = await panel.evaluate((panelEl) => {
+      // Cards are the direct white boxes wrapping each discussion thread.
+      const cards = Array.from(panelEl.querySelectorAll("div[class*='bg-white']"));
+      return cards
+        .filter((card) => card.scrollWidth > card.clientWidth + 1) // +1 for sub-pixel rounding
+        .map((card) => ({ scrollWidth: card.scrollWidth, clientWidth: card.clientWidth }));
+    });
+    expect(
+      overflowingCards,
+      `Discussion card(s) overflow horizontally: ${JSON.stringify(overflowingCards)}`
+    ).toHaveLength(0);
+  });
 });
