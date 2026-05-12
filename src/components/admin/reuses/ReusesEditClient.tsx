@@ -15,7 +15,6 @@ import {
   DropdownOption,
   StatusCard,
   Pill,
-  Switch,
   CardNoResults,
   CardLinks,
   Tabs,
@@ -25,7 +24,6 @@ import {
   Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -49,13 +47,10 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
-import AuxiliarList from "@/components/admin/AuxiliarList";
-import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import RecipientSelect, {
   type RecipientSelection,
 } from "@/components/admin/RecipientSelect";
-import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
+import ReusesEditMetadataTab from "@/components/admin/reuses/ReusesEditMetadataTab";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -519,6 +514,72 @@ export default function ReusesEditClient() {
     }
   };
 
+  const handlePublishReuse = async () => {
+    if (!reuse) return;
+    setApiError(null);
+    setApiSuccess(null);
+    setIsSubmitting(true);
+    try {
+      const updated = await updateReuse(reuse.id, {
+        private: false,
+      });
+      setReuse(updated);
+      setApiSuccess("Reutilização publicada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch {
+      setApiError("Erro ao publicar a reutilização.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleKeywordsChange = (value: string) => {
+    setSelectedKeywordsValue(value);
+    const selected = value.split(",").filter(Boolean);
+    let addedNew = false;
+    selected.forEach((keyword) => {
+      const lower = keyword.toLowerCase();
+      const existsInSuggestions = tagSuggestions.some(
+        (tag) => tag.text.toLowerCase() === lower,
+      );
+      const existsInSearch = tagSearch.some(
+        (tag) => tag.text.toLowerCase() === lower,
+      );
+      if (!existsInSuggestions && !existsInSearch) {
+        addedNew = true;
+        setTagSuggestions((prev) => {
+          if (prev.some((tag) => tag.text.toLowerCase() === lower)) {
+            return prev;
+          }
+          return [...prev, { text: keyword }];
+        });
+      }
+    });
+    if (addedNew) {
+      setKeywordSearch("");
+    }
+  };
+
+  const handleRemoveKeyword = (keyword: string) => {
+    const next = selectedKeywords
+      .filter((value) => value.toLowerCase() !== keyword.toLowerCase())
+      .join(",");
+    setSelectedKeywordsValue(next);
+    selectedKeywordsRef.current = next;
+  };
+
+  const handleOpenDeletePopup = () => {
+    if (!reuse) return;
+    show(
+      <DeleteReusePopupContent onClose={hide} onConfirm={handleDeleteReuse} />,
+      {
+        title: "Elimine a reutilização",
+        closeAriaLabel: "Fechar",
+        dimensions: "m",
+      },
+    );
+  };
+
   const handleSaveMetadata = async () => {
     if (!reuse) return;
     const errors: Record<string, boolean> = {};
@@ -738,404 +799,56 @@ export default function ReusesEditClient() {
           if (index === 4) loadActivities();
         }}
       >
-        {/* Metadata Tab */}
         <Tab>
           <TabHeader>Metadados</TabHeader>
           <TabBody>
-            <div className="admin-page__body">
-              <div className="admin-page__form-area">
-                {reuse.private && (
-                  <div className="dataset-edit-visibility-banner">
-                    <StatusCard
-                      variant="informative"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Modifique a visibilidade da reutilização.</strong>
-                          <br />
-                          Esta reutilização encontra-se atualmente em{" "}
-                          <strong>modo rascunho</strong>. Apenas o produtor e os membros
-                          da organização a podem visualizar e editar.
-                        </>
-                      }
-                    />
-                    <div>
-                      <Button
-                        variant="primary"
-                        appearance="outline"
-                        onClick={async () => {
-                          setApiError(null);
-                          setApiSuccess(null);
-                          setIsSubmitting(true);
-                          try {
-                            const updated = await updateReuse(reuse.id, {
-                              private: false,
-                            });
-                            setReuse(updated);
-                            setApiSuccess("Reutilização publicada com sucesso.");
-                            setTimeout(() => setApiSuccess(null), 10000);
-                          } catch {
-                            setApiError("Erro ao publicar a reutilização.");
-                          } finally {
-                            setIsSubmitting(false);
-                          }
-                        }}
-                        disabled={isSubmitting}
-                      >
-                        Publicar reutilização
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                <form
-                  className="admin-page__form"
-                  onSubmit={(e) => e.preventDefault()}
-                >
-                  <p className="text-neutral-900 text-base leading-7">
-                    Os campos marcados com um asterisco ( * ) são obrigatórios.
-                  </p>
-
-                  <h2 className="admin-page__section-title">Destaque</h2>
-                  <div className="admin-page__fields-group">
-                    <Switch
-                      label="Destaque"
-                      checked={featured}
-                      onChange={() => setFeatured((v) => !v)}
-                    />
-                  </div>
-
-                  <h2 className="admin-page__section-title">Descrição</h2>
-                  <div className="admin-page__fields-group">
-                    <InputText
-                      label="Nome da reutilização *"
-                      placeholder="Insira o nome aqui"
-                      id="edit-title"
-                      value={title}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setTitle(e.target.value);
-                        if (e.target.value.trim()) clearError("title");
-                      }}
-                      hasError={!!formErrors.title}
-                      hasFeedback={!!formErrors.title}
-                      feedbackState="danger"
-                      errorFeedbackText="Campo obrigatório"
-                    />
-                    <InputText
-                      label="URL *"
-                      placeholder="Insira o URL aqui (ex: https://...)"
-                      id="edit-url"
-                      value={url}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setUrl(e.target.value);
-                        if (e.target.value.trim()) clearError("url");
-                      }}
-                      hasError={!!formErrors.url}
-                      hasFeedback={!!formErrors.url}
-                      feedbackState="danger"
-                      errorFeedbackText="Campo obrigatório"
-                    />
-                    <IsolatedSelect
-                      label="Tipo *"
-                      placeholder="Selecione um tipo..."
-                      id="edit-type"
-                      searchable
-                      searchInputPlaceholder="Escreva para pesquisar..."
-                      searchNoResultsText="Nenhum resultado encontrado"
-                      onChangeRef={selectedTypeRef}
-                      defaultValue={selectedType}
-                      onChangeCallback={(v) => setSelectedType(v || "")}
-                    >
-                      <DropdownSection name="types">
-                        {reuseTypes.map((t) => (
-                          <DropdownOption
-                            key={t.id}
-                            value={t.id}
-                            selected={t.id === selectedType}
-                          >
-                            {localizeReuseType(t)}
-                          </DropdownOption>
-                        ))}
-                      </DropdownSection>
-                    </IsolatedSelect>
-                    <IsolatedSelect
-                      label="Tema *"
-                      placeholder="Selecione um tema..."
-                      id="edit-topic"
-                      searchable
-                      searchInputPlaceholder="Escreva para pesquisar..."
-                      searchNoResultsText="Nenhum resultado encontrado"
-                      onChangeRef={selectedTopicRef}
-                      defaultValue={selectedTopic}
-                      onChangeCallback={(v) => setSelectedTopic(v || "")}
-                    >
-                      <DropdownSection name="topics">
-                        {reuseTopics.map((t) => (
-                          <DropdownOption
-                            key={t.id}
-                            value={t.id}
-                            selected={t.id === selectedTopic}
-                          >
-                            {localizeReuseTopic(t)}
-                          </DropdownOption>
-                        ))}
-                      </DropdownSection>
-                    </IsolatedSelect>
-                    <InputTextArea
-                      label="Descrição *"
-                      placeholder="Insira a descrição aqui"
-                      id="edit-description"
-                      rows={6}
-                      maxLength={246}
-                      showCharCounter={true}
-                      value={description}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                        setDescription(e.target.value);
-                        if (e.target.value.trim()) clearError("description");
-                      }}
-                      hasError={formErrors.description ? true : undefined}
-                      hasFeedback={formErrors.description ? true : undefined}
-                      feedbackState="danger"
-                      feedbackText="Campo obrigatório"
-                      errorFeedbackText="Campo obrigatório"
-                    />
-                    <IsolatedSelect
-                      label="Palavras-chave"
-                      placeholder="Pesquise ou insira palavras-chave..."
-                      id="edit-keywords"
-                      type="checkbox"
-                      searchable
-                      searchInputPlaceholder="Escreva para pesquisar ou criar..."
-                      searchNoResultsText="Nenhum resultado encontrado"
-                      defaultValue={selectedKeywordsValue}
-                      onChangeRef={selectedKeywordsRef}
-                      onSearchCallback={setKeywordSearch}
-                      onChangeCallback={(value) => {
-                        setSelectedKeywordsValue(value);
-                        const selected = value.split(",").filter(Boolean);
-                        let addedNew = false;
-                        selected.forEach((v) => {
-                          const lower = v.toLowerCase();
-                          const existsInSuggestions = tagSuggestions.some(
-                            (t) => t.text.toLowerCase() === lower,
-                          );
-                          const existsInSearch = tagSearch.some(
-                            (t) => t.text.toLowerCase() === lower,
-                          );
-                          if (!existsInSuggestions && !existsInSearch) {
-                            addedNew = true;
-                            setTagSuggestions((prev) => {
-                              if (prev.some((t) => t.text.toLowerCase() === lower)) {
-                                return prev;
-                              }
-                              return [...prev, { text: v }];
-                            });
-                          }
-                        });
-                        if (addedNew) {
-                          setKeywordSearch("");
-                        }
-                      }}
-                    >
-                      {keywordOptions}
-                    </IsolatedSelect>
-
-                    {selectedKeywords.length > 0 && (
-                      <div className="flex flex-wrap gap-8 -mt-8">
-                        {[...selectedKeywords].sort((a, b) => a.localeCompare(b)).map((keyword) => (
-                          <Tag
-                            key={keyword}
-                            aria-label={`Remover ${keyword}`}
-                            onClick={() => {
-                              const next = selectedKeywords
-                                .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
-                                .join(",");
-                              setSelectedKeywordsValue(next);
-                              selectedKeywordsRef.current = next;
-                            }}
-                          >
-                            {keyword}
-                          </Tag>
-                        ))}
-                      </div>
-                    )}
-                    <div>
-                      <span className="text-primary-900 text-base font-medium leading-7">
-                        Imagem de capa *
-                      </span>
-                      {(reuse.image_thumbnail || reuse.image) && (
-                        <div className="mt-2 mb-2">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={reuse.image_thumbnail || reuse.image || ""}
-                            alt="Imagem de capa atual"
-                            className="rounded border border-neutral-200 max-h-[180px] object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
-                        <DragAndDropUploader
-                          label="Ficheiros"
-                          dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                          inputLabel="Selecione ou arraste o ficheiro"
-                          selectedFilesLabel="ficheiro selecionado"
-                          removeFileButtonLabel="Remover ficheiro"
-                          replaceFileButtonLabel="Substituir ficheiro"
-                          extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-                          accept=".jpg,.jpeg,.png"
-                          maxSize={4194304}
-                          maxCount={1}
-                          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-                          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                          hasError={!!imageError}
-                          hasFeedback={!!imageError}
-                          feedbackState="danger"
-                          feedbackText={imageError ?? undefined}
-                          onChange={handleImageUpload}
-                          onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="admin-page__actions flex justify-end mt-24">
-                    <Button
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-check-circle"
-                      trailingIconHover="agora-solid-check-circle"
-                      onClick={handleSaveMetadata}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "A guardar..." : "Guardar"}
-                    </Button>
-                  </div>
-
-                  <div className="dataset-edit-danger-actions">
-                    {/* Transfer reuse section hidden — keep for future use
-                    <StatusCard
-                      variant="informative"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Atenção esta ação é irreversível.</strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={() => {
-                              show(
-                                <TransferReusePopupContent
-                                  reuseTitle={reuse.title}
-                                  onConfirm={handleTransferReuse}
-                                />,
-                                {
-                                  title: "Transfira a reutilização",
-                                  closeAriaLabel: "Fechar",
-                                  dimensions: "m",
-                                },
-                              );
-                            }}
-                          >
-                            Transferir a reutilização
-                          </Button>
-                        </>
-                      }
-                    />
-                    */}
-                    <StatusCard
-                      variant="warning"
-                      showIcon
-                      description={
-                        <>
-                          <strong>
-                            {reuse.archived
-                              ? "Esta reutilização está arquivada. Pode desarquivar para voltar a indexá-la no portal."
-                              : "Uma reutilização arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto."}
-                          </strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={
-                              reuse.archived
-                                ? handleUnarchiveReuse
-                                : handleArchiveReuse
-                            }
-                            disabled={isSubmitting}
-                          >
-                            {reuse.archived
-                              ? "Desarquivar a reutilização"
-                              : "Arquivar a reutilização"}
-                          </Button>
-                        </>
-                      }
-                    />
-                    <StatusCard
-                      variant="danger"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Atenção esta ação é irreversível.</strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={() => {
-                              show(
-                                <DeleteReusePopupContent
-                                  onClose={hide}
-                                  onConfirm={handleDeleteReuse}
-                                />,
-                                {
-                                  title: "Elimine a reutilização",
-                                  closeAriaLabel: "Fechar",
-                                  dimensions: "m",
-                                },
-                              );
-                            }}
-                            disabled={isSubmitting}
-                          >
-                            Eliminar a reutilização
-                          </Button>
-                        </>
-                      }
-                    />
-                  </div>
-                </form>
-              </div>
-
-              <aside className="admin-page__auxiliar">
-                <div className="admin-page__auxiliar-inner">
-                  <div className="admin-page__auxiliar-header">
-                    <Icon
-                      name="agora-line-question-mark"
-                      className="w-24 h-24"
-                    />
-                    <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
-                  </div>
-                  <AuxiliarList
-                    items={getReuseAuxiliarItems({
-                      title: !!formErrors.title,
-                      link: !!formErrors.url,
-                      description: !!formErrors.description,
-                    })}
-                  />
-                </div>
-              </aside>
-            </div>
+            <ReusesEditMetadataTab
+              reuse={reuse}
+              isSubmitting={isSubmitting}
+              featured={featured}
+              title={title}
+              url={url}
+              description={description}
+              selectedType={selectedType}
+              selectedTopic={selectedTopic}
+              selectedTypeRef={selectedTypeRef}
+              selectedTopicRef={selectedTopicRef}
+              selectedKeywordsRef={selectedKeywordsRef}
+              selectedKeywordsValue={selectedKeywordsValue}
+              selectedKeywords={selectedKeywords}
+              keywordOptions={keywordOptions}
+              imageError={imageError}
+              formErrors={formErrors}
+              reuseTypes={reuseTypes}
+              reuseTopics={reuseTopics}
+              onPublishReuse={handlePublishReuse}
+              onToggleFeatured={() => setFeatured((value) => !value)}
+              onTitleChange={(value) => {
+                setTitle(value);
+                if (value.trim()) clearError("title");
+              }}
+              onUrlChange={(value) => {
+                setUrl(value);
+                if (value.trim()) clearError("url");
+              }}
+              onTypeChange={(value) => setSelectedType(value)}
+              onTopicChange={(value) => setSelectedTopic(value)}
+              onDescriptionChange={(value) => {
+                setDescription(value);
+                if (value.trim()) clearError("description");
+              }}
+              onKeywordSearchChange={setKeywordSearch}
+              onKeywordsChange={handleKeywordsChange}
+              onRemoveKeyword={handleRemoveKeyword}
+              onImageUpload={handleImageUpload}
+              onImageSecurityError={() => setImageError(POISONED_FILE_WARNING)}
+              onSaveMetadata={handleSaveMetadata}
+              onArchiveReuse={handleArchiveReuse}
+              onUnarchiveReuse={handleUnarchiveReuse}
+              onOpenDeletePopup={handleOpenDeletePopup}
+            />
           </TabBody>
         </Tab>
-
         {/* Datasets Tab */}
         <Tab>
           <TabHeader>Conjuntos de dados ({reuse.datasets?.length || 0})</TabHeader>
@@ -1758,3 +1471,4 @@ export default function ReusesEditClient() {
     </div>
   );
 }
+
