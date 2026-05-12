@@ -128,7 +128,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const [isEnabled, setIsEnabled] = useState(true);
   const [isAutoArchive, setIsAutoArchive] = useState(true);
   const [filters, setFilters] = useState<{ type: string; value: string; mode: string }[]>([]);
-  const harvesterScheduleRef = useRef("");
+  const [harvesterSchedule, setHarvesterSchedule] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -154,7 +154,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           setHarvesterUrl(data.url);
           setIsEnabled(data.active);
           setIsAutoArchive(data.autoarchive);
-          harvesterScheduleRef.current = data.schedule || "";
+          setHarvesterSchedule(data.schedule || "");
           setSelectedBackend(data.backend);
           const existingFilters = (data.config?.filters as { key?: string; value?: string; type?: string }[] | undefined) || [];
           setFilters(existingFilters.map((f) => ({ type: f.key || "", value: String(f.value || ""), mode: f.type || "include" })));
@@ -241,7 +241,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     setSaveError(null);
 
     try {
-      const newSchedule = harvesterScheduleRef.current.trim();
+      const newSchedule = harvesterSchedule.trim();
       const oldSchedule = source.schedule || "";
 
       const [updated] = await Promise.all([
@@ -291,7 +291,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
         name: harvesterName.trim() || source.name,
         url: harvesterUrl.trim() || source.url,
         backend: selectedBackend || source.backend,
-        schedule: harvesterScheduleRef.current.trim() || undefined,
+        schedule: harvesterSchedule.trim() || undefined,
         active: isEnabled,
         autoarchive: isAutoArchive,
         ...(filters.some((f) => f.value.trim() && f.type) && {
@@ -864,14 +864,13 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
                   <div className="admin-page__fields-group">
                     <InputText
-                      key={`schedule-${source.id}`}
                       label="Planeamento"
                       placeholder=""
                       id="harvester-schedule"
-                      defaultValue={harvesterScheduleRef.current}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        harvesterScheduleRef.current = e.target.value;
-                      }}
+                      value={harvesterSchedule}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setHarvesterSchedule(e.target.value)
+                      }
                     />
                   </div>
 
