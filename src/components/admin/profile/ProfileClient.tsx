@@ -100,6 +100,7 @@ export default function ProfileClient() {
 
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [newEmail, setNewEmail] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
   const [isChangingEmail, setIsChangingEmail] = useState(false);
   const [emailChangeSuccess, setEmailChangeSuccess] = useState(false);
 
@@ -284,6 +285,7 @@ export default function ProfileClient() {
     try {
       const csrfToken = await fetchCsrfToken();
       await requestEmailChange(newEmail, csrfToken);
+      setPendingEmail(newEmail);
       setEmailChangeSuccess(true);
       setIsEditingEmail(false);
       setNewEmail("");
@@ -590,7 +592,7 @@ export default function ProfileClient() {
                     <StatusCard
                       variant="success"
                       showIcon
-                      description="Foi enviado um e-mail de confirmação para o novo endereço. Verifique a sua caixa de entrada."
+                      description={`E-mail de confirmação enviado para ${pendingEmail}. Verifique a sua caixa de entrada e clique no link para concluir.`}
                     />
                   )}
 
@@ -611,53 +613,56 @@ export default function ProfileClient() {
                           label="Endereço de e-mail"
                           placeholder="Insira o e-mail aqui"
                           id="email"
-                          value={email}
+                          value={emailChangeSuccess ? pendingEmail : email}
                           readOnly
                         />
                       )}
                     </div>
-                    {!samlLogin && (
-                      <>
-                        {isEditingEmail ? (
-                          <div className="flex gap-8">
-                            <Button
-                              appearance="outline"
-                              variant="primary"
-                              onClick={handleEmailChange}
-                              disabled={isChangingEmail || !newEmail || newEmail === email}
-                            >
-                              {isChangingEmail ? "A enviar..." : "Confirmar"}
-                            </Button>
-                            <Button
-                              appearance="outline"
-                              variant="neutral"
-                              onClick={() => {
-                                setIsEditingEmail(false);
-                                setNewEmail("");
-                              }}
-                              disabled={isChangingEmail}
-                            >
-                              Cancelar
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            appearance="outline"
-                            variant="neutral"
-                            hasIcon
-                            leadingIcon="agora-line-edit"
-                            leadingIconHover="agora-solid-edit"
-                            onClick={() => {
-                              setIsEditingEmail(true);
-                              setNewEmail(email);
-                            }}
-                          >
-                            Alterar e-mail
-                          </Button>
-                        )}
-                      </>
+                    {!samlLogin && !isEditingEmail && (
+                      <Button
+                        appearance="outline"
+                        variant="neutral"
+                        hasIcon
+                        leadingIcon="agora-line-edit"
+                        leadingIconHover="agora-solid-edit"
+                        onClick={() => {
+                          setIsEditingEmail(true);
+                          setNewEmail(emailChangeSuccess ? pendingEmail : "");
+                        }}
+                      >
+                        Alterar e-mail
+                      </Button>
                     )}
                   </div>
+                  {emailChangeSuccess && !isEditingEmail && (
+                    <p className="text-sm text-neutral-600">
+                      Aguarda confirmação por e-mail — até confirmar, o e-mail ativo é{" "}
+                      <strong>{email}</strong>
+                    </p>
+                  )}
+                  {!samlLogin && isEditingEmail && (
+                    <div className="flex gap-8 justify-end">
+                      <Button
+                        appearance="outline"
+                        variant="primary"
+                        onClick={handleEmailChange}
+                        disabled={isChangingEmail || !newEmail || newEmail === email || newEmail === pendingEmail}
+                      >
+                        {isChangingEmail ? "A enviar..." : "Confirmar"}
+                      </Button>
+                      <Button
+                        appearance="outline"
+                        variant="neutral"
+                        onClick={() => {
+                          setIsEditingEmail(false);
+                          setNewEmail("");
+                        }}
+                        disabled={isChangingEmail}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  )}
 
                   <div className="flex items-end gap-16">
                     <div className="flex-1">
