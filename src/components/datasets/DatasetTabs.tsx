@@ -443,8 +443,8 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                         <div key={disc.id} className="bg-white rounded-8 p-32">
                                             {/* First message / topic */}
                                             <div className="flex justify-between items-start">
-                                                <div className="flex-1">
-                                                    <h4 className="font-bold text-neutral-900 text-base mb-16">{disc.title}</h4>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-bold text-neutral-900 text-base mb-16 [overflow-wrap:anywhere]">{disc.title}</h4>
                                                     <div className="flex items-center gap-8">
                                                         <Avatar
                                                             avatarType={disc.user.avatar_thumbnail ? "image" : "initials"}
@@ -501,7 +501,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                 </div>
                                             </div>
                                             {disc.discussion.length > 0 && (
-                                                <p className="text-neutral-900 text-sm mt-16 mb-16 max-w-[100ch]">
+                                                <p className="text-neutral-900 text-sm mt-16 mb-16 max-w-[100ch] [overflow-wrap:anywhere]">
                                                     {disc.discussion[0].content}
                                                 </p>
                                             )}
@@ -565,7 +565,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <p className="text-neutral-900 text-sm mt-4 max-w-[100ch]">
+                                                            <p className="text-neutral-900 text-sm mt-4 max-w-[100ch] [overflow-wrap:anywhere]">
                                                                 {msg.content}
                                                             </p>
                                                         </div>
