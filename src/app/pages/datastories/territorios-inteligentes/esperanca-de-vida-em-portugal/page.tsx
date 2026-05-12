@@ -29,7 +29,7 @@ export default async function DataStoryDetailPage({
 }) {
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "Início", url: "/" },
-    { label: "Datastories", url: "/pages/datastories" },
+    { label: "Data Stories", url: "/pages/datastories" },
     { label: "Territórios Inteligentes: Esperança de vida em Portugal", url: "/pages/datastories/territorios-inteligentes/esperanca-de-vida-em-portugal" },
   ];
 

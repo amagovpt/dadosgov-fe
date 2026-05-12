@@ -26,7 +26,7 @@ export default async function DataStoryDetailPage({
 }) {
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "Início", url: "/" },
-    { label: "Datastories", url: "/pages/datastories" },
+    { label: "Data Stories", url: "/pages/datastories" },
     { label: "Densidade populacional e consumo doméstico de energia elétrica: como se relacionam", url: "/pages/datastories/territorios-inteligentes/densidade-vs-consumo" },
   ];
 
