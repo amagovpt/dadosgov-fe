@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useLayoutEffect, useState, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
@@ -129,6 +129,12 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const [isAutoArchive, setIsAutoArchive] = useState(true);
   const [filters, setFilters] = useState<{ type: string; value: string; mode: string }[]>([]);
   const [harvesterSchedule, setHarvesterSchedule] = useState("");
+  // The agora-design-system InputText fires an internal setState on every
+  // keystroke (for the `has-value` CSS flag) which races our parent
+  // re-render and makes React re-apply `value` imperatively, resetting the
+  // caret to the end. We track the caret position on each onChange and
+  // restore it after the render commit.
+  const scheduleCursorRef = useRef<number | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -170,6 +176,22 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     }
     load();
   }, [slug]);
+
+  // Restore the caret on the Planeamento input after each parent re-render.
+  // Runs synchronously before paint via useLayoutEffect to avoid flicker.
+  useLayoutEffect(() => {
+    const cursor = scheduleCursorRef.current;
+    if (cursor === null) return;
+    const el = document.getElementById("harvester-schedule") as HTMLInputElement | null;
+    if (el && document.activeElement === el) {
+      try {
+        el.setSelectionRange(cursor, cursor);
+      } catch {
+        // setSelectionRange throws on some input types; safe to swallow.
+      }
+    }
+    scheduleCursorRef.current = null;
+  }, [harvesterSchedule]);
 
   const jobsInitialLoadDone = useRef(false);
 
@@ -868,9 +890,10 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                       placeholder=""
                       id="harvester-schedule"
                       value={harvesterSchedule}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setHarvesterSchedule(e.target.value)
-                      }
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        scheduleCursorRef.current = e.target.selectionStart;
+                        setHarvesterSchedule(e.target.value);
+                      }}
                     />
                   </div>
 
