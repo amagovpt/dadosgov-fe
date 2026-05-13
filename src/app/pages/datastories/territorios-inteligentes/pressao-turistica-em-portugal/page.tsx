@@ -30,7 +30,7 @@ export default async function DataStoryDetailPage({
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "Início", url: "/" },
     { label: "Data Stories", url: "/pages/datastories" },
-    { label: "Territórios Inteligentes: Pressão turística em Portugal", url: "/pages/datastories/territorios-inteligentes/pressao-turistica-em-portugal" },
+    { label: "Qual a intensidade da pressão turística em Portugal?", url: "/pages/datastories/territorios-inteligentes/pressao-turistica-em-portugal" },
   ];
 
   const datastory = await getDatastory(
