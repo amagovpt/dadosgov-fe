@@ -2,6 +2,7 @@ import React from "react";
 import {
   Button,
   DropdownOption,
+  type DropdownSectionProps,
   DropdownSection,
   Icon,
   StatusCard,
@@ -31,7 +32,9 @@ type ReusesEditMetadataTabProps = {
   selectedKeywordsRef: React.MutableRefObject<string>;
   selectedKeywordsValue: string;
   selectedKeywords: string[];
-  keywordOptions: React.ReactNode;
+  keywordOptions:
+    | React.ReactElement<DropdownSectionProps>
+    | React.ReactElement<DropdownSectionProps>[];
   imageError: string | null;
   formErrors: Record<string, boolean>;
   reuseTypes: ReuseType[];
