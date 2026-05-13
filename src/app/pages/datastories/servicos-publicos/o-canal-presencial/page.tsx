@@ -28,7 +28,7 @@ export default async function DataStoryDetailPage({
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "Início", url: "/" },
     { label: "Data Stories", url: "/pages/datastories" },
-    { label: "Servicos Públicos: O canal presencial", url: "/pages/datastories/servicos-publicos/o-canal-presencial" },
+    { label: "Serviços públicos: canal presencial", url: "/pages/datastories/servicos-publicos/o-canal-presencial" },
   ];
 
   const datastory = await getDatastory("servicos-publicos/o-canal-presencial", "pt");
