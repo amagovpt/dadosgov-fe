@@ -30,7 +30,7 @@ export default async function DataStoryDetailPage({
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "Início", url: "/" },
     { label: "Data Stories", url: "/pages/datastories" },
-    { label: "Territórios Inteligentes: Esperança de vida em Portugal", url: "/pages/datastories/territorios-inteligentes/esperanca-de-vida-em-portugal" },
+    { label: "Esperança de vida em Portugal: evolução e diferenças no território", url: "/pages/datastories/territorios-inteligentes/esperanca-de-vida-em-portugal" },
   ];
 
   const datastory = await getDatastory(
