@@ -89,7 +89,10 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
               section {
                 title
                 description
-                iframeSource
+                iframe {
+                  source
+                  classNames
+                }
               }
             }
           }

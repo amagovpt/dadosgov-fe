@@ -64,7 +64,7 @@ export default async function page() {
             <>
               <div className="w-full h-full grid gap-32 grid-cols-12 ">
                 {miniCourses.courses.map((course, index) => (
-                  <div className="col-span-12 lg:col-span-4 bg-wihte [&_a]:hidden [&_p]:hidden [&_.content]:!h-full" key={index}>
+                  <div className="col-span-12 lg:col-span-4 bg-wihte [&_.anchor]:hidden [&_p]:hidden [&_.title-text]:!min-h-64 h-full" key={index}>
                     <CardGeneral {
                       ...{
                         titleText: course.title,

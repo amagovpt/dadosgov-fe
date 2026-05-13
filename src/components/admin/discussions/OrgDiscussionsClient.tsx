@@ -191,15 +191,15 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
                   onClick={() => openDiscussion(discussion)}
                 >
                   <TableCell headerLabel="Título">
-                    <a
-                      href={discussion.url}
-                      className="text-primary-600 underline"
-                      onClick={(e) => e.stopPropagation()}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      className="text-primary-600 underline text-left"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDiscussion(discussion);
+                      }}
                     >
                       {discussion.title}
-                    </a>
+                    </button>
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDate(discussion.created)}
