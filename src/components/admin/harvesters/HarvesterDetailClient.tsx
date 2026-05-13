@@ -534,12 +534,9 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                 O seu harvester foi criado e está a aguardar validação da equipa de administração do portal.
               </p>
               <p className="text-sm text-neutral-700">
-                Informe-nos através do formulário de contacto abaixo se deseja que validemos o seu harvester. Será notificado da aprovação (ou rejeição).
+                A equipa de administração foi notificada automaticamente. Será
+                notificado da aprovação ou rejeição quando esta for decidida.
               </p>
-              <a href="#" className="flex items-center gap-8 text-sm text-primary-600">
-                Solicitar validação do harvester
-                <Icon name="agora-line-arrow-right-circle" className="w-[20px] h-[20px]" />
-              </a>
             </>
           )}
         </div>
