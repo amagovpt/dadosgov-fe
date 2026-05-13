@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
@@ -30,6 +30,7 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import IsolatedInput from "@/components/admin/IsolatedInput";
 import {
   fetchHarvester,
   fetchHarvestJobs,
@@ -129,12 +130,10 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const [isAutoArchive, setIsAutoArchive] = useState(true);
   const [filters, setFilters] = useState<{ type: string; value: string; mode: string }[]>([]);
   const [harvesterSchedule, setHarvesterSchedule] = useState("");
-  // The agora-design-system InputText fires an internal setState on every
-  // keystroke which can race our parent re-render and make React re-apply
-  // `value` imperatively, resetting the caret to the end. We track the
-  // caret position on each onChange and restore it after the commit.
-  const scheduleCursorRef = useRef<number | null>(null);
-  const scheduleInputRef = useRef<HTMLInputElement | null>(null);
+  // Seeded once from the API; passed as `defaultValue` to the IsolatedInput,
+  // which then owns the field state internally to avoid caret-jump on every
+  // parent re-render.
+  const [loadedSchedule, setLoadedSchedule] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -161,6 +160,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           setIsEnabled(data.active);
           setIsAutoArchive(data.autoarchive);
           setHarvesterSchedule(data.schedule || "");
+          setLoadedSchedule(data.schedule || "");
           setSelectedBackend(data.backend);
           const existingFilters = (data.config?.filters as { key?: string; value?: string; type?: string }[] | undefined) || [];
           setFilters(existingFilters.map((f) => ({ type: f.key || "", value: String(f.value || ""), mode: f.type || "include" })));
@@ -176,27 +176,6 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     }
     load();
   }, [slug]);
-
-  // Restore the caret on the Planeamento input after each parent re-render.
-  // Runs synchronously before paint via useLayoutEffect to avoid flicker.
-  // We resolve the element via two strategies — a forwarded ref first, then
-  // a DOM query as fallback — because the design-system InputText is typed
-  // as a plain FC, so `ref` propagation is not contractually guaranteed.
-  useLayoutEffect(() => {
-    const cursor = scheduleCursorRef.current;
-    if (cursor === null) return;
-    const el =
-      scheduleInputRef.current ??
-      (document.getElementById("harvester-schedule") as HTMLInputElement | null);
-    if (el) {
-      try {
-        el.setSelectionRange(cursor, cursor);
-      } catch {
-        // setSelectionRange throws on some input types; safe to swallow.
-      }
-    }
-    scheduleCursorRef.current = null;
-  }, [harvesterSchedule]);
 
   const jobsInitialLoadDone = useRef(false);
 
@@ -890,19 +869,12 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                   <h2 className="admin-page__section-title">Avançado</h2>
 
                   <div className="admin-page__fields-group">
-                    <InputText
+                    <IsolatedInput
                       label="Planeamento"
                       placeholder=""
                       id="harvester-schedule"
-                      // The design-system InputText is typed as `FC` but the
-                      // bundle forwards `ref` to the native <input>. Cast
-                      // narrows the gap so we keep a direct handle.
-                      ref={scheduleInputRef as unknown as React.Ref<HTMLInputElement>}
-                      value={harvesterSchedule}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        scheduleCursorRef.current = e.target.selectionStart;
-                        setHarvesterSchedule(e.target.value);
-                      }}
+                      defaultValue={loadedSchedule}
+                      onChange={(value: string) => setHarvesterSchedule(value)}
                     />
                   </div>
 
