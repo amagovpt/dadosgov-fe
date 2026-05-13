@@ -326,6 +326,9 @@ export default function ReusesEditClient() {
       .finally(() => setDiscussionsLoading(false));
   };
 
+  const discussionsCount =
+    discussionsLoaded ? discussions.length : (reuse?.metrics?.discussions ?? 0);
+
   const clearError = (field: string) => {
     if (formErrors[field]) {
       setFormErrors((prev) => {
@@ -919,7 +922,7 @@ export default function ReusesEditClient() {
         </Tab>
         {/* Discussions Tab */}
         <Tab>
-          <TabHeader>Discussões ({discussions.length})</TabHeader>
+          <TabHeader>Discussões ({discussionsCount})</TabHeader>
           <TabBody>
             <ReusesEditDiscussionsTab
               discussions={discussions}
