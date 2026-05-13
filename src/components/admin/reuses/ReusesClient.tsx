@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
   CardNoResults,
@@ -35,14 +34,11 @@ type ReuseSortField = "title" | "created_at" | "datasets";
 
 export default function ReusesClient() {
   const { displayName } = useCurrentUser();
-  const searchParams = useSearchParams();
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
+  const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,7 +46,6 @@ export default function ReusesClient() {
   const handleSort = (field: ReuseSortField) => (newOrder: SortOrder) => {
     setSortField(newOrder === "none" ? null : field);
     setSortOrder(newOrder);
-    setCurrentPage(1);
   };
 
   const getSortOrder = (field: ReuseSortField): SortOrder =>
@@ -76,7 +71,6 @@ export default function ReusesClient() {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
       setSearchQuery(value);
-      setCurrentPage(1);
     }, 400);
   };
 
@@ -86,25 +80,21 @@ export default function ReusesClient() {
       const q = searchQuery.trim().toLowerCase();
       result = result.filter((r) => r.title.toLowerCase().includes(q));
     }
-    if (statusFilter) {
-      return result.filter((r) => {
-        switch (statusFilter) {
-          case "public":
-            return !r.private && !r.archived && !r.deleted;
-          case "draft":
-            return r.private && !r.archived && !r.deleted;
-          case "archived":
-            return !!r.archived && !r.deleted;
-          case "deleted":
-            return !!r.deleted;
-          default:
-            return true;
-        }
-      });
-    }
-
-    // By default, hide deleted reuses (same behavior as datasets page).
-    return result.filter((r) => !r.deleted);
+    if (!statusFilter) return result;
+    return result.filter((r) => {
+      switch (statusFilter) {
+        case "public":
+          return !r.private && !r.archived && !r.deleted;
+        case "draft":
+          return r.private && !r.archived && !r.deleted;
+        case "archived":
+          return !!r.archived && !r.deleted;
+        case "deleted":
+          return !!r.deleted;
+        default:
+          return true;
+      }
+    });
   }, [reuses, searchQuery, statusFilter]);
 
   const sortedReuses = useMemo(() => {
@@ -125,11 +115,6 @@ export default function ReusesClient() {
       return (ad - bd) * dir;
     });
   }, [filteredReuses, sortField, sortOrder]);
-
-  const paginatedReuses = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sortedReuses.slice(start, start + itemsPerPage);
-  }, [sortedReuses, currentPage, itemsPerPage]);
 
   const getStatus = (reuse: Reuse) => {
     if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
@@ -156,7 +141,7 @@ export default function ReusesClient() {
       </div>
 
       <p className="text-neutral-700 text-sm mb-16">
-        {isLoading ? "A carregar..." : `${filteredReuses.length} resultados`}
+        {filteredReuses.length} resultados
       </p>
 
       <div className="flex items-end gap-16 mb-24">
@@ -176,10 +161,8 @@ export default function ReusesClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
-          defaultValue={statusFilter || undefined}
           onChange={(options) => {
             setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
-            setCurrentPage(1);
           }}
         >
           <DropdownSection name="status">
@@ -197,20 +180,15 @@ export default function ReusesClient() {
       ) : filteredReuses.length > 0 ? (
         <Table
           paginationProps={{
-            itemsPerPageLabel: "Itens por página",
-            itemsPerPage: itemsPerPage,
-            totalItems: sortedReuses.length,
+            itemsPerPageLabel: "Linhas por página",
+            itemsPerPage: 5,
+            totalItems: filteredReuses.length,
             availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
+            currentPage: 0,
             buttonDropdownAriaLabel: "Selecionar linhas por página",
             dropdownListAriaLabel: "Opções de linhas por página",
             prevButtonAriaLabel: "Página anterior",
             nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setItemsPerPage(size);
-              setCurrentPage(1);
-            },
           }}
         >
           <TableHeader>
@@ -241,7 +219,7 @@ export default function ReusesClient() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedReuses.map((reuse) => {
+            {sortedReuses.map((reuse) => {
               const status = getStatus(reuse);
               return (
                 <TableRow key={reuse.id}>
