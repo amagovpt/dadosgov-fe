@@ -104,7 +104,6 @@ export default function ReusesFormClient({
   useEffect(() => {
     const q = keywordSearch.trim();
     if (q.length < 2) {
-      setTagSearch([]);
       return;
     }
     const timer = setTimeout(async () => {
@@ -119,7 +118,6 @@ export default function ReusesFormClient({
   }, [keywordSearch]);
 
   useEffect(() => {
-    setSelectedDatasets([]);
     const dedupe = (items: Dataset[]) =>
       Array.from(new Map(items.map((d) => [d.id, d])).values());
     // When publishing as the user, preload the pool with the user's own
@@ -143,17 +141,26 @@ export default function ReusesFormClient({
     }
   }, [producerId, user?.organizations]);
 
-  useEffect(() => {
+  const clearStep2Errors = useCallback(() => {
     setDatasetLinkErrors({});
     setApiLinkErrors({});
-  }, [currentStep]);
+  }, []);
+
+  const goToNextStep = useCallback(() => {
+    clearStep2Errors();
+    onNextStep();
+  }, [clearStep2Errors, onNextStep]);
+
+  const goToPreviousStep = useCallback(() => {
+    clearStep2Errors();
+    onPreviousStep();
+  }, [clearStep2Errors, onPreviousStep]);
 
   // Search datasets across the whole portal when the user types in the
   // dataset search dropdown. Debounced lightly via the setTimeout below.
   useEffect(() => {
     const q = datasetSearch.trim();
     if (q.length < 2) {
-      setDatasetSearchResults([]);
       return;
     }
     const timer = setTimeout(async () => {
@@ -170,6 +177,7 @@ export default function ReusesFormClient({
   const keywordsChildren = useMemo(() => {
     const trimmed = keywordSearch.trim();
     const trimmedLower = trimmed.toLowerCase();
+    const visibleTagSearch = trimmed.length >= 2 ? tagSearch : [];
     // Selected tags stay visible regardless of query so the InputSelect keeps
     // tracking them across searches; otherwise typing a new query would drop
     // them from the children and the next onChange would lose those selections.
@@ -180,7 +188,7 @@ export default function ReusesFormClient({
         .filter(Boolean)
     );
     const seen = new Set<string>();
-    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
+    const uniqueTags = [...tags, ...visibleTagSearch].filter((t) => {
       const key = t.text.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
@@ -190,7 +198,7 @@ export default function ReusesFormClient({
     });
     const showCreate =
       trimmed.length > 0 &&
-      ![...tags, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
+      ![...tags, ...visibleTagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
       !selectedSet.has(trimmedLower);
     const options = [
       ...(showCreate
@@ -302,7 +310,7 @@ export default function ReusesFormClient({
       }
 
       setCreatedReuse(reuse);
-      onNextStep();
+      goToNextStep();
     } catch (error: unknown) {
       const err = error as { status?: number; data?: { errors?: Record<string, string>; message?: string } };
 
@@ -453,11 +461,13 @@ export default function ReusesFormClient({
 
   const datasetOptions = useMemo(() => {
     const selectedIds = new Set(selectedDatasets.map((d) => d.id));
+    const visibleDatasetSearchResults =
+      datasetSearch.trim().length >= 2 ? datasetSearchResults : [];
     // Show first the selected (keeps them visible even when not in results),
     // then the search results (if any), then the producer's own datasets.
     const combined: Dataset[] = [
       ...selectedDatasets,
-      ...datasetSearchResults,
+      ...visibleDatasetSearchResults,
       ...myDatasets,
     ];
     // Deduplicate while preserving order
@@ -468,7 +478,7 @@ export default function ReusesFormClient({
       </DropdownOption>
     ));
     return <DropdownSection name="datasets">{options}</DropdownSection>;
-  }, [myDatasets, datasetSearchResults, selectedDatasets]);
+  }, [myDatasets, datasetSearch, datasetSearchResults, selectedDatasets]);
 
   const topicOptions = useMemo(() => (
     <DropdownSection name="themes">
@@ -528,6 +538,9 @@ export default function ReusesFormClient({
                     const v = value || "user";
                     setSelectedProducerValue(v);
                     setProducerId(v);
+                    setSelectedDatasets([]);
+                    setDatasetSearch("");
+                    setDatasetSearchResults([]);
                   }}
                 >
                   {producerOptions}
@@ -731,7 +744,7 @@ export default function ReusesFormClient({
                     hasIcon
                     leadingIcon="agora-line-arrow-left-circle"
                     leadingIconHover="agora-solid-arrow-left-circle"
-                    onClick={onPreviousStep}
+                    onClick={goToPreviousStep}
                   >
                     Anterior
                   </Button>
@@ -940,7 +953,7 @@ export default function ReusesFormClient({
                     hasIcon
                     leadingIcon="agora-line-arrow-left-circle"
                     leadingIconHover="agora-solid-arrow-left-circle"
-                    onClick={onPreviousStep}
+                    onClick={goToPreviousStep}
                   >
                     Anterior
                   </Button>
@@ -997,7 +1010,7 @@ export default function ReusesFormClient({
                             }
                           }
                         }
-                        onNextStep();
+                        goToNextStep();
                       } catch (error: unknown) {
                         const err = error as { data?: Record<string, unknown> };
                         if (err.data && typeof err.data === "object") {
