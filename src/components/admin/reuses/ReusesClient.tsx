@@ -69,7 +69,11 @@ export default function ReusesClient() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    const timeoutId = setTimeout(() => {
+      void loadData();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [loadData]);
 
   const handleSearch = (value: string) => {
