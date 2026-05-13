@@ -194,10 +194,7 @@ export default function ReusesEditClient() {
   // Debounced portal-wide dataset search when the user types in the dropdown.
   useEffect(() => {
     const q = datasetSearch.trim();
-    if (q.length < 2) {
-      setDatasetSearchResults([]);
-      return;
-    }
+    if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
         const res = await searchDatasets(q, 1, 20);
@@ -217,10 +214,7 @@ export default function ReusesEditClient() {
   // Debounced tag search while user types in the keywords dropdown.
   useEffect(() => {
     const q = keywordSearch.trim();
-    if (q.length < 2) {
-      setTagSearch([]);
-      return;
-    }
+    if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
         const res = await suggestTags(q, 20);
@@ -339,6 +333,20 @@ export default function ReusesEditClient() {
         delete next[field];
         return next;
       });
+    }
+  };
+
+  const handleDatasetSearchChange = (value: string) => {
+    setDatasetSearch(value);
+    if (value.trim().length < 2) {
+      setDatasetSearchResults([]);
+    }
+  };
+
+  const handleKeywordSearchChange = (value: string) => {
+    setKeywordSearch(value);
+    if (value.trim().length < 2) {
+      setTagSearch([]);
     }
   };
 
@@ -859,7 +867,7 @@ export default function ReusesEditClient() {
                 setDescription(value);
                 if (value.trim()) clearError("description");
               }}
-              onKeywordSearchChange={setKeywordSearch}
+              onKeywordSearchChange={handleKeywordSearchChange}
               onKeywordsChange={handleKeywordsChange}
               onRemoveKeyword={handleRemoveKeyword}
               onImageUpload={handleImageUpload}
@@ -883,7 +891,7 @@ export default function ReusesEditClient() {
               datasetLinks={datasetLinks}
               datasetLinkErrors={datasetLinkErrors}
               isSubmitting={isSubmitting}
-              onDatasetSearchChange={setDatasetSearch}
+              onDatasetSearchChange={handleDatasetSearchChange}
               onDatasetSelectChange={handleDatasetSelectChange}
               onRemoveSelectedDataset={handleRemoveSelectedDataset}
               onDatasetLinkChange={handleDatasetLinkChange}
