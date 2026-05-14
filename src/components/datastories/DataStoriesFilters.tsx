@@ -180,7 +180,7 @@ export function DataStoriesFilters({
         onChange={handleToggleFilterChange}
         idPrefix="datastory-filter"
       />
-
+      {/*
       <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">
         Filtros avançados
       </h2>
@@ -195,7 +195,7 @@ export function DataStoriesFilters({
         showClearActions={true}
         checkboxIdPrefix="datastory"
       />
-
+      */}
       <div className="mt-32 mb-64">
         <Button
           variant="primary"
