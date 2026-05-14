@@ -13,6 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import HeroGeneral from "@/components/HeroGeneral";
 import { submitSupportContact, type SupportTopic } from "@/services/api";
+import IconAgora from "../Primitives/IconAgora";
 
 const FAQ_DATA = [
   {
@@ -113,11 +114,11 @@ const shouldPreselectFeedbackFromUrl = (): boolean => {
 
 const SupportPage = () => {
   const [activeItem, setActiveItem] = React.useState(() =>
-    shouldPreselectFeedbackFromUrl() ? "Ajuda" : "Nesta página",
+    shouldPreselectFeedbackFromUrl() ? "Ajuda" : "Nesta página"
   );
   const [expandedId, setExpandedId] = React.useState<string | null>("0-1");
   const [selectedToggle, setSelectedToggle] = React.useState<string | null>(() =>
-    shouldPreselectFeedbackFromUrl() ? "feedback" : null,
+    shouldPreselectFeedbackFromUrl() ? "feedback" : null
   );
   const [subjectBody, setSubjectBody] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -160,9 +161,7 @@ const SupportPage = () => {
       setErrors({ email: "", subject: "", description: "" });
     } catch (err) {
       console.error("Support form submission failed:", err);
-      setErrorMessage(
-        "Não foi possível enviar o seu pedido. Tente novamente em alguns instantes.",
-      );
+      setErrorMessage("Não foi possível enviar o seu pedido. Tente novamente em alguns instantes.");
     } finally {
       setIsSubmitting(false);
     }
@@ -197,10 +196,10 @@ const SupportPage = () => {
       <HeroGeneral
         title={
           <>
-            <span className="text-32 text-white font-[500] mb-[10px]">
+            <span className="mb-[10px] text-32 font-[500] text-white">
               Bem-vindo à página de suporte da
             </span>
-            <span className="text-32 text-white font-[500]">portal dados.gov.pt</span>
+            <span className="text-32 font-[500] text-white">portal dados.gov.pt</span>
           </>
         }
         breadcrumbItems={[
@@ -210,87 +209,42 @@ const SupportPage = () => {
         backgroundImageUrl="/Banner/hero-bg.png"
         subtitle={
           <>
-            <label className="block text-[20px] font-bold text-white mt-48">
+            <label className="mt-48 block text-[20px] font-bold text-white">
               Antes de nos contactar, consulte o fórum e os nossos guias:
               <br />a sua questão poderá já estar respondida nesses pontos de suporte!
             </label>
 
-            <div className="absolute w-full mb-64 bg-white text-neutral-900 shadow-lg dropdown"></div>
+            <div className="shadow-lg dropdown absolute mb-64 w-full bg-white text-neutral-900"></div>
 
             <div className="mt-16 flex flex-wrap gap-32">
               <a
                 href="#"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-8 text-white cursor-pointer hover:underline"
+                className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 Consulte a documentação em data.gov.pt
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="icon icon-m fill-white w-32 h-32"
-                  aria-hidden="true"
-                  role="img"
-                >
-                  <path d="M11.2929 8.70711C10.9024 8.31658 10.9024 7.68342 11.2929 7.29289C11.6834 6.90237 12.3166 6.90237 12.7071 7.29289L16.7071 11.2929C17.0976 11.6834 17.0976 12.3166 16.7071 12.7071L12.7071 16.7071C12.3166 17.0976 11.6834 17.0976 11.2929 16.7071C10.9024 16.3166 10.9024 15.6834 11.2929 15.2929L13.5858 13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H13.5858L11.2929 8.70711Z"></path>
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1ZM3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z"
-                  ></path>
-                </svg>
+                <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
               </a>
 
               <a
                 href="#"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-8 text-white cursor-pointer hover:underline"
+                className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 Consulte os guias sobre dados abertos
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="icon icon-m fill-white w-32 h-32"
-                  aria-hidden="true"
-                  role="img"
-                >
-                  <path d="M11.2929 8.70711C10.9024 8.31658 10.9024 7.68342 11.2929 7.29289C11.6834 6.90237 12.3166 6.90237 12.7071 7.29289L16.7071 11.2929C17.0976 11.6834 17.0976 12.3166 16.7071 12.7071L12.7071 16.7071C12.3166 17.0976 11.6834 17.0976 11.2929 16.7071C10.9024 16.3166 10.9024 15.6834 11.2929 15.2929L13.5858 13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H13.5858L11.2929 8.70711Z"></path>
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1ZM3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z"
-                  ></path>
-                </svg>
+                <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
               </a>
 
               <a
                 href="#"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-8 text-white cursor-pointer hover:underline"
+                className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 Consulte os guias sobre como usar os dados
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="icon icon-m fill-white w-32 h-32"
-                  aria-hidden="true"
-                  role="img"
-                >
-                  <path d="M11.2929 8.70711C10.9024 8.31658 10.9024 7.68342 11.2929 7.29289C11.6834 6.90237 12.3166 6.90237 12.7071 7.29289L16.7071 11.2929C17.0976 11.6834 17.0976 12.3166 16.7071 12.7071L12.7071 16.7071C12.3166 17.0976 11.6834 17.0976 11.2929 16.7071C10.9024 16.3166 10.9024 15.6834 11.2929 15.2929L13.5858 13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H13.5858L11.2929 8.70711Z"></path>
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1ZM3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z"
-                  ></path>
-                </svg>
+                <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
               </a>
             </div>
           </>
@@ -298,12 +252,12 @@ const SupportPage = () => {
       />
 
       <div className="container mx-auto px-4 py-64">
-        <div className="grid md:grid-cols-3 xl:grid-cols-12 gap-32">
-          <div className="xl:col-span-8 xl:block max-w-ch">
+        <div className="grid gap-32 md:grid-cols-3 xl:grid-cols-12">
+          <div className="max-w-ch xl:col-span-8 xl:block">
             {/* FAQ Section */}
-            <div id="faq" className="max-w-4xl mx-auto scroll-mt-[190px]">
-              <p className="text-sm text-neutral-700 mb-32">Conteúdos atualizado a 23.2.2026</p>
-              <h2 className="text-xl-semibold mb-32 text-primary-900">Perguntas frequentes</h2>
+            <div id="faq" className="mx-auto max-w-4xl scroll-mt-[190px]">
+              <p className="text-sm mb-32 text-neutral-700">Conteúdos atualizado a 23.2.2026</p>
+              <h2 className="mb-32 text-xl-semibold text-primary-900">Perguntas frequentes</h2>
 
               <div className="space-y-48">
                 {FAQ_DATA.map((category, idx) => (
@@ -317,7 +271,7 @@ const SupportPage = () => {
                       .replace(/[^\w-]/g, "")}
                     className={`${category.category !== "Sobre dados específicos" ? "mt-32" : ""} scroll-mt-[190px]`}
                   >
-                    <h3 className="text-[20px] font-bold text-[#021C51] mb-16">
+                    <h3 className="mb-16 text-[20px] font-bold text-[#021C51]">
                       {category.category}
                     </h3>
                     <div>
@@ -327,7 +281,7 @@ const SupportPage = () => {
                           <Accordion
                             key={`${currentId}-${expandedId === currentId}`}
                             headingTitle={
-                              <span className="text-[#2B363C] font-bold mr-16">
+                              <span className="mr-16 font-bold text-[#2B363C]">
                                 {item.question}
                               </span>
                             }
@@ -340,7 +294,7 @@ const SupportPage = () => {
                               }
                             }}
                           >
-                            <div className="py-16 mr-16 text-neutral-900 leading-relaxed">
+                            <div className="mr-16 py-16 leading-relaxed text-neutral-900">
                               {"richAnswer" in item && item.richAnswer === "publicar" ? (
                                 <div className="space-y-16">
                                   <div>
@@ -938,13 +892,10 @@ const SupportPage = () => {
             {/* Bottom Support Options */}
           </div>
 
-          <div className="xl:col-span-4 xl:block self-start sticky top-[190px] h-fit">
-            <div className="sidebar-index pr-64 border-l border-neutral-700">
+          <div className="sticky top-[190px] h-fit self-start xl:col-span-4 xl:block">
+            <div className="sidebar-index border-l border-neutral-700 pr-64">
               <ul>
-                <li
-                  className="mb-16 cursor-pointer"
-                  onClick={() => setActiveItem("Nesta página")}
-                >
+                <li className="mb-16 cursor-pointer" onClick={() => setActiveItem("Nesta página")}>
                   <a
                     href="#nesta-pagina"
                     className={`text-neutral-900 ${activeItem === "Nesta página" ? "text-m-bold font-bold" : "text-m-regular"}`}
@@ -990,9 +941,9 @@ const SupportPage = () => {
           </div>
         </div>
 
-        <div id="ajuda" className="mt-80 pt-64 border-neutral-200 scroll-mt-[190px]">
-          <h2 className="text-24 font-bold text-[#021C51] mb-24">Ajuda</h2>
-          <h3 className="text-[20px] font-[500] text-[#021C51] mb-16">
+        <div id="ajuda" className="mt-80 scroll-mt-[190px] border-neutral-200 pt-64">
+          <h2 className="mb-24 text-24 font-bold text-[#021C51]">Ajuda</h2>
+          <h3 className="mb-16 text-[20px] font-[500] text-[#021C51]">
             Não encontrou o que procurava?
           </h3>
 
@@ -1038,7 +989,7 @@ const SupportPage = () => {
 
           {selectedToggle && (
             <div className="mt-32 max-w-2xl">
-              <h3 className="text-[20px] font-bold text-[#021C51] mb-24">
+              <h3 className="mb-24 text-[20px] font-bold text-[#021C51]">
                 {TOGGLE_TITLE_MAP[selectedToggle]}
               </h3>
 

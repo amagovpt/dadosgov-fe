@@ -1,31 +1,72 @@
 'use client';
-import { Sidebar, SidebarItem, Checkbox, InputSelect, DropdownSection, DropdownOption } from '@ama-pt/agora-design-system';
+import { useId, useState, Children, isValidElement } from 'react';
+import { InputSelect, DropdownSection, DropdownOption, type DropdownOptionProps, type DropdownSectionProps } from '@ama-pt/agora-design-system';
+import type { ReactElement } from 'react';
 
-export const MiniCoursesFilters = () => {
+export interface MiniCoursesFiltersProps {
+  onSortChange: (sortKey: string) => void;
+}
+
+const sortOptions = [
+  { label: 'Ordem alfabética A-Z', value: 'asc' },
+  { label: 'Ordem alfabética Z-A', value: 'desc' },
+  { label: 'Mais recentes', value: 'newest' },
+];
+
+export default function MiniCoursesFilters({ onSortChange }: MiniCoursesFiltersProps) {
+  const id = useId();
+
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const filterGroups = [
     { name: 'Áreas técnicas', type: 'static' },
     { name: 'Perfis', type: 'static' }
   ];
 
+  const [sections, setSections] = useState<ReactElement<DropdownSectionProps>[]>([
+    <DropdownSection key={`sort-${id}`} name="order">
+      {sortOptions.map((opt, i) => (
+        <DropdownOption key={`sort-${id}-${i}`} value={opt.value} selected={i === 0}>
+          {opt.label}
+        </DropdownOption>
+      ))}
+    </DropdownSection>,
+  ]);
+
+  const handleSort = (selected: DropdownOptionProps[]) => {
+    const newSections = sections.map((s) => (
+      <DropdownSection {...s.props} key={`sort-${id}`}>
+        {Children.toArray(s.props.children).map((item, i) => {
+          if (isValidElement<DropdownOptionProps>(item)) {
+            return (
+              <DropdownOption
+                {...item.props}
+                key={`sort-${id}-${i}`}
+                selected={!!selected.find((sel) => sel.value === item.props.value)}
+              />
+            );
+          }
+          return null;
+        }).filter((item): item is ReactElement<DropdownOptionProps> => item !== null)}
+      </DropdownSection>
+    ));
+
+    setSections(newSections);
+
+    if (selected.length > 0) {
+      onSortChange(selected[0].value as string);
+    }
+  };
+
   return (
     <div className=" flex flex-col gap-64">
-      <div className="flex justify-center flex-col gap-16">
+      <div className="flex flex-col gap-16">
         <h2 className="text-l-bold text-neutral-900">Ordenar</h2>
-        <InputSelect
-          label="Ordenar"
-          id="sort-minicourses"
-          defaultValue="az"
-          hideLabel={true}
-        >
-          <DropdownSection name="order">
-            <DropdownOption value="az">Ordem alfabética A-Z</DropdownOption>
-            <DropdownOption value="za">Ordem alfabética Z-A</DropdownOption>
-            <DropdownOption value="recentes">Mais recentes</DropdownOption>
-          </DropdownSection>
+        <InputSelect label="Ordenar" hideLabel onChange={handleSort}>
+          {sections}
         </InputSelect>
       </div>
-
-      <div className="">
+      {/* <div className="">
         <h2 className="text-l-bold text-neutral-900 ">Filtrar</h2>
         <Sidebar variant="filter">
           {filterGroups.map((group, index) => (
@@ -50,8 +91,8 @@ export const MiniCoursesFilters = () => {
             </SidebarItem>
           ))}
         </Sidebar>
-      </div>
+      </div> */}
     </div>
   );
-};
+}
 

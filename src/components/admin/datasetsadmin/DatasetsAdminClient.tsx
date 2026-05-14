@@ -548,7 +548,11 @@ export default function DatasetsAdminClient({
   const handleStep2Next = async (e?: React.MouseEvent<HTMLButtonElement>) => {
     const errors: Record<string, boolean> = {};
     if (!selectedProducerRef.current) errors.datasetProducer = true;
-    if (!datasetTitle.trim()) errors.datasetTitle = true;
+    if (!datasetTitle.trim()) {
+      errors.datasetTitle = true;
+    } else if (datasetTitle.trim().length > 350) {
+      errors.datasetTitleTooLong = true;
+    }
     if (!datasetDescription.trim()) errors.datasetDescription = true;
     if (!selectedFrequencyRef.current) errors.datasetFrequency = true;
     const startRaw = (temporalStart || "").trim();
@@ -817,7 +821,7 @@ export default function DatasetsAdminClient({
   };
 
   const auxiliarItemsStep2 = getDatasetAuxiliarItems({
-    title: !!formErrors.datasetTitle,
+    title: !!formErrors.datasetTitle || !!formErrors.datasetTitleTooLong,
     description: !!formErrors.datasetDescription,
     frequency: !!formErrors.datasetFrequency,
   });
@@ -954,6 +958,13 @@ export default function DatasetsAdminClient({
                 <h2 className="admin-page__section-title">Descrição</h2>
 
                 <div className="admin-page__fields-group">
+                  {formErrors.datasetTitleTooLong && (
+                    <StatusCard
+                      variant="danger"
+                      showIcon
+                      description="O título não pode ter mais do que 350 caracteres."
+                    />
+                  )}
                   <InputText
                     label="Título*"
                     placeholder="Insira o título aqui"
@@ -962,11 +973,16 @@ export default function DatasetsAdminClient({
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setDatasetTitle(e.target.value);
                       if (e.target.value.trim()) clearError("datasetTitle");
+                      clearError("datasetTitleTooLong");
                     }}
-                    hasError={!!formErrors.datasetTitle}
-                    hasFeedback={!!formErrors.datasetTitle}
+                    hasError={!!formErrors.datasetTitle || !!formErrors.datasetTitleTooLong}
+                    hasFeedback={!!formErrors.datasetTitle || !!formErrors.datasetTitleTooLong}
                     feedbackState="danger"
-                    errorFeedbackText="Campo obrigatório"
+                    errorFeedbackText={
+                      formErrors.datasetTitleTooLong
+                        ? "O título não pode ter mais do que 350 caracteres."
+                        : "Campo obrigatório"
+                    }
                   />
                   <InputText
                     label="Sigla"

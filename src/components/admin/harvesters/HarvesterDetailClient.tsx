@@ -30,6 +30,7 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import IsolatedInput from "@/components/admin/IsolatedInput";
 import {
   fetchHarvester,
   fetchHarvestJobs,
@@ -128,7 +129,11 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const [isEnabled, setIsEnabled] = useState(true);
   const [isAutoArchive, setIsAutoArchive] = useState(true);
   const [filters, setFilters] = useState<{ type: string; value: string; mode: string }[]>([]);
-  const harvesterScheduleRef = useRef("");
+  const [harvesterSchedule, setHarvesterSchedule] = useState("");
+  // Seeded once from the API; passed as `defaultValue` to the IsolatedInput,
+  // which then owns the field state internally to avoid caret-jump on every
+  // parent re-render.
+  const [loadedSchedule, setLoadedSchedule] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -154,7 +159,8 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           setHarvesterUrl(data.url);
           setIsEnabled(data.active);
           setIsAutoArchive(data.autoarchive);
-          harvesterScheduleRef.current = data.schedule || "";
+          setHarvesterSchedule(data.schedule || "");
+          setLoadedSchedule(data.schedule || "");
           setSelectedBackend(data.backend);
           const existingFilters = (data.config?.filters as { key?: string; value?: string; type?: string }[] | undefined) || [];
           setFilters(existingFilters.map((f) => ({ type: f.key || "", value: String(f.value || ""), mode: f.type || "include" })));
@@ -241,7 +247,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     setSaveError(null);
 
     try {
-      const newSchedule = harvesterScheduleRef.current.trim();
+      const newSchedule = harvesterSchedule.trim();
       const oldSchedule = source.schedule || "";
 
       const [updated] = await Promise.all([
@@ -291,7 +297,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
         name: harvesterName.trim() || source.name,
         url: harvesterUrl.trim() || source.url,
         backend: selectedBackend || source.backend,
-        schedule: harvesterScheduleRef.current.trim() || undefined,
+        schedule: harvesterSchedule.trim() || undefined,
         active: isEnabled,
         autoarchive: isAutoArchive,
         ...(filters.some((f) => f.value.trim() && f.type) && {
@@ -528,12 +534,9 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                 O seu harvester foi criado e está a aguardar validação da equipa de administração do portal.
               </p>
               <p className="text-sm text-neutral-700">
-                Informe-nos através do formulário de contacto abaixo se deseja que validemos o seu harvester. Será notificado da aprovação (ou rejeição).
+                A equipa de administração foi notificada automaticamente. Será
+                notificado da aprovação ou rejeição quando esta for decidida.
               </p>
-              <a href="#" className="flex items-center gap-8 text-sm text-primary-600">
-                Solicitar validação do harvester
-                <Icon name="agora-line-arrow-right-circle" className="w-[20px] h-[20px]" />
-              </a>
             </>
           )}
         </div>
@@ -541,7 +544,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
       {/* Tabs */}
       <Tabs>
-        <Tab active={isConfigTab ? undefined : true}>
+        <Tab active={!isConfigTab}>
           <TabHeader>Trabalhos</TabHeader>
           <TabBody>
             {jobs.length === 0 ? (
@@ -678,7 +681,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           </TabBody>
         </Tab>
 
-        <Tab active={isConfigTab ? true : undefined}>
+        <Tab active={isConfigTab}>
           <TabHeader>Configuração</TabHeader>
           <TabBody>
             <div className="admin-page__body">
@@ -863,15 +866,12 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                   <h2 className="admin-page__section-title">Avançado</h2>
 
                   <div className="admin-page__fields-group">
-                    <InputText
-                      key={`schedule-${source.id}`}
+                    <IsolatedInput
                       label="Planeamento"
                       placeholder=""
                       id="harvester-schedule"
-                      defaultValue={harvesterScheduleRef.current}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        harvesterScheduleRef.current = e.target.value;
-                      }}
+                      defaultValue={loadedSchedule}
+                      onChange={(value: string) => setHarvesterSchedule(value)}
                     />
                   </div>
 

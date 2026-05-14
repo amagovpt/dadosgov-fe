@@ -12,6 +12,9 @@
     "test:e2e": "playwright test --project=frontend-public --reporter=html",
     "test:e2e:backoffice": "playwright test --project=backoffice --reporter=html",
     "test:e2e:all": "playwright test --project=frontend-public --project=backoffice --reporter=html",
+    "test:e2e:vulns": "playwright test --project=frontend-vulnerabilities --reporter=html",
+    "test:e2e:vulns:headed": "playwright test --project=frontend-vulnerabilities --headed",
+    "test:e2e:vulns:ui": "playwright test --project=frontend-vulnerabilities --ui",
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
@@ -53,7 +56,7 @@
     "@types/pg": "^8.18.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitest/ui": "^2.1.9",
+    "@vitest/ui": "^4.1.5",
     "autoprefixer": "^10.4.27",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
@@ -67,6 +70,6 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^3.4.19",
     "typescript": "^5",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.5"
   }
 }

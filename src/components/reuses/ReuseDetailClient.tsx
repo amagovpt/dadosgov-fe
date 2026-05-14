@@ -45,6 +45,7 @@ import { localizeReuseTypeId } from "@/lib/reuse-labels";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -474,7 +475,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       <div className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline">
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[rehypeSanitize]}
+                          rehypePlugins={[rehypeRaw, rehypeSanitize]}
                         >
                           {reuse.description}
                         </ReactMarkdown>
@@ -491,7 +492,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       <div className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline">
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[rehypeSanitize]}
+                          rehypePlugins={[rehypeRaw, rehypeSanitize]}
                         >
                           {reuse.description}
                         </ReactMarkdown>

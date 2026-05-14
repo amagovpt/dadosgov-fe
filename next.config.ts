@@ -136,6 +136,24 @@ const nextConfig: NextConfig = {
           source: "/saml/eidas/sso_logout",
           destination: `${BACKEND_URL}/saml/eidas/sso_logout`,
         },
+        // Flask-Security auth endpoints whose URLs are sent in emails. The
+        // backend builds links like https://<host>/confirm/<token>, but
+        // <host> is served by Next.js. Without these rewrites the email
+        // links land on Next.js which returns 404 instead of forwarding
+        // to Flask. Each endpoint terminates with a 302 redirect to the
+        // homepage with a flash message, so no Next.js page is needed.
+        {
+          source: "/confirm/:path*",
+          destination: `${BACKEND_URL}/confirm/:path*`,
+        },
+        {
+          source: "/reset/:path*",
+          destination: `${BACKEND_URL}/reset/:path*`,
+        },
+        {
+          source: "/confirm-change-email/:path*",
+          destination: `${BACKEND_URL}/confirm-change-email/:path*`,
+        },
         // Static file storage served by flask_storage at /s/<bucket>/<path>
         {
           source: "/s/:path*",

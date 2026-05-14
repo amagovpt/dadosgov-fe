@@ -22,6 +22,14 @@ export interface E2eFixtures {
     resource_id: string | null;
   };
   reuse: { id: string; slug: string; title: string };
+  // VULN-2075/2076 regression fixtures. Description / title contain raw XSS
+  // payloads written via update_one (bypasses pre_save sanitization), so
+  // tests in `frontend-vulnerabilities` exercise the rendering pipeline
+  // against a worst-case malicious record. See
+  // `tests/e2e/frontend-vulnerabilities/_payloads.ts` for the matching keys.
+  xss_organization: { id: string; slug: string };
+  xss_dataset: { id: string; slug: string };
+  xss_reuse: { id: string; slug: string };
 }
 
 const FIXTURE_PATH = path.resolve(__dirname, "..", ".fixtures", "e2e-fixtures.json");

@@ -1,5 +1,5 @@
 "use client";
-import { Typograph } from "../Generics/Typograph";
+import { Typograph } from "@/components/Shared/Generics/Typograph";
 import { twMerge } from "tailwind-merge";
 
 export interface IInfoBlockDescriptionProps {

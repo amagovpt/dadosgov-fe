@@ -1,10 +1,10 @@
+import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
 import ButtonNavigate from '@/components/Primitives/ButtonNavigate';
 import { getMiniCourseIntroductionPage } from '@/services/queries/courses/minicourses';
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
 import { getAssets } from '@/utils/getAssets';
 import dayjs from 'dayjs';
 import Image from 'next/image';
-import { getAsset } from 'node:sea';
 
 export default async function Page({
     params,
@@ -25,6 +25,14 @@ export default async function Page({
     return (
         <main className="flex justify-center items-center w-full bg-primary-100 py-64">
             <div className="container flex flex-col gap-64">
+                <Breadcrumb
+                    items={[
+                        { label: 'Início', url: '/' },
+                        { label: 'Aprender', url: '/pages/learn/' },
+                        { label: 'Minicursos', url: '/pages/learn/mini-courses/' },
+                        { label: title, url: '#' },
+                    ]}
+                />
                 <div className="flex">
                     <div className="w-full flex flex-col gap-64">
                         <h1 className="text-3xl-bold text-primary-600 ">

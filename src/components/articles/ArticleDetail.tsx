@@ -6,6 +6,7 @@ import { Breadcrumb } from "@ama-pt/agora-design-system";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import { fetchPost } from "@/services/api";
 import { Post } from "@/types/api";
 import { format } from "date-fns";
@@ -121,7 +122,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
                 <div className="markdown-container text-m-regular leading-7">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
+                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
                   >
                     {post.content.replace(/\n&nbsp;\s*\n/g, "\n\n")}
                   </ReactMarkdown>

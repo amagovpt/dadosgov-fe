@@ -2058,6 +2058,23 @@ export async function fetchNotifications(
   return await res.json();
 }
 
+export async function markNotificationRead(id: string): Promise<Notification> {
+  const res = await fetch(
+    `${API_AUTH_URL}/notifications/${encodeURIComponent(id)}/read/`,
+    { method: "POST", cache: "no-store", credentials: "include" }
+  );
+
+  if (res.status === 401) {
+    throw new Error("Authentication required");
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed to mark notification as read: ${res.statusText}`);
+  }
+
+  return await res.json();
+}
+
 // --- Topics (API v2) ---
 
 export async function fetchTopics(
