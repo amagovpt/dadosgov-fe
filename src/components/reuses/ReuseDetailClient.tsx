@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
   Button,
@@ -59,6 +59,8 @@ interface ReuseDetailClientProps {
 
 export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
   const { user, isAdmin } = useAuth();
   const [reuse, setReuse] = useState<Reuse | null>(null);
 
@@ -544,7 +546,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               </div>
             )}
           </Tab>
-          <Tab>
+          <Tab active={tabParam === "discussions" || undefined}>
             <TabHeader>Discussões ({discussionCount})</TabHeader>
             {renderTabBody(
               <div>
