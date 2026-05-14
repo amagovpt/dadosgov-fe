@@ -2,6 +2,16 @@ import { test, expect, type Page } from "playwright/test";
 
 const REUSES_URL = "/pages/reuses";
 
+async function getFirstReuseHref(page: Page): Promise<string> {
+  await page.goto(REUSES_URL);
+  await page.waitForLoadState("networkidle");
+  const firstLink = page.locator("a[href^='/pages/reuses/']").first();
+  await expect(firstLink).toBeVisible({ timeout: 15000 });
+  const href = await firstLink.getAttribute("href");
+  if (!href) throw new Error("No reuse link found on listing");
+  return href;
+}
+
 async function gotoFirstReuseDetail(page: Page) {
   await page.goto(REUSES_URL);
   await page.waitForLoadState("networkidle");
@@ -104,5 +114,61 @@ test.describe("Reuse Detail Page", () => {
       .locator('[role="tab"]', { hasText: /^Discussões \(\d+\)/i })
       .first();
     await expect(discussionsTab).toBeVisible({ timeout: 10000 });
+  });
+});
+
+test.describe("Reuse discussion tab — URL-driven activation (email link flow)", () => {
+  test("RD-10: ?tab=discussions query param activates the Discussões tab without a click", async ({
+    page,
+  }) => {
+    const href = await getFirstReuseHref(page);
+
+    await page.goto(`${href}?tab=discussions`);
+    await page.waitForLoadState("networkidle");
+    await expect(
+      page.getByRole("heading", { name: /Descrição/i }).first()
+    ).toBeVisible({ timeout: 15000 });
+
+    const panelHeading = page
+      .locator("h3", { hasText: /\d+ DISCUSS(ÃO|ÕES)|DISCUSS(ÃO|ÕES)/i })
+      .first();
+    await expect(panelHeading).toBeAttached({ timeout: 10000 });
+
+    const discussionTab = page
+      .locator('[role="tab"]', { hasText: /^Discussões \(\d+\)/i })
+      .first();
+    await expect(discussionTab).toHaveAttribute("aria-selected", "true", { timeout: 10000 });
+  });
+
+  test("RD-11: /discussions sub-path (email link format) redirects and activates the Discussões tab", async ({
+    page,
+  }) => {
+    const href = await getFirstReuseHref(page);
+
+    await page.goto(`${href}/discussions`);
+    await page.waitForLoadState("networkidle");
+    await expect(
+      page.getByRole("heading", { name: /Descrição/i }).first()
+    ).toBeVisible({ timeout: 15000 });
+
+    await expect(page).toHaveURL(/tab=discussions/, { timeout: 10000 });
+
+    const discussionTab = page
+      .locator('[role="tab"]', { hasText: /^Discussões \(\d+\)/i })
+      .first();
+    await expect(discussionTab).toHaveAttribute("aria-selected", "true", { timeout: 10000 });
+  });
+
+  test("RD-12: /discussions sub-path preserves discussion_id through the redirect", async ({
+    page,
+  }) => {
+    const href = await getFirstReuseHref(page);
+    const fakeId = "abc123";
+
+    await page.goto(`${href}/discussions?discussion_id=${fakeId}`);
+    await page.waitForLoadState("networkidle");
+
+    await expect(page).toHaveURL(/tab=discussions/, { timeout: 10000 });
+    await expect(page).toHaveURL(new RegExp(`discussion_id=${fakeId}`), { timeout: 10000 });
   });
 });
