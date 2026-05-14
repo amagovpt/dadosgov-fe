@@ -160,8 +160,8 @@ export default function OrgProfileClient() {
     const files = e.target.files;
     if (!org || !files || files.length === 0) return;
     const file = files[0];
-    if (file.size > 4194304) {
-      setLogoError("O ficheiro excede o tamanho máximo de 4 MB.");
+    if (file.size > 512000) {
+      setLogoError("O ficheiro excede o tamanho máximo de 500 KB.");
       return;
     }
     setLogoError(null);
@@ -170,13 +170,12 @@ export default function OrgProfileClient() {
     setLogoPreview(localPreview);
     try {
       await uploadOrgLogo(org.id, file);
-      // Upload succeeded — keep localPreview as the displayed avatar.
-      // The API returns { success, image } with a server-generated URL that
-      // may not be browser-accessible in dev (SERVER_NAME = "local.test").
     } catch (error) {
       console.error("Error uploading org logo:", error);
       URL.revokeObjectURL(localPreview);
       setLogoPreview(null);
+      const serverMsg = (error as { data?: { message?: string } })?.data?.message;
+      setLogoError(serverMsg || "Erro ao carregar o logotipo. Por favor, tente novamente.");
     }
   };
 
@@ -215,16 +214,22 @@ export default function OrgProfileClient() {
 
       {org && (
         <div className="profile-card">
-          <Avatar
-            avatarType={(logoPreview || org.logo_thumbnail) ? "image" : "initials"}
-            srcPath={
-              (logoPreview || org.logo_thumbnail ||
-                org.name?.charAt(0).toUpperCase() ||
-                "O") as unknown as undefined
-            }
-            alt={org.name}
-            className="profile-card__avatar"
-          />
+          <div className="profile-card__avatar-container">
+            {(logoPreview || org.logo_thumbnail) ? (
+              <img
+                src={logoPreview ?? org.logo_thumbnail!}
+                alt={org.name}
+                className="profile-card__avatar-img"
+              />
+            ) : (
+              <Avatar
+                avatarType="initials"
+                srcPath={(org.name?.charAt(0).toUpperCase() || "O") as unknown as undefined}
+                alt={org.name}
+                className="profile-card__avatar"
+              />
+            )}
+          </div>
 
           <div className="profile-card__body">
             <div className="profile-card__info">
@@ -334,11 +339,11 @@ export default function OrgProfileClient() {
                     selectedFilesLabel="ficheiro selecionado"
                     removeFileButtonLabel="Remover ficheiro"
                     replaceFileButtonLabel="Substituir ficheiro"
-                    extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
+                    extensionsInstructions="Tamanho máximo: 500 KB. Formatos aceites: JPG, JPEG, PNG."
                     accept=".jpg,.jpeg,.png"
-                    maxSize={4194304}
+                    maxSize={512000}
                     maxCount={1}
-                    maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
+                    maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 500 KB."
                     forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
                     hasError={!!logoError}
                     hasFeedback={!!logoError}
