@@ -150,20 +150,20 @@ export default function DatasetsAdminClient({
   const [keywordSearch, setKeywordSearch] = useState("");
   const producerDefaultValue =
     selectedProducer ||
-    selectedProducerRef.current ||
     createdDataset?.organization?.id ||
     (createdDataset ? "user" : "");
   const licenseDefaultValue =
-    selectedLicenseRef.current || createdDataset?.license || (licenses.length > 0 ? "notspecified" : "");
-  const frequencyDefaultValue = selectedFrequencyRef.current || createdDataset?.frequency || "";
+    createdDataset?.license || (licenses.length > 0 ? "notspecified" : "");
+  const frequencyDefaultValue = createdDataset?.frequency || "";
   const keywordsDefaultValue =
-    selectedKeywordsValue || selectedKeywordsRef.current || (createdDataset?.tags?.join(",") ?? "");
+    selectedKeywordsValue || (createdDataset?.tags?.join(",") ?? "");
   const selectedKeywords = keywordsDefaultValue
     .split(",")
     .map((k) => k.trim())
     .filter(Boolean);
-  const spatialCoverageDefaultValue = selectedSpatialZonesValue ?? spatialCoverageRef.current;
-  const spatialGranularityDefaultValue = spatialGranularityRef.current;
+  const spatialCoverageDefaultValue =
+    selectedSpatialZonesValue ?? (createdDataset?.spatial?.zones?.join(",") ?? "");
+  const spatialGranularityDefaultValue = createdDataset?.spatial?.granularity ?? "";
   const selectedSpatialZoneIds = (selectedSpatialZonesValue ?? "")
     .split(",")
     .map((id) => id.trim())
@@ -308,23 +308,14 @@ export default function DatasetsAdminClient({
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
   }, [allSpatialZones, selectedSpatialZonesValue]);
 
-  const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
-  useEffect(() => {
+  const selectedZoneObjects = useMemo<SpatialZone[]>(() => {
     const ids = (selectedSpatialZonesValue ?? "")
       .split(",")
       .map((id) => id.trim())
       .filter(Boolean);
-    if (ids.length === 0) {
-      setSelectedZoneObjects([]);
-      return;
-    }
-    setSelectedZoneObjects((prev) => {
-      const map = new Map(prev.map((z) => [z.id, z]));
-      allSpatialZones.forEach((z) => {
-        if (!map.has(z.id)) map.set(z.id, z);
-      });
-      return ids.map((id) => map.get(id)).filter(Boolean) as SpatialZone[];
-    });
+    if (ids.length === 0) return [];
+    const zoneMap = new Map(allSpatialZones.map((z) => [z.id, z]));
+    return ids.map((id) => zoneMap.get(id)).filter((z): z is SpatialZone => Boolean(z));
   }, [selectedSpatialZonesValue, allSpatialZones]);
 
   const granularityOptions = useMemo(() => {
@@ -360,10 +351,6 @@ export default function DatasetsAdminClient({
         }
       }
       loadContactPoints();
-    } else {
-      setOrgContactPoints([]);
-      setSelectedContactPointIds([]);
-      setDraftContacts([{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]);
     }
   }, [selectedProducer]);
 
@@ -493,10 +480,7 @@ export default function DatasetsAdminClient({
 
   useEffect(() => {
     const q = keywordSearch.trim();
-    if (q.length < 2) {
-      setTagSearch([]);
-      return;
-    }
+    if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
         const res = await suggestTags(q, 20);
@@ -858,7 +842,12 @@ export default function DatasetsAdminClient({
     setApiError(null);
     setIsSubmitting(true);
     try {
-      await updateDataset(createdDataset.id, { private: false });
+      const refTags = selectedKeywordsRef.current
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+      const tags = refTags.length > 0 ? refTags : createdDataset.tags || [];
+      await updateDataset(createdDataset.id, { private: false, tags });
       if (onComplete) onComplete();
       else router.push("/pages/admin/me/datasets");
     } catch (error) {
@@ -974,6 +963,11 @@ export default function DatasetsAdminClient({
                   defaultValue={producerDefaultValue}
                   onChangeRef={selectedProducerRef}
                   onChangeCallback={(value) => {
+                    // Reset org-only contact state immediately on producer switches.
+                    // Keeps this logic out of effects and avoids cascading renders warnings.
+                    setOrgContactPoints([]);
+                    setSelectedContactPointIds([]);
+                    setDraftContacts([{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]);
                     setSelectedProducer(value);
                     if (value) {
                       setFormErrors((prev) => {
@@ -1094,7 +1088,12 @@ export default function DatasetsAdminClient({
                     searchNoResultsText="Nenhum resultado encontrado"
                     defaultValue={keywordsDefaultValue}
                     onChangeRef={selectedKeywordsRef}
-                    onSearchCallback={setKeywordSearch}
+                    onSearchCallback={(q) => {
+                      setKeywordSearch(q);
+                      if (q.trim().length < 2) {
+                        setTagSearch([]);
+                      }
+                    }}
                     onChangeCallback={(value) => {
                       setSelectedKeywordsValue(value);
                       const selected = value.split(",").filter(Boolean);
