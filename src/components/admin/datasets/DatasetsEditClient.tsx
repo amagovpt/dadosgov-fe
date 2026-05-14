@@ -757,6 +757,8 @@ export default function DatasetsEditClient() {
         if (ds.temporal_coverage) {
           const toDateOnly = (iso: string) => {
             if (!iso) return "";
+            // Keep PT-formatted values as-is (avoid JS mm/dd parsing ambiguity).
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(iso)) return iso;
             const d = new Date(iso);
             if (isNaN(d.getTime())) return iso;
             return `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${d.getUTCFullYear()}`;
@@ -1568,7 +1570,16 @@ export default function DatasetsEditClient() {
                               : dataset.tags || [];
                             const updated = await updateDataset(dataset.id, {
                               private: false,
+                              title: dataset.title,
+                              description: dataset.description,
+                              description_short: dataset.description_short || undefined,
+                              acronym: dataset.acronym || undefined,
                               tags,
+                              license: dataset.license || undefined,
+                              frequency: dataset.frequency || undefined,
+                              temporal_coverage: dataset.temporal_coverage || undefined,
+                              spatial: dataset.spatial || undefined,
+                              organization: dataset.organization?.id,
                             });
                             setDataset(updated);
                             setApiSuccess("Conjunto de dados publicado com sucesso.");

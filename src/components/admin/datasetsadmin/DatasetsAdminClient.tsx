@@ -551,6 +551,31 @@ export default function DatasetsAdminClient({
     return Number.isNaN(isoTime) ? null : isoTime;
   };
 
+  const toIsoTemporalDate = (value: string): string | null => {
+    const raw = (value || "").trim();
+    if (!raw) return null;
+
+    // "dd/mm/yyyy" or "dd-mm-yyyy"
+    const ptMatch = raw.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+    if (ptMatch) {
+      const dd = ptMatch[1];
+      const mm = ptMatch[2];
+      const yyyy = ptMatch[3];
+      return `${yyyy}-${mm}-${dd}T00:00:00.000Z`;
+    }
+
+    // "yyyy-mm-dd" or "yyyy-mm-ddTHH:mm:ss..."
+    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:T.*)?$/);
+    if (isoMatch) {
+      const yyyy = isoMatch[1];
+      const mm = isoMatch[2];
+      const dd = isoMatch[3];
+      return `${yyyy}-${mm}-${dd}T00:00:00.000Z`;
+    }
+
+    return null;
+  };
+
   const handleStep2Next = async (e?: React.MouseEvent<HTMLButtonElement>) => {
     const errors: Record<string, boolean> = {};
     if (!selectedProducerRef.current) errors.datasetProducer = true;
@@ -646,9 +671,11 @@ export default function DatasetsAdminClient({
         payload.contact_points = selectedContactPointIds;
       }
       if (startRaw || endRaw) {
+        const startIso = toIsoTemporalDate(startRaw);
+        const endIso = toIsoTemporalDate(endRaw);
         payload.temporal_coverage = {
-          ...(startRaw ? { start: startRaw } : {}),
-          ...(endRaw ? { end: endRaw } : {}),
+          ...(startIso ? { start: startIso } : {}),
+          ...(endIso ? { end: endIso } : {}),
         } as Parameters<typeof createDataset>[0]["temporal_coverage"];
       }
       const spatialZoneIds = spatialCoverageRef.current
@@ -847,7 +874,20 @@ export default function DatasetsAdminClient({
         .map((tag) => tag.trim())
         .filter(Boolean);
       const tags = refTags.length > 0 ? refTags : createdDataset.tags || [];
-      await updateDataset(createdDataset.id, { private: false, tags });
+      const publishPayload: DatasetUpdatePayload = {
+        private: false,
+        title: createdDataset.title,
+        description: createdDataset.description,
+        description_short: createdDataset.description_short || undefined,
+        acronym: createdDataset.acronym || undefined,
+        tags,
+        license: createdDataset.license || undefined,
+        frequency: createdDataset.frequency || undefined,
+        temporal_coverage: createdDataset.temporal_coverage || undefined,
+        spatial: createdDataset.spatial || undefined,
+        organization: createdDataset.organization?.id,
+      };
+      await updateDataset(createdDataset.id, publishPayload);
       if (onComplete) onComplete();
       else router.push("/pages/admin/me/datasets");
     } catch (error) {
