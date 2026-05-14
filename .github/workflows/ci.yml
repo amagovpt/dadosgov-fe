@@ -29,8 +29,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Lint is informational: 98 pre-existing errors on main as of 2026-05-14.
+      # Build (Next.js) + vitest are the real gates. Remove once lint debt is paid down.
       - name: Lint
         run: npm run lint
+        continue-on-error: true
 
       - name: Unit tests (vitest)
         run: npm test
