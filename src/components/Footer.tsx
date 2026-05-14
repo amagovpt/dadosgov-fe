@@ -1,8 +1,20 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { FederatedFooter } from "@ama-pt/agora-design-system";
+import {
+  FederatedFooter,
+  FinancingSectionContainer,
+  Footer as FooterADS,
+  FooterDisclaimer,
+  FooterGenericLogo,
+  FooterLink,
+  LinksSectionContainer,
+  LinksSectionRelatedLinks,
+  LinksSectionRelatedLinksCopyright,
+  LinksSectionSocialLinks,
+} from "@ama-pt/agora-design-system";
 import Link from "next/link";
+import Image from "next/image";
 
 const linkColumns = [
   {
@@ -59,9 +71,9 @@ const usefulLinksData = [
 // Element 1: Links Navigation
 const FooterNavigation = () => {
   return (
-    <div className="flex flex-col gap-32 container mx-auto py-16 xl:py-64">
+    <div className="container mx-auto flex flex-col gap-32 py-16 xl:py-64">
       <h3 className="text-l-bold text-white">Mais para descobrir no portal</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-32">
+      <div className="grid grid-cols-1 gap-32 md:grid-cols-2 lg:grid-cols-3">
         {linkColumns.map((column, idx) => (
           <div key={idx} className="flex flex-col gap-16">
             <h4 className="text-m-semibold text-white">{column.title}</h4>
@@ -70,7 +82,7 @@ const FooterNavigation = () => {
                 <li key={linkIdx}>
                   <Link
                     href={link.href}
-                    className="text-white hover:underline text-sm transition-colors"
+                    className="text-sm text-white transition-colors hover:underline"
                     {...(link.href.startsWith("http")
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
@@ -83,6 +95,109 @@ const FooterNavigation = () => {
           </div>
         ))}
       </div>
+    </div>
+  );
+};
+
+const FooterBottom = () => {
+  return (
+    <div className="">
+      <FooterADS variant="primary-900">
+        <FinancingSectionContainer financingSectionAriaLabel="Custom aria label for financing section">
+          <FooterDisclaimer>Portal aberto de dados públicos portugueses</FooterDisclaimer>
+          <FooterGenericLogo>
+            <img
+              src="/Logos/NextGenerationEU.svg"
+              alt="NextGenerationEU"
+              style={{ height: "24px", width: "auto", opacity: 0.5 }}
+            />
+          </FooterGenericLogo>
+          <FooterGenericLogo>
+            <img
+              src="/Logos/republica-portuguesa.svg"
+              alt="República Portuguesa"
+              style={{ height: "24px", width: "auto", opacity: 0.5 }}
+            />
+          </FooterGenericLogo>
+          <FooterGenericLogo>
+            <img
+              src="/Logos/Logotipo_ARTE__Horizontal_branco_pt.svg"
+              alt="ARTE"
+              style={{ height: "24px", width: "auto", opacity: 0.5 }}
+            />
+          </FooterGenericLogo>
+        </FinancingSectionContainer>
+
+        <LinksSectionContainer>
+          <LinksSectionSocialLinks linksSectionSocialAriaLabel="Redes sociais">
+            <FooterLink
+              hasIcon
+              iconOnly
+              variant="neutral"
+              trailingIcon="agora-line-linkedin"
+              trailingIconHover="agora-solid-linkedin"
+              trailingIconActive="agora-solid-linkedin"
+              aria-label="LinkedIn"
+              href="https://www.linkedin.com/company/arte-gov-pt/"
+              target="_blank"
+            />
+
+            <FooterLink
+              hasIcon
+              iconOnly
+              variant="neutral"
+              trailingIcon="/Logos/github.svg"
+              trailingIconHover="/Logos/github.svg"
+              trailingIconActive="/Logos/github.svg"
+              aria-label="Github"
+              href="https://github.com/amagovpt/"
+              target="_blank"
+            />
+          </LinksSectionSocialLinks>
+
+          <LinksSectionRelatedLinks linksSectionRelatedAriaLabel="Links externos">
+            <FooterLink
+              appearance="link"
+              variant="neutral"
+              href="https://www.portugal.gov.pt/pt/gc25"
+              target="_blank"
+            >
+              República Portuguesa
+            </FooterLink>
+
+            <FooterLink
+              appearance="link"
+              variant="neutral"
+              href="https://www.compete2020.gov.pt/"
+              target="_blank"
+            >
+              Compete 2020
+            </FooterLink>
+
+            <FooterLink
+              appearance="link"
+              variant="neutral"
+              href="https://portugal2020.pt/"
+              target="_blank"
+            >
+              Portugal 2020
+            </FooterLink>
+
+            <FooterLink
+              appearance="link"
+              variant="neutral"
+              href="https://eur-lex.europa.eu/legal-content/PT/LSU/?uri=CELEX:32019L1024"
+              target="_blank"
+            >
+              Comissão Europeia
+            </FooterLink>
+
+            <LinksSectionRelatedLinksCopyright>
+              © 2026 República Portuguesa. Todos os direitos reservados.
+            </LinksSectionRelatedLinksCopyright>
+          </LinksSectionRelatedLinks>
+        </LinksSectionContainer>
+      </FooterADS>
     </div>
   );
 };
@@ -112,6 +227,8 @@ export const Footer = () => {
   return (
     <footer className="bg-primary-900 text-white" ref={footerRef}>
       <FooterNavigation />
+      <FooterBottom />
+
       <FederatedFooter
         darkMode={true}
         brandImage={{
