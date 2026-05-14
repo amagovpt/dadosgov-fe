@@ -30,6 +30,7 @@ import {
   suggestTags,
 } from "@/services/api";
 import type { Reuse, ReuseType, ReuseTopic, Dataset, TagSuggestion } from "@/types/api";
+import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import { format, formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import Link from "next/link";
@@ -85,7 +86,7 @@ export default function ReusesFormClient({
   const [selectedReuseTopicValue, setSelectedReuseTopicValue] = useState("");
 
   // Step 2 state
-  const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
+  const [datasetLinks, setDatasetLinks] = useState<RemoteDatasetEntry[]>([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
   const [apiLinks, setApiLinks] = useState([{ url: "" }]);
   const [apiLinkErrors, setApiLinkErrors] = useState<Record<number, string>>({});
@@ -350,7 +351,7 @@ export default function ReusesFormClient({
 
   const handleDatasetUrlChange = (index: number, value: string) => {
     const updated = [...datasetLinks];
-    updated[index] = { url: value };
+    updated[index] = { ...updated[index], url: value };
     setDatasetLinks(updated);
     if (value.trim() && datasetLinkErrors[index]) {
       setDatasetLinkErrors((prev) => {
@@ -359,6 +360,18 @@ export default function ReusesFormClient({
         return next;
       });
     }
+  };
+
+  const handleDatasetTitleChange = (index: number, value: string) => {
+    const updated = [...datasetLinks];
+    updated[index] = { ...updated[index], title: value };
+    setDatasetLinks(updated);
+  };
+
+  const handleDatasetDescriptionChange = (index: number, value: string) => {
+    const updated = [...datasetLinks];
+    updated[index] = { ...updated[index], description: value };
+    setDatasetLinks(updated);
   };
 
   const addDatasetLink = () => {
@@ -842,7 +855,7 @@ export default function ReusesFormClient({
                 </div>
 
                 {datasetLinks.map((link, index) => (
-                  <div key={`dataset-${index}`} className="mt-16">
+                  <div key={`dataset-${index}`} className="mt-16 flex flex-col gap-16">
                     <InputText
                       label="Link para o conjunto de dados"
                       placeholder="Insira o URL aqui"
@@ -856,8 +869,26 @@ export default function ReusesFormClient({
                       feedbackState="danger"
                       errorFeedbackText={datasetLinkErrors[index]}
                     />
+                    <InputText
+                      label="Título (opcional)"
+                      placeholder="Nome do conjunto de dados externo"
+                      id={`reuse-dataset-title-${index}`}
+                      value={link.title ?? ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleDatasetTitleChange(index, e.target.value)
+                      }
+                    />
+                    <InputTextArea
+                      label="Descrição (opcional)"
+                      placeholder="Pequena descrição do conjunto de dados"
+                      id={`reuse-dataset-description-${index}`}
+                      value={link.description ?? ""}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                        handleDatasetDescriptionChange(index, e.target.value)
+                      }
+                    />
                     {link.url.trim() && (
-                      <div className="flex justify-end mt-24">
+                      <div className="flex justify-end mt-8">
                         <Button
                           appearance="solid"
                           variant="danger"
@@ -966,11 +997,25 @@ export default function ReusesFormClient({
                     onClick={async () => {
                       if (!createdReuse) return;
 
-                      const remoteUrls = datasetLinks
-                        .map((l) => l.url.trim())
-                        .filter(Boolean);
+                      // LEDG-1748 PR 2: persist remote datasets as
+                      // { url, title?, description? } entries (deduped by URL,
+                      // first occurrence wins so user-typed metadata sticks).
+                      const seenUrls = new Set<string>();
+                      const remoteEntries: RemoteDatasetEntry[] = [];
+                      for (const link of datasetLinks) {
+                        const url = link.url.trim();
+                        if (!url || seenUrls.has(url)) continue;
+                        seenUrls.add(url);
+                        const title = link.title?.trim();
+                        const description = link.description?.trim();
+                        remoteEntries.push({
+                          url,
+                          title: title || undefined,
+                          description: description || undefined,
+                        });
+                      }
                       const hasLocal = selectedDatasets.length > 0;
-                      const hasRemote = remoteUrls.length > 0;
+                      const hasRemote = remoteEntries.length > 0;
 
                       // Mutual exclusion: local datasets OR remote URLs, not both.
                       if (hasLocal && hasRemote) {
@@ -988,15 +1033,15 @@ export default function ReusesFormClient({
                           const updated = await linkDatasetToReuse(createdReuse.id, dataset.id);
                           setCreatedReuse(updated);
                         }
-                        // Remote datasets -> stored as URLs on the reuse's extras
-                        // field. The backend model only accepts local Dataset
-                        // references on `datasets`, so remote URLs live on
-                        // extras.remote_datasets.
+                        // Remote datasets -> stored as objects on the reuse's
+                        // extras field. The backend model only accepts local
+                        // Dataset references on `datasets`, so remote entries
+                        // live on extras.remote_datasets.
                         if (hasRemote) {
                           const updated = await updateReuse(createdReuse.id, {
                             extras: {
                               ...(createdReuse.extras || {}),
-                              remote_datasets: remoteUrls,
+                              remote_datasets: remoteEntries,
                             },
                           });
                           setCreatedReuse(updated);
