@@ -45,6 +45,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
+import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 const activityLabels: Record<string, string> = {
@@ -122,6 +123,7 @@ export default function ProfileClient() {
   const [saveError, setSaveError] = useState("");
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
+  const [avatarUploaderKey, setAvatarUploaderKey] = useState(0);
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
@@ -281,11 +283,12 @@ export default function ProfileClient() {
       await deleteAvatar();
       if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
       setAvatarPreview(null);
+      setAvatarUploaderKey((k) => k + 1);
       setProfile((prev) => prev ? { ...prev, avatar_thumbnail: null } : prev);
       await refresh();
     } catch (error) {
       console.error("Error deleting avatar:", error);
-      setSaveError("Erro ao eliminar a imagem de perfil. Tente novamente.");
+      setSaveError("Erro ao eliminar a foto de perfil. Tente novamente.");
     } finally {
       setIsDeletingAvatar(false);
     }
@@ -495,6 +498,7 @@ export default function ProfileClient() {
                     </span>
                     <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                       <DragAndDropUploader
+                        key={avatarUploaderKey}
                         label="Ficheiros"
                         dragAndDropLabel="Arraste e largue o ficheiro aqui"
                         inputLabel="Selecione ou arraste o ficheiro"
@@ -763,7 +767,7 @@ export default function ProfileClient() {
                   </Button>
                 </div>
 
-                {(avatarPreview || profile?.avatar_thumbnail) && (
+                {profile?.avatar_thumbnail && (
                   <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
                     <StatusCard
                       variant="danger"
@@ -778,10 +782,16 @@ export default function ProfileClient() {
                             hasIcon
                             trailingIcon="agora-line-arrow-right-circle"
                             trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={handleDeleteAvatar}
+                            onClick={() =>
+                              show(<DeleteAvatarPopupContent onConfirm={handleDeleteAvatar} />, {
+                                title: "Eliminar foto de perfil",
+                                closeAriaLabel: "Fechar",
+                                dimensions: "s",
+                              })
+                            }
                             disabled={isDeletingAvatar}
                           >
-                            {isDeletingAvatar ? "A eliminar..." : "Eliminar a imagem de perfil"}
+                            {isDeletingAvatar ? "A eliminar..." : "Eliminar foto de perfil"}
                           </Button>
                         </>
                       }
