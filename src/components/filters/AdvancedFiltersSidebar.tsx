@@ -59,11 +59,14 @@ export function AdvancedFiltersSidebar({
           new Map([...selectedItems, ...group.data].map((item) => [item.id, item])).values()
         );
 
+        const normalize = (s: string) =>
+          s
+            .normalize("NFD")
+            .replace(/[̀-ͯ]/g, "")
+            .toLowerCase();
         const filteredData = group.suggest
           ? uniqueData
-          : uniqueData.filter((item) =>
-              item.name.toLowerCase().includes(searchQuery.toLowerCase())
-            );
+          : uniqueData.filter((item) => normalize(item.name).includes(normalize(searchQuery)));
         const showScroll = filteredData.length > 5;
         const minSearchChars = group.minSearchChars ?? 2;
 

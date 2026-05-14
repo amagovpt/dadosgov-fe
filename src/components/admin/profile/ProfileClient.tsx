@@ -11,6 +11,7 @@ import {
   fetchCsrfToken,
   updateProfile,
   uploadAvatar,
+  deleteAvatar,
   generateApiKey,
   fetchApiTokens,
   revokeApiToken,
@@ -78,6 +79,16 @@ const activityLabels: Record<string, string> = {
 
 const translateActivityLabel = (label: string) => activityLabels[label] ?? label;
 
+function toProxiedUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.pathname + parsed.search;
+  } catch {
+    return url;
+  }
+}
+
 export default function ProfileClient() {
   const router = useRouter();
   const { show } = usePopupContext();
@@ -86,6 +97,7 @@ export default function ProfileClient() {
 
   const [profile, setProfile] = useState<UserPublic | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -109,6 +121,7 @@ export default function ProfileClient() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
@@ -123,7 +136,11 @@ export default function ProfileClient() {
     async function loadProfile() {
       try {
         const data = await fetchFullProfile();
+        console.log("[ProfileClient] avatar_thumbnail:", data.avatar_thumbnail);
         setProfile(data);
+        if (data.avatar_thumbnail) {
+          setAvatarPreview(toProxiedUrl(data.avatar_thumbnail));
+        }
         setFirstName(data.first_name || "");
         setLastName(data.last_name || "");
         setAbout(data.about || "");
@@ -257,6 +274,23 @@ export default function ProfileClient() {
     }
   };
 
+  const handleDeleteAvatar = async () => {
+    setIsDeletingAvatar(true);
+    setSaveError("");
+    try {
+      await deleteAvatar();
+      if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
+      setAvatarPreview(null);
+      setProfile((prev) => prev ? { ...prev, avatar_thumbnail: undefined } : prev);
+      await refresh();
+    } catch (error) {
+      console.error("Error deleting avatar:", error);
+      setSaveError("Erro ao eliminar a imagem de perfil. Tente novamente.");
+    } finally {
+      setIsDeletingAvatar(false);
+    }
+  };
+
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -266,13 +300,24 @@ export default function ProfileClient() {
       return;
     }
     setAvatarError(null);
+    // Show image immediately via blob URL, then replace with server URL after upload.
+    if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
+    const localPreview = URL.createObjectURL(file);
+    setAvatarPreview(localPreview);
     try {
       await uploadAvatar(file);
       const updated = await fetchFullProfile();
-      setProfile(updated);
+      console.log("[ProfileClient] avatar_thumbnail after upload:", updated.avatar_thumbnail);
+      if (updated.avatar_thumbnail) {
+        if (localPreview.startsWith("blob:")) URL.revokeObjectURL(localPreview);
+        setAvatarPreview(toProxiedUrl(updated.avatar_thumbnail));
+        setProfile(updated);
+      }
       await refresh();
     } catch (error) {
       console.error("Error uploading avatar:", error);
+      if (localPreview.startsWith("blob:")) URL.revokeObjectURL(localPreview);
+      setAvatarPreview(null);
       setSaveError("Erro ao carregar a foto de perfil. Tente novamente.");
     }
   };
@@ -318,15 +363,25 @@ export default function ProfileClient() {
       <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
 
       <div className="profile-card">
-        <Avatar
-          avatarType={profile?.avatar_thumbnail ? "image" : "initials"}
-          srcPath={
-            (profile?.avatar_thumbnail ||
-              `${(profile?.first_name || "")[0] || ""}${(profile?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
-          }
-          alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
-          className="profile-card__avatar"
-        />
+        <div className="profile-card__avatar-container">
+          {avatarPreview || profile?.avatar_thumbnail ? (
+            <img
+              src={avatarPreview ?? profile!.avatar_thumbnail!}
+              alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
+              className="profile-card__avatar-img"
+            />
+          ) : (
+            <Avatar
+              avatarType={profile?.first_name || profile?.last_name ? "initials" : "icon"}
+              srcPath={
+                (`${(profile?.first_name || "")[0] || ""}${(profile?.last_name || "")[0] || ""}`.toUpperCase() ||
+                  "agora-line-user") as unknown as undefined
+              }
+              alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
+              className="profile-card__avatar"
+            />
+          )}
+        </div>
 
         <div className="profile-card__body">
           <div className="profile-card__info">
@@ -707,6 +762,116 @@ export default function ProfileClient() {
                     {isSaving ? "A guardar..." : "Guardar"}
                   </Button>
                 </div>
+
+                {(avatarPreview || profile?.avatar_thumbnail) && (
+                  <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
+                    <StatusCard
+                      variant="danger"
+                      showIcon
+                      description={
+                        <>
+                          <strong>Atenção esta ação é irreversível.</strong>
+                          <br />
+                          <Button
+                            appearance="link"
+                            variant="primary"
+                            hasIcon
+                            trailingIcon="agora-line-arrow-right-circle"
+                            trailingIconHover="agora-solid-arrow-right-circle"
+                            onClick={handleDeleteAvatar}
+                            disabled={isDeletingAvatar}
+                          >
+                            {isDeletingAvatar ? "A eliminar..." : "Eliminar a imagem de perfil"}
+                          </Button>
+                        </>
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            </TabBody>
+          </Tab>
+          <Tab>
+            <TabHeader>Subscrições</TabHeader>
+            <TabBody>
+              <div className="mt-24">
+                {isLoadingSubscriptions ? (
+                  <p className="text-neutral-900 text-base">A carregar subscrições...</p>
+                ) : subscriptions.length === 0 ? (
+                  <CardNoResults
+                    className="datasets-page__empty"
+                    position="center"
+                    icon={
+                      <Icon
+                        name="agora-line-bell"
+                        className="w-12 h-12 text-primary-500 icon-xl"
+                      />
+                    }
+                    title="Sem subscrições"
+                    description="Não segue conteúdos"
+                    hasAnchor={false}
+                  />
+                ) : (
+                  <div className="flex flex-col gap-16">
+                    {subscriptions.map((sub) => {
+                      const subName = sub.following.name || sub.following.title || "";
+                      const subAvatar = sub.following.avatar_thumbnail || sub.following.image_thumbnail;
+                      const initials = subName
+                        .split(" ")
+                        .map((w) => w.charAt(0).toUpperCase())
+                        .slice(0, 2)
+                        .join("");
+                      const classToPath: Record<string, string> = {
+                        Dataset: "/pages/datasets",
+                        Organization: "/pages/organizations",
+                        Reuse: "/pages/reuses",
+                        User: "/pages/users",
+                      };
+                      const basePath = classToPath[sub.following.class];
+                      const href = basePath && sub.following.slug
+                        ? `${basePath}/${sub.following.slug}`
+                        : null;
+                      const content = (
+                        <div className="flex items-center gap-16">
+                          <Avatar
+                            avatarType={subAvatar ? "image" : "initials"}
+                            srcPath={(subAvatar || initials) as unknown as undefined}
+                            alt={subName}
+                            className="w-48 h-48"
+                          />
+                          <span className="text-neutral-900 text-base font-medium">{subName}</span>
+                        </div>
+                      );
+                      return href ? (
+                        <Link key={sub.id} href={href} className="hover:opacity-80 transition-opacity">
+                          {content}
+                        </Link>
+                      ) : (
+                        <div key={sub.id}>{content}</div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </TabBody>
+          </Tab>
+          <Tab>
+            <TabHeader>Acompanhamentos</TabHeader>
+            <TabBody>
+              <div className="mt-24">
+                <CardNoResults
+                  className="datasets-page__empty"
+                  position="center"
+                  icon={
+                    <Icon
+                      name="agora-line-star"
+                      className="w-12 h-12 text-primary-500 icon-xl"
+                    />
+                  }
+                  title="Sem acompanhamentos"
+                  description="Não tem seguidores"
+                  hasAnchor={false}
+                />
               </div>
             </TabBody>
           </Tab>
@@ -803,90 +968,6 @@ export default function ProfileClient() {
                     </Table>
                   </>
                 )}
-              </div>
-            </TabBody>
-          </Tab>
-          <Tab>
-            <TabHeader>Subscrições</TabHeader>
-            <TabBody>
-              <div className="mt-24">
-                {isLoadingSubscriptions ? (
-                  <p className="text-neutral-900 text-base">A carregar subscrições...</p>
-                ) : subscriptions.length === 0 ? (
-                  <CardNoResults
-                    className="datasets-page__empty"
-                    position="center"
-                    icon={
-                      <Icon
-                        name="agora-line-bell"
-                        className="w-12 h-12 text-primary-500 icon-xl"
-                      />
-                    }
-                    title="Sem subscrições"
-                    description="Não segue conteúdos"
-                    hasAnchor={false}
-                  />
-                ) : (
-                  <div className="flex flex-col gap-16">
-                    {subscriptions.map((sub) => {
-                      const subName = sub.following.name || sub.following.title || "";
-                      const subAvatar = sub.following.avatar_thumbnail || sub.following.image_thumbnail;
-                      const initials = subName
-                        .split(" ")
-                        .map((w) => w.charAt(0).toUpperCase())
-                        .slice(0, 2)
-                        .join("");
-                      const classToPath: Record<string, string> = {
-                        Dataset: "/pages/datasets",
-                        Organization: "/pages/organizations",
-                        Reuse: "/pages/reuses",
-                        User: "/pages/users",
-                      };
-                      const basePath = classToPath[sub.following.class];
-                      const href = basePath && sub.following.slug
-                        ? `${basePath}/${sub.following.slug}`
-                        : null;
-                      const content = (
-                        <div className="flex items-center gap-16">
-                          <Avatar
-                            avatarType={subAvatar ? "image" : "initials"}
-                            srcPath={(subAvatar || initials) as unknown as undefined}
-                            alt={subName}
-                            className="w-48 h-48"
-                          />
-                          <span className="text-neutral-900 text-base font-medium">{subName}</span>
-                        </div>
-                      );
-                      return href ? (
-                        <Link key={sub.id} href={href} className="hover:opacity-80 transition-opacity">
-                          {content}
-                        </Link>
-                      ) : (
-                        <div key={sub.id}>{content}</div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </TabBody>
-          </Tab>
-          <Tab>
-            <TabHeader>Acompanhamentos</TabHeader>
-            <TabBody>
-              <div className="mt-24">
-                <CardNoResults
-                  className="datasets-page__empty"
-                  position="center"
-                  icon={
-                    <Icon
-                      name="agora-line-star"
-                      className="w-12 h-12 text-primary-500 icon-xl"
-                    />
-                  }
-                  title="Sem acompanhamentos"
-                  description="Não tem seguidores"
-                  hasAnchor={false}
-                />
               </div>
             </TabBody>
           </Tab>

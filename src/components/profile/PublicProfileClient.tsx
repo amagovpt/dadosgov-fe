@@ -199,14 +199,22 @@ export default function PublicProfileClient() {
 
       {/* Profile Card */}
       <div className="profile-card">
-        <Avatar
-          avatarType={displayUser?.avatar_thumbnail ? "image" : "initials"}
-          srcPath={
-            (displayUser?.avatar_thumbnail || initials) as unknown as undefined
-          }
-          alt={userName}
-          className="profile-card__avatar"
-        />
+        <div className="profile-card__avatar-container">
+          {displayUser?.avatar_thumbnail ? (
+            <img
+              src={displayUser.avatar_thumbnail}
+              alt={userName}
+              className="profile-card__avatar-img"
+            />
+          ) : (
+            <Avatar
+              avatarType={initials ? "initials" : "icon"}
+              srcPath={(initials || "agora-line-user") as unknown as undefined}
+              alt={userName}
+              className="profile-card__avatar"
+            />
+          )}
+        </div>
 
         <div className="profile-card__body">
           <div className="profile-card__info">
