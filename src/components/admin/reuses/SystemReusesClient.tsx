@@ -78,7 +78,11 @@ export default function SystemReusesClient() {
   }, [currentPage, pageSize, searchQuery, sortParam]);
 
   useEffect(() => {
-    loadData();
+    const timeoutId = setTimeout(() => {
+      void loadData();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [loadData]);
 
   const handleSearch = (value: string) => {
@@ -182,7 +186,9 @@ export default function SystemReusesClient() {
             dropdownListAriaLabel: "Opções de linhas por página",
             prevButtonAriaLabel: "Página anterior",
             nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
+            onPageChange: (page: number) => {
+              setCurrentPage(page + 1);
+            },
             onPageSizeChange: (size: number) => {
               setPageSize(size);
               setCurrentPage(1);

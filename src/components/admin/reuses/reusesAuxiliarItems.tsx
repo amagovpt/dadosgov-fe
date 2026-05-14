@@ -16,8 +16,8 @@ export function getReuseAuxiliarItems(errors: ReuseAuxiliarErrors = {}): Auxilia
       content: (
         <p>
           Prefira um título que explique claramente como a reutilização utiliza os dados, em vez de
-          usar apenas o nome do site ou da aplicação. Por exemplo: "Sistema de Pesquisa de Acordos
-          Comerciais" em vez de "acordoscomerciais.pt".
+          usar apenas o nome do site ou da aplicação. Por exemplo: &quot;Sistema de Pesquisa de Acordos
+          Comerciais&quot; em vez de &quot;acordoscomerciais.pt&quot;.
         </p>
       ),
       hasError: !!errors.title,
@@ -74,7 +74,7 @@ export function getReuseAuxiliarItems(errors: ReuseAuxiliarErrors = {}): Auxilia
         <p>
           Se a sua reutilização tiver uma componente visual, pode apresentar uma pré-visualização
           através de uma imagem ou de uma captura de ecrã (preferíveis a logótipos ou a simples
-          ilustrações). Esta imagem será exibida na secção "Reutilizações" na listagem das mesmas.
+          ilustrações). Esta imagem será exibida na secção &quot;Reutilizações&quot; na listagem das mesmas.
         </p>
       ),
     },

@@ -118,7 +118,7 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
             <span className="text-neutral-900 text-sm break-all">
               {contactPoints.length > 0
                 ? contactPoints.map((cp) => cp.email || cp.name).join(", ")
-                : "NÃ£o disponÃ­vel"}
+                : "Não disponível"}
             </span>
           </div>
         </div>
