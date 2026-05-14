@@ -8,27 +8,30 @@ import {
   Icon,
   InputSelect,
   InputText,
+  InputTextArea,
   StatusCard,
   Tag,
 } from "@ama-pt/agora-design-system";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import type { Dataset } from "@/types/api";
-
-type DatasetLink = { url: string };
+import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 
 type ReusesEditDatasetsTabProps = {
   associatedDatasets: Dataset[];
   selectedDatasets: Dataset[];
   datasetSearchResults: Dataset[];
   myDatasets: Dataset[];
-  datasetLinks: DatasetLink[];
+  datasetLinks: RemoteDatasetEntry[];
   datasetLinkErrors: Record<number, string>;
   isSubmitting: boolean;
   onDatasetSearchChange: (value: string) => void;
   onDatasetSelectChange: (selectedIds: string[]) => void;
   onRemoveSelectedDataset: (datasetId: string) => void;
   onDatasetLinkChange: (index: number, value: string) => void;
+  // LEDG-1748 PR 2: per-URL metadata inputs.
+  onDatasetTitleChange: (index: number, value: string) => void;
+  onDatasetDescriptionChange: (index: number, value: string) => void;
   onRemoveDatasetLink: (index: number) => void;
   onAddDatasetLink: () => void;
   onSave: () => void | Promise<void>;
@@ -46,6 +49,8 @@ export default function ReusesEditDatasetsTab({
   onDatasetSelectChange,
   onRemoveSelectedDataset,
   onDatasetLinkChange,
+  onDatasetTitleChange,
+  onDatasetDescriptionChange,
   onRemoveDatasetLink,
   onAddDatasetLink,
   onSave,
@@ -202,7 +207,7 @@ export default function ReusesEditDatasetsTab({
           </div>
 
           {datasetLinks.map((link, index) => (
-            <div key={`dataset-${index}`}>
+            <div key={`dataset-${index}`} className="flex flex-col gap-16">
               <InputText
                 label="Link para o conjunto de dados"
                 placeholder="Insira o URL aqui"
@@ -216,8 +221,26 @@ export default function ReusesEditDatasetsTab({
                 feedbackState="danger"
                 errorFeedbackText={datasetLinkErrors[index]}
               />
+              <InputText
+                label="Título (opcional)"
+                placeholder="Nome do conjunto de dados externo"
+                id={`edit-dataset-title-${index}`}
+                value={link.title ?? ""}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onDatasetTitleChange(index, e.target.value)
+                }
+              />
+              <InputTextArea
+                label="Descrição (opcional)"
+                placeholder="Pequena descrição do conjunto de dados"
+                id={`edit-dataset-description-${index}`}
+                value={link.description ?? ""}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  onDatasetDescriptionChange(index, e.target.value)
+                }
+              />
               {link.url.trim() && (
-                <div className="flex justify-end mt-24">
+                <div className="flex justify-end mt-8">
                   <Button
                     appearance="solid"
                     variant="danger"
