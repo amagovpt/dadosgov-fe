@@ -61,21 +61,28 @@ export default function OrgReusesClient() {
 
   useEffect(() => {
     if (!resolvedOrgId) {
-      setIsLoading(false);
       return;
     }
-    async function loadReuses() {
+
+    let isCancelled = false;
+    const timeoutId = setTimeout(() => {
       setIsLoading(true);
-      try {
-        const data = await fetchOrgReuses(resolvedOrgId!);
-        setReuses(data || []);
-      } catch (error) {
-        console.error("Error loading org reuses:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadReuses();
+      void fetchOrgReuses(resolvedOrgId)
+        .then((data) => {
+          if (!isCancelled) setReuses(data || []);
+        })
+        .catch((error) => {
+          console.error("Error loading org reuses:", error);
+        })
+        .finally(() => {
+          if (!isCancelled) setIsLoading(false);
+        });
+    }, 0);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [resolvedOrgId]);
 
   const filteredReuses = useMemo(() => {

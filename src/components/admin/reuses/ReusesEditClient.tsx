@@ -4,28 +4,19 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
-  Avatar,
   Breadcrumb,
   Button,
-  Icon,
-  InputText,
-  InputTextArea,
-  InputSelect,
-  DropdownSection,
   DropdownOption,
+  DropdownSection,
+  Icon,
   StatusCard,
   Pill,
-  Switch,
-  CardNoResults,
-  CardLinks,
   Tabs,
   Tab,
   TabHeader,
   TabBody,
-  Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -48,14 +39,13 @@ import {
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
-import { formatDistanceToNow } from "date-fns";
-import AuxiliarList from "@/components/admin/AuxiliarList";
-import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import RecipientSelect, {
-  type RecipientSelection,
-} from "@/components/admin/RecipientSelect";
-import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
+import type { RecipientSelection } from "@/components/admin/RecipientSelect";
+import ReusesEditMetadataTab from "@/components/admin/reuses/ReusesEditMetadataTab";
+import ReusesEditDatasetsTab from "@/components/admin/reuses/ReusesEditDatasetsTab";
+import ReusesEditApiTab from "@/components/admin/reuses/ReusesEditApiTab";
+import ReusesEditDiscussionsTab from "@/components/admin/reuses/ReusesEditDiscussionsTab";
+import ReusesEditActivitiesTab from "@/components/admin/reuses/ReusesEditActivitiesTab";
+import ReusesEditDeletePopup from "@/components/admin/reuses/ReusesEditDeletePopup";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -88,149 +78,6 @@ const activityLabels: Record<string, string> = {
 };
 
 const translateActivityLabel = (label: string) => activityLabels[label] ?? label;
-
-function TransferReusePopupContent({
-  reuseTitle,
-  onConfirm,
-}: {
-  reuseTitle: string;
-  onConfirm: (recipient: RecipientSelection, comment: string) => Promise<void>;
-}) {
-  const [recipient, setRecipient] = useState<RecipientSelection | null>(null);
-  const [comment, setComment] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showRecipientError, setShowRecipientError] = useState(false);
-
-  const handleConfirm = async () => {
-    if (!recipient) {
-      setShowRecipientError(true);
-      return;
-    }
-    setShowRecipientError(false);
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    try {
-      await onConfirm(recipient, comment.trim());
-      // Parent is responsible for hide() on success.
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : null;
-      setErrorMessage(msg || "Erro ao pedir a transferência da reutilização.");
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-16">
-      <p>
-        <Icon name="agora-line-document" className="inline w-4 h-4 mr-4" />
-        <span className="text-primary-600">{reuseTitle}</span>
-      </p>
-      <p>
-        <strong>Esta ação é irreversível.</strong>&nbsp;
-        Poderá deixar de conseguir gerir esta reutilização.
-      </p>
-
-      <div className="flex flex-col gap-8">
-        <label className="text-primary-900 text-base font-medium leading-7">
-          Organização ou utilizador <span className="text-danger-600">*</span>
-        </label>
-        <RecipientSelect
-          id="transfer-reuse-recipient"
-          placeholder="Selecione a identidade para a qual pretende transferir a reutilização..."
-          onChange={(selection) => {
-            setRecipient(selection);
-            if (selection) setShowRecipientError(false);
-          }}
-          hasError={showRecipientError}
-          errorFeedbackText="Selecione um utilizador ou organização"
-        />
-        {recipient && (
-          <p className="text-sm text-neutral-700">
-            Destinatário selecionado:{" "}
-            <strong className="text-primary-900">{recipient.label}</strong>{" "}
-            <span className="text-neutral-500">
-              ({recipient.class === "User" ? "utilizador" : "organização"})
-            </span>
-          </p>
-        )}
-      </div>
-
-      <div className="admin-page__org-card flex flex-col items-center gap-16 bg-neutral-50 rounded-lg p-8 text-center">
-        <h3 className="text-primary-900 text-lg font-bold leading-7">
-          Não pertence a uma organização.
-        </h3>
-        <p className="text-neutral-700 text-base leading-7">
-          Quando a reutilização for produzida no contexto de atividade profissional, é
-          recomendável que seja publicada em nome da organização responsável.
-        </p>
-        <Link
-          href="/pages/admin/organizations"
-          className="inline-flex items-center text-primary-500 text-base hover:underline"
-        >
-          <span className="mr-[5px]">Crie ou integre uma organização em dados.gov.pt</span>
-          <Icon name="agora-line-arrow-right-circle" className="w-5 h-5" />
-        </Link>
-      </div>
-
-      <div className="flex flex-col gap-8">
-        <label className="text-primary-900 text-base font-medium leading-7">
-          Comentário
-        </label>
-        <InputTextArea
-          placeholder="Mensagem opcional para o destinatário..."
-          id="transfer-reuse-comment"
-          label=""
-          rows={3}
-          value={comment}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setComment(e.target.value)
-          }
-        />
-      </div>
-
-      {errorMessage && (
-        <p className="text-danger-600 text-sm">{errorMessage}</p>
-      )}
-
-      <div className="flex justify-end gap-16 pt-16">
-        <Button
-          appearance="solid"
-          variant="primary"
-          hasIcon
-          leadingIcon="agora-line-plane"
-          leadingIconHover="agora-solid-plane"
-          onClick={handleConfirm}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "A transferir..." : "Transferir a reutilização"}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function DeleteReusePopupContent({
-  onClose,
-  onConfirm,
-}: {
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <div className="flex flex-col gap-16">
-      <p>Esta ação é irreversível. Tem a certeza que quer eliminar esta reutilização?</p>
-      <div className="flex justify-end gap-16 pt-16">
-        <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button variant="danger" onClick={onConfirm} hasIcon leadingIcon="agora-line-trash" leadingIconHover="agora-solid-trash">
-          Eliminar
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 export default function ReusesEditClient() {
   const searchParams = useSearchParams();
@@ -347,10 +194,7 @@ export default function ReusesEditClient() {
   // Debounced portal-wide dataset search when the user types in the dropdown.
   useEffect(() => {
     const q = datasetSearch.trim();
-    if (q.length < 2) {
-      setDatasetSearchResults([]);
-      return;
-    }
+    if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
         const res = await searchDatasets(q, 1, 20);
@@ -370,10 +214,7 @@ export default function ReusesEditClient() {
   // Debounced tag search while user types in the keywords dropdown.
   useEffect(() => {
     const q = keywordSearch.trim();
-    if (q.length < 2) {
-      setTagSearch([]);
-      return;
-    }
+    if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
         const res = await suggestTags(q, 20);
@@ -485,6 +326,9 @@ export default function ReusesEditClient() {
       .finally(() => setDiscussionsLoading(false));
   };
 
+  const discussionsCount =
+    discussionsLoaded ? discussions.length : (reuse?.metrics?.discussions ?? 0);
+
   const clearError = (field: string) => {
     if (formErrors[field]) {
       setFormErrors((prev) => {
@@ -492,6 +336,20 @@ export default function ReusesEditClient() {
         delete next[field];
         return next;
       });
+    }
+  };
+
+  const handleDatasetSearchChange = (value: string) => {
+    setDatasetSearch(value);
+    if (value.trim().length < 2) {
+      setDatasetSearchResults([]);
+    }
+  };
+
+  const handleKeywordSearchChange = (value: string) => {
+    setKeywordSearch(value);
+    if (value.trim().length < 2) {
+      setTagSearch([]);
     }
   };
 
@@ -514,6 +372,242 @@ export default function ReusesEditClient() {
       setTimeout(() => setApiSuccess(null), 10000);
     } catch {
       setApiError("Erro ao carregar imagem de capa.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePublishReuse = async () => {
+    if (!reuse) return;
+    setApiError(null);
+    setApiSuccess(null);
+    setIsSubmitting(true);
+    try {
+      const updated = await updateReuse(reuse.id, {
+        private: false,
+      });
+      setReuse(updated);
+      setApiSuccess("Reutilização publicada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch {
+      setApiError("Erro ao publicar a reutilização.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleKeywordsChange = (value: string) => {
+    setSelectedKeywordsValue(value);
+    const selected = value.split(",").filter(Boolean);
+    let addedNew = false;
+    selected.forEach((keyword) => {
+      const lower = keyword.toLowerCase();
+      const existsInSuggestions = tagSuggestions.some(
+        (tag) => tag.text.toLowerCase() === lower,
+      );
+      const existsInSearch = tagSearch.some(
+        (tag) => tag.text.toLowerCase() === lower,
+      );
+      if (!existsInSuggestions && !existsInSearch) {
+        addedNew = true;
+        setTagSuggestions((prev) => {
+          if (prev.some((tag) => tag.text.toLowerCase() === lower)) {
+            return prev;
+          }
+          return [...prev, { text: keyword }];
+        });
+      }
+    });
+    if (addedNew) {
+      setKeywordSearch("");
+    }
+  };
+
+  const handleRemoveKeyword = (keyword: string) => {
+    const next = selectedKeywords
+      .filter((value) => value.toLowerCase() !== keyword.toLowerCase())
+      .join(",");
+    setSelectedKeywordsValue(next);
+    selectedKeywordsRef.current = next;
+  };
+
+  const handleOpenDeletePopup = () => {
+    if (!reuse) return;
+    show(
+      <ReusesEditDeletePopup onClose={hide} onConfirm={handleDeleteReuse} />,
+      {
+        title: "Elimine a reutilização",
+        closeAriaLabel: "Fechar",
+        dimensions: "m",
+      },
+    );
+  };
+
+  const handleDatasetSelectChange = (selectedIds: string[]) => {
+    const selectedIdsSet = new Set(selectedIds);
+    const pool: Dataset[] = [
+      ...selectedDatasets,
+      ...datasetSearchResults,
+      ...myDatasets,
+    ];
+    const seen = new Set<string>();
+    const next: Dataset[] = [];
+    for (const dataset of pool) {
+      if (selectedIdsSet.has(dataset.id) && !seen.has(dataset.id)) {
+        seen.add(dataset.id);
+        next.push(dataset);
+      }
+    }
+    setSelectedDatasets(next);
+  };
+
+  const handleRemoveSelectedDataset = (datasetId: string) => {
+    setSelectedDatasets((prev) => prev.filter((dataset) => dataset.id !== datasetId));
+  };
+
+  const handleDatasetLinkChange = (index: number, value: string) => {
+    const nextLinks = [...datasetLinks];
+    nextLinks[index] = { url: value };
+    setDatasetLinks(nextLinks);
+    if (value.trim()) {
+      setDatasetLinkErrors((prev) => {
+        const nextErrors = { ...prev };
+        delete nextErrors[index];
+        return nextErrors;
+      });
+    }
+  };
+
+  const handleRemoveDatasetLink = (index: number) => {
+    const nextLinks = datasetLinks.filter((_, currentIndex) => currentIndex !== index);
+    setDatasetLinks(nextLinks.length > 0 ? nextLinks : [{ url: "" }]);
+  };
+
+  const handleAddDatasetLink = () => {
+    const lastIndex = datasetLinks.length - 1;
+    if (!datasetLinks[lastIndex].url.trim()) {
+      setDatasetLinkErrors((prev) => ({
+        ...prev,
+        [lastIndex]: "Campo obrigatório",
+      }));
+      return;
+    }
+    setDatasetLinks([...datasetLinks, { url: "" }]);
+  };
+
+  const handleSaveDatasetAssociations = async () => {
+    if (!reuse) return;
+    const remoteUrls = datasetLinks
+      .map((link) => link.url.trim())
+      .filter(Boolean);
+    const hasLocal = selectedDatasets.length > 0;
+    const hasRemote = remoteUrls.length > 0;
+
+    if (hasLocal && hasRemote) {
+      setApiError(
+        "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
+      );
+      return;
+    }
+    if (!hasLocal && !hasRemote) return;
+
+    setDatasetLinkErrors({});
+    setIsSubmitting(true);
+    setApiError(null);
+    try {
+      for (const dataset of selectedDatasets) {
+        await linkDatasetToReuse(reuse.id, dataset.id);
+      }
+      if (hasRemote) {
+        const existing = (reuse.extras?.remote_datasets as string[]) || [];
+        const mergedRemote = Array.from(new Set([...existing, ...remoteUrls]));
+        await updateReuse(reuse.id, {
+          extras: {
+            ...(reuse.extras || {}),
+            remote_datasets: mergedRemote,
+          },
+        });
+      }
+      const updated = await fetchReuse(reuseId);
+      setReuse(updated);
+      setDatasetLinks([{ url: "" }]);
+      setSelectedDatasets([]);
+      setApiSuccess("Conjuntos de dados associados com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch (error: unknown) {
+      const err = error as { data?: Record<string, unknown> };
+      if (err.data && typeof err.data === "object") {
+        const messages = Object.entries(err.data)
+          .map(([key, val]) => `${key}: ${val}`)
+          .join(", ");
+        setApiError(messages);
+      } else {
+        setApiError("Erro ao associar conjuntos de dados.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleApiLinkChange = (index: number, value: string) => {
+    const nextLinks = [...apiLinks];
+    nextLinks[index] = { url: value };
+    setApiLinks(nextLinks);
+    if (value.trim()) {
+      setApiLinkErrors((prev) => {
+        const nextErrors = { ...prev };
+        delete nextErrors[index];
+        return nextErrors;
+      });
+    }
+  };
+
+  const handleRemoveApiLink = (index: number) => {
+    const nextLinks = apiLinks.filter((_, currentIndex) => currentIndex !== index);
+    setApiLinks(nextLinks.length > 0 ? nextLinks : [{ url: "" }]);
+  };
+
+  const handleAddApiLink = () => {
+    const lastIndex = apiLinks.length - 1;
+    if (!apiLinks[lastIndex].url.trim()) {
+      setApiLinkErrors((prev) => ({
+        ...prev,
+        [lastIndex]: "Campo obrigatório",
+      }));
+      return;
+    }
+    setApiLinks([...apiLinks, { url: "" }]);
+  };
+
+  const handleSaveApiAssociations = async () => {
+    if (!reuse) return;
+    const errors: Record<number, string> = {};
+    apiLinks.forEach((link, index) => {
+      if (!link.url.trim() && apiLinks.length > 1) {
+        errors[index] = "Campo obrigatório";
+      }
+    });
+    if (Object.keys(errors).length > 0) {
+      setApiLinkErrors(errors);
+      return;
+    }
+
+    setApiLinkErrors({});
+    setIsSubmitting(true);
+    setApiError(null);
+    try {
+      for (const link of apiLinks) {
+        if (link.url.trim()) {
+          await linkDataserviceToReuse(reuse.id, link.url.trim());
+        }
+      }
+      const updated = await fetchReuse(reuseId);
+      setReuse(updated);
+      setApiLinks([{ url: "" }]);
+      setApiSuccess("APIs associadas com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch {
+      setApiError("Erro ao associar APIs.");
     } finally {
       setIsSubmitting(false);
     }
@@ -738,1020 +832,115 @@ export default function ReusesEditClient() {
           if (index === 4) loadActivities();
         }}
       >
-        {/* Metadata Tab */}
         <Tab>
           <TabHeader>Metadados</TabHeader>
           <TabBody>
-            <div className="admin-page__body">
-              <div className="admin-page__form-area">
-                {reuse.private && (
-                  <div className="dataset-edit-visibility-banner">
-                    <StatusCard
-                      variant="informative"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Modifique a visibilidade da reutilização.</strong>
-                          <br />
-                          Esta reutilização encontra-se atualmente em{" "}
-                          <strong>modo rascunho</strong>. Apenas o produtor e os membros
-                          da organização a podem visualizar e editar.
-                        </>
-                      }
-                    />
-                    <div>
-                      <Button
-                        variant="primary"
-                        appearance="outline"
-                        onClick={async () => {
-                          setApiError(null);
-                          setApiSuccess(null);
-                          setIsSubmitting(true);
-                          try {
-                            const updated = await updateReuse(reuse.id, {
-                              private: false,
-                            });
-                            setReuse(updated);
-                            setApiSuccess("Reutilização publicada com sucesso.");
-                            setTimeout(() => setApiSuccess(null), 10000);
-                          } catch {
-                            setApiError("Erro ao publicar a reutilização.");
-                          } finally {
-                            setIsSubmitting(false);
-                          }
-                        }}
-                        disabled={isSubmitting}
-                      >
-                        Publicar reutilização
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                <form
-                  className="admin-page__form"
-                  onSubmit={(e) => e.preventDefault()}
-                >
-                  <p className="text-neutral-900 text-base leading-7">
-                    Os campos marcados com um asterisco ( * ) são obrigatórios.
-                  </p>
-
-                  <h2 className="admin-page__section-title">Destaque</h2>
-                  <div className="admin-page__fields-group">
-                    <Switch
-                      label="Destaque"
-                      checked={featured}
-                      onChange={() => setFeatured((v) => !v)}
-                    />
-                  </div>
-
-                  <h2 className="admin-page__section-title">Descrição</h2>
-                  <div className="admin-page__fields-group">
-                    <InputText
-                      label="Nome da reutilização *"
-                      placeholder="Insira o nome aqui"
-                      id="edit-title"
-                      value={title}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setTitle(e.target.value);
-                        if (e.target.value.trim()) clearError("title");
-                      }}
-                      hasError={!!formErrors.title}
-                      hasFeedback={!!formErrors.title}
-                      feedbackState="danger"
-                      errorFeedbackText="Campo obrigatório"
-                    />
-                    <InputText
-                      label="URL *"
-                      placeholder="Insira o URL aqui (ex: https://...)"
-                      id="edit-url"
-                      value={url}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setUrl(e.target.value);
-                        if (e.target.value.trim()) clearError("url");
-                      }}
-                      hasError={!!formErrors.url}
-                      hasFeedback={!!formErrors.url}
-                      feedbackState="danger"
-                      errorFeedbackText="Campo obrigatório"
-                    />
-                    <IsolatedSelect
-                      label="Tipo *"
-                      placeholder="Selecione um tipo..."
-                      id="edit-type"
-                      searchable
-                      searchInputPlaceholder="Escreva para pesquisar..."
-                      searchNoResultsText="Nenhum resultado encontrado"
-                      onChangeRef={selectedTypeRef}
-                      defaultValue={selectedType}
-                      onChangeCallback={(v) => setSelectedType(v || "")}
-                    >
-                      <DropdownSection name="types">
-                        {reuseTypes.map((t) => (
-                          <DropdownOption
-                            key={t.id}
-                            value={t.id}
-                            selected={t.id === selectedType}
-                          >
-                            {localizeReuseType(t)}
-                          </DropdownOption>
-                        ))}
-                      </DropdownSection>
-                    </IsolatedSelect>
-                    <IsolatedSelect
-                      label="Tema *"
-                      placeholder="Selecione um tema..."
-                      id="edit-topic"
-                      searchable
-                      searchInputPlaceholder="Escreva para pesquisar..."
-                      searchNoResultsText="Nenhum resultado encontrado"
-                      onChangeRef={selectedTopicRef}
-                      defaultValue={selectedTopic}
-                      onChangeCallback={(v) => setSelectedTopic(v || "")}
-                    >
-                      <DropdownSection name="topics">
-                        {reuseTopics.map((t) => (
-                          <DropdownOption
-                            key={t.id}
-                            value={t.id}
-                            selected={t.id === selectedTopic}
-                          >
-                            {localizeReuseTopic(t)}
-                          </DropdownOption>
-                        ))}
-                      </DropdownSection>
-                    </IsolatedSelect>
-                    <InputTextArea
-                      label="Descrição *"
-                      placeholder="Insira a descrição aqui"
-                      id="edit-description"
-                      rows={6}
-                      maxLength={246}
-                      showCharCounter={true}
-                      value={description}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                        setDescription(e.target.value);
-                        if (e.target.value.trim()) clearError("description");
-                      }}
-                      hasError={formErrors.description ? true : undefined}
-                      hasFeedback={formErrors.description ? true : undefined}
-                      feedbackState="danger"
-                      feedbackText="Campo obrigatório"
-                      errorFeedbackText="Campo obrigatório"
-                    />
-                    <IsolatedSelect
-                      label="Palavras-chave"
-                      placeholder="Pesquise ou insira palavras-chave..."
-                      id="edit-keywords"
-                      type="checkbox"
-                      searchable
-                      searchInputPlaceholder="Escreva para pesquisar ou criar..."
-                      searchNoResultsText="Nenhum resultado encontrado"
-                      defaultValue={selectedKeywordsValue}
-                      onChangeRef={selectedKeywordsRef}
-                      onSearchCallback={setKeywordSearch}
-                      onChangeCallback={(value) => {
-                        setSelectedKeywordsValue(value);
-                        const selected = value.split(",").filter(Boolean);
-                        let addedNew = false;
-                        selected.forEach((v) => {
-                          const lower = v.toLowerCase();
-                          const existsInSuggestions = tagSuggestions.some(
-                            (t) => t.text.toLowerCase() === lower,
-                          );
-                          const existsInSearch = tagSearch.some(
-                            (t) => t.text.toLowerCase() === lower,
-                          );
-                          if (!existsInSuggestions && !existsInSearch) {
-                            addedNew = true;
-                            setTagSuggestions((prev) => {
-                              if (prev.some((t) => t.text.toLowerCase() === lower)) {
-                                return prev;
-                              }
-                              return [...prev, { text: v }];
-                            });
-                          }
-                        });
-                        if (addedNew) {
-                          setKeywordSearch("");
-                        }
-                      }}
-                    >
-                      {keywordOptions}
-                    </IsolatedSelect>
-
-                    {selectedKeywords.length > 0 && (
-                      <div className="flex flex-wrap gap-8 -mt-8">
-                        {[...selectedKeywords].sort((a, b) => a.localeCompare(b)).map((keyword) => (
-                          <Tag
-                            key={keyword}
-                            aria-label={`Remover ${keyword}`}
-                            onClick={() => {
-                              const next = selectedKeywords
-                                .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
-                                .join(",");
-                              setSelectedKeywordsValue(next);
-                              selectedKeywordsRef.current = next;
-                            }}
-                          >
-                            {keyword}
-                          </Tag>
-                        ))}
-                      </div>
-                    )}
-                    <div>
-                      <span className="text-primary-900 text-base font-medium leading-7">
-                        Imagem de capa *
-                      </span>
-                      {(reuse.image_thumbnail || reuse.image) && (
-                        <div className="mt-2 mb-2">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={reuse.image_thumbnail || reuse.image || ""}
-                            alt="Imagem de capa atual"
-                            className="rounded border border-neutral-200 max-h-[180px] object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
-                        <DragAndDropUploader
-                          label="Ficheiros"
-                          dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                          inputLabel="Selecione ou arraste o ficheiro"
-                          selectedFilesLabel="ficheiro selecionado"
-                          removeFileButtonLabel="Remover ficheiro"
-                          replaceFileButtonLabel="Substituir ficheiro"
-                          extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-                          accept=".jpg,.jpeg,.png"
-                          maxSize={4194304}
-                          maxCount={1}
-                          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-                          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                          hasError={!!imageError}
-                          hasFeedback={!!imageError}
-                          feedbackState="danger"
-                          feedbackText={imageError ?? undefined}
-                          onChange={handleImageUpload}
-                          onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="admin-page__actions flex justify-end mt-24">
-                    <Button
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-check-circle"
-                      trailingIconHover="agora-solid-check-circle"
-                      onClick={handleSaveMetadata}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "A guardar..." : "Guardar"}
-                    </Button>
-                  </div>
-
-                  <div className="dataset-edit-danger-actions">
-                    {/* Transfer reuse section hidden — keep for future use
-                    <StatusCard
-                      variant="informative"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Atenção esta ação é irreversível.</strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={() => {
-                              show(
-                                <TransferReusePopupContent
-                                  reuseTitle={reuse.title}
-                                  onConfirm={handleTransferReuse}
-                                />,
-                                {
-                                  title: "Transfira a reutilização",
-                                  closeAriaLabel: "Fechar",
-                                  dimensions: "m",
-                                },
-                              );
-                            }}
-                          >
-                            Transferir a reutilização
-                          </Button>
-                        </>
-                      }
-                    />
-                    */}
-                    <StatusCard
-                      variant="warning"
-                      showIcon
-                      description={
-                        <>
-                          <strong>
-                            {reuse.archived
-                              ? "Esta reutilização está arquivada. Pode desarquivar para voltar a indexá-la no portal."
-                              : "Uma reutilização arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto."}
-                          </strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={
-                              reuse.archived
-                                ? handleUnarchiveReuse
-                                : handleArchiveReuse
-                            }
-                            disabled={isSubmitting}
-                          >
-                            {reuse.archived
-                              ? "Desarquivar a reutilização"
-                              : "Arquivar a reutilização"}
-                          </Button>
-                        </>
-                      }
-                    />
-                    <StatusCard
-                      variant="danger"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Atenção esta ação é irreversível.</strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={() => {
-                              show(
-                                <DeleteReusePopupContent
-                                  onClose={hide}
-                                  onConfirm={handleDeleteReuse}
-                                />,
-                                {
-                                  title: "Elimine a reutilização",
-                                  closeAriaLabel: "Fechar",
-                                  dimensions: "m",
-                                },
-                              );
-                            }}
-                            disabled={isSubmitting}
-                          >
-                            Eliminar a reutilização
-                          </Button>
-                        </>
-                      }
-                    />
-                  </div>
-                </form>
-              </div>
-
-              <aside className="admin-page__auxiliar">
-                <div className="admin-page__auxiliar-inner">
-                  <div className="admin-page__auxiliar-header">
-                    <Icon
-                      name="agora-line-question-mark"
-                      className="w-24 h-24"
-                    />
-                    <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
-                  </div>
-                  <AuxiliarList
-                    items={getReuseAuxiliarItems({
-                      title: !!formErrors.title,
-                      link: !!formErrors.url,
-                      description: !!formErrors.description,
-                    })}
-                  />
-                </div>
-              </aside>
-            </div>
+            <ReusesEditMetadataTab
+              reuse={reuse}
+              isSubmitting={isSubmitting}
+              featured={featured}
+              title={title}
+              url={url}
+              description={description}
+              selectedType={selectedType}
+              selectedTopic={selectedTopic}
+              selectedTypeRef={selectedTypeRef}
+              selectedTopicRef={selectedTopicRef}
+              selectedKeywordsRef={selectedKeywordsRef}
+              selectedKeywordsValue={selectedKeywordsValue}
+              selectedKeywords={selectedKeywords}
+              keywordOptions={keywordOptions}
+              imageError={imageError}
+              formErrors={formErrors}
+              reuseTypes={reuseTypes}
+              reuseTopics={reuseTopics}
+              onPublishReuse={handlePublishReuse}
+              onToggleFeatured={() => setFeatured((value) => !value)}
+              onTitleChange={(value) => {
+                setTitle(value);
+                if (value.trim()) clearError("title");
+              }}
+              onUrlChange={(value) => {
+                setUrl(value);
+                if (value.trim()) clearError("url");
+              }}
+              onTypeChange={(value) => setSelectedType(value)}
+              onTopicChange={(value) => setSelectedTopic(value)}
+              onDescriptionChange={(value) => {
+                setDescription(value);
+                if (value.trim()) clearError("description");
+              }}
+              onKeywordSearchChange={handleKeywordSearchChange}
+              onKeywordsChange={handleKeywordsChange}
+              onRemoveKeyword={handleRemoveKeyword}
+              onImageUpload={handleImageUpload}
+              onImageSecurityError={() => setImageError(POISONED_FILE_WARNING)}
+              onSaveMetadata={handleSaveMetadata}
+              onArchiveReuse={handleArchiveReuse}
+              onUnarchiveReuse={handleUnarchiveReuse}
+              onOpenDeletePopup={handleOpenDeletePopup}
+            />
           </TabBody>
         </Tab>
-
         {/* Datasets Tab */}
         <Tab>
           <TabHeader>Conjuntos de dados ({reuse.datasets?.length || 0})</TabHeader>
           <TabBody>
-            <div className="admin-page__body mt-24">
-              <div className="admin-page__form-area">
-                {associatedDatasets.length > 0 && (
-                  <div className="agora-card-links-datasets-px0 mb-24">
-                    {associatedDatasets.map((dataset) => (
-                      <CardLinks
-                        key={dataset.id}
-                        onClick={() => { }}
-                        className="cursor-pointer text-neutral-900"
-                        variant="transparent"
-                        image={{
-                          src: dataset.organization?.logo || "/images/placeholders/organization.png",
-                          alt: dataset.organization?.name || "Organização sem logo",
-                        }}
-                        category={dataset.organization?.name}
-                        title={dataset.title}
-                        description={
-                          <div className="flex flex-col gap-12">
-                            <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
-                              {dataset.description}
-                            </p>
-                            <div className="flex flex-wrap gap-8 items-center mt-8">
-                              <span className="text-sm font-medium text-neutral-900">
-                                Metadados: {dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0}%
-                              </span>
-                            </div>
-                            <div className="flex items-center flex-wrap gap-32 text-xs mt-32 text-[#034AD8] mb-32">
-                              <div className="flex items-center gap-8" title="Visualizações">
-                                <Icon name="agora-line-eye" className="" aria-hidden="true" />
-                                <span>
-                                  {dataset.metrics?.views
-                                    ? dataset.metrics.views >= 1000
-                                      ? (dataset.metrics.views / 1000).toFixed(0) + " mil"
-                                      : dataset.metrics.views
-                                    : "0"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Downloads">
-                                <Icon name="agora-line-download" className="" aria-hidden="true" />
-                                <span>
-                                  {dataset.metrics?.resources_downloads
-                                    ? dataset.metrics.resources_downloads >= 1000
-                                      ? (dataset.metrics.resources_downloads / 1000).toFixed(0) + " mil"
-                                      : dataset.metrics.resources_downloads
-                                    : "0"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Reutilizações">
-                                <img src="/Icons/bar_chart_primary.svg" className="" alt="" aria-hidden="true" />
-                                <span>{dataset.metrics?.reuses || 0}</span>
-                              </div>
-                              <div className="flex items-center gap-8" title="Favoritos">
-                                <img src="/Icons/favorite.svg" className="" alt="" aria-hidden="true" />
-                                <span>{dataset.metrics?.followers || 0}</span>
-                              </div>
-                            </div>
-                          </div>
-                        }
-                        date={
-                          <span className="font-[300]">
-                            {`Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
-                          </span>
-                        }
-                        mainLink={
-                          <Link href={`/pages/datasets/${dataset.slug}`}>
-                            <span className="underline">{dataset.title}</span>
-                          </Link>
-                        }
-                        blockedLink={true}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <form
-                  className="admin-page__form"
-                  onSubmit={(e) => e.preventDefault()}
-                >
-                  <div className="mb-24">
-                    <StatusCard
-                      variant="warning"
-                      showIcon
-                      description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
-                    />
-                  </div>
-
-                  <InputSelect
-                    label="Pesquisar um conjunto de dados"
-                    placeholder="Selecione conjuntos de dados..."
-                    id="edit-dataset-search"
-                    type="checkbox"
-                    searchable
-                    searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
-                    searchNoResultsText="Nenhum resultado encontrado"
-                    onSearchInputChange={setDatasetSearch}
-                    onChange={(options) => {
-                      const selectedIds = new Set(options.map((o) => o.value as string));
-                      const pool: Dataset[] = [
-                        ...selectedDatasets,
-                        ...datasetSearchResults,
-                        ...myDatasets,
-                      ];
-                      const seen = new Set<string>();
-                      const next: Dataset[] = [];
-                      for (const d of pool) {
-                        if (selectedIds.has(d.id) && !seen.has(d.id)) {
-                          seen.add(d.id);
-                          next.push(d);
-                        }
-                      }
-                      setSelectedDatasets(next);
-                    }}
-                  >
-                    <DropdownSection name="datasets">
-                      {(() => {
-                        const combined: Dataset[] = [
-                          ...selectedDatasets,
-                          ...datasetSearchResults,
-                          ...myDatasets,
-                        ];
-                        const associatedIds = new Set(
-                          associatedDatasets.map((d) => d.id),
-                        );
-                        const seen = new Set<string>();
-                        return combined
-                          .filter((d) => {
-                            if (seen.has(d.id)) return false;
-                            if (associatedIds.has(d.id)) return false;
-                            seen.add(d.id);
-                            return true;
-                          })
-                          .map((d) => (
-                            <DropdownOption
-                              key={d.id}
-                              value={d.id}
-                              selected={selectedDatasets.some((s) => s.id === d.id)}
-                            >
-                              {d.title}
-                            </DropdownOption>
-                          ));
-                      })()}
-                    </DropdownSection>
-                  </InputSelect>
-
-                  {selectedDatasets.length > 0 && (
-                    <div className="flex flex-wrap gap-8 mt-16">
-                      {selectedDatasets.map((d) => (
-                        <Tag
-                          key={d.id}
-                          aria-label={`Remover ${d.title}`}
-                          onClick={() => {
-                            setSelectedDatasets((prev) =>
-                              prev.filter((x) => x.id !== d.id),
-                            );
-                          }}
-                        >
-                          {d.title}
-                        </Tag>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="admin-page__divider-or">
-                    <span className="admin-page__divider-or-text">ou</span>
-                  </div>
-
-                  {datasetLinks.map((link, index) => (
-                    <div key={`dataset-${index}`}>
-                      <InputText
-                        label="Link para o conjunto de dados"
-                        placeholder="Insira o URL aqui"
-                        id={`edit-dataset-url-${index}`}
-                        value={link.url}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const newLinks = [...datasetLinks];
-                          newLinks[index] = { url: e.target.value };
-                          setDatasetLinks(newLinks);
-                          if (e.target.value.trim()) {
-                            setDatasetLinkErrors((prev) => {
-                              const next = { ...prev };
-                              delete next[index];
-                              return next;
-                            });
-                          }
-                        }}
-                        hasError={!!datasetLinkErrors[index]}
-                        hasFeedback={!!datasetLinkErrors[index]}
-                        feedbackState="danger"
-                        errorFeedbackText={datasetLinkErrors[index]}
-                      />
-                      {link.url.trim() && (
-                        <div className="flex justify-end mt-24">
-                          <Button
-                            appearance="solid"
-                            variant="danger"
-                            hasIcon
-                            leadingIcon="agora-line-trash"
-                            leadingIconHover="agora-solid-trash"
-                            onClick={() => {
-                              const newLinks = datasetLinks.filter((_, i) => i !== index);
-                              setDatasetLinks(newLinks.length > 0 ? newLinks : [{ url: "" }]);
-                            }}
-                          >
-                            Eliminar
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  <div className="flex justify-end">
-                    <Button
-                      appearance="outline"
-                      variant="primary"
-                      hasIcon
-                      leadingIcon="agora-line-plus-circle"
-                      leadingIconHover="agora-solid-plus-circle"
-                      onClick={() => {
-                        const lastIndex = datasetLinks.length - 1;
-                        if (!datasetLinks[lastIndex].url.trim()) {
-                          setDatasetLinkErrors((prev) => ({
-                            ...prev,
-                            [lastIndex]: "Campo obrigatório",
-                          }));
-                          return;
-                        }
-                        setDatasetLinks([...datasetLinks, { url: "" }]);
-                      }}
-                    >
-                      Adicionar
-                    </Button>
-                  </div>
-
-                  <div className="admin-page__actions flex justify-end gap-[18px]">
-                    <Button
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-check-circle"
-                      trailingIconHover="agora-solid-check-circle"
-                      onClick={async () => {
-                        if (!reuse) return;
-                        const remoteUrls = datasetLinks
-                          .map((l) => l.url.trim())
-                          .filter(Boolean);
-                        const hasLocal = selectedDatasets.length > 0;
-                        const hasRemote = remoteUrls.length > 0;
-
-                        // Mutual exclusion: portal datasets OR remote URLs.
-                        if (hasLocal && hasRemote) {
-                          setApiError(
-                            "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
-                          );
-                          return;
-                        }
-                        if (!hasLocal && !hasRemote) return;
-
-                        setDatasetLinkErrors({});
-                        setIsSubmitting(true);
-                        setApiError(null);
-                        try {
-                          for (const dataset of selectedDatasets) {
-                            await linkDatasetToReuse(reuse.id, dataset.id);
-                          }
-                          if (hasRemote) {
-                            const existing =
-                              (reuse.extras?.remote_datasets as string[]) || [];
-                            const mergedRemote = Array.from(
-                              new Set([...existing, ...remoteUrls]),
-                            );
-                            await updateReuse(reuse.id, {
-                              extras: {
-                                ...(reuse.extras || {}),
-                                remote_datasets: mergedRemote,
-                              },
-                            });
-                          }
-                          const updated = await fetchReuse(reuseId);
-                          setReuse(updated);
-                          setDatasetLinks([{ url: "" }]);
-                          setSelectedDatasets([]);
-                          setApiSuccess("Conjuntos de dados associados com sucesso.");
-                          setTimeout(() => setApiSuccess(null), 10000);
-                        } catch (error: unknown) {
-                          const err = error as { data?: Record<string, unknown> };
-                          if (err.data && typeof err.data === "object") {
-                            const messages = Object.entries(err.data)
-                              .map(([key, val]) => `${key}: ${val}`)
-                              .join(", ");
-                            setApiError(messages);
-                          } else {
-                            setApiError("Erro ao associar conjuntos de dados.");
-                          }
-                        } finally {
-                          setIsSubmitting(false);
-                        }
-                      }}
-                      disabled={
-                        isSubmitting ||
-                        (selectedDatasets.length === 0 &&
-                          !datasetLinks.some((l) => l.url.trim()))
-                      }
-                    >
-                      {isSubmitting ? "A guardar..." : "Guardar"}
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </div>
+            <ReusesEditDatasetsTab
+              associatedDatasets={associatedDatasets}
+              selectedDatasets={selectedDatasets}
+              datasetSearchResults={datasetSearchResults}
+              myDatasets={myDatasets}
+              datasetLinks={datasetLinks}
+              datasetLinkErrors={datasetLinkErrors}
+              isSubmitting={isSubmitting}
+              onDatasetSearchChange={handleDatasetSearchChange}
+              onDatasetSelectChange={handleDatasetSelectChange}
+              onRemoveSelectedDataset={handleRemoveSelectedDataset}
+              onDatasetLinkChange={handleDatasetLinkChange}
+              onRemoveDatasetLink={handleRemoveDatasetLink}
+              onAddDatasetLink={handleAddDatasetLink}
+              onSave={handleSaveDatasetAssociations}
+            />
           </TabBody>
         </Tab>
-
         {/* API Tab */}
         <Tab>
           <TabHeader>API ({reuse.dataservices?.length || 0})</TabHeader>
           <TabBody>
-            <div className="admin-page__body mt-24">
-              <div className="admin-page__form-area">
-                {reuse.dataservices && reuse.dataservices.length > 0 && (
-                  <div className="space-y-16 mb-24">
-                    {reuse.dataservices.map((api) => (
-                      <div key={api.id} className="border border-neutral-200 rounded-4 p-16 flex items-center justify-between">
-                        <div className="flex items-center gap-12">
-                          <Icon name="agora-line-code" className="w-24 h-24" />
-                          <span className="text-neutral-900 font-medium">{api.title}</span>
-                        </div>
-                        <button
-                          type="button"
-                          className="border border-neutral-300 rounded-4 p-8 hover:bg-neutral-100"
-                          title="Eliminar API"
-                        >
-                          <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <form
-                  className="admin-page__form"
-                  onSubmit={(e) => e.preventDefault()}
-                >
-                  <InputSelect
-                    label="Pesquisar uma API"
-                    placeholder="Pesquise uma API..."
-                    id="edit-api-search"
-                    searchable
-                    searchInputPlaceholder="Escreva para pesquisar..."
-                    searchNoResultsText="Nenhum resultado encontrado"
-                  >
-                    <DropdownSection name="apis">
-                      <DropdownOption value="">—</DropdownOption>
-                    </DropdownSection>
-                  </InputSelect>
-
-                  <div className="admin-page__divider-or">
-                    <span className="admin-page__divider-or-text">ou</span>
-                  </div>
-
-                  {apiLinks.map((link, index) => (
-                    <div key={`api-${index}`}>
-                      <InputText
-                        label="Link para a API"
-                        placeholder="https://..."
-                        id={`edit-api-url-${index}`}
-                        value={link.url}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const newLinks = [...apiLinks];
-                          newLinks[index] = { url: e.target.value };
-                          setApiLinks(newLinks);
-                          if (e.target.value.trim()) {
-                            setApiLinkErrors((prev) => {
-                              const next = { ...prev };
-                              delete next[index];
-                              return next;
-                            });
-                          }
-                        }}
-                        hasError={!!apiLinkErrors[index]}
-                        hasFeedback={!!apiLinkErrors[index]}
-                        feedbackState="danger"
-                        errorFeedbackText={apiLinkErrors[index]}
-                      />
-                      {link.url.trim() && (
-                        <div className="flex justify-end mt-24">
-                          <Button
-                            appearance="solid"
-                            variant="danger"
-                            hasIcon
-                            leadingIcon="agora-line-trash"
-                            leadingIconHover="agora-solid-trash"
-                            onClick={() => {
-                              const newLinks = apiLinks.filter((_, i) => i !== index);
-                              setApiLinks(newLinks.length > 0 ? newLinks : [{ url: "" }]);
-                            }}
-                          >
-                            Eliminar
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  <div className="flex justify-end">
-                    <Button
-                      appearance="outline"
-                      variant="primary"
-                      hasIcon
-                      leadingIcon="agora-line-plus-circle"
-                      leadingIconHover="agora-solid-plus-circle"
-                      onClick={() => {
-                        const lastIndex = apiLinks.length - 1;
-                        if (!apiLinks[lastIndex].url.trim()) {
-                          setApiLinkErrors((prev) => ({
-                            ...prev,
-                            [lastIndex]: "Campo obrigatório",
-                          }));
-                          return;
-                        }
-                        setApiLinks([...apiLinks, { url: "" }]);
-                      }}
-                    >
-                      Adicionar
-                    </Button>
-                  </div>
-
-                  <div className="admin-page__actions flex justify-end gap-[18px]">
-                    <Button
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-check-circle"
-                      trailingIconHover="agora-solid-check-circle"
-                      onClick={async () => {
-                        if (!reuse) return;
-                        const errors: Record<number, string> = {};
-                        apiLinks.forEach((link, index) => {
-                          if (!link.url.trim() && apiLinks.length > 1) {
-                            errors[index] = "Campo obrigatório";
-                          }
-                        });
-                        if (Object.keys(errors).length > 0) {
-                          setApiLinkErrors(errors);
-                          return;
-                        }
-                        setApiLinkErrors({});
-                        setIsSubmitting(true);
-                        setApiError(null);
-                        try {
-                          for (const link of apiLinks) {
-                            if (link.url.trim()) {
-                              await linkDataserviceToReuse(reuse.id, link.url.trim());
-                            }
-                          }
-                          const updated = await fetchReuse(reuseId);
-                          setReuse(updated);
-                          setApiLinks([{ url: "" }]);
-                          setApiSuccess("APIs associadas com sucesso.");
-                          setTimeout(() => setApiSuccess(null), 10000);
-                        } catch {
-                          setApiError("Erro ao associar APIs.");
-                        } finally {
-                          setIsSubmitting(false);
-                        }
-                      }}
-                      disabled={isSubmitting || !apiLinks.some((l) => l.url.trim())}
-                    >
-                      {isSubmitting ? "A guardar..." : "Guardar"}
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </div>
+            <ReusesEditApiTab
+              dataservices={reuse.dataservices}
+              apiLinks={apiLinks}
+              apiLinkErrors={apiLinkErrors}
+              isSubmitting={isSubmitting}
+              onApiLinkChange={handleApiLinkChange}
+              onRemoveApiLink={handleRemoveApiLink}
+              onAddApiLink={handleAddApiLink}
+              onSave={handleSaveApiAssociations}
+            />
           </TabBody>
         </Tab>
-
         {/* Discussions Tab */}
         <Tab>
-          <TabHeader>Discussões ({discussions.length})</TabHeader>
+          <TabHeader>Discussões ({discussionsCount})</TabHeader>
           <TabBody>
-            <div className="mt-24">
-              {discussionsLoading && (
-                <p className="text-neutral-700 text-sm">A carregar...</p>
-              )}
-              {discussionsLoaded && discussions.length === 0 && (
-                <CardNoResults
-                  position="center"
-                  icon={
-                    <Icon name="agora-line-chat" className="w-12 h-12 text-primary-500 icon-xl" />
-                  }
-                  title="Sem discussões"
-                  description="Ainda não existem discussões nesta reutilização."
-                  hasAnchor={false}
-                />
-              )}
-              {discussionsLoaded && discussions.length > 0 && (
-                <div>
-                  <h2 className="font-medium text-neutral-900 text-base mb-16">
-                    {discussions.length} {discussions.length === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
-                  </h2>
-                  <div className="space-y-16">
-                    {discussions.map((disc) => (
-                      <div key={disc.id} className="bg-white rounded-8 p-32">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-neutral-900 text-base">{disc.title}</h4>
-                            <p className="text-sm text-neutral-900 mt-4">
-                              <span className="text-primary-600 font-medium">
-                                {disc.user.first_name} {disc.user.last_name}
-                              </span>
-                              {" — Publicado em "}
-                              {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", { locale: pt })}
-                            </p>
-                          </div>
-                          <Pill
-                            variant={disc.closed ? "neutral" : "informative"}
-                          >
-                            {disc.closed ? "Fechada" : "Aberta"}
-                          </Pill>
-                        </div>
-                        {disc.discussion.length > 0 && (
-                          <p className="text-neutral-900 text-sm mt-16">
-                            {disc.discussion[0].content}
-                          </p>
-                        )}
-                        {disc.discussion.length > 1 && (
-                          <div className="mt-16 space-y-16 border-t border-neutral-200 pt-16">
-                            {disc.discussion.slice(1).map((msg, idx) => (
-                              <div key={idx} className="border-l-2 border-primary-600 pl-24">
-                                <p className="text-sm text-neutral-900">
-                                  <span className="text-primary-600 font-medium">
-                                    {msg.posted_by.first_name} {msg.posted_by.last_name}
-                                  </span>
-                                  {" — "}
-                                  {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", { locale: pt })}
-                                </p>
-                                <p className="text-neutral-900 text-sm mt-4">
-                                  {msg.content}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <ReusesEditDiscussionsTab
+              discussions={discussions}
+              discussionsLoading={discussionsLoading}
+              discussionsLoaded={discussionsLoaded}
+            />
           </TabBody>
         </Tab>
-
         {/* Activities Tab */}
         <Tab>
           <TabHeader>Atividades</TabHeader>
           <TabBody>
-            <div className="mt-24">
-              {activitiesLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
-              {activitiesLoaded && activities.length === 0 && (
-                <CardNoResults
-                  position="center"
-                  icon={
-                    <Icon name="agora-line-time" className="w-12 h-12 text-primary-500 icon-xl" />
-                  }
-                  title="Sem atividades"
-                  description="Ainda não existem atividades registadas nesta reutilização."
-                  hasAnchor={false}
-                />
-              )}
-              {activitiesLoaded && activities.length > 0 && (
-                <>
-                  <h2 className="font-medium text-neutral-900 text-base mb-16">
-                    {activities.length} ATIVIDADES
-                  </h2>
-                  <div className="flex flex-col gap-12">
-                    {activities.map((activity, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-12 p-12 bg-neutral-50 rounded-lg"
-                      >
-                        <Avatar
-                          avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
-                          srcPath={
-                            (activity.actor?.avatar_thumbnail ||
-                              `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
-                          }
-                          alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
-                        />
-                        <div>
-                          <p className="text-sm text-neutral-900">
-                            <a
-                              href={`/pages/admin/users/${activity.actor?.id}`}
-                              className="text-primary-600 underline"
-                            >
-                              {activity.actor?.first_name} {activity.actor?.last_name}
-                            </a>{" "}
-                            {translateActivityLabel(activity.label)}
-                          </p>
-                          <p className="text-xs text-neutral-600 mt-4">
-                            {new Date(activity.created_at).toLocaleDateString("pt-PT", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            <ReusesEditActivitiesTab
+              activities={activities}
+              activitiesLoading={activitiesLoading}
+              activitiesLoaded={activitiesLoaded}
+              translateActivityLabel={translateActivityLabel}
+            />
           </TabBody>
         </Tab>
       </Tabs>
