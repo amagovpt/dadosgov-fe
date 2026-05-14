@@ -1234,6 +1234,11 @@ export default function DatasetsEditClient() {
     if (!dataset) return;
     show(
       <ResourceEditPopupContent
+        // LEDG-1747: key tied to resource.id so React mounts a fresh
+        // component per resource. Without it, `useState(resource.x)` only
+        // runs once and the popup keeps the previously-edited resource's
+        // values, making every resource look like the first one edited.
+        key={`edit-resource-${resource.id}`}
         resource={resource}
         datasetId={dataset.id}
         resourceTypes={resourceTypes}
@@ -1260,6 +1265,8 @@ export default function DatasetsEditClient() {
       setTimeout(() => {
         show(
           <ResourceEditPopupContent
+            // LEDG-1747: same fix as handleResourceEdit above.
+            key={`edit-resource-${resource.id}`}
             resource={resource}
             datasetId={dataset.id}
             resourceTypes={resourceTypes}

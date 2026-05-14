@@ -436,6 +436,12 @@ function ResourceItem({
   const handleEdit = () => {
     show(
       <ResourceEditPendingPopupContent
+        // LEDG-1747: key tied to the resource identity so React mounts a
+        // fresh component per resource. Without it, useState(initialMeta.x)
+        // only runs on the FIRST open and the popup keeps the state of the
+        // previously-edited resource (the form of the 2nd resource shows
+        // the 1st resource's data).
+        key={`pending-${name}`}
         isUrl={isUrl}
         name={name}
         file={file}
@@ -459,6 +465,10 @@ function ResourceItem({
   const handleView = () => {
     show(
       <ResourceViewPopupContent
+        // LEDG-1747: same rationale as handleEdit — force a fresh
+        // component instance per resource so the view popup does not
+        // inherit state from the previously-viewed resource.
+        key={`view-${name}`}
         name={name}
         size={size}
         file={file}
