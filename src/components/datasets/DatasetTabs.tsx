@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, Tabs, Tab, TabHeader, TabBody, CardNoResults, CardLinks, Icon, StatusCard, Button, InputSearchBar, InputText, InputTextArea, DropdownSection, DropdownOption, usePopupContext } from '@ama-pt/agora-design-system';
 import { Dataset, Discussion, DiscussionCreatePayload, Reuse, CommunityResource } from '@/types/api';
@@ -106,6 +107,8 @@ interface DatasetTabsProps {
 
 export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     const { user } = useAuth();
+    const searchParams = useSearchParams();
+    const tabParam = searchParams.get('tab');
     const { show, hide } = usePopupContext();
     const [discussions, setDiscussions] = useState<Discussion[]>([]);
     const [discussionCount, setDiscussionCount] = useState(dataset.metrics.discussions || 0);
@@ -315,7 +318,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                         </div>
                     )}
                 </Tab>
-                <Tab>
+                <Tab active={tabParam === 'discussions' || undefined}>
                     <TabHeader>Discussões ({discussionCount})</TabHeader>
                     {renderTabBody(
                         <div>
