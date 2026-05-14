@@ -39,6 +39,7 @@ import {
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
+import { extractRemoteDatasetUrls } from "@/lib/reuse-remote-datasets";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import ReusesEditMetadataTab from "@/components/admin/reuses/ReusesEditMetadataTab";
 import ReusesEditDatasetsTab from "@/components/admin/reuses/ReusesEditDatasetsTab";
@@ -135,6 +136,10 @@ export default function ReusesEditClient() {
   const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
+  // Tracks the URLs that were already persisted on the reuse when the page
+  // loaded. Used to detect whether the save needs to write a (possibly empty)
+  // remote_datasets list when the user removes all rows.
+  const previousRemoteUrlsRef = useRef<string[]>([]);
   const [apiLinks, setApiLinks] = useState([{ url: "" }]);
   const [apiLinkErrors, setApiLinkErrors] = useState<Record<number, string>>({});
   const { user } = useAuth();
@@ -161,6 +166,13 @@ export default function ReusesEditClient() {
         const initialKeywords = (r.tags || []).join(",");
         setSelectedKeywordsValue(initialKeywords);
         selectedKeywordsRef.current = initialKeywords;
+        // LEDG-1748: populate the external dataset URL inputs from
+        // extras.remote_datasets so the user can see, edit or remove what
+        // was already saved (instead of seeing empty fields and assuming
+        // the URLs were lost).
+        const remoteUrls = extractRemoteDatasetUrls(r.extras);
+        previousRemoteUrlsRef.current = remoteUrls;
+        setDatasetLinks(remoteUrls.length > 0 ? remoteUrls.map((url) => ({ url })) : [{ url: "" }]);
       } catch (error) {
         console.error("Error loading reuse:", error);
         setApiError("Erro ao carregar a reutilização.");
@@ -497,11 +509,25 @@ export default function ReusesEditClient() {
 
   const handleSaveDatasetAssociations = async () => {
     if (!reuse) return;
-    const remoteUrls = datasetLinks
-      .map((link) => link.url.trim())
-      .filter(Boolean);
+    // LEDG-1748: dedupe within the current form state and treat the list as
+    // authoritative. We diff against `previousRemoteUrlsRef` to know whether
+    // the user actually changed anything that needs to be persisted (which
+    // includes the case of removing every URL — previous behaviour silently
+    // dropped that change because the early-return short-circuited).
+    const remoteUrls = Array.from(
+      new Set(
+        datasetLinks
+          .map((link) => link.url.trim())
+          .filter(Boolean),
+      ),
+    );
     const hasLocal = selectedDatasets.length > 0;
     const hasRemote = remoteUrls.length > 0;
+    const previousRemoteUrls = previousRemoteUrlsRef.current;
+    const previousHadRemote = previousRemoteUrls.length > 0;
+    const remoteListChanged =
+      remoteUrls.length !== previousRemoteUrls.length ||
+      remoteUrls.some((u, i) => u !== previousRemoteUrls[i]);
 
     if (hasLocal && hasRemote) {
       setApiError(
@@ -509,7 +535,10 @@ export default function ReusesEditClient() {
       );
       return;
     }
-    if (!hasLocal && !hasRemote) return;
+    // Allow saving when the user removed every URL (previousHadRemote &&
+    // !hasRemote). Only short-circuit when there's nothing local to add and
+    // the remote list is unchanged.
+    if (!hasLocal && !remoteListChanged) return;
 
     setDatasetLinkErrors({});
     setIsSubmitting(true);
@@ -518,19 +547,21 @@ export default function ReusesEditClient() {
       for (const dataset of selectedDatasets) {
         await linkDatasetToReuse(reuse.id, dataset.id);
       }
-      if (hasRemote) {
-        const existing = (reuse.extras?.remote_datasets as string[]) || [];
-        const mergedRemote = Array.from(new Set([...existing, ...remoteUrls]));
+      // Overwrite remote_datasets with the current list — no more silent
+      // merge with previously-saved entries, so removals stick.
+      if (remoteListChanged || (previousHadRemote && !hasRemote)) {
         await updateReuse(reuse.id, {
           extras: {
             ...(reuse.extras || {}),
-            remote_datasets: mergedRemote,
+            remote_datasets: remoteUrls,
           },
         });
       }
       const updated = await fetchReuse(reuseId);
       setReuse(updated);
-      setDatasetLinks([{ url: "" }]);
+      const refreshedUrls = extractRemoteDatasetUrls(updated.extras);
+      previousRemoteUrlsRef.current = refreshedUrls;
+      setDatasetLinks(refreshedUrls.length > 0 ? refreshedUrls.map((url) => ({ url })) : [{ url: "" }]);
       setSelectedDatasets([]);
       setApiSuccess("Conjuntos de dados associados com sucesso.");
       setTimeout(() => setApiSuccess(null), 10000);
