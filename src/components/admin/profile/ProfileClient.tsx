@@ -281,7 +281,7 @@ export default function ProfileClient() {
       await deleteAvatar();
       if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
       setAvatarPreview(null);
-      setProfile((prev) => prev ? { ...prev, avatar_thumbnail: undefined } : prev);
+      setProfile((prev) => prev ? { ...prev, avatar_thumbnail: null } : prev);
       await refresh();
     } catch (error) {
       console.error("Error deleting avatar:", error);
