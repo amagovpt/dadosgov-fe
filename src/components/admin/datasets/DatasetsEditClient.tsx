@@ -697,7 +697,7 @@ export default function DatasetsEditClient() {
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
   const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
-  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
+  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState<string | null>(null);
 
   // Loaded default values for IsolatedSelect (needed because data arrives async after mount)
   const [loadedTitle, setLoadedTitle] = useState("");
@@ -770,6 +770,10 @@ export default function DatasetsEditClient() {
         setResourceTypes(resTypes);
 
         suggestTags("", 50).then(setTagSuggestions);
+        suggestSpatialZones("", 20).then((results) => {
+          spatialZoneSearchRef.current = results;
+          setSpatialZoneSearch(results);
+        });
 
         if (ds.spatial?.zones?.length) {
           fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
@@ -916,12 +920,18 @@ export default function DatasetsEditClient() {
     return merged.sort((a, b) => a.name.localeCompare(b.name, "pt"));
   }, [spatialZones, spatialZoneSearch]);
 
-  const effectiveSpatialIds = (selectedSpatialZonesValue || loadedSpatialZones.join(","))
+  const effectiveSpatialIds = (selectedSpatialZonesValue ?? loadedSpatialZones.join(","))
     .split(",")
     .filter(Boolean);
   const handleSpatialCoverageChange = useCallback((value: string) => {
-    setSelectedSpatialZonesValue(value);
-    const ids = new Set(value.split(",").filter(Boolean));
+    const normalized = value
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean)
+      .join(",");
+    setSelectedSpatialZonesValue(normalized);
+    spatialCoverageRef.current = normalized;
+    const ids = new Set(normalized.split(",").filter(Boolean));
     setSpatialZones((prev) => {
       // Pin newly selected zones; unpin deselected ones
       const seen = new Set(prev.map((z) => z.id));
@@ -934,7 +944,7 @@ export default function DatasetsEditClient() {
     });
   }, []);
   const selectedZoneObjects = useMemo<SpatialZone[]>(() => {
-    const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
+    const effective = selectedSpatialZonesValue ?? loadedSpatialZones.join(",");
     const ids = effective.split(",").filter(Boolean);
     if (ids.length === 0) return [];
 
@@ -943,7 +953,7 @@ export default function DatasetsEditClient() {
   }, [selectedSpatialZonesValue, loadedSpatialZones, allSpatialZones]);
 
   const spatialCoverageOptions = useMemo(() => {
-    const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
+    const effective = selectedSpatialZonesValue ?? loadedSpatialZones.join(",");
     const selectedIds = new Set(effective.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
       <Dropdown.Option key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
@@ -1026,7 +1036,42 @@ export default function DatasetsEditClient() {
       const tags = tagsValue ? tagsValue.split(",").filter(Boolean) : [];
       const granularity = spatialGranularityRef.current || undefined;
       const zonesValue = spatialCoverageRef.current;
-      const zones = zonesValue ? zonesValue.split(",").filter(Boolean) : undefined;
+      const zones = zonesValue
+        ? zonesValue
+            .split(",")
+            .map((id) => id.trim())
+            .filter(Boolean)
+        : undefined;
+      let validZones = zones;
+      let zoneDetails: SpatialZone[] = [];
+      if (zones && zones.length > 0) {
+        zoneDetails = await fetchSpatialZonesByIds(zones);
+        const validZoneIds = new Set(zoneDetails.map((z) => z.id));
+        validZones = zones.filter((id) => validZoneIds.has(id));
+        if (validZones.length !== zones.length) {
+          const normalized = validZones.join(",");
+          spatialCoverageRef.current = normalized;
+          setSelectedSpatialZonesValue(normalized);
+        }
+      }
+      let resolvedGranularity = granularity;
+      if (validZones && validZones.length > 0) {
+        const selectedZoneSet = new Set(validZones);
+        const levels = Array.from(
+          new Set(
+            zoneDetails
+              .filter((z) => selectedZoneSet.has(z.id))
+              .map((z) => (typeof z.level === "string" ? z.level.trim() : ""))
+              .filter(Boolean)
+          )
+        );
+        if (levels.length === 1) {
+          resolvedGranularity = levels[0];
+        } else if (levels.length > 1 && resolvedGranularity && !levels.includes(resolvedGranularity)) {
+          resolvedGranularity = levels[0];
+        }
+        spatialGranularityRef.current = resolvedGranularity || "";
+      }
 
       const updated = await updateDataset(dataset.id, {
         title: title.trim(),
@@ -1053,12 +1098,12 @@ export default function DatasetsEditClient() {
                 : {}),
             }
           : undefined,
-        ...(granularity || zones
+        ...(resolvedGranularity || validZones
           ? {
               spatial: {
                 geom: dataset.spatial?.geom ?? null,
-                zones: zones ?? dataset.spatial?.zones ?? [],
-                granularity: granularity ?? null,
+                zones: validZones ?? dataset.spatial?.zones ?? [],
+                granularity: resolvedGranularity ?? null,
               },
             }
           : {}),
@@ -1750,14 +1795,17 @@ export default function DatasetsEditClient() {
                       searchable
                       searchInputPlaceholder="Escreva para pesquisar..."
                       searchNoResultsText="Nenhum resultado encontrado"
-                      defaultValue={loadedSpatialZones.join(",")}
+                      defaultValue={selectedSpatialZonesValue ?? loadedSpatialZones.join(",")}
                       onChangeRef={spatialCoverageRef}
                       onChangeCallback={handleSpatialCoverageChange}
                       onSearchCallback={(q) => {
-                        if (q.length < 2) return;
-                        suggestSpatialZones(q, 50).then((results) => {
+                        if (!q) return;
+                        suggestSpatialZones(q, 20).then((results) => {
                           spatialZoneSearchRef.current = results;
                           setSpatialZoneSearch(results);
+                        }).catch(() => {
+                          spatialZoneSearchRef.current = [];
+                          setSpatialZoneSearch([]);
                         });
                       }}
                     >
