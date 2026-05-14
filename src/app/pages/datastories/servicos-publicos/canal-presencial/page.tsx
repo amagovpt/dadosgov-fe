@@ -9,7 +9,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const datastory = await getDatastoryMetadata("servicos-publicos/o-canal-presencial", "pt");
+  const datastory = await getDatastoryMetadata("servicos-publicos/canal-presencial", "pt");
 
   return {
     title: datastory.title,
@@ -28,10 +28,10 @@ export default async function DataStoryDetailPage({
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: "Início", url: "/" },
     { label: "Data Stories", url: "/pages/datastories" },
-    { label: "Serviços públicos: canal presencial", url: "/pages/datastories/servicos-publicos/o-canal-presencial" },
+    { label: "Serviços públicos: canal presencial", url: "/pages/datastories/servicos-publicos/canal-presencial" },
   ];
 
-  const datastory = await getDatastory("servicos-publicos/o-canal-presencial", "pt");
+  const datastory = await getDatastory("servicos-publicos/canal-presencial", "pt");
 
   return <DatastoryDetails datastory={datastory} breadcrumbItems={breadcrumbItems} />;
 }
