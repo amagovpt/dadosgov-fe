@@ -197,8 +197,8 @@ const SupportPage = () => {
         title={
           <>
             <span className="mb-[10px] text-32 font-[500] text-white">
-              Bem-vindo à página de suporte da
-            </span>
+              Bem-vindo à página de suporte do{" "}
+</span>
             <span className="text-32 font-[500] text-white">portal dados.gov.pt</span>
           </>
         }
@@ -218,7 +218,7 @@ const SupportPage = () => {
 
             <div className="mt-16 flex flex-wrap gap-32">
               <a
-                href="#"
+                href="https://dados.gov.pt/pt/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
@@ -228,9 +228,7 @@ const SupportPage = () => {
               </a>
 
               <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/pages/about-open-data"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 Consulte os guias sobre dados abertos
@@ -238,9 +236,7 @@ const SupportPage = () => {
               </a>
 
               <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/pages/faqs/terms"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 Consulte os guias sobre como usar os dados
