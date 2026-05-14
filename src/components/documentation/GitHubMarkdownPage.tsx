@@ -25,7 +25,19 @@ function sanitizeMarkdown(content: string): string {
   return content
     .replace(/<br\s*\/?>/gi, "")
     .replace(/^\s*\n/gm, "\n")
-    .replace(/\bdados gov\b/g, "dados.gov.pt");
+    .replace(/\bdados gov\b/g, "dados.gov.pt")
+    .replace(
+      /Para pedidos de certificação, enviar e-mail para: dados@ama\.pt\./g,
+      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/pages/support)."
+    )
+    .replace(
+      /### Utilização do e-mail dados\(arroba\)ama\.pt/g,
+      "### Contactar a equipa do dados.gov"
+    )
+    .replace(
+      /Este endereço de correio eletrónico permite contatar a equipa de projeto do dados\.gov, para questões relacionadas com o funcionamento geral da plataforma\. Não deverá ser utilizado para endereçar questões específicas sobre conjuntos de dados ou fornecedores\. Os participantes deverão ser contatados através do sistema de comentários relativo a cada conjunto de dados\./g,
+      "Para questões relacionadas com o funcionamento geral do portal dados.gov, deverá ser utilizada a página [Ajuda e Contactos](/pages/support). Esta via não deverá ser utilizada para endereçar questões específicas sobre conjuntos de dados ou fornecedores. Nesses casos, os participantes deverão ser contactados através do sistema de comentários associado a cada conjunto de dados."
+    );
 }
 
 export function GitHubMarkdownPage({
@@ -75,15 +87,19 @@ export function GitHubMarkdownPage({
                       ),
                       a: ({ href, children }) => {
                         const isExternal = href?.startsWith("http");
+                        const isPortalLink = href?.startsWith("/pages/");
                         const resolvedHref =
-                          href && !isExternal
-                            ? `https://dados.gov.pt/pt${href}`
-                            : (href ?? "#");
+                          isPortalLink || isExternal
+                            ? (href ?? "#")
+                            : href
+                              ? `https://dados.gov.pt/pt${href}`
+                              : "#";
+                        const openInNewTab = isExternal;
                         return (
                           <Link
                             href={resolvedHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            target={openInNewTab ? "_blank" : undefined}
+                            rel={openInNewTab ? "noopener noreferrer" : undefined}
                             className="text-[#034AD8] underline font-medium hover:text-primary-700"
                           >
                             {children}

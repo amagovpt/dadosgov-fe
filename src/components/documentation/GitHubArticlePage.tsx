@@ -101,7 +101,19 @@ function sanitizeMarkdown(content: string): string {
   return content
     .replace(/<br\s*\/?>/gi, "")
     .replace(/^\s*\n/gm, "\n")
-    .replace(/\bdados gov\b/g, "dados.gov.pt");
+    .replace(/\bdados gov\b/g, "dados.gov.pt")
+    .replace(
+      /A certificação pode ser pedida através do e-mail dados@ama\.pt\./g,
+      "O pedido de certificação deve ser realizado através da página [Ajuda e Contactos](/pages/support)."
+    )
+    .replace(
+      /A ARTE também poderá ajudar neste processo, incluindo colaborar na organização de workshops \/ eventos com vista a promover estas interações, contacte-nos em dados@ama\.pt\./g,
+      "A ARTE também poderá apoiar este processo, nomeadamente através da colaboração na organização de workshops e eventos que promovam estas interações. Para mais informações, consulte a página [Ajuda e Contactos](/pages/support)."
+    )
+    .replace(
+      /Para pedidos de certificação, enviar e-mail para: dados@ama\.pt\./g,
+      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/pages/support)."
+    );
 }
 
 export function GitHubArticlePage({
