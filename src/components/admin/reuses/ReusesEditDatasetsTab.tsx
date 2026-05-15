@@ -102,7 +102,7 @@ export default function ReusesEditDatasetsTab({
                     last_modified={formatDateToTimeAgo(dataset.last_modified)}
                     organization={dataset.organization ? {
                       name: dataset.organization.name,
-                      logo: dataset.organization.logo,
+                      logo: dataset.organization.logo ?? undefined,
                     } : undefined}
                     quality={dataset.quality}
                     metrics={dataset.metrics}
