@@ -486,7 +486,15 @@ function ResourceEditPopupContent({
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (!title.trim()) return;
     const trimmedUrl = resourceUrl.trim();
-    if (trimmedUrl) {
+    // LEDG-1756: only enforce HTTPS-format / reachability checks when the
+    // user actually edited the URL. Otherwise legacy/dev URLs (e.g. an
+    // existing `http://localhost:7000/s/resources/...` from a file
+    // uploaded via the dev portal, or an older record saved before the
+    // HTTPS rule existed) block all subsequent edits — even when the
+    // user only wants to fix the title or description.
+    const originalUrl = (resource.url || "").trim();
+    const urlChanged = trimmedUrl !== originalUrl;
+    if (trimmedUrl && urlChanged) {
       if (!isValidHttpsUrl(trimmedUrl)) {
         setUrlError("Insira um URL válido, começando com https://");
         return;
