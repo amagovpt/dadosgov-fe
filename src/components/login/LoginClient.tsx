@@ -1,8 +1,9 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import NextImage from "next/image";
+import ReCAPTCHA from "react-google-recaptcha";
 import {
   Button,
   RadioButton,
@@ -41,6 +42,42 @@ function LoginContent() {
   const [termsCmdAccepted, setTermsCmdAccepted] = useState(false);
   const [termsEidasAccepted, setTermsEidasAccepted] = useState(false);
   const [termsEmailAccepted, setTermsEmailAccepted] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  const [recoverySuccess, setRecoverySuccess] = useState(false);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+
+  const handleRecoverySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRecoveryLoading(true);
+    setRecoveryError(null);
+
+    const recaptchaToken = recaptchaRef.current?.getValue() || null;
+
+    try {
+      const res = await fetch("/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: recoveryEmail, recaptcha_token: recaptchaToken }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setRecoverySuccess(true);
+      } else {
+        setRecoveryError(data.message || "Erro ao enviar pedido. Tente novamente.");
+        recaptchaRef.current?.reset();
+      }
+    } catch {
+      setRecoveryError("Erro de ligação. Tente novamente.");
+      recaptchaRef.current?.reset();
+    } finally {
+      setRecoveryLoading(false);
+    }
+  };
 
   const samlEnabled = process.env.NEXT_PUBLIC_SAML_ENABLED === "true";
 
@@ -545,6 +582,97 @@ function LoginContent() {
                               </Button>
                             </div>
                           </>
+                        ) : showRecovery ? (
+                          <>
+                            {recoverySuccess ? (
+                              <StatusCard
+                                variant="success"
+                                showIcon
+                                description="Se o endereço de e-mail estiver associado a uma conta, receberá um e-mail com instruções para redefinir a sua palavra-passe."
+                              />
+                            ) : (
+                              <>
+                                <div>
+                                  <h2 className="text-xl-bold text-brand-blue-dark mb-8">
+                                    Recuperar palavra-passe
+                                  </h2>
+                                  <p className="text-neutral-900">
+                                    Introduza o seu endereço de e-mail e enviaremos instruções para
+                                    redefinir a sua palavra-passe.
+                                  </p>
+                                </div>
+
+                                {recoveryError && (
+                                  <StatusCard variant="danger" showIcon description={recoveryError} />
+                                )}
+
+                                <form
+                                  className="flex flex-col gap-24"
+                                  onSubmit={handleRecoverySubmit}
+                                >
+                                  <InputText
+                                    label="Endereço de e-mail *"
+                                    placeholder="Introduza aqui o texto"
+                                    id="recovery-email"
+                                    name="email"
+                                    type="email"
+                                    className="w-full max-w-[560px]"
+                                    disabled={recoveryLoading}
+                                    onChange={(e) => setRecoveryEmail(e.target.value)}
+                                  />
+
+                                  {recaptchaSiteKey && (
+                                    <div className="mt-8">
+                                      <ReCAPTCHA
+                                        ref={recaptchaRef}
+                                        sitekey={recaptchaSiteKey}
+                                        hl="pt"
+                                      />
+                                    </div>
+                                  )}
+
+                                  <div className="flex items-center gap-16 mt-8">
+                                    <Button
+                                      variant="primary"
+                                      type="submit"
+                                      className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                                      disabled={recoveryLoading || !recoveryEmail}
+                                    >
+                                      {recoveryLoading ? "A enviar..." : "Redefinir palavra-passe"}
+                                    </Button>
+                                    <button
+                                      type="button"
+                                      className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
+                                      onClick={() => {
+                                        setShowRecovery(false);
+                                        setRecoveryError(null);
+                                        setRecoveryEmail("");
+                                        recaptchaRef.current?.reset();
+                                      }}
+                                    >
+                                      Voltar ao início de sessão
+                                    </button>
+                                  </div>
+                                </form>
+                              </>
+                            )}
+
+                            {recoverySuccess && (
+                              <div className="mt-16">
+                                <button
+                                  type="button"
+                                  className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
+                                  onClick={() => {
+                                    setShowRecovery(false);
+                                    setRecoverySuccess(false);
+                                    setRecoveryEmail("");
+                                  }}
+                                >
+                                  Voltar ao início de sessão
+                                </button>
+                              </div>
+                            )}
+                          </>
                         ) : (
                           <>
                             <div>
@@ -602,7 +730,11 @@ function LoginContent() {
                                 <span className="text-sm text-neutral-900">
                                   Esqueceu-se da palavra-passe?
                                 </span>
-                                <button className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer">
+                                <button
+                                  type="button"
+                                  className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
+                                  onClick={() => setShowRecovery(true)}
+                                >
                                   Recuperar palavra-passe
                                 </button>
                               </div>
