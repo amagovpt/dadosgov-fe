@@ -432,6 +432,30 @@ function ResourceEditPopupContent({
   const [error, setError] = useState<string | null>(null);
   const [urlError, setUrlError] = useState<string | null>(null);
 
+  // LEDG-1747 follow-up: the `key={`edit-resource-${resource.id}`}` at the
+  // show() site is expected to force a remount per resource, but in
+  // practice the agora PopupProvider keeps the previous content element
+  // mounted (its hide() only flips dialog visibility — it does NOT clear
+  // the content state), and reconciliation has been observed to reuse the
+  // same component instance even with a different key when the parent
+  // stays alive across show() calls. Resync all field state from the
+  // current resource's props so opening the 2nd resource's edit popup
+  // never shows the 1st's data. The set-state-in-effect lint rule warns
+  // about cascading renders, but the alternative (waiting for a remount
+  // that never happens) is the bug we are fixing.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => {
+    setTitle(resource.title);
+    setDescription(resource.description || "");
+    setResourceUrl(resource.url || "");
+    setResourceFormat(resource.format || "");
+    setMime(resource.mime || "");
+    setFilesize(resource.filesize ? String(resource.filesize) : "");
+    resourceTypeRef.current = resource.type || "main";
+    setError(null);
+    setUrlError(null);
+  }, [resource]);
+
   const isValidHttpsUrl = (value: string): boolean => {
     try {
       const parsed = new URL(value);
