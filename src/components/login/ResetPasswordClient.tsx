@@ -10,8 +10,8 @@ import {
 } from "@ama-pt/agora-design-system";
 
 const breadcrumbItems = [
-  { label: "Portal", href: "/" },
-  { label: "Redefinir palavra-passe", href: "#" },
+  { label: "Home", url: "/" },
+  { label: "Redefinir palavra-passe", url: "#" },
 ];
 
 interface Props {
