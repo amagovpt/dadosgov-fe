@@ -1098,6 +1098,20 @@ export async function linkDatasetToReuse(
   return await res.json();
 }
 
+export async function unlinkDatasetFromReuse(
+  reuseId: string,
+  datasetId: string
+): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/reuses/${reuseId}/datasets/${datasetId}/`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+}
+
 export async function linkDataserviceToReuse(
   reuseId: string,
   dataserviceId: string

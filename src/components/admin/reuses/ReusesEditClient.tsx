@@ -31,6 +31,7 @@ import {
   fetchOrgDatasets,
   searchDatasets,
   linkDatasetToReuse,
+  unlinkDatasetFromReuse,
   linkDataserviceToReuse,
   fetchActivity,
   fetchDiscussions,
@@ -610,6 +611,44 @@ export default function ReusesEditClient() {
     }
   };
 
+  const handleRemoveAssociatedDataset = async (datasetId: string) => {
+    if (!reuse) return;
+    setApiError(null);
+    setIsSubmitting(true);
+    try {
+      await unlinkDatasetFromReuse(reuse.id, datasetId);
+      const updated = await fetchReuse(reuseId);
+      setReuse(updated);
+      setAssociatedDatasets((prev) => prev.filter((d) => d.id !== datasetId));
+      setApiSuccess("Conjunto de dados removido com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch {
+      setApiError("Erro ao remover o conjunto de dados.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRemoveAllAssociatedDatasets = async () => {
+    if (!reuse) return;
+    setApiError(null);
+    setIsSubmitting(true);
+    try {
+      for (const dataset of associatedDatasets) {
+        await unlinkDatasetFromReuse(reuse.id, dataset.id);
+      }
+      const updated = await fetchReuse(reuseId);
+      setReuse(updated);
+      setAssociatedDatasets([]);
+      setApiSuccess("Todos os conjuntos de dados foram removidos.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch {
+      setApiError("Erro ao remover os conjuntos de dados.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleApiLinkChange = (index: number, value: string) => {
     const nextLinks = [...apiLinks];
     nextLinks[index] = { url: value };
@@ -835,6 +874,7 @@ export default function ReusesEditClient() {
         <Button
           variant="primary"
           appearance="outline"
+          disabled={!!(reuse.archived || reuse.deleted)}
           onClick={() => window.open(`/pages/reuses/${reuse.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
@@ -844,6 +884,16 @@ export default function ReusesEditClient() {
         </Button>
       </div>
 
+      {reuse.deleted && (
+        <div className="mb-16">
+          <StatusCard variant="warning" showIcon description="Esta reutilização foi excluída e a sua página pública não está disponível." />
+        </div>
+      )}
+      {!reuse.deleted && reuse.archived && (
+        <div className="mb-16">
+          <StatusCard variant="warning" showIcon description="Esta reutilização está arquivada e a sua página pública não está disponível." />
+        </div>
+      )}
       {apiError && <div className="mb-16"><StatusCard variant="danger" showIcon description={apiError} /></div>}
       {apiSuccess && <div className="mb-16"><StatusCard variant="success" showIcon description={apiSuccess} /></div>}
 
@@ -958,6 +1008,8 @@ export default function ReusesEditClient() {
               onDatasetSearchChange={handleDatasetSearchChange}
               onDatasetSelectChange={handleDatasetSelectChange}
               onRemoveSelectedDataset={handleRemoveSelectedDataset}
+              onRemoveAssociatedDataset={handleRemoveAssociatedDataset}
+              onRemoveAllAssociatedDatasets={handleRemoveAllAssociatedDatasets}
               onDatasetLinkChange={handleDatasetLinkChange}
               onDatasetTitleChange={handleDatasetTitleChange}
               onDatasetDescriptionChange={handleDatasetDescriptionChange}
