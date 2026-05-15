@@ -212,4 +212,57 @@ test.describe("Datasets Listing", () => {
     const toggle12mAfter = page.locator("#ds-filter-atualizacao-12_months");
     await expect(toggle12mAfter).toBeChecked({ timeout: 10000 });
   });
+
+  test("DL-17: Trailing space after an active search query does not trigger extra navigation", async ({
+    page,
+  }) => {
+    // Start with an active search so currentQuery = "da" and searchQuery = "da"
+    await page.goto(DATASETS_URL + "?q=da");
+    await page.waitForLoadState("networkidle");
+
+    const searchInput = page.locator("#datasets-search");
+    await expect(searchInput).toHaveValue("da", { timeout: 10000 });
+
+    // Capture any RSC / data-fetch requests that Next.js makes on client navigation
+    const extraNavigationRequests: string[] = [];
+    page.on("request", (req) => {
+      const url = req.url();
+      // Next.js App Router appends _rsc=<hash> when fetching RSC payloads on navigation
+      if (url.includes("_rsc")) {
+        extraNavigationRequests.push(url);
+      }
+    });
+
+    // Add a trailing space — with the bug, searchQuery.trim() !== currentQuery comparison
+    // was missing, so debounce fired and called router.replace even for the same query
+    await searchInput.fill("da ");
+
+    // Wait well past debounce (default 200 ms) to let any erroneous request fire
+    await page.waitForTimeout(600);
+
+    // No RSC re-fetch should have been triggered — the effective query did not change
+    expect(extraNavigationRequests).toHaveLength(0);
+
+    // URL must remain exactly as before (no encoded space appended)
+    expect(page.url()).toContain("q=da");
+    expect(page.url()).not.toMatch(/q=da(%20|\+)/);
+  });
+
+  test("DL-18: Typing only whitespace does not add a q param to the URL", async ({
+    page,
+  }) => {
+    await page.goto(DATASETS_URL);
+    await page.waitForLoadState("networkidle");
+
+    const searchInput = page.locator("#datasets-search");
+
+    // Fill with spaces only — effective query after trim is "", same as currentQuery
+    await searchInput.fill("   ");
+
+    // Wait past debounce
+    await page.waitForTimeout(600);
+
+    // URL must not have acquired a q param
+    expect(page.url()).not.toMatch(/[?&]q=/);
+  });
 });
