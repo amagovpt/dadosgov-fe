@@ -529,7 +529,7 @@ function FeaturedDatasetsEditor({
         className="text-sm mb-[20px] w-full border-none text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
 
-      <div className="grid grid-cols-3 gap-16">
+      <div className="grid grid-cols-2 gap-16">
         {data.datasetIds.map((id, index) => {
           const dataset = nameMap?.[id];
           const qualityScore =
@@ -664,64 +664,64 @@ function FeaturedDatasetsEditor({
             </div>
           );
         })}
+      </div>
 
-        {data.datasetIds.length < 6 && !showSearch && (
+      {data.datasetIds.length < 6 && !showSearch && (
+        <button
+          type="button"
+          onClick={() => setShowSearch(true)}
+          className="mt-16 flex w-full items-center justify-center gap-8 rounded-8 border-2 border-dashed border-neutral-300 py-16 text-neutral-900 transition-colors hover:border-neutral-400"
+        >
+          <Icon name="agora-line-plus-circle" className="h-[20px] w-[20px]" />
+          <span className="text-xs">Adicionar um conjunto de dados</span>
+        </button>
+      )}
+
+      {showSearch && (
+        <div ref={searchContainerRef} className="relative mt-8 w-full">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Pesquisar conjunto de dados..."
+            className="text-sm w-full rounded-8 border border-neutral-300 px-12 py-[10px] outline-none focus:border-primary-500"
+            autoFocus
+          />
+          {isSearching && <p className="text-xs mt-4 text-neutral-400">A pesquisar...</p>}
+          {searchResults.length > 0 && (
+            <ul className="shadow-lg absolute z-10 mt-4 max-h-[240px] w-full overflow-y-auto rounded-8 border border-neutral-200 bg-white">
+              {searchResults.map((d) => (
+                <li key={d.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDataset(d)}
+                    className="text-sm w-full px-12 py-8 text-left transition-colors hover:bg-neutral-50"
+                  >
+                    <span className="font-medium text-neutral-800">{d.title}</span>
+                    {d.organization?.name && (
+                      <span className="ml-8 text-neutral-400">— {d.organization.name}</span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {searchQuery.length >= 2 && !isSearching && searchResults.length === 0 && (
+            <p className="text-xs mt-4 text-neutral-400">Nenhum resultado encontrado</p>
+          )}
           <button
             type="button"
-            onClick={() => setShowSearch(true)}
-            className="flex min-h-[200px] flex-col items-center justify-center rounded-8 border-2 border-dashed border-neutral-300 text-neutral-900 transition-colors hover:border-neutral-400"
+            onClick={() => {
+              setShowSearch(false);
+              setSearchQuery("");
+              setSearchResults([]);
+            }}
+            className="text-xs mt-4 text-neutral-400 hover:text-neutral-600"
           >
-            <Icon name="agora-line-plus-circle" className="mb-4 h-[20px] w-[20px]" />
-            <span className="text-xs">Adicionar um conjunto de dados</span>
+            Cancelar
           </button>
-        )}
-
-        {showSearch && (
-          <div ref={searchContainerRef} className="relative mt-8 w-full">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Pesquisar conjunto de dados..."
-              className="text-sm w-full rounded-8 border border-neutral-300 px-12 py-[10px] outline-none focus:border-primary-500"
-              autoFocus
-            />
-            {isSearching && <p className="text-xs mt-4 text-neutral-400">A pesquisar...</p>}
-            {searchResults.length > 0 && (
-              <ul className="shadow-lg absolute z-10 mt-4 max-h-[240px] w-full overflow-y-auto rounded-8 border border-neutral-200 bg-white">
-                {searchResults.map((d) => (
-                  <li key={d.id}>
-                    <button
-                      type="button"
-                      onClick={() => handleSelectDataset(d)}
-                      className="text-sm w-full px-12 py-8 text-left transition-colors hover:bg-neutral-50"
-                    >
-                      <span className="font-medium text-neutral-800">{d.title}</span>
-                      {d.organization?.name && (
-                        <span className="ml-8 text-neutral-400">— {d.organization.name}</span>
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {searchQuery.length >= 2 && !isSearching && searchResults.length === 0 && (
-              <p className="text-xs mt-4 text-neutral-400">Nenhum resultado encontrado</p>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                setShowSearch(false);
-                setSearchQuery("");
-                setSearchResults([]);
-              }}
-              className="text-xs mt-4 text-neutral-400 hover:text-neutral-600"
-            >
-              Cancelar
-            </button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

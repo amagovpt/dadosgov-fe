@@ -1,18 +1,17 @@
 import React from "react";
-import Link from "next/link";
 import {
   Button,
-  CardLinks,
   DropdownOption,
   DropdownSection,
+  Icon,
   InputSelect,
   InputText,
   InputTextArea,
   StatusCard,
   Tag,
 } from "@ama-pt/agora-design-system";
-import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
+import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 import type { Dataset } from "@/types/api";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 
@@ -77,10 +76,9 @@ export default function ReusesEditDatasetsTab({
   })();
 
   return (
-    <div className="admin-page__body mt-24">
-      <div className="admin-page__form-area">
-        {associatedDatasets.length > 0 && (
-          <div className="agora-card-links-datasets-px0 mb-24">
+    <div className="mt-24 flex flex-col gap-24">
+      {associatedDatasets.length > 0 && (
+          <div className="mb-24">
             <div className="flex justify-end mb-16">
               <Button
                 appearance="outline"
@@ -94,125 +92,44 @@ export default function ReusesEditDatasetsTab({
                 Eliminar todos
               </Button>
             </div>
-            {associatedDatasets.map((dataset) => (
-              <div key={dataset.id}>
-              <CardLinks
-                key={dataset.id}
-                onClick={() => {}}
-                className="cursor-pointer text-neutral-900"
-                variant="transparent"
-                image={{
-                  src:
-                    dataset.organization?.logo ||
-                    "/images/placeholders/organization.png",
-                  alt: dataset.organization?.name || "Organização sem logo",
-                }}
-                category={dataset.organization?.name}
-                title={dataset.title}
-                description={
-                  <div className="flex flex-col gap-12">
-                    <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
-                      {dataset.description}
-                    </p>
-                    <div className="flex flex-wrap gap-8 items-center mt-8">
-                      <span className="text-sm font-medium text-neutral-900">
-                        Metadados:{" "}
-                        {dataset.quality?.score != null
-                          ? Math.round(dataset.quality.score * 100)
-                          : 0}
-                        %
-                      </span>
-                    </div>
-                  </div>
-                }
-                links={[
-                  {
-                    href: "#",
-                    hasIcon: true,
-                    leadingIcon: "agora-line-eye",
-                    leadingIconHover: "agora-solid-eye",
-                    trailingIcon: "",
-                    trailingIconHover: "",
-                    trailingIconActive: "",
-                    children: dataset.metrics?.views != null && dataset.metrics.views >= 1000
-                      ? (dataset.metrics.views / 1000).toFixed(0) + " mil"
-                      : String(dataset.metrics?.views ?? 0),
-                    title: "Visualizações",
-                    onClick: (e: React.MouseEvent) => e.preventDefault(),
-                    className: "text-[#034AD8]",
-                  },
-                  {
-                    href: "#",
-                    hasIcon: true,
-                    leadingIcon: "agora-line-download",
-                    leadingIconHover: "agora-solid-download",
-                    trailingIcon: "",
-                    trailingIconHover: "",
-                    trailingIconActive: "",
-                    children: dataset.metrics?.resources_downloads != null && dataset.metrics.resources_downloads >= 1000
-                      ? (dataset.metrics.resources_downloads / 1000).toFixed(0) + " mil"
-                      : String(dataset.metrics?.resources_downloads ?? 0),
-                    title: "Downloads",
-                    onClick: (e: React.MouseEvent) => e.preventDefault(),
-                    className: "text-[#034AD8]",
-                  },
-                  {
-                    href: "#",
-                    hasIcon: false,
-                    children: (
-                      <span className="flex items-center gap-8">
-                        <img src="/Icons/bar_chart_primary.svg" alt="" aria-hidden="true" />
-                        <span>{dataset.metrics?.reuses || 0}</span>
-                      </span>
-                    ),
-                    title: "Reutilizações",
-                    onClick: (e: React.MouseEvent) => e.preventDefault(),
-                    className: "text-[#034AD8]",
-                  },
-                  {
-                    href: "#",
-                    hasIcon: true,
-                    leadingIcon: "agora-line-star",
-                    leadingIconHover: "agora-solid-star",
-                    trailingIcon: "",
-                    trailingIconHover: "",
-                    trailingIconActive: "",
-                    children: dataset.metrics?.followers || 0,
-                    title: "Favoritos",
-                    onClick: (e: React.MouseEvent) => e.preventDefault(),
-                    className: "text-[#034AD8]",
-                  },
-                ]}
-                date={
-                  <span className="font-[300]">
-                    {`Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
-                  </span>
-                }
-                mainLink={
-                  <Link href={`/pages/datasets/${dataset.slug}`}>
-                    <span className="underline">{dataset.title}</span>
-                  </Link>
-                }
-                blockedLink={true}
-              />
-              <div className="flex justify-end mt-8 mb-8">
-                <Button
-                  appearance="solid"
-                  variant="danger"
-                  hasIcon
-                  leadingIcon="agora-line-trash"
-                  leadingIconHover="agora-solid-trash"
-                  disabled={isSubmitting}
-                  onClick={() => onRemoveAssociatedDataset(dataset.id)}
-                >
-                  Eliminar
-                </Button>
-              </div>
-              </div>
-            ))}
+            <div className="grid grid-cols-2 gap-16">
+              {associatedDatasets.map((dataset) => (
+                <div key={dataset.id} className="relative group/card">
+                  <CardMetrics
+                    link={`/pages/datasets/${dataset.slug}`}
+                    title={dataset.title}
+                    description={dataset.description || ""}
+                    last_modified={formatDateToTimeAgo(dataset.last_modified)}
+                    organization={dataset.organization ? {
+                      name: dataset.organization.name,
+                      logo: dataset.organization.logo,
+                    } : undefined}
+                    quality={dataset.quality}
+                    metrics={dataset.metrics}
+                  />
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => onRemoveAssociatedDataset(dataset.id)}
+                    className="rounded group absolute right-8 top-8 z-10 p-4"
+                    title="Eliminar"
+                  >
+                    <Icon
+                      name="agora-line-trash"
+                      className="block h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:hidden"
+                    />
+                    <Icon
+                      name="agora-solid-trash"
+                      className="hidden h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:block"
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
+        <div className="admin-page__form-area">
         <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
           <div className="mb-24">
             <StatusCard
@@ -347,7 +264,7 @@ export default function ReusesEditDatasetsTab({
             </Button>
           </div>
         </form>
-      </div>
+        </div>
     </div>
   );
 }
