@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ResetPasswordClient from "@/components/login/ResetPasswordClient";
+import { ResetPasswordClient } from "@/components/login/ResetPasswordClient";
 
 export const metadata: Metadata = {
   title: "Redefinir palavra-passe - dados.gov.pt",

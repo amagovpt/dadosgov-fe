@@ -59,8 +59,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   // Error: try to extract validation message from HTML
   const html = await backendResponse.text();
-  const errorMatch = html.match(/class="help-block">([^<]+)</) ||
-    html.match(/class="flashes"[^>]*>.*?<li[^>]*>([^<]+)<\/li>/s);
+  const errorMatch =
+    html.match(/class="help-block">([^<]+)</) ||
+    html.match(/class="flashes"[^>]*>[\s\S]*?<li[^>]*>([^<]+)<\/li>/);
   const errorMessage = errorMatch
     ? errorMatch[1].trim()
     : "Erro ao redefinir a palavra-passe. O link pode ter expirado.";
