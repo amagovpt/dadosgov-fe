@@ -16,8 +16,13 @@ export function useSearchFilterUrlSync({
   const [searchQuery, setSearchQuery] = React.useState(currentQuery);
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Sync internal state when the URL param changes externally (e.g. header search navigation)
   React.useEffect(() => {
-    if (searchQuery === currentQuery) return;
+    setSearchQuery(currentQuery);
+  }, [currentQuery]);
+
+  React.useEffect(() => {
+    if (searchQuery.trim() === currentQuery) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       onSearchNavigate(searchQuery.trim());
