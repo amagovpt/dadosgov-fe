@@ -25,11 +25,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type StatusInfo = {
   label: string;
@@ -51,9 +47,7 @@ const getStatus = (source: HarvestSource): StatusInfo => {
   // Show validation state when it isn't "accepted" — matches the
   // dropdown filter options (Pendente / Validado / Recusado).
   if (source.validation?.state && source.validation.state !== "accepted") {
-    return (
-      VALIDATION_STATUS[source.validation.state] || VALIDATION_STATUS.pending
-    );
+    return VALIDATION_STATUS[source.validation.state] || VALIDATION_STATUS.pending;
   }
   // Otherwise show the latest job execution status.
   if (source.last_job?.status) {
@@ -172,9 +166,7 @@ export default function OrgHarvestersClient() {
         <CardNoResults
           className="datasets-page__empty"
           position="center"
-          icon={
-            <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />
-          }
+          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem organizações"
           description="Não pertence a nenhuma organização."
           hasAnchor={false}
@@ -200,13 +192,12 @@ export default function OrgHarvestersClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {harvesters.length} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{harvesters.length} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquise o nome do harvester"
             aria-label="Pesquisar harvesters"
@@ -223,12 +214,24 @@ export default function OrgHarvestersClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="pending" selected={statusFilter === "pending"}>Em espera de validação</DropdownOption>
-            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>Validado</DropdownOption>
-            <DropdownOption value="refused" selected={statusFilter === "refused"}>Recusado</DropdownOption>
-            <DropdownOption value="done" selected={statusFilter === "done"}>Terminado</DropdownOption>
-            <DropdownOption value="failed" selected={statusFilter === "failed"}>Falhado</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="pending" selected={statusFilter === "pending"}>
+              Em espera de validação
+            </DropdownOption>
+            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>
+              Validado
+            </DropdownOption>
+            <DropdownOption value="refused" selected={statusFilter === "refused"}>
+              Recusado
+            </DropdownOption>
+            <DropdownOption value="done" selected={statusFilter === "done"}>
+              Terminado
+            </DropdownOption>
+            <DropdownOption value="failed" selected={statusFilter === "failed"}>
+              Falhado
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
@@ -305,33 +308,27 @@ export default function OrgHarvestersClient() {
                   <TableCell headerLabel="Estado">
                     {(() => {
                       const status = getStatus(harvester);
-                      return (
-                        <StatusDot variant={status.variant}>
-                          {status.label}
-                        </StatusDot>
-                      );
+                      return <StatusDot variant={status.variant}>{status.label}</StatusDot>;
                     })()}
                   </TableCell>
-                  <TableCell headerLabel="Implementação">
-                    {harvester.backend}
-                  </TableCell>
+                  <TableCell headerLabel="Implementação">{harvester.backend}</TableCell>
                   <TableCell headerLabel="Criado em">
-                    {formatDate(harvester.created_at)}
+                    {formatDateToDMY(harvester.created_at)}
                   </TableCell>
                   <TableCell headerLabel="Última execução">
                     {harvester.last_job
-                      ? formatDate(harvester.last_job.started ?? harvester.last_job.ended ?? "")
+                      ? formatDateToDMY(
+                          harvester.last_job.started ?? harvester.last_job.ended ?? ""
+                        )
                       : "Ainda não"}
                   </TableCell>
                   <TableCell headerLabel="Conjuntos de dados">
                     {harvester.datasets_count ?? 0}
                   </TableCell>
-                  <TableCell headerLabel="API">
-                    {harvester.backend}
-                  </TableCell>
+                  <TableCell headerLabel="API">{harvester.backend}</TableCell>
                   <TableCell headerLabel="Ações">
                     <a href={`/pages/admin/harvesters/${harvester.id}`}>
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                     </a>
                   </TableCell>
                 </TableRow>
@@ -346,7 +343,7 @@ export default function OrgHarvestersClient() {
               className="datasets-page__empty"
               position="center"
               icon={
-                <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />
+                <Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />
               }
               title="Sem harvesters"
               description="A organização ainda não tem harvesters."

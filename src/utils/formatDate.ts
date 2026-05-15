@@ -13,3 +13,11 @@ export function formatDateToTimeAgo(
         .replace("cerca de ", "")
     : unknown;
 }
+
+export function formatDateToDMY(dateStr: string) {
+  const date = new Date(dateStr);
+  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const y = date.getFullYear();
+  return `${d}/${m}/${y}`;
+}

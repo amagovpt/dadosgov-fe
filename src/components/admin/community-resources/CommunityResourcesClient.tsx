@@ -20,11 +20,7 @@ import { fetchMyCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -231,10 +227,10 @@ export default function CommunityResourcesClient() {
                   {resource.format || "—"}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
-                  {formatDate(resource.created_at)}
+                  {formatDateToDMY(resource.created_at)}
                 </TableCell>
                 <TableCell headerLabel="Modificado em">
-                  {formatDate(resource.last_modified)}
+                  {formatDateToDMY(resource.last_modified)}
                 </TableCell>
                 <TableCell headerLabel="Ação">
                   <a href={`/pages/admin/me/community-resources/edit?id=${resource.id}`}>
