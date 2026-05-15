@@ -667,6 +667,10 @@ li.section-name:empty {
   padding: 12px 0px;
 }
 
+.agora-card-links-datasets-px0 .agora-card-links .bottom-container .links {
+  flex-wrap: nowrap;
+}
+
 .reuse .agora-card-links-datasets-px0 .agora-card-links,
 .reuse .agora-card-links-datasets-px0 .agora-card-links .card-links-container {
   height: 100%;

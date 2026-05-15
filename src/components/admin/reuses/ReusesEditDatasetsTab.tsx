@@ -5,7 +5,6 @@ import {
   CardLinks,
   DropdownOption,
   DropdownSection,
-  Icon,
   InputSelect,
   InputText,
   InputTextArea,
@@ -28,6 +27,8 @@ type ReusesEditDatasetsTabProps = {
   onDatasetSearchChange: (value: string) => void;
   onDatasetSelectChange: (selectedIds: string[]) => void;
   onRemoveSelectedDataset: (datasetId: string) => void;
+  onRemoveAssociatedDataset: (datasetId: string) => void;
+  onRemoveAllAssociatedDatasets: () => void;
   onDatasetLinkChange: (index: number, value: string) => void;
   // LEDG-1748 PR 2: per-URL metadata inputs.
   onDatasetTitleChange: (index: number, value: string) => void;
@@ -48,6 +49,8 @@ export default function ReusesEditDatasetsTab({
   onDatasetSearchChange,
   onDatasetSelectChange,
   onRemoveSelectedDataset,
+  onRemoveAssociatedDataset,
+  onRemoveAllAssociatedDatasets,
   onDatasetLinkChange,
   onDatasetTitleChange,
   onDatasetDescriptionChange,
@@ -66,6 +69,8 @@ export default function ReusesEditDatasetsTab({
     return combined.filter((dataset) => {
       if (seen.has(dataset.id)) return false;
       if (associatedIds.has(dataset.id)) return false;
+      if (dataset.archived) return false;
+      if (dataset.deleted) return false;
       seen.add(dataset.id);
       return true;
     });
@@ -76,7 +81,21 @@ export default function ReusesEditDatasetsTab({
       <div className="admin-page__form-area">
         {associatedDatasets.length > 0 && (
           <div className="agora-card-links-datasets-px0 mb-24">
+            <div className="flex justify-end mb-16">
+              <Button
+                appearance="outline"
+                variant="danger"
+                hasIcon
+                leadingIcon="agora-line-trash"
+                leadingIconHover="agora-solid-trash"
+                disabled={isSubmitting}
+                onClick={onRemoveAllAssociatedDatasets}
+              >
+                Eliminar todos
+              </Button>
+            </div>
             {associatedDatasets.map((dataset) => (
+              <div key={dataset.id}>
               <CardLinks
                 key={dataset.id}
                 onClick={() => {}}
@@ -104,38 +123,66 @@ export default function ReusesEditDatasetsTab({
                         %
                       </span>
                     </div>
-                    <div className="flex items-center flex-wrap gap-32 text-xs mt-32 text-[#034AD8] mb-32">
-                      <div className="flex items-center gap-8" title="Visualizações">
-                        <Icon name="agora-line-eye" aria-hidden="true" />
-                        <span>
-                          {dataset.metrics?.views
-                            ? dataset.metrics.views >= 1000
-                              ? (dataset.metrics.views / 1000).toFixed(0) + " mil"
-                              : dataset.metrics.views
-                            : "0"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-8" title="Downloads">
-                        <Icon name="agora-line-download" aria-hidden="true" />
-                        <span>
-                          {dataset.metrics?.resources_downloads
-                            ? dataset.metrics.resources_downloads >= 1000
-                              ? (dataset.metrics.resources_downloads / 1000).toFixed(0) + " mil"
-                              : dataset.metrics.resources_downloads
-                            : "0"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-8" title="Reutilizações">
-                        <img src="/Icons/bar_chart_primary.svg" alt="" aria-hidden="true" />
-                        <span>{dataset.metrics?.reuses || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-8" title="Favoritos">
-                        <img src="/Icons/favorite.svg" alt="" aria-hidden="true" />
-                        <span>{dataset.metrics?.followers || 0}</span>
-                      </div>
-                    </div>
                   </div>
                 }
+                links={[
+                  {
+                    href: "#",
+                    hasIcon: true,
+                    leadingIcon: "agora-line-eye",
+                    leadingIconHover: "agora-solid-eye",
+                    trailingIcon: "",
+                    trailingIconHover: "",
+                    trailingIconActive: "",
+                    children: dataset.metrics?.views != null && dataset.metrics.views >= 1000
+                      ? (dataset.metrics.views / 1000).toFixed(0) + " mil"
+                      : String(dataset.metrics?.views ?? 0),
+                    title: "Visualizações",
+                    onClick: (e: React.MouseEvent) => e.preventDefault(),
+                    className: "text-[#034AD8]",
+                  },
+                  {
+                    href: "#",
+                    hasIcon: true,
+                    leadingIcon: "agora-line-download",
+                    leadingIconHover: "agora-solid-download",
+                    trailingIcon: "",
+                    trailingIconHover: "",
+                    trailingIconActive: "",
+                    children: dataset.metrics?.resources_downloads != null && dataset.metrics.resources_downloads >= 1000
+                      ? (dataset.metrics.resources_downloads / 1000).toFixed(0) + " mil"
+                      : String(dataset.metrics?.resources_downloads ?? 0),
+                    title: "Downloads",
+                    onClick: (e: React.MouseEvent) => e.preventDefault(),
+                    className: "text-[#034AD8]",
+                  },
+                  {
+                    href: "#",
+                    hasIcon: false,
+                    children: (
+                      <span className="flex items-center gap-8">
+                        <img src="/Icons/bar_chart_primary.svg" alt="" aria-hidden="true" />
+                        <span>{dataset.metrics?.reuses || 0}</span>
+                      </span>
+                    ),
+                    title: "Reutilizações",
+                    onClick: (e: React.MouseEvent) => e.preventDefault(),
+                    className: "text-[#034AD8]",
+                  },
+                  {
+                    href: "#",
+                    hasIcon: true,
+                    leadingIcon: "agora-line-star",
+                    leadingIconHover: "agora-solid-star",
+                    trailingIcon: "",
+                    trailingIconHover: "",
+                    trailingIconActive: "",
+                    children: dataset.metrics?.followers || 0,
+                    title: "Favoritos",
+                    onClick: (e: React.MouseEvent) => e.preventDefault(),
+                    className: "text-[#034AD8]",
+                  },
+                ]}
                 date={
                   <span className="font-[300]">
                     {`Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
@@ -148,6 +195,20 @@ export default function ReusesEditDatasetsTab({
                 }
                 blockedLink={true}
               />
+              <div className="flex justify-end mt-8 mb-8">
+                <Button
+                  appearance="solid"
+                  variant="danger"
+                  hasIcon
+                  leadingIcon="agora-line-trash"
+                  leadingIconHover="agora-solid-trash"
+                  disabled={isSubmitting}
+                  onClick={() => onRemoveAssociatedDataset(dataset.id)}
+                >
+                  Eliminar
+                </Button>
+              </div>
+              </div>
             ))}
           </div>
         )}
