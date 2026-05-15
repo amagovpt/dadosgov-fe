@@ -23,11 +23,7 @@ import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created" | "last_update";
@@ -261,11 +257,11 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   )}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
-                  {formatDate(dataset.created_at)}
+                  {formatDateToDMY(dataset.created_at)}
                 </TableCell>
                 <TableCell headerLabel="Última modificação">
                   <div>
-                    <div>{formatDate(dataset.last_modified)}</div>
+                    <div>{formatDateToDMY(dataset.last_modified)}</div>
                     {dataset.owner ? (
                       <a
                         href={`/pages/users/${dataset.owner.slug}`}

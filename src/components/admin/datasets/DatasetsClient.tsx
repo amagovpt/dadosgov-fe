@@ -23,6 +23,7 @@ import { Dataset } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { Dropdown } from "@/components/Primitives/Dropdown";
+import { calculateQualityScore } from "@/utils/calculateQualityScore";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],
@@ -35,13 +36,6 @@ const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["temporal_coverage", "Cobertura temporal"],
   ["update_frequency", "Frequência de atualização"],
 ];
-
-function calculateQualityScore(quality?: Dataset["quality"]): number {
-  if (!quality) return 0;
-  if (quality.score > 0) return Math.round(quality.score * 100);
-  const met = QUALITY_CRITERIA.filter(([key]) => quality[key] === true).length;
-  return Math.round((met / QUALITY_CRITERIA.length) * 100);
-}
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
@@ -308,21 +302,21 @@ export default function DatasetsClient() {
                 <TableCell headerLabel="Pontuações">
                   <div
                     className={
-                      calculateQualityScore(dataset.quality) <= 45
+                      calculateQualityScore(QUALITY_CRITERIA, dataset.quality) <= 45
                         ? "quality-progress-warning"
-                        : calculateQualityScore(dataset.quality) > 50
+                        : calculateQualityScore(QUALITY_CRITERIA, dataset.quality) > 50
                           ? "quality-progress-success"
                           : ""
                     }
                   >
                     <ProgressBar
-                      value={calculateQualityScore(dataset.quality)}
+                      value={calculateQualityScore(QUALITY_CRITERIA, dataset.quality)}
                       max={100}
                       hidePercentageValue={true}
                     />
                   </div>
                   <span className="text-xs text-neutral-700">
-                    {calculateQualityScore(dataset.quality)}%
+                    {calculateQualityScore(QUALITY_CRITERIA, dataset.quality)}%
                   </span>
                 </TableCell>
                 <TableCell headerLabel="Ações">

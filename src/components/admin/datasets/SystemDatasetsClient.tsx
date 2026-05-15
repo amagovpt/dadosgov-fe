@@ -20,6 +20,7 @@ import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dropdown } from "@/components/Primitives/Dropdown";
+import { calculateQualityScore } from "@/utils/calculateQualityScore";
 
 
 type SortOrder = "none" | "ascending" | "descending";
@@ -36,13 +37,6 @@ const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["temporal_coverage", "Cobertura temporal"],
   ["spatial", "Cobertura espacial"],
 ];
-
-function calculateQualityScore(quality?: Dataset["quality"]): number {
-  if (!quality) return 0;
-  if (quality.score > 0) return Math.round(quality.score * 100);
-  const met = QUALITY_CRITERIA.filter(([key]) => quality[key] === true).length;
-  return Math.round((met / QUALITY_CRITERIA.length) * 100);
-}
 
 const SORT_FIELD_MAP: Record<SortField, string | null> = {
   title: "title",
@@ -267,21 +261,21 @@ export default function SystemDatasetsClient() {
                 <TableCell headerLabel="Pontuação">
                   <div
                     className={
-                      calculateQualityScore(dataset.quality) <= 45
+                      calculateQualityScore(QUALITY_CRITERIA, dataset.quality) <= 45
                         ? "quality-progress-warning"
-                        : calculateQualityScore(dataset.quality) > 50
+                        : calculateQualityScore(QUALITY_CRITERIA, dataset.quality) > 50
                           ? "quality-progress-success"
                           : ""
                     }
                   >
                     <ProgressBar
-                      value={calculateQualityScore(dataset.quality)}
+                      value={calculateQualityScore(QUALITY_CRITERIA, dataset.quality)}
                       max={100}
                       hidePercentageValue={true}
                     />
                   </div>
                   <span className="text-xs text-neutral-700">
-                    {calculateQualityScore(dataset.quality)}%
+                    {calculateQualityScore(QUALITY_CRITERIA, dataset.quality)}%
                   </span>
                 </TableCell>
                 <TableCell headerLabel="Ações">

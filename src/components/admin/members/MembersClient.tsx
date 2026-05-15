@@ -9,7 +9,6 @@ import {
   StatusCard,
   DropdownSection,
   DropdownOption,
-  InputSelect,
   InputTextArea,
   Table,
   TableHeader,
@@ -36,11 +35,7 @@ import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 const roleLabels: Record<string, string> = {
   admin: "Administrador",
@@ -618,7 +613,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                     {request.comment || "-"}
                   </TableCell>
                   <TableCell headerLabel="Data do pedido">
-                    {formatDate(request.created)}
+                    {formatDateToDMY(request.created)}
                   </TableCell>
                   <TableCell headerLabel="Ações">
                     <div className="flex gap-8">
@@ -751,7 +746,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                 </StatusDot>
               </TableCell>
               <TableCell headerLabel="Membro desde">
-                {formatDate(member.since)}
+                {formatDateToDMY(member.since)}
               </TableCell>
               <TableCell headerLabel="Ações">
                 <div className="flex gap-8">
