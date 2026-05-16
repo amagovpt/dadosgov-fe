@@ -102,6 +102,33 @@ const API_V2_BASE_URL = isServer
 // Relative API URL for authenticated requests (passes through Next.js proxy which forwards cookies)
 const API_AUTH_URL = "/api/1";
 
+// X-HTTP-Method-Override toggle. When NEXT_PUBLIC_USE_METHOD_OVERRIDE=true,
+// every PUT/PATCH/DELETE issued from this module is sent as POST with the
+// `X-HTTP-Method-Override` header so it can traverse proxies/WAFs that strip
+// non-GET/POST verbs. The backend WSGI middleware rewrites the method before
+// Flask routing sees it. Default is off so local development against
+// `inv serve` keeps using real verbs.
+const METHOD_OVERRIDE_VERBS = new Set(["PUT", "PATCH", "DELETE"]);
+
+/** @internal Exposed for unit tests; consumers should rely on the shadowed `fetch`. */
+export function applyMethodOverride(init?: RequestInit): RequestInit | undefined {
+  if (process.env.NEXT_PUBLIC_USE_METHOD_OVERRIDE !== "true" || !init?.method) return init;
+  const method = init.method.toUpperCase();
+  if (!METHOD_OVERRIDE_VERBS.has(method)) return init;
+
+  const headers = new Headers(init.headers);
+  headers.set("X-HTTP-Method-Override", method);
+  return { ...init, method: "POST", headers };
+}
+
+// Module-local `fetch` shadows the global so every call site in this file
+// transparently picks up the method override transformation. We capture the
+// runtime `globalThis.fetch` per-call to preserve Next.js's request-time
+// instrumentation (cache, revalidate).
+function fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  return globalThis.fetch(input, applyMethodOverride(init));
+}
+
 // Helper: use relative URL for authenticated fetches, public URL for public fetches
 function authFetch(path: string, init?: RequestInit): Promise<Response> {
   return fetch(`${API_AUTH_URL}${path}`, {
