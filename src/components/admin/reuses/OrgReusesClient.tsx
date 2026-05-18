@@ -25,11 +25,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -61,21 +57,28 @@ export default function OrgReusesClient() {
 
   useEffect(() => {
     if (!resolvedOrgId) {
-      setIsLoading(false);
       return;
     }
-    async function loadReuses() {
+
+    let isCancelled = false;
+    const timeoutId = setTimeout(() => {
       setIsLoading(true);
-      try {
-        const data = await fetchOrgReuses(resolvedOrgId!);
-        setReuses(data || []);
-      } catch (error) {
-        console.error("Error loading org reuses:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadReuses();
+      void fetchOrgReuses(resolvedOrgId)
+        .then((data) => {
+          if (!isCancelled) setReuses(data || []);
+        })
+        .catch((error) => {
+          console.error("Error loading org reuses:", error);
+        })
+        .finally(() => {
+          if (!isCancelled) setIsLoading(false);
+        });
+    }, 0);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [resolvedOrgId]);
 
   const filteredReuses = useMemo(() => {
@@ -258,7 +261,7 @@ export default function OrgReusesClient() {
                     )}
                   </TableCell>
                   <TableCell headerLabel="Criado em">
-                    {formatDate(reuse.created_at)}
+                    {formatDateToDMY(reuse.created_at)}
                   </TableCell>
                   <TableCell headerLabel="Conjuntos de dados">
                     {reuse.datasets?.length ?? 0}

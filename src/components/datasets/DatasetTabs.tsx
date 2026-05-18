@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, Tabs, Tab, TabHeader, TabBody, CardNoResults, CardLinks, Icon, StatusCard, Button, InputSearchBar, InputText, InputTextArea, DropdownSection, DropdownOption, usePopupContext } from '@ama-pt/agora-design-system';
 import { Dataset, Discussion, DiscussionCreatePayload, Reuse, CommunityResource } from '@/types/api';
@@ -106,6 +107,8 @@ interface DatasetTabsProps {
 
 export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     const { user } = useAuth();
+    const searchParams = useSearchParams();
+    const tabParam = searchParams.get('tab');
     const { show, hide } = usePopupContext();
     const [discussions, setDiscussions] = useState<Discussion[]>([]);
     const [discussionCount, setDiscussionCount] = useState(dataset.metrics.discussions || 0);
@@ -315,7 +318,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                         </div>
                     )}
                 </Tab>
-                <Tab>
+                <Tab active={tabParam === 'discussions' || undefined}>
                     <TabHeader>Discussões ({discussionCount})</TabHeader>
                     {renderTabBody(
                         <div>
@@ -443,8 +446,8 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                         <div key={disc.id} className="bg-white rounded-8 p-32">
                                             {/* First message / topic */}
                                             <div className="flex justify-between items-start">
-                                                <div className="flex-1">
-                                                    <h4 className="font-bold text-neutral-900 text-base mb-16">{disc.title}</h4>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-bold text-neutral-900 text-base mb-16 [overflow-wrap:anywhere]">{disc.title}</h4>
                                                     <div className="flex items-center gap-8">
                                                         <Avatar
                                                             avatarType={disc.user.avatar_thumbnail ? "image" : "initials"}
@@ -501,7 +504,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                 </div>
                                             </div>
                                             {disc.discussion.length > 0 && (
-                                                <p className="text-neutral-900 text-sm mt-16 mb-16 max-w-[100ch]">
+                                                <p className="text-neutral-900 text-sm mt-16 mb-16 max-w-[100ch] [overflow-wrap:anywhere]">
                                                     {disc.discussion[0].content}
                                                 </p>
                                             )}
@@ -565,7 +568,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <p className="text-neutral-900 text-sm mt-4 max-w-[100ch]">
+                                                            <p className="text-neutral-900 text-sm mt-4 max-w-[100ch] [overflow-wrap:anywhere]">
                                                                 {msg.content}
                                                             </p>
                                                         </div>

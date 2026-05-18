@@ -826,10 +826,22 @@ export interface TransferRequestNotificationDetails {
   transfer_subject: object | null;
 }
 
+export interface ValidateHarvesterNotificationSource {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface ValidateHarvesterNotificationDetails {
+  source: ValidateHarvesterNotificationSource | null;
+  status: "pending" | "accepted" | "refused";
+}
+
 export type NotificationDetails =
   | DiscussionNotificationDetails
   | MembershipRequestNotificationDetails
-  | TransferRequestNotificationDetails;
+  | TransferRequestNotificationDetails
+  | ValidateHarvesterNotificationDetails;
 
 export interface Notification {
   id: string;

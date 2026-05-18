@@ -1,34 +1,37 @@
 import React from "react";
-import Link from "next/link";
 import {
   Button,
-  CardLinks,
   DropdownOption,
   DropdownSection,
   Icon,
   InputSelect,
   InputText,
+  InputTextArea,
   StatusCard,
   Tag,
 } from "@ama-pt/agora-design-system";
-import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
+import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 import type { Dataset } from "@/types/api";
-
-type DatasetLink = { url: string };
+import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 
 type ReusesEditDatasetsTabProps = {
   associatedDatasets: Dataset[];
   selectedDatasets: Dataset[];
   datasetSearchResults: Dataset[];
   myDatasets: Dataset[];
-  datasetLinks: DatasetLink[];
+  datasetLinks: RemoteDatasetEntry[];
   datasetLinkErrors: Record<number, string>;
   isSubmitting: boolean;
   onDatasetSearchChange: (value: string) => void;
   onDatasetSelectChange: (selectedIds: string[]) => void;
   onRemoveSelectedDataset: (datasetId: string) => void;
+  onRemoveAssociatedDataset: (datasetId: string) => void;
+  onRemoveAllAssociatedDatasets: () => void;
   onDatasetLinkChange: (index: number, value: string) => void;
+  // LEDG-1748 PR 2: per-URL metadata inputs.
+  onDatasetTitleChange: (index: number, value: string) => void;
+  onDatasetDescriptionChange: (index: number, value: string) => void;
   onRemoveDatasetLink: (index: number) => void;
   onAddDatasetLink: () => void;
   onSave: () => void | Promise<void>;
@@ -45,7 +48,11 @@ export default function ReusesEditDatasetsTab({
   onDatasetSearchChange,
   onDatasetSelectChange,
   onRemoveSelectedDataset,
+  onRemoveAssociatedDataset,
+  onRemoveAllAssociatedDatasets,
   onDatasetLinkChange,
+  onDatasetTitleChange,
+  onDatasetDescriptionChange,
   onRemoveDatasetLink,
   onAddDatasetLink,
   onSave,
@@ -61,92 +68,68 @@ export default function ReusesEditDatasetsTab({
     return combined.filter((dataset) => {
       if (seen.has(dataset.id)) return false;
       if (associatedIds.has(dataset.id)) return false;
+      if (dataset.archived) return false;
+      if (dataset.deleted) return false;
       seen.add(dataset.id);
       return true;
     });
   })();
 
   return (
-    <div className="admin-page__body mt-24">
-      <div className="admin-page__form-area">
-        {associatedDatasets.length > 0 && (
-          <div className="agora-card-links-datasets-px0 mb-24">
-            {associatedDatasets.map((dataset) => (
-              <CardLinks
-                key={dataset.id}
-                onClick={() => {}}
-                className="cursor-pointer text-neutral-900"
-                variant="transparent"
-                image={{
-                  src:
-                    dataset.organization?.logo ||
-                    "/images/placeholders/organization.png",
-                  alt: dataset.organization?.name || "Organização sem logo",
-                }}
-                category={dataset.organization?.name}
-                title={dataset.title}
-                description={
-                  <div className="flex flex-col gap-12">
-                    <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
-                      {dataset.description}
-                    </p>
-                    <div className="flex flex-wrap gap-8 items-center mt-8">
-                      <span className="text-sm font-medium text-neutral-900">
-                        Metadados:{" "}
-                        {dataset.quality?.score != null
-                          ? Math.round(dataset.quality.score * 100)
-                          : 0}
-                        %
-                      </span>
-                    </div>
-                    <div className="flex items-center flex-wrap gap-32 text-xs mt-32 text-[#034AD8] mb-32">
-                      <div className="flex items-center gap-8" title="Visualizações">
-                        <Icon name="agora-line-eye" aria-hidden="true" />
-                        <span>
-                          {dataset.metrics?.views
-                            ? dataset.metrics.views >= 1000
-                              ? (dataset.metrics.views / 1000).toFixed(0) + " mil"
-                              : dataset.metrics.views
-                            : "0"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-8" title="Downloads">
-                        <Icon name="agora-line-download" aria-hidden="true" />
-                        <span>
-                          {dataset.metrics?.resources_downloads
-                            ? dataset.metrics.resources_downloads >= 1000
-                              ? (dataset.metrics.resources_downloads / 1000).toFixed(0) + " mil"
-                              : dataset.metrics.resources_downloads
-                            : "0"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-8" title="Reutilizações">
-                        <img src="/Icons/bar_chart_primary.svg" alt="" aria-hidden="true" />
-                        <span>{dataset.metrics?.reuses || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-8" title="Favoritos">
-                        <img src="/Icons/favorite.svg" alt="" aria-hidden="true" />
-                        <span>{dataset.metrics?.followers || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-                }
-                date={
-                  <span className="font-[300]">
-                    {`Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
-                  </span>
-                }
-                mainLink={
-                  <Link href={`/pages/datasets/${dataset.slug}`}>
-                    <span className="underline">{dataset.title}</span>
-                  </Link>
-                }
-                blockedLink={true}
-              />
-            ))}
+    <div className="mt-24 flex flex-col gap-24">
+      {associatedDatasets.length > 0 && (
+          <div className="mb-24">
+            <div className="flex justify-end mb-16">
+              <Button
+                appearance="outline"
+                variant="danger"
+                hasIcon
+                leadingIcon="agora-line-trash"
+                leadingIconHover="agora-solid-trash"
+                disabled={isSubmitting}
+                onClick={onRemoveAllAssociatedDatasets}
+              >
+                Eliminar todos
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-16">
+              {associatedDatasets.map((dataset) => (
+                <div key={dataset.id} className="relative group/card">
+                  <CardMetrics
+                    link={`/pages/datasets/${dataset.slug}`}
+                    title={dataset.title}
+                    description={dataset.description || ""}
+                    last_modified={formatDateToTimeAgo(dataset.last_modified)}
+                    organization={dataset.organization ? {
+                      name: dataset.organization.name,
+                      logo: dataset.organization.logo ?? undefined,
+                    } : undefined}
+                    quality={dataset.quality}
+                    metrics={dataset.metrics}
+                  />
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => onRemoveAssociatedDataset(dataset.id)}
+                    className="rounded group absolute right-8 top-8 z-10 p-4"
+                    title="Eliminar"
+                  >
+                    <Icon
+                      name="agora-line-trash"
+                      className="block h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:hidden"
+                    />
+                    <Icon
+                      name="agora-solid-trash"
+                      className="hidden h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:block"
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
+        <div className="admin-page__form-area">
         <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
           <div className="mb-24">
             <StatusCard
@@ -202,7 +185,7 @@ export default function ReusesEditDatasetsTab({
           </div>
 
           {datasetLinks.map((link, index) => (
-            <div key={`dataset-${index}`}>
+            <div key={`dataset-${index}`} className="flex flex-col gap-16">
               <InputText
                 label="Link para o conjunto de dados"
                 placeholder="Insira o URL aqui"
@@ -216,8 +199,26 @@ export default function ReusesEditDatasetsTab({
                 feedbackState="danger"
                 errorFeedbackText={datasetLinkErrors[index]}
               />
+              <InputText
+                label="Título (opcional)"
+                placeholder="Nome do conjunto de dados externo"
+                id={`edit-dataset-title-${index}`}
+                value={link.title ?? ""}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onDatasetTitleChange(index, e.target.value)
+                }
+              />
+              <InputTextArea
+                label="Descrição (opcional)"
+                placeholder="Pequena descrição do conjunto de dados"
+                id={`edit-dataset-description-${index}`}
+                value={link.description ?? ""}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  onDatasetDescriptionChange(index, e.target.value)
+                }
+              />
               {link.url.trim() && (
-                <div className="flex justify-end mt-24">
+                <div className="flex justify-end mt-8">
                   <Button
                     appearance="solid"
                     variant="danger"
@@ -263,7 +264,7 @@ export default function ReusesEditDatasetsTab({
             </Button>
           </div>
         </form>
-      </div>
+        </div>
     </div>
   );
 }

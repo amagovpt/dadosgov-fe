@@ -95,4 +95,61 @@ test.describe("Backoffice - Organizations", () => {
     expect(page.url()).toMatch(/\/pages\/(login|admin)/);
     await context.close();
   });
+
+  test("OR-09: Email link — welcome_new_member — /pages/admin/org/{id}/datasets loads correctly", async ({
+    page,
+  }) => {
+    // Simulates clicking "Ver a organização" from the welcome_new_member email.
+    await page.goto(`/pages/admin/org/${fixtures.organization.id}/datasets`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    // Admin org datasets page must render without redirecting to login.
+    expect(page.url()).toContain(`/pages/admin/org/${fixtures.organization.id}/datasets`);
+    const heading = page.locator("main").first();
+    await expect(heading).toBeAttached({ timeout: 10000 });
+  });
+
+  test("OR-10: Email link — new_membership_request — /pages/admin/org/{id}/members loads correctly", async ({
+    page,
+  }) => {
+    // Simulates clicking "See the request" from the new_membership_request email.
+    await page.goto(`/pages/admin/org/${fixtures.organization.id}/members`);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    expect(page.url()).toContain(`/pages/admin/org/${fixtures.organization.id}/members`);
+    const heading = page.locator("main").first();
+    await expect(heading).toBeAttached({ timeout: 10000 });
+  });
+
+  test("OR-11: Email link — membership_invitation (existing user) — /pages/admin/me/profile loads correctly", async ({
+    page,
+  }) => {
+    // Simulates clicking "View and respond to invitation" from the membership_invitation email.
+    await page.goto("/pages/admin/me/profile");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    expect(page.url()).toContain("/pages/admin/me/profile");
+    const heading = page.locator("main").first();
+    await expect(heading).toBeAttached({ timeout: 10000 });
+  });
+
+  test("OR-12: Email link — membership_invitation (new user) — /pages/register loads correctly", async ({
+    browser,
+  }) => {
+    // Simulates clicking "View and respond to invitation" for a user without an account.
+    // This is a public page so we use an unauthenticated context.
+    const context = await browser.newContext({ storageState: undefined });
+    const page = await context.newPage();
+    await page.goto("/pages/register");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    expect(page.url()).toContain("/pages/register");
+    const heading = page.locator("main").first();
+    await expect(heading).toBeAttached({ timeout: 10000 });
+    await context.close();
+  });
 });

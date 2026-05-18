@@ -17,11 +17,7 @@ import { fetchOrgDiscussions } from "@/services/api";
 import { Discussion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 export default function DiscussionsClient() {
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -147,7 +143,7 @@ export default function DiscussionsClient() {
                     )}
                   </TableCell>
                   <TableCell headerLabel="Data">
-                    {formatDate(discussion.created)}
+                    {formatDateToDMY(discussion.created)}
                   </TableCell>
                   <TableCell headerLabel="Mensagens">
                     {discussion.discussion?.length || 0}

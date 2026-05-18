@@ -25,11 +25,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -240,10 +236,10 @@ export default function OrgDataservicesClient() {
                   )}
                 </TableCell>
                 <TableCell headerLabel="Criado em">
-                  {formatDate(api.created_at)}
+                  {formatDateToDMY(api.created_at)}
                 </TableCell>
                 <TableCell headerLabel="Modificado em">
-                  {formatDate(api.last_modified)}
+                  {formatDateToDMY(api.last_modified)}
                   <br />
                   <span className="text-sm text-neutral-500">
                     sobre{" "}

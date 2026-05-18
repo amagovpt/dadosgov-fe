@@ -1098,6 +1098,20 @@ export async function linkDatasetToReuse(
   return await res.json();
 }
 
+export async function unlinkDatasetFromReuse(
+  reuseId: string,
+  datasetId: string
+): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/reuses/${reuseId}/datasets/${datasetId}/`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw { status: res.status, data: error };
+  }
+}
+
 export async function linkDataserviceToReuse(
   reuseId: string,
   dataserviceId: string
@@ -2058,6 +2072,23 @@ export async function fetchNotifications(
   return await res.json();
 }
 
+export async function markNotificationRead(id: string): Promise<Notification> {
+  const res = await fetch(
+    `${API_AUTH_URL}/notifications/${encodeURIComponent(id)}/read/`,
+    { method: "POST", cache: "no-store", credentials: "include" }
+  );
+
+  if (res.status === 401) {
+    throw new Error("Authentication required");
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed to mark notification as read: ${res.statusText}`);
+  }
+
+  return await res.json();
+}
+
 // --- Topics (API v2) ---
 
 export async function fetchTopics(
@@ -3001,6 +3032,16 @@ export async function uploadAvatar(file: File): Promise<{ image: string }> {
     throw { status: res.status, data: translateUploadErrorPayload(error) };
   }
   return await res.json();
+}
+
+export async function deleteAvatar(): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/me/avatar/`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    throw { status: res.status };
+  }
 }
 
 export async function uploadUserAvatar(userId: string, file: File): Promise<{ image: string }> {

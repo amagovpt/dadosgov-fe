@@ -44,6 +44,7 @@ type DatasetsEditMetadataTabProps = {
   temporalStart: string;
   temporalEnd: string;
   loadedSpatialZones: string[];
+  spatialCoverageValue: string;
   spatialCoverageOptions:
     | React.ReactElement<DropdownSectionProps>
     | React.ReactElement<DropdownSectionProps>[];
@@ -94,6 +95,7 @@ export default function DatasetsEditMetadataTab({
   temporalStart,
   temporalEnd,
   loadedSpatialZones,
+  spatialCoverageValue,
   spatialCoverageOptions,
   selectedZoneObjects,
   effectiveSpatialIds,
@@ -151,7 +153,7 @@ export default function DatasetsEditMetadataTab({
           </div>
         )}
 
-        <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
+        <form className="admin-page__form" noValidate onSubmit={(e) => e.preventDefault()}>
           <p className="text-neutral-900 text-base leading-7">
             Os campos marcados com um asterisco ( * ) são obrigatórios.
           </p>
@@ -309,7 +311,7 @@ export default function DatasetsEditMetadataTab({
               searchable
               searchInputPlaceholder="Escreva para pesquisar..."
               searchNoResultsText="Nenhum resultado encontrado"
-              defaultValue={loadedSpatialZones.join(",")}
+              defaultValue={spatialCoverageValue || loadedSpatialZones.join(",")}
               onChangeRef={spatialCoverageRef}
               onChangeCallback={onSpatialCoverageChange}
               onSearchCallback={onSpatialSearch}
@@ -324,7 +326,9 @@ export default function DatasetsEditMetadataTab({
                     key={zone.id}
                     aria-label={`Remover ${zone.name}`}
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       const savedScroll = window.scrollY;
                       const next = effectiveSpatialIds.filter((id) => id !== zone.id).join(",");
                       spatialCoverageRef.current = next;
@@ -356,6 +360,7 @@ export default function DatasetsEditMetadataTab({
 
           <div className="admin-page__actions flex justify-end mt-24">
             <Button
+              type="button"
               variant="primary"
               hasIcon
               trailingIcon="agora-line-check-circle"

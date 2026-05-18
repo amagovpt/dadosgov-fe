@@ -145,4 +145,53 @@ test.describe("Reuses Listing", () => {
     const toggle3yrAfter = page.locator("#reuse-filter-atualizacao-3_years");
     await expect(toggle3yrAfter).toBeChecked({ timeout: 10000 });
   });
+
+  test("RL-12: Search query persists in input after navigation", async ({ page }) => {
+    const searchInput = page.locator("#reuses-search");
+    await searchInput.fill("dados");
+    await searchInput.press("Enter");
+    await page.waitForURL(/q=dados/, { timeout: 10000 });
+
+    const inputAfter = page.locator("#reuses-search");
+    await expect(inputAfter).toHaveValue("dados");
+  });
+
+  test("RL-13: Clearing search restores broader list", async ({ page }) => {
+    const searchInput = page.locator("#reuses-search");
+    await searchInput.fill("educação");
+    await searchInput.press("Enter");
+    await page.waitForURL(/q=educa/, { timeout: 10000 });
+
+    await page.locator("#reuses-search").fill("");
+    await page.locator("#reuses-search").press("Enter");
+    await page.waitForURL((url) => !url.searchParams.get("q"), {
+      timeout: 10000,
+    });
+
+    const cards = page.locator(CARD_SELECTOR);
+    await expect(cards.first()).toBeVisible({ timeout: 15000 });
+    expect(await cards.count()).toBeGreaterThan(0);
+  });
+
+  test("RL-14: Date filter roundtrip — 12-month range is correctly detected from URL", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    const toggle12m = page.locator("#reuse-filter-atualizacao-12_months");
+    await expect(toggle12m).toBeVisible({ timeout: 10000 });
+    await toggle12m.click();
+    await page.waitForURL(/modified_since=/, { timeout: 10000 });
+
+    // Reload/bookmark simulation — the old day-counting code could misidentify
+    // 12-month dates when a leap year caused diffDays to reach 366.
+    const urlWithFilter = page.url();
+    await page.goto(urlWithFilter);
+    await page.waitForLoadState("networkidle");
+
+    await openFiltersPanel(page);
+
+    const toggle12mAfter = page.locator("#reuse-filter-atualizacao-12_months");
+    await expect(toggle12mAfter).toBeChecked({ timeout: 10000 });
+  });
 });

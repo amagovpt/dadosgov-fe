@@ -205,6 +205,8 @@ export default function DatasetsEditClient() {
         if (ds.temporal_coverage) {
           const toDateOnly = (iso: string) => {
             if (!iso) return "";
+            // Keep PT-formatted values as-is (avoid JS mm/dd parsing ambiguity).
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(iso)) return iso;
             const d = new Date(iso);
             if (isNaN(d.getTime())) return iso;
             return `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${d.getUTCFullYear()}`;
@@ -218,6 +220,10 @@ export default function DatasetsEditClient() {
         setResourceTypes(resTypes);
 
         suggestTags("", 50).then(setTagSuggestions);
+        suggestSpatialZones("", 20).then((results) => {
+          spatialZoneSearchRef.current = results;
+          setSpatialZoneSearch(results);
+        });
 
         if (ds.spatial?.zones?.length) {
           fetchSpatialZonesByIds(ds.spatial.zones).then((currentZones) => {
@@ -368,8 +374,14 @@ export default function DatasetsEditClient() {
     .split(",")
     .filter(Boolean);
   const handleSpatialCoverageChange = useCallback((value: string) => {
-    setSelectedSpatialZonesValue(value);
-    const ids = new Set(value.split(",").filter(Boolean));
+    const normalized = value
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean)
+      .join(",");
+    setSelectedSpatialZonesValue(normalized);
+    spatialCoverageRef.current = normalized;
+    const ids = new Set(normalized.split(",").filter(Boolean));
     setSpatialZones((prev) => {
       // Pin newly selected zones; unpin deselected ones
       const seen = new Set(prev.map((z) => z.id));
@@ -474,7 +486,42 @@ export default function DatasetsEditClient() {
       const tags = tagsValue ? tagsValue.split(",").filter(Boolean) : [];
       const granularity = spatialGranularityRef.current || undefined;
       const zonesValue = spatialCoverageRef.current;
-      const zones = zonesValue ? zonesValue.split(",").filter(Boolean) : undefined;
+      const zones = zonesValue
+        ? zonesValue
+            .split(",")
+            .map((id) => id.trim())
+            .filter(Boolean)
+        : undefined;
+      let validZones = zones;
+      let zoneDetails: SpatialZone[] = [];
+      if (zones && zones.length > 0) {
+        zoneDetails = await fetchSpatialZonesByIds(zones);
+        const validZoneIds = new Set(zoneDetails.map((z) => z.id));
+        validZones = zones.filter((id) => validZoneIds.has(id));
+        if (validZones.length !== zones.length) {
+          const normalized = validZones.join(",");
+          spatialCoverageRef.current = normalized;
+          setSelectedSpatialZonesValue(normalized);
+        }
+      }
+      let resolvedGranularity = granularity;
+      if (validZones && validZones.length > 0) {
+        const selectedZoneSet = new Set(validZones);
+        const levels = Array.from(
+          new Set(
+            zoneDetails
+              .filter((z) => selectedZoneSet.has(z.id))
+              .map((z) => (typeof z.level === "string" ? z.level.trim() : ""))
+              .filter(Boolean)
+          )
+        );
+        if (levels.length === 1) {
+          resolvedGranularity = levels[0];
+        } else if (levels.length > 1 && resolvedGranularity && !levels.includes(resolvedGranularity)) {
+          resolvedGranularity = levels[0];
+        }
+        spatialGranularityRef.current = resolvedGranularity || "";
+      }
 
       const updated = await updateDataset(dataset.id, {
         title: title.trim(),
@@ -501,12 +548,12 @@ export default function DatasetsEditClient() {
                 : {}),
             }
           : undefined,
-        ...(granularity || zones
+        ...(resolvedGranularity || validZones
           ? {
               spatial: {
                 geom: dataset.spatial?.geom ?? null,
-                zones: zones ?? dataset.spatial?.zones ?? [],
-                granularity: granularity ?? null,
+                zones: validZones ?? dataset.spatial?.zones ?? [],
+                granularity: resolvedGranularity ?? null,
               },
             }
           : {}),
@@ -515,7 +562,8 @@ export default function DatasetsEditClient() {
       setApiSuccess("Conjunto de dados atualizado com sucesso.");
       setTimeout(() => setApiSuccess(null), 10000);
       requestAnimationFrame(() => {
-        tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Keep feedback visible after save.
+        window.scrollTo({ top: 0, behavior: "smooth" });
         tabsRef.current?.focus({ preventScroll: true });
       });
     } catch (error: unknown) {
@@ -955,6 +1003,7 @@ export default function DatasetsEditClient() {
               temporalStart={temporalStart}
               temporalEnd={temporalEnd}
               loadedSpatialZones={loadedSpatialZones}
+              spatialCoverageValue={selectedSpatialZonesValue}
               spatialCoverageOptions={spatialCoverageOptions}
               selectedZoneObjects={selectedZoneObjects}
               effectiveSpatialIds={effectiveSpatialIds}
@@ -967,7 +1016,26 @@ export default function DatasetsEditClient() {
               spatialGranularityRef={spatialGranularityRef}
               onPublishDataset={async () => {
                 try {
-                  const updated = await updateDataset(dataset.id, { private: false });
+                  const tagsValue = keywordsRef.current;
+                  const tags = tagsValue
+                    ? tagsValue
+                        .split(",")
+                        .map((tag) => tag.trim())
+                        .filter(Boolean)
+                    : dataset.tags || [];
+                  const updated = await updateDataset(dataset.id, {
+                    private: false,
+                    title: dataset.title,
+                    description: dataset.description,
+                    description_short: dataset.description_short || undefined,
+                    acronym: dataset.acronym || undefined,
+                    tags,
+                    license: dataset.license || undefined,
+                    frequency: dataset.frequency || undefined,
+                    temporal_coverage: dataset.temporal_coverage || undefined,
+                    spatial: dataset.spatial || undefined,
+                    organization: dataset.organization?.id,
+                  });
                   setDataset(updated);
                   setApiSuccess("Conjunto de dados publicado com sucesso.");
                   setTimeout(() => setApiSuccess(null), 10000);
@@ -984,7 +1052,10 @@ export default function DatasetsEditClient() {
               }}
               onKeywordSearch={(q) => {
                 setKeywordSearch(q);
-                if (!q) return;
+                if (!q) {
+                  setTagSearch([]);
+                  return;
+                }
                 suggestTags(q, 20).then(setTagSearch);
               }}
               onKeywordsChange={(value) => {
@@ -1016,11 +1087,20 @@ export default function DatasetsEditClient() {
               onTemporalEndChange={setTemporalEnd}
               onSpatialCoverageChange={handleSpatialCoverageChange}
               onSpatialSearch={(q) => {
-                if (q.length < 2) return;
-                suggestSpatialZones(q, 50).then((results) => {
-                  spatialZoneSearchRef.current = results;
-                  setSpatialZoneSearch(results);
-                });
+                if (q.length < 2) {
+                  spatialZoneSearchRef.current = [];
+                  setSpatialZoneSearch([]);
+                  return;
+                }
+                suggestSpatialZones(q, 50)
+                  .then((results) => {
+                    spatialZoneSearchRef.current = results;
+                    setSpatialZoneSearch(results);
+                  })
+                  .catch(() => {
+                    spatialZoneSearchRef.current = [];
+                    setSpatialZoneSearch([]);
+                  });
               }}
               onRemoveSpatialZone={(zoneId) => {
                 const next = effectiveSpatialIds.filter((id) => id !== zoneId).join(",");
@@ -1097,3 +1177,4 @@ export default function DatasetsEditClient() {
     </div>
   );
 }
+

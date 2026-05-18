@@ -20,11 +20,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at";
@@ -78,7 +74,11 @@ export default function SystemReusesClient() {
   }, [currentPage, pageSize, searchQuery, sortParam]);
 
   useEffect(() => {
-    loadData();
+    const timeoutId = setTimeout(() => {
+      void loadData();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [loadData]);
 
   const handleSearch = (value: string) => {
@@ -182,7 +182,9 @@ export default function SystemReusesClient() {
             dropdownListAriaLabel: "Opções de linhas por página",
             prevButtonAriaLabel: "Página anterior",
             nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
+            onPageChange: (page: number) => {
+              setCurrentPage(page + 1);
+            },
             onPageSizeChange: (size: number) => {
               setPageSize(size);
               setCurrentPage(1);
@@ -229,7 +231,7 @@ export default function SystemReusesClient() {
                     </StatusDot>
                   </TableCell>
                   <TableCell headerLabel="Criado em">
-                    {formatDate(reuse.created_at)}
+                    {formatDateToDMY(reuse.created_at)}
                   </TableCell>
                   <TableCell headerLabel="Conjuntos de dados">
                     {reuse.datasets?.length ?? 0}

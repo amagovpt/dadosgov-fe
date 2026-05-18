@@ -17,6 +17,7 @@ import SearchDropdown from "@/components/search/SearchDropdown";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/services/api";
 
+
 function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col gap-16">
@@ -87,13 +88,7 @@ export function AdminHeader() {
   }, [show, hide]);
 
   return (
-    <div
-      ref={wrapperRef}
-      className="admin-header"
-      {...(user?.avatar_thumbnail
-        ? { style: { "--admin-avatar-url": `url(${user.avatar_thumbnail})` } as React.CSSProperties }
-        : { style: { "--admin-initials": `"${initials}"` } as React.CSSProperties })}
-    >
+    <div ref={wrapperRef} className="admin-header">
       <Header darkMode>
         <div className="admin-header__search-left">
           <SearchDropdown
@@ -105,9 +100,9 @@ export function AdminHeader() {
         <GeneralBar aria-label="Barra de opções do administrador">
           {/* Idioma oculto temporariamente */}
           <Authenticated
-            avatarType={user?.avatar_thumbnail ? "image" : "icon"}
+            avatarType={user?.avatar_thumbnail ? "image" : (initials ? "initials" : "icon")}
             srcPath={
-              (user?.avatar_thumbnail || "agora-line-user") as unknown as undefined
+              (user?.avatar_thumbnail || initials || "agora-line-user") as unknown as undefined
             }
             hasBadge
             badgePosition="top-right"
@@ -125,7 +120,14 @@ export function AdminHeader() {
               >
                 <a href={`/pages/users/${user?.slug || ''}`}>O meu perfil</a>
               </AuthenticatedBodyLink>
-              {/* As minhas definições e Notificações ocultos temporariamente */}
+              <AuthenticatedBodyLink
+                hasIcon
+                leadingIcon="agora-line-mega-phone"
+                leadingIconHover="agora-solid-mega-phone"
+              >
+                <a href="/pages/admin/notificacoes">Notificações</a>
+              </AuthenticatedBodyLink>
+              {/* "As minhas definições" continua oculto até a página existir. */}
             </AuthenticatedBody>
             <AuthenticatedFooter>
               <AuthenticatedFooterAction

@@ -31,6 +31,7 @@ import {
   fetchOrgDatasets,
   searchDatasets,
   linkDatasetToReuse,
+  unlinkDatasetFromReuse,
   linkDataserviceToReuse,
   fetchActivity,
   fetchDiscussions,
@@ -39,6 +40,10 @@ import {
 } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
+import {
+  normalizeRemoteDatasets,
+  type RemoteDatasetEntry,
+} from "@/lib/reuse-remote-datasets";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import ReusesEditMetadataTab from "@/components/admin/reuses/ReusesEditMetadataTab";
 import ReusesEditDatasetsTab from "@/components/admin/reuses/ReusesEditDatasetsTab";
@@ -133,8 +138,13 @@ export default function ReusesEditClient() {
   const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([]);
   const [datasetSearch, setDatasetSearch] = useState("");
   const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
-  const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
+  const [datasetLinks, setDatasetLinks] = useState<RemoteDatasetEntry[]>([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
+  // Tracks the entries that were already persisted on the reuse when the page
+  // loaded. Used to detect whether the save needs to write a (possibly empty)
+  // remote_datasets list when the user removes all rows OR edits any of the
+  // per-URL metadata fields (title / description).
+  const previousRemoteEntriesRef = useRef<RemoteDatasetEntry[]>([]);
   const [apiLinks, setApiLinks] = useState([{ url: "" }]);
   const [apiLinkErrors, setApiLinkErrors] = useState<Record<number, string>>({});
   const { user } = useAuth();
@@ -161,6 +171,15 @@ export default function ReusesEditClient() {
         const initialKeywords = (r.tags || []).join(",");
         setSelectedKeywordsValue(initialKeywords);
         selectedKeywordsRef.current = initialKeywords;
+        // LEDG-1748: populate the external dataset URL inputs from
+        // extras.remote_datasets so the user can see, edit or remove what
+        // was already saved (instead of seeing empty fields and assuming
+        // the URLs were lost). The normaliser also reads per-URL title /
+        // description from the richer entry shape (PR 2) while still
+        // accepting the legacy string[] shape from older data.
+        const remoteEntries = normalizeRemoteDatasets(r.extras);
+        previousRemoteEntriesRef.current = remoteEntries;
+        setDatasetLinks(remoteEntries.length > 0 ? remoteEntries : [{ url: "" }]);
       } catch (error) {
         console.error("Error loading reuse:", error);
         setApiError("Erro ao carregar a reutilização.");
@@ -194,10 +213,7 @@ export default function ReusesEditClient() {
   // Debounced portal-wide dataset search when the user types in the dropdown.
   useEffect(() => {
     const q = datasetSearch.trim();
-    if (q.length < 2) {
-      setDatasetSearchResults([]);
-      return;
-    }
+    if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
         const res = await searchDatasets(q, 1, 20);
@@ -217,10 +233,7 @@ export default function ReusesEditClient() {
   // Debounced tag search while user types in the keywords dropdown.
   useEffect(() => {
     const q = keywordSearch.trim();
-    if (q.length < 2) {
-      setTagSearch([]);
-      return;
-    }
+    if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
         const res = await suggestTags(q, 20);
@@ -332,6 +345,9 @@ export default function ReusesEditClient() {
       .finally(() => setDiscussionsLoading(false));
   };
 
+  const discussionsCount =
+    discussionsLoaded ? discussions.length : (reuse?.metrics?.discussions ?? 0);
+
   const clearError = (field: string) => {
     if (formErrors[field]) {
       setFormErrors((prev) => {
@@ -339,6 +355,20 @@ export default function ReusesEditClient() {
         delete next[field];
         return next;
       });
+    }
+  };
+
+  const handleDatasetSearchChange = (value: string) => {
+    setDatasetSearch(value);
+    if (value.trim().length < 2) {
+      setDatasetSearchResults([]);
+    }
+  };
+
+  const handleKeywordSearchChange = (value: string) => {
+    setKeywordSearch(value);
+    if (value.trim().length < 2) {
+      setTagSearch([]);
     }
   };
 
@@ -456,7 +486,7 @@ export default function ReusesEditClient() {
 
   const handleDatasetLinkChange = (index: number, value: string) => {
     const nextLinks = [...datasetLinks];
-    nextLinks[index] = { url: value };
+    nextLinks[index] = { ...nextLinks[index], url: value };
     setDatasetLinks(nextLinks);
     if (value.trim()) {
       setDatasetLinkErrors((prev) => {
@@ -465,6 +495,20 @@ export default function ReusesEditClient() {
         return nextErrors;
       });
     }
+  };
+
+  // LEDG-1748 PR 2: per-URL metadata fields kept on the same row so the
+  // user can describe each external dataset alongside its URL.
+  const handleDatasetTitleChange = (index: number, value: string) => {
+    const nextLinks = [...datasetLinks];
+    nextLinks[index] = { ...nextLinks[index], title: value };
+    setDatasetLinks(nextLinks);
+  };
+
+  const handleDatasetDescriptionChange = (index: number, value: string) => {
+    const nextLinks = [...datasetLinks];
+    nextLinks[index] = { ...nextLinks[index], description: value };
+    setDatasetLinks(nextLinks);
   };
 
   const handleRemoveDatasetLink = (index: number) => {
@@ -486,11 +530,35 @@ export default function ReusesEditClient() {
 
   const handleSaveDatasetAssociations = async () => {
     if (!reuse) return;
-    const remoteUrls = datasetLinks
-      .map((link) => link.url.trim())
-      .filter(Boolean);
+    // LEDG-1748 PR 2: build the entries list with the new
+    // { url, title?, description? } shape. Dedupe by URL (first occurrence
+    // wins so the title / description the user typed is the one that
+    // sticks). Compare against the snapshot taken at load time to know
+    // whether anything was edited or removed — empty/whitespace fields
+    // become `undefined` rather than persisted empty strings.
+    const seenUrls = new Set<string>();
+    const remoteEntries: RemoteDatasetEntry[] = [];
+    for (const link of datasetLinks) {
+      const url = link.url.trim();
+      if (!url || seenUrls.has(url)) continue;
+      seenUrls.add(url);
+      const title = link.title?.trim();
+      const description = link.description?.trim();
+      remoteEntries.push({
+        url,
+        title: title || undefined,
+        description: description || undefined,
+      });
+    }
     const hasLocal = selectedDatasets.length > 0;
-    const hasRemote = remoteUrls.length > 0;
+    const hasRemote = remoteEntries.length > 0;
+    const previousRemoteEntries = previousRemoteEntriesRef.current;
+    const previousHadRemote = previousRemoteEntries.length > 0;
+    // JSON-equality is good enough here: the entries are small flat objects
+    // with no field-order ambiguity (we always emit url, title, description
+    // in the same order via the constructor above).
+    const remoteListChanged =
+      JSON.stringify(remoteEntries) !== JSON.stringify(previousRemoteEntries);
 
     if (hasLocal && hasRemote) {
       setApiError(
@@ -498,7 +566,10 @@ export default function ReusesEditClient() {
       );
       return;
     }
-    if (!hasLocal && !hasRemote) return;
+    // Allow saving when the user removed every URL (previousHadRemote &&
+    // !hasRemote). Only short-circuit when there's nothing local to add and
+    // the remote list is unchanged.
+    if (!hasLocal && !remoteListChanged) return;
 
     setDatasetLinkErrors({});
     setIsSubmitting(true);
@@ -507,19 +578,21 @@ export default function ReusesEditClient() {
       for (const dataset of selectedDatasets) {
         await linkDatasetToReuse(reuse.id, dataset.id);
       }
-      if (hasRemote) {
-        const existing = (reuse.extras?.remote_datasets as string[]) || [];
-        const mergedRemote = Array.from(new Set([...existing, ...remoteUrls]));
+      // Overwrite remote_datasets with the current list — no more silent
+      // merge with previously-saved entries, so removals stick.
+      if (remoteListChanged || (previousHadRemote && !hasRemote)) {
         await updateReuse(reuse.id, {
           extras: {
             ...(reuse.extras || {}),
-            remote_datasets: mergedRemote,
+            remote_datasets: remoteEntries,
           },
         });
       }
       const updated = await fetchReuse(reuseId);
       setReuse(updated);
-      setDatasetLinks([{ url: "" }]);
+      const refreshedEntries = normalizeRemoteDatasets(updated.extras);
+      previousRemoteEntriesRef.current = refreshedEntries;
+      setDatasetLinks(refreshedEntries.length > 0 ? refreshedEntries : [{ url: "" }]);
       setSelectedDatasets([]);
       setApiSuccess("Conjuntos de dados associados com sucesso.");
       setTimeout(() => setApiSuccess(null), 10000);
@@ -533,6 +606,44 @@ export default function ReusesEditClient() {
       } else {
         setApiError("Erro ao associar conjuntos de dados.");
       }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRemoveAssociatedDataset = async (datasetId: string) => {
+    if (!reuse) return;
+    setApiError(null);
+    setIsSubmitting(true);
+    try {
+      await unlinkDatasetFromReuse(reuse.id, datasetId);
+      const updated = await fetchReuse(reuseId);
+      setReuse(updated);
+      setAssociatedDatasets((prev) => prev.filter((d) => d.id !== datasetId));
+      setApiSuccess("Conjunto de dados removido com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch {
+      setApiError("Erro ao remover o conjunto de dados.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRemoveAllAssociatedDatasets = async () => {
+    if (!reuse) return;
+    setApiError(null);
+    setIsSubmitting(true);
+    try {
+      for (const dataset of associatedDatasets) {
+        await unlinkDatasetFromReuse(reuse.id, dataset.id);
+      }
+      const updated = await fetchReuse(reuseId);
+      setReuse(updated);
+      setAssociatedDatasets([]);
+      setApiSuccess("Todos os conjuntos de dados foram removidos.");
+      setTimeout(() => setApiSuccess(null), 10000);
+    } catch {
+      setApiError("Erro ao remover os conjuntos de dados.");
     } finally {
       setIsSubmitting(false);
     }
@@ -763,6 +874,7 @@ export default function ReusesEditClient() {
         <Button
           variant="primary"
           appearance="outline"
+          disabled={!!(reuse.archived || reuse.deleted)}
           onClick={() => window.open(`/pages/reuses/${reuse.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
@@ -772,6 +884,16 @@ export default function ReusesEditClient() {
         </Button>
       </div>
 
+      {reuse.deleted && (
+        <div className="mb-16">
+          <StatusCard variant="warning" showIcon description="Esta reutilização foi excluída e a sua página pública não está disponível." />
+        </div>
+      )}
+      {!reuse.deleted && reuse.archived && (
+        <div className="mb-16">
+          <StatusCard variant="warning" showIcon description="Esta reutilização está arquivada e a sua página pública não está disponível." />
+        </div>
+      )}
       {apiError && <div className="mb-16"><StatusCard variant="danger" showIcon description={apiError} /></div>}
       {apiSuccess && <div className="mb-16"><StatusCard variant="success" showIcon description={apiSuccess} /></div>}
 
@@ -859,7 +981,7 @@ export default function ReusesEditClient() {
                 setDescription(value);
                 if (value.trim()) clearError("description");
               }}
-              onKeywordSearchChange={setKeywordSearch}
+              onKeywordSearchChange={handleKeywordSearchChange}
               onKeywordsChange={handleKeywordsChange}
               onRemoveKeyword={handleRemoveKeyword}
               onImageUpload={handleImageUpload}
@@ -883,10 +1005,14 @@ export default function ReusesEditClient() {
               datasetLinks={datasetLinks}
               datasetLinkErrors={datasetLinkErrors}
               isSubmitting={isSubmitting}
-              onDatasetSearchChange={setDatasetSearch}
+              onDatasetSearchChange={handleDatasetSearchChange}
               onDatasetSelectChange={handleDatasetSelectChange}
               onRemoveSelectedDataset={handleRemoveSelectedDataset}
+              onRemoveAssociatedDataset={handleRemoveAssociatedDataset}
+              onRemoveAllAssociatedDatasets={handleRemoveAllAssociatedDatasets}
               onDatasetLinkChange={handleDatasetLinkChange}
+              onDatasetTitleChange={handleDatasetTitleChange}
+              onDatasetDescriptionChange={handleDatasetDescriptionChange}
               onRemoveDatasetLink={handleRemoveDatasetLink}
               onAddDatasetLink={handleAddDatasetLink}
               onSave={handleSaveDatasetAssociations}
@@ -911,7 +1037,7 @@ export default function ReusesEditClient() {
         </Tab>
         {/* Discussions Tab */}
         <Tab>
-          <TabHeader>Discussões ({discussions.length})</TabHeader>
+          <TabHeader>Discussões ({discussionsCount})</TabHeader>
           <TabBody>
             <ReusesEditDiscussionsTab
               discussions={discussions}

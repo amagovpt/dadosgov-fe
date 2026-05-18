@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
   Button,
@@ -42,6 +42,7 @@ import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";
 import DeleteDiscussionPopup from "@/components/discussions/DeleteDiscussionPopup";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 import { localizeReuseTypeId } from "@/lib/reuse-labels";
+import { normalizeRemoteDatasets } from "@/lib/reuse-remote-datasets";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -59,6 +60,8 @@ interface ReuseDetailClientProps {
 
 export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
   const { user, isAdmin } = useAuth();
   const [reuse, setReuse] = useState<Reuse | null>(null);
 
@@ -202,6 +205,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const datasetsPageSize = 6;
 
   const datasetRefs = reuse?.datasets || [];
+  // LEDG-1748: external dataset URLs persisted as `extras.remote_datasets`.
+  // Until now this list was written from the admin form but never rendered
+  // anywhere, so admins had no way to verify what was saved and the public
+  // page silently hid the data.
+  const remoteDatasets = normalizeRemoteDatasets(reuse?.extras);
 
   useEffect(() => {
     if (!reuse || datasetRefs.length === 0) {
@@ -544,7 +552,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               </div>
             )}
           </Tab>
-          <Tab>
+          <Tab active={tabParam === "discussions" || undefined}>
             <TabHeader>Discussões ({discussionCount})</TabHeader>
             {renderTabBody(
               <div>
@@ -1023,6 +1031,40 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 Não foi possível carregar os conjuntos de dados associados.
               </div>
             )}
+          </div>
+        </section>
+      )}
+
+      {/* LEDG-1748: external dataset URLs (extras.remote_datasets) — */}
+      {/* rendered as plain link cards. Title/description per entry will */}
+      {/* land in PR 2; for now we show the URL as both label and target. */}
+      {remoteDatasets.length > 0 && (
+        <section className="w-full py-64">
+          <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
+            <h2 className="text-xl mb-32 font-bold text-[#000032]">
+              {remoteDatasets.length} conjunto{remoteDatasets.length !== 1 ? "s" : ""} de dados
+              externo{remoteDatasets.length !== 1 ? "s" : ""}
+            </h2>
+            <ul className="flex flex-col gap-16">
+              {remoteDatasets.map((entry, index) => (
+                <li
+                  key={`remote-dataset-${index}`}
+                  className="border border-neutral-200 rounded-8 p-16"
+                >
+                  <a
+                    href={entry.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-600 underline break-all font-medium"
+                  >
+                    {entry.title || entry.url}
+                  </a>
+                  {entry.description && (
+                    <p className="text-neutral-700 text-sm mt-8">{entry.description}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       )}

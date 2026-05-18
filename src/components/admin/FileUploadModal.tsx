@@ -109,6 +109,30 @@ function ResourceEditPendingPopupContent({
   const [mime, setMime] = useState(initialMeta.mime ?? (file?.type || ""));
   const [urlError, setUrlError] = useState<string | null>(null);
 
+  // LEDG-1747 follow-up: the `key={`pending-${name}`}` at the show() site is
+  // expected to force a remount per resource, but in practice the agora
+  // PopupProvider keeps the previous content element mounted (its hide()
+  // only flips dialog visibility — it does NOT clear the content state),
+  // and reconciliation has been observed to reuse the same component
+  // instance even with a different key when the parent stays alive across
+  // show() calls. Resync all field state from the current resource's props
+  // so opening the 2nd resource's edit popup never shows the 1st's data.
+  // The set-state-in-effect lint rule warns about cascading renders, but
+  // the alternative (waiting for a remount that never happens) is the bug
+  // we are fixing — this prop-sync is the smaller of the two evils.
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => {
+    const t = initialMeta.title || name;
+    setTitle(!isUrl && fileExt && t === name ? baseName : t);
+    setDescription(initialMeta.description || "");
+    setUrl(isUrl ? name : "");
+    setFilesize(initialMeta.filesize ?? (file ? String(file.size) : ""));
+    setFormat(initialMeta.format ?? (fileExt ? fileExt.slice(1).toLowerCase() : ""));
+    setMime(initialMeta.mime ?? (file?.type || ""));
+    setUrlError(null);
+    resourceTypeRef.current = defaultType;
+  }, [name, isUrl, initialMeta, file]);
+
   const isValidHttpsUrl = (value: string): boolean => {
     try {
       const parsed = new URL(value);
@@ -436,6 +460,12 @@ function ResourceItem({
   const handleEdit = () => {
     show(
       <ResourceEditPendingPopupContent
+        // LEDG-1747: key tied to the resource identity so React mounts a
+        // fresh component per resource. Without it, useState(initialMeta.x)
+        // only runs on the FIRST open and the popup keeps the state of the
+        // previously-edited resource (the form of the 2nd resource shows
+        // the 1st resource's data).
+        key={`pending-${name}`}
         isUrl={isUrl}
         name={name}
         file={file}
@@ -459,6 +489,10 @@ function ResourceItem({
   const handleView = () => {
     show(
       <ResourceViewPopupContent
+        // LEDG-1747: same rationale as handleEdit — force a fresh
+        // component instance per resource so the view popup does not
+        // inherit state from the previously-viewed resource.
+        key={`view-${name}`}
         name={name}
         size={size}
         file={file}

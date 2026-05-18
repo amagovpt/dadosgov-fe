@@ -197,8 +197,8 @@ const SupportPage = () => {
         title={
           <>
             <span className="mb-[10px] text-32 font-[500] text-white">
-              Bem-vindo à página de suporte da
-            </span>
+              Bem-vindo à página de suporte do{" "}
+</span>
             <span className="text-32 font-[500] text-white">portal dados.gov.pt</span>
           </>
         }
@@ -218,7 +218,7 @@ const SupportPage = () => {
 
             <div className="mt-16 flex flex-wrap gap-32">
               <a
-                href="#"
+                href="https://dados.gov.pt/pt/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
@@ -228,9 +228,7 @@ const SupportPage = () => {
               </a>
 
               <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/pages/about-open-data"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 Consulte os guias sobre dados abertos
@@ -238,9 +236,7 @@ const SupportPage = () => {
               </a>
 
               <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/pages/faqs/terms"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 Consulte os guias sobre como usar os dados
@@ -299,7 +295,7 @@ const SupportPage = () => {
                                 <div className="space-y-16">
                                   <div>
                                     <p className="font-bold">Informação oficial sobre publicação</p>
-                                    <p>Página &ldquo;Publicar Dados&rdquo; no portal português:</p>
+                                    <p>Página &ldquo;Publicar Dados&rdquo; no portal:</p>
                                     <p>
                                       Como publicar dados — explicação passo-a-passo no portal{" "}
                                       <Button
@@ -326,7 +322,7 @@ const SupportPage = () => {
                                     <p className="font-bold">Tópicos incluídos:</p>
                                     <p>Quem pode publicar (AP e outros participantes)</p>
                                     <p>Criar conta / associar organização</p>
-                                    <p>Carregar datasets ou referenciar URL</p>
+                                    <p>Carregar conjunto de dados ou referenciar URL</p>
                                     <p>Usar API ou harvester</p>
                                     <p>Certificação de fornecedores oficiais</p>
                                   </div>
@@ -337,7 +333,7 @@ const SupportPage = () => {
                                     <p>3. Aguardar validação</p>
                                   </div>
                                   <div>
-                                    <p className="font-bold">Atualizar um dataset</p>
+                                    <p className="font-bold">Atualizar um conjunto de dados</p>
                                     <p>
                                       Pode editar o conjunto de dados e substituir ou acrescentar
                                       recursos a qualquer momento
@@ -391,7 +387,7 @@ const SupportPage = () => {
                                     <p className="font-bold">Como reutilizar dados</p>
                                     <p>
                                       Consultar secções de exemplos de reutilização e licenças no
-                                      portal (ex:{" "}
+                                      portal, ex:{" "}
                                       <Button
                                         appearance="link"
                                         variant="neutral"
@@ -408,9 +404,8 @@ const SupportPage = () => {
                                           )
                                         }
                                       >
-                                        Como reutilizar dados?
+                                        (Como reutilizar dados?)
                                       </Button>
-                                      )
                                     </p>
                                   </div>
                                   <div>
@@ -442,7 +437,7 @@ const SupportPage = () => {
                                     <p className="font-bold">Citar dados corretamente</p>
                                     <p>Ver informação de metadados em cada conjunto de dados</p>
                                     <p>
-                                      Indicar: nome do dataset, entidade publicadora, link original,
+                                      Indicar: nome do conjunto de dados, entidade publicadora, link original,
                                       data de acesso
                                     </p>
                                   </div>
@@ -459,7 +454,6 @@ const SupportPage = () => {
                                   <div>
                                     <p className="font-bold">Documentação da API</p>
                                     <p>
-                                      Endpoint de API do portal{" "}
                                       <Button
                                         appearance="link"
                                         variant="neutral"
@@ -470,10 +464,10 @@ const SupportPage = () => {
                                           minWidth: "auto",
                                         }}
                                         onClick={() =>
-                                          window.open("https://dados.gov.pt/api", "_blank")
+                                          window.open("/pages/faqs/api-documentation", "_blank")
                                         }
                                       >
-                                        API
+                                        Endpoint de API do portal
                                       </Button>
                                     </p>
                                   </div>
@@ -548,7 +542,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pages/support",
+                                            "/pages/support#ajuda",
                                             "_blank"
                                           )
                                         }
@@ -868,7 +862,7 @@ const SupportPage = () => {
                                   </div>
                                   <div>
                                     <p className="font-bold">
-                                      Questões sobre um dataset no dados.gov.pt
+                                      Questões sobre um conjunto de dados no dados.gov.pt
                                     </p>
                                     <p>
                                       Abrir o separador <strong>&ldquo;Discussões&rdquo;</strong> na

@@ -107,7 +107,7 @@ export default function DataStoriesClient({
         </div>
         <div className="divider-neutral-200 mb-24" />
         <div
-          className={`grid gap-32 ${filtersOpen ? "grid-cols-12" : ""}`}
+          className={`grid gap-32 w-full ${filtersOpen ? "grid-cols-12" : ""}`}
         >
           {/* Sidebar */}
           {filtersOpen && (

@@ -16,23 +16,23 @@ export type DatastoryDetailsProps = {
 export default function DatastoryDetails({ breadcrumbItems, datastory }: DatastoryDetailsProps) {
   return (
     <main className="flex flex-col">
-      <Section className="bg-primary-900 flex items-center justify-center ">
+      <Section className="flex items-center justify-center bg-primary-900">
         <InfoBlock.Root className="py-96">
           <InfoBlock.Header>
             <Breadcrumb items={breadcrumbItems} darkMode />
             <InfoBlock.Title
               titleLevel="h1"
               title={datastory.hero.title}
-              className="text-white text-3xl-bold "
+              className="text-3xl-bold text-white"
             />
           </InfoBlock.Header>
-          <InfoBlock.Content className="flex min-[1280px]:flex-row flex-col justify-between min-[1280px]:gap-[136px] gap-32">
+          <InfoBlock.Content className="flex flex-col justify-between gap-32 min-[1280px]:flex-row min-[1280px]:gap-[136px]">
             <InfoBlock.Description
               className="whitespace-pre-wrap text-m-regular text-white"
               classNameContent="flex flex-col gap-32"
               description={formatHtmlParagraphs(datastory.hero.description) as string[]}
             />
-            <div className="w-full h-full flex flex-col gap-128">
+            <div className="flex h-full w-full flex-col gap-128">
               <div className="flex flex-col gap-64">
                 {datastory.hero.cards.map((card, index) => (
                   <CardCompound.Root key={index}>
@@ -42,17 +42,27 @@ export default function DatastoryDetails({ breadcrumbItems, datastory }: Datasto
                         number={card.bignumber.number}
                         detail={card.bignumber.description}
                       />
-                    ) : <div className="w-full h-16" />}
+                    ) : (
+                      <div className="h-16 w-full" />
+                    )}
                     <CardCompound.Subtitle>{card?.title}</CardCompound.Subtitle>
-                    {card?.subtitle && <CardCompound.Description>{card?.subtitle}</CardCompound.Description>}
-                    {card.anchor && <CardCompound.Anchor href={card.anchor.href} className="py-16">{card.anchor.children}</CardCompound.Anchor>}
+                    {card?.subtitle && (
+                      <CardCompound.Description>{card?.subtitle}</CardCompound.Description>
+                    )}
+                    {card.anchor && (
+                      <CardCompound.Anchor href={card.anchor.href} className="py-16">
+                        {card.anchor.children}
+                      </CardCompound.Anchor>
+                    )}
                   </CardCompound.Root>
                 ))}
               </div>
-              {datastory.hero.dateReference && <FooterReference
-                text={`${datastory.hero.dateReference?.date.includes("-") || datastory.hero.dateReference?.date.includes(" ") ? "Período" : "Ano"} de referência`}
-                period={datastory.hero.dateReference?.date}
-              />}
+              {datastory.hero.dateReference && (
+                <FooterReference
+                  text={`${datastory.hero.dateReference?.date.includes("-") || datastory.hero.dateReference?.date.includes(" ") ? "Período" : "Ano"} de referência`}
+                  period={datastory.hero.dateReference?.date}
+                />
+              )}
             </div>
           </InfoBlock.Content>
         </InfoBlock.Root>
@@ -63,7 +73,7 @@ export default function DatastoryDetails({ breadcrumbItems, datastory }: Datasto
           className={"flex flex-col items-center justify-center gap-64 bg-white"}
           key={index}
         >
-          <InfoBlock.Root className={"pt-64 gap-64"}>
+          <InfoBlock.Root className={"gap-64 pt-64"}>
             <InfoBlock.Header className="gap-16">
               <InfoBlock.Title
                 titleLevel="h2"
@@ -71,19 +81,22 @@ export default function DatastoryDetails({ breadcrumbItems, datastory }: Datasto
                 className="text-2xl font-bold text-primary-900"
               />
               <InfoBlock.Description
-                className="whitespace-pre-wrap text-m-light text-black max-w-[500px] "
+                className="max-w-[500px] whitespace-pre-wrap text-m-light text-black"
                 description={formatHtmlParagraphs(section.description) as string[]}
               />
             </InfoBlock.Header>
           </InfoBlock.Root>
-          <div className="w-full flex flex-col items-center justify-center gap-128 pt-32  bg-primary-100">
+          <div className="flex w-full flex-col items-center justify-center gap-128 bg-primary-100 pt-32">
             <div className="container -mb-[54px]">
-              <InfoBlock.IFrame
-                src={section.iframeSource}
-                className={
-                  "min-[1440px]:!h-[800px] min-[1024px]:!h-[610px] min-[768px]:!h-[470px] min-[425px]:!h-[310px] min-[375px]:!h-[285px] min-[320px]:!h-[285px]"
-                }
-              />
+              {section.iframe.map((iframe) => {
+                return (
+                  <InfoBlock.IFrame
+                    key={`iframe-${index}`}
+                    src={iframe.source}
+                    className={iframe.classNames}
+                  />
+                );
+              })}
             </div>
           </div>
         </Section>

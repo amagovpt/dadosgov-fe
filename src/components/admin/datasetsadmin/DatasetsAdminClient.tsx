@@ -29,6 +29,7 @@ import {
   fetchFrequencies,
   fetchGranularities,
   suggestSpatialZones,
+  fetchSpatialZonesByIds,
   fetchDataset,
   fetchMyDatasets,
   suggestTags,
@@ -142,31 +143,40 @@ export default function DatasetsAdminClient({
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
   const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
-  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
+  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState<string | null>(null);
   const [tags, setTags] = useState<TagSuggestion[]>([]);
   const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
   const [keywordSearch, setKeywordSearch] = useState("");
   const producerDefaultValue =
     selectedProducer ||
-    selectedProducerRef.current ||
     createdDataset?.organization?.id ||
     (createdDataset ? "user" : "");
   const licenseDefaultValue =
-    selectedLicenseRef.current || createdDataset?.license || (licenses.length > 0 ? "notspecified" : "");
-  const frequencyDefaultValue = selectedFrequencyRef.current || createdDataset?.frequency || "";
+    createdDataset?.license || (licenses.length > 0 ? "notspecified" : "");
+  const frequencyDefaultValue = createdDataset?.frequency || "";
   const keywordsDefaultValue =
-    selectedKeywordsValue || selectedKeywordsRef.current || (createdDataset?.tags?.join(",") ?? "");
+    selectedKeywordsValue || (createdDataset?.tags?.join(",") ?? "");
   const selectedKeywords = keywordsDefaultValue
     .split(",")
     .map((k) => k.trim())
     .filter(Boolean);
-  const spatialCoverageDefaultValue = spatialCoverageRef.current;
-  const spatialGranularityDefaultValue = spatialGranularityRef.current;
-  const selectedSpatialZoneIds = selectedSpatialZonesValue.split(",").filter(Boolean);
+  const spatialCoverageDefaultValue =
+    selectedSpatialZonesValue ?? (createdDataset?.spatial?.zones?.join(",") ?? "");
+  const spatialGranularityDefaultValue = createdDataset?.spatial?.granularity ?? "";
+  const selectedSpatialZoneIds = (selectedSpatialZonesValue ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
   const handleSpatialCoverageChange = useCallback((value: string) => {
-    setSelectedSpatialZonesValue(value);
-    const ids = new Set(value.split(",").filter(Boolean));
+    const normalized = value
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean)
+      .join(",");
+    setSelectedSpatialZonesValue(normalized);
+    spatialCoverageRef.current = normalized;
+    const ids = new Set(normalized.split(",").filter(Boolean));
     setSpatialZones((prev) => {
       // Pin newly selected zones; unpin deselected ones
       const seen = new Set(prev.map((z) => z.id));
@@ -277,7 +287,12 @@ export default function DatasetsAdminClient({
   }, [spatialZones, spatialZoneSearch]);
 
   const spatialCoverageOptions = useMemo(() => {
-    const selectedIds = new Set(selectedSpatialZonesValue.split(",").filter(Boolean));
+    const selectedIds = new Set(
+      (selectedSpatialZonesValue ?? "")
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean)
+    );
     const options = allSpatialZones.map((z) => (
       <DropdownOption key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
         {z.code ? `${getZoneName(z)} (${z.code})` : getZoneName(z)}
@@ -293,20 +308,14 @@ export default function DatasetsAdminClient({
     return <DropdownSection name="spatial-coverage">{options}</DropdownSection>;
   }, [allSpatialZones, selectedSpatialZonesValue]);
 
-  const [selectedZoneObjects, setSelectedZoneObjects] = useState<SpatialZone[]>([]);
-  useEffect(() => {
-    const ids = selectedSpatialZonesValue.split(",").filter(Boolean);
-    if (ids.length === 0) {
-      setSelectedZoneObjects([]);
-      return;
-    }
-    setSelectedZoneObjects((prev) => {
-      const map = new Map(prev.map((z) => [z.id, z]));
-      allSpatialZones.forEach((z) => {
-        if (!map.has(z.id)) map.set(z.id, z);
-      });
-      return ids.map((id) => map.get(id)).filter(Boolean) as SpatialZone[];
-    });
+  const selectedZoneObjects = useMemo<SpatialZone[]>(() => {
+    const ids = (selectedSpatialZonesValue ?? "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+    if (ids.length === 0) return [];
+    const zoneMap = new Map(allSpatialZones.map((z) => [z.id, z]));
+    return ids.map((id) => zoneMap.get(id)).filter((z): z is SpatialZone => Boolean(z));
   }, [selectedSpatialZonesValue, allSpatialZones]);
 
   const granularityOptions = useMemo(() => {
@@ -342,10 +351,6 @@ export default function DatasetsAdminClient({
         }
       }
       loadContactPoints();
-    } else {
-      setOrgContactPoints([]);
-      setSelectedContactPointIds([]);
-      setDraftContacts([{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]);
     }
   }, [selectedProducer]);
 
@@ -444,6 +449,7 @@ export default function DatasetsAdminClient({
           granularitiesData,
           myDatasetsData,
           tagsData,
+          zonesData,
           resTypes,
           extData,
         ] = await Promise.all([
@@ -452,6 +458,7 @@ export default function DatasetsAdminClient({
           fetchGranularities(),
           fetchMyDatasets(1, 1),
           suggestTags("", 50),
+          suggestSpatialZones("", 20),
           fetchResourceTypes(),
           fetchAllowedExtensions(),
         ]);
@@ -460,6 +467,8 @@ export default function DatasetsAdminClient({
         setGranularities(granularitiesData);
         setHasDatasets(myDatasetsData.data.length > 0);
         setTags(tagsData);
+        spatialZoneSearchRef.current = zonesData;
+        setSpatialZoneSearch(zonesData);
         setResourceTypes(resTypes);
         setAllowedExtensions(extData);
       } catch (error) {
@@ -471,10 +480,7 @@ export default function DatasetsAdminClient({
 
   useEffect(() => {
     const q = keywordSearch.trim();
-    if (q.length < 2) {
-      setTagSearch([]);
-      return;
-    }
+    if (q.length < 2) return;
     const timer = setTimeout(async () => {
       try {
         const res = await suggestTags(q, 20);
@@ -543,6 +549,31 @@ export default function DatasetsAdminClient({
     const iso = new Date(raw);
     const isoTime = iso.getTime();
     return Number.isNaN(isoTime) ? null : isoTime;
+  };
+
+  const toIsoTemporalDate = (value: string): string | null => {
+    const raw = (value || "").trim();
+    if (!raw) return null;
+
+    // "dd/mm/yyyy" or "dd-mm-yyyy"
+    const ptMatch = raw.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+    if (ptMatch) {
+      const dd = ptMatch[1];
+      const mm = ptMatch[2];
+      const yyyy = ptMatch[3];
+      return `${yyyy}-${mm}-${dd}T00:00:00.000Z`;
+    }
+
+    // "yyyy-mm-dd" or "yyyy-mm-ddTHH:mm:ss..."
+    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:T.*)?$/);
+    if (isoMatch) {
+      const yyyy = isoMatch[1];
+      const mm = isoMatch[2];
+      const dd = isoMatch[3];
+      return `${yyyy}-${mm}-${dd}T00:00:00.000Z`;
+    }
+
+    return null;
   };
 
   const handleStep2Next = async (e?: React.MouseEvent<HTMLButtonElement>) => {
@@ -640,18 +671,52 @@ export default function DatasetsAdminClient({
         payload.contact_points = selectedContactPointIds;
       }
       if (startRaw || endRaw) {
+        const startIso = toIsoTemporalDate(startRaw);
+        const endIso = toIsoTemporalDate(endRaw);
         payload.temporal_coverage = {
-          ...(startRaw ? { start: startRaw } : {}),
-          ...(endRaw ? { end: endRaw } : {}),
+          ...(startIso ? { start: startIso } : {}),
+          ...(endIso ? { end: endIso } : {}),
         } as Parameters<typeof createDataset>[0]["temporal_coverage"];
       }
-      const spatialZoneIds = spatialCoverageRef.current.split(",").filter(Boolean);
-      const spatialGranularity = spatialGranularityRef.current || null;
-      if (spatialZoneIds.length > 0 || spatialGranularity) {
+      const spatialZoneIds = spatialCoverageRef.current
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean);
+      let validSpatialZoneIds = spatialZoneIds;
+      let zoneDetails: SpatialZone[] = [];
+      if (spatialZoneIds.length > 0) {
+        zoneDetails = await fetchSpatialZonesByIds(spatialZoneIds);
+        const validZoneIds = new Set(zoneDetails.map((z) => z.id));
+        validSpatialZoneIds = spatialZoneIds.filter((id) => validZoneIds.has(id));
+        if (validSpatialZoneIds.length !== spatialZoneIds.length) {
+          const normalized = validSpatialZoneIds.join(",");
+          spatialCoverageRef.current = normalized;
+          setSelectedSpatialZonesValue(normalized);
+        }
+      }
+      let resolvedGranularity = spatialGranularityRef.current || null;
+      if (validSpatialZoneIds.length > 0) {
+        const selectedZoneSet = new Set(validSpatialZoneIds);
+        const levels = Array.from(
+          new Set(
+            zoneDetails
+              .filter((z) => selectedZoneSet.has(z.id))
+              .map((z) => (typeof z.level === "string" ? z.level.trim() : ""))
+              .filter(Boolean)
+          )
+        );
+        if (levels.length === 1) {
+          resolvedGranularity = levels[0];
+        } else if (levels.length > 1 && resolvedGranularity && !levels.includes(resolvedGranularity)) {
+          resolvedGranularity = levels[0];
+        }
+        spatialGranularityRef.current = resolvedGranularity || "";
+      }
+      if (validSpatialZoneIds.length > 0 || resolvedGranularity) {
         payload.spatial = {
           geom: null,
-          zones: spatialZoneIds,
-          granularity: spatialGranularity,
+          zones: validSpatialZoneIds,
+          granularity: resolvedGranularity,
         };
       }
 
@@ -804,7 +869,25 @@ export default function DatasetsAdminClient({
     setApiError(null);
     setIsSubmitting(true);
     try {
-      await updateDataset(createdDataset.id, { private: false });
+      const refTags = selectedKeywordsRef.current
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+      const tags = refTags.length > 0 ? refTags : createdDataset.tags || [];
+      const publishPayload: DatasetUpdatePayload = {
+        private: false,
+        title: createdDataset.title,
+        description: createdDataset.description,
+        description_short: createdDataset.description_short || undefined,
+        acronym: createdDataset.acronym || undefined,
+        tags,
+        license: createdDataset.license || undefined,
+        frequency: createdDataset.frequency || undefined,
+        temporal_coverage: createdDataset.temporal_coverage || undefined,
+        spatial: createdDataset.spatial || undefined,
+        organization: createdDataset.organization?.id,
+      };
+      await updateDataset(createdDataset.id, publishPayload);
       if (onComplete) onComplete();
       else router.push("/pages/admin/me/datasets");
     } catch (error) {
@@ -815,9 +898,62 @@ export default function DatasetsAdminClient({
     }
   };
 
-  const handleSaveDraft = () => {
-    if (onComplete) onComplete();
-    else router.push("/pages/admin/me/datasets");
+  const handleSaveDraft = async () => {
+    if (!createdDataset) {
+      if (onComplete) onComplete();
+      else router.push("/pages/admin/me/datasets");
+      return;
+    }
+
+    setApiError(null);
+    setIsSubmitting(true);
+    try {
+      const refTags = selectedKeywordsRef.current
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+      const tags = refTags.length > 0 ? refTags : createdDataset.tags || [];
+      const startIso = toIsoTemporalDate(temporalStart);
+      const endIso = toIsoTemporalDate(temporalEnd);
+      let temporalCoverage: DatasetUpdatePayload["temporal_coverage"] | undefined =
+        createdDataset.temporal_coverage || undefined;
+      if (startIso || endIso) {
+        const start = startIso || createdDataset.temporal_coverage?.start;
+        if (start) {
+          temporalCoverage = {
+            start,
+            ...(endIso
+              ? { end: endIso }
+              : createdDataset.temporal_coverage?.end
+                ? { end: createdDataset.temporal_coverage.end }
+                : {}),
+          };
+        }
+      }
+
+      const draftPayload: DatasetUpdatePayload = {
+        private: true,
+        title: createdDataset.title,
+        description: createdDataset.description,
+        description_short: createdDataset.description_short || undefined,
+        acronym: createdDataset.acronym || undefined,
+        tags,
+        license: createdDataset.license || undefined,
+        frequency: createdDataset.frequency || undefined,
+        temporal_coverage: temporalCoverage,
+        spatial: createdDataset.spatial || undefined,
+        organization: createdDataset.organization?.id,
+      };
+
+      await updateDataset(createdDataset.id, draftPayload);
+      if (onComplete) onComplete();
+      else router.push("/pages/admin/me/datasets");
+    } catch (error) {
+      console.error("Error saving draft dataset:", error);
+      setApiError("Erro ao guardar o rascunho. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const auxiliarItemsStep2 = getDatasetAuxiliarItems({
@@ -920,6 +1056,11 @@ export default function DatasetsAdminClient({
                   defaultValue={producerDefaultValue}
                   onChangeRef={selectedProducerRef}
                   onChangeCallback={(value) => {
+                    // Reset org-only contact state immediately on producer switches.
+                    // Keeps this logic out of effects and avoids cascading renders warnings.
+                    setOrgContactPoints([]);
+                    setSelectedContactPointIds([]);
+                    setDraftContacts([{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]);
                     setSelectedProducer(value);
                     if (value) {
                       setFormErrors((prev) => {
@@ -1040,7 +1181,12 @@ export default function DatasetsAdminClient({
                     searchNoResultsText="Nenhum resultado encontrado"
                     defaultValue={keywordsDefaultValue}
                     onChangeRef={selectedKeywordsRef}
-                    onSearchCallback={setKeywordSearch}
+                    onSearchCallback={(q) => {
+                      setKeywordSearch(q);
+                      if (q.trim().length < 2) {
+                        setTagSearch([]);
+                      }
+                    }}
                     onChangeCallback={(value) => {
                       setSelectedKeywordsValue(value);
                       const selected = value.split(",").filter(Boolean);
@@ -1314,10 +1460,13 @@ export default function DatasetsAdminClient({
                     onChangeRef={spatialCoverageRef}
                     onChangeCallback={handleSpatialCoverageChange}
                     onSearchCallback={(q) => {
-                      if (q.length < 2) return;
-                      suggestSpatialZones(q, 50).then((results) => {
+                      if (!q) return;
+                      suggestSpatialZones(q, 20).then((results) => {
                         spatialZoneSearchRef.current = results;
                         setSpatialZoneSearch(results);
+                      }).catch(() => {
+                        spatialZoneSearchRef.current = [];
+                        setSpatialZoneSearch([]);
                       });
                     }}
                   >

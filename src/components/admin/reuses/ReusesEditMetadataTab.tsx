@@ -2,10 +2,9 @@ import React from "react";
 import {
   Button,
   DropdownOption,
+  type DropdownSectionProps,
   DropdownSection,
   Icon,
-  InputText,
-  InputTextArea,
   StatusCard,
   Switch,
   Tag,
@@ -13,6 +12,8 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import IsolatedInput from "@/components/admin/IsolatedInput";
+import IsolatedTextArea from "@/components/admin/IsolatedTextArea";
 import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
 import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
 import type { Reuse, ReuseTopic, ReuseType } from "@/types/api";
@@ -31,7 +32,9 @@ type ReusesEditMetadataTabProps = {
   selectedKeywordsRef: React.MutableRefObject<string>;
   selectedKeywordsValue: string;
   selectedKeywords: string[];
-  keywordOptions: React.ReactNode;
+  keywordOptions:
+    | React.ReactElement<DropdownSectionProps>
+    | React.ReactElement<DropdownSectionProps>[];
   imageError: string | null;
   formErrors: Record<string, boolean>;
   reuseTypes: ReuseType[];
@@ -137,27 +140,23 @@ export default function ReusesEditMetadataTab({
 
               <h2 className="admin-page__section-title">Descrição</h2>
               <div className="admin-page__fields-group">
-                <InputText
+                <IsolatedInput
                   label="Nome da reutilização *"
                   placeholder="Insira o nome aqui"
                   id="edit-title"
-                  value={title}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    onTitleChange(e.target.value)
-                  }
+                  defaultValue={title}
+                  onChange={onTitleChange}
                   hasError={!!formErrors.title}
                   hasFeedback={!!formErrors.title}
                   feedbackState="danger"
                   errorFeedbackText="Campo obrigatório"
                 />
-                <InputText
+                <IsolatedInput
                   label="URL *"
                   placeholder="Insira o URL aqui (ex: https://...)"
                   id="edit-url"
-                  value={url}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    onUrlChange(e.target.value)
-                  }
+                  defaultValue={url}
+                  onChange={onUrlChange}
                   hasError={!!formErrors.url}
                   hasFeedback={!!formErrors.url}
                   feedbackState="danger"
@@ -209,17 +208,15 @@ export default function ReusesEditMetadataTab({
                     ))}
                   </DropdownSection>
                 </IsolatedSelect>
-                <InputTextArea
+                <IsolatedTextArea
                   label="Descrição *"
                   placeholder="Insira a descrição aqui"
                   id="edit-description"
                   rows={6}
                   maxLength={246}
                   showCharCounter
-                  value={description}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    onDescriptionChange(e.target.value)
-                  }
+                  defaultValue={description}
+                  onChange={onDescriptionChange}
                   hasError={formErrors.description ? true : undefined}
                   hasFeedback={formErrors.description ? true : undefined}
                   feedbackState="danger"

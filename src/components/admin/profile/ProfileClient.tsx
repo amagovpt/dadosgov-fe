@@ -11,6 +11,7 @@ import {
   fetchCsrfToken,
   updateProfile,
   uploadAvatar,
+  deleteAvatar,
   generateApiKey,
   fetchApiTokens,
   revokeApiToken,
@@ -44,6 +45,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
+import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 const activityLabels: Record<string, string> = {
@@ -78,6 +80,16 @@ const activityLabels: Record<string, string> = {
 
 const translateActivityLabel = (label: string) => activityLabels[label] ?? label;
 
+function toProxiedUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.pathname + parsed.search;
+  } catch {
+    return url;
+  }
+}
+
 export default function ProfileClient() {
   const router = useRouter();
   const { show } = usePopupContext();
@@ -86,6 +98,7 @@ export default function ProfileClient() {
 
   const [profile, setProfile] = useState<UserPublic | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -100,6 +113,7 @@ export default function ProfileClient() {
 
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [newEmail, setNewEmail] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
   const [isChangingEmail, setIsChangingEmail] = useState(false);
   const [emailChangeSuccess, setEmailChangeSuccess] = useState(false);
 
@@ -108,6 +122,8 @@ export default function ProfileClient() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
+  const [avatarUploaderKey, setAvatarUploaderKey] = useState(0);
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
@@ -122,7 +138,11 @@ export default function ProfileClient() {
     async function loadProfile() {
       try {
         const data = await fetchFullProfile();
+        console.log("[ProfileClient] avatar_thumbnail:", data.avatar_thumbnail);
         setProfile(data);
+        if (data.avatar_thumbnail) {
+          setAvatarPreview(toProxiedUrl(data.avatar_thumbnail));
+        }
         setFirstName(data.first_name || "");
         setLastName(data.last_name || "");
         setAbout(data.about || "");
@@ -256,6 +276,24 @@ export default function ProfileClient() {
     }
   };
 
+  const handleDeleteAvatar = async () => {
+    setIsDeletingAvatar(true);
+    setSaveError("");
+    try {
+      await deleteAvatar();
+      if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
+      setAvatarPreview(null);
+      setAvatarUploaderKey((k) => k + 1);
+      setProfile((prev) => prev ? { ...prev, avatar_thumbnail: null } : prev);
+      await refresh();
+    } catch (error) {
+      console.error("Error deleting avatar:", error);
+      setSaveError("Erro ao eliminar a foto de perfil. Tente novamente.");
+    } finally {
+      setIsDeletingAvatar(false);
+    }
+  };
+
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -265,13 +303,24 @@ export default function ProfileClient() {
       return;
     }
     setAvatarError(null);
+    // Show image immediately via blob URL, then replace with server URL after upload.
+    if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
+    const localPreview = URL.createObjectURL(file);
+    setAvatarPreview(localPreview);
     try {
       await uploadAvatar(file);
       const updated = await fetchFullProfile();
-      setProfile(updated);
+      console.log("[ProfileClient] avatar_thumbnail after upload:", updated.avatar_thumbnail);
+      if (updated.avatar_thumbnail) {
+        if (localPreview.startsWith("blob:")) URL.revokeObjectURL(localPreview);
+        setAvatarPreview(toProxiedUrl(updated.avatar_thumbnail));
+        setProfile(updated);
+      }
       await refresh();
     } catch (error) {
       console.error("Error uploading avatar:", error);
+      if (localPreview.startsWith("blob:")) URL.revokeObjectURL(localPreview);
+      setAvatarPreview(null);
       setSaveError("Erro ao carregar a foto de perfil. Tente novamente.");
     }
   };
@@ -284,6 +333,7 @@ export default function ProfileClient() {
     try {
       const csrfToken = await fetchCsrfToken();
       await requestEmailChange(newEmail, csrfToken);
+      setPendingEmail(newEmail);
       setEmailChangeSuccess(true);
       setIsEditingEmail(false);
       setNewEmail("");
@@ -316,15 +366,25 @@ export default function ProfileClient() {
       <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
 
       <div className="profile-card">
-        <Avatar
-          avatarType={profile?.avatar_thumbnail ? "image" : "initials"}
-          srcPath={
-            (profile?.avatar_thumbnail ||
-              `${(profile?.first_name || "")[0] || ""}${(profile?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
-          }
-          alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
-          className="profile-card__avatar"
-        />
+        <div className="profile-card__avatar-container">
+          {avatarPreview || profile?.avatar_thumbnail ? (
+            <img
+              src={avatarPreview ?? profile!.avatar_thumbnail!}
+              alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
+              className="profile-card__avatar-img"
+            />
+          ) : (
+            <Avatar
+              avatarType={profile?.first_name || profile?.last_name ? "initials" : "icon"}
+              srcPath={
+                (`${(profile?.first_name || "")[0] || ""}${(profile?.last_name || "")[0] || ""}`.toUpperCase() ||
+                  "agora-line-user") as unknown as undefined
+              }
+              alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
+              className="profile-card__avatar"
+            />
+          )}
+        </div>
 
         <div className="profile-card__body">
           <div className="profile-card__info">
@@ -438,6 +498,7 @@ export default function ProfileClient() {
                     </span>
                     <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
                       <DragAndDropUploader
+                        key={avatarUploaderKey}
                         label="Ficheiros"
                         dragAndDropLabel="Arraste e largue o ficheiro aqui"
                         inputLabel="Selecione ou arraste o ficheiro"
@@ -590,7 +651,7 @@ export default function ProfileClient() {
                     <StatusCard
                       variant="success"
                       showIcon
-                      description="Foi enviado um e-mail de confirmação para o novo endereço. Verifique a sua caixa de entrada."
+                      description={`E-mail de confirmação enviado para ${pendingEmail}. Verifique a sua caixa de entrada e clique no link para concluir.`}
                     />
                   )}
 
@@ -611,53 +672,56 @@ export default function ProfileClient() {
                           label="Endereço de e-mail"
                           placeholder="Insira o e-mail aqui"
                           id="email"
-                          value={email}
+                          value={emailChangeSuccess ? pendingEmail : email}
                           readOnly
                         />
                       )}
                     </div>
-                    {!samlLogin && (
-                      <>
-                        {isEditingEmail ? (
-                          <div className="flex gap-8">
-                            <Button
-                              appearance="outline"
-                              variant="primary"
-                              onClick={handleEmailChange}
-                              disabled={isChangingEmail || !newEmail || newEmail === email}
-                            >
-                              {isChangingEmail ? "A enviar..." : "Confirmar"}
-                            </Button>
-                            <Button
-                              appearance="outline"
-                              variant="neutral"
-                              onClick={() => {
-                                setIsEditingEmail(false);
-                                setNewEmail("");
-                              }}
-                              disabled={isChangingEmail}
-                            >
-                              Cancelar
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            appearance="outline"
-                            variant="neutral"
-                            hasIcon
-                            leadingIcon="agora-line-edit"
-                            leadingIconHover="agora-solid-edit"
-                            onClick={() => {
-                              setIsEditingEmail(true);
-                              setNewEmail(email);
-                            }}
-                          >
-                            Alterar e-mail
-                          </Button>
-                        )}
-                      </>
+                    {!samlLogin && !isEditingEmail && (
+                      <Button
+                        appearance="outline"
+                        variant="neutral"
+                        hasIcon
+                        leadingIcon="agora-line-edit"
+                        leadingIconHover="agora-solid-edit"
+                        onClick={() => {
+                          setIsEditingEmail(true);
+                          setNewEmail(emailChangeSuccess ? pendingEmail : "");
+                        }}
+                      >
+                        Alterar e-mail
+                      </Button>
                     )}
                   </div>
+                  {emailChangeSuccess && !isEditingEmail && (
+                    <p className="text-sm text-neutral-600">
+                      Aguarda confirmação por e-mail — até confirmar, o e-mail ativo é{" "}
+                      <strong>{email}</strong>
+                    </p>
+                  )}
+                  {!samlLogin && isEditingEmail && (
+                    <div className="flex gap-8 justify-end">
+                      <Button
+                        appearance="outline"
+                        variant="primary"
+                        onClick={handleEmailChange}
+                        disabled={isChangingEmail || !newEmail || newEmail === email || newEmail === pendingEmail}
+                      >
+                        {isChangingEmail ? "A enviar..." : "Confirmar"}
+                      </Button>
+                      <Button
+                        appearance="outline"
+                        variant="neutral"
+                        onClick={() => {
+                          setIsEditingEmail(false);
+                          setNewEmail("");
+                        }}
+                        disabled={isChangingEmail}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  )}
 
                   <div className="flex items-end gap-16">
                     <div className="flex-1">
@@ -702,6 +766,122 @@ export default function ProfileClient() {
                     {isSaving ? "A guardar..." : "Guardar"}
                   </Button>
                 </div>
+
+                {profile?.avatar_thumbnail && (
+                  <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
+                    <StatusCard
+                      variant="danger"
+                      showIcon
+                      description={
+                        <>
+                          <strong>Atenção esta ação é irreversível.</strong>
+                          <br />
+                          <Button
+                            appearance="link"
+                            variant="primary"
+                            hasIcon
+                            trailingIcon="agora-line-arrow-right-circle"
+                            trailingIconHover="agora-solid-arrow-right-circle"
+                            onClick={() =>
+                              show(<DeleteAvatarPopupContent onConfirm={handleDeleteAvatar} />, {
+                                title: "Eliminar foto de perfil",
+                                closeAriaLabel: "Fechar",
+                                dimensions: "s",
+                              })
+                            }
+                            disabled={isDeletingAvatar}
+                          >
+                            {isDeletingAvatar ? "A eliminar..." : "Eliminar foto de perfil"}
+                          </Button>
+                        </>
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            </TabBody>
+          </Tab>
+          <Tab>
+            <TabHeader>Subscrições</TabHeader>
+            <TabBody>
+              <div className="mt-24">
+                {isLoadingSubscriptions ? (
+                  <p className="text-neutral-900 text-base">A carregar subscrições...</p>
+                ) : subscriptions.length === 0 ? (
+                  <CardNoResults
+                    className="datasets-page__empty"
+                    position="center"
+                    icon={
+                      <Icon
+                        name="agora-line-bell"
+                        className="w-12 h-12 text-primary-500 icon-xl"
+                      />
+                    }
+                    title="Sem subscrições"
+                    description="Não segue conteúdos"
+                    hasAnchor={false}
+                  />
+                ) : (
+                  <div className="flex flex-col gap-16">
+                    {subscriptions.map((sub) => {
+                      const subName = sub.following.name || sub.following.title || "";
+                      const subAvatar = sub.following.avatar_thumbnail || sub.following.image_thumbnail;
+                      const initials = subName
+                        .split(" ")
+                        .map((w) => w.charAt(0).toUpperCase())
+                        .slice(0, 2)
+                        .join("");
+                      const classToPath: Record<string, string> = {
+                        Dataset: "/pages/datasets",
+                        Organization: "/pages/organizations",
+                        Reuse: "/pages/reuses",
+                        User: "/pages/users",
+                      };
+                      const basePath = classToPath[sub.following.class];
+                      const href = basePath && sub.following.slug
+                        ? `${basePath}/${sub.following.slug}`
+                        : null;
+                      const content = (
+                        <div className="flex items-center gap-16">
+                          <Avatar
+                            avatarType={subAvatar ? "image" : "initials"}
+                            srcPath={(subAvatar || initials) as unknown as undefined}
+                            alt={subName}
+                            className="w-48 h-48"
+                          />
+                          <span className="text-neutral-900 text-base font-medium">{subName}</span>
+                        </div>
+                      );
+                      return href ? (
+                        <Link key={sub.id} href={href} className="hover:opacity-80 transition-opacity">
+                          {content}
+                        </Link>
+                      ) : (
+                        <div key={sub.id}>{content}</div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </TabBody>
+          </Tab>
+          <Tab>
+            <TabHeader>Acompanhamentos</TabHeader>
+            <TabBody>
+              <div className="mt-24">
+                <CardNoResults
+                  className="datasets-page__empty"
+                  position="center"
+                  icon={
+                    <Icon
+                      name="agora-line-star"
+                      className="w-12 h-12 text-primary-500 icon-xl"
+                    />
+                  }
+                  title="Sem acompanhamentos"
+                  description="Não tem seguidores"
+                  hasAnchor={false}
+                />
               </div>
             </TabBody>
           </Tab>
@@ -798,90 +978,6 @@ export default function ProfileClient() {
                     </Table>
                   </>
                 )}
-              </div>
-            </TabBody>
-          </Tab>
-          <Tab>
-            <TabHeader>Subscrições</TabHeader>
-            <TabBody>
-              <div className="mt-24">
-                {isLoadingSubscriptions ? (
-                  <p className="text-neutral-900 text-base">A carregar subscrições...</p>
-                ) : subscriptions.length === 0 ? (
-                  <CardNoResults
-                    className="datasets-page__empty"
-                    position="center"
-                    icon={
-                      <Icon
-                        name="agora-line-bell"
-                        className="w-12 h-12 text-primary-500 icon-xl"
-                      />
-                    }
-                    title="Sem subscrições"
-                    description="Não segue conteúdos"
-                    hasAnchor={false}
-                  />
-                ) : (
-                  <div className="flex flex-col gap-16">
-                    {subscriptions.map((sub) => {
-                      const subName = sub.following.name || sub.following.title || "";
-                      const subAvatar = sub.following.avatar_thumbnail || sub.following.image_thumbnail;
-                      const initials = subName
-                        .split(" ")
-                        .map((w) => w.charAt(0).toUpperCase())
-                        .slice(0, 2)
-                        .join("");
-                      const classToPath: Record<string, string> = {
-                        Dataset: "/pages/datasets",
-                        Organization: "/pages/organizations",
-                        Reuse: "/pages/reuses",
-                        User: "/pages/users",
-                      };
-                      const basePath = classToPath[sub.following.class];
-                      const href = basePath && sub.following.slug
-                        ? `${basePath}/${sub.following.slug}`
-                        : null;
-                      const content = (
-                        <div className="flex items-center gap-16">
-                          <Avatar
-                            avatarType={subAvatar ? "image" : "initials"}
-                            srcPath={(subAvatar || initials) as unknown as undefined}
-                            alt={subName}
-                            className="w-48 h-48"
-                          />
-                          <span className="text-neutral-900 text-base font-medium">{subName}</span>
-                        </div>
-                      );
-                      return href ? (
-                        <Link key={sub.id} href={href} className="hover:opacity-80 transition-opacity">
-                          {content}
-                        </Link>
-                      ) : (
-                        <div key={sub.id}>{content}</div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </TabBody>
-          </Tab>
-          <Tab>
-            <TabHeader>Acompanhamentos</TabHeader>
-            <TabBody>
-              <div className="mt-24">
-                <CardNoResults
-                  className="datasets-page__empty"
-                  position="center"
-                  icon={
-                    <Icon
-                      name="agora-line-star"
-                      className="w-12 h-12 text-primary-500 icon-xl"
-                    />
-                  }
-                  title="Sem acompanhamentos"
-                  description="Não tem seguidores"
-                  hasAnchor={false}
-                />
               </div>
             </TabBody>
           </Tab>

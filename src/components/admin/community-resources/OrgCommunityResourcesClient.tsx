@@ -21,14 +21,10 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
 
 export default function OrgCommunityResourcesClient() {
   const params = useParams();
@@ -214,11 +210,11 @@ export default function OrgCommunityResourcesClient() {
                     )}
                   </TableCell>
                   <TableCell headerLabel="Criado em">
-                    {formatDate(resource.created_at)}
+                    {formatDateToDMY(resource.created_at)}
                   </TableCell>
                   <TableCell headerLabel="Última modificação">
                     <div>
-                      <div>{formatDate(resource.last_modified)}</div>
+                      <div>{formatDateToDMY(resource.last_modified)}</div>
                       {resource.owner && (
                         <a
                           href={`/pages/users/${resource.owner.slug}`}

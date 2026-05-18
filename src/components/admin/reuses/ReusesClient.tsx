@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
   CardNoResults,
@@ -22,23 +23,21 @@ import { fetchMyReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-};
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
 
 export default function ReusesClient() {
   const { displayName } = useCurrentUser();
+  const searchParams = useSearchParams();
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,6 +45,7 @@ export default function ReusesClient() {
   const handleSort = (field: ReuseSortField) => (newOrder: SortOrder) => {
     setSortField(newOrder === "none" ? null : field);
     setSortOrder(newOrder);
+    setCurrentPage(1);
   };
 
   const getSortOrder = (field: ReuseSortField): SortOrder =>
@@ -64,13 +64,18 @@ export default function ReusesClient() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    const timeoutId = setTimeout(() => {
+      void loadData();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [loadData]);
 
   const handleSearch = (value: string) => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
       setSearchQuery(value);
+      setCurrentPage(1);
     }, 400);
   };
 
@@ -80,21 +85,25 @@ export default function ReusesClient() {
       const q = searchQuery.trim().toLowerCase();
       result = result.filter((r) => r.title.toLowerCase().includes(q));
     }
-    if (!statusFilter) return result;
-    return result.filter((r) => {
-      switch (statusFilter) {
-        case "public":
-          return !r.private && !r.archived && !r.deleted;
-        case "draft":
-          return r.private && !r.archived && !r.deleted;
-        case "archived":
-          return !!r.archived && !r.deleted;
-        case "deleted":
-          return !!r.deleted;
-        default:
-          return true;
-      }
-    });
+    if (statusFilter) {
+      return result.filter((r) => {
+        switch (statusFilter) {
+          case "public":
+            return !r.private && !r.archived && !r.deleted;
+          case "draft":
+            return r.private && !r.archived && !r.deleted;
+          case "archived":
+            return !!r.archived && !r.deleted;
+          case "deleted":
+            return !!r.deleted;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // By default, hide deleted reuses (same behavior as datasets page).
+    return result.filter((r) => !r.deleted);
   }, [reuses, searchQuery, statusFilter]);
 
   const sortedReuses = useMemo(() => {
@@ -115,6 +124,11 @@ export default function ReusesClient() {
       return (ad - bd) * dir;
     });
   }, [filteredReuses, sortField, sortOrder]);
+
+  const paginatedReuses = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return sortedReuses.slice(start, start + itemsPerPage);
+  }, [sortedReuses, currentPage, itemsPerPage]);
 
   const getStatus = (reuse: Reuse) => {
     if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
@@ -141,7 +155,7 @@ export default function ReusesClient() {
       </div>
 
       <p className="text-neutral-700 text-sm mb-16">
-        {filteredReuses.length} resultados
+        {isLoading ? "A carregar..." : `${filteredReuses.length} resultados`}
       </p>
 
       <div className="flex items-end gap-16 mb-24">
@@ -161,8 +175,10 @@ export default function ReusesClient() {
           hideLabel
           placeholder="Filtrar por estado"
           id="filter-status"
+          defaultValue={statusFilter || undefined}
           onChange={(options) => {
             setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+            setCurrentPage(1);
           }}
         >
           <DropdownSection name="status">
@@ -180,15 +196,20 @@ export default function ReusesClient() {
       ) : filteredReuses.length > 0 ? (
         <Table
           paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: 5,
-            totalItems: filteredReuses.length,
+            itemsPerPageLabel: "Itens por página",
+            itemsPerPage: itemsPerPage,
+            totalItems: sortedReuses.length,
             availablePageSizes: [5, 10, 20],
-            currentPage: 0,
+            currentPage: currentPage - 1,
             buttonDropdownAriaLabel: "Selecionar linhas por página",
             dropdownListAriaLabel: "Opções de linhas por página",
             prevButtonAriaLabel: "Página anterior",
             nextButtonAriaLabel: "Próxima página",
+            onPageChange: (page: number) => setCurrentPage(page + 1),
+            onPageSizeChange: (size: number) => {
+              setItemsPerPage(size);
+              setCurrentPage(1);
+            },
           }}
         >
           <TableHeader>
@@ -219,7 +240,7 @@ export default function ReusesClient() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedReuses.map((reuse) => {
+            {paginatedReuses.map((reuse) => {
               const status = getStatus(reuse);
               return (
                 <TableRow key={reuse.id}>
@@ -235,7 +256,7 @@ export default function ReusesClient() {
                     <StatusDot variant={status.variant}>{status.label}</StatusDot>
                   </TableCell>
                   <TableCell headerLabel="Criado em">
-                    {formatDate(reuse.created_at)}
+                    {formatDateToDMY(reuse.created_at)}
                     <br />
                     <span className="text-sm text-neutral-500">
                       {reuse.owner ? (
