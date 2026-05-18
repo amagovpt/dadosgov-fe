@@ -3,16 +3,13 @@ import { Home } from "@/types/home";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 
-export async function getHome(
-  locale: string = "pt"
-): Promise<Home> {
+export async function getHome(locale: string = "pt"): Promise<Home> {
   const query = gql(/* GraphQL */ `
         query GetHome {
         findHomeSingleton {
             data {
                 datastories {
                     ${locale} {
-                    ... on DataStories {
                         data {
                             metadata {
                                 ${locale} {
@@ -22,12 +19,36 @@ export async function getHome(
                                         fileName
                                         url
                                         id
+                                        slug
                                     }
                                     createdAt
                                     }
                                 }
                             }
+                        
+                    }
+                }
+                usedDailyBy {
+                    iv {
+                      data {
+                        alt {
+                          ${locale}
                         }
+                        anchor {
+                          iv {
+                            children
+                            href
+                          }
+                        }
+                        logo {
+                          iv {
+                            id
+                            url
+                            slug
+                            fileName
+                          }
+                        }
+                      }
                     }
                 }
             }
@@ -36,7 +57,7 @@ export async function getHome(
   `);
 
   const { data, error } = await apolloClient.query<{
-    findHomeSingleton: {data: Record<string, unknown>;};
+    findHomeSingleton: { data: Record<string, unknown> };
   }>({
     query: query,
   });

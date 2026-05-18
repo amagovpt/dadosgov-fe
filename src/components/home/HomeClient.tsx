@@ -5,15 +5,16 @@ import { useRouter } from "next/navigation";
 import { Button, Icon, CardArticle } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import { Dataset, Post, Reuse, SiteMetrics } from "@/types/api";
-import { formatDistanceToNow, format } from "date-fns";
+import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
-import { Datastory } from "@/types/home";
+import { Datastory, UsedDailyBy } from "@/types/home";
 import { getAssets } from "@/utils/getAssets";
 import HeroGeneral from "../HeroGeneral";
 import PublishDropdown from "../admin/PublishDropdown";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
+import Image from "next/image";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -40,6 +41,7 @@ interface HomeClientProps {
   datastories: Datastory[];
   latestReuses: Reuse[];
   posts: Post[];
+  usedDailyBy?: UsedDailyBy[];
 }
 
 export default function HomeClient({
@@ -48,6 +50,7 @@ export default function HomeClient({
   datastories,
   latestReuses,
   posts,
+  usedDailyBy
 }: HomeClientProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -368,51 +371,35 @@ export default function HomeClient({
         </div>
 
         {/* Utilizado diariamente por */}
-        <div className="bg-white xl:pb-64">
-          <div className="container mx-auto px-4">
-            <h2 className="mb-32 text-xl-bold text-primary-900">Utilizado diariamente por:</h2>
-            <div className="mt-32 flex flex-col">
-              <div className="flex flex-wrap items-center justify-between gap-x-32">
-                {Array(5)
-                  .fill("arte_black.svg")
-                  .map((logo, i) => (
-                    <div key={`row1-${i}`} className="flex items-center justify-center">
-                      <img
-                        src={`/Logos/${logo}`}
-                        alt={`Logo ${logo.replace(".svg", "")}`}
-                        className="h-32 w-auto object-contain"
-                      />
-                    </div>
-                  ))}
-              </div>
-              <div className="mt-32 flex flex-wrap items-center justify-between gap-x-32">
-                {Array(5)
-                  .fill("arte_black.svg")
-                  .map((logo, i) => (
-                    <div key={`row2-${i}`} className="flex items-center justify-center">
-                      <img
-                        src={`/Logos/${logo}`}
-                        alt={`Logo ${logo.replace(".svg", "")}`}
-                        className="h-32 w-auto object-contain"
-                      />
-                    </div>
-                  ))}
+        <div className="w-full flex flex-col items-center justify-center pb-64">
+          <div className="container flex flex-col gap-32 ">
+            <div className="w-full flex flex-col gap-32">
+              <h2 className="text-xl-bold text-primary-900">Utilizado diariamente por:</h2>
+              <div className="grid grid-cols-4 xl:grid-cols-10 gap-32 ">
+                {usedDailyBy && usedDailyBy.length > 0 ? (
+                  usedDailyBy.map((entry, index) => (
+                    <div key={index} className="col-span-2 flex items-center justify-center">
+                      <Image src={getAssets(entry.logo[0].id)} alt={entry.alt} width={160} height={75} className="object-contain" unoptimized />
+                    </div>))
+                ) : (
+                  <div className="py-32 text-center text-neutral-500 xl:col-span-12">
+                    Nenhuma organização encontrada.
+                  </div>
+                )}
               </div>
             </div>
-            <div className="mt-32">
-              <Link href="/pages/organizations">
-                <Button
-                  variant="primary"
-                  appearance="link"
-                  hasIcon={true}
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  className="p-0! h-auto"
-                >
-                  <span>Ver todas as organizações</span>
-                </Button>
-              </Link>
-            </div>
+            <Link href="/pages/organizations">
+              <Button
+                variant="primary"
+                appearance="link"
+                hasIcon={true}
+                trailingIcon="agora-line-arrow-right-circle"
+                trailingIconHover="agora-solid-arrow-right-circle"
+                className="p-0! h-auto"
+              >
+                <span>Ver todas as organizações</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

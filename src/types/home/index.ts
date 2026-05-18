@@ -7,6 +7,16 @@ export type Datastory = {
     createdAt: string;
 };
 
+export type UsedDailyBy = {
+    alt: string;
+    anchor: {
+        children: string;
+        href: string;
+    }
+    logo: Image[];
+};
+
 export type Home = {
     datastories: Datastory[];
+    usedDailyBy: UsedDailyBy[]
 };

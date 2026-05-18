@@ -1,13 +1,10 @@
 export function flattenData(
   data: Record<string, unknown>,
-  preferredLocales: string | string[] = ["pt", "pt-PT", "en"]
+  preferredLocales: string | string[] = ["pt", "pt-PT", "en"],
 ): Record<string, unknown> {
   if (!data || typeof data !== "object") return {};
 
   const locales = Array.isArray(preferredLocales) ? preferredLocales : [preferredLocales];
-
-  const isPrimitive = (v: unknown): v is string | number | boolean | null =>
-    v === null || ["string", "number", "boolean"].includes(typeof v);
 
   const isLocaleKey = (k: string) => /^[a-z]{2,3}(?:-[a-zA-Z0-9]+)?$/i.test(k);
 
@@ -24,6 +21,7 @@ export function flattenData(
     const keys = Object.keys(cleaned);
     if (keys.length === 0) return {};
 
+    // Resolve locale-keyed objects (e.g. { pt: "...", en: "..." } or { pt: {...} })
     if (keys.every(isLocaleKey)) {
       for (const loc of locales) {
         if (loc in cleaned) return deepFlatten(cleaned[loc]);
@@ -31,11 +29,12 @@ export function flattenData(
       return deepFlatten(cleaned[keys[0]]);
     }
 
+    // Unwrap single-key structural wrappers (e.g. { iv: ... }, { data: ... }, { metadata: ... })
+    // In Squidex's GraphQL output, objects with a single non-locale key are always structural
+    // wrappers, never meaningful content — content objects always have multiple fields.
+    // This includes null values (e.g. { iv: null } → null).
     if (keys.length === 1) {
-      const only = cleaned[keys[0]];
-      if (keys[0] === "iv") return deepFlatten(only);
-      if (isPrimitive(only)) return only;
-      if (typeof only === "object" && only !== null) return deepFlatten(only);
+      return deepFlatten(cleaned[keys[0]]);
     }
 
     const out: Record<string, unknown> = {};
