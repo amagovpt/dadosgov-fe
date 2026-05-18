@@ -63,6 +63,7 @@ export const tailwindSafelist = [
   'min-[1440px]:!h-[870px]',
   'min-[1440px]:!h-[890px]',
   'min-[1440px]:!h-[1050px]',
+  'min-[1440px]:!h-[1060px]',
   'min-[1440px]:!h-[1080px]',
   'min-[1440px]:!h-[1130px]',
   'min-[1440px]:!h-[1250px]',
