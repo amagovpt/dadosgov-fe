@@ -210,36 +210,40 @@ const SupportPage = () => {
         subtitle={
           <>
             <label className="mt-48 block text-[20px] font-bold text-white">
-              Antes de nos contactar, consulte o fórum e os nossos guias:
-              <br />a sua questão poderá já estar respondida nesses pontos de suporte!
-            </label>
-
-            <div className="shadow-lg dropdown absolute mb-64 w-full bg-white text-neutral-900"></div>
-
-            <div className="mt-16 flex flex-wrap gap-32">
+              Antes de nos contactar, recomendamos a consulta das Perguntas Frequentes desta página
+              ou da área de Conhecimento do{" "}
               <a
                 href="https://dados.gov.pt/pt/"
                 target="_blank"
                 rel="noopener noreferrer"
+                className="underline font-bold text-white text-[20px]"
+              >
+                dados.gov.pt
+              </a>
+              , onde pode encontrar respostas e informação de apoio sobre dados abertos, publicação e
+              reutilização de dados.
+            </label>
+
+            <div className="shadow-lg dropdown absolute mb-64 w-full bg-white text-neutral-900"></div>
+
+            <div className="mt-16 flex flex-col gap-16">
+              <a
+                href="https://dados.gov.pt/pt/pages/faqs/about_dadosgov/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
-                Consulte a documentação em data.gov.pt
+                O que é o dados.gov.pt
                 <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
               </a>
 
               <a
-                href="/pages/about-open-data"
+                href="https://dados.gov.pt/pages/about-open-data"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
-                Consulte os guias sobre dados abertos
-                <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
-              </a>
-
-              <a
-                href="/pages/faqs/terms"
-                className="flex cursor-pointer items-center gap-8 text-white hover:underline"
-              >
-                Consulte os guias sobre como usar os dados
+                Saber mais sobre dados abertos
                 <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
               </a>
             </div>
