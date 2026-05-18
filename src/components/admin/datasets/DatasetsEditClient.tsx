@@ -4,31 +4,17 @@ import Link from "next/link";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
-  Avatar,
   Button,
   Icon,
-  InputText,
-  InputTextArea,
-  InputDate,
   StatusCard,
-  Table,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
   Pill,
-  Switch,
-  CardNoResults,
   Tabs,
   Tab,
   TabHeader,
   TabBody,
-  Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 
 import { format } from "date-fns";
@@ -39,8 +25,6 @@ import {
   deleteDataset,
   uploadResource,
   createResource,
-  updateResource,
-  replaceResourceFile,
   fetchLicenses,
   fetchFrequencies,
   fetchResourceTypes,
@@ -51,11 +35,8 @@ import {
   fetchActivity,
   fetchDiscussions,
   requestTransfer,
-  checkUrlReachable,
 } from "@/services/api";
-import RecipientSelect, {
-  type RecipientSelection,
-} from "@/components/admin/RecipientSelect";
+import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import {
   Dataset,
   License,
@@ -68,18 +49,14 @@ import {
   ResourceType,
   Discussion,
 } from "@/types/api";
-import dynamic from "next/dynamic";
-import StatusDot from "@/components/admin/StatusDot";
 import DeleteResourcePopup from "@/components/admin/datasets/DeleteResourcePopup";
-
-const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEditor"), {
-  ssr: false,
-  loading: () => <p>A carregar editor...</p>,
-});
-import AuxiliarList from "@/components/admin/AuxiliarList";
-import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import IsolatedInput from "@/components/admin/IsolatedInput";
+import DatasetsEditDeletePopup from "@/components/admin/datasets/DatasetsEditDeletePopup";
+import DatasetsEditResourceDetailPopup from "@/components/admin/datasets/DatasetsEditResourceDetailPopup";
+import DatasetsEditResourceEditPopup from "@/components/admin/datasets/DatasetsEditResourceEditPopup";
+import DatasetsEditMetadataTab from "@/components/admin/datasets/DatasetsEditMetadataTab";
+import DatasetsEditResourcesTab from "@/components/admin/datasets/DatasetsEditResourcesTab";
+import DatasetsEditDiscussionsTab from "@/components/admin/datasets/DatasetsEditDiscussionsTab";
+import DatasetsEditActivitiesTab from "@/components/admin/datasets/DatasetsEditActivitiesTab";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import {
@@ -119,567 +96,6 @@ const activityLabels: Record<string, string> = {
 
 function translateActivityLabel(label: string): string {
   return activityLabels[label] || label;
-}
-
-function TransferDatasetPopupContent({
-  datasetTitle,
-  onConfirm,
-}: {
-  datasetTitle: string;
-  onConfirm: (recipient: RecipientSelection, comment: string) => Promise<void>;
-}) {
-  const [recipient, setRecipient] = useState<RecipientSelection | null>(null);
-  const [comment, setComment] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showRecipientError, setShowRecipientError] = useState(false);
-
-  const handleConfirm = async () => {
-    if (!recipient) {
-      setShowRecipientError(true);
-      return;
-    }
-    setShowRecipientError(false);
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    try {
-      await onConfirm(recipient, comment.trim());
-      // Parent is responsible for hide() on success.
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : null;
-      setErrorMessage(msg || "Erro ao pedir a transferência do conjunto de dados.");
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-16">
-      <p>
-        <Icon name="agora-line-document" className="inline w-4 h-4 mr-4" />
-        <span className="text-primary-600">{datasetTitle}</span>
-      </p>
-      <p>
-        <strong>Esta ação é irreversível.</strong>&nbsp; Vai deixar de gerir este conjunto de dados
-      </p>
-
-      <div className="flex flex-col gap-8">
-        <label className="text-primary-900 text-base font-medium leading-7">
-          Organização ou utilizador <span className="text-danger-600">*</span>
-        </label>
-        <RecipientSelect
-          id="transfer-dataset-recipient"
-          placeholder="Selecione a identidade para a qual pretende transferir o conjunto de dados..."
-          onChange={(selection) => {
-            setRecipient(selection);
-            if (selection) setShowRecipientError(false);
-          }}
-          hasError={showRecipientError}
-          errorFeedbackText="Selecione um utilizador ou organização"
-        />
-        {recipient && (
-          <p className="text-sm text-neutral-700">
-            Destinatário selecionado:{" "}
-            <strong className="text-primary-900">{recipient.label}</strong>{" "}
-            <span className="text-neutral-500">
-              ({recipient.class === "User" ? "utilizador" : "organização"})
-            </span>
-          </p>
-        )}
-      </div>
-
-      <div className="admin-page__org-card flex flex-col items-center gap-16 bg-neutral-50 rounded-lg p-8 text-center">
-        <h3 className="text-primary-900 text-lg font-bold leading-7">
-          Não pertence a uma organização.
-        </h3>
-        <p className="text-neutral-700 text-base leading-7">
-          Quando o conjunto de dados for produzido no contexto de atividade profissional, é
-          recomendável que seja publicado em nome da organização responsável.
-        </p>
-        <Link
-          href="/pages/admin/organizations"
-          className="inline-flex items-center text-primary-500 text-base hover:underline"
-        >
-          <span className="mr-[5px]">Crie ou integre uma organização em dados.gov.pt</span>
-          <Icon name="agora-line-arrow-right-circle" className="w-5 h-5" />
-        </Link>
-      </div>
-
-      <div className="flex flex-col gap-8">
-        <label className="text-primary-900 text-base font-medium leading-7">Comentário</label>
-        <InputTextArea
-          placeholder="Mensagem opcional para o destinatário..."
-          id="transfer-dataset-comment"
-          label=""
-          rows={3}
-          value={comment}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setComment(e.target.value)
-          }
-        />
-      </div>
-
-      {errorMessage && (
-        <p className="text-danger-600 text-sm">{errorMessage}</p>
-      )}
-
-      <div className="flex justify-end gap-16 pt-16">
-        <Button
-          appearance="solid"
-          variant="primary"
-          hasIcon
-          leadingIcon="agora-line-plane"
-          leadingIconHover="agora-solid-plane"
-          onClick={handleConfirm}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "A transferir..." : "Transferir o conjunto de dados"}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function DeleteDatasetPopupContent({
-  onClose,
-  onConfirm,
-}: {
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <div className="flex flex-col gap-16">
-      <p>Essa ação é irreversível. Tem a certeza que quer eliminar este conjunto de dados?</p>
-      <div className="flex justify-end gap-16 pt-16">
-        <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button
-          variant="danger"
-          onClick={onConfirm}
-          hasIcon
-          leadingIcon="agora-line-trash"
-          leadingIconHover="agora-solid-trash"
-        >
-          Eliminar
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function ResourceDetailPopupContent({
-  resource,
-  onEdit,
-  onDelete,
-  onClose,
-}: {
-  resource: Resource;
-  onEdit: () => void;
-  onDelete: () => void;
-  onClose: () => void;
-}) {
-  const formatSize = (bytes?: number) => {
-    if (!bytes) return "-";
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const typeLabel = resource.type === "main" ? "Main file" : resource.type || "-";
-
-  const location =
-    resource.filetype === "remote"
-      ? "Este recurso é um link externo"
-      : "Este recurso encontra-se nos nossos servidores";
-
-  return (
-    <div className="flex flex-col gap-16" style={{ minHeight: "60vh" }}>
-      {resource.description && <p className="text-neutral-700 text-sm">{resource.description}</p>}
-      <div className="flex-1 overflow-y-auto">
-        <table className="text-sm w-full">
-          <tbody>
-            <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Tipo</td>
-              <td className="py-4">{typeLabel}</td>
-            </tr>
-            <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                Localização
-              </td>
-              <td className="py-4">{location}</td>
-            </tr>
-            <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">URL</td>
-              <td className="py-4 break-all">
-                <a
-                  href={resource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-600 underline"
-                >
-                  {resource.url}
-                </a>
-              </td>
-            </tr>
-            {resource.filetype !== "remote" && (
-              <>
-                <tr>
-                  <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                    Formato
-                  </td>
-                  <td className="py-4">{resource.format || "-"}</td>
-                </tr>
-                <tr>
-                  <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                    Mime Type
-                  </td>
-                  <td className="py-4">{resource.mime || "-"}</td>
-                </tr>
-                <tr>
-                  <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                    Tamanho
-                  </td>
-                  <td className="py-4">{formatSize(resource.filesize)}</td>
-                </tr>
-              </>
-            )}
-            {resource.checksum && (
-              <tr>
-                <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                  {resource.checksum.type}
-                </td>
-                <td className="py-4 break-all font-mono text-xs">{resource.checksum.value}</td>
-              </tr>
-            )}
-            <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                Criado em
-              </td>
-              <td className="py-4">
-                {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy HH:mm", {
-                  locale: pt,
-                })}
-              </td>
-            </tr>
-            <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
-                Modificado em
-              </td>
-              <td className="py-4">
-                {format(
-                  new Date(resource.last_modified || resource.created_at),
-                  "d 'de' MMMM 'de' yyyy HH:mm",
-                  { locale: pt }
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div className="flex justify-between pt-8">
-        <Button appearance="outline" variant="primary" onClick={onClose}>
-          Cancelar
-        </Button>
-        <div className="flex gap-8">
-          <Button
-            variant="danger"
-            hasIcon
-            leadingIcon="agora-line-trash"
-            leadingIconHover="agora-solid-trash"
-            onClick={onDelete}
-          >
-            Eliminar
-          </Button>
-          <Button
-            variant="primary"
-            hasIcon
-            leadingIcon="agora-line-edit"
-            leadingIconHover="agora-solid-edit"
-            onClick={onEdit}
-          >
-            Editar
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ResourceEditPopupContent({
-  resource,
-  datasetId,
-  resourceTypes,
-  onSaved,
-  onCancel,
-}: {
-  resource: Resource;
-  datasetId: string;
-  resourceTypes: ResourceType[];
-  onSaved: () => void;
-  onCancel: () => void;
-}) {
-  const [title, setTitle] = useState(resource.title);
-  const [description, setDescription] = useState(resource.description || "");
-  const [resourceUrl, setResourceUrl] = useState(resource.url || "");
-  const [resourceFormat, setResourceFormat] = useState(resource.format || "");
-  const [mime, setMime] = useState(resource.mime || "");
-  const [filesize, setFilesize] = useState(resource.filesize ? String(resource.filesize) : "");
-  const resourceTypeRef = useRef(resource.type || "main");
-  const replaceFileInputRef = useRef<HTMLInputElement>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isReplacing, setIsReplacing] = useState(false);
-  const [isCheckingUrl, setIsCheckingUrl] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [urlError, setUrlError] = useState<string | null>(null);
-
-  // LEDG-1747 follow-up: the `key={`edit-resource-${resource.id}`}` at the
-  // show() site is expected to force a remount per resource, but in
-  // practice the agora PopupProvider keeps the previous content element
-  // mounted (its hide() only flips dialog visibility — it does NOT clear
-  // the content state), and reconciliation has been observed to reuse the
-  // same component instance even with a different key when the parent
-  // stays alive across show() calls. Resync all field state from the
-  // current resource's props so opening the 2nd resource's edit popup
-  // never shows the 1st's data. The set-state-in-effect lint rule warns
-  // about cascading renders, but the alternative (waiting for a remount
-  // that never happens) is the bug we are fixing.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
-    setTitle(resource.title);
-    setDescription(resource.description || "");
-    setResourceUrl(resource.url || "");
-    setResourceFormat(resource.format || "");
-    setMime(resource.mime || "");
-    setFilesize(resource.filesize ? String(resource.filesize) : "");
-    resourceTypeRef.current = resource.type || "main";
-    setError(null);
-    setUrlError(null);
-  }, [resource]);
-
-  const isValidHttpsUrl = (value: string): boolean => {
-    try {
-      const parsed = new URL(value);
-      if (parsed.protocol !== "https:") return false;
-      if (!parsed.hostname) return false;
-      const hostname = parsed.hostname.toLowerCase();
-      const isIpv4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(
-        hostname
-      );
-      const labels = hostname.split(".");
-      const hasValidDomainShape = labels.length >= 2;
-      const hasValidLabels = labels.every(
-        (label) =>
-          label.length > 0 &&
-          !label.startsWith("-") &&
-          !label.endsWith("-") &&
-          /^[a-z0-9-]+$/i.test(label)
-      );
-      const tld = labels[labels.length - 1] || "";
-      const hasValidTld = /^([a-z]{2,}|xn--[a-z0-9-]{2,})$/i.test(tld);
-      return isIpv4 || (hasValidDomainShape && hasValidLabels && hasValidTld);
-    } catch {
-      return false;
-    }
-  };
-
-  const handleSave = async () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    if (!title.trim()) return;
-    const trimmedUrl = resourceUrl.trim();
-    // LEDG-1756: only enforce HTTPS-format / reachability checks when the
-    // user actually edited the URL. Otherwise legacy/dev URLs (e.g. an
-    // existing `http://localhost:7000/s/resources/...` from a file
-    // uploaded via the dev portal, or an older record saved before the
-    // HTTPS rule existed) block all subsequent edits — even when the
-    // user only wants to fix the title or description.
-    const originalUrl = (resource.url || "").trim();
-    const urlChanged = trimmedUrl !== originalUrl;
-    if (trimmedUrl && urlChanged) {
-      if (!isValidHttpsUrl(trimmedUrl)) {
-        setUrlError("Insira um URL válido, começando com https://");
-        return;
-      }
-      setIsCheckingUrl(true);
-      const reachable = await checkUrlReachable(trimmedUrl);
-      setIsCheckingUrl(false);
-      if (!reachable) {
-        setUrlError("URL não acessível. Verifique se o endereço está correto e acessível publicamente.");
-        return;
-      }
-    }
-    setUrlError(null);
-    setIsSaving(true);
-    setError(null);
-    try {
-      await updateResource(datasetId, resource.id, {
-        title: title.trim(),
-        description: description.trim() || undefined,
-        url: resourceUrl.trim() || undefined,
-        format: resourceFormat.trim() || undefined,
-        mime: mime.trim() || undefined,
-        filesize: filesize ? Number(filesize) : undefined,
-        type: resourceTypeRef.current,
-      });
-      onSaved();
-    } catch (err) {
-      console.error("Error updating resource:", err);
-      setError("Erro ao guardar as alterações.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleReplaceFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = (e.target as HTMLInputElement).files;
-    if (!files || files.length === 0) return;
-    setIsReplacing(true);
-    setError(null);
-    try {
-      await replaceResourceFile(datasetId, resource.id, files[0]);
-      onSaved();
-    } catch (err: unknown) {
-      const apiErr = err as { status?: number; data?: Record<string, unknown> };
-      console.error("Error replacing file:", apiErr.status, apiErr.data);
-      const msg = apiErr.data?.message
-        ? translateUploadError(String(apiErr.data.message))
-        : `Erro ao substituir o ficheiro (${apiErr.status || "desconhecido"}).`;
-      setError(msg);
-    } finally {
-      setIsReplacing(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-16" style={{ minHeight: "60vh" }}>
-      {error && <StatusCard variant="danger" description={error} />}
-
-      <div className="flex-1 overflow-y-auto flex flex-col gap-16">
-        <InputText
-          label="Título *"
-          placeholder="Título do recurso"
-          id="res-edit-title"
-          value={title}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-        />
-
-        <IsolatedSelect
-          label="Tipo *"
-          placeholder="Selecione um tipo..."
-          id="res-edit-type"
-          defaultValue={resource.type || "main"}
-          onChangeRef={resourceTypeRef}
-        >
-          <Dropdown.Section name="resource-types">
-            {resourceTypes.map((rt) => (
-              <Dropdown.Option key={rt.id} value={rt.id} selected={rt.id === (resource.type || "main")}>
-                {rt.label}
-              </Dropdown.Option>
-            ))}
-          </Dropdown.Section>
-        </IsolatedSelect>
-
-        <InputTextArea
-          label="Descrição"
-          placeholder="Descrição do recurso"
-          id="res-edit-description"
-          rows={4}
-          value={description}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
-        />
-
-        <InputText
-          label="URL *"
-          placeholder="URL do recurso"
-          id="res-edit-url"
-          value={resourceUrl}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setResourceUrl(e.target.value);
-            if (urlError) setUrlError(null);
-          }}
-          hasError={!!urlError}
-          hasFeedback={!!urlError}
-          feedbackText={urlError ?? ""}
-        />
-
-        {resource.filetype !== "remote" && (
-          <>
-            <div className="grid grid-cols-2 gap-16">
-              <InputText
-                label="Tamanho"
-                placeholder="Tamanho em bytes"
-                id="res-edit-filesize"
-                value={filesize}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilesize(e.target.value)}
-                disabled
-              />
-              <InputText
-                label="Formato"
-                placeholder="csv, json, xlsx..."
-                id="res-edit-format"
-                value={resourceFormat}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setResourceFormat(e.target.value)
-                }
-                disabled
-              />
-            </div>
-
-            <InputText
-              label="Mime Type"
-              placeholder="application/json, text/csv..."
-              id="res-edit-mime"
-              value={mime}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMime(e.target.value)}
-              disabled
-            />
-          </>
-        )}
-
-        {resource.checksum && (
-          <div className="flex items-center gap-8">
-            <span className="text-sm font-semibold">Soma de verificação</span>
-            <span className="bg-neutral-100 rounded px-8 py-2 text-xs font-mono">
-              {resource.checksum.type}
-            </span>
-            <span className="text-xs font-mono break-all">{resource.checksum.value}</span>
-          </div>
-        )}
-      </div>
-
-      <div className="flex justify-between pt-8">
-        <Button appearance="outline" variant="primary" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <div className="flex gap-8">
-          <input
-            ref={replaceFileInputRef}
-            type="file"
-            className="hidden"
-            onChange={handleReplaceFile}
-            disabled={isReplacing}
-          />
-          <Button
-            appearance="outline"
-            variant="primary"
-            onClick={() => replaceFileInputRef.current?.click()}
-            disabled={isReplacing}
-          >
-            {isReplacing ? "A substituir..." : "Substituir o ficheiro"}
-          </Button>
-          <Button
-            variant="primary"
-            hasIcon
-            trailingIcon="agora-line-check-circle"
-            trailingIconHover="agora-solid-check-circle"
-            onClick={handleSave}
-            disabled={isSaving || isCheckingUrl || !title.trim()}
-          >
-            {isCheckingUrl ? "A verificar URL..." : isSaving ? "A guardar..." : "Guardar"}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default function DatasetsEditClient() {
@@ -729,7 +145,7 @@ export default function DatasetsEditClient() {
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
   const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
-  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState<string | null>(null);
+  const [selectedSpatialZonesValue, setSelectedSpatialZonesValue] = useState("");
 
   // Loaded default values for IsolatedSelect (needed because data arrives async after mount)
   const [loadedTitle, setLoadedTitle] = useState("");
@@ -954,7 +370,7 @@ export default function DatasetsEditClient() {
     return merged.sort((a, b) => a.name.localeCompare(b.name, "pt"));
   }, [spatialZones, spatialZoneSearch]);
 
-  const effectiveSpatialIds = (selectedSpatialZonesValue ?? loadedSpatialZones.join(","))
+  const effectiveSpatialIds = (selectedSpatialZonesValue || loadedSpatialZones.join(","))
     .split(",")
     .filter(Boolean);
   const handleSpatialCoverageChange = useCallback((value: string) => {
@@ -978,7 +394,7 @@ export default function DatasetsEditClient() {
     });
   }, []);
   const selectedZoneObjects = useMemo<SpatialZone[]>(() => {
-    const effective = selectedSpatialZonesValue ?? loadedSpatialZones.join(",");
+    const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
     const ids = effective.split(",").filter(Boolean);
     if (ids.length === 0) return [];
 
@@ -987,7 +403,7 @@ export default function DatasetsEditClient() {
   }, [selectedSpatialZonesValue, loadedSpatialZones, allSpatialZones]);
 
   const spatialCoverageOptions = useMemo(() => {
-    const effective = selectedSpatialZonesValue ?? loadedSpatialZones.join(",");
+    const effective = selectedSpatialZonesValue || loadedSpatialZones.join(",");
     const selectedIds = new Set(effective.split(",").filter(Boolean));
     const options = allSpatialZones.map((z) => (
       <Dropdown.Option key={z.id} value={z.id} selected={selectedIds.has(z.id)}>
@@ -1146,8 +562,7 @@ export default function DatasetsEditClient() {
       setApiSuccess("Conjunto de dados atualizado com sucesso.");
       setTimeout(() => setApiSuccess(null), 10000);
       requestAnimationFrame(() => {
-        //if its scroll to tab we cant see success or error messages
-        //tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Keep feedback visible after save.
         window.scrollTo({ top: 0, behavior: "smooth" });
         tabsRef.current?.focus({ preventScroll: true });
       });
@@ -1314,12 +729,7 @@ export default function DatasetsEditClient() {
   const handleResourceEdit = (resource: Resource) => {
     if (!dataset) return;
     show(
-      <ResourceEditPopupContent
-        // LEDG-1747: key tied to resource.id so React mounts a fresh
-        // component per resource. Without it, `useState(resource.x)` only
-        // runs once and the popup keeps the previously-edited resource's
-        // values, making every resource look like the first one edited.
-        key={`edit-resource-${resource.id}`}
+      <DatasetsEditResourceEditPopup
         resource={resource}
         datasetId={dataset.id}
         resourceTypes={resourceTypes}
@@ -1345,9 +755,7 @@ export default function DatasetsEditClient() {
       hide();
       setTimeout(() => {
         show(
-          <ResourceEditPopupContent
-            // LEDG-1747: same fix as handleResourceEdit above.
-            key={`edit-resource-${resource.id}`}
+          <DatasetsEditResourceEditPopup
             resource={resource}
             datasetId={dataset.id}
             resourceTypes={resourceTypes}
@@ -1376,7 +784,7 @@ export default function DatasetsEditClient() {
     };
 
     show(
-      <ResourceDetailPopupContent
+      <DatasetsEditResourceDetailPopup
         resource={resource}
         onEdit={openEdit}
         onDelete={openDelete}
@@ -1577,479 +985,148 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Metadados</TabHeader>
           <TabBody>
-            <div className="admin-page__body">
-              <div className="admin-page__form-area">
-                {dataset.private && (
-                  <div className="dataset-edit-visibility-banner">
-                    <StatusCard
-                      variant="informative"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Modifique a visibilidade do conjunto de dados.</strong>
-                          <br />
-                          Este conjunto de dados encontra‑se atualmente em{" "}
-                          <strong>modo privado</strong>. Apenas os membros da organização o podem
-                          visualizar e editar.
-                        </>
-                      }
-                    />
-                    <div>
-                      <Button
-                        variant="primary"
-                        appearance="outline"
-                        onClick={async () => {
-                          try {
-                            const tagsValue = keywordsRef.current;
-                            const tags = tagsValue
-                              ? tagsValue
-                                  .split(",")
-                                  .map((tag) => tag.trim())
-                                  .filter(Boolean)
-                              : dataset.tags || [];
-                            const updated = await updateDataset(dataset.id, {
-                              private: false,
-                              title: dataset.title,
-                              description: dataset.description,
-                              description_short: dataset.description_short || undefined,
-                              acronym: dataset.acronym || undefined,
-                              tags,
-                              license: dataset.license || undefined,
-                              frequency: dataset.frequency || undefined,
-                              temporal_coverage: dataset.temporal_coverage || undefined,
-                              spatial: dataset.spatial || undefined,
-                              organization: dataset.organization?.id,
-                            });
-                            setDataset(updated);
-                            setApiSuccess("Conjunto de dados publicado com sucesso.");
-                            setTimeout(() => setApiSuccess(null), 10000);
-                          } catch {
-                            setApiError("Erro ao publicar o conjunto de dados.");
-                          }
-                        }}
-                        disabled={isSubmitting}
-                      >
-                        Publicar o conjunto de dados
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                <form className="admin-page__form" noValidate onSubmit={(e) => e.preventDefault()}>
-                  <p className="text-neutral-900 text-base leading-7">
-                    Os campos marcados com um asterisco ( * ) são obrigatórios.
-                  </p>
-
-                  <div>
-                    <h2 className="admin-page__section-title admin-page__section-title--no-top">
-                      Destaque
-                    </h2>
-                    <Switch
-                      id="edit-featured"
-                      label="Destaque"
-                      checked={featured}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setFeatured(e.target.checked)
-                      }
-                    />
-                  </div>
-
-                  <h2 className="admin-page__section-title admin-page__section-title--no-top">
-                    Descrição
-                  </h2>
-                  <div className="admin-page__fields-group">
-                    <IsolatedInput
-                      label="Título*"
-                      placeholder="Insira o título aqui"
-                      id="edit-title"
-                      defaultValue={loadedTitle}
-                      onChange={handleTitleChange}
-                      hasError={!!formErrors.title}
-                      hasFeedback={!!formErrors.title}
-                      feedbackState="danger"
-                      errorFeedbackText="Campo obrigatório"
-                    />
-                    <IsolatedInput
-                      label="Sigla"
-                      placeholder="Insira a sigla aqui"
-                      id="edit-acronym"
-                      defaultValue={loadedAcronym}
-                      onChange={setAcronym}
-                    />
-                    <div className="flex flex-col gap-8">
-                      <span className="text-primary-900 text-base font-medium leading-7">
-                        Descrição *
-                      </span>
-                      <RichTextEditor
-                        content={description}
-                        onChange={(html) => {
-                          setDescription(html);
-                          if (html.trim()) clearError("description");
-                        }}
-                      />
-                      {formErrors.description && (
-                        <span className="text-danger-600 text-sm">Campo obrigatório</span>
-                      )}
-                    </div>
-                    {/*<InputTextArea
-                      label="Descrição resumida"
-                      placeholder="Insira a descrição aqui"
-                      id="edit-short-description"
-                      rows={3}
-                      maxLength={200}
-                      showCharCounter={true}
-                      value={shortDescription}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                        setShortDescription(e.target.value)
-                      }
-                      hasFeedback
-                      feedbackState="info"
-                      feedbackText="Se este campo for deixado em branco, serão utilizados os primeiros 197 caracteres da sua descrição, seguidos de '...' (máximo de 200 caracteres)."
-                    />*/}
-                    <IsolatedSelect
-                      label="Palavras-chave"
-                      placeholder="Pesquise ou insira palavras-chave..."
-                      id="edit-keywords"
-                      type="checkbox"
-                      searchable
-                      searchInputPlaceholder="Escreva para pesquisar ou criar..."
-                      searchNoResultsText="Nenhum resultado encontrado"
-                      defaultValue={loadedKeywords}
-                      onChangeRef={keywordsRef}
-                      onSearchCallback={(q) => {
-                        setKeywordSearch(q);
-                        if (!q) return;
-                        suggestTags(q, 20).then(setTagSearch);
-                      }}
-                      onChangeCallback={(value) => {
-                        setLoadedKeywords(value);
-                        const selected = value.split(",").filter(Boolean);
-                        let addedNew = false;
-                        selected.forEach((v) => {
-                          const lower = v.toLowerCase();
-                          const existsInSuggestions = tagSuggestions.some(
-                            (t) => t.text.toLowerCase() === lower,
-                          );
-                          const existsInSearch = tagSearch.some(
-                            (t) => t.text.toLowerCase() === lower,
-                          );
-                          if (!existsInSuggestions && !existsInSearch) {
-                            addedNew = true;
-                            setTagSuggestions((prev) => {
-                              if (prev.some((t) => t.text.toLowerCase() === lower)) {
-                                return prev;
-                              }
-                              return [...prev, { text: v }];
-                            });
-                          }
-                        });
-                        if (addedNew) {
-                          setKeywordSearch("");
-                        }
-                      }}
-                    >
-                      {keywordOptions}
-                    </IsolatedSelect>
-
-                    {selectedKeywords.length > 0 && (
-                      <div className="flex flex-wrap gap-8 -mt-8">
-                        {selectedKeywords.map((keyword) => (
-                          <Tag
-                            key={keyword}
-                            aria-label={`Remover ${keyword}`}
-                            onClick={() => {
-                              const next = selectedKeywords
-                                .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
-                                .join(",");
-                              setLoadedKeywords(next);
-                              keywordsRef.current = next;
-                            }}
-                          >
-                            {keyword}
-                          </Tag>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <h2 className="admin-page__section-title">Acesso</h2>
-                  <div className="admin-page__fields-group">
-                    <IsolatedSelect
-                      label="Licença"
-                      placeholder="Selecione uma licença..."
-                      id="edit-license"
-                      defaultValue={loadedLicense}
-                      onChangeRef={selectedLicenseRef}
-                    >
-                      {licenseOptions}
-                    </IsolatedSelect>
-                  </div>
-
-                  <h2 className="admin-page__section-title">Tempo</h2>
-                  <div className="admin-page__fields-group">
-                    <IsolatedSelect
-                      label="Frequência de atualização *"
-                      placeholder="Selecione uma frequência..."
-                      id="edit-frequency"
-                      defaultValue={frequencyDefaultValue}
-                      onChangeRef={selectedFrequencyRef}
-                    >
-                      {frequencyOptions}
-                    </IsolatedSelect>
-
-                    <div className="flex gap-[18px] [&>*]:flex-1">
-                      <InputDate
-                        key={`date-start-${temporalStart}`}
-                        label="Cobertura temporal (Data de início)"
-                        id="edit-date-start"
-                        defaultValue={temporalStart}
-                        dayInputPlaceholder="dd"
-                        monthInputPlaceholder="mm"
-                        yearInputPlaceholder="aaaa"
-                        calendarIconAriaLabel="Abrir calendário"
-                        previousYearAriaLabel="Ano anterior"
-                        previousMonthAriaLabel="Mês anterior"
-                        nextMonthAriaLabel="Próximo mês"
-                        nextYearAriaLabel="Próximo ano"
-                        selectedDayAriaLabel="Dia selecionado"
-                        todayDayAriaLabel="Hoje"
-                        todayLabel="Hoje"
-                        cancelLabel="Cancelar"
-                        okLabel="OK"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setTemporalStart(e.target.value)
-                        }
-                      />
-                      <InputDate
-                        key={`date-end-${temporalEnd}`}
-                        label="Data de fim"
-                        id="edit-date-end"
-                        defaultValue={temporalEnd}
-                        hasError={!!formErrors.temporalEnd}
-                        errorFeedbackText="A data de fim tem de ser posterior à data de início"
-                        dayInputPlaceholder="dd"
-                        monthInputPlaceholder="mm"
-                        yearInputPlaceholder="aaaa"
-                        calendarIconAriaLabel="Abrir calendário"
-                        previousYearAriaLabel="Ano anterior"
-                        previousMonthAriaLabel="Mês anterior"
-                        nextMonthAriaLabel="Próximo mês"
-                        nextYearAriaLabel="Próximo ano"
-                        selectedDayAriaLabel="Dia selecionado"
-                        todayDayAriaLabel="Hoje"
-                        todayLabel="Hoje"
-                        cancelLabel="Cancelar"
-                        okLabel="OK"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setTemporalEnd(e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <h2 className="admin-page__section-title">Espaço</h2>
-                  <div className="admin-page__fields-group">
-                    <IsolatedSelect
-                      label="Cobertura espacial"
-                      placeholder="Selecione uma cobertura espacial..."
-                      id="edit-spatial-coverage"
-                      type="checkbox"
-                      searchable
-                      searchInputPlaceholder="Escreva para pesquisar..."
-                      searchNoResultsText="Nenhum resultado encontrado"
-                      defaultValue={selectedSpatialZonesValue ?? loadedSpatialZones.join(",")}
-                      onChangeRef={spatialCoverageRef}
-                      onChangeCallback={handleSpatialCoverageChange}
-                      onSearchCallback={(q) => {
-                        if (!q) return;
-                        suggestSpatialZones(q, 20).then((results) => {
-                          spatialZoneSearchRef.current = results;
-                          setSpatialZoneSearch(results);
-                        }).catch(() => {
-                          spatialZoneSearchRef.current = [];
-                          setSpatialZoneSearch([]);
-                        });
-                      }}
-                    >
-                      {spatialCoverageOptions}
-                    </IsolatedSelect>
-
-                    {selectedZoneObjects.length > 0 && (
-                      <div className="flex flex-wrap gap-8 -mt-8">
-                        {selectedZoneObjects.map((zone) => (
-                          <Tag
-                            key={zone.id}
-                            aria-label={`Remover ${zone.name}`}
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              const savedScroll = window.scrollY;
-                              const next = effectiveSpatialIds
-                                .filter((id) => id !== zone.id)
-                                .join(",");
-                              setSelectedSpatialZonesValue(next);
-                              spatialCoverageRef.current = next;
-                              setSpatialZones((prev) => prev.filter((z) => z.id !== zone.id));
-                              setTimeout(() => {
-                                document
-                                  .getElementById(
-                                    "agora-input-select-edit-spatial-coverage-control",
-                                  )
-                                  ?.focus({ preventScroll: true });
-                                window.scrollTo({ top: savedScroll, behavior: "instant" });
-                              }, 50);
-                            }}
-                          >
-                            {zone.code ? `${zone.name} (${zone.code})` : zone.name}
-                          </Tag>
-                        ))}
-                      </div>
-                    )}
-
-                    <IsolatedSelect
-                      label="Granularidade espacial"
-                      placeholder="Selecione uma granularidade..."
-                      id="edit-spatial-granularity"
-                      defaultValue={loadedSpatialGranularity}
-                      onChangeRef={spatialGranularityRef}
-                    >
-                      {spatialGranularityOptions}
-                    </IsolatedSelect>
-                  </div>
-
-                  <div className="admin-page__actions flex justify-end mt-24">
-                    <Button
-                      type="button"
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-check-circle"
-                      trailingIconHover="agora-solid-check-circle"
-                      onClick={handleSaveMetadata}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "A guardar..." : "Guardar"}
-                    </Button>
-                  </div>
-
-                  <div className="dataset-edit-danger-actions">
-                    {/* Transfer dataset section hidden — keep for future use
-                    <StatusCard
-                      variant="informative"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Atenção esta ação é irreversível.</strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={() => {
-                              show(
-                                <TransferDatasetPopupContent
-                                  datasetTitle={dataset.title}
-                                  onConfirm={handleTransferDataset}
-                                />,
-                                {
-                                  title: "Transfira o conjunto de dados",
-                                  closeAriaLabel: "Fechar",
-                                  dimensions: "m",
-                                }
-                              );
-                            }}
-                          >
-                            Tranferir o conjunto de dados
-                          </Button>
-                        </>
-                      }
-                    />
-                    */}
-                    <StatusCard
-                      variant="warning"
-                      showIcon
-                      description={
-                        <>
-                          <strong>
-                            Um conjunto de dados arquivado deixa de estar indexado no portal, mas
-                            permanece acessível através de um link direto.
-                          </strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={(e: React.MouseEvent) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              dataset?.archived ? handleUnarchiveDataset() : handleArchiveDataset();
-                            }}
-                          >
-                            {dataset?.archived
-                              ? "Desarquivar o conjunto de dados"
-                              : "Arquivar o conjunto de dados"}
-                          </Button>
-                        </>
-                      }
-                    />
-                    <StatusCard
-                      variant="danger"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Atenção esta ação é irreversível.</strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={(e: React.MouseEvent) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              show(
-                                <DeleteDatasetPopupContent
-                                  onClose={hide}
-                                  onConfirm={handleDeleteDataset}
-                                />,
-                                {
-                                  title: "Elimine o conjunto de dados",
-                                  closeAriaLabel: "Fechar",
-                                  dimensions: "m",
-                                }
-                              );
-                            }}
-                            disabled={isSubmitting}
-                          >
-                            Eliminar o conjunto de dados
-                          </Button>
-                        </>
-                      }
-                    />
-                  </div>
-                </form>
-              </div>
-
-              <aside className="admin-page__auxiliar">
-                <div className="admin-page__auxiliar-inner">
-                  <div className="admin-page__auxiliar-header">
-                    <Icon name="agora-line-question-mark" className="w-24 h-24" />
-                    <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
-                  </div>
-                  <AuxiliarList
-                    items={getDatasetAuxiliarItems({
-                      title: !!formErrors.title,
-                      description: !!formErrors.description,
-                    })}
-                  />
-                </div>
-              </aside>
-            </div>
+            <DatasetsEditMetadataTab
+              dataset={dataset}
+              featured={featured}
+              isSubmitting={isSubmitting}
+              formErrors={formErrors}
+              loadedTitle={loadedTitle}
+              loadedAcronym={loadedAcronym}
+              description={description}
+              loadedKeywords={loadedKeywords}
+              selectedKeywords={selectedKeywords}
+              keywordOptions={keywordOptions}
+              loadedLicense={loadedLicense}
+              licenseOptions={licenseOptions}
+              loadedFrequency={frequencyDefaultValue}
+              frequencyOptions={frequencyOptions}
+              temporalStart={temporalStart}
+              temporalEnd={temporalEnd}
+              loadedSpatialZones={loadedSpatialZones}
+              spatialCoverageValue={selectedSpatialZonesValue}
+              spatialCoverageOptions={spatialCoverageOptions}
+              selectedZoneObjects={selectedZoneObjects}
+              effectiveSpatialIds={effectiveSpatialIds}
+              loadedSpatialGranularity={loadedSpatialGranularity}
+              spatialGranularityOptions={spatialGranularityOptions}
+              keywordsRef={keywordsRef}
+              selectedLicenseRef={selectedLicenseRef}
+              selectedFrequencyRef={selectedFrequencyRef}
+              spatialCoverageRef={spatialCoverageRef}
+              spatialGranularityRef={spatialGranularityRef}
+              onPublishDataset={async () => {
+                try {
+                  const tagsValue = keywordsRef.current;
+                  const tags = tagsValue
+                    ? tagsValue
+                        .split(",")
+                        .map((tag) => tag.trim())
+                        .filter(Boolean)
+                    : dataset.tags || [];
+                  const updated = await updateDataset(dataset.id, {
+                    private: false,
+                    title: dataset.title,
+                    description: dataset.description,
+                    description_short: dataset.description_short || undefined,
+                    acronym: dataset.acronym || undefined,
+                    tags,
+                    license: dataset.license || undefined,
+                    frequency: dataset.frequency || undefined,
+                    temporal_coverage: dataset.temporal_coverage || undefined,
+                    spatial: dataset.spatial || undefined,
+                    organization: dataset.organization?.id,
+                  });
+                  setDataset(updated);
+                  setApiSuccess("Conjunto de dados publicado com sucesso.");
+                  setTimeout(() => setApiSuccess(null), 10000);
+                } catch {
+                  setApiError("Erro ao publicar o conjunto de dados.");
+                }
+              }}
+              onFeaturedChange={(checked) => setFeatured(checked)}
+              onTitleChange={handleTitleChange}
+              onAcronymChange={setAcronym}
+              onDescriptionChange={(html) => {
+                setDescription(html);
+                if (html.trim()) clearError("description");
+              }}
+              onKeywordSearch={(q) => {
+                setKeywordSearch(q);
+                if (!q) {
+                  setTagSearch([]);
+                  return;
+                }
+                suggestTags(q, 20).then(setTagSearch);
+              }}
+              onKeywordsChange={(value) => {
+                setLoadedKeywords(value);
+                const selected = value.split(",").filter(Boolean);
+                let addedNew = false;
+                selected.forEach((v) => {
+                  const lower = v.toLowerCase();
+                  const existsInSuggestions = tagSuggestions.some((t) => t.text.toLowerCase() === lower);
+                  const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
+                  if (!existsInSuggestions && !existsInSearch) {
+                    addedNew = true;
+                    setTagSuggestions((prev) => {
+                      if (prev.some((t) => t.text.toLowerCase() === lower)) return prev;
+                      return [...prev, { text: v }];
+                    });
+                  }
+                });
+                if (addedNew) setKeywordSearch("");
+              }}
+              onRemoveKeyword={(keyword) => {
+                const next = selectedKeywords
+                  .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                  .join(",");
+                setLoadedKeywords(next);
+                keywordsRef.current = next;
+              }}
+              onTemporalStartChange={setTemporalStart}
+              onTemporalEndChange={setTemporalEnd}
+              onSpatialCoverageChange={handleSpatialCoverageChange}
+              onSpatialSearch={(q) => {
+                if (q.length < 2) {
+                  spatialZoneSearchRef.current = [];
+                  setSpatialZoneSearch([]);
+                  return;
+                }
+                suggestSpatialZones(q, 50)
+                  .then((results) => {
+                    spatialZoneSearchRef.current = results;
+                    setSpatialZoneSearch(results);
+                  })
+                  .catch(() => {
+                    spatialZoneSearchRef.current = [];
+                    setSpatialZoneSearch([]);
+                  });
+              }}
+              onRemoveSpatialZone={(zoneId) => {
+                const next = effectiveSpatialIds.filter((id) => id !== zoneId).join(",");
+                setSelectedSpatialZonesValue(next);
+                spatialCoverageRef.current = next;
+                setSpatialZones((prev) => prev.filter((z) => z.id !== zoneId));
+              }}
+              onSaveMetadata={handleSaveMetadata}
+              onToggleArchive={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dataset.archived ? handleUnarchiveDataset() : handleArchiveDataset();
+              }}
+              onOpenDeletePopup={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                show(
+                  <DatasetsEditDeletePopup onClose={hide} onConfirm={handleDeleteDataset} />,
+                  {
+                    title: "Elimine o conjunto de dados",
+                    closeAriaLabel: "Fechar",
+                    dimensions: "m",
+                  },
+                );
+              }}
+            />
           </TabBody>
         </Tab>
 
@@ -2057,128 +1134,17 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
           <TabBody>
-            <div className="mt-24">
-              <div className="flex items-end gap-16 mb-16 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
-                <DragAndDropUploader
-                  key={uploaderKey}
-                  label="Ficheiros"
-                  dragAndDropLabel="Arraste e largue os ficheiros aqui"
-                  inputLabel="Selecione ou arraste os ficheiros"
-                  selectedFilesLabel="ficheiros selecionados"
-                  removeFileButtonLabel="Remover ficheiro"
-                  replaceFileButtonLabel="Substituir ficheiro"
-                  maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo permitido."
-                  forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                  hasError={!!fileUploadError}
-                  hasFeedback={!!fileUploadError}
-                  feedbackState="danger"
-                  feedbackText={fileUploadError ?? undefined}
-                  multiple
-                  onChange={handleFileUpload}
-                  onSecurityError={() => setFileUploadError(POISONED_FILE_WARNING)}
-                />
-                <Button appearance="outline" variant="primary" className="mb-32">
-                  Reordene os ficheiros
-                </Button>
-              </div>
-
-              <h2 className="font-medium text-neutral-900 text-base mb-16">
-                {dataset.resources.length}{" "}
-                {dataset.resources.length === 1 ? "FICHEIRO" : "FICHEIROS"}
-              </h2>
-
-              {dataset.resources.length === 0 && (
-                <CardNoResults
-                  position="center"
-                  icon={
-                    <Icon
-                      name="agora-line-document"
-                      className="w-12 h-12 text-primary-500 icon-xl"
-                    />
-                  }
-                  title="Sem ficheiros"
-                  description="Este conjunto de dados ainda não tem ficheiros. Adicione ficheiros ou links para começar."
-                  hasAnchor={false}
-                />
-              )}
-
-              {dataset.resources.length > 0 && (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHeaderCell>Nome do ficheiro</TableHeaderCell>
-                      <TableHeaderCell>Estado</TableHeaderCell>
-                      <TableHeaderCell>Tipo</TableHeaderCell>
-                      <TableHeaderCell>Formato</TableHeaderCell>
-                      <TableHeaderCell>Criado em</TableHeaderCell>
-                      <TableHeaderCell>Atualizado em</TableHeaderCell>
-                      <TableHeaderCell>Ação</TableHeaderCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {dataset.resources.map((resource) => (
-                      <TableRow key={resource.id}>
-                        <TableCell headerLabel="Nome do ficheiro">
-                          <button
-                            className="text-primary-600 underline text-left cursor-pointer"
-                            onClick={() => handleResourceClick(resource)}
-                          >
-                            {resource.title}
-                          </button>
-                        </TableCell>
-                        <TableCell headerLabel="Estado">
-                          <StatusDot variant="success">DISPONÍVEL</StatusDot>
-                        </TableCell>
-                        <TableCell headerLabel="Tipo">
-                          {resource.type === "main" ? "Ficheiros principais" : resource.type || "-"}
-                        </TableCell>
-                        <TableCell headerLabel="Formato">
-                          {resource.format ? resource.format.toUpperCase() : "-"}
-                        </TableCell>
-                        <TableCell headerLabel="Criado em">
-                          {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy", {
-                            locale: pt,
-                          })}
-                        </TableCell>
-                        <TableCell headerLabel="Atualizado em">
-                          {format(
-                            new Date(resource.last_modified || resource.created_at),
-                            "d 'de' MMMM 'de' yyyy",
-                            { locale: pt }
-                          )}
-                        </TableCell>
-                        <TableCell headerLabel="Ação">
-                          <div className="flex items-center gap-8">
-                            <button
-                              className="text-primary-500 hover:text-primary-700"
-                              title="Ver detalhes"
-                              onClick={() => handleResourceClick(resource)}
-                            >
-                              <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                            </button>
-                            <button
-                              className="text-primary-500 hover:text-primary-700"
-                              title="Editar recurso"
-                              onClick={() => handleResourceEdit(resource)}
-                            >
-                              <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                            </button>
-                            <button
-                              className="text-danger-500 hover:text-danger-700"
-                              title="Eliminar ficheiro"
-                              onClick={() => handleDeleteResource(resource)}
-                              disabled={isSubmitting}
-                            >
-                              <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
+            <DatasetsEditResourcesTab
+              dataset={dataset}
+              uploaderKey={uploaderKey}
+              fileUploadError={fileUploadError}
+              isSubmitting={isSubmitting}
+              onFileUpload={handleFileUpload}
+              onSecurityError={() => setFileUploadError(POISONED_FILE_WARNING)}
+              onResourceClick={handleResourceClick}
+              onResourceEdit={handleResourceEdit}
+              onDeleteResource={handleDeleteResource}
+            />
           </TabBody>
         </Tab>
 
@@ -2186,73 +1152,11 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Discussões ({discussionsTotal ?? 0})</TabHeader>
           <TabBody>
-            <div className="mt-24">
-              {discussionsLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
-              {discussionsLoaded && discussions.length === 0 && (
-                <CardNoResults
-                  position="center"
-                  icon={
-                    <Icon name="agora-line-chat" className="w-12 h-12 text-primary-500 icon-xl" />
-                  }
-                  title="Sem discussões"
-                  description="Ainda não existem discussões neste conjunto de dados."
-                  hasAnchor={false}
-                />
-              )}
-              {discussionsLoaded && discussions.length > 0 && (
-                <div>
-                  <h2 className="font-medium text-neutral-900 text-base mb-16">
-                    {discussions.length} {discussions.length === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
-                  </h2>
-                  <div className="space-y-16">
-                    {discussions.map((disc) => (
-                      <div key={disc.id} className="bg-white rounded-8 p-32">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-neutral-900 text-base">{disc.title}</h4>
-                            <p className="text-sm text-neutral-900 mt-4">
-                              <span className="text-primary-600 font-medium">
-                                {disc.user.first_name} {disc.user.last_name}
-                              </span>
-                              {" — Publicado em "}
-                              {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", {
-                                locale: pt,
-                              })}
-                            </p>
-                          </div>
-                          <Pill variant={disc.closed ? "neutral" : "informative"}>
-                            {disc.closed ? "Fechada" : "Aberta"}
-                          </Pill>
-                        </div>
-                        {disc.discussion.length > 0 && (
-                          <p className="text-neutral-900 text-sm mt-16">
-                            {disc.discussion[0].content}
-                          </p>
-                        )}
-                        {disc.discussion.length > 1 && (
-                          <div className="mt-16 space-y-16 border-t border-neutral-200 pt-16">
-                            {disc.discussion.slice(1).map((msg, idx) => (
-                              <div key={idx} className="border-l-2 border-primary-600 pl-24">
-                                <p className="text-sm text-neutral-900">
-                                  <span className="text-primary-600 font-medium">
-                                    {msg.posted_by.first_name} {msg.posted_by.last_name}
-                                  </span>
-                                  {" — "}
-                                  {format(new Date(msg.posted_on), "d 'de' MMMM 'de' yyyy", {
-                                    locale: pt,
-                                  })}
-                                </p>
-                                <p className="text-neutral-900 text-sm mt-4">{msg.content}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <DatasetsEditDiscussionsTab
+              discussionsLoading={discussionsLoading}
+              discussionsLoaded={discussionsLoaded}
+              discussions={discussions}
+            />
           </TabBody>
         </Tab>
 
@@ -2260,64 +1164,12 @@ export default function DatasetsEditClient() {
         <Tab>
           <TabHeader>Atividades</TabHeader>
           <TabBody>
-            <div className="mt-24">
-              {activitiesLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
-              {activitiesLoaded && activities.length === 0 && (
-                <CardNoResults
-                  position="center"
-                  icon={
-                    <Icon name="agora-line-time" className="w-12 h-12 text-primary-500 icon-xl" />
-                  }
-                  title="Sem atividades"
-                  description="Ainda não existem atividades registadas neste conjunto de dados."
-                  hasAnchor={false}
-                />
-              )}
-              {activitiesLoaded && activities.length > 0 && (
-                <>
-                  <h2 className="font-medium text-neutral-900 text-base mb-16">
-                    {activities.length} ATIVIDADES
-                  </h2>
-                  <div className="flex flex-col gap-12">
-                    {activities.map((activity, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-12 p-12 bg-neutral-50 rounded-lg"
-                      >
-                        <Avatar
-                          avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
-                          srcPath={
-                            (activity.actor?.avatar_thumbnail ||
-                              `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
-                          }
-                          alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
-                        />
-                        <div>
-                          <p className="text-sm text-neutral-900">
-                            <a
-                              href={`/pages/admin/users/${activity.actor?.id}`}
-                              className="text-primary-600 underline"
-                            >
-                              {activity.actor?.first_name} {activity.actor?.last_name}
-                            </a>{" "}
-                            {translateActivityLabel(activity.label)}
-                          </p>
-                          <p className="text-xs text-neutral-600 mt-4">
-                            {new Date(activity.created_at).toLocaleDateString("pt-PT", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            <DatasetsEditActivitiesTab
+              activitiesLoading={activitiesLoading}
+              activitiesLoaded={activitiesLoaded}
+              activities={activities}
+              translateActivityLabel={translateActivityLabel}
+            />
           </TabBody>
         </Tab>
       </Tabs>
@@ -2325,3 +1177,4 @@ export default function DatasetsEditClient() {
     </div>
   );
 }
+

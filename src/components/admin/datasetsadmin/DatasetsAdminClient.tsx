@@ -898,9 +898,62 @@ export default function DatasetsAdminClient({
     }
   };
 
-  const handleSaveDraft = () => {
-    if (onComplete) onComplete();
-    else router.push("/pages/admin/me/datasets");
+  const handleSaveDraft = async () => {
+    if (!createdDataset) {
+      if (onComplete) onComplete();
+      else router.push("/pages/admin/me/datasets");
+      return;
+    }
+
+    setApiError(null);
+    setIsSubmitting(true);
+    try {
+      const refTags = selectedKeywordsRef.current
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+      const tags = refTags.length > 0 ? refTags : createdDataset.tags || [];
+      const startIso = toIsoTemporalDate(temporalStart);
+      const endIso = toIsoTemporalDate(temporalEnd);
+      let temporalCoverage: DatasetUpdatePayload["temporal_coverage"] | undefined =
+        createdDataset.temporal_coverage || undefined;
+      if (startIso || endIso) {
+        const start = startIso || createdDataset.temporal_coverage?.start;
+        if (start) {
+          temporalCoverage = {
+            start,
+            ...(endIso
+              ? { end: endIso }
+              : createdDataset.temporal_coverage?.end
+                ? { end: createdDataset.temporal_coverage.end }
+                : {}),
+          };
+        }
+      }
+
+      const draftPayload: DatasetUpdatePayload = {
+        private: true,
+        title: createdDataset.title,
+        description: createdDataset.description,
+        description_short: createdDataset.description_short || undefined,
+        acronym: createdDataset.acronym || undefined,
+        tags,
+        license: createdDataset.license || undefined,
+        frequency: createdDataset.frequency || undefined,
+        temporal_coverage: temporalCoverage,
+        spatial: createdDataset.spatial || undefined,
+        organization: createdDataset.organization?.id,
+      };
+
+      await updateDataset(createdDataset.id, draftPayload);
+      if (onComplete) onComplete();
+      else router.push("/pages/admin/me/datasets");
+    } catch (error) {
+      console.error("Error saving draft dataset:", error);
+      setApiError("Erro ao guardar o rascunho. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const auxiliarItemsStep2 = getDatasetAuxiliarItems({
