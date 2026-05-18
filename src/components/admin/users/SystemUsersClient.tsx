@@ -102,8 +102,7 @@ export default function SystemUsersClient() {
       } else if (sortOrder === "descending") {
         setSortOrder("ascending");
       } else {
-        setSortField(null);
-        setSortOrder("none");
+        setSortOrder("descending");
       }
     } else {
       setSortField(_newOrder === "none" ? null : field);
