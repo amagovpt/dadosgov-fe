@@ -26,6 +26,7 @@ function LoginContent() {
     const raw = searchParams.get("next") || "/";
     return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
   })();
+  const prefilledEmail = searchParams.get("email") || "";
 
   const [cmdModalOpen, setCmdModalOpen] = useState(false);
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
@@ -35,7 +36,7 @@ function LoginContent() {
   const [isHoveredEidasCreate, setIsHoveredEidasCreate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loginEmail, setLoginEmail] = useState("");
+  const [loginEmail, setLoginEmail] = useState(prefilledEmail);
   const [loginPassword, setLoginPassword] = useState("");
   const [migrationRequired, setMigrationRequired] = useState(false);
   const [citizenType, setCitizenType] = useState<string | null>(null);
@@ -703,6 +704,7 @@ function LoginContent() {
                                 type="email"
                                 className="w-full max-w-[560px]"
                                 disabled={isLoading}
+                                value={loginEmail}
                                 onChange={(e) => setLoginEmail(e.target.value)}
                               />
 
