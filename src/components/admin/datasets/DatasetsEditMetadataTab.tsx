@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Button,
+  type DropdownSectionProps,
   Icon,
   InputDate,
   StatusCard,
@@ -29,19 +30,29 @@ type DatasetsEditMetadataTabProps = {
   description: string;
   loadedKeywords: string;
   selectedKeywords: string[];
-  keywordOptions: React.ReactNode;
+  keywordOptions:
+    | React.ReactElement<DropdownSectionProps>
+    | React.ReactElement<DropdownSectionProps>[];
   loadedLicense: string;
-  licenseOptions: React.ReactNode;
+  licenseOptions:
+    | React.ReactElement<DropdownSectionProps>
+    | React.ReactElement<DropdownSectionProps>[];
   loadedFrequency: string;
-  frequencyOptions: React.ReactNode;
+  frequencyOptions:
+    | React.ReactElement<DropdownSectionProps>
+    | React.ReactElement<DropdownSectionProps>[];
   temporalStart: string;
   temporalEnd: string;
   loadedSpatialZones: string[];
-  spatialCoverageOptions: React.ReactNode;
+  spatialCoverageOptions:
+    | React.ReactElement<DropdownSectionProps>
+    | React.ReactElement<DropdownSectionProps>[];
   selectedZoneObjects: SpatialZone[];
   effectiveSpatialIds: string[];
   loadedSpatialGranularity: string;
-  spatialGranularityOptions: React.ReactNode;
+  spatialGranularityOptions:
+    | React.ReactElement<DropdownSectionProps>
+    | React.ReactElement<DropdownSectionProps>[];
   keywordsRef: React.MutableRefObject<string>;
   selectedLicenseRef: React.MutableRefObject<string>;
   selectedFrequencyRef: React.MutableRefObject<string>;
