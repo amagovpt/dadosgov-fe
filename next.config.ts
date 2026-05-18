@@ -17,7 +17,6 @@ try {
   // backend dir not available (e.g. standalone frontend deploy)
 }
 
-
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_UDATA_VERSION: udataVersion,
@@ -87,7 +86,7 @@ const nextConfig: NextConfig = {
       {
         protocol: urlAPI.protocol.slice(0, -1) as "http" | "https", // remove trailing colon
         hostname: urlAPI.hostname || "",
-      }
+      },
     ],
   },
   async rewrites() {
@@ -171,6 +170,12 @@ const nextConfig: NextConfig = {
         {
           source: "/api/:path*",
           destination: `${BACKEND_URL}/api/:path*`,
+        },
+        // Swagger UI static assets served by Flask-RestX at the backend root.
+        // Needed so `/api/1/` rendered via the frontend can load its CSS/JS.
+        {
+          source: "/swaggerui/:path*",
+          destination: `${BACKEND_URL}/swaggerui/:path*`,
         },
       ],
       afterFiles: [],
