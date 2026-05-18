@@ -1,7 +1,7 @@
 import { fetchHomepageData } from "@/services/api";
 import HomeClient from "@/components/home/HomeClient";
 import { getHome } from "@/queries/home";
-import { Datastory } from "@/types/home";
+import { Datastory, UsedDailyBy } from "@/types/home";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,13 +10,15 @@ export default async function Home() {
 
 
   let datastories: Datastory[] = [];
+  let usedDailyBy: UsedDailyBy[] = [];
   try {
-    const homeData = await getHome("pt");
-
-    datastories = homeData.datastories;
+    const result = await getHome("pt");
+    datastories = result.datastories;
+    usedDailyBy = result.usedDailyBy;
   } catch (error) {
     console.error("Error fetching home data:", error);
     // Fallback: use empty array if any datastory fails to load
+    usedDailyBy = [];
     datastories = [];
   }
 
@@ -27,6 +29,7 @@ export default async function Home() {
       datastories={datastories}
       latestReuses={data.latest_reuses}
       posts={data.latest_posts}
+      usedDailyBy={usedDailyBy}
     />
   );
 }

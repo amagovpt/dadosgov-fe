@@ -2,6 +2,7 @@ export interface Image {
     url: string
     fileName: string
     id: string
+    slug: string
 }
 
 export interface Hero {
