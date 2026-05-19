@@ -8,7 +8,7 @@ import { Dataset, Discussion, DiscussionCreatePayload, Reuse, CommunityResource 
 import IsolatedSelect from '@/components/admin/IsolatedSelect';
 import EditDiscussionPopup from '@/components/discussions/EditDiscussionPopup';
 import DeleteDiscussionPopup from '@/components/discussions/DeleteDiscussionPopup';
-import { fetchReuses } from '@/services/api';
+import { fetchReuses } from "@/api/reuses";
 import {
   fetchDiscussions,
   createDiscussion,

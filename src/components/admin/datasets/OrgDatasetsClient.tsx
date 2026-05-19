@@ -16,7 +16,7 @@ import {
 } from "@ama-pt/agora-design-system";
 
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchOrgDatasets } from "@/services/api";
+import { fetchOrgDatasets } from "@/api/organizations";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";

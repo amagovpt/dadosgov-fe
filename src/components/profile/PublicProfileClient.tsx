@@ -20,12 +20,12 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Dataset, Reuse, Follow, UserFollowing, UserPublic } from "@/types/api";
 import {
-  fetchMyDatasets,
-  fetchMyReuses,
-  fetchUserProfile,
   fetchDatasets,
   fetchReuses,
 } from "@/services/api";
+import { fetchMyDatasets } from "@/api/datasets";
+import { fetchMyReuses } from "@/api/reuses";
+import { fetchUserProfile } from "@/api/users";
 import { fetchUserFollowers, fetchMyFollowing } from "@/api/followers";
 import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";

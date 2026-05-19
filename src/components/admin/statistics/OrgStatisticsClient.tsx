@@ -21,11 +21,11 @@ import {
 } from "@ama-pt/agora-design-system";
 import {
   fetchOrgDatasets,
-  fetchOrgDataservices,
   fetchOrgMetrics,
   fetchOrgReuses,
   fetchOrganization,
-} from "@/services/api";
+} from "@/api/organizations";
+import { fetchOrgDataservices } from "@/api/dataservices";
 import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 

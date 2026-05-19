@@ -7,8 +7,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   fetchFullProfile,
-  fetchUserActivity,
-  fetchCsrfToken,
   updateProfile,
   uploadAvatar,
   deleteAvatar,
@@ -17,6 +15,8 @@ import {
   revokeApiToken,
   requestEmailChange,
 } from "@/services/api";
+import { fetchCsrfToken } from "@/api/auth";
+import { fetchUserActivity, updateProfile } from "@/api/users";
 import { fetchMyFollowing } from "@/api/followers";
 import { Activity, ApiToken, UserFollowing, UserPublic } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";

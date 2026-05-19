@@ -21,7 +21,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import { CategoryToggles } from "@/components/CategoryToggles";
-import { fetchOrganizations } from "@/services/api";
+import { fetchOrganizations } from "@/api/organizations";
 import { suggestTags } from "@/api/search";
 import { APIResponse, Dataservice, Organization, SiteMetrics } from "@/types/api";
 import HeroGeneral from "@/components/HeroGeneral";

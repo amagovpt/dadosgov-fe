@@ -1,4 +1,5 @@
-import { fetchOrganizations, fetchReuses } from '@/services/api';
+import { fetchOrganizations } from "@/api/organizations";
+import { fetchReuses } from "@/api/reuses";
 import ReusesClient from '@/components/reuses/ReusesClient';
 import { ReuseFilters } from '@/types/api';
 import { Metadata } from 'next';

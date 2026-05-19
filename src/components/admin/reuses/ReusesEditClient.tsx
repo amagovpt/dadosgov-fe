@@ -27,14 +27,14 @@ import {
   deleteReuse,
   fetchReuseTypes,
   fetchReuseTopics,
-  fetchMyDatasets,
-  fetchOrgDatasets,
   linkDatasetToReuse,
   unlinkDatasetFromReuse,
   linkDataserviceToReuse,
   fetchActivity,
   requestTransfer,
 } from "@/services/api";
+import { fetchMyDatasets } from "@/api/datasets";
+import { fetchOrgDatasets } from "@/api/organizations";
 import { fetchDiscussions } from "@/api/discussions-topics";
 import { searchDatasets, suggestTags } from "@/api/search";
 import { useAuth } from "@/context/AuthContext";

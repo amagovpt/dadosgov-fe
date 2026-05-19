@@ -44,7 +44,7 @@ import rehypeSanitize from "rehype-sanitize";
 import {
   fetchOrgDatasets,
   fetchOrgReuses,
-} from "@/services/api";
+} from "@/api/organizations";
 import {
   fetchOrgDiscussions,
   createDiscussion,

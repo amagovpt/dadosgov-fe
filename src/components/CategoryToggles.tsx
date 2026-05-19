@@ -4,11 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Toggle, Pill } from '@ama-pt/agora-design-system';
 import { SiteMetrics } from '@/types/api';
-import {
-  fetchDatasets,
-  fetchReuses,
-  fetchOrganizations,
-} from '@/services/api';
+import { fetchDatasets } from "@/api/datasets";
+import { fetchReuses } from "@/api/reuses";
+import { fetchOrganizations } from "@/api/organizations";
 import {
   searchDatasets,
   searchOrganizations,

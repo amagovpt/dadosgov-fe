@@ -24,9 +24,9 @@ import {
   linkDataserviceToReuse,
   fetchReuseTypes,
   fetchReuseTopics,
-  fetchMyDatasets,
-  fetchOrgDatasets,
 } from "@/services/api";
+import { fetchMyDatasets } from "@/api/datasets";
+import { fetchOrgDatasets } from "@/api/organizations";
 import { searchDatasets, suggestTags } from "@/api/search";
 import type { Reuse, ReuseType, ReuseTopic, Dataset, TagSuggestion } from "@/types/api";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";

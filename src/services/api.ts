@@ -18,7 +18,6 @@ import {
   UserFollowing,
   FormatSuggestion,
   Frequency,
-  GlobalSearchSuggestion,
   License,
   Notification,
   Organization,
@@ -36,15 +35,12 @@ import {
   ReuseTopic,
   ReuseType,
   ReuseUpdatePayload,
-  SiteConfigUpdatePayload,
-  SiteInfo,
   GeoLevel,
   Granularity,
   Report,
   ReportCreatePayload,
   ReportReason,
   SpatialZone,
-  TagSuggestion,
   Topic,
   TopicCreatePayload,
   TopicElement,
@@ -55,7 +51,6 @@ import {
   UserAdmin,
   UserAdminUpdatePayload,
   UserRole,
-  UserSuggestion,
   UserUpdatePayload,
   CommunityResource,
   CommunityResourceCreatePayload,
@@ -67,9 +62,6 @@ import {
   HarvestSourceCreatePayload,
   HarvestSourceUpdatePayload,
   HarvestValidationPayload,
-  HomepageData,
-  SystemLogContent,
-  SystemLogFile,
   Transfer,
   TransferRequestPayload,
 } from "@/types/api";
@@ -112,6 +104,32 @@ export {
   deleteDataservice,
   searchDataservices,
 } from "@/api/dataservices";
+export {
+  searchDatasets,
+  searchOrganizations,
+  searchReuses,
+  suggestTags,
+  suggestUsers,
+  suggestGlobalSearch,
+  suggestSpatialZones,
+} from "@/api/search";
+export {
+  fetchSiteInfo,
+  updateSiteConfig,
+  fetchHomepageData,
+  fetchFeaturedDatasets,
+  fetchFeaturedReuses,
+  fetchLatestDatasets,
+  fetchLatestReuses,
+  fetchHomeFeaturedDatasets,
+  updateHomeFeaturedDatasets,
+  fetchHomeFeaturedReuses,
+  updateHomeFeaturedReuses,
+  fetchSystemLogs,
+  fetchSystemLogContent,
+  submitSupportContact,
+} from "@/api/system";
+export type { SupportTopic } from "@/api/system";
 
 // Server-side (Node.js) needs absolute URLs; client-side uses relative URLs via Next.js proxy
 const isServer = typeof window === "undefined";
@@ -586,138 +604,6 @@ export async function unfollowReuse(id: string): Promise<void> {
   if (!res.ok) throw new Error(`Failed to unfollow reuse: ${res.statusText}`);
 }
 
-export async function fetchSiteInfo(): Promise<SiteInfo> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/site/`, {
-      next: { revalidate: 300 },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch site info: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching site info:", error);
-    return {
-      id: "",
-      title: "",
-      metrics: { datasets: 0, organizations: 0, reuses: 0, users: 0 },
-    };
-  }
-}
-
-export async function updateSiteConfig(payload: SiteConfigUpdatePayload): Promise<SiteInfo> {
-  const res = await fetch(`${API_AUTH_URL}/site/`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.message || `Failed to update site config: ${res.statusText}`);
-  }
-
-  return await res.json();
-}
-
-export async function fetchFeaturedDatasets(pageSize: number = 3): Promise<APIResponse<Dataset>> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/datasets/?featured=true&page_size=${pageSize}`, {
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch featured datasets: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching featured datasets:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-export async function fetchFeaturedReuses(pageSize: number = 3): Promise<APIResponse<Reuse>> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/reuses/?featured=true&page_size=${pageSize}`, {
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch featured reuses: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching featured reuses:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-export async function fetchLatestDatasets(pageSize: number = 3): Promise<APIResponse<Dataset>> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/datasets/?sort=-created&page_size=${pageSize}`, {
-      next: { revalidate: 60 },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch latest datasets: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching latest datasets:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-export async function fetchLatestReuses(pageSize: number = 3): Promise<APIResponse<Reuse>> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/reuses/?sort=-created&page_size=${pageSize}`, {
-      next: { revalidate: 60 },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch latest reuses: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching latest reuses:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
 
 export async function fetchPosts(
   page: number = 1,
@@ -749,28 +635,6 @@ export async function fetchPosts(
       total: 0,
       next_page: null,
       previous_page: null,
-    };
-  }
-}
-
-export async function fetchHomepageData(): Promise<HomepageData> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/site/home/`, {
-      next: { revalidate: 60 },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch homepage data: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching homepage data:", error);
-    return {
-      site_metrics: { datasets: 0, organizations: 0, reuses: 0, users: 0 },
-      latest_datasets: [],
-      latest_reuses: [],
-      latest_posts: [],
     };
   }
 }
@@ -969,87 +833,6 @@ export async function uploadPostImage(
   } catch (error) {
     console.error("Error uploading post image:", error);
     return null;
-  }
-}
-
-export async function searchDatasets(
-  query: string,
-  page: number = 1,
-  pageSize: number = 10
-): Promise<APIResponse<Dataset>> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/datasets/?q=${encodeURIComponent(query)}&page=${page}&page_size=${pageSize}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) {
-      throw new Error(`Failed to search datasets: ${res.statusText}`);
-    }
-    return await res.json();
-  } catch (error) {
-    console.error("Error searching datasets:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-export async function searchOrganizations(
-  query: string,
-  page: number = 1,
-  pageSize: number = 10
-): Promise<APIResponse<Organization>> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/organizations/?q=${encodeURIComponent(query)}&page=${page}&page_size=${pageSize}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) {
-      throw new Error(`Failed to search organizations: ${res.statusText}`);
-    }
-    return await res.json();
-  } catch (error) {
-    console.error("Error searching organizations:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-export async function searchReuses(
-  query: string,
-  page: number = 1,
-  pageSize: number = 10
-): Promise<APIResponse<Reuse>> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/reuses/?q=${encodeURIComponent(query)}&page=${page}&page_size=${pageSize}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) {
-      throw new Error(`Failed to search reuses: ${res.statusText}`);
-    }
-    return await res.json();
-  } catch (error) {
-    console.error("Error searching reuses:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
   }
 }
 
@@ -1329,20 +1112,6 @@ export async function suggestFormats(query: string): Promise<FormatSuggestion[]>
   }
 }
 
-export async function suggestTags(query: string, size: number = 10): Promise<TagSuggestion[]> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/tags/suggest/?q=${encodeURIComponent(query)}&size=${size}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) throw new Error(`Failed to suggest tags: ${res.statusText}`);
-    return await res.json();
-  } catch (error) {
-    console.error("Error suggesting tags:", error);
-    return [];
-  }
-}
-
 export async function suggestDatasets(
   query: string,
   size: number = 5
@@ -1424,27 +1193,6 @@ export async function skipMigration(): Promise<{ success: boolean }> {
   });
   if (!res.ok) throw new Error("Failed to skip migration");
   return await res.json();
-}
-
-export async function suggestGlobalSearch(
-  query: string,
-  size: number = 5
-): Promise<GlobalSearchSuggestion[]> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/datasets/suggest/?q=${encodeURIComponent(query)}&size=${size}`,
-      { cache: "no-store" }
-    );
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch search suggestions: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching search suggestions:", error);
-    return [];
-  }
 }
 
 // --- Notifications ---
@@ -1918,23 +1666,6 @@ export async function deleteDiscussionComment(
 }
 
 // --- Spatial / Geographic ---
-
-export async function suggestSpatialZones(
-  query: string,
-  size: number = 10
-): Promise<SpatialZone[]> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/spatial/zones/suggest/?q=${encodeURIComponent(query)}&size=${size}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) throw new Error(`Failed to suggest spatial zones: ${res.statusText}`);
-    return await res.json();
-  } catch (error) {
-    console.error("Error suggesting spatial zones:", error);
-    return [];
-  }
-}
 
 export async function fetchSpatialZones(ids: string[]): Promise<object> {
   try {
@@ -2562,23 +2293,6 @@ export async function fetchUserRoles(): Promise<UserRole[]> {
   }
 }
 
-export async function suggestUsers(query: string, size: number = 20): Promise<UserSuggestion[]> {
-  try {
-    const res = await fetch(
-      `${API_AUTH_URL}/users/suggest/?q=${encodeURIComponent(query)}&size=${size}`,
-      { cache: "no-store", credentials: "include" }
-    );
-
-    if (!res.ok) {
-      throw new Error(`Failed to suggest users: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error suggesting users:", error);
-    return [];
-  }
-}
 
 // ── Community Resources CRUD (TICKET-31) ─────────────────────────────
 
@@ -3032,89 +2746,6 @@ export async function fetchOrgCommunityResources(
 
 // ─── Editorial / Home Featured Content ────────────────────────────────
 
-export async function fetchHomeFeaturedDatasets(): Promise<Dataset[]> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/site/home/datasets/`, {
-      cache: "no-store",
-      credentials: "include",
-    });
-    if (!res.ok)
-      throw new Error(`Failed to fetch home featured datasets: ${res.statusText}`);
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching home featured datasets:", error);
-    return [];
-  }
-}
-
-export async function updateHomeFeaturedDatasets(
-  datasetIds: string[]
-): Promise<Dataset[]> {
-  const res = await fetch(`${API_AUTH_URL}/site/home/datasets/`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(datasetIds),
-  });
-  if (!res.ok)
-    throw new Error(`Failed to update home featured datasets: ${res.statusText}`);
-  return await res.json();
-}
-
-export async function fetchHomeFeaturedReuses(): Promise<Reuse[]> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/site/home/reuses/`, {
-      cache: "no-store",
-      credentials: "include",
-    });
-    if (!res.ok)
-      throw new Error(`Failed to fetch home featured reuses: ${res.statusText}`);
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching home featured reuses:", error);
-    return [];
-  }
-}
-
-export async function updateHomeFeaturedReuses(
-  reuseIds: string[]
-): Promise<Reuse[]> {
-  const res = await fetch(`${API_AUTH_URL}/site/home/reuses/`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(reuseIds),
-  });
-  if (!res.ok)
-    throw new Error(`Failed to update home featured reuses: ${res.statusText}`);
-  return await res.json();
-}
-
-export type SupportTopic = "question" | "bug" | "feedback";
-
-export async function submitSupportContact(payload: {
-  topic: SupportTopic;
-  email: string;
-  subject: string;
-  message: string;
-}): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/site/contact/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    let detail = "";
-    try {
-      const data = await res.json();
-      detail = data?.message || data?.errors ? JSON.stringify(data.errors || data.message) : "";
-    } catch {
-      // ignore — keep generic message
-    }
-    throw new Error(detail || `Failed to submit support form: ${res.statusText}`);
-  }
-}
-
 export async function requestTransfer(payload: TransferRequestPayload): Promise<Transfer> {
   const res = await fetch(`${API_AUTH_URL}/transfer/`, {
     method: "POST",
@@ -3137,42 +2768,6 @@ export async function requestTransfer(payload: TransferRequestPayload): Promise<
     throw new Error(detail || `Failed to request transfer: ${res.statusText}`);
   }
   return await res.json();
-}
-
-/**
- * Fetch the list of available host log files (admin only).
- */
-export async function fetchSystemLogs(): Promise<SystemLogFile[]> {
-  try {
-    const res = await authFetch("/site/logs/", { cache: "no-store" });
-    if (!res.ok) {
-      throw new Error(`Failed to fetch logs: ${res.statusText}`);
-    }
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching system logs:", error);
-    return [];
-  }
-}
-
-/**
- * Fetch the content of a single host log file (admin only). Backend tails to ~1MB.
- */
-export async function fetchSystemLogContent(
-  filename: string
-): Promise<SystemLogContent | null> {
-  try {
-    const res = await authFetch(`/site/logs/${encodeURIComponent(filename)}/`, {
-      cache: "no-store",
-    });
-    if (!res.ok) {
-      throw new Error(`Failed to fetch log content: ${res.statusText}`);
-    }
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching system log content:", error);
-    return null;
-  }
 }
 
 /**

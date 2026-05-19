@@ -15,7 +15,7 @@ import {
   DropdownOption,
   CardGeneral,
 } from "@ama-pt/agora-design-system";
-import { createDataservice } from "@/services/api";
+import { createDataservice } from "@/api/dataservices";
 import type { Dataservice } from "@/types/api";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";

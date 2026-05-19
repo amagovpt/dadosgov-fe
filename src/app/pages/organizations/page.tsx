@@ -1,4 +1,4 @@
-import { fetchOrganizations, fetchOrgBadges } from '@/services/api';
+import { fetchOrganizations, fetchOrgBadges } from "@/api/organizations";
 import OrganizationsClient from '@/components/organizations/OrganizationsClient';
 import { OrganizationFilters } from '@/types/api';
 import { Metadata } from 'next';

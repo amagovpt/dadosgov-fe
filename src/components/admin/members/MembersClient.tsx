@@ -27,7 +27,7 @@ import {
   fetchMembershipRequests,
   acceptMembership,
   refuseMembership,
-} from "@/services/api";
+} from "@/api/organizations";
 import { suggestUsers } from "@/api/search";
 import { Organization, OrganizationMember, MembershipRequest, UserSuggestion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";

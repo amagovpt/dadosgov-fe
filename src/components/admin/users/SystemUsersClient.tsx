@@ -17,7 +17,7 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { fetchUsers } from "@/services/api";
+import { fetchUsers } from "@/api/users";
 import { UserAdmin } from "@/types/api";
 
 type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";

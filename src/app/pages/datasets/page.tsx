@@ -3,8 +3,8 @@ import {
   fetchFrequencies,
   fetchGranularities,
   fetchLicenses,
-  fetchOrganizations,
-} from '@/services/api';
+} from "@/api/datasets";
+import { fetchOrganizations } from "@/api/organizations";
 import { DatasetFilters } from '@/types/api';
 import DatasetsClient from '@/components/datasets/DatasetsClient';
 

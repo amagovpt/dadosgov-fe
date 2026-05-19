@@ -16,7 +16,7 @@ import {
 import { Organization } from "@/types/api";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { useAuth } from "@/context/AuthContext";
-import { requestMembership } from "@/services/api";
+import { requestMembership } from "@/api/organizations";
 import { followEntity, unfollowEntity, isFollowing } from "@/api/followers";
 import { formatMetricValue } from "@/utils/formatNumber";
 import ReactMarkdown from "react-markdown";

@@ -7,7 +7,7 @@ import { Sidebar, SidebarItem, Icon } from "@ama-pt/agora-design-system";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { fetchOrganization } from "@/services/api";
+import { fetchOrganization } from "@/api/organizations";
 import { Organization } from "@/types/api";
 
 interface NavChild {
