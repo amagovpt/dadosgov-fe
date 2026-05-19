@@ -8,14 +8,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Email é obrigatório" }, { status: 400 });
   }
 
-  // Get CSRF token from backend, using the client's existing session cookies
+  // Use a fresh session for the CSRF token — do not forward the client's existing session.
+  // A SAML-authenticated session lacks csrf_token; merging it with the /get-csrf session
+  // would send duplicate session cookies, Flask would pick the old one (no csrf_token),
+  // and the CSRF check on POST /reset/ would return 400.
   let csrfToken: string;
   let sessionCookies: string;
   try {
-    const existingCookies = request.headers.get("cookie") || "";
-    const csrfRes = await backendFetch("/get-csrf", {
-      headers: { Cookie: existingCookies },
-    });
+    const csrfRes = await backendFetch("/get-csrf");
     if (!csrfRes.ok) {
       return NextResponse.json({ message: "Erro ao obter token de segurança" }, { status: 502 });
     }
@@ -24,9 +24,8 @@ export async function POST(request: NextRequest) {
     if (!csrfToken) {
       return NextResponse.json({ message: "Token de segurança inválido" }, { status: 502 });
     }
-    // Merge any new session cookies set by /get-csrf with the client cookies
-    const newCookies = csrfRes.headers.getSetCookie().map((c) => c.split(";")[0]).join("; ");
-    sessionCookies = [existingCookies, newCookies].filter(Boolean).join("; ");
+    // Use only the fresh session cookie returned by /get-csrf (it always contains csrf_token)
+    sessionCookies = csrfRes.headers.getSetCookie().map((c) => c.split(";")[0]).join("; ");
   } catch {
     return NextResponse.json({ message: "Backend indisponível" }, { status: 502 });
   }
