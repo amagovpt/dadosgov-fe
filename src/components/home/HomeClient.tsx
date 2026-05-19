@@ -212,11 +212,10 @@ export default function HomeClient({
         </div>
 
         {/* Featured Datasets */}
-        <div className="bg-white pb-64 xl:pt-64">
-          <div className="container mx-auto px-4">
-            <h2 className="mb-32 text-xl-bold text-primary-900">Conjuntos de dados</h2>
-
-            <div className="grid gap-32 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
+        <section className="w-full flex flex-col items-center justify-center pt-64">
+          <div className="container flex flex-col gap-32">
+            <h2 className="text-xl-bold text-primary-900">Conjuntos de dados</h2>
+            <div className="grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
               {latestDatasets.length > 0 ? (
                 latestDatasets.map((dataset, index) => {
                   const timeAgo = formatDateToTimeAgo(dataset.last_modified);
@@ -248,11 +247,11 @@ export default function HomeClient({
               </Link>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Data Stories */}
-        <div className="bg-primary-900 xl:py-64">
-          <div className="container mx-auto px-4">
+        <section className="w-full flex flex-col items-center justify-center bg-primary-900 py-64">
+          <div className="container flex flex-col gap-32">
             <h2 className="text-xl-bold text-white">Data Stories</h2>
             <p className="mb-32 mt-16 max-w-3xl text-white">
               Histórias contadas com dados abertos — análises e visualizações sobre temas de
@@ -260,7 +259,7 @@ export default function HomeClient({
             </p>
             {datastories && datastories.length > 0 ? (
               <>
-                <div className="storytellings grid gap-32 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
+                <div className="storytellings grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
                   {datastories.map((story) => (
                     <CardArticle
                       key={story.slug}
@@ -307,13 +306,13 @@ export default function HomeClient({
               </div>
             )}
           </div>
-        </div>
+        </section>
 
         {/* Latest News */}
-        <div className="latest-news-section bg-white xl:py-64">
-          <div className="container mx-auto px-4">
-            <h2 className="mb-32 text-xl-bold text-primary-900">Últimas novidades</h2>
-            <div className="grid gap-32 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
+        <section className="w-full flex flex-col items-center justify-center py-64">
+          <div className="container flex flex-col gap-32">
+            <h2 className="text-xl-bold text-primary-900">Últimas novidades</h2>
+            <div className="grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
               {posts.length > 0 ? (
                 posts.map((post) => (
                   <div key={post.id} className="latest-news-card-wrapper h-full">
@@ -368,10 +367,10 @@ export default function HomeClient({
               </Link>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Utilizado diariamente por */}
-        <div className="w-full flex flex-col items-center justify-center pb-64">
+        <section className="w-full flex flex-col items-center justify-center pb-64">
           <div className="container flex flex-col gap-32 ">
             <div className="w-full flex flex-col gap-32">
               <h2 className="text-xl-bold text-primary-900">Utilizado diariamente por:</h2>
@@ -401,7 +400,7 @@ export default function HomeClient({
               </Button>
             </Link>
           </div>
-        </div>
+        </section>
       </div>
     </main>
   );
