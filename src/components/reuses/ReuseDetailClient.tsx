@@ -29,13 +29,13 @@ import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from "@/types/api
 import {
   fetchDataset,
   fetchReuse,
+} from "@/services/api";
+import {
   fetchDiscussions,
   createDiscussion,
   replyToDiscussion,
-  followEntity,
-  unfollowEntity,
-  isFollowing,
-} from "@/services/api";
+} from "@/api/discussions-topics";
+import { followEntity, unfollowEntity, isFollowing } from "@/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";

@@ -7,12 +7,14 @@ import { pt } from "date-fns/locale";
 import { Avatar, Button, Icon, InputTextArea, usePopupContext } from "@ama-pt/agora-design-system";
 import { Discussion, Dataset, Reuse } from "@/types/api";
 import {
-  replyToDiscussion,
-  closeDiscussion,
-  deleteDiscussion,
   fetchDataset,
   fetchReuse,
 } from "@/services/api";
+import {
+  replyToDiscussion,
+  closeDiscussion,
+  deleteDiscussion,
+} from "@/api/discussions-topics";
 
 interface DiscussionDetailPopupProps {
   discussion: Discussion;

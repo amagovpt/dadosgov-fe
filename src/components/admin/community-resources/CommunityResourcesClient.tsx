@@ -16,7 +16,7 @@ import {
   Button,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchMyCommunityResources } from "@/services/api";
+import { fetchMyCommunityResources } from "@/api/community-resources";
 import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";

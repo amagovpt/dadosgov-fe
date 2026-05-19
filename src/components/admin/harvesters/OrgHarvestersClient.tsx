@@ -19,7 +19,7 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchOrgHarvesters } from "@/services/api";
+import { fetchOrgHarvesters } from "@/api/harvesters";
 import { HarvestSource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";

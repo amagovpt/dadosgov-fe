@@ -33,9 +33,9 @@ import {
   suggestSpatialZones,
   suggestTags,
   fetchActivity,
-  fetchDiscussions,
   requestTransfer,
 } from "@/services/api";
+import { fetchDiscussions } from "@/api/discussions-topics";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import {
   Dataset,

@@ -42,7 +42,7 @@ import {
   deleteHarvester,
   rejectHarvestSource,
   validateHarvestSource,
-} from "@/services/api";
+} from "@/api/harvesters";
 import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,

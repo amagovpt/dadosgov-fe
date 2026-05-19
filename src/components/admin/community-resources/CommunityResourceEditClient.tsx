@@ -13,12 +13,14 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import {
-  fetchCommunityResource,
-  updateCommunityResource,
-  deleteCommunityResource,
   fetchResourceTypes,
   fetchSchemas,
 } from "@/services/api";
+import {
+  fetchCommunityResource,
+  updateCommunityResource,
+  deleteCommunityResource,
+} from "@/api/community-resources";
 import type { CommunityResource, ResourceType } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";

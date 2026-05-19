@@ -16,8 +16,8 @@ import {
   fetchApiTokens,
   revokeApiToken,
   requestEmailChange,
-  fetchMyFollowing,
 } from "@/services/api";
+import { fetchMyFollowing } from "@/api/followers";
 import { Activity, ApiToken, UserFollowing, UserPublic } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";

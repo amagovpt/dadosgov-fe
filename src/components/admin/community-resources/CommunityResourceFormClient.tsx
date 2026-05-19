@@ -16,12 +16,14 @@ import {
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import {
-  createCommunityResource,
-  uploadCommunityResourceFile,
   fetchDataset,
   fetchMyDatasets,
   fetchResourceTypes,
 } from "@/services/api";
+import {
+  createCommunityResource,
+  uploadCommunityResourceFile,
+} from "@/api/community-resources";
 import type { Dataset, CommunityResource, ResourceType } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";

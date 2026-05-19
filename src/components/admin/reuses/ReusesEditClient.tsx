@@ -34,10 +34,10 @@ import {
   unlinkDatasetFromReuse,
   linkDataserviceToReuse,
   fetchActivity,
-  fetchDiscussions,
   suggestTags,
   requestTransfer,
 } from "@/services/api";
+import { fetchDiscussions } from "@/api/discussions-topics";
 import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
 import {

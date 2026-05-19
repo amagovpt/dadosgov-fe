@@ -22,12 +22,11 @@ import { Dataset, Reuse, Follow, UserFollowing, UserPublic } from "@/types/api";
 import {
   fetchMyDatasets,
   fetchMyReuses,
-  fetchUserFollowers,
-  fetchMyFollowing,
   fetchUserProfile,
   fetchDatasets,
   fetchReuses,
 } from "@/services/api";
+import { fetchUserFollowers, fetchMyFollowing } from "@/api/followers";
 import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
