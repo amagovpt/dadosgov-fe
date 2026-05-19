@@ -67,7 +67,6 @@ import {
   UserPublic,
   UserAdmin,
   UserAdminUpdatePayload,
-  UserRef,
   UserRole,
   UserSuggestion,
   UserUpdatePayload,
@@ -89,6 +88,10 @@ import {
   TransferRequestPayload,
 } from "@/types/api";
 import { translateUploadError } from "@/lib/security/translateUploadError";
+export { fetchCsrfToken, login, logout, fetchCurrentUser } from "@/api/auth";
+export { fetchMyDatasets, fetchMyOrgDatasets } from "@/api/datasets";
+export { fetchMyReuses } from "@/api/reuses";
+export { fetchUserProfile } from "@/api/users";
 
 // Server-side (Node.js) needs absolute URLs; client-side uses relative URLs via Next.js proxy
 const isServer = typeof window === "undefined";
@@ -120,213 +123,6 @@ function translateUploadErrorPayload(
 ): Record<string, unknown> {
   if (typeof data?.message !== "string") return data;
   return { ...data, message: translateUploadError(data.message) };
-}
-
-/**
- * Fetch CSRF token from backend
- */
-export async function fetchCsrfToken(): Promise<string> {
-  const res = await fetch("/csrf", { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch CSRF token");
-  const data = await res.json();
-  return data.csrf_token;
-}
-
-/**
- * Perform login using the frontend route handler proxy
- */
-export async function login(formData: FormData): Promise<{ message: string; redirect?: string }> {
-  const params = new URLSearchParams();
-  for (const [key, value] of formData.entries()) {
-    params.append(key, typeof value === "string" ? value : value.name);
-  }
-
-  const res = await fetch("/login", {
-    method: "POST",
-    body: params,
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || "Login failed");
-  }
-  return data;
-}
-
-/**
- * Perform logout
- */
-export async function logout(): Promise<void> {
-  const res = await fetch("/logout", { method: "GET" });
-  if (!res.ok) throw new Error("Logout failed");
-}
-
-/**
- * Fetch the currently authenticated user profile
- */
-export async function fetchCurrentUser(): Promise<UserRef | null> {
-  try {
-    const res = await fetch("/me", { cache: "no-store" });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Fetch the authenticated user's personal datasets (owner = current user).
- * Backend returns a flat array; we filter out org-owned and wrap into APIResponse.
- */
-export async function fetchMyDatasets(
-  page: number = 1,
-  pageSize: number = 20
-): Promise<APIResponse<Dataset>> {
-  try {
-    const res = await authFetch("/me/datasets/", { cache: "no-store" });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch my datasets: ${res.statusText}`);
-    }
-
-    const raw: Dataset[] = await res.json();
-    // Keep only personal datasets: owner must exist and organization must be absent
-    const allDatasets = raw.filter((d) => !!d.owner && !d.organization);
-    const total = allDatasets.length;
-    const start = (page - 1) * pageSize;
-    const data = allDatasets.slice(start, start + pageSize);
-
-    return {
-      data,
-      page,
-      page_size: pageSize,
-      total,
-      next_page: start + pageSize < total ? String(page + 1) : null,
-      previous_page: page > 1 ? String(page - 1) : null,
-    };
-  } catch (error) {
-    console.error("Error fetching my datasets:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-/**
- * Fetch the authenticated user's reuses (paginated)
- */
-export async function fetchMyReuses(
-  page: number = 1,
-  pageSize: number = 20
-): Promise<APIResponse<Reuse>> {
-  try {
-    const res = await fetch(
-      `${API_AUTH_URL}/me/reuses/`,
-      { cache: "no-store", credentials: "include" }
-    );
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch my reuses: ${res.statusText}`);
-    }
-
-    const raw: Reuse[] = await res.json();
-    const allReuses = raw;
-    const total = allReuses.length;
-    const start = (page - 1) * pageSize;
-    const data = allReuses.slice(start, start + pageSize);
-
-    return {
-      data,
-      page,
-      page_size: pageSize,
-      total,
-      next_page: start + pageSize < total ? String(page + 1) : null,
-      previous_page: page > 1 ? String(page - 1) : null,
-    };
-  } catch (error) {
-    console.error("Error fetching my reuses:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-/**
- * Fetch datasets from the authenticated user's organizations.
- * Backend returns a flat array; we wrap it into APIResponse for consistency.
- */
-export async function fetchMyOrgDatasets(
-  page: number = 1,
-  pageSize: number = 20
-): Promise<APIResponse<Dataset>> {
-  try {
-    const res = await fetch(
-      `${API_AUTH_URL}/me/org_datasets/`,
-      { cache: "no-store", credentials: "include" }
-    );
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch my org datasets: ${res.statusText}`);
-    }
-
-    const allDatasets: Dataset[] = await res.json();
-    const total = allDatasets.length;
-    const start = (page - 1) * pageSize;
-    const data = allDatasets.slice(start, start + pageSize);
-
-    return {
-      data,
-      page,
-      page_size: pageSize,
-      total,
-      next_page: start + pageSize < total ? String(page + 1) : null,
-      previous_page: page > 1 ? String(page - 1) : null,
-    };
-  } catch (error) {
-    console.error("Error fetching my org datasets:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-/**
- * Fetch the public profile of any user by ID or slug
- */
-export async function fetchUserProfile(userId: string): Promise<UserPublic | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/users/${userId}/`, {
-      cache: "no-store",
-    });
-
-    if (res.status === 404) {
-      return null;
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch user profile: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching user profile:", error);
-    throw error;
-  }
 }
 
 export async function fetchDatasets(
