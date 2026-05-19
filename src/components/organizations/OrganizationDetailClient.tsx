@@ -180,7 +180,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
       </div>
 
       {user && isMember && (
-        <StatusCard variant="info" showIcon description="Já pertence a esta organização." />
+        <StatusCard variant="informative" showIcon description="Já pertence a esta organização." />
       )}
       {requestSuccess && (
         <StatusCard

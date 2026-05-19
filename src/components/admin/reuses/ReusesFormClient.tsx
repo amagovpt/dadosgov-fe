@@ -874,6 +874,7 @@ export default function ReusesFormClient({
                       placeholder="Nome do conjunto de dados externo"
                       id={`reuse-dataset-title-${index}`}
                       value={link.title ?? ""}
+                      required={false}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleDatasetTitleChange(index, e.target.value)
                       }
@@ -883,6 +884,7 @@ export default function ReusesFormClient({
                       placeholder="Pequena descrição do conjunto de dados"
                       id={`reuse-dataset-description-${index}`}
                       value={link.description ?? ""}
+                      required={false}
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         handleDatasetDescriptionChange(index, e.target.value)
                       }
