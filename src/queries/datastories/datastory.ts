@@ -1,6 +1,6 @@
 import apolloClient from "@/services/apollo-client";
-import { DataStoryMetadata } from "@/types/datastories/datastories";
-import { Datastory } from "@/types/datastories/datastory";
+import { DataStoryMetadata } from "@/service/types/datastories/datastories";
+import { Datastory } from "@/service/types/datastories/datastory";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import IconAgora from '@/components/Primitives/IconAgora';
 import CardIllustrative from '@/components/Primitives/Cards/CardIllustrative';
 import { Pagination } from '@/components/Pagination';
-import { PageMiniCourses } from '@/services/types/courses';
+import { PageMiniCourses } from '@/service/types/courses';
 
 
 export interface MiniCoursesResultProps {

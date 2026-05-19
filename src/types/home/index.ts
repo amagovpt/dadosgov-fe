@@ -1,4 +1,4 @@
-import { Image } from "@/services/types/common";
+import { Image } from "@/service/types/common";
 
 export type Datastory = {
     slug: string;

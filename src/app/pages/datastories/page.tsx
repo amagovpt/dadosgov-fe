@@ -1,7 +1,7 @@
 import DataStoriesClient from "@/components/datastories/DataStoriesClient";
-import { getDataStories } from "@/queries/datastories/datastories";
-import apolloClient from "@/services/apollo-client";
-import { Datastories } from "@/types/datastories/datastories";
+import { getDataStories } from "@/service/queries/datastories/datastories";
+import apolloClient from "@/service/utils/apollo-client";
+import { Datastories } from "@/service/types/datastories/datastories";
 import { flattenData } from "@/utils/flattenObject";
 import { Metadata } from "next";
 
