@@ -21,6 +21,7 @@ import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/Dra
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { ResourceType } from "@/types/api";
+import { AppLink } from "../Primitives/AppLink";
 
 export interface PendingResourceMeta {
   title: string;
@@ -45,7 +46,7 @@ function DeleteConfirmContent({ name, onConfirm }: { name: string; onConfirm: ()
   return (
     <div className="flex flex-col p-2">
       <StatusCard variant="informative" showIcon description="Esta ação é irreversível." />
-      <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
+      <p className="text-sm text-neutral-900" style={{ marginTop: "24px" }}>
         Tem a certeza que pretende eliminar <span className="font-bold">{name}</span>?
       </p>
       <div className="flex justify-end gap-[18px]" style={{ marginTop: "32px" }}>
@@ -100,9 +101,7 @@ function ResourceEditPendingPopupContent({
   const resourceTypeRef = useRef(defaultType);
   const [description, setDescription] = useState(initialMeta.description || "");
   const [url, setUrl] = useState(isUrl ? name : "");
-  const [filesize, setFilesize] = useState(
-    initialMeta.filesize ?? (file ? String(file.size) : "")
-  );
+  const [filesize, setFilesize] = useState(initialMeta.filesize ?? (file ? String(file.size) : ""));
   const [format, setFormat] = useState(
     initialMeta.format ?? (fileExt ? fileExt.slice(1).toLowerCase() : "")
   );
@@ -180,7 +179,7 @@ function ResourceEditPendingPopupContent({
         format: format.trim() || undefined,
         mime: mime.trim() || undefined,
       },
-      isUrl ? url.trim() : undefined,
+      isUrl ? url.trim() : undefined
     );
     hide();
   };
@@ -202,9 +201,9 @@ function ResourceEditPendingPopupContent({
 
   return (
     <div className="flex flex-col gap-16" style={{ minHeight: "60vh" }}>
-      <div className="flex-1 overflow-y-auto flex flex-col gap-16">
+      <div className="flex flex-1 flex-col gap-16 overflow-y-auto">
         <div className="flex items-end gap-2">
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <InputText
               label="Título *"
               placeholder="Título do recurso"
@@ -214,7 +213,9 @@ function ResourceEditPendingPopupContent({
             />
           </div>
           {!isUrl && fileExt && (
-            <span className="text-neutral-900 text-sm font-medium pb-[13px] shrink-0">{fileExt.toUpperCase()}</span>
+            <span className="text-sm shrink-0 pb-[13px] font-medium text-neutral-900">
+              {fileExt.toUpperCase()}
+            </span>
           )}
         </div>
 
@@ -298,7 +299,12 @@ function ResourceEditPendingPopupContent({
         <div className="flex gap-8">
           {!isUrl && onReplaceFile && (
             <>
-              <input ref={replaceFileInputRef} type="file" className="hidden" onChange={handleReplaceFile} />
+              <input
+                ref={replaceFileInputRef}
+                type="file"
+                className="hidden"
+                onChange={handleReplaceFile}
+              />
               <Button
                 appearance="outline"
                 variant="primary"
@@ -344,7 +350,8 @@ function ResourceViewPopupContent({
   onDelete: () => void;
   onClose: () => void;
 }) {
-  const typeLabel = resourceTypes.find((rt) => rt.id === meta.resourceType)?.label ?? meta.resourceType;
+  const typeLabel =
+    resourceTypes.find((rt) => rt.id === meta.resourceType)?.label ?? meta.resourceType;
   const extMatch = !isUrl ? name.match(/(\.[^.]+)$/) : null;
   const fileExt = extMatch ? extMatch[1].slice(1).toUpperCase() : null;
   const location = isUrl
@@ -355,43 +362,41 @@ function ResourceViewPopupContent({
 
   return (
     <div className="flex flex-col gap-16" style={{ minHeight: "40vh" }}>
-      {meta.description && <p className="text-neutral-700 text-sm">{meta.description}</p>}
+      {meta.description && <p className="text-sm text-neutral-700">{meta.description}</p>}
       <div className="flex-1 overflow-y-auto">
         <table className="text-sm w-full">
           <tbody>
             <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Tipo</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Tipo</td>
               <td className="py-4">{typeLabel}</td>
             </tr>
             <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Localização</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Localização</td>
               <td className="py-4">{location}</td>
             </tr>
             {isUrl && (
               <tr>
-                <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">URL</td>
-                <td className="py-4 break-all">
-                  <a href={name} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">
-                    {name}
-                  </a>
+                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">URL</td>
+                <td className="break-all py-4">
+                  <AppLink href={name}>{name}</AppLink>
                 </td>
               </tr>
             )}
             {format && (
               <tr>
-                <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Formato</td>
+                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Formato</td>
                 <td className="py-4">{format}</td>
               </tr>
             )}
             {mimeType && (
               <tr>
-                <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Mime Type</td>
+                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Mime Type</td>
                 <td className="py-4">{mimeType}</td>
               </tr>
             )}
             {size && (
               <tr>
-                <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Tamanho</td>
+                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Tamanho</td>
                 <td className="py-4">{size}</td>
               </tr>
             )}
@@ -474,7 +479,7 @@ function ResourceItem({
         onSave={onSaveMeta}
         onReplaceFile={onReplace}
       />,
-      { title: displayName, closeAriaLabel: "Fechar", dimensions: "l" },
+      { title: displayName, closeAriaLabel: "Fechar", dimensions: "l" }
     );
   };
 
@@ -499,11 +504,17 @@ function ResourceItem({
         isUrl={isUrl}
         resourceTypes={resourceTypes}
         meta={currentMeta}
-        onEdit={() => { hide(); setTimeout(handleEdit, 50); }}
-        onDelete={() => { hide(); handleRemove(); }}
+        onEdit={() => {
+          hide();
+          setTimeout(handleEdit, 50);
+        }}
+        onDelete={() => {
+          hide();
+          handleRemove();
+        }}
         onClose={hide}
       />,
-      { title: displayName, closeAriaLabel: "Fechar", dimensions: "l" },
+      { title: displayName, closeAriaLabel: "Fechar", dimensions: "l" }
     );
   };
 
@@ -515,7 +526,7 @@ function ResourceItem({
         onClick={handleView}
         aria-label={`Ver ${displayName}`}
       >
-        <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+        <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
       </button>
       <button
         className="text-primary-500 hover:text-primary-700"
@@ -523,7 +534,7 @@ function ResourceItem({
         onClick={handleEdit}
         aria-label={`Editar ${displayName}`}
       >
-        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
       </button>
       <button
         className="text-danger-500 hover:text-danger-700"
@@ -531,7 +542,7 @@ function ResourceItem({
         onClick={handleRemove}
         aria-label={`Eliminar ${displayName}`}
       >
-        <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
+        <Icon name="agora-line-trash" className="h-[20px] w-[20px]" />
       </button>
     </>
   );
@@ -556,15 +567,27 @@ export function PendingResourceTable({
   resourceMetadata: Record<string, PendingResourceMeta>;
   onEditMeta: (key: string, meta: PendingResourceMeta, newUrl?: string) => void;
 }) {
-  const items: { key: string; name: string; size?: string; isUrl: boolean; index: number; file?: File }[] = [];
+  const items: {
+    key: string;
+    name: string;
+    size?: string;
+    isUrl: boolean;
+    index: number;
+    file?: File;
+  }[] = [];
 
   files.forEach((file, i) => {
     const sizeKB = (file.size / 1024).toFixed(1);
     const sizeLabel =
-      file.size >= 1024 * 1024
-        ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-        : `${sizeKB} KB`;
-    items.push({ key: `file-${file.name}`, name: file.name, size: sizeLabel, isUrl: false, index: i, file });
+      file.size >= 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${sizeKB} KB`;
+    items.push({
+      key: `file-${file.name}`,
+      name: file.name,
+      size: sizeLabel,
+      isUrl: false,
+      index: i,
+      file,
+    });
   });
 
   urls.forEach((url, i) => {
@@ -592,13 +615,18 @@ export function PendingResourceTable({
             resourceTypes.find((rt) => rt.id === meta.resourceType)?.label ?? meta.resourceType;
           const extMatch = !item.isUrl ? item.name.match(/(\.[^.]+)$/) : null;
           const fileExt = extMatch ? extMatch[1] : "";
-          const formatLabel = (meta.format || (fileExt ? fileExt.slice(1) : "")).toUpperCase() || "-";
+          const formatLabel =
+            (meta.format || (fileExt ? fileExt.slice(1) : "")).toUpperCase() || "-";
           const baseName = fileExt ? item.name.slice(0, -fileExt.length) : item.name;
-          const displayName = meta.title && meta.title !== item.name
-            ? meta.title + (fileExt && !meta.title.toLowerCase().endsWith(fileExt.toLowerCase()) ? fileExt : "")
-            : item.isUrl
-              ? item.name
-              : baseName + fileExt;
+          const displayName =
+            meta.title && meta.title !== item.name
+              ? meta.title +
+                (fileExt && !meta.title.toLowerCase().endsWith(fileExt.toLowerCase())
+                  ? fileExt
+                  : "")
+              : item.isUrl
+                ? item.name
+                : baseName + fileExt;
 
           return (
             <TableRow key={item.key}>
@@ -712,7 +740,7 @@ export default function FileUploadModal({
           feedbackState="danger"
           feedbackText={urlError ?? ""}
         />
-        <div className="w-fit mt-12 [&_button]:mt-0">
+        <div className="mt-12 w-fit [&_button]:mt-0">
           <Button
             variant="primary"
             appearance="outline"
@@ -728,11 +756,11 @@ export default function FileUploadModal({
 
       <div className="flex items-center gap-4">
         <div className="flex-1 border-t border-neutral-300" />
-        <span className="text-neutral-500 text-sm px-3">ou</span>
+        <span className="text-sm px-3 text-neutral-500">ou</span>
         <div className="flex-1 border-t border-neutral-300" />
       </div>
 
-      <div className="[&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
+      <div className="[&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
         <DragAndDropUploader
           key={uploaderKey}
           multiple
@@ -744,8 +772,12 @@ export default function FileUploadModal({
           replaceFileButtonLabel="Substituir ficheiro"
           maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo permitido."
           forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-          hasError={securityErrors.length > 0 || extensionErrors.length > 0 || (hasError && !hasSelection)}
-          hasFeedback={securityErrors.length > 0 || extensionErrors.length > 0 || (hasError && !hasSelection)}
+          hasError={
+            securityErrors.length > 0 || extensionErrors.length > 0 || (hasError && !hasSelection)
+          }
+          hasFeedback={
+            securityErrors.length > 0 || extensionErrors.length > 0 || (hasError && !hasSelection)
+          }
           feedbackState="danger"
           feedbackText={
             securityErrors.length > 0
@@ -774,7 +806,6 @@ export default function FileUploadModal({
           }
         />
       </div>
-
     </div>
   );
 }

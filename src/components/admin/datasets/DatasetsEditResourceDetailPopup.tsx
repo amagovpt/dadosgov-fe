@@ -3,6 +3,7 @@ import { Button } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import type { Resource } from "@/types/api";
+import { AppLink } from "@/components/Primitives/AppLink";
 
 type DatasetsEditResourceDetailPopupProps = {
   resource: Resource;
@@ -33,59 +34,52 @@ export default function DatasetsEditResourceDetailPopup({
 
   return (
     <div className="flex flex-col gap-16" style={{ minHeight: "60vh" }}>
-      {resource.description && <p className="text-neutral-700 text-sm">{resource.description}</p>}
+      {resource.description && <p className="text-sm text-neutral-700">{resource.description}</p>}
       <div className="flex-1 overflow-y-auto">
         <table className="text-sm w-full">
           <tbody>
             <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Tipo</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Tipo</td>
               <td className="py-4">{typeLabel}</td>
             </tr>
             <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Localização</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Localização</td>
               <td className="py-4">{location}</td>
             </tr>
             <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">URL</td>
-              <td className="py-4 break-all">
-                <a
-                  href={resource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-600 underline"
-                >
-                  {resource.url}
-                </a>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">URL</td>
+              <td className="break-all py-4">
+                <AppLink href={resource.url}>{resource.url}</AppLink>
               </td>
             </tr>
             {resource.filetype !== "remote" && (
               <>
                 <tr>
-                  <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Formato</td>
+                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Formato</td>
                   <td className="py-4">{resource.format || "-"}</td>
                 </tr>
                 <tr>
-                  <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
+                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
                     Mime Type
                   </td>
                   <td className="py-4">{resource.mime || "-"}</td>
                 </tr>
                 <tr>
-                  <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Tamanho</td>
+                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Tamanho</td>
                   <td className="py-4">{formatSize(resource.filesize)}</td>
                 </tr>
               </>
             )}
             {resource.checksum && (
               <tr>
-                <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
+                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
                   {resource.checksum.type}
                 </td>
-                <td className="py-4 break-all font-mono text-xs">{resource.checksum.value}</td>
+                <td className="font-mono text-xs break-all py-4">{resource.checksum.value}</td>
               </tr>
             )}
             <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">Criado em</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Criado em</td>
               <td className="py-4">
                 {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy HH:mm", {
                   locale: pt,
@@ -93,13 +87,17 @@ export default function DatasetsEditResourceDetailPopup({
               </td>
             </tr>
             <tr>
-              <td className="font-semibold pr-16 py-4 align-top whitespace-nowrap">
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
                 Modificado em
               </td>
               <td className="py-4">
-                {format(new Date(resource.last_modified || resource.created_at), "d 'de' MMMM 'de' yyyy HH:mm", {
-                  locale: pt,
-                })}
+                {format(
+                  new Date(resource.last_modified || resource.created_at),
+                  "d 'de' MMMM 'de' yyyy HH:mm",
+                  {
+                    locale: pt,
+                  }
+                )}
               </td>
             </tr>
           </tbody>

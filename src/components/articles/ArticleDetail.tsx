@@ -11,6 +11,7 @@ import { fetchPost } from "@/services/api";
 import { Post } from "@/types/api";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { AppLink } from "../Primitives/AppLink";
 
 interface ArticleDetailProps {
   rid: string;
@@ -57,7 +58,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <span className="text-neutral-600">A carregar artigo...</span>
       </div>
     );
@@ -65,12 +66,12 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
   if (notFound || !post) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-16">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-16">
         <h1 className="text-2xl-bold text-neutral-900">Artigo não encontrado</h1>
         <p className="text-neutral-600">O artigo que procura não existe ou foi removido.</p>
-        <Link href="/pages/posts" className="text-primary-600 underline hover:text-primary-700">
+        <AppLink href="/pages/posts" className="hover:text-primary-700">
           Voltar aos artigos
-        </Link>
+        </AppLink>
       </div>
     );
   }
@@ -78,7 +79,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
   const displayDate = formatPostDate(post.published || post.created_at);
 
   return (
-    <main className="flex-grow bg-white min-h-screen">
+    <main className="min-h-screen flex-grow bg-white">
       <div className="container mx-auto pt-32">
         {/* Breadcrumb */}
         <div>
@@ -93,73 +94,75 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
 
         {/* Title Section */}
         <div>
-          <p className="text-[20px] font-normal text-[#021C51] mt-64 mb-8">
+          <p className="mb-8 mt-64 text-[20px] font-normal text-[#021C51]">
             Publicado em {displayDate}
           </p>
-          <h1 className="text-32 font-normal text-[#021C51] mb-16 leading-[48px]">{post.name}</h1>
+          <h1 className="mb-16 text-32 font-normal leading-[48px] text-[#021C51]">{post.name}</h1>
           {post.headline && (
-            <p className="text-m-regular font-normal text-[#64718B] max-w-2xl mb-32">{post.headline}</p>
+            <p className="mb-32 max-w-2xl text-m-regular font-normal text-[#64718B]">
+              {post.headline}
+            </p>
           )}
         </div>
       </div>
 
-      <div className="bg-[#F7F8FA] pt-64 pb-[38px]">
+      <div className="bg-[#F7F8FA] pb-[38px] pt-64">
         <div className="container mx-auto">
-          <div className="text-[#2b363c] flex flex-col gap-32">
+          <div className="flex flex-col gap-32 text-[#2b363c]">
             <div className="max-w-[592px]">
-                {/* Article Image */}
-                {post.image && (
-                  <div className="mb-32 rounded overflow-hidden bg-neutral-100">
-                    <img
-                      src={post.image}
-                      alt={post.name}
-                      className="w-full object-cover aspect-[16/9]"
-                    />
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="markdown-container text-m-regular leading-7">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                  >
-                    {post.content.replace(/\n&nbsp;\s*\n/g, "\n\n")}
-                  </ReactMarkdown>
+              {/* Article Image */}
+              {post.image && (
+                <div className="rounded mb-32 overflow-hidden bg-neutral-100">
+                  <img
+                    src={post.image}
+                    alt={post.name}
+                    className="aspect-[16/9] w-full object-cover"
+                  />
                 </div>
+              )}
 
-                {/* Credits */}
-                {post.credit_to && (
-                  <p className="text-s-regular text-neutral-500 mt-16">
-                    Créditos:{" "}
-                    {post.credit_url ? (
-                      <a
-                        href={post.credit_url}
-                        className="text-[#034AD8] underline font-medium hover:text-primary-700"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {post.credit_to}
-                      </a>
-                    ) : (
-                      post.credit_to
-                    )}
-                  </p>
-                )}
+              {/* Content */}
+              <div className="markdown-container text-m-regular leading-7">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                >
+                  {post.content.replace(/\n&nbsp;\s*\n/g, "\n\n")}
+                </ReactMarkdown>
+              </div>
 
-                {/* Tags */}
-                {post.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-8 pt-32">
-                    {post.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-12 py-4 bg-neutral-100 text-neutral-700 text-xs rounded-4"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+              {/* Credits */}
+              {post.credit_to && (
+                <p className="mt-16 text-s-regular text-neutral-500">
+                  Créditos:{" "}
+                  {post.credit_url ? (
+                    <a
+                      href={post.credit_url}
+                      className="font-medium text-[#034AD8] underline hover:text-primary-700"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {post.credit_to}
+                    </a>
+                  ) : (
+                    post.credit_to
+                  )}
+                </p>
+              )}
+
+              {/* Tags */}
+              {post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-8 pt-32">
+                  {post.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-xs rounded-4 bg-neutral-100 px-12 py-4 text-neutral-700"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -21,7 +21,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
-
+import { AppLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
@@ -46,7 +46,6 @@ const SORT_FIELD_MAP: Record<SortField, string | null> = {
 };
 
 export default function SystemDatasetsClient() {
-
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,10 +67,23 @@ export default function SystemDatasetsClient() {
           : `${sortOrder === "descending" ? "-" : ""}${apiSort}`;
 
       const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
-      if (statusFilter === "public")   { statusFilters.private = false; statusFilters.archived = false; statusFilters.deleted = false; }
-      if (statusFilter === "draft")    { statusFilters.private = true; statusFilters.archived = false; statusFilters.deleted = false; }
-      if (statusFilter === "archived") { statusFilters.archived = true; statusFilters.deleted = false; }
-      if (statusFilter === "deleted")  { statusFilters.deleted = true; }
+      if (statusFilter === "public") {
+        statusFilters.private = false;
+        statusFilters.archived = false;
+        statusFilters.deleted = false;
+      }
+      if (statusFilter === "draft") {
+        statusFilters.private = true;
+        statusFilters.archived = false;
+        statusFilters.deleted = false;
+      }
+      if (statusFilter === "archived") {
+        statusFilters.archived = true;
+        statusFilters.deleted = false;
+      }
+      if (statusFilter === "deleted") {
+        statusFilters.deleted = true;
+      }
 
       const filters = {
         q: searchQuery.trim() || undefined,
@@ -142,13 +154,14 @@ export default function SystemDatasetsClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
+      <p className="text-sm mb-16 text-neutral-700">
         {isLoading ? "A carregar..." : `${totalItems} resultados`}
       </p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquise o nome, código ou sigla da entidade"
             aria-label="Pesquisar conjuntos de dados"
@@ -168,17 +181,27 @@ export default function SystemDatasetsClient() {
           }}
         >
           <Dropdown.Section name="status">
-            <Dropdown.Option value="" selected={statusFilter === ""}>Todos</Dropdown.Option>
-            <Dropdown.Option value="public" selected={statusFilter === "public"}>Público</Dropdown.Option>
-            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>Arquivado</Dropdown.Option>
-            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>Rascunho</Dropdown.Option>
-            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>Excluído</Dropdown.Option>
+            <Dropdown.Option value="" selected={statusFilter === ""}>
+              Todos
+            </Dropdown.Option>
+            <Dropdown.Option value="public" selected={statusFilter === "public"}>
+              Público
+            </Dropdown.Option>
+            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>
+              Arquivado
+            </Dropdown.Option>
+            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>
+              Rascunho
+            </Dropdown.Option>
+            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>
+              Excluído
+            </Dropdown.Option>
           </Dropdown.Section>
         </InputSelect>
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : datasets.length > 0 ? (
         <Table
           paginationProps={{
@@ -231,12 +254,7 @@ export default function SystemDatasetsClient() {
             {datasets.map((dataset) => (
               <TableRow key={dataset.id}>
                 <TableCell headerLabel="Título">
-                  <a
-                    href={`/pages/datasets/${dataset.slug}`}
-                    className="text-primary-600 underline"
-                  >
-                    {dataset.title}
-                  </a>
+                  <AppLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</AppLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {dataset.deleted ? (
@@ -249,15 +267,11 @@ export default function SystemDatasetsClient() {
                     <StatusDot variant="success">Público</StatusDot>
                   )}
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDate(dataset.created_at)}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDate(dataset.created_at)}</TableCell>
                 <TableCell headerLabel="Última modificação">
                   {formatDate(dataset.last_modified)}
                 </TableCell>
-                <TableCell headerLabel="Ficheiros">
-                  {dataset.resources?.length || 0}
-                </TableCell>
+                <TableCell headerLabel="Ficheiros">{dataset.resources?.length || 0}</TableCell>
                 <TableCell headerLabel="Pontuação">
                   <div
                     className={
@@ -281,10 +295,10 @@ export default function SystemDatasetsClient() {
                 <TableCell headerLabel="Ações">
                   <div className="flex gap-8">
                     <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                     </a>
                     <a href={`/pages/admin/datasets/${dataset.id}`}>
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                     </a>
                   </div>
                 </TableCell>
@@ -298,9 +312,7 @@ export default function SystemDatasetsClient() {
             <CardNoResults
               className="datasets-page__empty"
               position="center"
-              icon={
-                <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
-              }
+              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
               title="Sem publicações"
               description="Nenhum conjunto de dados encontrado."
               hasAnchor={false}

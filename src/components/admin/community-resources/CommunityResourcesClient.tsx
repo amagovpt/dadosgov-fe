@@ -21,6 +21,7 @@ import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { AppLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -58,9 +59,7 @@ export default function CommunityResourcesClient() {
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       result = result.filter(
-        (r) =>
-          r.title.toLowerCase().includes(q) ||
-          (r.format && r.format.toLowerCase().includes(q))
+        (r) => r.title.toLowerCase().includes(q) || (r.format && r.format.toLowerCase().includes(q))
       );
     }
 
@@ -80,14 +79,10 @@ export default function CommunityResourcesClient() {
           cmp = (a.format || "").localeCompare(b.format || "");
           break;
         case "created_at":
-          cmp =
-            new Date(a.created_at).getTime() -
-            new Date(b.created_at).getTime();
+          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
         case "last_modified":
-          cmp =
-            new Date(a.last_modified).getTime() -
-            new Date(b.last_modified).getTime();
+          cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
           break;
       }
       return sortOrder === "descending" ? -cmp : cmp;
@@ -125,11 +120,11 @@ export default function CommunityResourcesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
+      <p className="text-sm mb-16 text-neutral-700">
         {isLoading ? "A carregar..." : `${totalItems} resultados`}
       </p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -205,12 +200,9 @@ export default function CommunityResourcesClient() {
                   {resource.dataset && (
                     <>
                       <br />
-                      <a
-                        href={`/pages/datasets/${resource.dataset.id}`}
-                        className="text-primary-600 underline text-sm"
-                      >
+                      <AppLink href={`/pages/datasets/${resource.dataset.id}`} className="text-sm">
                         {resource.dataset.title}
-                      </a>
+                      </AppLink>
                     </>
                   )}
                 </TableCell>
@@ -223,9 +215,7 @@ export default function CommunityResourcesClient() {
                     <StatusDot variant="success">Público</StatusDot>
                   )}
                 </TableCell>
-                <TableCell headerLabel="Formato">
-                  {resource.format || "—"}
-                </TableCell>
+                <TableCell headerLabel="Formato">{resource.format || "—"}</TableCell>
                 <TableCell headerLabel="Criado em">
                   {formatDateToDMY(resource.created_at)}
                 </TableCell>
@@ -234,7 +224,7 @@ export default function CommunityResourcesClient() {
                 </TableCell>
                 <TableCell headerLabel="Ação">
                   <a href={`/pages/admin/me/community-resources/edit?id=${resource.id}`}>
-                    <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                    <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                   </a>
                 </TableCell>
               </TableRow>
@@ -248,10 +238,7 @@ export default function CommunityResourcesClient() {
               className="datasets-page__empty"
               position="center"
               icon={
-                <Icon
-                  name="agora-line-user-group"
-                  className="w-12 h-12 text-primary-500 icon-xl"
-                />
+                <Icon name="agora-line-user-group" className="icon-xl h-12 w-12 text-primary-500" />
               }
               title="Sem publicações"
               description="Ainda não publicou um recurso comunitário."

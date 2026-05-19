@@ -21,6 +21,7 @@ import { fetchDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { AppLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -121,11 +122,9 @@ export default function SystemDataservicesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {totalItems} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -143,23 +142,31 @@ export default function SystemDataservicesClient() {
           placeholder="Filtrar por estado"
           id="filter-status"
           onChange={(options) => {
-            setStatusFilter(
-              options.length > 0 ? (options[0].value as string) : ""
-            );
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>
+              Público
+            </DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>
+              Arquivado
+            </DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>
+              Rascunho
+            </DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
+              Excluído
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filteredApis.length > 0 ? (
         <Table
           paginationProps={{
@@ -210,12 +217,7 @@ export default function SystemDataservicesClient() {
             {filteredApis.map((api) => (
               <TableRow key={api.id}>
                 <TableCell headerLabel="Título">
-                  <a
-                    href={`/pages/dataservices/${api.slug}`}
-                    className="text-primary-600 underline"
-                  >
-                    {api.title}
-                  </a>
+                  <AppLink href={`/pages/dataservices/${api.slug}`}>{api.title}</AppLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {api.deleted ? (
@@ -228,9 +230,7 @@ export default function SystemDataservicesClient() {
                     <StatusDot variant="success">Público</StatusDot>
                   )}
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDateToDMY(api.created_at)}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
                 <TableCell headerLabel="Modificado em">
                   {formatDateToDMY(api.last_modified)}
                   {api.owner && (
@@ -245,18 +245,10 @@ export default function SystemDataservicesClient() {
                 <TableCell headerLabel="Ações">
                   <div className="flex gap-8">
                     <a href={`/pages/dataservices/${api.slug}`}>
-                      <Icon
-                        name="agora-line-eye"
-                        className="w-[20px] h-[20px]"
-                      />
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                     </a>
-                    <a
-                      href={`/pages/admin/dataservices/edit?slug=${api.slug}`}
-                    >
-                      <Icon
-                        name="agora-line-edit"
-                        className="w-[20px] h-[20px]"
-                      />
+                    <a href={`/pages/admin/dataservices/edit?slug=${api.slug}`}>
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                     </a>
                   </div>
                 </TableCell>
@@ -267,12 +259,7 @@ export default function SystemDataservicesClient() {
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-code"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-code" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem APIs"
           description="Nenhuma API encontrada."
           hasAnchor={false}

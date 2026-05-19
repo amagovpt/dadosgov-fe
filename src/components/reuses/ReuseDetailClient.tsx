@@ -53,6 +53,7 @@ import { pt } from "date-fns/locale";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
+import { AppLink } from "../Primitives/AppLink";
 
 interface ReuseDetailClientProps {
   slug: string;
@@ -379,12 +380,9 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             <p className="admin-edit-info__activity">
               <Icon name="agora-line-user" className="admin-edit-info__clock-icon" />
               {" Criado por: "}
-              <Link
-                href={`/pages/users/${reuse.owner.slug}`}
-                className="text-primary-600 underline"
-              >
+              <AppLink href={`/pages/users/${reuse.owner.slug}`}>
                 {reuse.owner.first_name} {reuse.owner.last_name}
-              </Link>
+              </AppLink>
             </p>
           )}
 
@@ -419,12 +417,12 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       </div>
                     )}
                     {reuse.organization && (
-                      <Link
+                      <AppLink
                         href={`/pages/organizations/${reuse.organization.slug}`}
-                        className="text-sm font-medium text-primary-600 underline hover:text-primary-800"
+                        className="text-sm font-medium hover:text-primary-800"
                       >
                         {reuse.organization.name}
-                      </Link>
+                      </AppLink>
                     )}
                   </div>
                 }
@@ -563,13 +561,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     description={
                       <span>
                         A sua questão não é sobre a reutilização?{" "}
-                        <Link
-                          href="https://dados.gov.pt/pt/"
-                          className="text-primary-600 underline"
-                          target="_blank"
-                        >
-                          Visite o nosso fórum.
-                        </Link>
+                        <AppLink href="https://dados.gov.pt/pt/">Visite o nosso fórum.</AppLink>
                       </span>
                     }
                   />
@@ -675,10 +667,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   <CardNoResults
                     position="center"
                     icon={
-                      <Icon
-                        name="agora-line-chat"
-                        className="icon-xl h-40 w-40 text-primary-500"
-                      />
+                      <Icon name="agora-line-chat" className="icon-xl h-40 w-40 text-primary-500" />
                     }
                     title="Ainda não há discussão."
                     description=""
@@ -1049,18 +1038,13 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               {remoteDatasets.map((entry, index) => (
                 <li
                   key={`remote-dataset-${index}`}
-                  className="border border-neutral-200 rounded-8 p-16"
+                  className="rounded-8 border border-neutral-200 p-16"
                 >
-                  <a
-                    href={entry.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary-600 underline break-all font-medium"
-                  >
+                  <AppLink href={entry.url} className="break-all font-medium">
                     {entry.title || entry.url}
-                  </a>
+                  </AppLink>
                   {entry.description && (
-                    <p className="text-neutral-700 text-sm mt-8">{entry.description}</p>
+                    <p className="text-sm mt-8 text-neutral-700">{entry.description}</p>
                   )}
                 </li>
               ))}

@@ -26,6 +26,7 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { AppLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -242,12 +243,11 @@ export default function OrgReusesClient() {
               {paginatedReuses.map((reuse, index) => (
                 <TableRow key={index}>
                   <TableCell headerLabel="Título">
-                    <a
+                    <AppLink
                       href={`/pages/reuses/${reuse.slug}`}
-                      className="text-primary-600 underline"
                     >
                       {reuse.title}
-                    </a>
+                    </AppLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     {reuse.deleted ? (

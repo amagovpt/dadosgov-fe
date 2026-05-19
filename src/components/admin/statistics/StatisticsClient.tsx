@@ -22,6 +22,7 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { fetchMyDatasets, fetchMyReuses } from "@/services/api";
 import { Dataset, Reuse } from "@/types/api";
+import { AppLink } from "@/components/Primitives/AppLink";
 
 const PAGE_SIZE = 10;
 
@@ -82,21 +83,21 @@ export default function StatisticsClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-64 mb-16">Estatísticas</h1>
+      <h1 className="admin-page__title mb-16 mt-64">Estatísticas</h1>
 
       <Tabs>
         <Tab active>
           <TabHeader>Utilizador</TabHeader>
           <TabBody>
-            <div className="flex gap-24 mt-48">
+            <div className="mt-48 flex gap-24">
               <div className="flex-1">
                 <CardFrame label={isDatasetsLoading ? "..." : String(datasetsTotal)}>
-                  <p className="text-neutral-700 text-base">Conjuntos de dados</p>
+                  <p className="text-base text-neutral-700">Conjuntos de dados</p>
                 </CardFrame>
               </div>
               <div className="flex-1">
                 <CardFrame label={isReusesLoading ? "..." : String(reusesTotal)}>
-                  <p className="text-neutral-700 text-base">Reutilizar</p>
+                  <p className="text-base text-neutral-700">Reutilizar</p>
                 </CardFrame>
               </div>
             </div>
@@ -107,7 +108,7 @@ export default function StatisticsClient() {
           <TabHeader>Conjuntos de dados</TabHeader>
           <TabBody>
             <div className="mt-24">
-              <div className="flex items-end gap-16 mb-24">
+              <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
@@ -119,13 +120,13 @@ export default function StatisticsClient() {
               </div>
 
               {isDatasetsLoading ? (
-                <p className="text-neutral-500 text-sm">A carregar...</p>
+                <p className="text-sm text-neutral-500">A carregar...</p>
               ) : datasets.length === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src="/Icons/reduce.svg" alt="" className="w-40 h-40" />
+                    <img src="/Icons/reduce.svg" alt="" className="h-40 w-40" />
                   }
                   title="Sem publicações"
                   description="Ainda não publicou um conjunto de dados."
@@ -161,20 +162,20 @@ export default function StatisticsClient() {
                     <TableRow>
                       <TableHeaderCell>TÍTULO DO CONJUNTO DE DADOS</TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-chat" className="w-16 h-16" />
+                        <Icon name="agora-line-chat" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-eye" className="w-16 h-16" />
+                        <Icon name="agora-line-eye" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-download" className="w-16 h-16" />
+                        <Icon name="agora-line-download" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="w-16 h-16" />
+                        <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-star" className="w-16 h-16" />
+                        <Icon name="agora-line-star" className="h-16 w-16" />
                       </TableHeaderCell>
                     </TableRow>
                   </TableHeader>
@@ -182,9 +183,7 @@ export default function StatisticsClient() {
                     {datasets.map((dataset) => (
                       <TableRow key={dataset.id}>
                         <TableCell headerLabel="Título">
-                          <a href={dataset.page} className="text-primary-600 underline">
-                            {dataset.title}
-                          </a>
+                          <AppLink href={dataset.page}>{dataset.title}</AppLink>
                         </TableCell>
                         <TableCell headerLabel="Discussões">
                           {dataset.metrics?.discussions ?? 0}
@@ -215,15 +214,15 @@ export default function StatisticsClient() {
           <TabBody>
             <div className="mt-24">
               {isReusesLoading ? (
-                <p className="text-neutral-500 text-sm">A carregar...</p>
+                <p className="text-sm text-neutral-500">A carregar...</p>
               ) : reuses.length === 0 ? (
                 <>
-                  <p className="text-neutral-700 text-sm mb-16">0 resultados</p>
+                  <p className="text-sm mb-16 text-neutral-700">0 resultados</p>
                   <CardNoResults
                     position="center"
                     icon={
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src="/Icons/bar_chart.svg" alt="" className="w-40 h-40" />
+                      <img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />
                     }
                     title="Sem publicações"
                     description="Ainda não publicou uma reutilização."
@@ -243,7 +242,7 @@ export default function StatisticsClient() {
                 </>
               ) : (
                 <>
-                  <p className="text-neutral-700 text-sm mb-16">{reusesTotal} resultados</p>
+                  <p className="text-sm mb-16 text-neutral-700">{reusesTotal} resultados</p>
                   <Table
                     paginationProps={{
                       itemsPerPageLabel: "Itens por página",
@@ -262,10 +261,10 @@ export default function StatisticsClient() {
                       <TableRow>
                         <TableHeaderCell>TÍTULO DA REUTILIZAÇÃO</TableHeaderCell>
                         <TableHeaderCell>
-                          <Icon name="agora-line-eye" className="w-16 h-16" />
+                          <Icon name="agora-line-eye" className="h-16 w-16" />
                         </TableHeaderCell>
                         <TableHeaderCell>
-                          <Icon name="agora-line-star" className="w-16 h-16" />
+                          <Icon name="agora-line-star" className="h-16 w-16" />
                         </TableHeaderCell>
                         <TableHeaderCell>ESTADO</TableHeaderCell>
                       </TableRow>
@@ -274,9 +273,7 @@ export default function StatisticsClient() {
                       {reuses.map((reuse) => (
                         <TableRow key={reuse.id}>
                           <TableCell headerLabel="Título">
-                            <a href={reuse.url} className="text-primary-600 underline">
-                              {reuse.title}
-                            </a>
+                            <AppLink href={reuse.url}>{reuse.title}</AppLink>
                           </TableCell>
                           <TableCell headerLabel="Visualizações">
                             {reuse.metrics?.views ?? 0}

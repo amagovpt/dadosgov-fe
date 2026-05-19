@@ -24,6 +24,7 @@ import { Reuse } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { AppLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -154,11 +155,11 @@ export default function ReusesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
+      <p className="text-sm mb-16 text-neutral-700">
         {isLoading ? "A carregar..." : `${filteredReuses.length} resultados`}
       </p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -182,17 +183,27 @@ export default function ReusesClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>
+              Público
+            </DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>
+              Arquivado
+            </DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>
+              Rascunho
+            </DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
+              Excluído
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filteredReuses.length > 0 ? (
         <Table
           paginationProps={{
@@ -245,12 +256,7 @@ export default function ReusesClient() {
               return (
                 <TableRow key={reuse.id}>
                   <TableCell headerLabel="Título">
-                    <a
-                      href={`/pages/reuses/${reuse.slug}`}
-                      className="text-primary-600 underline"
-                    >
-                      {reuse.title}
-                    </a>
+                    <AppLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</AppLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     <StatusDot variant={status.variant}>{status.label}</StatusDot>
@@ -260,12 +266,9 @@ export default function ReusesClient() {
                     <br />
                     <span className="text-sm text-neutral-500">
                       {reuse.owner ? (
-                        <a
-                          href={`/pages/users/${reuse.owner.slug}`}
-                          className="text-primary-600 text-xs underline"
-                        >
+                        <AppLink href={`/pages/users/${reuse.owner.slug}`} className="text-xs">
                           {reuse.owner.first_name} {reuse.owner.last_name}
-                        </a>
+                        </AppLink>
                       ) : (
                         "—"
                       )}
@@ -277,10 +280,10 @@ export default function ReusesClient() {
                   <TableCell headerLabel="Ações">
                     <div className="flex gap-8">
                       <a href={`/pages/reuses/${reuse.slug}`}>
-                        <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                        <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                       </a>
                       <a href={`/pages/admin/me/reuses/edit?id=${reuse.id}`}>
-                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                       </a>
                     </div>
                   </TableCell>
@@ -295,9 +298,7 @@ export default function ReusesClient() {
             <CardNoResults
               className="datasets-page__empty"
               position="center"
-              icon={
-                <img src="/Icons/bar_chart.svg" alt="" className="w-40 h-40" />
-              }
+              icon={<img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />}
               title="Sem reutilizações"
               description="Não publicou reutilizações"
               hasAnchor={false}
@@ -306,7 +307,7 @@ export default function ReusesClient() {
                   <Button
                     variant="primary"
                     appearance="outline"
-                    onClick={() => window.location.href = '/pages/admin/reuses/new'}
+                    onClick={() => (window.location.href = "/pages/admin/reuses/new")}
                   >
                     Publique no portal
                   </Button>

@@ -47,6 +47,7 @@ import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/Dra
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
 import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { AppLink } from "@/components/Primitives/AppLink";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -199,7 +200,7 @@ export default function ProfileClient() {
   }, []);
 
   const handleSave = async () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setIsSaving(true);
     setSaveSuccess(false);
     setSaveError("");
@@ -284,7 +285,7 @@ export default function ProfileClient() {
       if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
       setAvatarPreview(null);
       setAvatarUploaderKey((k) => k + 1);
-      setProfile((prev) => prev ? { ...prev, avatar_thumbnail: null } : prev);
+      setProfile((prev) => (prev ? { ...prev, avatar_thumbnail: null } : prev));
       await refresh();
     } catch (error) {
       console.error("Error deleting avatar:", error);
@@ -363,7 +364,7 @@ export default function ProfileClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
+      <h1 className="admin-page__title mb-32 mt-64">Perfil</h1>
 
       <div className="profile-card">
         <div className="profile-card__avatar-container">
@@ -389,21 +390,21 @@ export default function ProfileClient() {
         <div className="profile-card__body">
           <div className="profile-card__info">
             {profile?.organizations?.[0] && (
-              <p className="text-neutral-900 text-base font-light leading-7">
+              <p className="text-base font-light leading-7 text-neutral-900">
                 {profile.organizations[0].name}
               </p>
             )}
-            <p className="text-neutral-900 text-xl font-semibold leading-8">
+            <p className="text-xl font-semibold leading-8 text-neutral-900">
               {profile ? `${profile.first_name} ${profile.last_name}` : "..."}
             </p>
             {lastModified && (
-              <p className="text-neutral-900 text-base leading-7">
+              <p className="text-base leading-7 text-neutral-900">
                 <span className="font-semibold">Membro desde:</span> {lastModified}
               </p>
             )}
           </div>
 
-          <div className="absolute top-32 right-32">
+          <div className="absolute right-32 top-32">
             <Button
               variant="primary"
               appearance="outline"
@@ -428,8 +429,7 @@ export default function ProfileClient() {
               <div
                 className="admin-page__form mt-24"
                 style={{
-                  maxWidth:
-                    "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))",
+                  maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))",
                 }}
               >
                 <h2 className="admin-page__section-title">EDITAR PERFIL</h2>
@@ -441,9 +441,7 @@ export default function ProfileClient() {
                     description="Perfil guardado com sucesso."
                   />
                 )}
-                {saveError && (
-                  <StatusCard variant="danger" showIcon description={saveError} />
-                )}
+                {saveError && <StatusCard variant="danger" showIcon description={saveError} />}
 
                 <div className="admin-page__fields-group">
                   <div className="flex gap-[18px]">
@@ -493,10 +491,10 @@ export default function ProfileClient() {
                   />
 
                   <div>
-                    <span className="text-primary-900 text-base font-medium leading-7">
+                    <span className="text-base font-medium leading-7 text-primary-900">
                       Foto de perfil
                     </span>
-                    <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
+                    <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
                       <DragAndDropUploader
                         key={avatarUploaderKey}
                         label="Ficheiros"
@@ -523,13 +521,11 @@ export default function ProfileClient() {
 
                   <div className="flex flex-col gap-16">
                     <div>
-                      <p className="text-base font-medium text-neutral-900 mb-8">
-                        Chaves da API
-                      </p>
-                      <p className="text-sm text-neutral-700 mb-16">
-                        Gere uma chave para autenticar pedidos à API. Por motivos de segurança,
-                        a chave completa só é apresentada uma vez no momento da criação —
-                        guarde-a num local seguro.
+                      <p className="mb-8 text-base font-medium text-neutral-900">Chaves da API</p>
+                      <p className="text-sm mb-16 text-neutral-700">
+                        Gere uma chave para autenticar pedidos à API. Por motivos de segurança, a
+                        chave completa só é apresentada uma vez no momento da criação — guarde-a num
+                        local seguro.
                       </p>
                     </div>
 
@@ -569,7 +565,7 @@ export default function ProfileClient() {
                               apresentada.
                             </p>
                             <div className="flex items-center gap-8">
-                              <code className="flex-1 bg-neutral-50 border border-neutral-300 rounded-4 px-12 py-8 text-xs break-all">
+                              <code className="text-xs flex-1 break-all rounded-4 border border-neutral-300 bg-neutral-50 px-12 py-8">
                                 {newToken}
                               </code>
                               <Button
@@ -595,24 +591,22 @@ export default function ProfileClient() {
                         <p className="text-sm font-medium text-neutral-900">
                           Chaves activas ({apiTokens.length})
                         </p>
-                        <div className="flex flex-col divide-y divide-neutral-200 border border-neutral-200 rounded-4">
+                        <div className="flex flex-col divide-y divide-neutral-200 rounded-4 border border-neutral-200">
                           {apiTokens.map((token) => (
                             <div
                               key={token.id}
                               className="flex items-center justify-between gap-16 px-16 py-12"
                             >
-                              <div className="flex-1 min-w-0">
+                              <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-8">
                                   <code className="text-sm font-mono text-neutral-900">
                                     {token.token_prefix}…
                                   </code>
                                   {token.name && (
-                                    <span className="text-sm text-neutral-700">
-                                      — {token.name}
-                                    </span>
+                                    <span className="text-sm text-neutral-700">— {token.name}</span>
                                   )}
                                 </div>
-                                <p className="text-xs text-neutral-700 mt-4">
+                                <p className="text-xs mt-4 text-neutral-700">
                                   Criada em{" "}
                                   {format(new Date(token.created_at), "dd/MM/yyyy", {
                                     locale: pt,
@@ -641,7 +635,7 @@ export default function ProfileClient() {
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-neutral-700 italic">
+                      <p className="text-sm italic text-neutral-700">
                         Ainda não tem chaves de API geradas.
                       </p>
                     )}
@@ -700,12 +694,17 @@ export default function ProfileClient() {
                     </p>
                   )}
                   {!samlLogin && isEditingEmail && (
-                    <div className="flex gap-8 justify-end">
+                    <div className="flex justify-end gap-8">
                       <Button
                         appearance="outline"
                         variant="primary"
                         onClick={handleEmailChange}
-                        disabled={isChangingEmail || !newEmail || newEmail === email || newEmail === pendingEmail}
+                        disabled={
+                          isChangingEmail ||
+                          !newEmail ||
+                          newEmail === email ||
+                          newEmail === pendingEmail
+                        }
                       >
                         {isChangingEmail ? "A enviar..." : "Confirmar"}
                       </Button>
@@ -754,7 +753,7 @@ export default function ProfileClient() {
                   </div>
                 </div>
 
-                <div className="flex justify-end mt-16">
+                <div className="mt-16 flex justify-end">
                   <Button
                     variant="primary"
                     hasIcon={true}
@@ -806,16 +805,13 @@ export default function ProfileClient() {
             <TabBody>
               <div className="mt-24">
                 {isLoadingSubscriptions ? (
-                  <p className="text-neutral-900 text-base">A carregar subscrições...</p>
+                  <p className="text-base text-neutral-900">A carregar subscrições...</p>
                 ) : subscriptions.length === 0 ? (
                   <CardNoResults
                     className="datasets-page__empty"
                     position="center"
                     icon={
-                      <Icon
-                        name="agora-line-bell"
-                        className="w-12 h-12 text-primary-500 icon-xl"
-                      />
+                      <Icon name="agora-line-bell" className="icon-xl h-12 w-12 text-primary-500" />
                     }
                     title="Sem subscrições"
                     description="Não segue conteúdos"
@@ -825,7 +821,8 @@ export default function ProfileClient() {
                   <div className="flex flex-col gap-16">
                     {subscriptions.map((sub) => {
                       const subName = sub.following.name || sub.following.title || "";
-                      const subAvatar = sub.following.avatar_thumbnail || sub.following.image_thumbnail;
+                      const subAvatar =
+                        sub.following.avatar_thumbnail || sub.following.image_thumbnail;
                       const initials = subName
                         .split(" ")
                         .map((w) => w.charAt(0).toUpperCase())
@@ -838,22 +835,25 @@ export default function ProfileClient() {
                         User: "/pages/users",
                       };
                       const basePath = classToPath[sub.following.class];
-                      const href = basePath && sub.following.slug
-                        ? `${basePath}/${sub.following.slug}`
-                        : null;
+                      const href =
+                        basePath && sub.following.slug ? `${basePath}/${sub.following.slug}` : null;
                       const content = (
                         <div className="flex items-center gap-16">
                           <Avatar
                             avatarType={subAvatar ? "image" : "initials"}
                             srcPath={(subAvatar || initials) as unknown as undefined}
                             alt={subName}
-                            className="w-48 h-48"
+                            className="h-48 w-48"
                           />
-                          <span className="text-neutral-900 text-base font-medium">{subName}</span>
+                          <span className="text-base font-medium text-neutral-900">{subName}</span>
                         </div>
                       );
                       return href ? (
-                        <Link key={sub.id} href={href} className="hover:opacity-80 transition-opacity">
+                        <Link
+                          key={sub.id}
+                          href={href}
+                          className="transition-opacity hover:opacity-80"
+                        >
                           {content}
                         </Link>
                       ) : (
@@ -873,10 +873,7 @@ export default function ProfileClient() {
                   className="datasets-page__empty"
                   position="center"
                   icon={
-                    <Icon
-                      name="agora-line-star"
-                      className="w-12 h-12 text-primary-500 icon-xl"
-                    />
+                    <Icon name="agora-line-star" className="icon-xl h-12 w-12 text-primary-500" />
                   }
                   title="Sem acompanhamentos"
                   description="Não tem seguidores"
@@ -889,18 +886,13 @@ export default function ProfileClient() {
             <TabHeader>Atividades</TabHeader>
             <TabBody>
               <div className="mt-24">
-                {isLoadingActivities && (
-                  <p className="text-neutral-700 text-sm">A carregar...</p>
-                )}
+                {isLoadingActivities && <p className="text-sm text-neutral-700">A carregar...</p>}
                 {!isLoadingActivities && activities.length === 0 && (
                   <CardNoResults
                     className="datasets-page__empty"
                     position="center"
                     icon={
-                      <Icon
-                        name="agora-line-time"
-                        className="w-12 h-12 text-primary-500 icon-xl"
-                      />
+                      <Icon name="agora-line-time" className="icon-xl h-12 w-12 text-primary-500" />
                     }
                     title="Sem atividades"
                     description="Nenhuma atividade registada."
@@ -909,7 +901,7 @@ export default function ProfileClient() {
                 )}
                 {!isLoadingActivities && activities.length > 0 && (
                   <>
-                    <h2 className="font-medium text-neutral-900 text-base mb-16">
+                    <h2 className="mb-16 text-base font-medium text-neutral-900">
                       {activityTotal} ATIVIDADES
                     </h2>
                     <Table
@@ -952,12 +944,12 @@ export default function ProfileClient() {
                                   }
                                   alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
                                 />
-                                <a
+                                <AppLink
                                   href={`/pages/admin/users/${activity.actor?.id}`}
-                                  className="text-primary-600 underline text-sm"
+                                  className="text-sm"
                                 >
                                   {activity.actor?.first_name} {activity.actor?.last_name}
-                                </a>
+                                </AppLink>
                               </div>
                             </TableCell>
                             <TableCell headerLabel="Ação">

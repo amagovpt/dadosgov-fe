@@ -26,6 +26,7 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { AppLink } from "@/components/Primitives/AppLink";
 
 type StatusInfo = {
   label: string;
@@ -298,12 +299,9 @@ export default function OrgHarvestersClient() {
               {paginatedHarvesters.map((harvester, index) => (
                 <TableRow key={index}>
                   <TableCell headerLabel="Nome">
-                    <a
-                      href={`/pages/admin/org/harvesters/${harvester.id}`}
-                      className="text-primary-600 underline"
-                    >
+                    <AppLink href={`/pages/admin/org/harvesters/${harvester.id}`}>
                       {harvester.name}
-                    </a>
+                    </AppLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     {(() => {
