@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export function getCoursesPage(locale: string = "pt") {
-    return gql`
+  return gql`
        query GetCoursesPage {
         findPageCursosSingleton {
             data {
@@ -25,7 +25,7 @@ export function getCoursesPage(locale: string = "pt") {
                         ... on Minicursos {
                         data {
                                 id {
-                                        iv 
+                                        iv
                                     }
                                 title {${locale}}
                                 description {${locale}}
@@ -66,6 +66,12 @@ export function getCoursesPage(locale: string = "pt") {
                         description {
                         ${locale}
                         }
+                        anchor {
+                            ${locale} {
+                                children
+                                href
+                            }
+                        }
                     }
                     }
                 }
@@ -75,5 +81,4 @@ export function getCoursesPage(locale: string = "pt") {
         }
         }
     `;
-
 }
