@@ -448,6 +448,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [requestAction, setRequestAction] = useState<string | null>(null);
+  const [requestError, setRequestError] = useState<string | null>(null);
   const [sortField, setSortField] = useState<MemberSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
@@ -490,11 +491,14 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
 
   const handleAcceptRequest = async (request: MembershipRequest) => {
     setRequestAction(request.id);
+    setRequestError(null);
     try {
       await acceptMembership(resolvedOrgId!, request.id);
       await loadMembers();
     } catch (error) {
       console.error("Error accepting membership:", error);
+      const msg = error instanceof Error ? error.message : null;
+      setRequestError(msg || "Ocorreu um erro ao aceitar o pedido. Tente novamente.");
     } finally {
       setRequestAction(null);
     }
@@ -575,6 +579,11 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
           <h2 className="text-neutral-900 text-base font-semibold mb-16">
             Pedidos de adesão pendentes ({pendingRequests.length})
           </h2>
+          {requestError && (
+            <div className="mb-16">
+              <StatusCard variant="danger" showIcon description={requestError} />
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow>
