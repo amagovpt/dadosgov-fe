@@ -21,9 +21,11 @@ import {
   updateHomeFeaturedDatasets,
   fetchHomeFeaturedReuses,
   updateHomeFeaturedReuses,
+} from "@/api/system";
+import {
   searchDatasets,
   searchReuses,
-} from "@/services/api";
+} from "@/api/search";
 import type { Dataset, Reuse } from "@/types/api";
 import { formatMetricValue } from "@/utils/formatNumber";
 

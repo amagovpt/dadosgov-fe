@@ -5,14 +5,16 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Toggle, Pill } from '@ama-pt/agora-design-system';
 import { SiteMetrics } from '@/types/api';
 import {
-  searchDatasets,
-  searchOrganizations,
-  searchReuses,
-  searchDataservices,
   fetchDatasets,
   fetchReuses,
   fetchOrganizations,
 } from '@/services/api';
+import {
+  searchDatasets,
+  searchOrganizations,
+  searchReuses,
+  searchDataservices,
+} from "@/api/search";
 
 interface CategoryToggleItem {
   id: string;

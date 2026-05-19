@@ -12,7 +12,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import HeroGeneral from "@/components/HeroGeneral";
-import { submitSupportContact, type SupportTopic } from "@/services/api";
+import { submitSupportContact, type SupportTopic } from "@/api/system";
 import IconAgora from "../Primitives/IconAgora";
 
 const FAQ_DATA = [

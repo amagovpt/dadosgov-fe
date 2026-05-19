@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { DropdownSection, DropdownOption } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "./IsolatedSelect";
-import { suggestUsers, suggestOrganizations } from "@/services/api";
+import { suggestUsers, suggestOrganizations } from "@/api/search";
 import type { OrganizationSuggestion, UserSuggestion } from "@/types/api";
 import type { TransferRecipientClass } from "@/types/api";
 

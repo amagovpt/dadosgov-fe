@@ -26,9 +26,8 @@ import {
   fetchReuseTopics,
   fetchMyDatasets,
   fetchOrgDatasets,
-  searchDatasets,
-  suggestTags,
 } from "@/services/api";
+import { searchDatasets, suggestTags } from "@/api/search";
 import type { Reuse, ReuseType, ReuseTopic, Dataset, TagSuggestion } from "@/types/api";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import { format, formatDistanceToNow } from "date-fns";

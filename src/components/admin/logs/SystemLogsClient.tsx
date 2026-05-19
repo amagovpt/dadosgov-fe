@@ -12,7 +12,7 @@ import {
   Pill,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { fetchSystemLogContent, fetchSystemLogs } from "@/services/api";
+import { fetchSystemLogContent, fetchSystemLogs } from "@/api/system";
 import { SystemLogContent, SystemLogFile } from "@/types/api";
 
 const AUTO_REFRESH_MS = 10_000;

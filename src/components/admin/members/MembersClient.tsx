@@ -24,11 +24,11 @@ import {
   addMember,
   updateMemberRole,
   removeMember,
-  suggestUsers,
   fetchMembershipRequests,
   acceptMembership,
   refuseMembership,
 } from "@/services/api";
+import { suggestUsers } from "@/api/search";
 import { Organization, OrganizationMember, MembershipRequest, UserSuggestion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";

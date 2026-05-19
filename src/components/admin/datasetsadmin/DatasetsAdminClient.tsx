@@ -28,16 +28,15 @@ import {
   fetchLicenses,
   fetchFrequencies,
   fetchGranularities,
-  suggestSpatialZones,
   fetchSpatialZonesByIds,
   fetchDataset,
   fetchMyDatasets,
-  suggestTags,
   fetchOrgContactPoints,
   createContactPoint,
   fetchResourceTypes,
   fetchAllowedExtensions,
 } from "@/services/api";
+import { suggestSpatialZones, suggestTags } from "@/api/search";
 import {
   License,
   Frequency,

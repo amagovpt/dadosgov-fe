@@ -30,12 +30,11 @@ import {
   fetchResourceTypes,
   fetchGranularities,
   fetchSpatialZonesByIds,
-  suggestSpatialZones,
-  suggestTags,
   fetchActivity,
   requestTransfer,
 } from "@/services/api";
 import { fetchDiscussions } from "@/api/discussions-topics";
+import { suggestSpatialZones, suggestTags } from "@/api/search";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import {
   Dataset,

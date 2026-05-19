@@ -18,17 +18,19 @@ import {
 import HeroGeneral from "@/components/HeroGeneral";
 import { Pagination } from "@/components/Pagination";
 import {
-  searchDatasets,
-  searchOrganizations,
-  searchReuses,
-  searchDataservices,
   fetchOrganizations,
   fetchLicenses,
   fetchGranularities,
   suggestFormats,
+} from "@/services/api";
+import {
+  searchDatasets,
+  searchOrganizations,
+  searchReuses,
+  searchDataservices,
   suggestTags,
   suggestSpatialZones,
-} from "@/services/api";
+} from "@/api/search";
 import {
   Dataset,
   Organization,

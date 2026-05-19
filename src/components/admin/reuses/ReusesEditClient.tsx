@@ -29,15 +29,14 @@ import {
   fetchReuseTopics,
   fetchMyDatasets,
   fetchOrgDatasets,
-  searchDatasets,
   linkDatasetToReuse,
   unlinkDatasetFromReuse,
   linkDataserviceToReuse,
   fetchActivity,
-  suggestTags,
   requestTransfer,
 } from "@/services/api";
 import { fetchDiscussions } from "@/api/discussions-topics";
+import { searchDatasets, suggestTags } from "@/api/search";
 import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
 import {
