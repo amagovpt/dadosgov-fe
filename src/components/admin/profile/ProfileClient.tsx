@@ -7,14 +7,13 @@ import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   fetchFullProfile,
-  updateProfile,
   uploadAvatar,
   deleteAvatar,
   generateApiKey,
   fetchApiTokens,
   revokeApiToken,
   requestEmailChange,
-} from "@/services/api";
+} from "@/api/profile";
 import { fetchCsrfToken } from "@/api/auth";
 import { fetchUserActivity, updateProfile } from "@/api/users";
 import { fetchMyFollowing } from "@/api/followers";

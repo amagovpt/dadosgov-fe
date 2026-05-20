@@ -24,7 +24,7 @@ import {
   linkDataserviceToReuse,
   fetchReuseTypes,
   fetchReuseTopics,
-} from "@/services/api";
+} from "@/api/reuses";
 import { fetchMyDatasets } from "@/api/datasets";
 import { fetchOrgDatasets } from "@/api/organizations";
 import { searchDatasets, suggestTags } from "@/api/search";

@@ -8,7 +8,7 @@ import {
   CardNoResults,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { deleteDataset } from "@/services/api";
+import { deleteDataset } from "@/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";

@@ -31,11 +31,13 @@ import {
   fetchSpatialZonesByIds,
   fetchDataset,
   fetchMyDatasets,
-  fetchOrgContactPoints,
-  createContactPoint,
   fetchResourceTypes,
   fetchAllowedExtensions,
-} from "@/services/api";
+} from "@/api/datasets";
+import {
+  fetchOrgContactPoints,
+  createContactPoint,
+} from "@/api/organizations";
 import { suggestSpatialZones, suggestTags } from "@/api/search";
 import {
   License,

@@ -22,7 +22,6 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
   fetchReuse,
-  fetchDataset,
   updateReuse,
   deleteReuse,
   fetchReuseTypes,
@@ -30,10 +29,13 @@ import {
   linkDatasetToReuse,
   unlinkDatasetFromReuse,
   linkDataserviceToReuse,
+  uploadReuseImage,
+} from "@/api/reuses";
+import { fetchDataset, fetchMyDatasets } from "@/api/datasets";
+import {
   fetchActivity,
-  requestTransfer,
-} from "@/services/api";
-import { fetchMyDatasets } from "@/api/datasets";
+} from "@/api/activity";
+import { requestTransfer } from "@/api/transfers";
 import { fetchOrgDatasets } from "@/api/organizations";
 import { fetchDiscussions } from "@/api/discussions-topics";
 import { searchDatasets, suggestTags } from "@/api/search";
@@ -382,7 +384,6 @@ export default function ReusesEditClient() {
     setImageError(null);
     setIsSubmitting(true);
     try {
-      const { uploadReuseImage } = await import("@/services/api");
       await uploadReuseImage(reuse.id, file);
       const updated = await fetchReuse(reuse.id);
       setReuse(updated);

@@ -7,7 +7,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
-import { fetchPost } from "@/services/api";
+import { fetchPost } from "@/api/posts";
 import { Post } from "@/types/api";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";

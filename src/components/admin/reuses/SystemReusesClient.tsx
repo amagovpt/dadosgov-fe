@@ -17,7 +17,7 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchReuses } from "@/services/api";
+import { fetchReuses } from "@/api/reuses";
 import { Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";

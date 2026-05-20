@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import { Resource } from "@/types/api";
-import { deleteResource } from "@/services/api";
+import { deleteResource } from "@/api/datasets";
 
 interface DeleteResourcePopupProps {
   datasetId: string;

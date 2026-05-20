@@ -9,7 +9,7 @@ import {
   CardNoResults,
   Icon,
 } from "@ama-pt/agora-design-system";
-import { fetchNotifications, markNotificationRead } from "@/services/api";
+import { fetchNotifications, markNotificationRead } from "@/api/notifications";
 import type {
   Notification,
   ValidateHarvesterNotificationDetails,

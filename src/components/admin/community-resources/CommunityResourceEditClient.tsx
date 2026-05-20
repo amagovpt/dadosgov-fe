@@ -15,7 +15,7 @@ import {
 import {
   fetchResourceTypes,
   fetchSchemas,
-} from "@/services/api";
+} from "@/api/datasets";
 import {
   fetchCommunityResource,
   updateCommunityResource,

@@ -19,11 +19,7 @@ import {
   FormatSuggestion,
   Frequency,
   License,
-  Notification,
   Organization,
-  Post,
-  PostCreatePayload,
-  PostUpdatePayload,
   Resource,
   ResourceCreatePayload,
   ResourceType,
@@ -69,7 +65,36 @@ import { translateUploadError } from "@/lib/security/translateUploadError";
 export { fetchCsrfToken, login, logout, fetchCurrentUser } from "@/api/auth";
 export { fetchMyDatasets, fetchMyOrgDatasets } from "@/api/datasets";
 export { fetchMyReuses } from "@/api/reuses";
-export { fetchUserProfile } from "@/api/users";
+export {
+  fetchUserProfile,
+  updateProfile,
+  uploadUserAvatar,
+  fetchUsers,
+  fetchUser,
+  updateUser,
+  deleteUser,
+  fetchUserRoles,
+  fetchUserActivity,
+} from "@/api/users";
+export {
+  uploadAvatar,
+  deleteAvatar,
+  fetchFullProfile,
+  fetchApiTokens,
+  generateApiKey,
+  revokeApiToken,
+  requestEmailChange,
+  changePassword,
+  deleteAccount,
+  fetchMyMetrics,
+} from "@/api/profile";
+export {
+  fetchMigrationPending,
+  searchMigrationAccount,
+  sendMigrationCode,
+  confirmMigration,
+  skipMigration,
+} from "@/api/migration";
 export {
   fetchOrganizations,
   fetchOrganization,
@@ -113,6 +138,21 @@ export {
   suggestGlobalSearch,
   suggestSpatialZones,
 } from "@/api/search";
+export {
+  fetchPosts,
+  fetchPost,
+  createPost,
+  updatePost,
+  fetchAdminPosts,
+  publishPost,
+  unpublishPost,
+  deletePost,
+  uploadPostImage,
+} from "@/api/posts";
+export {
+  fetchNotifications,
+  markNotificationRead,
+} from "@/api/notifications";
 export {
   fetchSiteInfo,
   updateSiteConfig,
@@ -605,237 +645,6 @@ export async function unfollowReuse(id: string): Promise<void> {
 }
 
 
-export async function fetchPosts(
-  page: number = 1,
-  pageSize: number = 3,
-  sort: string = "-published",
-  q?: string
-): Promise<APIResponse<Post>> {
-  try {
-    const params = new URLSearchParams({ page: String(page), page_size: String(pageSize), sort });
-    if (q) params.set("q", q);
-    const res = await fetch(
-      `${API_BASE_URL}/posts/?${params.toString()}`,
-      {
-        next: { revalidate: 120 },
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch posts: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-export async function fetchPost(slugOrId: string): Promise<Post | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/posts/${slugOrId}/`, {
-      cache: "no-store",
-    });
-
-    if (res.status === 404) {
-      return null;
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch post: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching post:", error);
-    return null;
-  }
-}
-
-export async function createPost(
-  payload: PostCreatePayload
-): Promise<Post | null> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/posts/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-
-    if (res.status === 401) {
-      throw new Error("Authentication required to create a post");
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to create post: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error creating post:", error);
-    return null;
-  }
-}
-
-export async function updatePost(
-  id: string,
-  payload: PostUpdatePayload
-): Promise<Post | null> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/posts/${id}/`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-
-    if (res.status === 401) {
-      throw new Error("Authentication required to update a post");
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to update post: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error updating post:", error);
-    return null;
-  }
-}
-
-export async function fetchAdminPosts(
-  page: number = 1,
-  pageSize: number = 100,
-  sort: string = "-created_at"
-): Promise<APIResponse<Post>> {
-  try {
-    const params = new URLSearchParams({
-      page: String(page),
-      page_size: String(pageSize),
-      sort,
-      with_drafts: "true",
-    });
-    const res = await fetch(`${API_AUTH_URL}/posts/?${params.toString()}`, {
-      credentials: "include",
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch admin posts: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching admin posts:", error);
-    return { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null };
-  }
-}
-
-export async function publishPost(id: string): Promise<Post | null> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/posts/${id}/publish/`, {
-      method: "POST",
-      credentials: "include",
-    });
-
-    if (res.status === 401) {
-      throw new Error("Authentication required to publish a post");
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to publish post: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error publishing post:", error);
-    return null;
-  }
-}
-
-export async function unpublishPost(id: string): Promise<Post | null> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/posts/${id}/publish/`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.status === 401) {
-      throw new Error("Authentication required to unpublish a post");
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to unpublish post: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error unpublishing post:", error);
-    return null;
-  }
-}
-
-export async function deletePost(id: string): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/posts/${id}/`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.status === 401) {
-      throw new Error("Authentication required to delete a post");
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to delete post: ${res.statusText}`);
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Error deleting post:", error);
-    return false;
-  }
-}
-
-export async function uploadPostImage(
-  id: string,
-  file: File
-): Promise<Post | null> {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch(`${API_AUTH_URL}/posts/${id}/image/`, {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-    });
-
-    if (res.status === 401) {
-      throw new Error("Authentication required to upload a post image");
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to upload post image: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error uploading post image:", error);
-    return null;
-  }
-}
-
 export async function fetchLicenses(): Promise<License[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/datasets/licenses/`, { cache: "no-store" });
@@ -1131,107 +940,6 @@ export async function suggestDatasets(
     console.error("Error fetching dataset suggestions:", error);
     return [];
   }
-}
-
-// --- Account Migration ---
-
-export async function fetchMigrationPending(): Promise<{
-  pending: boolean;
-  email?: string;
-  has_email?: boolean;
-  first_name?: string;
-  last_name?: string;
-}> {
-  const res = await fetch("/saml/migration/pending", { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch migration status");
-  return await res.json();
-}
-
-export async function searchMigrationAccount(
-  payload: { email?: string; first_name?: string; last_name?: string }
-): Promise<{ found: boolean; email?: string }> {
-  const res = await fetch("/saml/migration/search", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error("Failed to search migration account");
-  return await res.json();
-}
-
-export async function sendMigrationCode(): Promise<{ sent: boolean }> {
-  const res = await fetch("/saml/migration/send-code", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Failed to send migration code");
-  }
-  return await res.json();
-}
-
-export async function confirmMigration(
-  payload: { method: "code"; code: string } | { method: "password"; password: string }
-): Promise<{ success: boolean }> {
-  const res = await fetch("/saml/migration/confirm", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || "Failed to confirm migration");
-  }
-  return await res.json();
-}
-
-export async function skipMigration(): Promise<{ success: boolean }> {
-  const res = await fetch("/saml/migration/skip", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  });
-  if (!res.ok) throw new Error("Failed to skip migration");
-  return await res.json();
-}
-
-// --- Notifications ---
-
-export async function fetchNotifications(
-  page: number = 1,
-  pageSize: number = 20
-): Promise<APIResponse<Notification>> {
-  const res = await fetch(
-    `${API_AUTH_URL}/notifications/?page=${page}&page_size=${pageSize}`,
-    { cache: "no-store", credentials: "include" }
-  );
-
-  if (res.status === 401) {
-    throw new Error("Authentication required");
-  }
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch notifications: ${res.statusText}`);
-  }
-
-  return await res.json();
-}
-
-export async function markNotificationRead(id: string): Promise<Notification> {
-  const res = await fetch(
-    `${API_AUTH_URL}/notifications/${encodeURIComponent(id)}/read/`,
-    { method: "POST", cache: "no-store", credentials: "include" }
-  );
-
-  if (res.status === 401) {
-    throw new Error("Authentication required");
-  }
-
-  if (!res.ok) {
-    throw new Error(`Failed to mark notification as read: ${res.statusText}`);
-  }
-
-  return await res.json();
 }
 
 // --- Topics (API v2) ---
@@ -1982,319 +1690,9 @@ export async function isFollowing(
   }
 }
 
-// ── User Profile & Metrics (TICKET-30) ──────────────────────────────
+// â”€â”€ User Profile & Metrics (TICKET-30) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export async function updateProfile(payload: UserUpdatePayload): Promise<UserPublic> {
-  const res = await fetch(`${API_AUTH_URL}/me/`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw { status: res.status, data: error };
-  }
-  return await res.json();
-}
-
-export async function uploadAvatar(file: File): Promise<{ image: string }> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(`${API_AUTH_URL}/me/avatar/`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
-  });
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw { status: res.status, data: translateUploadErrorPayload(error) };
-  }
-  return await res.json();
-}
-
-export async function deleteAvatar(): Promise<void> {
-  const res = await fetch(`${API_AUTH_URL}/me/avatar/`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    throw { status: res.status };
-  }
-}
-
-export async function uploadUserAvatar(userId: string, file: File): Promise<{ image: string }> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(`${API_AUTH_URL}/users/${userId}/avatar/`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
-  });
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw { status: res.status, data: translateUploadErrorPayload(error) };
-  }
-  return await res.json();
-}
-
-export async function fetchFullProfile(): Promise<UserPublic> {
-  const res = await fetch(`${API_AUTH_URL}/me/`, {
-    cache: "no-store",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error(`Failed to fetch profile: ${res.statusText}`);
-  return await res.json();
-}
-
-export async function fetchApiTokens(): Promise<ApiToken[]> {
-  const res = await fetch(`${API_AUTH_URL}/me/api_tokens/`, {
-    method: "GET",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error(`Failed to fetch API tokens: ${res.statusText}`);
-  return await res.json();
-}
-
-export async function generateApiKey(name?: string): Promise<ApiTokenCreated> {
-  const res = await fetch(`${API_AUTH_URL}/me/api_tokens/`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(name ? { name } : {}),
-  });
-  if (!res.ok) throw new Error(`Failed to generate API key: ${res.statusText}`);
-  return await res.json();
-}
-
-export async function revokeApiToken(tokenId: string): Promise<void> {
-  const res = await fetch(`${API_AUTH_URL}/me/api_tokens/${tokenId}/`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error(`Failed to revoke API token: ${res.statusText}`);
-}
-
-export async function requestEmailChange(
-  newEmail: string,
-  csrfToken: string
-): Promise<{ message: string }> {
-  const body = new URLSearchParams({
-    new_email: newEmail,
-    new_email_confirm: newEmail,
-    csrf_token: csrfToken,
-  });
-  const res = await fetch("/change-email", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to request email change");
-  return data;
-}
-
-export async function changePassword(
-  currentPassword: string,
-  newPassword: string,
-  newPasswordConfirm: string,
-  csrfToken: string
-): Promise<{ message: string }> {
-  const body = new URLSearchParams({
-    password: currentPassword,
-    new_password: newPassword,
-    new_password_confirm: newPasswordConfirm,
-    csrf_token: csrfToken,
-  });
-  const res = await fetch("/change", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to change password");
-  return data;
-}
-
-export async function deleteAccount(): Promise<void> {
-  const res = await fetch(`${API_AUTH_URL}/me/`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error(`Failed to delete account: ${res.statusText}`);
-}
-
-export async function fetchMyMetrics(): Promise<UserMetrics> {
-  const res = await fetch(`${API_AUTH_URL}/me/metrics/`, {
-    cache: "no-store",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error(`Failed to fetch user metrics: ${res.statusText}`);
-  return await res.json();
-}
-
-export async function fetchUserActivity(
-  userId?: string,
-  page: number = 1,
-  pageSize: number = 20
-): Promise<APIResponse<Activity>> {
-  try {
-    const params = new URLSearchParams({
-      page: String(page),
-      page_size: String(pageSize),
-      sort: "-created_at",
-    });
-    if (userId) params.set("user", userId);
-    const res = await fetch(`${API_AUTH_URL}/activity/?${params.toString()}`, {
-      cache: "no-store",
-      credentials: "include",
-    });
-    if (!res.ok) throw new Error(`Failed to fetch user activity: ${res.statusText}`);
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching user activity:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-// --- User Management (Sysadmin) ---
-
-export async function fetchUsers(
-  page: number = 1,
-  q?: string,
-  sort?: string,
-  pageSize: number = 20,
-  role?: string
-): Promise<APIResponse<UserAdmin>> {
-  try {
-    const params = new URLSearchParams();
-    params.set("page", String(page));
-    params.set("page_size", String(pageSize));
-    if (q) params.set("q", q);
-    if (sort) params.set("sort", sort);
-    if (role) params.set("role", role);
-
-    const res = await fetch(`${API_AUTH_URL}/users/?${params.toString()}`, {
-      cache: "no-store",
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch users: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    return {
-      data: [],
-      page: 1,
-      page_size: pageSize,
-      total: 0,
-      next_page: null,
-      previous_page: null,
-    };
-  }
-}
-
-export async function fetchUser(id: string): Promise<UserAdmin | null> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/users/${id}/`, {
-      cache: "no-store",
-      credentials: "include",
-    });
-
-    if (res.status === 404) {
-      return null;
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch user: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    return null;
-  }
-}
-
-export async function updateUser(
-  id: string,
-  payload: UserAdminUpdatePayload
-): Promise<UserAdmin | null> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/users/${id}/`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-
-    if (res.status === 401) {
-      throw new Error("Authentication required to update a user");
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to update user: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error updating user:", error);
-    return null;
-  }
-}
-
-export async function deleteUser(id: string): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/users/${id}/`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.status === 401) {
-      throw new Error("Authentication required to delete a user");
-    }
-
-    if (!res.ok) {
-      throw new Error(`Failed to delete user: ${res.statusText}`);
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    return false;
-  }
-}
-
-export async function fetchUserRoles(): Promise<UserRole[]> {
-  try {
-    const res = await fetch(`${API_AUTH_URL}/users/roles/`, {
-      cache: "no-store",
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch user roles: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching user roles:", error);
-    return [];
-  }
-}
-
-
-// ── Community Resources CRUD (TICKET-31) ─────────────────────────────
+// â”€â”€ Community Resources CRUD (TICKET-31) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchMyCommunityResources(
   page: number = 1,
@@ -2462,7 +1860,7 @@ export async function uploadCommunityResourceFile(
   return await res.json();
 }
 
-// ── Harvesters CRUD (TICKET-32) ──────────────────────────────────────
+// â”€â”€ Harvesters CRUD (TICKET-32) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function fetchHarvesters(
   page: number = 1,
@@ -2744,7 +2142,7 @@ export async function fetchOrgCommunityResources(
 }
 
 
-// ─── Editorial / Home Featured Content ────────────────────────────────
+// â”€â”€â”€ Editorial / Home Featured Content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function requestTransfer(payload: TransferRequestPayload): Promise<Transfer> {
   const res = await fetch(`${API_AUTH_URL}/transfer/`, {
@@ -2763,7 +2161,7 @@ export async function requestTransfer(payload: TransferRequestPayload): Promise<
           ? JSON.stringify(data.errors)
           : "";
     } catch {
-      // ignore — keep generic message
+      // ignore â€” keep generic message
     }
     throw new Error(detail || `Failed to request transfer: ${res.statusText}`);
   }

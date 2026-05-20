@@ -7,9 +7,9 @@ import { pt } from "date-fns/locale";
 import { Avatar, Button, Icon, InputTextArea, usePopupContext } from "@ama-pt/agora-design-system";
 import { Discussion, Dataset, Reuse } from "@/types/api";
 import {
-  fetchDataset,
   fetchReuse,
-} from "@/services/api";
+} from "@/api/reuses";
+import { fetchDataset } from "@/api/datasets";
 import {
   replyToDiscussion,
   closeDiscussion,

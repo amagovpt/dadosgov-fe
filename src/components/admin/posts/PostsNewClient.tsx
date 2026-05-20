@@ -13,7 +13,7 @@ import {
   Tag,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { createPost, uploadPostImage, publishPost } from "@/services/api";
+import { createPost, uploadPostImage, publishPost } from "@/api/posts";
 import { suggestTags } from "@/api/search";
 import type { TagSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";

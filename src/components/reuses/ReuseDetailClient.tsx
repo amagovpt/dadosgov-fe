@@ -27,9 +27,9 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from "@/types/api";
 import {
-  fetchDataset,
   fetchReuse,
-} from "@/services/api";
+} from "@/api/reuses";
+import { fetchDataset } from "@/api/datasets";
 import {
   fetchDiscussions,
   createDiscussion,

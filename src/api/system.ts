@@ -280,3 +280,21 @@ export async function fetchSystemLogContent(
     return null;
   }
 }
+
+/**
+ * Check if URL is publicly reachable.
+ * If backend check fails, return true to avoid blocking submissions on outages.
+ */
+export async function checkUrlReachable(url: string): Promise<boolean> {
+  try {
+    const res = await authFetch(`/site/check_url/?url=${encodeURIComponent(url)}`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!res.ok) return true;
+    const data = await res.json();
+    return data.reachable !== false;
+  } catch {
+    return true;
+  }
+}

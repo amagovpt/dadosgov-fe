@@ -19,7 +19,7 @@ import {
   fetchDataset,
   fetchMyDatasets,
   fetchResourceTypes,
-} from "@/services/api";
+} from "@/api/datasets";
 import {
   createCommunityResource,
   uploadCommunityResourceFile,

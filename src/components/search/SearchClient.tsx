@@ -18,11 +18,11 @@ import {
 import HeroGeneral from "@/components/HeroGeneral";
 import { Pagination } from "@/components/Pagination";
 import {
-  fetchOrganizations,
   fetchLicenses,
   fetchGranularities,
   suggestFormats,
-} from "@/services/api";
+} from "@/api/datasets";
+import { fetchOrganizations } from "@/api/organizations";
 import {
   searchDatasets,
   searchOrganizations,

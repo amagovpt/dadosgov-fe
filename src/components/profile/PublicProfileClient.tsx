@@ -21,10 +21,9 @@ import {
 import { Dataset, Reuse, Follow, UserFollowing, UserPublic } from "@/types/api";
 import {
   fetchDatasets,
-  fetchReuses,
-} from "@/services/api";
-import { fetchMyDatasets } from "@/api/datasets";
-import { fetchMyReuses } from "@/api/reuses";
+  fetchMyDatasets,
+} from "@/api/datasets";
+import { fetchReuses, fetchMyReuses } from "@/api/reuses";
 import { fetchUserProfile } from "@/api/users";
 import { fetchUserFollowers, fetchMyFollowing } from "@/api/followers";
 import { format, formatDistanceToNow } from "date-fns";

@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@ama-pt/agora-design-system";
 import {
   suggestFormats,
-} from "@/services/api";
+} from "@/api/datasets";
 import { suggestSpatialZones, suggestTags } from "@/api/search";
 import { Frequency, Granularity, License, Organization } from "@/types/api";
 import {
