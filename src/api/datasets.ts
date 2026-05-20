@@ -1,6 +1,7 @@
 import {
   APIResponse,
   Dataset,
+  DatasetSuggestion,
   DatasetCreatePayload,
   DatasetFilters,
   DatasetUpdatePayload,
@@ -482,6 +483,25 @@ export async function deleteResource(datasetId: string, resourceId: string): Pro
   if (!res.ok) throw new Error(`Failed to delete resource: ${res.statusText}`);
 }
 
+export async function reorderResources(datasetId: string, resourceIds: string[]): Promise<void> {
+  const res = await fetch(`${API_AUTH_URL}/datasets/${datasetId}/resources/`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(resourceIds),
+  });
+  if (!res.ok) throw new Error(`Failed to reorder resources: ${res.statusText}`);
+}
+
+export async function toggleDatasetFeatured(id: string, featured: boolean): Promise<Dataset> {
+  const res = await fetch(`${API_AUTH_URL}/datasets/${id}/featured/`, {
+    method: featured ? "POST" : "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(`Failed to toggle dataset featured: ${res.statusText}`);
+  return await res.json();
+}
+
 export async function fetchAllowedExtensions(): Promise<string[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/datasets/extensions/`, {
@@ -505,6 +525,25 @@ export async function suggestFormats(query: string): Promise<FormatSuggestion[]>
     return await res.json();
   } catch (error) {
     console.error("Error suggesting formats:", error);
+    return [];
+  }
+}
+
+export async function suggestDatasets(
+  query: string,
+  size: number = 5
+): Promise<DatasetSuggestion[]> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/datasets/suggest/?q=${encodeURIComponent(query)}&size=${size}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) {
+      throw new Error(`Failed to fetch dataset suggestions: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching dataset suggestions:", error);
     return [];
   }
 }
