@@ -18,7 +18,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchAllCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -193,9 +193,9 @@ export default function SystemCommunityResourcesClient() {
                       <span className="text-neutral-900">{resource.title}</span>
                       {resource.dataset && (
                         <div className="text-sm text-neutral-700">
-                          <AppLink href={`/pages/datasets/${resource.dataset.id}`}>
+                          <TextLink href={`/pages/datasets/${resource.dataset.id}`}>
                             {resource.dataset.title}
-                          </AppLink>
+                          </TextLink>
                         </div>
                       )}
                     </div>

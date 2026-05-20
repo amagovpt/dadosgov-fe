@@ -11,7 +11,7 @@ import { fetchPost } from "@/services/api";
 import { Post } from "@/types/api";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { AppLink } from "../Primitives/AppLink";
+import { TextLink } from "../Primitives/AppLink";
 
 interface ArticleDetailProps {
   rid: string;
@@ -69,9 +69,9 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
       <div className="flex min-h-screen flex-col items-center justify-center gap-16">
         <h1 className="text-2xl-bold text-neutral-900">Artigo não encontrado</h1>
         <p className="text-neutral-600">O artigo que procura não existe ou foi removido.</p>
-        <AppLink href="/pages/posts" className="hover:text-primary-700">
+        <TextLink href="/pages/posts" className="hover:text-primary-700">
           Voltar aos artigos
-        </AppLink>
+        </TextLink>
       </div>
     );
   }

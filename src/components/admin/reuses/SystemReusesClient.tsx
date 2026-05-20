@@ -21,7 +21,7 @@ import { fetchReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at";
@@ -225,7 +225,7 @@ export default function SystemReusesClient() {
               return (
                 <TableRow key={reuse.id}>
                   <TableCell headerLabel="Título">
-                    <AppLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</AppLink>
+                    <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     <StatusDot variant={status.variant}>{status.label}</StatusDot>

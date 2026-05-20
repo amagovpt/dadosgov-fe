@@ -56,7 +56,7 @@ import ReusesEditApiTab from "@/components/admin/reuses/ReusesEditApiTab";
 import ReusesEditDiscussionsTab from "@/components/admin/reuses/ReusesEditDiscussionsTab";
 import ReusesEditActivitiesTab from "@/components/admin/reuses/ReusesEditActivitiesTab";
 import ReusesEditDeletePopup from "@/components/admin/reuses/ReusesEditDeletePopup";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -922,9 +922,9 @@ export default function ReusesEditClient() {
           {" Atividade mais recente: "}
           {reuse.owner && (
             <>
-              <AppLink href={`/pages/users/${reuse.owner.slug}`}>
+              <TextLink href={`/pages/users/${reuse.owner.slug}`}>
                 {reuse.owner.first_name} {reuse.owner.last_name}
-              </AppLink>
+              </TextLink>
             </>
           )}
           {" — editou a reutilização — "}

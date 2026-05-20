@@ -20,7 +20,7 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchHarvestJob, fetchHarvester } from "@/services/api";
 import type { HarvestJob, HarvestItem, HarvestSource } from "@/types/api";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 interface HarvestJobDetailClientProps {
   slug: string;
@@ -314,24 +314,24 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
                 </TableCell>
                 <TableCell headerLabel="Link dados.gov.pt">
                   {item.dataset ? (
-                    <AppLink
+                    <TextLink
                       href={`/pages/datasets/${item.dataset.id}`}
                       className="flex items-center gap-4"
                     >
                       <Icon name="agora-line-globe" className="h-[14px] w-[14px]" />
                       {item.dataset.title}
-                    </AppLink>
+                    </TextLink>
                   ) : (
                     "—"
                   )}
                 </TableCell>
                 <TableCell headerLabel="Link fonte">
                   {item.remote_url ? (
-                    <AppLink href={item.remote_url}>
+                    <TextLink href={item.remote_url}>
                       {item.remote_url.length > 60
                         ? `${item.remote_url.slice(0, 60)}...`
                         : item.remote_url}
-                    </AppLink>
+                    </TextLink>
                   ) : (
                     "—"
                   )}

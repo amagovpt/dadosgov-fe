@@ -22,7 +22,7 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { fetchMyDatasets, fetchMyReuses } from "@/services/api";
 import { Dataset, Reuse } from "@/types/api";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 const PAGE_SIZE = 10;
 
@@ -183,7 +183,7 @@ export default function StatisticsClient() {
                     {datasets.map((dataset) => (
                       <TableRow key={dataset.id}>
                         <TableCell headerLabel="Título">
-                          <AppLink href={dataset.page}>{dataset.title}</AppLink>
+                          <TextLink href={dataset.page}>{dataset.title}</TextLink>
                         </TableCell>
                         <TableCell headerLabel="Discussões">
                           {dataset.metrics?.discussions ?? 0}
@@ -273,7 +273,7 @@ export default function StatisticsClient() {
                       {reuses.map((reuse) => (
                         <TableRow key={reuse.id}>
                           <TableCell headerLabel="Título">
-                            <AppLink href={reuse.url}>{reuse.title}</AppLink>
+                            <TextLink href={reuse.url}>{reuse.title}</TextLink>
                           </TableCell>
                           <TableCell headerLabel="Visualizações">
                             {reuse.metrics?.views ?? 0}

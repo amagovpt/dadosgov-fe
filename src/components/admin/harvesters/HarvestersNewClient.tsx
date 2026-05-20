@@ -21,7 +21,7 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { createHarvester, previewHarvestSource } from "@/services/api";
 import { HarvestSourceCreatePayload, HarvestPreviewJob } from "@/types/api";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 export default function HarvestersNewClient() {
   const { user } = useAuth();
@@ -239,9 +239,9 @@ export default function HarvestersNewClient() {
           <p className="auxiliar-list__content mt-8 !p-0">
             Selecione uma organização da qual seja administrador. Se a sua organização ainda não
             existir, terá de a criar primeiro através deste{" "}
-            <AppLink href="/pages/admin/organizations/new" className="auxiliar-list__content !p-0">
+            <TextLink href="/pages/admin/organizations/new" className="auxiliar-list__content !p-0">
               link ↗
-            </AppLink>
+            </TextLink>
             .
           </p>
         </>

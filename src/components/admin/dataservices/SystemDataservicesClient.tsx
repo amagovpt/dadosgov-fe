@@ -21,7 +21,7 @@ import { fetchDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -217,7 +217,7 @@ export default function SystemDataservicesClient() {
             {filteredApis.map((api) => (
               <TableRow key={api.id}>
                 <TableCell headerLabel="Título">
-                  <AppLink href={`/pages/dataservices/${api.slug}`}>{api.title}</AppLink>
+                  <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {api.deleted ? (

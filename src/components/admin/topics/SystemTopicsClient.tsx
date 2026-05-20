@@ -15,7 +15,7 @@ import {
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchTopics } from "@/services/api";
 import { Topic } from "@/types/api";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -103,7 +103,7 @@ export default function SystemTopicsClient() {
             {topics.map((topic) => (
               <TableRow key={topic.id}>
                 <TableCell headerLabel="Nome">
-                  <AppLink href={`/pages/themes/${topic.slug}`}>{topic.name}</AppLink>
+                  <TextLink href={`/pages/themes/${topic.slug}`}>{topic.name}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDate(topic.created_at)}</TableCell>
                 <TableCell headerLabel="Conjuntos de dados">{topic.datasets_count ?? 0}</TableCell>

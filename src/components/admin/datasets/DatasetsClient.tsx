@@ -24,7 +24,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],
@@ -274,7 +274,7 @@ export default function DatasetsClient() {
             {datasets.map((dataset) => (
               <TableRow key={dataset.id}>
                 <TableCell headerLabel="Título">
-                  <AppLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</AppLink>
+                  <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {dataset.deleted ? (
@@ -292,9 +292,9 @@ export default function DatasetsClient() {
                   <div>
                     <div>{formatDate(dataset.last_modified)}</div>
                     {dataset.owner && (
-                      <AppLink href={`/pages/users/${dataset.owner.slug}`} className="text-xs">
+                      <TextLink href={`/pages/users/${dataset.owner.slug}`} className="text-xs">
                         {dataset.owner.first_name} {dataset.owner.last_name}
-                      </AppLink>
+                      </TextLink>
                     )}
                   </div>
                 </TableCell>

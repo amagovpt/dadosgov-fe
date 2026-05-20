@@ -19,7 +19,7 @@ import {
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchUsers } from "@/services/api";
 import { UserAdmin } from "@/types/api";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
 type SortOrder = "ascending" | "descending" | "none";
@@ -238,9 +238,9 @@ export default function SystemUsersClient() {
               <TableRow key={user.id}>
                 <TableCell headerLabel="Nome">
                   <div>
-                    <AppLink href={`/pages/users/${user.slug}`}>
+                    <TextLink href={`/pages/users/${user.slug}`}>
                       {user.first_name} {user.last_name}
-                    </AppLink>
+                    </TextLink>
                     {user.email && (
                       <div className="text-sm flex items-center gap-4 text-neutral-900">
                         <Icon name="agora-line-mail" className="h-[14px] w-[14px]" />

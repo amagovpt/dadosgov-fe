@@ -19,7 +19,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import { fetchCsrfToken, login } from "@/services/api";
-import { AppLink } from "../Primitives/AppLink";
+import { TextLink } from "../Primitives/AppLink";
 
 function LoginContent() {
   const searchParams = useSearchParams();
@@ -435,12 +435,12 @@ function LoginContent() {
                           <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
                           <p className="text-sm">
                             Deve ler atentamente os{" "}
-                            <AppLink
+                            <TextLink
                               href="/pages/faqs/terms"
                               className="hover:text-primary-800 active:decoration-dashed"
                             >
                               Termos e condições para o tratamento dos seus dados
-                            </AppLink>
+                            </TextLink>
                           </p>
                           <Checkbox
                             id="terms-cmd"
@@ -520,12 +520,12 @@ function LoginContent() {
                         <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
                         <p className="text-sm">
                           Deve ler atentamente os{" "}
-                          <AppLink
+                          <TextLink
                             href="/pages/faqs/terms"
                             className="hover:text-primary-800 active:decoration-dashed"
                           >
                             Termos e condições para o tratamento dos seus dados
-                          </AppLink>
+                          </TextLink>
                         </p>
                         <Checkbox
                           id="terms-eidas"
@@ -786,12 +786,12 @@ function LoginContent() {
                                 </h3>
                                 <p className="text-sm">
                                   Deve ler atentamente os{" "}
-                                  <AppLink
+                                  <TextLink
                                     href="/pages/faqs/terms"
                                     className="hover:text-primary-800 active:decoration-dashed"
                                   >
                                     Termos e condições para o tratamento dos seus dados
-                                  </AppLink>
+                                  </TextLink>
                                 </p>
                                 <Checkbox
                                   id="terms-email"

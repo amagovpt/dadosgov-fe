@@ -60,7 +60,7 @@ import DatasetsEditActivitiesTab from "@/components/admin/datasets/DatasetsEditA
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { POISONED_FILE_WARNING, translateUploadError } from "@/lib/security/translateUploadError";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -924,9 +924,9 @@ export default function DatasetsEditClient() {
           {latestActivity ? (
             <>
               {" Atividade mais recente: "}
-              <AppLink href={`/pages/users/${latestActivity.actor.slug}`}>
+              <TextLink href={`/pages/users/${latestActivity.actor.slug}`}>
                 {latestActivity.actor.first_name} {latestActivity.actor.last_name}
-              </AppLink>
+              </TextLink>
               {" — "}
               {translateActivityLabel(latestActivity.label)}
               {" — "}
@@ -941,9 +941,9 @@ export default function DatasetsEditClient() {
               {" Atividade mais recente: "}
               {dataset.owner && (
                 <>
-                  <AppLink href={`/pages/users/${dataset.owner.slug}`}>
+                  <TextLink href={`/pages/users/${dataset.owner.slug}`}>
                     {dataset.owner.first_name} {dataset.owner.last_name}
-                  </AppLink>
+                  </TextLink>
                 </>
               )}
               {" — editou o conjunto de dados — "}

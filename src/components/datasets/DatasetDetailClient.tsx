@@ -22,7 +22,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { formatMetricValue } from "@/utils/formatNumber";
-import { AppLink } from "../Primitives/AppLink";
+import { TextLink } from "../Primitives/AppLink";
 
 interface DatasetDetailClientProps {
   slug: string;
@@ -327,7 +327,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                 </div>
                 {dataset.license && (
                   <div className="text-sm">
-                    <AppLink
+                    <TextLink
                       href={
                         dataset.license_url ||
                         `https://dados.gov.pt/pt/licenses/${dataset.license}/`
@@ -335,7 +335,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     >
                       <span className="text-m-semibold">Licença:</span>{" "}
                       {dataset.license_title || dataset.license}
-                    </AppLink>
+                    </TextLink>
                   </div>
                 )}
                 {dataset.contact_points && dataset.contact_points.length > 0 && (
@@ -347,14 +347,14 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                         </div>
                         <div className="mb-4 text-neutral-900">{cp.name}</div>
                         {cp.email && (
-                          <AppLink href={`mailto:${cp.email}`} className="block break-all">
+                          <TextLink href={`mailto:${cp.email}`} className="block break-all">
                             {cp.email}
-                          </AppLink>
+                          </TextLink>
                         )}
                         {cp.contact_form && (
-                          <AppLink href={cp.contact_form} className="block">
+                          <TextLink href={cp.contact_form} className="block">
                             Formulário de contacto
-                          </AppLink>
+                          </TextLink>
                         )}
                       </div>
                     ))}

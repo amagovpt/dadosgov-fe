@@ -26,7 +26,7 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -225,7 +225,7 @@ export default function OrgDataservicesClient() {
             {sortedApis.map((api, index) => (
               <TableRow key={index}>
                 <TableCell headerLabel="Título">
-                  <AppLink href={`/pages/dataservices/${api.slug}`}>{api.title}</AppLink>
+                  <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {api.deleted ? (

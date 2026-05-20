@@ -3,7 +3,7 @@ import { Button } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import type { Resource } from "@/types/api";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type DatasetsEditResourceDetailPopupProps = {
   resource: Resource;
@@ -49,7 +49,7 @@ export default function DatasetsEditResourceDetailPopup({
             <tr>
               <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">URL</td>
               <td className="break-all py-4">
-                <AppLink href={resource.url}>{resource.url}</AppLink>
+                <TextLink href={resource.url}>{resource.url}</TextLink>
               </td>
             </tr>
             {resource.filetype !== "remote" && (

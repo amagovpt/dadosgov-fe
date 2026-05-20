@@ -22,7 +22,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchAdminPosts } from "@/services/api";
 import { Post } from "@/types/api";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "name" | "created_at" | "last_modified";
@@ -272,7 +272,7 @@ export default function SystemPostsClient() {
             {posts.map((post) => (
               <TableRow key={post.id}>
                 <TableCell headerLabel="Título">
-                  <AppLink href={`/pages/posts/${post.slug}`}>{post.name}</AppLink>
+                  <TextLink href={`/pages/posts/${post.slug}`}>{post.name}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Tipo">
                   {post.kind === "page" ? "Página" : "Notícias"}

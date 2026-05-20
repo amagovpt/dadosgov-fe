@@ -21,7 +21,7 @@ import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -200,9 +200,9 @@ export default function CommunityResourcesClient() {
                   {resource.dataset && (
                     <>
                       <br />
-                      <AppLink href={`/pages/datasets/${resource.dataset.id}`} className="text-sm">
+                      <TextLink href={`/pages/datasets/${resource.dataset.id}`} className="text-sm">
                         {resource.dataset.title}
-                      </AppLink>
+                      </TextLink>
                     </>
                   )}
                 </TableCell>

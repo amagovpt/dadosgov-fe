@@ -36,7 +36,7 @@ import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 const roleLabels: Record<string, string> = {
   admin: "Administrador",
@@ -579,9 +579,9 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                       ) : (
                         <Icon name="agora-line-user" className="h-32 w-32" />
                       )}
-                      <AppLink href={`/pages/users/${request.user.slug}`}>
+                      <TextLink href={`/pages/users/${request.user.slug}`}>
                         {request.user.first_name} {request.user.last_name}
-                      </AppLink>
+                      </TextLink>
                     </div>
                   </TableCell>
                   <TableCell headerLabel="Comentário">{request.comment || "-"}</TableCell>
@@ -701,9 +701,9 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                     <Icon name="agora-line-user" className="h-32 w-32" />
                   )}
                   <div>
-                    <AppLink href={`/pages/users/${member.user.slug}`}>
+                    <TextLink href={`/pages/users/${member.user.slug}`}>
                       {member.user.first_name} {member.user.last_name}
-                    </AppLink>
+                    </TextLink>
                   </div>
                 </div>
               </TableCell>

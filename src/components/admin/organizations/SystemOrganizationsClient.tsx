@@ -18,7 +18,7 @@ import {
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -228,7 +228,7 @@ export default function SystemOrganizationsClient() {
             {organizations.map((org) => (
               <TableRow key={org.id}>
                 <TableCell headerLabel="Nome">
-                  <AppLink href={`/pages/admin/org/${org.id}/profile`}>{org.name}</AppLink>
+                  <TextLink href={`/pages/admin/org/${org.id}/profile`}>{org.name}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDate(org.created_at)}</TableCell>
                 <TableCell headerLabel="Conjuntos de dados">{org.metrics?.datasets ?? 0}</TableCell>

@@ -22,6 +22,7 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
@@ -100,9 +101,7 @@ export default function OrgCommunityResourcesClient() {
         <CardNoResults
           className="datasets-page__empty"
           position="center"
-          icon={
-            <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />
-          }
+          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem organizações"
           description="Não pertence a nenhuma organização."
           hasAnchor={false}
@@ -131,13 +130,12 @@ export default function OrgCommunityResourcesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {resources.length} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{resources.length} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquisar recursos comunitários"
             aria-label="Pesquisar recursos comunitários"
@@ -218,7 +216,7 @@ export default function OrgCommunityResourcesClient() {
                       {resource.owner && (
                         <a
                           href={`/pages/users/${resource.owner.slug}`}
-                          className="text-primary-600 text-xs underline"
+                          className="text-xs text-primary-600 underline"
                         >
                           {resource.owner.first_name} {resource.owner.last_name}
                         </a>
@@ -227,9 +225,9 @@ export default function OrgCommunityResourcesClient() {
                   </TableCell>
                   <TableCell headerLabel="Ações">
                     <div className="flex gap-8">
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <AppIcon name="agora-line-eye" />
                       <a href={`/pages/admin/community-resources/edit?resource_id=${resource.id}`}>
-                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                        <AppIcon name="agora-line-edit" />
                       </a>
                     </div>
                   </TableCell>
@@ -245,10 +243,7 @@ export default function OrgCommunityResourcesClient() {
               className="datasets-page__empty"
               position="center"
               icon={
-                <Icon
-                  name="agora-line-buildings"
-                  className="w-12 h-12 text-primary-500 icon-xl"
-                />
+                <Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />
               }
               title="Sem recursos comunitários"
               description="A organização ainda não tem recursos comunitários."

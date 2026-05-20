@@ -1,6 +1,6 @@
 import React from "react";
 import { AuxiliarItem } from "@/components/admin/AuxiliarList";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 interface DatasetAuxiliarErrors {
   title?: boolean;
@@ -76,10 +76,10 @@ export function getDatasetAuxiliarItems(errors: DatasetAuxiliarErrors = {}): Aux
             necessidades.
           </p>
           <p className="mt-3">
-            <AppLink href="#">
+            <TextLink href="#">
               A IA baseia-se exclusivamente nas informações que forneceu e, por vezes, pode cometer
               erros: releia sempre a proposta antes de validar.
-            </AppLink>
+            </TextLink>
           </p>
         </>
       ),
@@ -98,10 +98,10 @@ export function getDatasetAuxiliarItems(errors: DatasetAuxiliarErrors = {}): Aux
             automaticamente. Pode aceitá-las, modificá-las ou excluí-las.
           </p>
           <p className="mt-3">
-            <AppLink href="#">
+            <TextLink href="#">
               A IA baseia-se exclusivamente nas informações que forneceu e, por vezes, pode cometer
               erros: releia sempre a proposta antes de validar.
-            </AppLink>
+            </TextLink>
           </p>
         </>
       ),

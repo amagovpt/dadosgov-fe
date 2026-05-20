@@ -29,7 +29,7 @@ import {
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 const VALIDATION_STATUS: Record<
   string,
@@ -325,9 +325,9 @@ export default function SystemHarvestersClient() {
                   style={{ cursor: "pointer" }}
                 >
                   <TableCell headerLabel="Nome">
-                    <AppLink href={`/pages/admin/harvesters/${harvester.id}`}>
+                    <TextLink href={`/pages/admin/harvesters/${harvester.id}`}>
                       {harvester.name}
-                    </AppLink>
+                    </TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     <StatusDot variant={status.variant}>{status.label}</StatusDot>

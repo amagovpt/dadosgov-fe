@@ -13,7 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import HeroGeneral from "@/components/HeroGeneral";
 import { submitSupportContact, type SupportTopic } from "@/services/api";
-import IconAgora from "../Primitives/IconAgora";
+import AppIcon from "../Primitives/AppIcon";
 
 const FAQ_DATA = [
   {
@@ -234,7 +234,7 @@ const SupportPage = () => {
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 O que é o dados.gov.pt
-                <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
+                <AppIcon name="agora-line-arrow-right-circle" className="fill-white" />
               </a>
 
               <a
@@ -244,7 +244,7 @@ const SupportPage = () => {
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 Saber mais sobre dados abertos
-                <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
+                <AppIcon name="agora-line-arrow-right-circle" className="fill-white" />
               </a>
             </div>
           </>

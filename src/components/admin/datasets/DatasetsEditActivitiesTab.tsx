@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import type { Activity } from "@/types/api";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type DatasetsEditActivitiesTabProps = {
   activitiesLoading: boolean;
@@ -46,9 +46,9 @@ export default function DatasetsEditActivitiesTab({
                 />
                 <div>
                   <p className="text-sm text-neutral-900">
-                    <AppLink href={`/pages/admin/users/${activity.actor?.id}`}>
+                    <TextLink href={`/pages/admin/users/${activity.actor?.id}`}>
                       {activity.actor?.first_name} {activity.actor?.last_name}
-                    </AppLink>{" "}
+                    </TextLink>{" "}
                     {translateActivityLabel(activity.label)}
                   </p>
                   <p className="text-xs mt-4 text-neutral-600">

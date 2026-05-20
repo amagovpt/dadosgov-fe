@@ -24,7 +24,7 @@ import { Reuse } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -256,7 +256,7 @@ export default function ReusesClient() {
               return (
                 <TableRow key={reuse.id}>
                   <TableCell headerLabel="Título">
-                    <AppLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</AppLink>
+                    <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     <StatusDot variant={status.variant}>{status.label}</StatusDot>
@@ -266,9 +266,9 @@ export default function ReusesClient() {
                     <br />
                     <span className="text-sm text-neutral-500">
                       {reuse.owner ? (
-                        <AppLink href={`/pages/users/${reuse.owner.slug}`} className="text-xs">
+                        <TextLink href={`/pages/users/${reuse.owner.slug}`} className="text-xs">
                           {reuse.owner.first_name} {reuse.owner.last_name}
-                        </AppLink>
+                        </TextLink>
                       ) : (
                         "—"
                       )}

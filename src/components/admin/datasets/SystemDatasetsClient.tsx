@@ -21,7 +21,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
@@ -254,7 +254,7 @@ export default function SystemDatasetsClient() {
             {datasets.map((dataset) => (
               <TableRow key={dataset.id}>
                 <TableCell headerLabel="Título">
-                  <AppLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</AppLink>
+                  <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {dataset.deleted ? (

@@ -24,7 +24,7 @@ import { Dropdown } from "@/components/Primitives/Dropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created" | "last_update";
@@ -242,7 +242,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
             {datasets.map((dataset) => (
               <TableRow key={dataset.id}>
                 <TableCell headerLabel="Título">
-                  <AppLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</AppLink>
+                  <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {dataset.deleted ? (
@@ -260,16 +260,16 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   <div>
                     <div>{formatDateToDMY(dataset.last_modified)}</div>
                     {dataset.owner ? (
-                      <AppLink href={`/pages/users/${dataset.owner.slug}`} className="text-xs">
+                      <TextLink href={`/pages/users/${dataset.owner.slug}`} className="text-xs">
                         {dataset.owner.first_name} {dataset.owner.last_name}
-                      </AppLink>
+                      </TextLink>
                     ) : dataset.organization ? (
-                      <AppLink
+                      <TextLink
                         href={`/pages/organizations/${dataset.organization.slug}`}
                         className="text-xs"
                       >
                         {dataset.organization.name}
-                      </AppLink>
+                      </TextLink>
                     ) : null}
                   </div>
                 </TableCell>

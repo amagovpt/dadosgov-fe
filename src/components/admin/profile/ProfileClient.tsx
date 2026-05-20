@@ -47,7 +47,7 @@ import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/Dra
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
 import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import { AppLink } from "@/components/Primitives/AppLink";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -944,12 +944,12 @@ export default function ProfileClient() {
                                   }
                                   alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
                                 />
-                                <AppLink
+                                <TextLink
                                   href={`/pages/admin/users/${activity.actor?.id}`}
                                   className="text-sm"
                                 >
                                   {activity.actor?.first_name} {activity.actor?.last_name}
-                                </AppLink>
+                                </TextLink>
                               </div>
                             </TableCell>
                             <TableCell headerLabel="Ação">

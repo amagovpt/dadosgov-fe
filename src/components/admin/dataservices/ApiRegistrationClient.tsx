@@ -20,6 +20,7 @@ import type { Dataservice } from "@/types/api";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 interface ApiRegistrationClientProps {
   currentStep: number;
@@ -277,7 +278,7 @@ export default function ApiRegistrationClient({
                     className="admin-page__org-card-link"
                   >
                     Crie ou integre uma organização em dados.gov.pt
-                    <Icon
+                    <AppIcon
                       name="agora-line-arrow-right-circle"
                       className="w-24 h-24"
                     />
@@ -583,7 +584,7 @@ export default function ApiRegistrationClient({
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon
+                <AppIcon
                   name="agora-line-question-mark"
                   className="w-24 h-24"
                 />

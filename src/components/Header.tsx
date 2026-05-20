@@ -28,7 +28,7 @@ import SearchDropdown from "@/components/search/SearchDropdown";
 import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/services/api";
-import { AppLink } from "./Primitives/AppLink";
+import { TextLink } from "./Primitives/AppLink";
 
 export const Header = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -740,13 +740,13 @@ export const Header = () => {
                 <div className="h-[1px] bg-primary-600" />
                 <div className="flex flex-row gap-32">
                   {artePortals.map((link) => (
-                    <AppLink
+                    <TextLink
                       key={link.href}
                       href={link.href}
                       className="text-base hover:text-primary-800"
                     >
                       {link.label}
-                    </AppLink>
+                    </TextLink>
                   ))}
                 </div>
               </div>

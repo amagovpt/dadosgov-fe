@@ -44,6 +44,7 @@ import {
   POISONED_FILE_WARNING,
   translateUploadError,
 } from "@/lib/security/translateUploadError";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 interface ReusesFormClientProps {
   currentStep: number;
@@ -573,7 +574,7 @@ export default function ReusesFormClient({
                       className="admin-page__org-card-link"
                     >
                       Crie ou integre uma organização em dados.gov.pt
-                      <Icon
+                      <AppIcon
                         name="agora-line-arrow-right-circle"
                         className="w-24 h-24"
                       />
@@ -1220,7 +1221,7 @@ export default function ReusesFormClient({
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon
+                <AppIcon
                   name="agora-line-question-mark"
                   className="w-24 h-24"
                 />

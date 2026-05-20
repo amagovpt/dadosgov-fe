@@ -21,7 +21,7 @@ import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/Dra
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { ResourceType } from "@/types/api";
-import { AppLink } from "../Primitives/AppLink";
+import { TextLink } from "../Primitives/AppLink";
 
 export interface PendingResourceMeta {
   title: string;
@@ -378,7 +378,7 @@ function ResourceViewPopupContent({
               <tr>
                 <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">URL</td>
                 <td className="break-all py-4">
-                  <AppLink href={name}>{name}</AppLink>
+                  <TextLink href={name}>{name}</TextLink>
                 </td>
               </tr>
             )}

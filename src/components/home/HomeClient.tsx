@@ -15,6 +15,7 @@ import HeroGeneral from "../HeroGeneral";
 import PublishDropdown from "../admin/PublishDropdown";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import Image from "next/image";
+import AppIcon from "../Primitives/AppIcon";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -140,7 +141,7 @@ export default function HomeClient({
                 {/* Utilizadores */}
                 <div className="flex items-center gap-16">
                   <div className="px-24 py-24 rounded-8 border-2 border-[#FFD700] text-[#FFD700]">
-                    <Icon
+                    <AppIcon
                       name="agora-line-user-group"
                       aria-hidden="true"
                       className="w-24 h-24 fill-[#FFD700]"
@@ -163,7 +164,7 @@ export default function HomeClient({
                 {/* Conjuntos de dados */}
                 <div className="flex items-center gap-16">
                   <div className="px-24 py-24 rounded-8 border-2 border-[#A6D5FF] text-[#A6D5FF]">
-                    <Icon
+                    <AppIcon
                       name="agora-line-layers-menu"
                       aria-hidden="true"
                       className="w-24 h-24 fill-[#A6D5FF]"
@@ -186,7 +187,7 @@ export default function HomeClient({
                 {/* Organizações */}
                 <div className="flex items-center gap-16">
                   <div className="px-24 py-24 rounded-8 border-2 border-[#CBFF3F] !text-[#CBFF3F]">
-                    <Icon
+                    <AppIcon
                       name="agora-line-buildings"
                       aria-hidden="true"
                       className="w-24 h-24 fill-[#CBFF3F]"

@@ -53,7 +53,7 @@ import { pt } from "date-fns/locale";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
-import { AppLink } from "../Primitives/AppLink";
+import { TextLink } from "../Primitives/AppLink";
 
 interface ReuseDetailClientProps {
   slug: string;
@@ -380,9 +380,9 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             <p className="admin-edit-info__activity">
               <Icon name="agora-line-user" className="admin-edit-info__clock-icon" />
               {" Criado por: "}
-              <AppLink href={`/pages/users/${reuse.owner.slug}`}>
+              <TextLink href={`/pages/users/${reuse.owner.slug}`}>
                 {reuse.owner.first_name} {reuse.owner.last_name}
-              </AppLink>
+              </TextLink>
             </p>
           )}
 
@@ -417,12 +417,12 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       </div>
                     )}
                     {reuse.organization && (
-                      <AppLink
+                      <TextLink
                         href={`/pages/organizations/${reuse.organization.slug}`}
                         className="text-sm font-medium hover:text-primary-800"
                       >
                         {reuse.organization.name}
-                      </AppLink>
+                      </TextLink>
                     )}
                   </div>
                 }
@@ -561,7 +561,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     description={
                       <span>
                         A sua questão não é sobre a reutilização?{" "}
-                        <AppLink href="https://dados.gov.pt/pt/">Visite o nosso fórum.</AppLink>
+                        <TextLink href="https://dados.gov.pt/pt/">Visite o nosso fórum.</TextLink>
                       </span>
                     }
                   />
@@ -1040,9 +1040,9 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   key={`remote-dataset-${index}`}
                   className="rounded-8 border border-neutral-200 p-16"
                 >
-                  <AppLink href={entry.url} className="break-all font-medium">
+                  <TextLink href={entry.url} className="break-all font-medium">
                     {entry.title || entry.url}
-                  </AppLink>
+                  </TextLink>
                   {entry.description && (
                     <p className="text-sm mt-8 text-neutral-700">{entry.description}</p>
                   )}
