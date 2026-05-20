@@ -64,7 +64,7 @@ export default function DatasetsClient({
     show(
       <div className="flex flex-col gap-16">
         <p>
-          Essa aÁ„o È irreversÌvel.{" "}
+          Essa a√ß√£o √© irrevers√≠vel.{" "}
           <span className="text-red-600">Tem a certeza que quer eliminar este conjunto de dados?</span>
         </p>
         <div className="flex justify-end gap-16 pt-16">
@@ -104,8 +104,8 @@ export default function DatasetsClient({
         subtitle={
           <p className="text-primary-100 max-w-[592px]">
             {total === 0
-              ? "N„o existem resultados disponÌveis para a sua pesquisa"
-              : `Pesquise atravÈs de ${total.toLocaleString("pt-PT")} conjuntos de dados em dados.gov.pt`}
+              ? "N√£o existem resultados dispon√≠veis para a sua pesquisa"
+              : `Pesquise atrav√©s de ${total.toLocaleString("pt-PT")} conjuntos de dados em dados.gov.pt`}
           </p>
         }
       >
@@ -207,9 +207,9 @@ export default function DatasetsClient({
                           className="w-12 h-12 text-primary-500 icon-xl"
                         />
                       }
-                      title="N„o encontr·mos o que procura"
+                      title="N√£o encontr√°mos o que procura"
                       subtitle={
-                        <span className="font-bold">A sua pesquisa n„o devolveu resultados.</span>
+                        <span className="font-bold">A sua pesquisa n√£o devolveu resultados.</span>
                       }
                       description={
                         <div className="max-w-[592px] mx-auto">
