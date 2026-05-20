@@ -238,7 +238,7 @@ const SupportPage = () => {
               </a>
 
               <a
-                href="https://dados.gov.pt/pages/about-open-data"
+                href="https://dados.gov.pt/pt/pages/faqs/about_opendata/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
