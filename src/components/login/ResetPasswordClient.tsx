@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import {
   Button,
   Breadcrumb,
@@ -24,9 +25,12 @@ export function ResetPasswordClient({ token }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
   const passwordsMatch = password && passwordConfirm && password === passwordConfirm;
-  const canSubmit = passwordsMatch && !isLoading;
+  const canSubmit = passwordsMatch && !isLoading && (!recaptchaSiteKey || !!captchaToken);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,9 +53,13 @@ export function ResetPasswordClient({ token }: Props) {
         setSuccess(true);
       } else {
         setError(data.message || "Erro ao redefinir a palavra-passe. Tente novamente.");
+        recaptchaRef.current?.reset();
+        setCaptchaToken(null);
       }
     } catch {
       setError("Erro de ligação. Tente novamente.");
+      recaptchaRef.current?.reset();
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -114,15 +122,21 @@ export function ResetPasswordClient({ token }: Props) {
                     }
                   }}
                 >
-                  <InputPassword
-                    label="Nova palavra-passe *"
-                    placeholder="Introduza a nova palavra-passe"
-                    id="password"
-                    name="password"
-                    className="w-full"
-                    disabled={isLoading}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <div className="flex flex-col gap-8">
+                    <InputPassword
+                      label="Nova palavra-passe *"
+                      placeholder="Introduza a nova palavra-passe"
+                      id="password"
+                      name="password"
+                      className="w-full"
+                      disabled={isLoading}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <p className="text-sm text-neutral-600">
+                      A palavra-passe tem de ter no mínimo 13 caracteres e incluir pelo menos um
+                      símbolo (ex: !@#$%).
+                    </p>
+                  </div>
 
                   <InputPassword
                     label="Confirmar nova palavra-passe *"
@@ -136,6 +150,16 @@ export function ResetPasswordClient({ token }: Props) {
 
                   {passwordConfirm && !passwordsMatch && (
                     <p className="text-sm text-danger-600">As palavras-passe não coincidem.</p>
+                  )}
+
+                  {recaptchaSiteKey && (
+                    <ReCAPTCHA
+                      ref={recaptchaRef}
+                      sitekey={recaptchaSiteKey}
+                      hl="pt"
+                      onChange={(token) => setCaptchaToken(token)}
+                      onExpired={() => setCaptchaToken(null)}
+                    />
                   )}
 
                   <div className="mt-8">
