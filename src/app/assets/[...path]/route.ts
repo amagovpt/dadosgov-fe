@@ -11,8 +11,6 @@ export async function GET(
   const assetPath = path.join("/");
   const search = request.nextUrl.search;
 
-  console.log(`Fetching asset from: ${assetPath}${search}`);
-
   const targetUrl = `${BE_CMS_URL}/api/assets/${assetPath}${search}`;
 
   try {
