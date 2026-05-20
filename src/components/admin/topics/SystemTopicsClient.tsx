@@ -16,6 +16,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchTopics } from "@/services/api";
 import { Topic } from "@/types/api";
+import TextLink from "@/components/Primitives/TextLink";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -67,12 +68,10 @@ export default function SystemTopicsClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {totalItems} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : topics.length > 0 ? (
         <Table
           paginationProps={createPaginationProps(
@@ -96,26 +95,15 @@ export default function SystemTopicsClient() {
             {topics.map((topic) => (
               <TableRow key={topic.id}>
                 <TableCell headerLabel="Nome">
-                  <a
-                    href={`/pages/themes/${topic.slug}`}
-                    className="text-primary-600 underline"
-                  >
-                    {topic.name}
-                  </a>
+                  <TextLink href={`/pages/themes/${topic.slug}`}>{topic.name}</TextLink>
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDate(topic.created_at)}
-                </TableCell>
-                <TableCell headerLabel="Conjuntos de dados">
-                  {topic.datasets_count ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Reutilizações">
-                  {topic.reuses_count ?? 0}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDate(topic.created_at)}</TableCell>
+                <TableCell headerLabel="Conjuntos de dados">{topic.datasets_count ?? 0}</TableCell>
+                <TableCell headerLabel="Reutilizações">{topic.reuses_count ?? 0}</TableCell>
                 <TableCell headerLabel="Ações">
                   <div className="flex gap-8">
                     <a href={`/pages/themes/${topic.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                     </a>
                   </div>
                 </TableCell>
@@ -126,12 +114,7 @@ export default function SystemTopicsClient() {
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-tag"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-tag" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem temas"
           description="Nenhum tema encontrado."
           hasAnchor={false}

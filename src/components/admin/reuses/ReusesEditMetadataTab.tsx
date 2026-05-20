@@ -17,6 +17,7 @@ import IsolatedTextArea from "@/components/admin/IsolatedTextArea";
 import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
 import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
 import type { Reuse, ReuseTopic, ReuseType } from "@/types/api";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 type ReusesEditMetadataTabProps = {
   reuse: Reuse;
@@ -362,7 +363,7 @@ export default function ReusesEditMetadataTab({
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="w-24 h-24" />
+                <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList

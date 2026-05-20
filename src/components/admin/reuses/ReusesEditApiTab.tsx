@@ -8,6 +8,7 @@ import {
   InputText,
 } from "@ama-pt/agora-design-system";
 import type { Reuse } from "@/types/api";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 type ApiLink = { url: string };
 
@@ -43,7 +44,7 @@ export default function ReusesEditApiTab({
                 className="border border-neutral-200 rounded-4 p-16 flex items-center justify-between"
               >
                 <div className="flex items-center gap-12">
-                  <Icon name="agora-line-code" className="w-24 h-24" />
+                  <AppIcon name="agora-line-code" className="w-24 h-24" />
                   <span className="text-neutral-900 font-medium">{api.title}</span>
                 </div>
                 <button
@@ -51,7 +52,7 @@ export default function ReusesEditApiTab({
                   className="border border-neutral-300 rounded-4 p-8 hover:bg-neutral-100"
                   title="Eliminar API"
                 >
-                  <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
+                  <AppIcon name="agora-line-trash" />
                 </button>
               </div>
             ))}

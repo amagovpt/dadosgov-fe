@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react'
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs'
 import MiniCoursesFilters from './MiniCoursesFilters';
 import Link from 'next/link';
-import IconAgora from '@/components/Primitives/IconAgora';
+import AppIcon from '@/components/Primitives/AppIcon';
 import CardIllustrative from '@/components/Primitives/Cards/CardIllustrative';
 import { Pagination } from '@/components/Pagination';
 import { PageMiniCourses } from '@/services/types/courses';
@@ -52,7 +52,7 @@ export default function MiniCoursesResult({ filteredCourses, currentPage, PAGE_S
                                 description={formatHtmlParagraphs(course.description)}
                                 mainLink={
                                     <Link href={`/pages/learn/mini-courses/${course.id}`} className="flex items-center h-full">
-                                        <IconAgora name="agora-line-arrow-right-circle" className="w-24 h-24" />
+                                        <AppIcon name="agora-line-arrow-right-circle" className="w-24 h-24" />
                                     </Link>
                                 }
                             />

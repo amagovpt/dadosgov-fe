@@ -21,6 +21,7 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchHarvestJob, fetchHarvester } from "@/services/api";
 import type { HarvestJob, HarvestItem, HarvestSource } from "@/types/api";
+import TextLink from "@/components/Primitives/TextLink";
 
 interface HarvestJobDetailClientProps {
   slug: string;
@@ -47,10 +48,7 @@ const ITEM_STATUS_LABELS: Record<string, string> = {
   archived: "Arquivado",
 };
 
-const ITEM_STATUS_VARIANT: Record<
-  string,
-  "success" | "warning" | "danger" | "informative"
-> = {
+const ITEM_STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "informative"> = {
   pending: "informative",
   started: "informative",
   done: "success",
@@ -59,10 +57,7 @@ const ITEM_STATUS_VARIANT: Record<
   archived: "informative",
 };
 
-export default function HarvestJobDetailClient({
-  slug,
-  jobId,
-}: HarvestJobDetailClientProps) {
+export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetailClientProps) {
   const [job, setJob] = useState<HarvestJob | null>(null);
   const [source, setSource] = useState<HarvestSource | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -166,14 +161,12 @@ export default function HarvestJobDetailClient({
         />
       </div>
 
-      <h1 className="text-2xl font-bold text-neutral-900 mt-16 mb-16">
-        {job.id.toUpperCase()}
-      </h1>
+      <h1 className="text-2xl mb-16 mt-16 font-bold text-neutral-900">{job.id.toUpperCase()}</h1>
 
       {/* Metadata */}
-      <div className="flex flex-col gap-8 text-sm text-neutral-800 mb-24">
+      <div className="text-sm mb-24 flex flex-col gap-8 text-neutral-800">
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-calendar" className="w-16 h-16" />
+          <Icon name="agora-line-calendar" className="h-16 w-16" />
           <span>
             <strong>Começou em:</strong>{" "}
             {job.started
@@ -188,7 +181,7 @@ export default function HarvestJobDetailClient({
           </span>
         </div>
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-calendar" className="w-16 h-16" />
+          <Icon name="agora-line-calendar" className="h-16 w-16" />
           <span>
             <strong>Terminou em:</strong>{" "}
             {job.ended
@@ -203,7 +196,7 @@ export default function HarvestJobDetailClient({
           </span>
         </div>
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-info-mark" className="w-16 h-16" />
+          <Icon name="agora-line-info-mark" className="h-16 w-16" />
           <span>
             <strong>Status:</strong>{" "}
             <span
@@ -220,31 +213,21 @@ export default function HarvestJobDetailClient({
           </span>
         </div>
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-info-mark" className="w-16 h-16" />
+          <Icon name="agora-line-info-mark" className="h-16 w-16" />
           <span>
             <strong>Elementos:</strong>{" "}
-            <Icon name="agora-line-check" className="w-[14px] h-[14px] inline" />{" "}
-            {doneCount}{" "}
-            <Icon name="agora-line-eye-off" className="w-[14px] h-[14px] inline" />{" "}
-            {skippedCount}{" "}
-            <img
-              src="/Icons/box.svg"
-              alt="Arquivados"
-              className="w-[14px] h-[14px] inline"
-            />{" "}
-            {archivedCount}{" "}
-            <Icon name="agora-line-x" className="w-[14px] h-[14px] inline" />{" "}
-            {failedCount}{" "}
-            ({items.length} no total)
+            <Icon name="agora-line-check" className="inline h-[14px] w-[14px]" /> {doneCount}{" "}
+            <Icon name="agora-line-eye-off" className="inline h-[14px] w-[14px]" /> {skippedCount}{" "}
+            <img src="/Icons/box.svg" alt="Arquivados" className="inline h-[14px] w-[14px]" />{" "}
+            {archivedCount} <Icon name="agora-line-x" className="inline h-[14px] w-[14px]" />{" "}
+            {failedCount} ({items.length} no total)
           </span>
         </div>
       </div>
 
       {/* Items table */}
-      <div className="flex items-center justify-between mb-16">
-        <h2 className="text-lg font-bold text-neutral-900">
-          {filteredItems.length} ITENS
-        </h2>
+      <div className="mb-16 flex items-center justify-between">
+        <h2 className="text-lg font-bold text-neutral-900">{filteredItems.length} ITENS</h2>
         <div className="flex items-end gap-16">
           <div className="admin-search-wrapper">
             <InputSearchBar
@@ -263,19 +246,29 @@ export default function HarvestJobDetailClient({
             placeholder="Filtrar por status"
             id="filter-item-status"
             onChange={(options) => {
-              setStatusFilter(
-                options.length > 0 ? (options[0].value as string) : ""
-              );
+              setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
               setCurrentPage(1);
             }}
           >
             <DropdownSection name="status">
-              <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-              <DropdownOption value="done" selected={statusFilter === "done"}>Concluído</DropdownOption>
-              <DropdownOption value="failed" selected={statusFilter === "failed"}>Falhado</DropdownOption>
-              <DropdownOption value="skipped" selected={statusFilter === "skipped"}>Ignorado</DropdownOption>
-              <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
-              <DropdownOption value="pending" selected={statusFilter === "pending"}>Pendente</DropdownOption>
+              <DropdownOption value="" selected={statusFilter === ""}>
+                Todos
+              </DropdownOption>
+              <DropdownOption value="done" selected={statusFilter === "done"}>
+                Concluído
+              </DropdownOption>
+              <DropdownOption value="failed" selected={statusFilter === "failed"}>
+                Falhado
+              </DropdownOption>
+              <DropdownOption value="skipped" selected={statusFilter === "skipped"}>
+                Ignorado
+              </DropdownOption>
+              <DropdownOption value="archived" selected={statusFilter === "archived"}>
+                Arquivado
+              </DropdownOption>
+              <DropdownOption value="pending" selected={statusFilter === "pending"}>
+                Pendente
+              </DropdownOption>
             </DropdownSection>
           </InputSelect>
         </div>
@@ -299,7 +292,7 @@ export default function HarvestJobDetailClient({
               <TableHeaderCell>Link dados.gov.pt</TableHeaderCell>
               <TableHeaderCell>Link fonte</TableHeaderCell>
               <TableHeaderCell>
-                <Icon name="agora-line-alert-triangle" className="w-16 h-16" />
+                <Icon name="agora-line-alert-triangle" className="h-16 w-16" />
               </TableHeaderCell>
             </TableRow>
           </TableHeader>
@@ -314,32 +307,24 @@ export default function HarvestJobDetailClient({
                 </TableCell>
                 <TableCell headerLabel="Link dados.gov.pt">
                   {item.dataset ? (
-                    <a
+                    <TextLink
                       href={`/pages/datasets/${item.dataset.id}`}
-                      className="text-primary-600 underline flex items-center gap-4"
+                      className="flex items-center gap-4"
                     >
-                      <Icon
-                        name="agora-line-globe"
-                        className="w-[14px] h-[14px]"
-                      />
+                      <Icon name="agora-line-globe" className="h-[14px] w-[14px]" />
                       {item.dataset.title}
-                    </a>
+                    </TextLink>
                   ) : (
                     "—"
                   )}
                 </TableCell>
                 <TableCell headerLabel="Link fonte">
                   {item.remote_url ? (
-                    <a
-                      href={item.remote_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-600 underline"
-                    >
+                    <TextLink href={item.remote_url}>
                       {item.remote_url.length > 60
                         ? `${item.remote_url.slice(0, 60)}...`
                         : item.remote_url}
-                    </a>
+                    </TextLink>
                   ) : (
                     "—"
                   )}
@@ -354,12 +339,7 @@ export default function HarvestJobDetailClient({
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-search"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-search" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem itens"
           description="Nenhum item encontrado com os filtros aplicados."
           hasAnchor={false}

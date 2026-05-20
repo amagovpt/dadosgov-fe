@@ -24,6 +24,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
+import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
@@ -168,13 +169,14 @@ export default function DatasetsClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
+      <p className="text-sm mb-16 text-neutral-700">
         {isLoading ? "A carregar..." : `${totalItems} resultados`}
       </p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquise o nome, código ou sigla da entidade"
             aria-label="Pesquisar conjuntos de dados"
@@ -196,11 +198,21 @@ export default function DatasetsClient() {
           }}
         >
           <Dropdown.Section name="status">
-            <Dropdown.Option value="" selected={statusFilter === ""}>Todos</Dropdown.Option>
-            <Dropdown.Option value="public" selected={statusFilter === "public"}>Público</Dropdown.Option>
-            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>Arquivado</Dropdown.Option>
-            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>Rascunho</Dropdown.Option>
-            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>Excluído</Dropdown.Option>
+            <Dropdown.Option value="" selected={statusFilter === ""}>
+              Todos
+            </Dropdown.Option>
+            <Dropdown.Option value="public" selected={statusFilter === "public"}>
+              Público
+            </Dropdown.Option>
+            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>
+              Arquivado
+            </Dropdown.Option>
+            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>
+              Rascunho
+            </Dropdown.Option>
+            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>
+              Excluído
+            </Dropdown.Option>
           </Dropdown.Section>
         </InputSelect>
       </div>
@@ -254,12 +266,7 @@ export default function DatasetsClient() {
             {datasets.map((dataset) => (
               <TableRow key={dataset.id}>
                 <TableCell headerLabel="Título">
-                  <a
-                    href={`/pages/datasets/${dataset.slug}`}
-                    className="text-primary-600 underline"
-                  >
-                    {dataset.title}
-                  </a>
+                  <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {dataset.deleted ? (
@@ -272,25 +279,18 @@ export default function DatasetsClient() {
                     <StatusDot variant="success">Público</StatusDot>
                   )}
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDate(dataset.created_at)}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDate(dataset.created_at)}</TableCell>
                 <TableCell headerLabel="Última modificação">
                   <div>
                     <div>{formatDate(dataset.last_modified)}</div>
                     {dataset.owner && (
-                      <a
-                        href={`/pages/users/${dataset.owner.slug}`}
-                        className="text-primary-600 text-xs underline"
-                      >
+                      <TextLink href={`/pages/users/${dataset.owner.slug}`} className="text-xs">
                         {dataset.owner.first_name} {dataset.owner.last_name}
-                      </a>
+                      </TextLink>
                     )}
                   </div>
                 </TableCell>
-                <TableCell headerLabel="Ficheiros">
-                  {dataset.resources?.length || 0}
-                </TableCell>
+                <TableCell headerLabel="Ficheiros">{dataset.resources?.length || 0}</TableCell>
                 <TableCell headerLabel="Pontuações">
                   <div
                     className={
@@ -314,10 +314,10 @@ export default function DatasetsClient() {
                 <TableCell headerLabel="Ações">
                   <div className="flex gap-8">
                     <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                     </a>
                     <a href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                     </a>
                   </div>
                 </TableCell>
@@ -331,9 +331,7 @@ export default function DatasetsClient() {
             <CardNoResults
               className="datasets-page__empty"
               position="center"
-              icon={
-                <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
-              }
+              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
               title="Sem conjuntos de dados"
               description="Não publicou conjuntos de dados."
               hasAnchor={false}
@@ -342,7 +340,7 @@ export default function DatasetsClient() {
                   <Button
                     variant="primary"
                     appearance="outline"
-                    onClick={() => window.location.href = '/pages/admin/datasets/new'}
+                    onClick={() => (window.location.href = "/pages/admin/datasets/new")}
                   >
                     Publique no portal
                   </Button>

@@ -19,6 +19,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
+import TextLink from "@/components/Primitives/TextLink";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -144,7 +145,7 @@ export default function SystemOrganizationsClient() {
         title: "Tem a certeza que quer eliminar esta organização?",
         closeAriaLabel: "Fechar",
         dimensions: "m",
-      },
+      }
     );
   };
 
@@ -165,11 +166,9 @@ export default function SystemOrganizationsClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {totalItems} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -184,7 +183,7 @@ export default function SystemOrganizationsClient() {
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : organizations.length > 0 ? (
         <Table
           paginationProps={createPaginationProps(
@@ -221,32 +220,19 @@ export default function SystemOrganizationsClient() {
             {organizations.map((org) => (
               <TableRow key={org.id}>
                 <TableCell headerLabel="Nome">
-                  <a
-                    href={`/pages/admin/org/${org.id}/profile`}
-                    className="text-primary-600 underline"
-                  >
-                    {org.name}
-                  </a>
+                  <TextLink href={`/pages/admin/org/${org.id}/profile`}>{org.name}</TextLink>
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDate(org.created_at)}
-                </TableCell>
-                <TableCell headerLabel="Conjuntos de dados">
-                  {org.metrics?.datasets ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Reutilizações">
-                  {org.metrics?.reuses ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Membros">
-                  {org.members?.length ?? 0}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDate(org.created_at)}</TableCell>
+                <TableCell headerLabel="Conjuntos de dados">{org.metrics?.datasets ?? 0}</TableCell>
+                <TableCell headerLabel="Reutilizações">{org.metrics?.reuses ?? 0}</TableCell>
+                <TableCell headerLabel="Membros">{org.members?.length ?? 0}</TableCell>
                 <TableCell headerLabel="Ações">
                   <div className="flex gap-8">
                     <a href={`/pages/organizations/${org.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                     </a>
                     <a href={`/pages/admin/org/${org.id}/profile`}>
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                     </a>
                     <button
                       aria-label={`Eliminar ${org.name}`}
@@ -254,7 +240,7 @@ export default function SystemOrganizationsClient() {
                       onClick={() => handleDeleteOrg(org)}
                       className="text-danger-600 disabled:opacity-50"
                     >
-                      <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-trash" className="h-[20px] w-[20px]" />
                     </button>
                   </div>
                 </TableCell>
@@ -265,12 +251,7 @@ export default function SystemOrganizationsClient() {
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-building"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-building" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem organizações"
           description="Nenhuma organização encontrada."
           hasAnchor={false}

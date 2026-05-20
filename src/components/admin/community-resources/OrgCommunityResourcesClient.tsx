@@ -23,6 +23,7 @@ import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
@@ -216,9 +217,9 @@ export default function OrgCommunityResourcesClient() {
                   </TableCell>
                   <TableCell headerLabel="Ações">
                     <div className="flex gap-8">
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
+                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                       <a href={`/pages/admin/community-resources/edit?resource_id=${resource.id}`}>
-                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
+                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
                       </a>
                     </div>
                   </TableCell>

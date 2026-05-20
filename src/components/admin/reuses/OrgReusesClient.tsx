@@ -26,6 +26,8 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import TextLink from "@/components/Primitives/TextLink";
+import AppIcon from "@/components/Primitives/AppIcon";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
 type SortOrder = "none" | "ascending" | "descending";
@@ -131,9 +133,7 @@ export default function OrgReusesClient() {
         <CardNoResults
           className="datasets-page__empty"
           position="center"
-          icon={
-            <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />
-          }
+          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem organizações"
           description="Não pertence a nenhuma organização."
           hasAnchor={false}
@@ -159,13 +159,12 @@ export default function OrgReusesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {reuses.length} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{reuses.length} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquise o nome da reutilização"
             aria-label="Pesquisar reutilizações"
@@ -182,11 +181,21 @@ export default function OrgReusesClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>
+              Público
+            </DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>
+              Arquivado
+            </DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>
+              Rascunho
+            </DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
+              Excluído
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
@@ -278,9 +287,7 @@ export default function OrgReusesClient() {
             <CardNoResults
               className="datasets-page__empty"
               position="center"
-              icon={
-                <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
-              }
+              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
               title="Sem publicações"
               description="A organização ainda não publicou uma reutilização."
               hasAnchor={false}
@@ -289,7 +296,7 @@ export default function OrgReusesClient() {
                   <Button
                     variant="primary"
                     appearance="outline"
-                    onClick={() => window.location.href = '/pages/admin/reuses/new'}
+                    onClick={() => (window.location.href = "/pages/admin/reuses/new")}
                   >
                     Publique no portal
                   </Button>

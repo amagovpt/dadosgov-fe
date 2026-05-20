@@ -20,11 +20,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import {
-  fetchHarvesters,
-  rejectHarvestSource,
-  validateHarvestSource,
-} from "@/services/api";
+import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/services/api";
 import type { HarvestSource } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import {
@@ -33,6 +29,7 @@ import {
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
+import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
 const VALIDATION_STATUS: Record<
@@ -59,9 +56,7 @@ const JOB_STATUS: Record<
 
 function getStatus(source: HarvestSource) {
   if (source.validation?.state && source.validation.state !== "accepted") {
-    return (
-      VALIDATION_STATUS[source.validation.state] || VALIDATION_STATUS.pending
-    );
+    return VALIDATION_STATUS[source.validation.state] || VALIDATION_STATUS.pending;
   }
   if (source.last_job?.status) {
     return (
@@ -82,9 +77,10 @@ export default function SystemHarvestersClient() {
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [feedback, setFeedback] = useState<
-    { variant: "success" | "danger"; message: string } | null
-  >(null);
+  const [feedback, setFeedback] = useState<{
+    variant: "success" | "danger";
+    message: string;
+  } | null>(null);
   const router = useRouter();
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { isAdmin } = useAuth();
@@ -93,19 +89,14 @@ export default function SystemHarvestersClient() {
   const applyValidationUpdate = useCallback((updated: HarvestSource) => {
     setHarvesters((prev) =>
       prev.map((h) =>
-        h.id === updated.id
-          ? { ...h, validation: updated.validation ?? h.validation }
-          : h
+        h.id === updated.id ? { ...h, validation: updated.validation ?? h.validation } : h
       )
     );
   }, []);
 
   const handleApprove = useCallback(
     async (harvester: HarvestSource, comment: string) => {
-      const updated = await validateHarvestSource(
-        harvester.id,
-        comment || undefined
-      );
+      const updated = await validateHarvestSource(harvester.id, comment || undefined);
       applyValidationUpdate(updated);
       hide();
       setFeedback({
@@ -228,11 +219,11 @@ export default function SystemHarvestersClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
+      <p className="text-sm mb-16 text-neutral-700">
         {isLoading ? "A carregar..." : `${totalItems} resultados`}
       </p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -250,20 +241,28 @@ export default function SystemHarvestersClient() {
           placeholder="Filtrar por estado"
           id="filter-status"
           onChange={(options) => {
-            setStatusFilter(
-              options.length > 0 ? (options[0].value as string) : ""
-            );
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>
+              Todos
+            </DropdownOption>
             <DropdownOption value="pending" selected={statusFilter === "pending"}>
               Em espera de validação
             </DropdownOption>
-            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>Validado</DropdownOption>
-            <DropdownOption value="refused" selected={statusFilter === "refused"}>Recusado</DropdownOption>
-            <DropdownOption value="done" selected={statusFilter === "done"}>Terminado</DropdownOption>
-            <DropdownOption value="failed" selected={statusFilter === "failed"}>Falhado</DropdownOption>
+            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>
+              Validado
+            </DropdownOption>
+            <DropdownOption value="refused" selected={statusFilter === "refused"}>
+              Recusado
+            </DropdownOption>
+            <DropdownOption value="done" selected={statusFilter === "done"}>
+              Terminado
+            </DropdownOption>
+            <DropdownOption value="failed" selected={statusFilter === "failed"}>
+              Falhado
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
@@ -280,16 +279,12 @@ export default function SystemHarvestersClient() {
 
       {feedback && (
         <div className="mb-[24px]">
-          <StatusCard
-            variant={feedback.variant}
-            showIcon
-            description={feedback.message}
-          />
+          <StatusCard variant={feedback.variant} showIcon description={feedback.message} />
         </div>
       )}
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filtered.length > 0 ? (
         <Table
           paginationProps={createPaginationProps(
@@ -318,28 +313,18 @@ export default function SystemHarvestersClient() {
               return (
                 <TableRow
                   key={harvester.id}
-                  onClick={() =>
-                    router.push(`/pages/admin/harvesters/${harvester.id}`)
-                  }
+                  onClick={() => router.push(`/pages/admin/harvesters/${harvester.id}`)}
                   style={{ cursor: "pointer" }}
                 >
                   <TableCell headerLabel="Nome">
-                    <a
-                      href={`/pages/admin/harvesters/${harvester.id}`}
-                      className="text-primary-600 underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <TextLink href={`/pages/admin/harvesters/${harvester.id}`}>
                       {harvester.name}
-                    </a>
+                    </TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant={status.variant}>
-                      {status.label}
-                    </StatusDot>
+                    <StatusDot variant={status.variant}>{status.label}</StatusDot>
                   </TableCell>
-                  <TableCell headerLabel="Implementação">
-                    {harvester.backend}
-                  </TableCell>
+                  <TableCell headerLabel="Implementação">{harvester.backend}</TableCell>
                   <TableCell headerLabel="Criado em">
                     {format(new Date(harvester.created_at), "dd/MM/yyyy")}
                   </TableCell>
@@ -351,52 +336,46 @@ export default function SystemHarvestersClient() {
                   <TableCell headerLabel="Conjuntos de dados">
                     {harvester.datasets_count ?? 0}
                   </TableCell>
-                  <TableCell headerLabel="API">
-                    0
-                  </TableCell>
+                  <TableCell headerLabel="API">0</TableCell>
                   <TableCell headerLabel="Ações">
                     <div className="flex items-center gap-[12px]">
-                      {isAdmin &&
-                        harvester.validation?.state === "pending" && (
-                          <>
-                            <button
-                              type="button"
-                              aria-label={`Aprovar harvester ${harvester.name}`}
-                              title="Aprovar harvester"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openApprovePopup(harvester);
-                              }}
-                            >
-                              <Icon
-                                name="agora-line-check-circle"
-                                className="w-[20px] h-[20px] text-success-600"
-                              />
-                            </button>
-                            <button
-                              type="button"
-                              aria-label={`Rejeitar harvester ${harvester.name}`}
-                              title="Rejeitar harvester"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openRejectPopup(harvester);
-                              }}
-                            >
-                              <Icon
-                                name="agora-line-x-circle"
-                                className="w-[20px] h-[20px] text-danger-600"
-                              />
-                            </button>
-                          </>
-                        )}
+                      {isAdmin && harvester.validation?.state === "pending" && (
+                        <>
+                          <button
+                            type="button"
+                            aria-label={`Aprovar harvester ${harvester.name}`}
+                            title="Aprovar harvester"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openApprovePopup(harvester);
+                            }}
+                          >
+                            <Icon
+                              name="agora-line-check-circle"
+                              className="h-[20px] w-[20px] text-success-600"
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Rejeitar harvester ${harvester.name}`}
+                            title="Rejeitar harvester"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openRejectPopup(harvester);
+                            }}
+                          >
+                            <Icon
+                              name="agora-line-x-circle"
+                              className="h-[20px] w-[20px] text-danger-600"
+                            />
+                          </button>
+                        </>
+                      )}
                       <a
                         href={`/pages/admin/harvesters/${harvester.id}?tab=config`}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Icon
-                          name="agora-line-edit"
-                          className="w-[20px] h-[20px]"
-                        />
+                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                       </a>
                     </div>
                   </TableCell>
@@ -408,12 +387,7 @@ export default function SystemHarvestersClient() {
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-download"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-download" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem harvesters"
           description="Nenhum harvester encontrado."
           hasAnchor={false}
