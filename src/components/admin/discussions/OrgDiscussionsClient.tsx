@@ -16,6 +16,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { fetchOrgDiscussions } from "@/services/api";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { Discussion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
@@ -147,22 +148,13 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
           </p>
 
           <Table
-            paginationProps={{
-              itemsPerPageLabel: "Linhas por página",
-              itemsPerPage: itemsPerPage,
-              totalItems: discussions.length,
-              availablePageSizes: [5, 10, 20],
-              currentPage: currentPage - 1,
-              buttonDropdownAriaLabel: "Selecionar linhas por página",
-              dropdownListAriaLabel: "Opções de linhas por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => setCurrentPage(page + 1),
-              onPageSizeChange: (size: number) => {
-                setItemsPerPage(size);
-                setCurrentPage(1);
-              },
-            }}
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              discussions.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage
+            )}
           >
             <TableHeader>
               <TableRow>

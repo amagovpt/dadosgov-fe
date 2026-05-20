@@ -23,6 +23,7 @@ import { Dataservice } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -157,17 +158,14 @@ export default function DataservicesClient() {
 
       {!isLoading && filteredApis.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: 5,
-            totalItems: filteredApis.length,
-            availablePageSizes: [5, 10, 20],
-            currentPage: 0,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-          }}
+          paginationProps={createPaginationProps(
+            5,
+            filteredApis.length,
+            0,
+            undefined,
+            undefined,
+            { currentPageIsZeroBased: true }
+          )}
         >
           <TableHeader>
             <TableRow>

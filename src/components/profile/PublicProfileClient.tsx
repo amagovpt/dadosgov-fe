@@ -31,6 +31,7 @@ import {
 import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 export default function PublicProfileClient() {
   const { user } = useAuth();
@@ -538,20 +539,18 @@ export default function PublicProfileClient() {
           />
         ) : (
           <Table
-            paginationProps={{
-              itemsPerPageLabel: "Linhas por página",
-              itemsPerPage: itemsPerPage,
-              totalItems: datasets.length,
-              availablePageSizes: [5, 10, 20],
-              currentPage: currentPage,
-              buttonDropdownAriaLabel: "Selecionar linhas por página",
-              dropdownListAriaLabel: "Opções de linhas por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => handlePageChange(page),
-              onPageSizeChange: (size: number) =>
-                handleItemsPerPageChange(String(size)),
-            }}
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              datasets.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage,
+              {
+                currentPageIsZeroBased: true,
+                onPageChange: (page) => handlePageChange(page),
+                onPageSizeChange: (size) => handleItemsPerPageChange(String(size)),
+              }
+            )}
           >
             <TableHeader>
               <TableRow>

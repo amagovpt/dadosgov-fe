@@ -36,6 +36,8 @@ import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 const roleLabels: Record<string, string> = {
   admin: "Administrador",
@@ -164,7 +166,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
         />
       )}
       <div className="flex flex-col gap-4">
-        <span className="text-primary-900 text-base font-medium leading-7">
+        <span className="text-base font-medium leading-7 text-primary-900">
           Utilizador <span className="text-danger-600">*</span>
         </span>
         <IsolatedSelect
@@ -176,9 +178,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
           onChangeRef={selectedUserIdRef}
           searchable
           searchInputPlaceholder="Escreva pelo menos 2 caracteres..."
-          searchNoResultsText={
-            isSearching ? "A pesquisar..." : "Nenhum utilizador encontrado"
-          }
+          searchNoResultsText={isSearching ? "A pesquisar..." : "Nenhum utilizador encontrado"}
           hasError={alreadyMember}
           errorFeedbackText="Utilizador já está associado a esta organização"
           onChangeCallback={onUserChangeCallback}
@@ -189,7 +189,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
       </div>
 
       <div className="flex flex-col gap-12">
-        <span className="text-primary-900 text-base font-medium leading-7">
+        <span className="text-base font-medium leading-7 text-primary-900">
           Papel do membro <span className="text-danger-600">*</span>
         </span>
         <div className="flex gap-24">
@@ -212,19 +212,13 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
         </div>
       </div>
 
-      {addError && (
-        <p className="text-sm text-danger-600">{addError}</p>
-      )}
+      {addError && <p className="text-sm text-danger-600">{addError}</p>}
 
       <div className="flex gap-16">
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
         </Button>
-        <Button
-          variant="primary"
-          onClick={handleAdd}
-          disabled={!canSubmitRef.current}
-        >
+        <Button variant="primary" onClick={handleAdd} disabled={!canSubmitRef.current}>
           Adicionar
         </Button>
       </div>
@@ -238,11 +232,7 @@ interface RemoveMemberPopupProps {
   onMemberRemoved: () => void;
 }
 
-function RemoveMemberPopupContent({
-  orgId,
-  member,
-  onMemberRemoved,
-}: RemoveMemberPopupProps) {
+function RemoveMemberPopupContent({ orgId, member, onMemberRemoved }: RemoveMemberPopupProps) {
   const { hide } = usePopupContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -261,9 +251,7 @@ function RemoveMemberPopupContent({
 
   return (
     <div className="flex flex-col gap-24">
-      <p className="text-neutral-900">
-        Tem a certeza que deseja eliminar este membro?
-      </p>
+      <p className="text-neutral-900">Tem a certeza que deseja eliminar este membro?</p>
       <div className="flex gap-16">
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
@@ -290,12 +278,7 @@ interface EditRolePopupProps {
   openKey: number;
 }
 
-function EditRolePopupContent({
-  orgId,
-  member,
-  onRoleUpdated,
-  openKey,
-}: EditRolePopupProps) {
+function EditRolePopupContent({ orgId, member, onRoleUpdated, openKey }: EditRolePopupProps) {
   const { hide } = usePopupContext();
   const [selectedRole, setSelectedRole] = useState(member.role);
 
@@ -319,7 +302,7 @@ function EditRolePopupContent({
       </p>
 
       <div className="flex flex-col gap-12">
-        <span className="text-primary-900 text-base font-medium leading-7">Papel do membro</span>
+        <span className="text-base font-medium leading-7 text-primary-900">Papel do membro</span>
         <div className="flex gap-16">
           <RadioButton
             id="role-admin"
@@ -364,11 +347,7 @@ interface RefuseMembershipPopupProps {
   onRefused: () => void;
 }
 
-function RefuseMembershipPopupContent({
-  orgId,
-  request,
-  onRefused,
-}: RefuseMembershipPopupProps) {
+function RefuseMembershipPopupContent({ orgId, request, onRefused }: RefuseMembershipPopupProps) {
   const { hide } = usePopupContext();
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -409,11 +388,7 @@ function RefuseMembershipPopupContent({
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
         </Button>
-        <Button
-          variant="danger"
-          onClick={handleRefuse}
-          disabled={isSubmitting}
-        >
+        <Button variant="danger" onClick={handleRefuse} disabled={isSubmitting}>
           {isSubmitting ? "A recusar..." : "Recusar"}
         </Button>
       </div>
@@ -471,9 +446,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       ]);
       setViewedOrg(orgData);
       setMembers(orgData?.members || []);
-      setPendingRequests(
-        requests.filter((r: MembershipRequest) => r.status === "pending")
-      );
+      setPendingRequests(requests.filter((r: MembershipRequest) => r.status === "pending"));
     } catch (error) {
       console.error("Error loading members:", error);
     } finally {
@@ -576,7 +549,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
 
       {pendingRequests.length > 0 && (
         <div className="mb-32">
-          <h2 className="text-neutral-900 text-base font-semibold mb-16">
+          <h2 className="mb-16 text-base font-semibold text-neutral-900">
             Pedidos de adesão pendentes ({pendingRequests.length})
           </h2>
           {requestError && (
@@ -602,25 +575,17 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                         <img
                           src={request.user.avatar_thumbnail}
                           alt={`${request.user.first_name} ${request.user.last_name}`}
-                          className="w-32 h-32 rounded-full"
+                          className="h-32 w-32 rounded-full"
                         />
                       ) : (
-                        <Icon
-                          name="agora-line-user"
-                          className="w-32 h-32"
-                        />
+                        <Icon name="agora-line-user" className="h-32 w-32" />
                       )}
-                      <a
-                        href={`/pages/users/${request.user.slug}`}
-                        className="text-primary-600 underline"
-                      >
+                      <TextLink href={`/pages/users/${request.user.slug}`}>
                         {request.user.first_name} {request.user.last_name}
-                      </a>
+                      </TextLink>
                     </div>
                   </TableCell>
-                  <TableCell headerLabel="Comentário">
-                    {request.comment || "-"}
-                  </TableCell>
+                  <TableCell headerLabel="Comentário">{request.comment || "-"}</TableCell>
                   <TableCell headerLabel="Data do pedido">
                     {formatDateToDMY(request.created)}
                   </TableCell>
@@ -653,8 +618,8 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-24">
-        <p className="text-neutral-700 text-sm font-semibold uppercase">
+      <div className="mb-24 flex items-center justify-between">
+        <p className="text-sm font-semibold uppercase text-neutral-700">
           {members.length} {members.length === 1 ? "membro" : "membros"}
         </p>
         <Button
@@ -685,22 +650,13 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       </div>
 
       <Table
-        paginationProps={{
-          itemsPerPageLabel: "Itens por página",
-          itemsPerPage: itemsPerPage,
-          totalItems: members.length,
-          availablePageSizes: [10, 20, 50],
-          currentPage: currentPage - 1,
-          buttonDropdownAriaLabel: "Selecionar itens por página",
-          dropdownListAriaLabel: "Opções de itens por página",
-          prevButtonAriaLabel: "Página anterior",
-          nextButtonAriaLabel: "Próxima página",
-          onPageChange: (page: number) => setCurrentPage(page + 1),
-          onPageSizeChange: (size: number) => {
-            setItemsPerPage(size);
-            setCurrentPage(1);
-          },
-        }}
+        paginationProps={createPaginationProps(
+          itemsPerPage,
+          members.length,
+          currentPage,
+          setCurrentPage,
+          setItemsPerPage
+        )}
       >
         <TableHeader>
           <TableRow>
@@ -731,21 +687,15 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                     <img
                       src={member.user.avatar_thumbnail}
                       alt={`${member.user.first_name} ${member.user.last_name}`}
-                      className="w-32 h-32 rounded-full"
+                      className="h-32 w-32 rounded-full"
                     />
                   ) : (
-                    <Icon
-                      name="agora-line-user"
-                      className="w-32 h-32"
-                    />
+                    <Icon name="agora-line-user" className="h-32 w-32" />
                   )}
                   <div>
-                    <a
-                      href={`/pages/users/${member.user.slug}`}
-                      className="text-primary-600 underline"
-                    >
+                    <TextLink href={`/pages/users/${member.user.slug}`}>
                       {member.user.first_name} {member.user.last_name}
-                    </a>
+                    </TextLink>
                   </div>
                 </div>
               </TableCell>
@@ -754,9 +704,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                   {roleLabels[member.role] || member.role}
                 </StatusDot>
               </TableCell>
-              <TableCell headerLabel="Membro desde">
-                {formatDateToDMY(member.since)}
-              </TableCell>
+              <TableCell headerLabel="Membro desde">{formatDateToDMY(member.since)}</TableCell>
               <TableCell headerLabel="Ações">
                 <div className="flex gap-8">
                   <button
@@ -781,16 +729,13 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                   >
                     <Icon
                       name="agora-line-edit"
-                      className="w-[20px] h-[20px] text-primary-600 cursor-pointer"
+                      className="h-[20px] w-[20px] cursor-pointer text-primary-600"
                     />
                   </button>
-                  <button
-                    onClick={() => handleRemoveMember(member)}
-                    title="Remover membro"
-                  >
+                  <button onClick={() => handleRemoveMember(member)} title="Remover membro">
                     <Icon
                       name="agora-line-trash"
-                      className="w-[20px] h-[20px] text-danger-600 cursor-pointer"
+                      className="h-[20px] w-[20px] cursor-pointer text-danger-600"
                     />
                   </button>
                 </div>
@@ -799,7 +744,6 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
           ))}
         </TableBody>
       </Table>
-
     </div>
   );
 }

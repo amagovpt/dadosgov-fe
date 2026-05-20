@@ -22,6 +22,7 @@ import { Activity, ApiToken, UserFollowing, UserPublic } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import {
   Avatar,
   Breadcrumb,
@@ -913,22 +914,13 @@ export default function ProfileClient() {
                       {activityTotal} ATIVIDADES
                     </h2>
                     <Table
-                      paginationProps={{
-                        itemsPerPageLabel: "Itens por página",
-                        itemsPerPage: activityPageSize,
-                        totalItems: activityTotal,
-                        availablePageSizes: [10, 20, 50],
-                        currentPage: activityPage - 1,
-                        buttonDropdownAriaLabel: "Selecionar itens por página",
-                        dropdownListAriaLabel: "Opções de itens por página",
-                        prevButtonAriaLabel: "Página anterior",
-                        nextButtonAriaLabel: "Próxima página",
-                        onPageChange: (page: number) => setActivityPage(page + 1),
-                        onPageSizeChange: (size: number) => {
-                          setActivityPageSize(size);
-                          setActivityPage(1);
-                        },
-                      }}
+                      paginationProps={createPaginationProps(
+                        activityPageSize,
+                        activityTotal,
+                        activityPage,
+                        setActivityPage,
+                        setActivityPageSize
+                      )}
                     >
                       <TableHeader>
                         <TableRow>

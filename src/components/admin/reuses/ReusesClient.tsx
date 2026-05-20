@@ -24,6 +24,7 @@ import { Reuse } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { createPaginationProps } from "@/utils/createPaginationProps"; // Ensure import exists
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -195,22 +196,13 @@ export default function ReusesClient() {
         <p className="text-neutral-700 text-sm">A carregar...</p>
       ) : filteredReuses.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Itens por página",
-            itemsPerPage: itemsPerPage,
-            totalItems: sortedReuses.length,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setItemsPerPage(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            itemsPerPage,
+            sortedReuses.length,
+            currentPage,
+            setCurrentPage,
+            setItemsPerPage
+          )}
         >
           <TableHeader>
             <TableRow>

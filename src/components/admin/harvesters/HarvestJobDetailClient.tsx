@@ -17,6 +17,7 @@ import {
   CardNoResults,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchHarvestJob, fetchHarvester } from "@/services/api";
 import type { HarvestJob, HarvestItem, HarvestSource } from "@/types/api";
@@ -282,22 +283,14 @@ export default function HarvestJobDetailClient({
 
       {paginatedItems.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: pageSize,
-            totalItems: filteredItems.length,
-            availablePageSizes: [5, 10, 20, 50],
+          paginationProps={createPaginationProps(
+            pageSize,
+            filteredItems.length,
             currentPage,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+            setCurrentPage,
+            setPageSize,
+            { currentPageIsZeroBased: true }
+          )}
         >
           <TableHeader>
             <TableRow>

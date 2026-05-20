@@ -26,6 +26,7 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -194,22 +195,13 @@ export default function OrgReusesClient() {
         <p>A carregar...</p>
       ) : reuses.length > 0 ? (
           <Table
-            paginationProps={{
-              itemsPerPageLabel: "Itens por página",
-              itemsPerPage: itemsPerPage,
-              totalItems: reuses.length,
-              availablePageSizes: [10, 20, 50],
-              currentPage: currentPage - 1,
-              buttonDropdownAriaLabel: "Selecionar itens por página",
-              dropdownListAriaLabel: "Opções de itens por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => setCurrentPage(page + 1),
-              onPageSizeChange: (size: number) => {
-                setItemsPerPage(size);
-                setCurrentPage(1);
-              },
-            }}
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              reuses.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage
+            )}
           >
             <TableHeader>
               <TableRow>

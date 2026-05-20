@@ -22,6 +22,7 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { fetchMyDatasets, fetchMyReuses } from "@/services/api";
 import { Dataset, Reuse } from "@/types/api";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 const PAGE_SIZE = 10;
 
@@ -144,18 +145,12 @@ export default function StatisticsClient() {
                 />
               ) : (
                 <Table
-                  paginationProps={{
-                    itemsPerPageLabel: "Itens por página",
-                    itemsPerPage: PAGE_SIZE,
-                    totalItems: datasetsTotal,
-                    availablePageSizes: [5, 10, 20],
-                    currentPage: datasetsPage - 1,
-                    buttonDropdownAriaLabel: "Selecionar itens por página",
-                    dropdownListAriaLabel: "Opções de itens por página",
-                    prevButtonAriaLabel: "Página anterior",
-                    nextButtonAriaLabel: "Próxima página",
-                    onPageChange: (page: number) => setDatasetsPage(page + 1),
-                  }}
+                  paginationProps={createPaginationProps(
+                    PAGE_SIZE,
+                    datasetsTotal,
+                    datasetsPage,
+                    setDatasetsPage
+                  )}
                 >
                   <TableHeader>
                     <TableRow>
@@ -245,18 +240,12 @@ export default function StatisticsClient() {
                 <>
                   <p className="text-neutral-700 text-sm mb-16">{reusesTotal} resultados</p>
                   <Table
-                    paginationProps={{
-                      itemsPerPageLabel: "Itens por página",
-                      itemsPerPage: PAGE_SIZE,
-                      totalItems: reusesTotal,
-                      availablePageSizes: [5, 10, 20],
-                      currentPage: reusesPage - 1,
-                      buttonDropdownAriaLabel: "Selecionar itens por página",
-                      dropdownListAriaLabel: "Opções de itens por página",
-                      prevButtonAriaLabel: "Página anterior",
-                      nextButtonAriaLabel: "Próxima página",
-                      onPageChange: (page: number) => setReusesPage(page + 1),
-                    }}
+                  paginationProps={createPaginationProps(
+                    PAGE_SIZE,
+                    reusesTotal,
+                    reusesPage,
+                    setReusesPage
+                  )}
                   >
                     <TableHeader>
                       <TableRow>

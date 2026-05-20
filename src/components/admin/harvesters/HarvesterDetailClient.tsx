@@ -49,6 +49,7 @@ import {
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
 import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/types/api";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 interface HarvesterDetailClientProps {
   slug: string;
@@ -563,22 +564,13 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
               />
             ) : (
               <Table
-                paginationProps={{
-                  itemsPerPageLabel: "Linhas por página",
-                  itemsPerPage: jobsPageSize,
-                  totalItems: jobsTotal,
-                  availablePageSizes: [5, 10, 20],
-                  currentPage: jobsPage - 1,
-                  buttonDropdownAriaLabel: "Selecionar linhas por página",
-                  dropdownListAriaLabel: "Opções de linhas por página",
-                  prevButtonAriaLabel: "Página anterior",
-                  nextButtonAriaLabel: "Próxima página",
-                  onPageChange: (newPage) => setJobsPage(newPage + 1),
-                  onPageSizeChange: (newPageSize) => {
-                    setJobsPageSize(newPageSize);
-                    setJobsPage(1);
-                  },
-                }}
+                paginationProps={createPaginationProps(
+                  jobsPageSize,
+                  jobsTotal,
+                  jobsPage,
+                  setJobsPage,
+                  setJobsPageSize
+                )}
               >
                 <TableHeader>
                   <TableRow>
