@@ -31,6 +31,7 @@ import {
 import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
+import AppIcon from "../Primitives/AppIcon";
 
 export default function PublicProfileClient() {
   const { user } = useAuth();
@@ -599,7 +600,7 @@ export default function PublicProfileClient() {
                   </TableCell>
                   <TableCell headerLabel="">
                     <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <AppIcon name="agora-line-eye" />
                     </a>
                   </TableCell>
                 </TableRow>

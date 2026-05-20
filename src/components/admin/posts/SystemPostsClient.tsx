@@ -22,6 +22,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchAdminPosts } from "@/services/api";
 import { Post } from "@/types/api";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "name" | "created_at" | "last_modified";
@@ -148,11 +149,9 @@ export default function SystemPostsClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {totalItems} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -170,16 +169,20 @@ export default function SystemPostsClient() {
           placeholder="Filtrar por tipo"
           id="filter-type"
           onChange={(options) => {
-            setTypeFilter(
-              options.length > 0 ? (options[0].value as string) : ""
-            );
+            setTypeFilter(options.length > 0 ? (options[0].value as string) : "");
             setCurrentPage(1);
           }}
         >
           <DropdownSection name="type">
-            <DropdownOption value="" selected={typeFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="news" selected={typeFilter === "news"}>Notícias</DropdownOption>
-            <DropdownOption value="page" selected={typeFilter === "page"}>Página</DropdownOption>
+            <DropdownOption value="" selected={typeFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="news" selected={typeFilter === "news"}>
+              Notícias
+            </DropdownOption>
+            <DropdownOption value="page" selected={typeFilter === "page"}>
+              Página
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
         <InputSelect
@@ -188,16 +191,20 @@ export default function SystemPostsClient() {
           placeholder="Filtrar por estado"
           id="filter-status"
           onChange={(options) => {
-            setStatusFilter(
-              options.length > 0 ? (options[0].value as string) : ""
-            );
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
             setCurrentPage(1);
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="published" selected={statusFilter === "published"}>Publicado</DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>Despublicado</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="published" selected={statusFilter === "published"}>
+              Publicado
+            </DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>
+              Despublicado
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
         <Button
@@ -213,7 +220,7 @@ export default function SystemPostsClient() {
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : posts.length > 0 ? (
         <Table
           paginationProps={{
@@ -265,12 +272,7 @@ export default function SystemPostsClient() {
             {posts.map((post) => (
               <TableRow key={post.id}>
                 <TableCell headerLabel="Título">
-                  <a
-                    href={`/pages/posts/${post.slug}`}
-                    className="text-primary-600 underline"
-                  >
-                    {post.name}
-                  </a>
+                  <TextLink href={`/pages/posts/${post.slug}`}>{post.name}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Tipo">
                   {post.kind === "page" ? "Página" : "Notícias"}
@@ -280,19 +282,15 @@ export default function SystemPostsClient() {
                     {post.published ? "Publicado" : "Despublicado"}
                   </StatusDot>
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDate(post.created_at)}
-                </TableCell>
-                <TableCell headerLabel="Atualizado em">
-                  {formatDate(post.last_modified)}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDate(post.created_at)}</TableCell>
+                <TableCell headerLabel="Atualizado em">{formatDate(post.last_modified)}</TableCell>
                 <TableCell headerLabel="Ação">
                   <div className="flex gap-8">
                     <a href={`/pages/posts/${post.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                     </a>
                     <a href={`/pages/admin/posts/${post.id}`}>
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                     </a>
                   </div>
                 </TableCell>
@@ -303,12 +301,7 @@ export default function SystemPostsClient() {
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-edit"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem artigos"
           description="Nenhum artigo encontrado."
           hasAnchor={false}
@@ -317,4 +310,3 @@ export default function SystemPostsClient() {
     </div>
   );
 }
-

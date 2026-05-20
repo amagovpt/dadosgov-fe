@@ -28,6 +28,7 @@ import {
 } from "@/services/api";
 import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 interface OrgStatisticsClientProps {
   orgId: string;
@@ -128,9 +129,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
         <CardNoResults
           className="datasets-page__empty"
           position="center"
-          icon={
-            <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />
-          }
+          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem organizações"
           description="Não pertence a nenhuma organização."
           hasAnchor={false}
@@ -161,7 +160,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
           <TabHeader>Organização</TabHeader>
           <TabBody>
             <div className="mt-48">
-              <div className="flex justify-end mb-24">
+              <div className="mb-24 flex justify-end">
                 <Button
                   variant="neutral"
                   appearance="outline"
@@ -172,42 +171,42 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   Estatísticas agregadas
                 </Button>
               </div>
-              <div className="flex gap-24 mb-24">
+              <div className="mb-24 flex gap-24">
                 <div className="flex-1">
                   <CardFrame label={isDatasetsLoading ? "..." : String(datasetsTotal)}>
-                    <p className="text-neutral-700 text-base">Conjuntos de dados</p>
+                    <p className="text-base text-neutral-700">Conjuntos de dados</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={isDataservicesLoading ? "..." : String(dataservicesTotal)}>
-                    <p className="text-neutral-700 text-base">API</p>
+                    <p className="text-base text-neutral-700">API</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={isReusesLoading ? "..." : String(reuses.length)}>
-                    <p className="text-neutral-700 text-base">Reutilizações</p>
+                    <p className="text-base text-neutral-700">Reutilizações</p>
                   </CardFrame>
                 </div>
               </div>
               <div className="flex gap-24">
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.views ?? 0)}>
-                    <p className="text-neutral-700 text-base">Visitas ao conjunto de dados</p>
+                    <p className="text-base text-neutral-700">Visitas ao conjunto de dados</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.resource_downloads ?? 0)}>
-                    <p className="text-neutral-700 text-base">Downloads de dados</p>
+                    <p className="text-base text-neutral-700">Downloads de dados</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.dataservice_views ?? 0)}>
-                    <p className="text-neutral-700 text-base">Passeios pela API</p>
+                    <p className="text-base text-neutral-700">Passeios pela API</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.reuse_views ?? 0)}>
-                    <p className="text-neutral-700 text-base">Visitas a locais de reutilização</p>
+                    <p className="text-base text-neutral-700">Visitas a locais de reutilização</p>
                   </CardFrame>
                 </div>
               </div>
@@ -219,7 +218,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
           <TabHeader>Conjuntos de dados</TabHeader>
           <TabBody>
             <div className="mt-24">
-              <div className="flex items-end gap-16 mb-24">
+              <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
@@ -249,12 +248,12 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
               </div>
 
               {isDatasetsLoading ? (
-                <p className="text-neutral-500 text-sm">A carregar...</p>
+                <p className="text-sm text-neutral-500">A carregar...</p>
               ) : datasets.length === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
-                    <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
+                    <Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />
                   }
                   title="Sem publicações"
                   description="Ainda não publicou um conjunto de dados."
@@ -290,20 +289,20 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                     <TableRow>
                       <TableHeaderCell>TÍTULO DO CONJUNTO DE DADOS</TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-chat" className="w-16 h-16" />
+                        <Icon name="agora-line-chat" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-eye" className="w-16 h-16" />
+                        <Icon name="agora-line-eye" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-download" className="w-16 h-16" />
+                        <Icon name="agora-line-download" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="w-16 h-16" />
+                        <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-star" className="w-16 h-16" />
+                        <Icon name="agora-line-star" className="h-16 w-16" />
                       </TableHeaderCell>
                     </TableRow>
                   </TableHeader>
@@ -311,9 +310,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                     {datasets.map((dataset) => (
                       <TableRow key={dataset.id}>
                         <TableCell headerLabel="Título">
-                          <a href={dataset.page} className="text-primary-600 underline">
-                            {dataset.title}
-                          </a>
+                          <TextLink href={dataset.page}>{dataset.title}</TextLink>
                         </TableCell>
                         <TableCell headerLabel="Discussões">
                           {dataset.metrics?.discussions ?? 0}
@@ -343,7 +340,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
           <TabHeader>API</TabHeader>
           <TabBody>
             <div className="mt-24">
-              <div className="flex items-end gap-16 mb-24">
+              <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
@@ -364,12 +361,12 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
               </div>
 
               {isDataservicesLoading ? (
-                <p className="text-neutral-500 text-sm">A carregar...</p>
+                <p className="text-sm text-neutral-500">A carregar...</p>
               ) : dataservices.length === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
-                    <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
+                    <Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />
                   }
                   title="Sem publicações"
                   description="Ainda não publicou uma API."
@@ -405,10 +402,10 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                     <TableRow>
                       <TableHeaderCell>TÍTULO DA API</TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-eye" className="w-16 h-16" />
+                        <Icon name="agora-line-eye" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-star" className="w-16 h-16" />
+                        <Icon name="agora-line-star" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>ESTADO</TableHeaderCell>
                     </TableRow>
@@ -419,12 +416,8 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                         <TableCell headerLabel="Título">
                           <span className="text-primary-600">{ds.title}</span>
                         </TableCell>
-                        <TableCell headerLabel="Visualizações">
-                          {ds.metrics?.views ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Favoritos">
-                          {ds.metrics?.followers ?? 0}
-                        </TableCell>
+                        <TableCell headerLabel="Visualizações">{ds.metrics?.views ?? 0}</TableCell>
+                        <TableCell headerLabel="Favoritos">{ds.metrics?.followers ?? 0}</TableCell>
                         <TableCell headerLabel="Estado">
                           {ds.private ? "Privado" : ds.archived ? "Arquivado" : "Público"}
                         </TableCell>
@@ -441,7 +434,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
           <TabHeader>Reutilizações</TabHeader>
           <TabBody>
             <div className="mt-24">
-              <div className="flex items-end gap-16 mb-24">
+              <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
@@ -453,12 +446,12 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
               </div>
 
               {isReusesLoading ? (
-                <p className="text-neutral-500 text-sm">A carregar...</p>
+                <p className="text-sm text-neutral-500">A carregar...</p>
               ) : reuses.length === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
-                    <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
+                    <Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />
                   }
                   title="Sem publicações"
                   description="Ainda não publicou uma reutilização."
@@ -494,10 +487,10 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                     <TableRow>
                       <TableHeaderCell>TÍTULO DA REUTILIZAÇÃO</TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-eye" className="w-16 h-16" />
+                        <Icon name="agora-line-eye" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
-                        <Icon name="agora-line-star" className="w-16 h-16" />
+                        <Icon name="agora-line-star" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>ESTADO</TableHeaderCell>
                     </TableRow>
@@ -506,9 +499,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                     {reusesPagedData.map((reuse) => (
                       <TableRow key={reuse.id}>
                         <TableCell headerLabel="Título">
-                          <a href={reuse.url} className="text-primary-600 underline">
-                            {reuse.title}
-                          </a>
+                          <TextLink href={reuse.url}>{reuse.title}</TextLink>
                         </TableCell>
                         <TableCell headerLabel="Visualizações">
                           {reuse.metrics?.views ?? 0}

@@ -24,6 +24,7 @@ import { Dropdown } from "@/components/Primitives/Dropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created" | "last_update";
@@ -53,48 +54,45 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
     return order === "ascending" ? field : `-${field}`;
   };
 
-  const loadDatasets = useCallback(async (
-    page: number,
-    pageSize: number,
-    q: string,
-    status: string,
-    sort: string,
-  ) => {
-    setIsLoading(true);
-    try {
-      const filters: {
-        q?: string;
-        sort: string;
-        private?: boolean;
-        archived?: boolean;
-        deleted?: boolean;
-      } = { sort };
+  const loadDatasets = useCallback(
+    async (page: number, pageSize: number, q: string, status: string, sort: string) => {
+      setIsLoading(true);
+      try {
+        const filters: {
+          q?: string;
+          sort: string;
+          private?: boolean;
+          archived?: boolean;
+          deleted?: boolean;
+        } = { sort };
 
-      if (q.trim()) filters.q = q.trim();
-      if (status === "public") {
-        filters.private = false;
-        filters.archived = false;
-        filters.deleted = false;
-      } else if (status === "draft") {
-        filters.private = true;
-        filters.archived = false;
-        filters.deleted = false;
-      } else if (status === "archived") {
-        filters.archived = true;
-        filters.deleted = false;
-      } else if (status === "deleted") {
-        filters.deleted = true;
+        if (q.trim()) filters.q = q.trim();
+        if (status === "public") {
+          filters.private = false;
+          filters.archived = false;
+          filters.deleted = false;
+        } else if (status === "draft") {
+          filters.private = true;
+          filters.archived = false;
+          filters.deleted = false;
+        } else if (status === "archived") {
+          filters.archived = true;
+          filters.deleted = false;
+        } else if (status === "deleted") {
+          filters.deleted = true;
+        }
+
+        const response = await fetchOrgDatasets(orgId, page, pageSize, filters);
+        setDatasets(response.data || []);
+        setTotal(response.total || 0);
+      } catch (error) {
+        console.error("Error loading org datasets:", error);
+      } finally {
+        setIsLoading(false);
       }
-
-      const response = await fetchOrgDatasets(orgId, page, pageSize, filters);
-      setDatasets(response.data || []);
-      setTotal(response.total || 0);
-    } catch (error) {
-      console.error("Error loading org datasets:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [orgId]);
+    },
+    [orgId]
+  );
 
   useEffect(() => {
     const sort = buildSortParam(sortField, sortOrder);
@@ -142,20 +140,16 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {total} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{total} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquise o nome, código ou sigla da entidade"
             aria-label="Pesquisar conjuntos de dados"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleSearch(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
           />
         </div>
         <InputSelect
@@ -166,11 +160,21 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
           onChange={handleStatusChange}
         >
           <Dropdown.Section name="status">
-            <Dropdown.Option value="" selected={statusFilter === ""}>Todos</Dropdown.Option>
-            <Dropdown.Option value="public" selected={statusFilter === "public"}>Público</Dropdown.Option>
-            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>Arquivado</Dropdown.Option>
-            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>Rascunho</Dropdown.Option>
-            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>Excluído</Dropdown.Option>
+            <Dropdown.Option value="" selected={statusFilter === ""}>
+              Todos
+            </Dropdown.Option>
+            <Dropdown.Option value="public" selected={statusFilter === "public"}>
+              Público
+            </Dropdown.Option>
+            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>
+              Arquivado
+            </Dropdown.Option>
+            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>
+              Rascunho
+            </Dropdown.Option>
+            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>
+              Excluído
+            </Dropdown.Option>
           </Dropdown.Section>
         </InputSelect>
         <a href={`/api/1/organizations/${orgId}/catalog`} download>
@@ -238,12 +242,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
             {datasets.map((dataset) => (
               <TableRow key={dataset.id}>
                 <TableCell headerLabel="Título">
-                  <a
-                    href={`/pages/datasets/${dataset.slug}`}
-                    className="text-primary-600 underline"
-                  >
-                    {dataset.title}
-                  </a>
+                  <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {dataset.deleted ? (
@@ -256,44 +255,31 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                     <StatusDot variant="success">Público</StatusDot>
                   )}
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDateToDMY(dataset.created_at)}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDateToDMY(dataset.created_at)}</TableCell>
                 <TableCell headerLabel="Última modificação">
                   <div>
                     <div>{formatDateToDMY(dataset.last_modified)}</div>
                     {dataset.owner ? (
-                      <a
-                        href={`/pages/users/${dataset.owner.slug}`}
-                        className="text-primary-600 text-xs underline"
-                      >
+                      <TextLink href={`/pages/users/${dataset.owner.slug}`} className="text-xs">
                         {dataset.owner.first_name} {dataset.owner.last_name}
-                      </a>
+                      </TextLink>
                     ) : dataset.organization ? (
-                      <a
+                      <TextLink
                         href={`/pages/organizations/${dataset.organization.slug}`}
-                        className="text-primary-600 text-xs underline"
+                        className="text-xs"
                       >
                         {dataset.organization.name}
-                      </a>
+                      </TextLink>
                     ) : null}
                   </div>
                 </TableCell>
                 <TableCell headerLabel="Ações">
                   <div className="flex gap-8">
                     <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon
-                        name="agora-line-eye"
-                        className="w-[20px] h-[20px]"
-                      />
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                     </a>
-                    <a
-                      href={`/pages/admin/org/datasets/edit?slug=${dataset.slug}`}
-                    >
-                      <Icon
-                        name="agora-line-edit"
-                        className="w-[20px] h-[20px]"
-                      />
+                    <a href={`/pages/admin/org/datasets/edit?slug=${dataset.slug}`}>
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                     </a>
                   </div>
                 </TableCell>
@@ -307,12 +293,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
             <CardNoResults
               className="datasets-page__empty"
               position="center"
-              icon={
-                <Icon
-                  name="agora-line-edit"
-                  className="w-12 h-12 text-primary-500 icon-xl"
-                />
-              }
+              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
               title="Sem publicações"
               description="A organização ainda não publicou conjuntos de dados."
               hasAnchor={false}
@@ -321,9 +302,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   <Button
                     variant="primary"
                     appearance="outline"
-                    onClick={() =>
-                      (window.location.href = "/pages/admin/datasets/new")
-                    }
+                    onClick={() => (window.location.href = "/pages/admin/datasets/new")}
                   >
                     Publique no portal
                   </Button>

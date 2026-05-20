@@ -21,6 +21,7 @@ import { fetchReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at";
@@ -131,11 +132,9 @@ export default function SystemReusesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {totalItems} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -153,23 +152,31 @@ export default function SystemReusesClient() {
           placeholder="Filtrar por estado"
           id="filter-status"
           onChange={(options) => {
-            setStatusFilter(
-              options.length > 0 ? (options[0].value as string) : ""
-            );
+            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>
+              Público
+            </DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>
+              Arquivado
+            </DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>
+              Rascunho
+            </DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
+              Excluído
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filteredReuses.length > 0 ? (
         <Table
           paginationProps={{
@@ -218,37 +225,22 @@ export default function SystemReusesClient() {
               return (
                 <TableRow key={reuse.id}>
                   <TableCell headerLabel="Título">
-                    <a
-                      href={`/pages/reuses/${reuse.slug}`}
-                      className="text-primary-600 underline"
-                    >
-                      {reuse.title}
-                    </a>
+                    <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant={status.variant}>
-                      {status.label}
-                    </StatusDot>
+                    <StatusDot variant={status.variant}>{status.label}</StatusDot>
                   </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDateToDMY(reuse.created_at)}
-                  </TableCell>
+                  <TableCell headerLabel="Criado em">{formatDateToDMY(reuse.created_at)}</TableCell>
                   <TableCell headerLabel="Conjuntos de dados">
                     {reuse.datasets?.length ?? 0}
                   </TableCell>
                   <TableCell headerLabel="Ações">
                     <div className="flex gap-8">
                       <a href={`/pages/reuses/${reuse.slug}`}>
-                        <Icon
-                          name="agora-line-eye"
-                          className="w-[20px] h-[20px]"
-                        />
+                        <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                       </a>
                       <a href={`/pages/admin/reuses/${reuse.id}`}>
-                        <Icon
-                          name="agora-line-edit"
-                          className="w-[20px] h-[20px]"
-                        />
+                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                       </a>
                     </div>
                   </TableCell>
@@ -260,12 +252,7 @@ export default function SystemReusesClient() {
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-edit"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem reutilizações"
           description="Nenhuma reutilização encontrada."
           hasAnchor={false}

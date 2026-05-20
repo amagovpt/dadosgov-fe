@@ -18,6 +18,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchAllCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -120,12 +121,10 @@ export default function SystemCommunityResourcesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {resources.length} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{resources.length} resultados</p>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : resources.length > 0 ? (
         <Table
           paginationProps={{
@@ -194,12 +193,9 @@ export default function SystemCommunityResourcesClient() {
                       <span className="text-neutral-900">{resource.title}</span>
                       {resource.dataset && (
                         <div className="text-sm text-neutral-700">
-                          <a
-                            href={`/pages/datasets/${resource.dataset.id}`}
-                            className="text-primary-600 underline"
-                          >
+                          <TextLink href={`/pages/datasets/${resource.dataset.id}`}>
                             {resource.dataset.title}
-                          </a>
+                          </TextLink>
                         </div>
                       )}
                     </div>
@@ -207,11 +203,7 @@ export default function SystemCommunityResourcesClient() {
                   <TableCell headerLabel="Estado">
                     <StatusDot
                       variant={
-                        resource.deleted
-                          ? "danger"
-                          : resource.archived
-                            ? "warning"
-                            : "success"
+                        resource.deleted ? "danger" : resource.archived ? "warning" : "success"
                       }
                     >
                       {resource.deleted
@@ -224,20 +216,13 @@ export default function SystemCommunityResourcesClient() {
                   <TableCell headerLabel="Formato">
                     {resource.format ? resource.format.toUpperCase() : "—"}
                   </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDate(resource.created_at)}
-                  </TableCell>
+                  <TableCell headerLabel="Criado em">{formatDate(resource.created_at)}</TableCell>
                   <TableCell headerLabel="Modificado em">
                     {formatDate(resource.last_modified)}
                   </TableCell>
                   <TableCell headerLabel="Ação">
-                    <a
-                      href={`/pages/admin/system/community-resources?resource_id=${resource.id}`}
-                    >
-                      <Icon
-                        name="agora-line-edit"
-                        className="w-[20px] h-[20px]"
-                      />
+                    <a href={`/pages/admin/system/community-resources?resource_id=${resource.id}`}>
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                     </a>
                   </TableCell>
                 </TableRow>
@@ -249,10 +234,7 @@ export default function SystemCommunityResourcesClient() {
         <CardNoResults
           position="center"
           icon={
-            <Icon
-              name="agora-line-user-group"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
+            <Icon name="agora-line-user-group" className="icon-xl h-12 w-12 text-primary-500" />
           }
           title="Sem recursos comunitários"
           description="Nenhum recurso comunitário encontrado."

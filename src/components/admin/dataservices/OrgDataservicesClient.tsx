@@ -26,6 +26,7 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -111,9 +112,7 @@ export default function OrgDataservicesClient() {
         <CardNoResults
           className="datasets-page__empty"
           position="center"
-          icon={
-            <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />
-          }
+          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem organizações"
           description="Não pertence a nenhuma organização."
           hasAnchor={false}
@@ -139,13 +138,12 @@ export default function OrgDataservicesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {filteredApis.length} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{filteredApis.length} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquise o nome da API"
             aria-label="Pesquisar APIs"
@@ -161,11 +159,21 @@ export default function OrgDataservicesClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>
+              Público
+            </DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>
+              Arquivado
+            </DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>
+              Rascunho
+            </DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
+              Excluído
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
@@ -217,12 +225,7 @@ export default function OrgDataservicesClient() {
             {sortedApis.map((api, index) => (
               <TableRow key={index}>
                 <TableCell headerLabel="Título">
-                  <a
-                    href={`/pages/dataservices/${api.slug}`}
-                    className="text-primary-600 underline"
-                  >
-                    {api.title}
-                  </a>
+                  <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   {api.deleted ? (
@@ -235,27 +238,22 @@ export default function OrgDataservicesClient() {
                     <StatusDot variant="success">Público</StatusDot>
                   )}
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDateToDMY(api.created_at)}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
                 <TableCell headerLabel="Modificado em">
                   {formatDateToDMY(api.last_modified)}
                   <br />
                   <span className="text-sm text-neutral-500">
-                    sobre{" "}
-                    <span className="text-success-600">●</span>{" "}
-                    {api.owner
-                      ? `${api.owner.first_name} ${api.owner.last_name}`
-                      : "—"}
+                    sobre <span className="text-success-600">●</span>{" "}
+                    {api.owner ? `${api.owner.first_name} ${api.owner.last_name}` : "—"}
                   </span>
                 </TableCell>
                 <TableCell headerLabel="Ações">
                   <div className="flex gap-8">
                     <a href={`/pages/dataservices/${api.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                     </a>
                     <a href={`/pages/admin/dataservices/edit?slug=${api.slug}`}>
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                     </a>
                   </div>
                 </TableCell>
@@ -269,9 +267,7 @@ export default function OrgDataservicesClient() {
             <CardNoResults
               className="datasets-page__empty"
               position="center"
-              icon={
-                <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
-              }
+              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
               title="Sem publicações"
               description="A organização ainda não publicou uma API."
               hasAnchor={false}
@@ -280,7 +276,7 @@ export default function OrgDataservicesClient() {
                   <Button
                     variant="primary"
                     appearance="outline"
-                    onClick={() => window.location.href = '/pages/admin/dataservices/new'}
+                    onClick={() => (window.location.href = "/pages/admin/dataservices/new")}
                   >
                     Publique no portal
                   </Button>

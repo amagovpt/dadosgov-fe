@@ -26,6 +26,8 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { TextLink } from "@/components/Primitives/AppLink";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -130,9 +132,7 @@ export default function OrgReusesClient() {
         <CardNoResults
           className="datasets-page__empty"
           position="center"
-          icon={
-            <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />
-          }
+          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem organizações"
           description="Não pertence a nenhuma organização."
           hasAnchor={false}
@@ -158,13 +158,12 @@ export default function OrgReusesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {reuses.length} resultados
-      </p>
+      <p className="text-sm mb-16 text-neutral-700">{reuses.length} resultados</p>
 
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquise o nome da reutilização"
             aria-label="Pesquisar reutilizações"
@@ -181,11 +180,21 @@ export default function OrgReusesClient() {
           }}
         >
           <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>Público</DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>Arquivado</DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>Rascunho</DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>Excluído</DropdownOption>
+            <DropdownOption value="" selected={statusFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="public" selected={statusFilter === "public"}>
+              Público
+            </DropdownOption>
+            <DropdownOption value="archived" selected={statusFilter === "archived"}>
+              Arquivado
+            </DropdownOption>
+            <DropdownOption value="draft" selected={statusFilter === "draft"}>
+              Rascunho
+            </DropdownOption>
+            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
+              Excluído
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
@@ -193,102 +202,93 @@ export default function OrgReusesClient() {
       {isLoading ? (
         <p>A carregar...</p>
       ) : reuses.length > 0 ? (
-          <Table
-            paginationProps={{
-              itemsPerPageLabel: "Itens por página",
-              itemsPerPage: itemsPerPage,
-              totalItems: reuses.length,
-              availablePageSizes: [10, 20, 50],
-              currentPage: currentPage - 1,
-              buttonDropdownAriaLabel: "Selecionar itens por página",
-              dropdownListAriaLabel: "Opções de itens por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => setCurrentPage(page + 1),
-              onPageSizeChange: (size: number) => {
-                setItemsPerPage(size);
-                setCurrentPage(1);
-              },
-            }}
-          >
-            <TableHeader>
-              <TableRow>
-                <TableHeaderCell
-                  sortType="numeric"
-                  sortOrder={getSortOrder("title")}
-                  onSortChange={handleSort("title")}
-                >
-                  Título da reutilização
-                </TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell
-                  sortType="date"
-                  sortOrder={getSortOrder("created_at")}
-                  onSortChange={handleSort("created_at")}
-                >
-                  Criado em
-                </TableHeaderCell>
-                <TableHeaderCell
-                  sortType="numeric"
-                  sortOrder={getSortOrder("datasets")}
-                  onSortChange={handleSort("datasets")}
-                >
-                  Conjuntos de dados
-                </TableHeaderCell>
-                <TableHeaderCell>Ações</TableHeaderCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedReuses.map((reuse, index) => (
-                <TableRow key={index}>
-                  <TableCell headerLabel="Título">
-                    <a
-                      href={`/pages/reuses/${reuse.slug}`}
-                      className="text-primary-600 underline"
-                    >
-                      {reuse.title}
+        <Table
+          paginationProps={{
+            itemsPerPageLabel: "Itens por página",
+            itemsPerPage: itemsPerPage,
+            totalItems: reuses.length,
+            availablePageSizes: [10, 20, 50],
+            currentPage: currentPage - 1,
+            buttonDropdownAriaLabel: "Selecionar itens por página",
+            dropdownListAriaLabel: "Opções de itens por página",
+            prevButtonAriaLabel: "Página anterior",
+            nextButtonAriaLabel: "Próxima página",
+            onPageChange: (page: number) => setCurrentPage(page + 1),
+            onPageSizeChange: (size: number) => {
+              setItemsPerPage(size);
+              setCurrentPage(1);
+            },
+          }}
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHeaderCell
+                sortType="numeric"
+                sortOrder={getSortOrder("title")}
+                onSortChange={handleSort("title")}
+              >
+                Título da reutilização
+              </TableHeaderCell>
+              <TableHeaderCell>Estado</TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("created_at")}
+                onSortChange={handleSort("created_at")}
+              >
+                Criado em
+              </TableHeaderCell>
+              <TableHeaderCell
+                sortType="numeric"
+                sortOrder={getSortOrder("datasets")}
+                onSortChange={handleSort("datasets")}
+              >
+                Conjuntos de dados
+              </TableHeaderCell>
+              <TableHeaderCell>Ações</TableHeaderCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedReuses.map((reuse, index) => (
+              <TableRow key={index}>
+                <TableCell headerLabel="Título">
+                  <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
+                </TableCell>
+                <TableCell headerLabel="Estado">
+                  {reuse.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : reuse.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : reuse.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
+                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDateToDMY(reuse.created_at)}</TableCell>
+                <TableCell headerLabel="Conjuntos de dados">
+                  {reuse.datasets?.length ?? 0}
+                </TableCell>
+                <TableCell headerLabel="Ações">
+                  <div className="flex gap-8">
+                    <a href={`/pages/reuses/${reuse.slug}`}>
+                      <AppIcon name="agora-line-eye" />
                     </a>
-                  </TableCell>
-                  <TableCell headerLabel="Estado">
-                    {reuse.deleted ? (
-                      <StatusDot variant="danger">Excluído</StatusDot>
-                    ) : reuse.archived ? (
-                      <StatusDot variant="neutral">Arquivado</StatusDot>
-                    ) : reuse.private ? (
-                      <StatusDot variant="warning">Rascunho</StatusDot>
-                    ) : (
-                      <StatusDot variant="success">Público</StatusDot>
-                    )}
-                  </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDateToDMY(reuse.created_at)}
-                  </TableCell>
-                  <TableCell headerLabel="Conjuntos de dados">
-                    {reuse.datasets?.length ?? 0}
-                  </TableCell>
-                  <TableCell headerLabel="Ações">
-                    <div className="flex gap-8">
-                      <a href={`/pages/reuses/${reuse.slug}`}>
-                        <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                      </a>
-                      <a href={`/pages/admin/org/reuses/edit?slug=${reuse.slug}`}>
-                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                      </a>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    <a href={`/pages/admin/org/reuses/edit?slug=${reuse.slug}`}>
+                      <AppIcon name="agora-line-edit" />
+                    </a>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">
             <CardNoResults
               className="datasets-page__empty"
               position="center"
-              icon={
-                <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
-              }
+              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
               title="Sem publicações"
               description="A organização ainda não publicou uma reutilização."
               hasAnchor={false}
@@ -297,7 +297,7 @@ export default function OrgReusesClient() {
                   <Button
                     variant="primary"
                     appearance="outline"
-                    onClick={() => window.location.href = '/pages/admin/reuses/new'}
+                    onClick={() => (window.location.href = "/pages/admin/reuses/new")}
                   >
                     Publique no portal
                   </Button>

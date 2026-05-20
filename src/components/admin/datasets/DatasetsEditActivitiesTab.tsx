@@ -1,6 +1,7 @@
 import React from "react";
 import { Avatar, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import type { Activity } from "@/types/api";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 type DatasetsEditActivitiesTabProps = {
   activitiesLoading: boolean;
@@ -17,11 +18,11 @@ export default function DatasetsEditActivitiesTab({
 }: DatasetsEditActivitiesTabProps) {
   return (
     <div className="mt-24">
-      {activitiesLoading && <p className="text-neutral-700 text-sm">A carregar...</p>}
+      {activitiesLoading && <p className="text-sm text-neutral-700">A carregar...</p>}
       {activitiesLoaded && activities.length === 0 && (
         <CardNoResults
           position="center"
-          icon={<Icon name="agora-line-time" className="w-12 h-12 text-primary-500 icon-xl" />}
+          icon={<Icon name="agora-line-time" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem atividades"
           description="Ainda não existem atividades registadas neste conjunto de dados."
           hasAnchor={false}
@@ -29,12 +30,12 @@ export default function DatasetsEditActivitiesTab({
       )}
       {activitiesLoaded && activities.length > 0 && (
         <>
-          <h2 className="font-medium text-neutral-900 text-base mb-16">
+          <h2 className="mb-16 text-base font-medium text-neutral-900">
             {activities.length} ATIVIDADES
           </h2>
           <div className="flex flex-col gap-12">
             {activities.map((activity, index) => (
-              <div key={index} className="flex items-start gap-12 p-12 bg-neutral-50 rounded-lg">
+              <div key={index} className="rounded-lg flex items-start gap-12 bg-neutral-50 p-12">
                 <Avatar
                   avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
                   srcPath={
@@ -45,15 +46,12 @@ export default function DatasetsEditActivitiesTab({
                 />
                 <div>
                   <p className="text-sm text-neutral-900">
-                    <a
-                      href={`/pages/admin/users/${activity.actor?.id}`}
-                      className="text-primary-600 underline"
-                    >
+                    <TextLink href={`/pages/admin/users/${activity.actor?.id}`}>
                       {activity.actor?.first_name} {activity.actor?.last_name}
-                    </a>{" "}
+                    </TextLink>{" "}
                     {translateActivityLabel(activity.label)}
                   </p>
-                  <p className="text-xs text-neutral-600 mt-4">
+                  <p className="text-xs mt-4 text-neutral-600">
                     {new Date(activity.created_at).toLocaleDateString("pt-PT", {
                       day: "2-digit",
                       month: "2-digit",

@@ -1,5 +1,6 @@
 import React from "react";
 import { AuxiliarItem } from "@/components/admin/AuxiliarList";
+import { TextLink } from "@/components/Primitives/AppLink";
 
 interface DatasetAuxiliarErrors {
   title?: boolean;
@@ -40,12 +41,12 @@ export function getDatasetAuxiliarItems(errors: DatasetAuxiliarErrors = {}): Aux
             sobre o conteúdo e a estrutura dos recursos publicados; pode, em particular, fornecer
             informações como:
           </p>
-          <ul className="list-disc pl-5 mt-2 flex flex-col gap-2">
+          <ul className="pl-5 mt-2 flex list-disc flex-col gap-2">
             <li>A lista de ficheiros disponibilizados;</li>
             <li>A descrição do formato do ficheiro;</li>
             <li>A frequência de atualização;</li>
           </ul>
-          <ul className="list-disc pl-5 mt-4 flex flex-col gap-2">
+          <ul className="pl-5 mt-4 flex list-disc flex-col gap-2">
             <li>As motivações para a criação do conjunto de dados;</li>
             <li>A composição do conjunto de dados;</li>
             <li>O processo de recolha de dados;</li>
@@ -68,17 +69,17 @@ export function getDatasetAuxiliarItems(errors: DatasetAuxiliarErrors = {}): Aux
             compreensão imediata do conteúdo pelos utilizadores e aumenta a sua visibilidade nos
             resultados de pesquisa.
           </p>
-          <p className="font-bold mt-3">Sugestões automáticas</p>
+          <p className="mt-3 font-bold">Sugestões automáticas</p>
           <p className="mt-2">
             Uma primeira versão pode ser gerada automaticamente se já tiver preenchido o título e
             uma descrição de pelo menos 200 caracteres, sendo então adaptada de acordo com as suas
             necessidades.
           </p>
           <p className="mt-3">
-            <a href="#" className="text-primary-600 underline">
+            <TextLink href="#">
               A IA baseia-se exclusivamente nas informações que forneceu e, por vezes, pode cometer
               erros: releia sempre a proposta antes de validar.
-            </a>
+            </TextLink>
           </p>
         </>
       ),
@@ -91,16 +92,16 @@ export function getDatasetAuxiliarItems(errors: DatasetAuxiliarErrors = {}): Aux
             As palavras-chave ajudam a caracterizar o conjunto de dados, tornam-no mais fácil de
             encontrar e contribuem para um melhor posicionamento nos motores de busca.
           </p>
-          <p className="font-bold mt-3">Sugestões automáticas</p>
+          <p className="mt-3 font-bold">Sugestões automáticas</p>
           <p className="mt-2">
             Com base no conteúdo do seu conjunto de dados, podem ser sugeridas palavras-chave
             automaticamente. Pode aceitá-las, modificá-las ou excluí-las.
           </p>
           <p className="mt-3">
-            <a href="#" className="text-primary-600 underline">
+            <TextLink href="#">
               A IA baseia-se exclusivamente nas informações que forneceu e, por vezes, pode cometer
               erros: releia sempre a proposta antes de validar.
-            </a>
+            </TextLink>
           </p>
         </>
       ),

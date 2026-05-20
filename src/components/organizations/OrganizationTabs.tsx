@@ -498,18 +498,16 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                   description={
                     <>
                       A sua questão é sobre outro tema que não esta organização?{" "}
-                      <a
+                      <AppLink
                         href="https://dados.gov.pt"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 underline font-semibold"
+                        className="font-semibold"
                       >
                         Visite o nosso fórum{" "}
                         <Icon
                           name="agora-line-external-link"
                           className="w-4 h-4 inline"
                         />
-                      </a>
+                      </AppLink>
                     </>
                   }
                 />

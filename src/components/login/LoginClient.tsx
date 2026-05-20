@@ -19,6 +19,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import { fetchCsrfToken, login } from "@/services/api";
+import { TextLink } from "../Primitives/AppLink";
 
 function LoginContent() {
   const searchParams = useSearchParams();
@@ -136,12 +137,16 @@ function LoginContent() {
   };
 
   const handleSamlLogin = () => {
-    const endpoint = nextUrl !== "/" ? `/saml/login?next=${encodeURIComponent(nextUrl)}` : "/saml/login";
+    const endpoint =
+      nextUrl !== "/" ? `/saml/login?next=${encodeURIComponent(nextUrl)}` : "/saml/login";
     submitSamlForm(endpoint);
   };
 
   const handleEidasLogin = () => {
-    const endpoint = nextUrl !== "/" ? `/saml/eidas/login?next=${encodeURIComponent(nextUrl)}` : "/saml/eidas/login";
+    const endpoint =
+      nextUrl !== "/"
+        ? `/saml/eidas/login?next=${encodeURIComponent(nextUrl)}`
+        : "/saml/eidas/login";
     submitSamlForm(endpoint);
   };
 
@@ -182,7 +187,8 @@ function LoginContent() {
       // 4. Redirect on success (full reload to update auth state)
       window.location.href = nextUrl;
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Ocorreu um erro ao tentar iniciar sessão.";
+      const message =
+        err instanceof Error ? err.message : "Ocorreu um erro ao tentar iniciar sessão.";
       if (message === "migration_required") {
         setMigrationRequired(true);
         setError(null);
@@ -195,8 +201,8 @@ function LoginContent() {
   };
 
   return (
-    <main className="flex-grow bg-white min-h-screen relative">
-      <div className="container mx-auto px-16 pt-32 pb-64 max-w-7xl login-page">
+    <main className="relative min-h-screen flex-grow bg-white">
+      <div className="login-page container mx-auto max-w-7xl px-16 pb-64 pt-32">
         {/* Breadcrumb */}
         {!cmdModalOpen && !eidasModalOpen && (
           <div>
@@ -212,12 +218,12 @@ function LoginContent() {
                 onClick={() => setEidasModalOpen(false)}
                 onMouseEnter={() => setIsHoveredClose(true)}
                 onMouseLeave={() => setIsHoveredClose(false)}
-                className="flex items-center gap-8 text-sm text-neutral-900 hover:text-neutral-700"
+                className="text-sm flex items-center gap-8 text-neutral-900 hover:text-neutral-700"
               >
                 Fechar
                 <Icon
                   name={isHoveredClose ? "agora-solid-x" : "agora-line-x"}
-                  className="w-20 h-20"
+                  className="h-20 w-20"
                 />
               </button>
             </div>
@@ -226,26 +232,33 @@ function LoginContent() {
             </h2>
             <ul className="flex flex-col gap-16">
               <li className="flex items-start gap-16">
-                <Icon name="agora-line-check" className="w-20 h-20 text-primary-600 shrink-0 mt-2" />
+                <Icon
+                  name="agora-line-check"
+                  className="mt-2 h-20 w-20 shrink-0 text-primary-600"
+                />
                 <span>
                   Ter um mecanismo de identificação eletrónica emitida por outro Estado-Membro da
                   União Europeia que já tenha infraestruturas de autenticação (eIDAS) disponível.
                 </span>
               </li>
             </ul>
-            <div className="flex flex-col gap-24 mt-32 items-start">
+            <div className="mt-32 flex flex-col items-start gap-24">
               <a
                 href="https://www.autenticacao.gov.pt/eidas"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-600 flex items-center gap-8 text-sm"
+                className="text-sm flex items-center gap-8 text-primary-600"
                 onMouseEnter={() => setIsHoveredEidasCreate(true)}
                 onMouseLeave={() => setIsHoveredEidasCreate(false)}
               >
                 Criar conta com Autenticação Europeia
                 <Icon
-                  name={isHoveredEidasCreate ? "agora-solid-arrow-right-circle" : "agora-line-arrow-right-circle"}
-                  className="w-20 h-20"
+                  name={
+                    isHoveredEidasCreate
+                      ? "agora-solid-arrow-right-circle"
+                      : "agora-line-arrow-right-circle"
+                  }
+                  className="h-20 w-20"
                 />
               </a>
             </div>
@@ -257,12 +270,12 @@ function LoginContent() {
                 onClick={() => setCmdModalOpen(false)}
                 onMouseEnter={() => setIsHoveredClose(true)}
                 onMouseLeave={() => setIsHoveredClose(false)}
-                className="flex items-center gap-8 text-sm text-neutral-900 hover:text-neutral-700"
+                className="text-sm flex items-center gap-8 text-neutral-900 hover:text-neutral-700"
               >
                 Fechar
                 <Icon
                   name={isHoveredClose ? "agora-solid-x" : "agora-line-x"}
-                  className="w-20 h-20"
+                  className="h-20 w-20"
                 />
               </button>
             </div>
@@ -271,13 +284,22 @@ function LoginContent() {
             </h2>
             <ul className="flex flex-col gap-16">
               <li className="flex items-start gap-16">
-                <Icon name="agora-line-check" className="w-20 h-20 text-primary-600 shrink-0 mt-2" />
-                <span>Para cidadãs/ãos nacionais e estrangeiras/os com Chave Móvel Digital (CMD) ativa.</span>
+                <Icon
+                  name="agora-line-check"
+                  className="mt-2 h-20 w-20 shrink-0 text-primary-600"
+                />
+                <span>
+                  Para cidadãs/ãos nacionais e estrangeiras/os com Chave Móvel Digital (CMD) ativa.
+                </span>
               </li>
               <li className="flex items-start gap-16">
-                <Icon name="agora-line-check" className="w-20 h-20 text-primary-600 shrink-0 mt-2" />
+                <Icon
+                  name="agora-line-check"
+                  className="mt-2 h-20 w-20 shrink-0 text-primary-600"
+                />
                 <span>
-                  Precisa do código PIN da sua CMD e do telemóvel que lhe está associado. Se ainda não o fez, pode
+                  Precisa do código PIN da sua CMD e do telemóvel que lhe está associado. Se ainda
+                  não o fez, pode
                   <br />
                   <a
                     href="https://www.autenticacao.gov.pt/cmd-pedido-chave"
@@ -290,40 +312,60 @@ function LoginContent() {
                 </span>
               </li>
               <li className="flex items-start gap-16">
-                <Icon name="agora-line-check" className="w-20 h-20 text-primary-600 shrink-0 mt-2" />
-                <span>O registo com CMD permite a realização de todos os serviços online disponibilizados neste portal.</span>
+                <Icon
+                  name="agora-line-check"
+                  className="mt-2 h-20 w-20 shrink-0 text-primary-600"
+                />
+                <span>
+                  O registo com CMD permite a realização de todos os serviços online
+                  disponibilizados neste portal.
+                </span>
               </li>
             </ul>
-            <div className="flex flex-col gap-24 mt-32 items-start">
+            <div className="mt-32 flex flex-col items-start gap-24">
               <a
                 href="https://www.autenticacao.gov.pt/cmd-pedido-chave?partnerEntityID=https://dados.gov.pt"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-600 flex items-center gap-8 text-sm"
+                className="text-sm flex items-center gap-8 text-primary-600"
                 onMouseEnter={() => setIsHoveredNacional(true)}
                 onMouseLeave={() => setIsHoveredNacional(false)}
               >
                 Criar conta como cidadão nacional
-                <Icon name={isHoveredNacional ? "agora-solid-arrow-right-circle" : "agora-line-arrow-right-circle"} className="w-20 h-20" />
+                <Icon
+                  name={
+                    isHoveredNacional
+                      ? "agora-solid-arrow-right-circle"
+                      : "agora-line-arrow-right-circle"
+                  }
+                  className="h-20 w-20"
+                />
               </a>
               <a
                 href="https://www.autenticacao.gov.pt/cmd-pedido-chave-estrangeiro"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-600 flex items-center gap-8 text-sm"
+                className="text-sm flex items-center gap-8 text-primary-600"
                 onMouseEnter={() => setIsHoveredEstrangeiro(true)}
                 onMouseLeave={() => setIsHoveredEstrangeiro(false)}
               >
                 Criar conta como cidadão estrangeiro
-                <Icon name={isHoveredEstrangeiro ? "agora-solid-arrow-right-circle" : "agora-line-arrow-right-circle"} className="w-20 h-20" />
+                <Icon
+                  name={
+                    isHoveredEstrangeiro
+                      ? "agora-solid-arrow-right-circle"
+                      : "agora-line-arrow-right-circle"
+                  }
+                  className="h-20 w-20"
+                />
               </a>
             </div>
           </div>
         ) : (
           <>
             <div>
-              <h1 className="text-2xl-medium text-brand-blue-dark mt-64 mb-16">Autenticação</h1>
-              <p className="text-lg text-neutral-700 max-w-2xl mb-32">
+              <h1 className="mb-16 mt-64 text-2xl-medium text-brand-blue-dark">Autenticação</h1>
+              <p className="text-lg mb-32 max-w-2xl text-neutral-700">
                 Escolha um meio de autenticação para se autenticar no portal e ter acesso aos vários{" "}
                 <br />
                 serviços e funcionalidades online.
@@ -354,22 +396,25 @@ function LoginContent() {
                           />
                         </div>
                       </div>
-                      <div className="flex items-center gap-8 my-32">
+                      <div className="my-32 flex items-center gap-8">
                         <p className="text-sm text-neutral-900">
                           <strong>Não tem Chave Móvel Digital?</strong>
                         </p>
                         <button
-                          className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
-                          onClick={() => { setCmdModalOpen(true); window.scrollTo(0, 0); }}
+                          className="text-sm cursor-pointer border-0 bg-transparent p-0 text-primary-600 underline active:decoration-dashed"
+                          onClick={() => {
+                            setCmdModalOpen(true);
+                            window.scrollTo(0, 0);
+                          }}
                         >
                           Descubra como criar conta
                         </button>
                       </div>
-                      <div className="w-full h-[2px] bg-neutral-400"></div>
+                      <div className="h-[2px] w-full bg-neutral-400"></div>
                       <div className="flex flex-col gap-24">
                         <div className="flex flex-col gap-8">
-                          <h3 className="text-l-bold text-brand-blue-dark mt-32">Entrar como</h3>
-                          <div className="flex flex-col gap-16 mt-8">
+                          <h3 className="mt-32 text-l-bold text-brand-blue-dark">Entrar como</h3>
+                          <div className="mt-8 flex flex-col gap-16">
                             <RadioButton
                               label="Pessoa com nacionalidade portuguesa"
                               id="nacional"
@@ -386,34 +431,31 @@ function LoginContent() {
                             />
                           </div>
                         </div>
-                        <div className="flex flex-col gap-8 mt-8">
+                        <div className="mt-8 flex flex-col gap-8">
                           <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
                           <p className="text-sm">
                             Deve ler atentamente os{" "}
-                            <a
+                            <TextLink
                               href="/pages/faqs/terms"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
+                              className="hover:text-primary-800 active:decoration-dashed"
                             >
                               Termos e condições para o tratamento dos seus dados
-                            </a>
+                            </TextLink>
                           </p>
                           <Checkbox
                             id="terms-cmd"
-                            className="text-sm text-neutral-700 leading-relaxed"
+                            className="text-sm leading-relaxed text-neutral-700"
                             onChange={(e) => setTermsCmdAccepted(e.target.checked)}
                           >
-                            Declaro que li e aceito os termos e condições para o tratamento dos
-                            meus dados pessoais no acesso e utilização da Área Reservada do
-                            dados.gov.pt.
+                            Declaro que li e aceito os termos e condições para o tratamento dos meus
+                            dados pessoais no acesso e utilização da Área Reservada do dados.gov.pt.
                           </Checkbox>
                         </div>
                       </div>
                       <div className="mt-16">
                         <Button
                           variant="primary"
-                          className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                          className="text-lg shadow-md hover:shadow-lg h-56 px-48 font-bold transition-all"
                           hasIcon={true}
                           trailingIcon={"agora-line-arrow-right-circle"}
                           trailingIconHover="agora-solid-arrow-right-circle"
@@ -443,13 +485,8 @@ function LoginContent() {
                             disponível para a qualquer cidadã/o da UE.
                           </p>
                         </div>
-                        <div className="shrink-0 flex items-center gap-32">
-                          <NextImage
-                            src="/eidas.svg"
-                            alt="eIDAS"
-                            width={64}
-                            height={64}
-                          />
+                        <div className="flex shrink-0 items-center gap-32">
+                          <NextImage src="/eidas.svg" alt="eIDAS" width={64} height={64} />
                           <NextImage
                             src="/Logos/your_europe.svg"
                             alt="Your Europe"
@@ -458,50 +495,51 @@ function LoginContent() {
                           />
                         </div>
                       </div>
-                      <div className="flex items-center gap-8 mt-32">
+                      <div className="mt-32 flex items-center gap-8">
                         <p className="text-sm text-neutral-900">
                           <strong>Não tem Autenticação Europeia?</strong>
                         </p>
                         <button
-                          className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
-                          onClick={() => { setEidasModalOpen(true); window.scrollTo(0, 0); }}
+                          className="text-sm cursor-pointer border-0 bg-transparent p-0 text-primary-600 underline active:decoration-dashed"
+                          onClick={() => {
+                            setEidasModalOpen(true);
+                            window.scrollTo(0, 0);
+                          }}
                         >
                           Descubra como criar conta
                         </button>
                       </div>
-                      <div className="w-full h-[2px] bg-neutral-400 my-32"></div>
+                      <div className="my-32 h-[2px] w-full bg-neutral-400"></div>
                       <p className="text-sm text-neutral-900">
-                        Precisa <strong>fornecer documentos</strong> que foram emitidos por uma entidade
-                        pública de <strong>outro Estado-Membro</strong> da UE? Agora já é possível
-                        recupera-los diretamente do portal emissor entrando com a sua autenticação Europeia.
+                        Precisa <strong>fornecer documentos</strong> que foram emitidos por uma
+                        entidade pública de <strong>outro Estado-Membro</strong> da UE? Agora já é
+                        possível recupera-los diretamente do portal emissor entrando com a sua
+                        autenticação Europeia.
                       </p>
-                      <div className="flex flex-col gap-8 mt-8">
+                      <div className="mt-8 flex flex-col gap-8">
                         <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
                         <p className="text-sm">
                           Deve ler atentamente os{" "}
-                          <a
+                          <TextLink
                             href="/pages/faqs/terms"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
+                            className="hover:text-primary-800 active:decoration-dashed"
                           >
                             Termos e condições para o tratamento dos seus dados
-                          </a>
+                          </TextLink>
                         </p>
                         <Checkbox
                           id="terms-eidas"
-                          className="text-sm text-neutral-700 leading-relaxed"
+                          className="text-sm leading-relaxed text-neutral-700"
                           onChange={(e) => setTermsEidasAccepted(e.target.checked)}
                         >
-                          Declaro que li e aceito os termos e condições para o tratamento dos
-                          meus dados pessoais no acesso e utilização da Área Reservada do
-                          dados.gov.pt.
+                          Declaro que li e aceito os termos e condições para o tratamento dos meus
+                          dados pessoais no acesso e utilização da Área Reservada do dados.gov.pt.
                         </Checkbox>
                       </div>
                       <div className="mt-16">
                         <Button
                           variant="primary"
-                          className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                          className="text-lg shadow-md hover:shadow-lg h-56 px-48 font-bold transition-all"
                           hasIcon={true}
                           trailingIcon={"agora-line-arrow-right-circle"}
                           trailingIconHover="agora-solid-arrow-right-circle"
@@ -530,29 +568,29 @@ function LoginContent() {
                             palavra-passe, conseguem autenticar-se desta forma.
                           </p>
                         </div>
-                        <div className="shrink-0 bg-primary-600 rounded-8 p-16 icon-white">
-                          <Icon name="agora-solid-social-security" className="w-24 h-24" />
+                        <div className="icon-white shrink-0 rounded-8 bg-primary-600 p-16">
+                          <Icon name="agora-solid-social-security" className="h-24 w-24" />
                         </div>
                       </div>
-                      <div className="w-full h-[2px] bg-neutral-400 my-32"></div>
+                      <div className="my-32 h-[2px] w-full bg-neutral-400"></div>
                       <div className="flex flex-col gap-32">
                         {migrationRequired ? (
                           <>
                             <div>
-                              <h2 className="text-xl-bold text-brand-blue-dark mb-8">
+                              <h2 className="mb-8 text-xl-bold text-brand-blue-dark">
                                 Migração obrigatória
                               </h2>
                               <p className="text-neutral-900">
-                                O login por email e palavra-passe vai ser descontinuado. Para continuar a
-                                aceder ao portal, é necessário migrar a sua conta para a Chave Móvel
-                                Digital (CMD) ou autenticação europeia (eIDAS).
+                                O login por email e palavra-passe vai ser descontinuado. Para
+                                continuar a aceder ao portal, é necessário migrar a sua conta para a
+                                Chave Móvel Digital (CMD) ou autenticação europeia (eIDAS).
                               </p>
                             </div>
-                            <div className="p-24 rounded-8 bg-amber-50 border border-amber-200">
-                              <div className="flex gap-12 items-start">
+                            <div className="bg-amber-50 border-amber-200 rounded-8 border p-24">
+                              <div className="flex items-start gap-12">
                                 <Icon
                                   name="agora-line-info-mark"
-                                  className="w-24 h-24 text-amber-600 shrink-0 mt-2"
+                                  className="text-amber-600 mt-2 h-24 w-24 shrink-0"
                                 />
                                 <div>
                                   <p className="text-sm-bold text-amber-800 mb-4">Como migrar?</p>
@@ -569,14 +607,14 @@ function LoginContent() {
                             <div className="flex gap-16">
                               <Button
                                 variant="primary"
-                                className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                                className="text-lg shadow-md hover:shadow-lg h-56 px-48 font-bold transition-all"
                                 onClick={handleSamlLogin}
                               >
                                 Migrar com CMD
                               </Button>
                               <Button
                                 variant="neutral"
-                                className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                                className="text-lg shadow-md hover:shadow-lg h-56 px-48 font-bold transition-all"
                                 onClick={handleEidasLogin}
                               >
                                 Migrar com eIDAS
@@ -594,7 +632,7 @@ function LoginContent() {
                             ) : (
                               <>
                                 <div>
-                                  <h2 className="text-xl-bold text-brand-blue-dark mb-8">
+                                  <h2 className="mb-8 text-xl-bold text-brand-blue-dark">
                                     Recuperar palavra-passe
                                   </h2>
                                   <p className="text-neutral-900">
@@ -604,7 +642,11 @@ function LoginContent() {
                                 </div>
 
                                 {recoveryError && (
-                                  <StatusCard variant="danger" showIcon description={recoveryError} />
+                                  <StatusCard
+                                    variant="danger"
+                                    showIcon
+                                    description={recoveryError}
+                                  />
                                 )}
 
                                 <form
@@ -632,18 +674,18 @@ function LoginContent() {
                                     </div>
                                   )}
 
-                                  <div className="flex items-center gap-16 mt-8">
+                                  <div className="mt-8 flex items-center gap-16">
                                     <Button
                                       variant="primary"
                                       type="submit"
-                                      className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                                      className="text-lg shadow-md hover:shadow-lg h-56 px-48 font-bold transition-all"
                                       disabled={recoveryLoading || !recoveryEmail}
                                     >
                                       {recoveryLoading ? "A enviar..." : "Redefinir palavra-passe"}
                                     </Button>
                                     <button
                                       type="button"
-                                      className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
+                                      className="text-sm cursor-pointer border-0 bg-transparent p-0 text-primary-600 underline active:decoration-dashed"
                                       onClick={() => {
                                         setShowRecovery(false);
                                         setRecoveryError(null);
@@ -662,7 +704,7 @@ function LoginContent() {
                               <div className="mt-16">
                                 <button
                                   type="button"
-                                  className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
+                                  className="text-sm cursor-pointer border-0 bg-transparent p-0 text-primary-600 underline active:decoration-dashed"
                                   onClick={() => {
                                     setShowRecovery(false);
                                     setRecoverySuccess(false);
@@ -682,9 +724,7 @@ function LoginContent() {
                               </p>
                             </div>
 
-                            {error && (
-                              <StatusCard variant="danger" showIcon description={error} />
-                            )}
+                            {error && <StatusCard variant="danger" showIcon description={error} />}
 
                             <form
                               className="flex flex-col gap-24"
@@ -708,7 +748,7 @@ function LoginContent() {
                                 onChange={(e) => setLoginEmail(e.target.value)}
                               />
 
-                              <div className="flex flex-col gap-8 max-w-[560px]">
+                              <div className="flex max-w-[560px] flex-col gap-8">
                                 <InputPassword
                                   label="Palavra-passe *"
                                   placeholder="Introduza aqui a palavra-passe"
@@ -728,47 +768,52 @@ function LoginContent() {
                                 />
                               </div>
 
-                              <div className="flex items-center mt-24 gap-8">
+                              <div className="mt-24 flex items-center gap-8">
                                 <span className="text-sm text-neutral-900">
                                   Esqueceu-se da palavra-passe?
                                 </span>
                                 <button
                                   type="button"
-                                  className="text-primary-600 text-sm underline active:decoration-dashed bg-transparent border-0 p-0 cursor-pointer"
+                                  className="text-sm cursor-pointer border-0 bg-transparent p-0 text-primary-600 underline active:decoration-dashed"
                                   onClick={() => setShowRecovery(true)}
                                 >
                                   Recuperar palavra-passe
                                 </button>
                               </div>
-                              <div className="flex flex-col gap-8 mt-8">
-                                <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
+                              <div className="mt-8 flex flex-col gap-8">
+                                <h3 className="text-l-bold text-brand-blue-dark">
+                                  Termos e condições
+                                </h3>
                                 <p className="text-sm">
                                   Deve ler atentamente os{" "}
-                                  <a
+                                  <TextLink
                                     href="/pages/faqs/terms"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-primary-600 underline active:decoration-dashed hover:text-primary-800"
+                                    className="hover:text-primary-800 active:decoration-dashed"
                                   >
                                     Termos e condições para o tratamento dos seus dados
-                                  </a>
+                                  </TextLink>
                                 </p>
                                 <Checkbox
                                   id="terms-email"
-                                  className="text-sm text-neutral-700 leading-relaxed"
+                                  className="text-sm leading-relaxed text-neutral-700"
                                   onChange={(e) => setTermsEmailAccepted(e.target.checked)}
                                 >
-                                  Declaro que li e aceito os termos e condições para o tratamento dos
-                                  meus dados pessoais no acesso e utilização da Área Reservada do
-                                  dados.gov.pt.
+                                  Declaro que li e aceito os termos e condições para o tratamento
+                                  dos meus dados pessoais no acesso e utilização da Área Reservada
+                                  do dados.gov.pt.
                                 </Checkbox>
                               </div>
                               <div className="mt-8">
                                 <Button
                                   variant="primary"
                                   type="submit"
-                                  className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                                  disabled={isLoading || !loginEmail || !loginPassword || !termsEmailAccepted}
+                                  className="text-lg shadow-md hover:shadow-lg h-56 px-48 font-bold transition-all"
+                                  disabled={
+                                    isLoading ||
+                                    !loginEmail ||
+                                    !loginPassword ||
+                                    !termsEmailAccepted
+                                  }
                                 >
                                   {isLoading ? "A autenticar..." : "Autenticar"}
                                 </Button>
@@ -784,7 +829,7 @@ function LoginContent() {
             </Tabs>
 
             {/* Status card aligned with tab content */}
-            <div className="grid xl:grid-cols-12 gap-32 mt-32">
+            <div className="mt-32 grid gap-32 xl:grid-cols-12">
               <div className="xl:col-span-3" />
               <div className="xl:col-span-9 xl:col-start-4">
                 <StatusCard
@@ -798,10 +843,13 @@ function LoginContent() {
                       </p>
                       <a
                         href="/pages/support"
-                        className="text-sm text-informative-600 flex items-center gap-8"
+                        className="text-sm flex items-center gap-8 text-informative-600"
                       >
                         Formulário de contacto
-                        <Icon name="agora-line-arrow-right-circle" className="w-16 h-16 text-informative-600" />
+                        <Icon
+                          name="agora-line-arrow-right-circle"
+                          className="h-16 w-16 text-informative-600"
+                        />
                       </a>
                     </div>
                   }

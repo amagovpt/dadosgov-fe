@@ -49,6 +49,7 @@ import {
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
 import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/types/api";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 interface HarvesterDetailClientProps {
   slug: string;
@@ -1052,7 +1053,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
               <aside className="admin-page__auxiliar">
                 <div className="admin-page__auxiliar-inner">
                   <div className="admin-page__auxiliar-header">
-                    <Icon name="agora-line-question-mark" className="w-24 h-24" />
+                    <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
                     <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                   </div>
                   <AuxiliarList items={auxiliarItems} />
