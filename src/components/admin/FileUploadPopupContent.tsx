@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Icon, usePopupContext } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { fetchAllowedExtensions } from "@/api/datasets";
+import { fetchAllowedExtensions } from "@/api/datasets/route";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 interface FileUploadPopupContentProps {

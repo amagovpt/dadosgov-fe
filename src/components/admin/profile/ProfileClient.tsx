@@ -13,10 +13,10 @@ import {
   fetchApiTokens,
   revokeApiToken,
   requestEmailChange,
-} from "@/api/profile";
-import { fetchCsrfToken } from "@/api/auth";
-import { fetchUserActivity, updateProfile } from "@/api/users";
-import { fetchMyFollowing } from "@/api/followers";
+} from "@/api/profile/route";
+import { fetchCsrfToken } from "@/api/auth/route";
+import { fetchUserActivity, updateProfile } from "@/api/users/route";
+import { fetchMyFollowing } from "@/api/followers/route";
 import { Activity, ApiToken, UserFollowing, UserPublic } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";

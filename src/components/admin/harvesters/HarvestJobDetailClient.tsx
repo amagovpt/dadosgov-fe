@@ -18,7 +18,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchHarvestJob, fetchHarvester } from "@/api/harvesters";
+import { fetchHarvestJob, fetchHarvester } from "@/api/harvesters/route";
 import type { HarvestJob, HarvestItem, HarvestSource } from "@/types/api";
 
 interface HarvestJobDetailClientProps {

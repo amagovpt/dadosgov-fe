@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Avatar, Button, InputText, InputTextArea, usePopupContext } from "@ama-pt/agora-design-system";
 import { Discussion } from "@/types/api";
-import { updateDiscussion, editDiscussionComment } from "@/api/discussions-topics";
+import { updateDiscussion, editDiscussionComment } from "@/api/discussions-topics/route";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 

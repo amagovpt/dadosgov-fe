@@ -28,14 +28,14 @@ import {
 import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from "@/types/api";
 import {
   fetchReuse,
-} from "@/api/reuses";
-import { fetchDataset } from "@/api/datasets";
+} from "@/api/reuses/route";
+import { fetchDataset } from "@/api/datasets/route";
 import {
   fetchDiscussions,
   createDiscussion,
   replyToDiscussion,
-} from "@/api/discussions-topics";
-import { followEntity, unfollowEntity, isFollowing } from "@/api/followers";
+} from "@/api/discussions-topics/route";
+import { followEntity, unfollowEntity, isFollowing } from "@/api/followers/route";
 import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";

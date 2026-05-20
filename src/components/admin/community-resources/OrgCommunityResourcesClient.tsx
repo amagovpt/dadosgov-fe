@@ -15,7 +15,7 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchOrgCommunityResources } from "@/api/community-resources";
+import { fetchOrgCommunityResources } from "@/api/community-resources/route";
 import { CommunityResource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchCurrentUser } from "@/api/auth";
+import { fetchCurrentUser } from "@/api/auth/route";
 import { UserRef } from "@/types/api";
 
 export function useCurrentUser() {

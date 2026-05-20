@@ -8,13 +8,13 @@ import { Dataset, Discussion, DiscussionCreatePayload, Reuse, CommunityResource 
 import IsolatedSelect from '@/components/admin/IsolatedSelect';
 import EditDiscussionPopup from '@/components/discussions/EditDiscussionPopup';
 import DeleteDiscussionPopup from '@/components/discussions/DeleteDiscussionPopup';
-import { fetchReuses } from "@/api/reuses";
+import { fetchReuses } from "@/api/reuses/route";
 import {
   fetchDiscussions,
   createDiscussion,
   replyToDiscussion,
-} from "@/api/discussions-topics";
-import { fetchCommunityResourcesByDataset } from "@/api/community-resources";
+} from "@/api/discussions-topics/route";
+import { fetchCommunityResourcesByDataset } from "@/api/community-resources/route";
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { DatasetResourcesTable } from './DatasetResourcesTable';

@@ -27,7 +27,7 @@ import {
 import SearchDropdown from '@/components/search/SearchDropdown';
 import { HeaderCard } from '@/components/HeaderCard';
 import { useAuth } from '@/context/AuthContext';
-import { logout } from "@/api/auth";
+import { logout } from "@/api/auth/route";
 
 export const Header = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

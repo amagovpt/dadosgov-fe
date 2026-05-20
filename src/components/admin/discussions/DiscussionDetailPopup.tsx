@@ -8,13 +8,13 @@ import { Avatar, Button, Icon, InputTextArea, usePopupContext } from "@ama-pt/ag
 import { Discussion, Dataset, Reuse } from "@/types/api";
 import {
   fetchReuse,
-} from "@/api/reuses";
-import { fetchDataset } from "@/api/datasets";
+} from "@/api/reuses/route";
+import { fetchDataset } from "@/api/datasets/route";
 import {
   replyToDiscussion,
   closeDiscussion,
   deleteDiscussion,
-} from "@/api/discussions-topics";
+} from "@/api/discussions-topics/route";
 
 interface DiscussionDetailPopupProps {
   discussion: Discussion;

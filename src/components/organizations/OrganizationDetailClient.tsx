@@ -16,8 +16,8 @@ import {
 import { Organization } from "@/types/api";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { useAuth } from "@/context/AuthContext";
-import { requestMembership } from "@/api/organizations";
-import { followEntity, unfollowEntity, isFollowing } from "@/api/followers";
+import { requestMembership } from "@/api/organizations/route";
+import { followEntity, unfollowEntity, isFollowing } from "@/api/followers/route";
 import { formatMetricValue } from "@/utils/formatNumber";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";

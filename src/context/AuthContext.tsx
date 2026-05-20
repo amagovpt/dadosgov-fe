@@ -10,7 +10,7 @@ import {
   ReactNode,
 } from "react";
 import { UserRef } from "@/types/api";
-import { fetchCurrentUser } from "@/api/auth";
+import { fetchCurrentUser } from "@/api/auth/route";
 
 interface AuthContextProps {
   user: UserRef | null;

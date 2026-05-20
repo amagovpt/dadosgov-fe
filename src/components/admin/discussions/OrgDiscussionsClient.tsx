@@ -15,7 +15,7 @@ import {
   TableCell,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { fetchOrgDiscussions } from "@/api/discussions-topics";
+import { fetchOrgDiscussions } from "@/api/discussions-topics/route";
 import { Discussion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";

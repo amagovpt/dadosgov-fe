@@ -14,7 +14,7 @@ import {
 import HeroGeneral from "@/components/HeroGeneral";
 import { Pagination } from "@/components/Pagination";
 
-import { fetchPosts } from "@/api/posts";
+import { fetchPosts } from "@/api/posts/route";
 import { Post } from "@/types/api";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";

@@ -18,7 +18,7 @@ import {
   InputPassword,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { fetchCsrfToken, login } from "@/api/auth";
+import { fetchCsrfToken, login } from "@/api/auth/route";
 
 function LoginContent() {
   const searchParams = useSearchParams();

@@ -18,7 +18,7 @@ import {
   ProgressBar,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchMyDatasets } from "@/api/datasets";
+import { fetchMyDatasets } from "@/api/datasets/route";
 import { Dataset } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";

@@ -24,7 +24,7 @@ import {
   fetchHarvesters,
   rejectHarvestSource,
   validateHarvestSource,
-} from "@/api/harvesters";
+} from "@/api/harvesters/route";
 import type { HarvestSource } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import {

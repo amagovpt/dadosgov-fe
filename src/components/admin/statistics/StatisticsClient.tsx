@@ -20,8 +20,8 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { fetchMyDatasets } from "@/api/datasets";
-import { fetchMyReuses } from "@/api/reuses";
+import { fetchMyDatasets } from "@/api/datasets/route";
+import { fetchMyReuses } from "@/api/reuses/route";
 import { Dataset, Reuse } from "@/types/api";
 
 const PAGE_SIZE = 10;

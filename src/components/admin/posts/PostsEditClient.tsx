@@ -20,8 +20,8 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { fetchPost, updatePost, uploadPostImage, deletePost, unpublishPost, publishPost } from "@/api/posts";
-import { suggestTags } from "@/api/search";
+import { fetchPost, updatePost, uploadPostImage, deletePost, unpublishPost, publishPost } from "@/api/posts/route";
+import { suggestTags } from "@/api/search/route";
 import type { Post, PostUpdatePayload, TagSuggestion } from "@/types/api";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import dynamic from "next/dynamic";

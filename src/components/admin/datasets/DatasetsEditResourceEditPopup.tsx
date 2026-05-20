@@ -2,8 +2,8 @@ import React, { useRef, useState } from "react";
 import { Button, InputText, InputTextArea, StatusCard } from "@ama-pt/agora-design-system";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import { replaceResourceFile, updateResource } from "@/api/datasets";
-import { checkUrlReachable } from "@/api/system";
+import { replaceResourceFile, updateResource } from "@/api/datasets/route";
+import { checkUrlReachable } from "@/api/system/route";
 import type { Resource, ResourceType } from "@/types/api";
 import { translateUploadError } from "@/lib/security/translateUploadError";
 

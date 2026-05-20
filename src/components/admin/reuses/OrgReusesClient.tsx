@@ -19,7 +19,7 @@ import {
   Button,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchOrgReuses } from "@/api/organizations";
+import { fetchOrgReuses } from "@/api/organizations/route";
 import { Reuse } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";

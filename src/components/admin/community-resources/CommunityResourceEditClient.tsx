@@ -15,12 +15,12 @@ import {
 import {
   fetchResourceTypes,
   fetchSchemas,
-} from "@/api/datasets";
+} from "@/api/datasets/route";
 import {
   fetchCommunityResource,
   updateCommunityResource,
   deleteCommunityResource,
-} from "@/api/community-resources";
+} from "@/api/community-resources/route";
 import type { CommunityResource, ResourceType } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";

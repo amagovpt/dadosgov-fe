@@ -2,7 +2,7 @@
 
 import { useEffect, useReducer } from "react";
 import type { Organization } from "@/types/api";
-import { fetchOrganization } from "@/api/organizations";
+import { fetchOrganization } from "@/api/organizations/route";
 
 /**
  * Returns the display name for an organization referenced by id or slug.

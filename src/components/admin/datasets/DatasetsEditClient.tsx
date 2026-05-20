@@ -30,11 +30,11 @@ import {
   fetchResourceTypes,
   fetchGranularities,
   fetchSpatialZonesByIds,
-} from "@/api/datasets";
-import { fetchActivity } from "@/api/activity";
-import { requestTransfer } from "@/api/transfers";
-import { fetchDiscussions } from "@/api/discussions-topics";
-import { suggestSpatialZones, suggestTags } from "@/api/search";
+} from "@/api/datasets/route";
+import { fetchActivity } from "@/api/activity/route";
+import { requestTransfer } from "@/api/transfers/route";
+import { fetchDiscussions } from "@/api/discussions-topics/route";
+import { suggestSpatialZones, suggestTags } from "@/api/search/route";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import {
   Dataset,

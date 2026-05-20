@@ -21,8 +21,8 @@ import {
   fetchLicenses,
   fetchGranularities,
   suggestFormats,
-} from "@/api/datasets";
-import { fetchOrganizations } from "@/api/organizations";
+} from "@/api/datasets/route";
+import { fetchOrganizations } from "@/api/organizations/route";
 import {
   searchDatasets,
   searchOrganizations,
@@ -30,7 +30,7 @@ import {
   searchDataservices,
   suggestTags,
   suggestSpatialZones,
-} from "@/api/search";
+} from "@/api/search/route";
 import {
   Dataset,
   Organization,

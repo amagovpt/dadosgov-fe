@@ -12,8 +12,8 @@ import {
   CardExpandable,
 } from "@ama-pt/agora-design-system";
 import { Dataset } from "@/types/api";
-import { fetchDataset } from "@/api/datasets";
-import { followEntity, isFollowing, unfollowEntity } from "@/api/followers";
+import { fetchDataset } from "@/api/datasets/route";
+import { followEntity, isFollowing, unfollowEntity } from "@/api/followers/route";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";

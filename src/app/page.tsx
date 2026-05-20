@@ -1,4 +1,4 @@
-import { fetchHomepageData } from "@/api/system";
+import { fetchHomepageData } from "@/api/system/route";
 import HomeClient from "@/components/home/HomeClient";
 import { getHome } from "@/service/queries/home";
 import { Datastory, UsedDailyBy } from "@/service/types/home";

@@ -30,15 +30,15 @@ import {
   unlinkDatasetFromReuse,
   linkDataserviceToReuse,
   uploadReuseImage,
-} from "@/api/reuses";
-import { fetchDataset, fetchMyDatasets } from "@/api/datasets";
+} from "@/api/reuses/route";
+import { fetchDataset, fetchMyDatasets } from "@/api/datasets/route";
 import {
   fetchActivity,
-} from "@/api/activity";
-import { requestTransfer } from "@/api/transfers";
-import { fetchOrgDatasets } from "@/api/organizations";
-import { fetchDiscussions } from "@/api/discussions-topics";
-import { searchDatasets, suggestTags } from "@/api/search";
+} from "@/api/activity/route";
+import { requestTransfer } from "@/api/transfers/route";
+import { fetchOrgDatasets } from "@/api/organizations/route";
+import { fetchDiscussions } from "@/api/discussions-topics/route";
+import { searchDatasets, suggestTags } from "@/api/search/route";
 import { useAuth } from "@/context/AuthContext";
 import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
 import {

@@ -33,12 +33,12 @@ import {
   fetchMyDatasets,
   fetchResourceTypes,
   fetchAllowedExtensions,
-} from "@/api/datasets";
+} from "@/api/datasets/route";
 import {
   fetchOrgContactPoints,
   createContactPoint,
-} from "@/api/organizations";
-import { suggestSpatialZones, suggestTags } from "@/api/search";
+} from "@/api/organizations/route";
+import { suggestSpatialZones, suggestTags } from "@/api/search/route";
 import {
   License,
   Frequency,

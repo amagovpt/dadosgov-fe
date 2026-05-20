@@ -20,7 +20,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { fetchAdminPosts } from "@/api/posts";
+import { fetchAdminPosts } from "@/api/posts/route";
 import { Post } from "@/types/api";
 
 type SortOrder = "none" | "ascending" | "descending";

@@ -44,12 +44,12 @@ import rehypeSanitize from "rehype-sanitize";
 import {
   fetchOrgDatasets,
   fetchOrgReuses,
-} from "@/api/organizations";
+} from "@/api/organizations/route";
 import {
   fetchOrgDiscussions,
   createDiscussion,
   replyToDiscussion,
-} from "@/api/discussions-topics";
+} from "@/api/discussions-topics/route";
 import { useAuth } from "@/context/AuthContext";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";

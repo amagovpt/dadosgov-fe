@@ -16,8 +16,8 @@ import {
   AccordionGroup,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { createOrganization, uploadOrgLogo } from "@/api/organizations";
-import { suggestOrganizations } from "@/api/search";
+import { createOrganization, uploadOrgLogo } from "@/api/organizations/route";
+import { suggestOrganizations } from "@/api/search/route";
 import type { OrganizationSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";

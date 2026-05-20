@@ -24,8 +24,8 @@ import {
   fetchOrgMetrics,
   fetchOrgReuses,
   fetchOrganization,
-} from "@/api/organizations";
-import { fetchOrgDataservices } from "@/api/dataservices";
+} from "@/api/organizations/route";
+import { fetchOrgDataservices } from "@/api/dataservices/route";
 import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 

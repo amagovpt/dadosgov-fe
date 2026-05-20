@@ -15,7 +15,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { fetchAllCommunityResources } from "@/api/community-resources";
+import { fetchAllCommunityResources } from "@/api/community-resources/route";
 import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 

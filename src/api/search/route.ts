@@ -9,8 +9,8 @@ import {
   UserSuggestion,
 } from "@/types/api";
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
-import { searchDataservices } from "@/api/dataservices";
-import { suggestOrganizations } from "@/api/organizations";
+import { searchDataservices } from "@/api/dataservices/route";
+import { suggestOrganizations } from "@/api/organizations/route";
 
 const API_BASE_URL = getApiBaseUrl(1);
 const API_AUTH_URL = getAuthApiBaseUrl();

@@ -21,11 +21,11 @@ import {
   updateHomeFeaturedDatasets,
   fetchHomeFeaturedReuses,
   updateHomeFeaturedReuses,
-} from "@/api/system";
+} from "@/api/system/route";
 import {
   searchDatasets,
   searchReuses,
-} from "@/api/search";
+} from "@/api/search/route";
 import type { Dataset, Reuse } from "@/types/api";
 import { formatMetricValue } from "@/utils/formatNumber";
 
