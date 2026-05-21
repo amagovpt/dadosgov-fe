@@ -24,12 +24,10 @@ import { Reuse } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import TextLink from "@/components/Primitives/TextLink";
-import AppIcon from "@/components/Primitives/AppIcon";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -131,22 +129,13 @@ export default function OrgReusesClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            { label: "Reutilizações", url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Reutilizações</h1>
-        <PublishDropdown />
-      </div>
-
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: orgName || "Organização", url: "#" },
+      { label: "Reutilizações", url: "#" },
+    ]}
+      title="Reutilizações"
+    >
       <p className="text-sm mb-16 text-neutral-700">{reuses.length} resultados</p>
 
       <div className="mb-24 flex items-end gap-16">
@@ -294,6 +283,6 @@ export default function OrgReusesClient() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
@@ -15,11 +14,11 @@ import {
   TableCell,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -102,7 +101,9 @@ export default function SystemOrganizationsClient() {
   }, [currentPage, pageSize, searchQuery, sortField, sortOrder]);
 
   useEffect(() => {
-    loadData();
+    void (async () => {
+      await loadData();
+    })();
   }, [loadData]);
 
   const handleSearch = (value: string) => {
@@ -150,22 +151,13 @@ export default function SystemOrganizationsClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Organizações", url: "/pages/admin/system/organizations" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Organizações</h1>
-        <PublishDropdown />
-      </div>
-
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: "Sistema", url: "#" },
+      { label: "Organizações", url: "/pages/admin/system/organizations" },
+    ]}
+      title="Organizações"
+    >
       <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
       <div className="mb-24 flex items-end gap-16">
@@ -257,6 +249,6 @@ export default function SystemOrganizationsClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

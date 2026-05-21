@@ -18,14 +18,13 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
-import TextLink from "@/components/Primitives/TextLink";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import TextLink from "@/components/Primitives/TextLink";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created" | "last_update";
@@ -97,7 +96,9 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
 
   useEffect(() => {
     const sort = buildSortParam(sortField, sortOrder);
-    loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
+    void (async () => {
+      await loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
+    })();
   }, [currentPage, itemsPerPage, searchQuery, statusFilter, sortField, sortOrder, loadDatasets]);
 
   const handleSearch = (value: string) => {
@@ -125,21 +126,16 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            { label: "Conjuntos de dados", url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Conjuntos de dados</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={
+        [
+          { label: "Administração", url: "/pages/admin" },
+          { label: orgName || "Organização", url: "#" },
+          { label: "Conjuntos de dados", url: "#" },
+        ]
+      }
+      title="Conjuntos de dados"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">{total} resultados</p>
 
@@ -304,6 +300,6 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }

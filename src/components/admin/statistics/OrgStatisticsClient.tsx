@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  Breadcrumb,
   Button,
   CardFrame,
   CardNoResults,
@@ -27,7 +26,7 @@ import {
   fetchOrganization,
 } from "@/services/api";
 import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
@@ -140,21 +139,14 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: org?.name || "Organização", url: "#" },
-            { label: "Estatísticas", url: "/pages/admin/org/statistics" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Estatísticas</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: org?.name || "Organização", url: "#" },
+        { label: "Estatísticas", url: "/pages/admin/org/statistics" },
+      ]}
+      title="Estatísticas"
+    >
 
       <Tabs>
         <Tab active>
@@ -502,6 +494,6 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }

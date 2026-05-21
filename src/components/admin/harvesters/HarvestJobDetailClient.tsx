@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Breadcrumb,
   Icon,
   InputSelect,
   InputSearchBar,
@@ -17,6 +16,7 @@ import {
   CardNoResults,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchHarvestJob, fetchHarvester } from "@/services/api";
@@ -146,22 +146,16 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
         : "informative";
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Reapers", url: "/pages/admin/system/harvesters" },
-            {
-              label: source?.name || "Harvester",
-              url: `/pages/admin/harvesters/${slug}`,
-            },
-            { label: job.id.toUpperCase(), url: "#" },
-          ]}
-        />
-      </div>
-
-      <h1 className="text-2xl mb-16 mt-16 font-bold text-neutral-900">{job.id.toUpperCase()}</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Reapers", url: "/pages/admin/system/harvesters" },
+        { label: source?.name || "Harvester", url: `/pages/admin/harvesters/${slug}` },
+        { label: job.id.toUpperCase() },
+      ]}
+      title={job.id.toUpperCase()}
+      headerAction={null}
+    >
 
       {/* Metadata */}
       <div className="text-sm mb-24 flex flex-col gap-8 text-neutral-800">
@@ -345,6 +339,6 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

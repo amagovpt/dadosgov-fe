@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   Table,
@@ -18,7 +17,7 @@ import {
 import { fetchOrgDiscussions } from "@/services/api";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { Discussion } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
@@ -105,21 +104,14 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            { label: "Discussões", url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Discussões</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Discussões" },
+      ]}
+      title="Discussões"
+    >
 
       {isLoading ? (
         <p>A carregar...</p>
@@ -206,6 +198,6 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
 
         </>
       )}
-    </div>
+    </AdminLayout>
   );
 }

@@ -9,7 +9,6 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
@@ -23,6 +22,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import Link from "next/link";
 
 function DeleteUserPopupContent({
@@ -222,18 +222,15 @@ export default function UserProfileClient() {
     : "";
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Utilizadores", url: "/pages/admin/system/users" },
-            { label: displayName || "...", url: "#" },
-          ]}
-        />
-      </div>
-
-      <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Utilizadores", url: "/pages/admin/system/users" },
+        { label: displayName || "..." },
+      ]}
+      title="Perfil"
+      headerAction={null}
+    >
 
       <div className="profile-card">
         <Avatar
@@ -680,6 +677,6 @@ export default function UserProfileClient() {
           </Tab>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

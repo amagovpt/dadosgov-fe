@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   InputSearchBar,
@@ -19,7 +18,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchMyCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -105,21 +104,14 @@ export default function CommunityResourcesClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Recursos comunitários</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: displayName || "...", url: "#" },
+        { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
+      ]}
+      title="Recursos comunitários"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">
         {isLoading ? "A carregar..." : `${totalItems} resultados`}
@@ -250,6 +242,6 @@ export default function CommunityResourcesClient() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }

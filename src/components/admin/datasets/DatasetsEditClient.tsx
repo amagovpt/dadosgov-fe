@@ -14,7 +14,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 
 import { format } from "date-fns";
@@ -851,19 +851,14 @@ export default function DatasetsEditClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
-            { label: dataset.title, url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">{dataset.title}</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
+        { label: dataset.title },
+      ]}
+      title={dataset.title}
+      headerAction={
         <Button
           variant="primary"
           appearance="outline"
@@ -874,7 +869,8 @@ export default function DatasetsEditClient() {
             Ver página pública
           </span>
         </Button>
-      </div>
+      }
+    >
 
       {apiError && (
         <div className="my-24">
@@ -1158,6 +1154,6 @@ export default function DatasetsEditClient() {
           </Tab>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

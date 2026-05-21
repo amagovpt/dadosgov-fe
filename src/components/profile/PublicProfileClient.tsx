@@ -188,7 +188,7 @@ export default function PublicProfileClient() {
 
   return (
     <div className="container mx-auto mb-64">
-      <div className="admin-page__breadcrumb">
+      <div className="pb-64">
         <Breadcrumb
           items={[
             { label: "Início", url: "/" },
@@ -197,7 +197,7 @@ export default function PublicProfileClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
+      <h1 className="text-2xl-bold text-brand-blue-secondary mt-64 mb-32 max-w-[696px]">Perfil</h1>
 
       {/* Profile Card */}
       <div className="profile-card">
@@ -344,8 +344,8 @@ export default function PublicProfileClient() {
                       children: org.metrics?.views
                         ? org.metrics.views >= 1000000
                           ? (org.metrics.views / 1000000)
-                              .toFixed(1)
-                              .replace(".", ",") + " M"
+                            .toFixed(1)
+                            .replace(".", ",") + " M"
                           : org.metrics.views >= 1000
                             ? (org.metrics.views / 1000).toFixed(0) + " mil"
                             : String(org.metrics.views)

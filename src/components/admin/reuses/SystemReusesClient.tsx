@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   InputSelect,
@@ -19,7 +18,7 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -105,21 +104,14 @@ export default function SystemReusesClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Reutilizações", url: "/pages/admin/system/reuses" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Reutilizações</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Reutilizações", url: "/pages/admin/system/reuses" },
+      ]}
+      title="Reutilizações"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
@@ -236,6 +228,6 @@ export default function SystemReusesClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

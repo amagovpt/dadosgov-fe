@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   Table,
@@ -16,7 +15,7 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDiscussions } from "@/services/api";
 import { Discussion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import AppIcon from "@/components/Primitives/AppIcon";
 
@@ -58,21 +57,14 @@ export default function DiscussionsClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: activeOrg?.name || "Organização", url: "#" },
-            { label: "Discussões", url: "/pages/admin/org/discussions" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Discussões</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: activeOrg?.name || "Organização", url: "#" },
+        { label: "Discussões", url: "/pages/admin/org/discussions" },
+      ]}
+      title="Discussões"
+    >
 
       {discussions.length === 0 ? (
         <div className="datasets-page__body">
@@ -184,6 +176,6 @@ export default function DiscussionsClient() {
           </div>
         </>
       )}
-    </div>
+    </AdminLayout>
   );
 }

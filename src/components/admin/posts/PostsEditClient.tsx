@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   DropdownSection,
   DropdownOption,
@@ -19,6 +18,7 @@ import {
   Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchPost, updatePost, uploadPostImage, suggestTags, deletePost, unpublishPost, publishPost } from "@/services/api";
 import type { Post, PostUpdatePayload, TagSuggestion } from "@/types/api";
@@ -350,35 +350,26 @@ export default function PostsEditClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Bem-vindo", url: "/pages/admin" },
-            { label: "Artigos", url: "/pages/admin/system/posts" },
-            { label: post.name, url: "#" },
-          ]}
-        />
-      </div>
-
-      <div
-        className="admin-page__header"
-        style={{ flexDirection: "column", alignItems: "flex-start" }}
-      >
-        <div className="flex justify-end w-full">
-          <Button
-            variant="primary"
-            appearance="outline"
-            onClick={() => window.open(`/pages/posts/${post.slug}`, "_blank")}
-          >
-            <span className="admin-edit-info__btn-content">
-              <Icon name="agora-line-eye" className="w-16 h-16" />
-              Veja a página do artigo
-            </span>
-          </Button>
-        </div>
-        <h1 className="admin-page__title">{post.name}</h1>
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Bem-vindo", url: "/pages/admin" },
+        { label: "Artigos", url: "/pages/admin/system/posts" },
+        { label: post.name },
+      ]}
+      title={post.name}
+      headerAction={
+        <Button
+          variant="primary"
+          appearance="outline"
+          onClick={() => window.open(`/pages/posts/${post.slug}`, "_blank")}
+        >
+          <span className="admin-edit-info__btn-content">
+            <Icon name="agora-line-eye" className="w-16 h-16" />
+            Veja a página do artigo
+          </span>
+        </Button>
+      }
+    >
 
       {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
       {apiSuccess && <StatusCard variant="success" showIcon description={apiSuccess} />}
@@ -712,6 +703,6 @@ export default function PostsEditClient() {
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  Breadcrumb,
   Button,
   CardFrame,
   CardNoResults,
@@ -20,6 +19,7 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { fetchMyDatasets, fetchMyReuses } from "@/services/api";
 import { Dataset, Reuse } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
@@ -73,18 +73,15 @@ export default function StatisticsClient() {
   }, [reusesPage]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Estatísticas", url: "/pages/admin/me/statistics" },
-          ]}
-        />
-      </div>
-
-      <h1 className="admin-page__title mb-16 mt-64">Estatísticas</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: displayName || "...", url: "#" },
+        { label: "Estatísticas", url: "/pages/admin/me/statistics" },
+      ]}
+      title="Estatísticas"
+      headerAction={null}
+    >
 
       <Tabs>
         <Tab active>
@@ -283,6 +280,6 @@ export default function StatisticsClient() {
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }
