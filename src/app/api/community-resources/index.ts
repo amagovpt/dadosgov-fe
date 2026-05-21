@@ -1,10 +1,10 @@
 import { translateUploadError } from "@/lib/security/translateUploadError";
-import {
-  APIResponse,
+import type {
   CommunityResource,
   CommunityResourceCreatePayload,
   CommunityResourceUpdatePayload,
-} from "@/service/types/api";
+} from '@/service/types/community-resource';
+import type { APIResponse } from '@/service/types/shared/core';
 import { authFetch, getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -208,3 +208,4 @@ export async function fetchOrgCommunityResources(
     };
   }
 }
+

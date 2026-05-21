@@ -1,6 +1,6 @@
 import { translateUploadError } from "@/lib/security/translateUploadError";
-import {
-  APIResponse,
+import type { APIResponse } from '@/service/types/shared/core';
+import type {
   Reuse,
   ReuseCreatePayload,
   ReuseFilters,
@@ -8,7 +8,7 @@ import {
   ReuseTopic,
   ReuseType,
   ReuseUpdatePayload,
-} from "@/service/types/api";
+} from '@/service/types/reuse';
 import { authFetch, getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -292,3 +292,4 @@ export async function unfollowReuse(id: string): Promise<void> {
   });
   if (!res.ok) throw new Error(`Failed to unfollow reuse: ${res.statusText}`);
 }
+

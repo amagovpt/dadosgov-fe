@@ -26,7 +26,10 @@ import {
   fetchOrganization,
 } from "@/app/api/organizations";
 import { fetchOrgDataservices } from "@/app/api/dataservices";
-import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/service/types/api";
+import type { Dataservice } from '@/service/types/dataservice';
+import type { Dataset } from '@/service/types/dataset';
+import type { Organization, OrganizationMetrics } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import PublishDropdown from "@/components/admin/PublishDropdown";
 
 interface OrgStatisticsClientProps {

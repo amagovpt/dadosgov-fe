@@ -1,13 +1,9 @@
-import {
-  APIResponse,
-  Dataset,
-  GlobalSearchSuggestion,
-  Organization,
-  Reuse,
-  SpatialZone,
-  TagSuggestion,
-  UserSuggestion,
-} from "@/service/types/api";
+import type { SpatialZone, TagSuggestion } from '@/service/types/catalog';
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Dataset } from '@/service/types/dataset';
+import type { Organization, UserSuggestion } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
+import type { GlobalSearchSuggestion } from '@/service/types/search';
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 import { searchDataservices } from "@/app/api/dataservices";
 import { suggestOrganizations } from "@/app/api/organizations";
@@ -169,3 +165,4 @@ export async function suggestSpatialZones(
     return [];
   }
 }
+

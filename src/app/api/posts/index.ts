@@ -1,9 +1,5 @@
-import {
-  APIResponse,
-  Post,
-  PostCreatePayload,
-  PostUpdatePayload,
-} from "@/service/types/api";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Post, PostCreatePayload, PostUpdatePayload } from '@/service/types/posts';
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -236,3 +232,4 @@ export async function uploadPostImage(
     return null;
   }
 }
+

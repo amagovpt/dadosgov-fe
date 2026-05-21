@@ -1,4 +1,5 @@
-import { APIResponse, Report, ReportCreatePayload, ReportReason } from "@/service/types/api";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Report, ReportCreatePayload, ReportReason } from '@/service/types/notifications-reporting';
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -79,3 +80,4 @@ export async function dismissReport(id: string): Promise<Report> {
 
   return await res.json();
 }
+

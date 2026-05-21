@@ -1,5 +1,5 @@
 import apolloClient from "@/service/utils/apollo-client";
-import { Home } from "@/service/types/home/home";
+import { Home } from "@/service/types/home";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 

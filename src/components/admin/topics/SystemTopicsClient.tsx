@@ -14,7 +14,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchTopics } from "@/app/api/discussions-topics";
-import { Topic } from "@/service/types/api";
+import type { Topic } from '@/service/types/topic';
 
 const formatDate = (dateStr: string) => {
   try {

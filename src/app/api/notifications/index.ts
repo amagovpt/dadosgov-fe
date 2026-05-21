@@ -1,4 +1,5 @@
-import { APIResponse, Notification } from "@/service/types/api";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Notification } from '@/service/types/notifications-reporting';
 import { getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_AUTH_URL = getAuthApiBaseUrl();
@@ -39,3 +40,4 @@ export async function markNotificationRead(id: string): Promise<Notification> {
 
   return await res.json();
 }
+

@@ -7,7 +7,8 @@ import {
   suggestFormats,
 } from "@/app/api/datasets";
 import { suggestSpatialZones, suggestTags } from "@/app/api/search";
-import { Frequency, Granularity, License, Organization } from "@/service/types/api";
+import type { Frequency, Granularity, License } from '@/service/types/catalog';
+import type { Organization } from '@/service/types/identity';
 import {
   AdvancedFilterGroup,
   AdvancedFiltersSidebar,

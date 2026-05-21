@@ -13,7 +13,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import { fetchSystemLogContent, fetchSystemLogs } from "@/app/api/system";
-import { SystemLogContent, SystemLogFile } from "@/service/types/api";
+import type { SystemLogContent, SystemLogFile } from '@/service/types/transfer-system';
 
 const AUTO_REFRESH_MS = 10_000;
 

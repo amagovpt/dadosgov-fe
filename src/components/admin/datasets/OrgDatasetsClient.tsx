@@ -17,7 +17,7 @@ import {
 
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDatasets } from "@/app/api/organizations";
-import { Dataset } from "@/service/types/api";
+import type { Dataset } from '@/service/types/dataset';
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dropdown } from "@/components/Primitives/Dropdown";

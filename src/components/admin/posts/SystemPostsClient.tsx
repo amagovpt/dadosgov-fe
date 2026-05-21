@@ -21,7 +21,7 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchAdminPosts } from "@/app/api/posts";
-import { Post } from "@/service/types/api";
+import type { Post } from '@/service/types/posts';
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "name" | "created_at" | "last_modified";

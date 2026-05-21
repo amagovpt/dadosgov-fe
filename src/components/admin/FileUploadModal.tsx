@@ -20,7 +20,7 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import { ResourceType } from "@/service/types/api";
+import type { ResourceType } from '@/service/types/catalog';
 
 export interface PendingResourceMeta {
   title: string;

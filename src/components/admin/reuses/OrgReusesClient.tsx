@@ -20,7 +20,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgReuses } from "@/app/api/organizations";
-import { Reuse } from "@/service/types/api";
+import type { Reuse } from '@/service/types/reuse';
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";

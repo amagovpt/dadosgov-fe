@@ -15,10 +15,10 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { createPost, uploadPostImage, publishPost } from "@/app/api/posts";
 import { suggestTags } from "@/app/api/search";
-import type { TagSuggestion } from "@/service/types/api";
+import type { TagSuggestion } from '@/service/types/catalog';
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import type { PostCreatePayload } from "@/service/types/api";
+import type { PostCreatePayload } from '@/service/types/posts';
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 
 export default function PostsNewClient() {

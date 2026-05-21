@@ -29,14 +29,11 @@ import {
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";
 import DeleteDiscussionPopup from "@/components/discussions/DeleteDiscussionPopup";
-import {
-  Organization,
-  Dataset,
-  Reuse,
-  Discussion,
-  DiscussionCreatePayload,
-  APIResponse,
-} from "@/service/types/api";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Dataset } from '@/service/types/dataset';
+import type { Discussion, DiscussionCreatePayload } from '@/service/types/discussion';
+import type { Organization } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";

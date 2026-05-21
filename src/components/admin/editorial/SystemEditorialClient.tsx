@@ -26,7 +26,8 @@ import {
   searchDatasets,
   searchReuses,
 } from "@/app/api/search";
-import type { Dataset, Reuse } from "@/service/types/api";
+import type { Dataset } from '@/service/types/dataset';
+import type { Reuse } from '@/service/types/reuse';
 import { formatMetricValue } from "@/utils/formatNumber";
 
 // ─── Block types & definitions ───────────────────────────────────────────────

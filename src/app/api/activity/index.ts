@@ -1,4 +1,5 @@
-import { Activity, APIResponse } from "@/service/types/api";
+import type { Activity } from '@/service/types/catalog';
+import type { APIResponse } from '@/service/types/shared/core';
 import { getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_AUTH_URL = getAuthApiBaseUrl();
@@ -27,3 +28,4 @@ export async function fetchActivity(
     };
   }
 }
+

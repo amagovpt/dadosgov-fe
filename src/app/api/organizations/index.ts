@@ -1,13 +1,8 @@
 import { translateUploadError } from "@/lib/security/translateUploadError";
-import {
-  APIResponse,
-  ContactPoint,
-  ContactPointCreatePayload,
-  Dataset,
+import type { APIResponse } from '@/service/types/shared/core';
+import type { ContactPoint, ContactPointCreatePayload, Dataset } from '@/service/types/dataset';
+import type {
   MembershipRequest,
-  OrgBadges,
-  OrgInvitation,
-  OrgRole,
   Organization,
   OrganizationCreatePayload,
   OrganizationFilters,
@@ -15,8 +10,11 @@ import {
   OrganizationMetrics,
   OrganizationSuggestion,
   OrganizationUpdatePayload,
-  Reuse,
-} from "@/service/types/api";
+  OrgBadges,
+  OrgInvitation,
+  OrgRole,
+} from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -453,3 +451,4 @@ export async function fetchOrgMetrics(
     };
   }
 }
+

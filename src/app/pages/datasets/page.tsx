@@ -5,7 +5,7 @@ import {
   fetchLicenses,
 } from "@/app/api/datasets";
 import { fetchOrganizations } from "@/app/api/organizations";
-import { DatasetFilters } from '@/service/types/api';
+import type { DatasetFilters } from '@/service/types/dataset';
 import DatasetsClient from '@/components/datasets/DatasetsClient';
 
 export const dynamic = 'force-dynamic';

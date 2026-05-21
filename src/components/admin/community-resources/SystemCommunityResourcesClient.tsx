@@ -16,7 +16,7 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchAllCommunityResources } from "@/app/api/community-resources";
-import { CommunityResource } from "@/service/types/api";
+import type { CommunityResource } from '@/service/types/community-resource';
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 
 type SortOrder = "none" | "ascending" | "descending";

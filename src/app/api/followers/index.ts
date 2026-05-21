@@ -1,10 +1,10 @@
-import {
-  APIResponse,
+import type { APIResponse } from '@/service/types/shared/core';
+import type {
   Follow,
   FollowableEntityType,
   FollowResponse,
   UserFollowing,
-} from "@/service/types/api";
+} from '@/service/types/identity';
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -167,3 +167,4 @@ export async function isFollowing(
     return false;
   }
 }
+

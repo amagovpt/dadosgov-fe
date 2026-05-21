@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchCurrentUser } from "@/app/api/auth";
-import { UserRef } from "@/service/types/api";
+import type { UserRef } from '@/service/types/identity';
 
 export function useCurrentUser() {
   const [user, setUser] = useState<UserRef | null>(null);

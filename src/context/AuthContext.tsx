@@ -9,7 +9,7 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { UserRef } from "@/service/types/api";
+import type { UserRef } from '@/service/types/identity';
 import { fetchCurrentUser } from "@/app/api/auth";
 
 interface AuthContextProps {

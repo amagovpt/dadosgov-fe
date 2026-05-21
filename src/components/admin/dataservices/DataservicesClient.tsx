@@ -19,7 +19,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchMyDataservices } from "@/app/api/dataservices";
-import { Dataservice } from "@/service/types/api";
+import type { Dataservice } from '@/service/types/dataservice';
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";

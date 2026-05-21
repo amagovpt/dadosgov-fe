@@ -36,18 +36,17 @@ import { requestTransfer } from "@/app/api/transfers";
 import { fetchDiscussions } from "@/app/api/discussions-topics";
 import { suggestSpatialZones, suggestTags } from "@/app/api/search";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
-import {
-  Dataset,
-  License,
+import type {
+  Activity,
   Frequency,
   Granularity,
+  License,
+  ResourceType,
   SpatialZone,
   TagSuggestion,
-  Activity,
-  Resource,
-  ResourceType,
-  Discussion,
-} from "@/service/types/api";
+} from '@/service/types/catalog';
+import type { Dataset, Resource } from '@/service/types/dataset';
+import type { Discussion } from '@/service/types/discussion';
 import DeleteResourcePopup from "@/components/admin/datasets/DeleteResourcePopup";
 import DatasetsEditDeletePopup from "@/components/admin/datasets/DatasetsEditDeletePopup";
 import DatasetsEditResourceDetailPopup from "@/components/admin/datasets/DatasetsEditResourceDetailPopup";

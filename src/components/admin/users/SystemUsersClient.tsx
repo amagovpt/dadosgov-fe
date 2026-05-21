@@ -18,7 +18,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchUsers } from "@/app/api/users";
-import { UserAdmin } from "@/service/types/api";
+import type { UserAdmin } from '@/service/types/identity';
 
 type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
 type SortOrder = "ascending" | "descending" | "none";

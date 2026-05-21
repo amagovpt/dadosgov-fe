@@ -1,5 +1,5 @@
 import apolloClient from "@/service/utils/apollo-client";
-import { MiniCourseDetail } from "@/service/types/courses/courses";
+import { MiniCourseDetail } from "@/service/types/courses";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 

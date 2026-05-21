@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@ama-pt/agora-design-system";
 import { suggestTags } from "@/app/api/search";
-import { Datastories } from "@/service/types/datastories/datastories";
+import { Datastories } from "@/service/types/datastories";
 import { DataStoriesFilterState, DataStoriesToggleState } from "@/service/types/datastories/filters";
 import {
   AdvancedFilterGroup,

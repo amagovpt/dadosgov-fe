@@ -1,4 +1,4 @@
-import { GeoLevel } from "@/service/types/api";
+import type { GeoLevel } from '@/service/types/catalog';
 import { getApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -26,3 +26,4 @@ export async function fetchGeoLevels(): Promise<GeoLevel[]> {
     return [];
   }
 }
+

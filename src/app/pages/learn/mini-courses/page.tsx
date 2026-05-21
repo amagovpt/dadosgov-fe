@@ -3,7 +3,7 @@ import HeroCourses from '@/components/Learn/Hero';
 import apolloClient from '@/service/utils/apollo-client';
 import { flattenData } from '@/utils/flattenObject';
 import { getMiniCoursesPages } from '@/service/queries/courses/minicourses';
-import { PageMiniCourses } from '@/service/types/courses/courses';
+import { PageMiniCourses } from '@/service/types/courses';
 import { getAssets } from '@/utils/getAssets';
 import MiniCoursesSearchInput from '@/components/Learn/MiniCoursesSearchInput';
 import MiniCoursesResult from '@/components/Learn/mini-courses/MiniCoursesResult';

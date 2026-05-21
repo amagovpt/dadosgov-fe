@@ -18,7 +18,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchDataservices } from "@/app/api/dataservices";
-import { Dataservice } from "@/service/types/api";
+import type { Dataservice } from '@/service/types/dataservice';
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 

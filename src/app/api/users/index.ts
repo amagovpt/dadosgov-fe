@@ -1,13 +1,13 @@
 import { translateUploadError } from "@/lib/security/translateUploadError";
-import {
-  Activity,
-  APIResponse,
+import type { Activity } from '@/service/types/catalog';
+import type { APIResponse } from '@/service/types/shared/core';
+import type {
   UserAdmin,
   UserAdminUpdatePayload,
   UserPublic,
   UserRole,
   UserUpdatePayload,
-} from "@/service/types/api";
+} from '@/service/types/identity';
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -226,3 +226,4 @@ export async function fetchUserActivity(
     };
   }
 }
+

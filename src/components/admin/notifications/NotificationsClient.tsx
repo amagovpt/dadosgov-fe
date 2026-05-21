@@ -10,10 +10,7 @@ import {
   Icon,
 } from "@ama-pt/agora-design-system";
 import { fetchNotifications, markNotificationRead } from "@/app/api/notifications";
-import type {
-  Notification,
-  ValidateHarvesterNotificationDetails,
-} from "@/service/types/api";
+import type { Notification, ValidateHarvesterNotificationDetails } from '@/service/types/notifications-reporting';
 import {
   harvesterValidationLink,
   isHarvesterValidation,

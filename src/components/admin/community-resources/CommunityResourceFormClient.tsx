@@ -24,7 +24,9 @@ import {
   createCommunityResource,
   uploadCommunityResourceFile,
 } from "@/app/api/community-resources";
-import type { Dataset, CommunityResource, ResourceType } from "@/service/types/api";
+import type { ResourceType } from '@/service/types/catalog';
+import type { CommunityResource } from '@/service/types/community-resource';
+import type { Dataset } from '@/service/types/dataset';
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";

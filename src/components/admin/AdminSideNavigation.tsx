@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { fetchOrganization } from "@/app/api/organizations";
-import { Organization } from "@/service/types/api";
+import type { Organization } from '@/service/types/identity';
 
 interface NavChild {
   label: string;

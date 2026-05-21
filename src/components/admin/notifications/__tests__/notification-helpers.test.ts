@@ -4,7 +4,7 @@ import {
   harvesterValidationLink,
   isHarvesterValidation,
 } from "../notification-helpers";
-import type { Notification } from "@/service/types/api";
+import type { Notification } from '@/service/types/notifications-reporting';
 
 const harvesterDetails = {
   source: { id: "abc", name: "Test source", slug: "test-source" },

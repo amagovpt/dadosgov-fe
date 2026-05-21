@@ -31,14 +31,11 @@ import {
   suggestTags,
   suggestSpatialZones,
 } from "@/app/api/search";
-import {
-  Dataset,
-  Organization,
-  Reuse,
-  Dataservice,
-  License,
-  Granularity,
-} from "@/service/types/api";
+import type { License, Granularity } from '@/service/types/catalog';
+import type { Dataservice } from '@/service/types/dataservice';
+import type { Dataset } from '@/service/types/dataset';
+import type { Organization } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";
 

@@ -21,7 +21,8 @@ import {
   updateCommunityResource,
   deleteCommunityResource,
 } from "@/app/api/community-resources";
-import type { CommunityResource, ResourceType } from "@/service/types/api";
+import type { ResourceType } from '@/service/types/catalog';
+import type { CommunityResource } from '@/service/types/community-resource';
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import AuxiliarList from "@/components/admin/AuxiliarList";

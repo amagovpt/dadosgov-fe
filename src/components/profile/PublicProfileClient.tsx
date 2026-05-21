@@ -18,7 +18,9 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import { Dataset, Reuse, Follow, UserFollowing, UserPublic } from "@/service/types/api";
+import type { Dataset } from '@/service/types/dataset';
+import type { Follow, UserFollowing, UserPublic } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import {
   fetchDatasets,
   fetchMyDatasets,

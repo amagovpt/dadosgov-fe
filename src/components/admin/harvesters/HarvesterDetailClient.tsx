@@ -48,7 +48,7 @@ import {
   RejectHarvesterPopupContent,
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
-import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/service/types/api";
+import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from '@/service/types/harvester';
 
 interface HarvesterDetailClientProps {
   slug: string;

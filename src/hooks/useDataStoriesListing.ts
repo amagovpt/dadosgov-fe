@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Datastories } from "@/service/types/datastories/datastories";
+import { Datastories } from "@/service/types/datastories";
 import { DataStoriesFilterState } from "@/service/types/datastories/filters";
 import { useListingUrlState } from "@/hooks/useListingUrlState";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";

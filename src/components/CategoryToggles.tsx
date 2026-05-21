@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Toggle, Pill } from '@ama-pt/agora-design-system';
-import { SiteMetrics } from '@/service/types/api';
+import type { SiteMetrics } from '@/service/types/shared/site-metrics';
 import { fetchDatasets } from "@/app/api/datasets";
 import { fetchReuses } from "@/app/api/reuses";
 import { fetchOrganizations } from "@/app/api/organizations";

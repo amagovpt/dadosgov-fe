@@ -1,21 +1,23 @@
-import {
-  APIResponse,
-  Dataset,
-  DatasetSuggestion,
-  DatasetCreatePayload,
-  DatasetFilters,
-  DatasetUpdatePayload,
+import type {
   DatasetBadges,
-  Frequency,
   FormatSuggestion,
+  Frequency,
   Granularity,
   License,
+  ResourceType,
+  SpatialZone,
+} from '@/service/types/catalog';
+import type { APIResponse } from '@/service/types/shared/core';
+import type {
+  Dataset,
+  DatasetCreatePayload,
+  DatasetFilters,
+  DatasetSuggestion,
+  DatasetUpdatePayload,
   Resource,
   ResourceCreatePayload,
-  ResourceType,
   ResourceUpdatePayload,
-  SpatialZone,
-} from "@/service/types/api";
+} from '@/service/types/dataset';
 import { translateUploadError } from "@/lib/security/translateUploadError";
 import { authFetch, getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
@@ -547,3 +549,4 @@ export async function suggestDatasets(
     return [];
   }
 }
+

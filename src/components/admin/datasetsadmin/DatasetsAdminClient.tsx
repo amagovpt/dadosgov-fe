@@ -39,17 +39,15 @@ import {
   createContactPoint,
 } from "@/app/api/organizations";
 import { suggestSpatialZones, suggestTags } from "@/app/api/search";
-import {
-  License,
+import type {
   Frequency,
   Granularity,
-  SpatialZone,
-  Dataset,
-  TagSuggestion,
-  ContactPoint,
+  License,
   ResourceType,
-  DatasetUpdatePayload,
-} from "@/service/types/api";
+  SpatialZone,
+  TagSuggestion,
+} from '@/service/types/catalog';
+import type { Dataset, ContactPoint, DatasetUpdatePayload } from '@/service/types/dataset';
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";

@@ -1,10 +1,10 @@
 import { translateUploadError } from "@/lib/security/translateUploadError";
-import {
+import type {
   ApiToken,
   ApiTokenCreated,
   UserMetrics,
   UserPublic,
-} from "@/service/types/api";
+} from '@/service/types/identity';
 import { getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_AUTH_URL = getAuthApiBaseUrl();
@@ -131,3 +131,4 @@ export async function fetchMyMetrics(): Promise<UserMetrics> {
   if (!res.ok) throw new Error(`Failed to fetch user metrics: ${res.statusText}`);
   return await res.json();
 }
+

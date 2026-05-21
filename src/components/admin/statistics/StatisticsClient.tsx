@@ -22,7 +22,8 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { fetchMyDatasets } from "@/app/api/datasets";
 import { fetchMyReuses } from "@/app/api/reuses";
-import { Dataset, Reuse } from "@/service/types/api";
+import type { Dataset } from '@/service/types/dataset';
+import type { Reuse } from '@/service/types/reuse';
 
 const PAGE_SIZE = 10;
 

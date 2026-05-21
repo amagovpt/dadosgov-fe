@@ -16,7 +16,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgCommunityResources } from "@/app/api/community-resources";
-import { CommunityResource } from "@/service/types/api";
+import type { CommunityResource } from '@/service/types/community-resource';
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";

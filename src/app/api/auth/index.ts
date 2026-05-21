@@ -1,4 +1,4 @@
-import { UserRef } from "@/service/types/api";
+import type { UserRef } from '@/service/types/identity';
 
 /**
  * Fetch CSRF token from backend
@@ -51,3 +51,4 @@ export async function fetchCurrentUser(): Promise<UserRef | null> {
     return null;
   }
 }
+

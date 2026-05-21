@@ -17,7 +17,8 @@ import {
 import { fetchCsrfToken } from "@/app/api/auth";
 import { fetchUserActivity, updateProfile } from "@/app/api/users";
 import { fetchMyFollowing } from "@/app/api/followers";
-import { Activity, ApiToken, UserFollowing, UserPublic } from "@/service/types/api";
+import type { Activity } from '@/service/types/catalog';
+import type { ApiToken, UserFollowing, UserPublic } from '@/service/types/identity';
 import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";

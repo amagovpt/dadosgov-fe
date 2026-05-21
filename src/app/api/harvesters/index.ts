@@ -1,5 +1,5 @@
-import {
-  APIResponse,
+import type { APIResponse } from '@/service/types/shared/core';
+import type {
   HarvestBackend,
   HarvestJob,
   HarvestPreviewJob,
@@ -7,7 +7,7 @@ import {
   HarvestSourceCreatePayload,
   HarvestSourceUpdatePayload,
   HarvestValidationPayload,
-} from "@/service/types/api";
+} from '@/service/types/harvester';
 import { getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_AUTH_URL = getAuthApiBaseUrl();
@@ -264,3 +264,4 @@ export async function fetchOrgHarvesters(
     };
   }
 }
+

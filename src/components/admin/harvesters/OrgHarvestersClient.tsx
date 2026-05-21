@@ -20,7 +20,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgHarvesters } from "@/app/api/harvesters";
-import { HarvestSource } from "@/service/types/api";
+import type { HarvestSource } from '@/service/types/harvester';
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";

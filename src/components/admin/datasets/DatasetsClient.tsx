@@ -19,7 +19,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchMyDatasets } from "@/app/api/datasets";
-import { Dataset } from "@/service/types/api";
+import type { Dataset } from '@/service/types/dataset';
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { Dropdown } from "@/components/Primitives/Dropdown";

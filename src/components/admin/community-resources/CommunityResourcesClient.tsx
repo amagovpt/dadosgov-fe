@@ -17,7 +17,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchMyCommunityResources } from "@/app/api/community-resources";
-import { CommunityResource } from "@/service/types/api";
+import type { CommunityResource } from '@/service/types/community-resource';
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";

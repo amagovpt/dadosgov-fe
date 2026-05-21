@@ -20,7 +20,7 @@ import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { createHarvester, previewHarvestSource } from "@/app/api/harvesters";
-import { HarvestSourceCreatePayload, HarvestPreviewJob } from "@/service/types/api";
+import type { HarvestSourceCreatePayload, HarvestPreviewJob } from '@/service/types/harvester';
 
 export default function HarvestersNewClient() {
   const { user } = useAuth();

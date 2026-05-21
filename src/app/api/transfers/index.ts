@@ -1,4 +1,4 @@
-import { Transfer, TransferRequestPayload } from "@/service/types/api";
+import type { Transfer, TransferRequestPayload } from '@/service/types/transfer-system';
 import { getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_AUTH_URL = getAuthApiBaseUrl();
@@ -26,3 +26,4 @@ export async function requestTransfer(payload: TransferRequestPayload): Promise<
   }
   return await res.json();
 }
+

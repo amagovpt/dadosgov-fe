@@ -40,7 +40,10 @@ import { fetchOrgDatasets } from "@/app/api/organizations";
 import { fetchDiscussions } from "@/app/api/discussions-topics";
 import { searchDatasets, suggestTags } from "@/app/api/search";
 import { useAuth } from "@/context/AuthContext";
-import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/service/types/api";
+import type { Activity, TagSuggestion } from '@/service/types/catalog';
+import type { Dataset } from '@/service/types/dataset';
+import type { Discussion } from '@/service/types/discussion';
+import type { Reuse, ReuseType, ReuseTopic } from '@/service/types/reuse';
 import {
   normalizeRemoteDatasets,
   type RemoteDatasetEntry,

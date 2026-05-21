@@ -1,13 +1,12 @@
-import {
-  APIResponse,
-  Discussion,
-  DiscussionCreatePayload,
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Discussion, DiscussionCreatePayload } from '@/service/types/discussion';
+import type {
   Topic,
   TopicCreatePayload,
   TopicElement,
   TopicElementCreatePayload,
   TopicUpdatePayload,
-} from "@/service/types/api";
+} from '@/service/types/topic';
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -508,3 +507,4 @@ export async function deleteDiscussionComment(
     return false;
   }
 }
+

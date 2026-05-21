@@ -1,6 +1,6 @@
 import React from "react";
 import { Avatar, CardNoResults, Icon } from "@ama-pt/agora-design-system";
-import type { Activity } from "@/service/types/api";
+import type { Activity } from '@/service/types/catalog';
 
 type DatasetsEditActivitiesTabProps = {
   activitiesLoading: boolean;

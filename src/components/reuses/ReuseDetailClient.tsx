@@ -25,7 +25,9 @@ import {
   DropdownOption,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from "@/service/types/api";
+import type { Dataset } from '@/service/types/dataset';
+import type { Discussion, DiscussionCreatePayload } from '@/service/types/discussion';
+import type { Reuse } from '@/service/types/reuse';
 import {
   fetchReuse,
 } from "@/app/api/reuses";

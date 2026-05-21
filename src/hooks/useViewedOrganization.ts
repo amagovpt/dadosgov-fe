@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useReducer } from "react";
-import type { Organization } from "@/service/types/api";
+import type { Organization } from '@/service/types/identity';
 import { fetchOrganization } from "@/app/api/organizations";
 
 /**

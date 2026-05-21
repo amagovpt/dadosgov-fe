@@ -16,7 +16,7 @@ import {
   CardGeneral,
 } from "@ama-pt/agora-design-system";
 import { createDataservice } from "@/app/api/dataservices";
-import type { Dataservice } from "@/service/types/api";
+import type { Dataservice } from '@/service/types/dataservice';
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";

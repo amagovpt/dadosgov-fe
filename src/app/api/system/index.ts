@@ -1,13 +1,9 @@
-import {
-  APIResponse,
-  Dataset,
-  HomepageData,
-  Reuse,
-  SiteConfigUpdatePayload,
-  SiteInfo,
-  SystemLogContent,
-  SystemLogFile,
-} from "@/service/types/api";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Dataset } from '@/service/types/dataset';
+import type { Reuse } from '@/service/types/reuse';
+import type { HomepageData } from '@/service/types/home/homepage';
+import type { SiteConfigUpdatePayload, SiteInfo } from '@/service/types/shared/site-metrics';
+import type { SystemLogContent, SystemLogFile } from '@/service/types/transfer-system';
 import { authFetch, getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);

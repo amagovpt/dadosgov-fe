@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { fetchUser, fetchUserActivity, updateUser, deleteUser, uploadUserAvatar } from "@/app/api/users";
 import { fetchUserFollowing } from "@/app/api/followers";
-import { Activity, UserAdmin, UserFollowing } from "@/service/types/api";
+import type { Activity } from '@/service/types/catalog';
+import type { UserAdmin, UserFollowing } from '@/service/types/identity';
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {

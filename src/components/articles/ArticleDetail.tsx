@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import { fetchPost } from "@/app/api/posts";
-import { Post } from "@/service/types/api";
+import type { Post } from '@/service/types/posts';
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 

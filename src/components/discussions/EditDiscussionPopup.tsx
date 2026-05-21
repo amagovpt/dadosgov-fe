@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Avatar, Button, InputText, InputTextArea, usePopupContext } from "@ama-pt/agora-design-system";
-import { Discussion } from "@/service/types/api";
+import type { Discussion } from '@/service/types/discussion';
 import { updateDiscussion, editDiscussionComment } from "@/app/api/discussions-topics";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";

@@ -18,7 +18,7 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { createOrganization, uploadOrgLogo } from "@/app/api/organizations";
 import { suggestOrganizations } from "@/app/api/search";
-import type { OrganizationSuggestion } from "@/service/types/api";
+import type { OrganizationSuggestion } from '@/service/types/identity';
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";

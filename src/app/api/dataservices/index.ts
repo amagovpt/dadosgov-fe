@@ -1,9 +1,5 @@
-import {
-  APIResponse,
-  Dataservice,
-  DataserviceCreatePayload,
-  DataserviceUpdatePayload,
-} from "@/service/types/api";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Dataservice, DataserviceCreatePayload, DataserviceUpdatePayload } from '@/service/types/dataservice';
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
 
 const API_BASE_URL = getApiBaseUrl(1);
@@ -204,3 +200,4 @@ export async function searchDataservices(
     };
   }
 }
+

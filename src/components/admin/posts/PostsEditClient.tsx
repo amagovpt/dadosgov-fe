@@ -22,7 +22,8 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchPost, updatePost, uploadPostImage, deletePost, unpublishPost, publishPost } from "@/app/api/posts";
 import { suggestTags } from "@/app/api/search";
-import type { Post, PostUpdatePayload, TagSuggestion } from "@/service/types/api";
+import type { TagSuggestion } from '@/service/types/catalog';
+import type { Post, PostUpdatePayload } from '@/service/types/posts';
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import dynamic from "next/dynamic";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";

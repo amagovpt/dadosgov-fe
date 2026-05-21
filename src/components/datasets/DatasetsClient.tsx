@@ -12,7 +12,10 @@ import { deleteDataset } from "@/app/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { APIResponse, Dataset, Frequency, Granularity, License, Organization } from "@/service/types/api";
+import type { Frequency, Granularity, License } from '@/service/types/catalog';
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Dataset } from '@/service/types/dataset';
+import type { Organization } from '@/service/types/identity';
 
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";

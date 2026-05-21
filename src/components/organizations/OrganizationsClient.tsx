@@ -6,11 +6,8 @@ import { Button, Icon, ToggleGroup, Toggle, CardNoResults } from "@ama-pt/agora-
 import { Pagination } from "@/components/Pagination";
 import { OrganizationsFilters } from "./OrganizationsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import {
-  APIResponse,
-  OrgBadges,
-  Organization,
-} from "@/service/types/api";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { OrgBadges, Organization } from '@/service/types/identity';
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";

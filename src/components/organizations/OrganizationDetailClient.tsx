@@ -13,7 +13,7 @@ import {
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { Organization } from "@/service/types/api";
+import type { Organization } from '@/service/types/identity';
 import { OrganizationTabs } from "./OrganizationTabs";
 import { useAuth } from "@/context/AuthContext";
 import { requestMembership } from "@/app/api/organizations";
