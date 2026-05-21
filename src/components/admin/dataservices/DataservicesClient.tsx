@@ -25,6 +25,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import { filterByStatus } from "@/utils/filterByStatus";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -46,23 +47,10 @@ export default function DataservicesClient() {
   const getSortOrder = (field: DataserviceSortField): SortOrder =>
     sortField === field ? sortOrder : "none";
 
-  const filteredApis = useMemo(() => {
-    if (!statusFilter) return apis;
-    return apis.filter((a) => {
-      switch (statusFilter) {
-        case "public":
-          return !a.private && !a.archived && !a.deleted;
-        case "draft":
-          return a.private && !a.archived && !a.deleted;
-        case "archived":
-          return !!a.archived && !a.deleted;
-        case "deleted":
-          return !!a.deleted;
-        default:
-          return true;
-      }
-    });
-  }, [apis, statusFilter]);
+  const filteredApis = useMemo(
+    () => filterByStatus(apis, statusFilter),
+    [apis, statusFilter]
+  );
 
   const sortedApis = useMemo(() => {
     if (!sortField || sortOrder === "none") return filteredApis;

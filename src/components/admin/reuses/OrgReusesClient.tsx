@@ -29,6 +29,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AppIcon from "@/components/Primitives/AppIcon";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import { filterByStatus } from "@/utils/filterByStatus";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -84,23 +85,10 @@ export default function OrgReusesClient() {
     };
   }, [resolvedOrgId]);
 
-  const filteredReuses = useMemo(() => {
-    if (!statusFilter) return reuses;
-    return reuses.filter((r) => {
-      switch (statusFilter) {
-        case "public":
-          return !r.private && !r.archived && !r.deleted;
-        case "draft":
-          return r.private && !r.archived && !r.deleted;
-        case "archived":
-          return !!r.archived && !r.deleted;
-        case "deleted":
-          return !!r.deleted;
-        default:
-          return true;
-      }
-    });
-  }, [reuses, statusFilter]);
+  const filteredReuses = useMemo(
+    () => filterByStatus(reuses, statusFilter),
+    [reuses, statusFilter]
+  );
 
   const sortedReuses = useMemo(() => {
     if (!sortField || sortOrder === "none") return filteredReuses;

@@ -23,6 +23,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import { filterByStatus } from "@/utils/filterByStatus";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at";
@@ -91,23 +92,10 @@ export default function SystemReusesClient() {
     }, 400);
   };
 
-  const filteredReuses = useMemo(() => {
-    if (!statusFilter) return reuses;
-    return reuses.filter((r) => {
-      switch (statusFilter) {
-        case "public":
-          return !r.private && !r.archived && !r.deleted;
-        case "draft":
-          return r.private && !r.archived && !r.deleted;
-        case "archived":
-          return !!r.archived && !r.deleted;
-        case "deleted":
-          return !!r.deleted;
-        default:
-          return true;
-      }
-    });
-  }, [reuses, statusFilter]);
+  const filteredReuses = useMemo(
+    () => filterByStatus(reuses, statusFilter),
+    [reuses, statusFilter]
+  );
 
   const getStatus = (reuse: Reuse) => {
     if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };

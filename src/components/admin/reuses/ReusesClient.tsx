@@ -25,7 +25,8 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps"; // Ensure import exists
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import { filterByStatus } from "@/utils/filterByStatus";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -88,24 +89,13 @@ export default function ReusesClient() {
       result = result.filter((r) => r.title.toLowerCase().includes(q));
     }
     if (statusFilter) {
-      return result.filter((r) => {
-        switch (statusFilter) {
-          case "public":
-            return !r.private && !r.archived && !r.deleted;
-          case "draft":
-            return r.private && !r.archived && !r.deleted;
-          case "archived":
-            return !!r.archived && !r.deleted;
-          case "deleted":
-            return !!r.deleted;
-          default:
-            return true;
-        }
-      });
+      result = filterByStatus(result, statusFilter);
+    } else {
+      // By default, hide deleted reuses (same behavior as datasets page).
+      result = result.filter((r) => !r.deleted);
     }
 
-    // By default, hide deleted reuses (same behavior as datasets page).
-    return result.filter((r) => !r.deleted);
+    return result;
   }, [reuses, searchQuery, statusFilter]);
 
   const sortedReuses = useMemo(() => {

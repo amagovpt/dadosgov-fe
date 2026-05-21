@@ -84,20 +84,7 @@ export default function DatasetsClient() {
     }
 
     if (statusFilter) {
-      result = result.filter((d) => {
-        switch (statusFilter) {
-          case "public":
-            return !d.private && !d.archived && !d.deleted;
-          case "draft":
-            return !!d.private && !d.archived && !d.deleted;
-          case "archived":
-            return !!d.archived && !d.deleted;
-          case "deleted":
-            return !!d.deleted;
-          default:
-            return true;
-        }
-      });
+      result = filterByStatus(result, statusFilter);
     } else {
       // By default, hide deleted datasets
       result = result.filter((d) => !d.deleted);
