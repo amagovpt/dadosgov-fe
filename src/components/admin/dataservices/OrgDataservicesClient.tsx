@@ -26,7 +26,9 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import { filterByStatus } from "@/utils/filterByStatus";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -53,23 +55,10 @@ export default function OrgDataservicesClient() {
   const getSortOrder = (field: DataserviceSortField): SortOrder =>
     sortField === field ? sortOrder : "none";
 
-  const filteredApis = useMemo(() => {
-    if (!statusFilter) return apis;
-    return apis.filter((a) => {
-      switch (statusFilter) {
-        case "public":
-          return !a.private && !a.archived && !a.deleted;
-        case "draft":
-          return a.private && !a.archived && !a.deleted;
-        case "archived":
-          return !!a.archived && !a.deleted;
-        case "deleted":
-          return !!a.deleted;
-        default:
-          return true;
-      }
-    });
-  }, [apis, statusFilter]);
+  const filteredApis = useMemo(
+    () => filterByStatus(apis, statusFilter),
+    [apis, statusFilter]
+  );
 
   const sortedApis = useMemo(() => {
     if (!sortField || sortOrder === "none") return filteredApis;
@@ -182,17 +171,14 @@ export default function OrgDataservicesClient() {
         <p>A carregar...</p>
       ) : filteredApis.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: 5,
-            totalItems: filteredApis.length,
-            availablePageSizes: [5, 10, 20],
-            currentPage: 0,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-          }}
+          paginationProps={createPaginationProps(
+            5,
+            filteredApis.length,
+            0,
+            undefined,
+            undefined,
+            { currentPageIsZeroBased: true }
+          )}
         >
           <TableHeader>
             <TableRow>

@@ -26,8 +26,10 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 import AppIcon from "@/components/Primitives/AppIcon";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import { filterByStatus } from "@/utils/filterByStatus";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -83,23 +85,10 @@ export default function OrgReusesClient() {
     };
   }, [resolvedOrgId]);
 
-  const filteredReuses = useMemo(() => {
-    if (!statusFilter) return reuses;
-    return reuses.filter((r) => {
-      switch (statusFilter) {
-        case "public":
-          return !r.private && !r.archived && !r.deleted;
-        case "draft":
-          return r.private && !r.archived && !r.deleted;
-        case "archived":
-          return !!r.archived && !r.deleted;
-        case "deleted":
-          return !!r.deleted;
-        default:
-          return true;
-      }
-    });
-  }, [reuses, statusFilter]);
+  const filteredReuses = useMemo(
+    () => filterByStatus(reuses, statusFilter),
+    [reuses, statusFilter]
+  );
 
   const sortedReuses = useMemo(() => {
     if (!sortField || sortOrder === "none") return filteredReuses;
@@ -202,86 +191,84 @@ export default function OrgReusesClient() {
       {isLoading ? (
         <p>A carregar...</p>
       ) : reuses.length > 0 ? (
-        <Table
-          paginationProps={{
-            itemsPerPageLabel: "Itens por página",
-            itemsPerPage: itemsPerPage,
-            totalItems: reuses.length,
-            availablePageSizes: [10, 20, 50],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar itens por página",
-            dropdownListAriaLabel: "Opções de itens por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setItemsPerPage(size);
-              setCurrentPage(1);
-            },
-          }}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("title")}
-                onSortChange={handleSort("title")}
-              >
-                Título da reutilização
-              </TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("created_at")}
-                onSortChange={handleSort("created_at")}
-              >
-                Criado em
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("datasets")}
-                onSortChange={handleSort("datasets")}
-              >
-                Conjuntos de dados
-              </TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedReuses.map((reuse, index) => (
-              <TableRow key={index}>
-                <TableCell headerLabel="Título">
-                  <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
-                </TableCell>
-                <TableCell headerLabel="Estado">
-                  {reuse.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : reuse.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : reuse.private ? (
-                    <StatusDot variant="warning">Rascunho</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
-                </TableCell>
-                <TableCell headerLabel="Criado em">{formatDateToDMY(reuse.created_at)}</TableCell>
-                <TableCell headerLabel="Conjuntos de dados">
-                  {reuse.datasets?.length ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/reuses/${reuse.slug}`}>
-                      <AppIcon name="agora-line-eye" />
-                    </a>
-                    <a href={`/pages/admin/org/reuses/edit?slug=${reuse.slug}`}>
-                      <AppIcon name="agora-line-edit" />
-                    </a>
-                  </div>
-                </TableCell>
+          <Table
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              reuses.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage
+            )}
+          >
+            <TableHeader>
+              <TableRow>
+                <TableHeaderCell
+                  sortType="numeric"
+                  sortOrder={getSortOrder("title")}
+                  onSortChange={handleSort("title")}
+                >
+                  Título da reutilização
+                </TableHeaderCell>
+                <TableHeaderCell>Estado</TableHeaderCell>
+                <TableHeaderCell
+                  sortType="date"
+                  sortOrder={getSortOrder("created_at")}
+                  onSortChange={handleSort("created_at")}
+                >
+                  Criado em
+                </TableHeaderCell>
+                <TableHeaderCell
+                  sortType="numeric"
+                  sortOrder={getSortOrder("datasets")}
+                  onSortChange={handleSort("datasets")}
+                >
+                  Conjuntos de dados
+                </TableHeaderCell>
+                <TableHeaderCell>Ações</TableHeaderCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {paginatedReuses.map((reuse, index) => (
+                <TableRow key={index}>
+                  <TableCell headerLabel="Título">
+                    <a
+                      href={`/pages/reuses/${reuse.slug}`}
+                      className="text-primary-600 underline"
+                    >
+                      {reuse.title}
+                    </a>
+                  </TableCell>
+                  <TableCell headerLabel="Estado">
+                    {reuse.deleted ? (
+                      <StatusDot variant="danger">Excluído</StatusDot>
+                    ) : reuse.archived ? (
+                      <StatusDot variant="neutral">Arquivado</StatusDot>
+                    ) : reuse.private ? (
+                      <StatusDot variant="warning">Rascunho</StatusDot>
+                    ) : (
+                      <StatusDot variant="success">Público</StatusDot>
+                    )}
+                  </TableCell>
+                  <TableCell headerLabel="Criado em">
+                    {formatDateToDMY(reuse.created_at)}
+                  </TableCell>
+                  <TableCell headerLabel="Conjuntos de dados">
+                    {reuse.datasets?.length ?? 0}
+                  </TableCell>
+                  <TableCell headerLabel="Ações">
+                    <div className="flex gap-8">
+                      <a href={`/pages/reuses/${reuse.slug}`}>
+                        <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      </a>
+                      <a href={`/pages/admin/org/reuses/edit?slug=${reuse.slug}`}>
+                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                      </a>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">

@@ -11,7 +11,7 @@ import { fetchPost } from "@/services/api";
 import { Post } from "@/types/api";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { TextLink } from "../Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 interface ArticleDetailProps {
   rid: string;

@@ -498,7 +498,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                   description={
                     <>
                       A sua questão é sobre outro tema que não esta organização?{" "}
-                      <AppLink
+                      <TextLink
                         href="https://dados.gov.pt"
                         className="font-semibold"
                       >
@@ -507,7 +507,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                           name="agora-line-external-link"
                           className="w-4 h-4 inline"
                         />
-                      </AppLink>
+                      </TextLink>
                     </>
                   }
                 />

@@ -28,7 +28,8 @@ import {
 } from "@/services/api";
 import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 interface OrgStatisticsClientProps {
   orgId: string;
@@ -272,18 +273,12 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                 />
               ) : (
                 <Table
-                  paginationProps={{
-                    itemsPerPageLabel: "Itens por página",
-                    itemsPerPage: PAGE_SIZE,
-                    totalItems: datasetsTotal,
-                    availablePageSizes: [5, 10, 20],
-                    currentPage: datasetsPage - 1,
-                    buttonDropdownAriaLabel: "Selecionar itens por página",
-                    dropdownListAriaLabel: "Opções de itens por página",
-                    prevButtonAriaLabel: "Página anterior",
-                    nextButtonAriaLabel: "Próxima página",
-                    onPageChange: (page: number) => setDatasetsPage(page + 1),
-                  }}
+                  paginationProps={createPaginationProps(
+                    PAGE_SIZE,
+                    datasetsTotal,
+                    datasetsPage,
+                    setDatasetsPage
+                  )}
                 >
                   <TableHeader>
                     <TableRow>
@@ -385,18 +380,12 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                 />
               ) : (
                 <Table
-                  paginationProps={{
-                    itemsPerPageLabel: "Itens por página",
-                    itemsPerPage: PAGE_SIZE,
-                    totalItems: dataservicesTotal,
-                    availablePageSizes: [5, 10, 20],
-                    currentPage: dataservicesPage - 1,
-                    buttonDropdownAriaLabel: "Selecionar itens por página",
-                    dropdownListAriaLabel: "Opções de itens por página",
-                    prevButtonAriaLabel: "Página anterior",
-                    nextButtonAriaLabel: "Próxima página",
-                    onPageChange: (page: number) => setDataservicesPage(page + 1),
-                  }}
+                  paginationProps={createPaginationProps(
+                    PAGE_SIZE,
+                    dataservicesTotal,
+                    dataservicesPage,
+                    setDataservicesPage
+                  )}
                 >
                   <TableHeader>
                     <TableRow>
@@ -470,18 +459,12 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                 />
               ) : (
                 <Table
-                  paginationProps={{
-                    itemsPerPageLabel: "Itens por página",
-                    itemsPerPage: PAGE_SIZE,
-                    totalItems: reuses.length,
-                    availablePageSizes: [5, 10, 20],
-                    currentPage: reusesPage - 1,
-                    buttonDropdownAriaLabel: "Selecionar itens por página",
-                    dropdownListAriaLabel: "Opções de itens por página",
-                    prevButtonAriaLabel: "Página anterior",
-                    nextButtonAriaLabel: "Próxima página",
-                    onPageChange: (page: number) => setReusesPage(page + 1),
-                  }}
+                  paginationProps={createPaginationProps(
+                    PAGE_SIZE,
+                    reuses.length,
+                    reusesPage,
+                    setReusesPage
+                  )}
                 >
                   <TableHeader>
                     <TableRow>

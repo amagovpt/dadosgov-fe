@@ -1,6 +1,6 @@
 import React from "react";
 import { AuxiliarItem } from "@/components/admin/AuxiliarList";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 interface DatasetAuxiliarErrors {
   title?: boolean;

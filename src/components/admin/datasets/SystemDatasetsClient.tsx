@@ -21,7 +21,8 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";import { createPaginationProps } from "@/utils/createPaginationProps";
+
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
@@ -204,22 +205,13 @@ export default function SystemDatasetsClient() {
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : datasets.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Itens por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar itens por página",
-            dropdownListAriaLabel: "Opções de itens por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>

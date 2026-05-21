@@ -120,9 +120,9 @@ export default function OrganizationsNewClient() {
           </p>
           <p className="mt-2">
             Pode encontrar o seu número SIRET no{" "}
-            <AppLink href="#">
+            <TextLink href="#">
               Diretório Comercial.
-            </AppLink>
+            </TextLink>
           </p>
         </>
       ),

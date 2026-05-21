@@ -56,7 +56,7 @@ import ReusesEditApiTab from "@/components/admin/reuses/ReusesEditApiTab";
 import ReusesEditDiscussionsTab from "@/components/admin/reuses/ReusesEditDiscussionsTab";
 import ReusesEditActivitiesTab from "@/components/admin/reuses/ReusesEditActivitiesTab";
 import ReusesEditDeletePopup from "@/components/admin/reuses/ReusesEditDeletePopup";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",

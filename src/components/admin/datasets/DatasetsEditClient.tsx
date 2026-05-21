@@ -60,7 +60,7 @@ import DatasetsEditActivitiesTab from "@/components/admin/datasets/DatasetsEditA
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { POISONED_FILE_WARNING, translateUploadError } from "@/lib/security/translateUploadError";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",

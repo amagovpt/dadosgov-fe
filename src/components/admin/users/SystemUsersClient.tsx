@@ -17,9 +17,10 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchUsers } from "@/services/api";
 import { UserAdmin } from "@/types/api";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
 type SortOrder = "ascending" | "descending" | "none";
@@ -175,22 +176,13 @@ export default function SystemUsersClient() {
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : users.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>

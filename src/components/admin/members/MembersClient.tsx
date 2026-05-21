@@ -36,7 +36,8 @@ import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 const roleLabels: Record<string, string> = {
   admin: "Administrador",
@@ -649,22 +650,13 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       </div>
 
       <Table
-        paginationProps={{
-          itemsPerPageLabel: "Itens por página",
-          itemsPerPage: itemsPerPage,
-          totalItems: members.length,
-          availablePageSizes: [10, 20, 50],
-          currentPage: currentPage - 1,
-          buttonDropdownAriaLabel: "Selecionar itens por página",
-          dropdownListAriaLabel: "Opções de itens por página",
-          prevButtonAriaLabel: "Página anterior",
-          nextButtonAriaLabel: "Próxima página",
-          onPageChange: (page: number) => setCurrentPage(page + 1),
-          onPageSizeChange: (size: number) => {
-            setItemsPerPage(size);
-            setCurrentPage(1);
-          },
-        }}
+        paginationProps={createPaginationProps(
+          itemsPerPage,
+          members.length,
+          currentPage,
+          setCurrentPage,
+          setItemsPerPage
+        )}
       >
         <TableHeader>
           <TableRow>

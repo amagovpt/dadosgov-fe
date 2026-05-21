@@ -21,7 +21,7 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { createHarvester, previewHarvestSource } from "@/services/api";
 import { HarvestSourceCreatePayload, HarvestPreviewJob } from "@/types/api";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 export default function HarvestersNewClient() {
   const { user } = useAuth();

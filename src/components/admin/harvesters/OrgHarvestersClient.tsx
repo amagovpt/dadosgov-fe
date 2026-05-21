@@ -25,8 +25,9 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 type StatusInfo = {
   label: string;
@@ -252,18 +253,13 @@ export default function OrgHarvestersClient() {
       ) : harvesters.length > 0 ? (
         <>
           <Table
-            paginationProps={{
-              itemsPerPageLabel: "Linhas por página",
+            paginationProps={createPaginationProps(
               itemsPerPage,
-              totalItems: harvesters.length,
-              availablePageSizes: [5, 10, 20],
-              currentPage: currentPage - 1,
-              buttonDropdownAriaLabel: "Selecionar linhas por página",
-              dropdownListAriaLabel: "Opções de linhas por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => setCurrentPage(page + 1),
-            }}
+              harvesters.length,
+              currentPage,
+              setCurrentPage,
+              undefined
+            )}
           >
             <TableHeader>
               <TableRow>

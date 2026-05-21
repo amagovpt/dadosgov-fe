@@ -24,7 +24,9 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import { filterByStatus } from "@/utils/filterByStatus";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],
@@ -83,20 +85,7 @@ export default function DatasetsClient() {
     }
 
     if (statusFilter) {
-      result = result.filter((d) => {
-        switch (statusFilter) {
-          case "public":
-            return !d.private && !d.archived && !d.deleted;
-          case "draft":
-            return !!d.private && !d.archived && !d.deleted;
-          case "archived":
-            return !!d.archived && !d.deleted;
-          case "deleted":
-            return !!d.deleted;
-          default:
-            return true;
-        }
-      });
+      result = filterByStatus(result, statusFilter);
     } else {
       // By default, hide deleted datasets
       result = result.filter((d) => !d.deleted);
@@ -218,22 +207,13 @@ export default function DatasetsClient() {
 
       {!isLoading && totalItems > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Itens por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar itens por página",
-            dropdownListAriaLabel: "Opções de itens por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>

@@ -21,7 +21,9 @@ import { fetchReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import { filterByStatus } from "@/utils/filterByStatus";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at";
@@ -90,23 +92,10 @@ export default function SystemReusesClient() {
     }, 400);
   };
 
-  const filteredReuses = useMemo(() => {
-    if (!statusFilter) return reuses;
-    return reuses.filter((r) => {
-      switch (statusFilter) {
-        case "public":
-          return !r.private && !r.archived && !r.deleted;
-        case "draft":
-          return r.private && !r.archived && !r.deleted;
-        case "archived":
-          return !!r.archived && !r.deleted;
-        case "deleted":
-          return !!r.deleted;
-        default:
-          return true;
-      }
-    });
-  }, [reuses, statusFilter]);
+  const filteredReuses = useMemo(
+    () => filterByStatus(reuses, statusFilter),
+    [reuses, statusFilter]
+  );
 
   const getStatus = (reuse: Reuse) => {
     if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
@@ -179,24 +168,13 @@ export default function SystemReusesClient() {
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filteredReuses.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => {
-              setCurrentPage(page + 1);
-            },
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>

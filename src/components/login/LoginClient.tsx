@@ -19,7 +19,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import { fetchCsrfToken, login } from "@/services/api";
-import { TextLink } from "../Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 function LoginContent() {
   const searchParams = useSearchParams();

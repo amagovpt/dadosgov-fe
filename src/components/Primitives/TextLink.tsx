@@ -3,14 +3,14 @@ import { ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 import { UrlObject } from "url";
 
-export interface AppLinkI extends LinkProps {
+export interface TextLinkI extends LinkProps {
   href: string | UrlObject;
   children: ReactNode;
   target?: "_self" | "_blank" | "_parent" | "_top";
   className?: string;
 }
 
-export function TextLink(args: AppLinkI) {
+export default function TextLink(args: TextLinkI) {
   return (
     <Link
       href={args.href}

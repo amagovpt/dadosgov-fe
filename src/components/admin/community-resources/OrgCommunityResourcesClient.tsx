@@ -22,6 +22,7 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import AppIcon from "@/components/Primitives/AppIcon";
 
 type SortOrder = "none" | "ascending" | "descending";
@@ -148,22 +149,13 @@ export default function OrgCommunityResourcesClient() {
       ) : resources.length > 0 ? (
         <>
           <Table
-            paginationProps={{
-              itemsPerPageLabel: "Itens por página",
-              itemsPerPage: itemsPerPage,
-              totalItems: resources.length,
-              availablePageSizes: [10, 20, 50],
-              currentPage: currentPage - 1,
-              buttonDropdownAriaLabel: "Selecionar itens por página",
-              dropdownListAriaLabel: "Opções de itens por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => setCurrentPage(page + 1),
-              onPageSizeChange: (size: number) => {
-                setItemsPerPage(size);
-                setCurrentPage(1);
-              },
-            }}
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              resources.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage
+            )}
           >
             <TableHeader>
               <TableRow>
@@ -225,9 +217,9 @@ export default function OrgCommunityResourcesClient() {
                   </TableCell>
                   <TableCell headerLabel="Ações">
                     <div className="flex gap-8">
-                      <AppIcon name="agora-line-eye" />
+                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
                       <a href={`/pages/admin/community-resources/edit?resource_id=${resource.id}`}>
-                        <AppIcon name="agora-line-edit" />
+                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
                       </a>
                     </div>
                   </TableCell>

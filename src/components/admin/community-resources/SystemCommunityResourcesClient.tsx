@@ -18,7 +18,8 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchAllCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -127,22 +128,13 @@ export default function SystemCommunityResourcesClient() {
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : resources.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: pageSize,
-            totalItems: resources.length,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            resources.length,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>

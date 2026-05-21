@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import type { Activity } from "@/types/api";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 type ReusesEditActivitiesTabProps = {
   activities: Activity[];

@@ -21,7 +21,7 @@ import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/Dra
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { ResourceType } from "@/types/api";
-import { TextLink } from "../Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 export interface PendingResourceMeta {
   title: string;

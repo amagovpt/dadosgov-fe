@@ -24,7 +24,9 @@ import { Reuse } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import { filterByStatus } from "@/utils/filterByStatus";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -87,24 +89,13 @@ export default function ReusesClient() {
       result = result.filter((r) => r.title.toLowerCase().includes(q));
     }
     if (statusFilter) {
-      return result.filter((r) => {
-        switch (statusFilter) {
-          case "public":
-            return !r.private && !r.archived && !r.deleted;
-          case "draft":
-            return r.private && !r.archived && !r.deleted;
-          case "archived":
-            return !!r.archived && !r.deleted;
-          case "deleted":
-            return !!r.deleted;
-          default:
-            return true;
-        }
-      });
+      result = filterByStatus(result, statusFilter);
+    } else {
+      // By default, hide deleted reuses (same behavior as datasets page).
+      result = result.filter((r) => !r.deleted);
     }
 
-    // By default, hide deleted reuses (same behavior as datasets page).
-    return result.filter((r) => !r.deleted);
+    return result;
   }, [reuses, searchQuery, statusFilter]);
 
   const sortedReuses = useMemo(() => {
@@ -206,22 +197,13 @@ export default function ReusesClient() {
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filteredReuses.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Itens por página",
-            itemsPerPage: itemsPerPage,
-            totalItems: sortedReuses.length,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setItemsPerPage(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            itemsPerPage,
+            sortedReuses.length,
+            currentPage,
+            setCurrentPage,
+            setItemsPerPage
+          )}
         >
           <TableHeader>
             <TableRow>

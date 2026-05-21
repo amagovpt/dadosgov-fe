@@ -53,7 +53,7 @@ import { pt } from "date-fns/locale";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
-import { TextLink } from "../Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 interface ReuseDetailClientProps {
   slug: string;

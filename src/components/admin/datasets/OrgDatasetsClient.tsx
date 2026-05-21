@@ -24,7 +24,8 @@ import { Dropdown } from "@/components/Primitives/Dropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created" | "last_update";
@@ -194,22 +195,13 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         <p>A carregar...</p>
       ) : datasets.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Itens por página",
-            itemsPerPage: itemsPerPage,
-            totalItems: total,
-            availablePageSizes: [10, 20, 50],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar itens por página",
-            dropdownListAriaLabel: "Opções de itens por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setItemsPerPage(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            itemsPerPage,
+            total,
+            currentPage,
+            setCurrentPage,
+            setItemsPerPage
+          )}
         >
           <TableHeader>
             <TableRow>

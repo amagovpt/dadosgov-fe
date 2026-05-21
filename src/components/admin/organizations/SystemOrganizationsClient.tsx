@@ -16,9 +16,10 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
-import { TextLink } from "@/components/Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -185,22 +186,13 @@ export default function SystemOrganizationsClient() {
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : organizations.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>

@@ -22,7 +22,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { formatMetricValue } from "@/utils/formatNumber";
-import { TextLink } from "../Primitives/AppLink";
+import TextLink from "@/components/Primitives/TextLink";
 
 interface DatasetDetailClientProps {
   slug: string;
