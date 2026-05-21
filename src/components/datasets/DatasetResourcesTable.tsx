@@ -494,6 +494,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                       href={downloadUrl(resource)}
                       target="_blank"
                       rel="noopener noreferrer"
+                      download={resource.title || ""}
                       className="text-primary-600 text-sm hover:underline flex items-center"
                       style={{ gap: "8px" }}
                     >
@@ -592,6 +593,7 @@ const ResourceCard: React.FC<{
             href={downloadUrl(resource)}
             target="_blank"
             rel="noopener noreferrer"
+            download={resource.title || ""}
             className="inline-flex items-center gap-8 text-primary-600 hover:underline"
           >
             <Icon name="agora-line-document" className="w-6 h-6" />
@@ -604,6 +606,7 @@ const ResourceCard: React.FC<{
             href={downloadUrl(resource)}
             target="_blank"
             rel="noopener noreferrer"
+            download={resource.title || ""}
             aria-label={`Descarregar ${resource.title}`}
             className="ml-auto"
           >
