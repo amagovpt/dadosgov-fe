@@ -281,7 +281,14 @@ export async function acceptMembership(org: string, requestId: string): Promise<
     `${API_AUTH_URL}/organizations/${org}/membership/${requestId}/accept/`,
     { method: "POST", credentials: "include" }
   );
-  if (!res.ok) throw new Error(`Failed to accept membership: ${res.statusText}`);
+  if (!res.ok) {
+    let message = res.statusText;
+    try {
+      const body = await res.json();
+      message = body?.message || body?.error || message;
+    } catch {}
+    throw new Error(`[${res.status}] ${message}`);
+  }
   return await res.json();
 }
 
