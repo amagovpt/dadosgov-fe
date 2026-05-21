@@ -183,7 +183,7 @@ export default function OrgProfileClient() {
     return (
       <div className="admin-page">
         <CardNoResults
-          className="datasets-page__empty"
+          className="admin-page__empty"
           position="center"
           icon={
             <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />

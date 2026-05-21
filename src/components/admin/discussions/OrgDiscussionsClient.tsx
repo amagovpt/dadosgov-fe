@@ -124,10 +124,10 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
       {isLoading ? (
         <p>A carregar...</p>
       ) : discussions.length === 0 ? (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
+        <div className="admin-page__body">
+          <div className="admin-page__content">
             <CardNoResults
-              className="datasets-page__empty"
+              className="admin-page__empty"
               position="center"
               icon={
                 <Icon

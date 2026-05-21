@@ -75,12 +75,12 @@ export default function DiscussionsClient() {
       </div>
 
       {discussions.length === 0 ? (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
+        <div className="admin-page__body">
+          <div className="admin-page__content">
             <CardNoResults
-              className="datasets-page__empty"
+              className="admin-page__empty"
               position="center"
-              icon={<Icon name="agora-line-chat" className="datasets-page__empty-icon" />}
+              icon={<Icon name="agora-line-chat" className="admin-page__empty-icon" />}
               description="Ainda não há discussões sobre esta organização."
             />
           </div>

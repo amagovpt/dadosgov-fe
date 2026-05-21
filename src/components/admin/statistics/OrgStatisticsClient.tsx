@@ -128,7 +128,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
     return (
       <div className="admin-page">
         <CardNoResults
-          className="datasets-page__empty"
+          className="admin-page__empty"
           position="center"
           icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem organizações"

@@ -81,7 +81,7 @@ export default function DatasetsNewClient() {
 
       {currentStep === 1 && (
         <>
-          <div className="datasets-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
+          <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
             <CardAction
               variant="neutral-100"
               titleText="Publique um conjunto de dados"
@@ -101,8 +101,8 @@ export default function DatasetsNewClient() {
           </div>
 
           {/* Admin sections */}
-          <div className="datasets-new-page__admin-sections">
-            <div className="datasets-new-page__admin-section">
+          <div className="admin-new-page__admin-sections">
+            <div className="admin-new-page__admin-section">
               <p className="text-primary-900 text-base font-bold leading-7">
                 É administrador e deseja automatizar a publicação dos seus dados?
               </p>
@@ -134,7 +134,7 @@ export default function DatasetsNewClient() {
               </div>
             </div>
 
-            <div className="datasets-new-page__admin-section">
+            <div className="admin-new-page__admin-section">
               <p className="text-primary-900 text-base font-bold leading-7">
                 É administrador e deseja catalogar os seus dados?
               </p>

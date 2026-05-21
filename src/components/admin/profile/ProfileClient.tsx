@@ -809,7 +809,7 @@ export default function ProfileClient() {
                   <p className="text-base text-neutral-900">A carregar subscrições...</p>
                 ) : subscriptions.length === 0 ? (
                   <CardNoResults
-                    className="datasets-page__empty"
+                    className="admin-page__empty"
                     position="center"
                     icon={
                       <Icon name="agora-line-bell" className="icon-xl h-12 w-12 text-primary-500" />
@@ -871,7 +871,7 @@ export default function ProfileClient() {
             <TabBody>
               <div className="mt-24">
                 <CardNoResults
-                  className="datasets-page__empty"
+                  className="admin-page__empty"
                   position="center"
                   icon={
                     <Icon name="agora-line-star" className="icon-xl h-12 w-12 text-primary-500" />
@@ -890,7 +890,7 @@ export default function ProfileClient() {
                 {isLoadingActivities && <p className="text-sm text-neutral-700">A carregar...</p>}
                 {!isLoadingActivities && activities.length === 0 && (
                   <CardNoResults
-                    className="datasets-page__empty"
+                    className="admin-page__empty"
                     position="center"
                     icon={
                       <Icon name="agora-line-time" className="icon-xl h-12 w-12 text-primary-500" />

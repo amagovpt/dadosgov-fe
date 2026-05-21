@@ -275,10 +275,10 @@ export default function ReusesClient() {
           </TableBody>
         </Table>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
+        <div className="admin-page__body">
+          <div className="admin-page__content">
             <CardNoResults
-              className="datasets-page__empty"
+              className="admin-page__empty"
               position="center"
               icon={<img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />}
               title="Sem reutilizações"

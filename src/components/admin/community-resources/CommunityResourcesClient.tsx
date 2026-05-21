@@ -224,10 +224,10 @@ export default function CommunityResourcesClient() {
           </TableBody>
         </Table>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
+        <div className="admin-page__body">
+          <div className="admin-page__content">
             <CardNoResults
-              className="datasets-page__empty"
+              className="admin-page__empty"
               position="center"
               icon={
                 <Icon name="agora-line-user-group" className="icon-xl h-12 w-12 text-primary-500" />
