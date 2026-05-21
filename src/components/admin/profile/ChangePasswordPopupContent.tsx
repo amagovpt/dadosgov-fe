@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Button, InputText, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
-import { fetchCsrfToken } from "@/api/auth/route";
-import { changePassword } from "@/api/profile/route";
+import { fetchCsrfToken } from "@/app/api/auth";
+import { changePassword } from "@/app/api/profile";
 
 export function ChangePasswordPopupContent() {
   const { hide } = usePopupContext();

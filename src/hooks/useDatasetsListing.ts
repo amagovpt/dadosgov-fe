@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { APIResponse, Dataset } from "@/types/api";
+import { APIResponse, Dataset } from "@/service/types/api";
 import { useListingUrlState } from "@/hooks/useListingUrlState";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import {

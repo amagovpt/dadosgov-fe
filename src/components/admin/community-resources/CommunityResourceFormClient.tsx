@@ -19,12 +19,12 @@ import {
   fetchDataset,
   fetchMyDatasets,
   fetchResourceTypes,
-} from "@/api/datasets/route";
+} from "@/app/api/datasets";
 import {
   createCommunityResource,
   uploadCommunityResourceFile,
-} from "@/api/community-resources/route";
-import type { Dataset, CommunityResource, ResourceType } from "@/types/api";
+} from "@/app/api/community-resources";
+import type { Dataset, CommunityResource, ResourceType } from "@/service/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";

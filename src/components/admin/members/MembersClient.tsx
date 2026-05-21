@@ -27,9 +27,9 @@ import {
   fetchMembershipRequests,
   acceptMembership,
   refuseMembership,
-} from "@/api/organizations/route";
-import { suggestUsers } from "@/api/search/route";
-import { Organization, OrganizationMember, MembershipRequest, UserSuggestion } from "@/types/api";
+} from "@/app/api/organizations";
+import { suggestUsers } from "@/app/api/search";
+import { Organization, OrganizationMember, MembershipRequest, UserSuggestion } from "@/service/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";

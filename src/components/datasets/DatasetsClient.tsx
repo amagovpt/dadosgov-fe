@@ -8,11 +8,11 @@ import {
   CardNoResults,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { deleteDataset } from "@/api/datasets/route";
+import { deleteDataset } from "@/app/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { APIResponse, Dataset, Frequency, Granularity, License, Organization } from "@/types/api";
+import { APIResponse, Dataset, Frequency, Granularity, License, Organization } from "@/service/types/api";
 
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";

@@ -13,8 +13,8 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { fetchTopics } from "@/api/discussions-topics/route";
-import { Topic } from "@/types/api";
+import { fetchTopics } from "@/app/api/discussions-topics";
+import { Topic } from "@/service/types/api";
 
 const formatDate = (dateStr: string) => {
   try {

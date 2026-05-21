@@ -30,17 +30,17 @@ import {
   unlinkDatasetFromReuse,
   linkDataserviceToReuse,
   uploadReuseImage,
-} from "@/api/reuses/route";
-import { fetchDataset, fetchMyDatasets } from "@/api/datasets/route";
+} from "@/app/api/reuses";
+import { fetchDataset, fetchMyDatasets } from "@/app/api/datasets";
 import {
   fetchActivity,
-} from "@/api/activity/route";
-import { requestTransfer } from "@/api/transfers/route";
-import { fetchOrgDatasets } from "@/api/organizations/route";
-import { fetchDiscussions } from "@/api/discussions-topics/route";
-import { searchDatasets, suggestTags } from "@/api/search/route";
+} from "@/app/api/activity";
+import { requestTransfer } from "@/app/api/transfers";
+import { fetchOrgDatasets } from "@/app/api/organizations";
+import { fetchDiscussions } from "@/app/api/discussions-topics";
+import { searchDatasets, suggestTags } from "@/app/api/search";
 import { useAuth } from "@/context/AuthContext";
-import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/types/api";
+import { Reuse, ReuseType, ReuseTopic, Dataset, Activity, Discussion, TagSuggestion } from "@/service/types/api";
 import {
   normalizeRemoteDatasets,
   type RemoteDatasetEntry,

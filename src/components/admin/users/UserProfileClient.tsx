@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { fetchUser, fetchUserActivity, updateUser, deleteUser, uploadUserAvatar } from "@/api/users/route";
-import { fetchUserFollowing } from "@/api/followers/route";
-import { Activity, UserAdmin, UserFollowing } from "@/types/api";
+import { fetchUser, fetchUserActivity, updateUser, deleteUser, uploadUserAvatar } from "@/app/api/users";
+import { fetchUserFollowing } from "@/app/api/followers";
+import { Activity, UserAdmin, UserFollowing } from "@/service/types/api";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {

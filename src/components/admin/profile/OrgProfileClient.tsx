@@ -14,8 +14,8 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { fetchOrganization, updateOrganization, uploadOrgLogo, deleteOrganization } from "@/api/organizations/route";
-import { Organization } from "@/types/api";
+import { fetchOrganization, updateOrganization, uploadOrgLogo, deleteOrganization } from "@/app/api/organizations";
+import { Organization } from "@/service/types/api";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";

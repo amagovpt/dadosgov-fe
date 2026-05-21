@@ -1,4 +1,4 @@
-import { OrganizationFilters } from "@/types/api";
+import { OrganizationFilters } from "@/service/types/api";
 
 export const ORGANIZATION_SORT_OPTIONS: Record<string, string> = {
   relevancia: "",

@@ -10,7 +10,7 @@ import {
   APIResponse,
   OrgBadges,
   Organization,
-} from "@/types/api";
+} from "@/service/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";

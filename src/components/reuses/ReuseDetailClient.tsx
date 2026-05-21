@@ -25,17 +25,17 @@ import {
   DropdownOption,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from "@/types/api";
+import { Reuse, Dataset, Discussion, DiscussionCreatePayload } from "@/service/types/api";
 import {
   fetchReuse,
-} from "@/api/reuses/route";
-import { fetchDataset } from "@/api/datasets/route";
+} from "@/app/api/reuses";
+import { fetchDataset } from "@/app/api/datasets";
 import {
   fetchDiscussions,
   createDiscussion,
   replyToDiscussion,
-} from "@/api/discussions-topics/route";
-import { followEntity, unfollowEntity, isFollowing } from "@/api/followers/route";
+} from "@/app/api/discussions-topics";
+import { followEntity, unfollowEntity, isFollowing } from "@/app/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";

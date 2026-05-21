@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Organization } from "@/types/api";
+import { Organization } from "@/service/types/api";
 
 export function useActiveOrganization() {
   const { user, isLoading } = useAuth();

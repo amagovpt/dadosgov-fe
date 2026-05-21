@@ -33,12 +33,12 @@ import {
   fetchMyDatasets,
   fetchResourceTypes,
   fetchAllowedExtensions,
-} from "@/api/datasets/route";
+} from "@/app/api/datasets";
 import {
   fetchOrgContactPoints,
   createContactPoint,
-} from "@/api/organizations/route";
-import { suggestSpatialZones, suggestTags } from "@/api/search/route";
+} from "@/app/api/organizations";
+import { suggestSpatialZones, suggestTags } from "@/app/api/search";
 import {
   License,
   Frequency,
@@ -49,7 +49,7 @@ import {
   ContactPoint,
   ResourceType,
   DatasetUpdatePayload,
-} from "@/types/api";
+} from "@/service/types/api";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";

@@ -3,9 +3,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { DropdownSection, DropdownOption } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "./IsolatedSelect";
-import { suggestUsers, suggestOrganizations } from "@/api/search/route";
-import type { OrganizationSuggestion, UserSuggestion } from "@/types/api";
-import type { TransferRecipientClass } from "@/types/api";
+import { suggestUsers, suggestOrganizations } from "@/app/api/search";
+import type { OrganizationSuggestion, UserSuggestion } from "@/service/types/api";
+import type { TransferRecipientClass } from "@/service/types/api";
 
 export interface RecipientSelection {
   class: TransferRecipientClass;

@@ -2,7 +2,7 @@ import type {
   Notification,
   NotificationDetails,
   ValidateHarvesterNotificationDetails,
-} from "@/types/api";
+} from "@/service/types/api";
 
 /**
  * Type-guard for the harvester-validation notification variant. Lets us safely

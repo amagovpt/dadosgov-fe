@@ -36,7 +36,7 @@ import {
   Discussion,
   DiscussionCreatePayload,
   APIResponse,
-} from "@/types/api";
+} from "@/service/types/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -44,12 +44,12 @@ import rehypeSanitize from "rehype-sanitize";
 import {
   fetchOrgDatasets,
   fetchOrgReuses,
-} from "@/api/organizations/route";
+} from "@/app/api/organizations";
 import {
   fetchOrgDiscussions,
   createDiscussion,
   replyToDiscussion,
-} from "@/api/discussions-topics/route";
+} from "@/app/api/discussions-topics";
 import { useAuth } from "@/context/AuthContext";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";

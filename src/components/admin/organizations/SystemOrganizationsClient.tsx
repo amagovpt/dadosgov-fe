@@ -16,8 +16,8 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { fetchOrganizations, deleteOrganization } from "@/api/organizations/route";
-import { Organization } from "@/types/api";
+import { fetchOrganizations, deleteOrganization } from "@/app/api/organizations";
+import { Organization } from "@/service/types/api";
 
 function DeleteOrgPopupContent({
   onClose,

@@ -1,6 +1,6 @@
-import { fetchOrganizations, fetchOrgBadges } from "@/api/organizations/route";
+import { fetchOrganizations, fetchOrgBadges } from "@/app/api/organizations";
 import OrganizationsClient from '@/components/organizations/OrganizationsClient';
-import { OrganizationFilters } from '@/types/api';
+import { OrganizationFilters } from '@/service/types/api';
 import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';

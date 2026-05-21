@@ -13,8 +13,8 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchOrgDiscussions } from "@/api/discussions-topics/route";
-import { Discussion } from "@/types/api";
+import { fetchOrgDiscussions } from "@/app/api/discussions-topics";
+import { Discussion } from "@/service/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";

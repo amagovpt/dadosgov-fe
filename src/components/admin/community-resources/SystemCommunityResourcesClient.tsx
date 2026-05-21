@@ -15,8 +15,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { fetchAllCommunityResources } from "@/api/community-resources/route";
-import { CommunityResource } from "@/types/api";
+import { fetchAllCommunityResources } from "@/app/api/community-resources";
+import { CommunityResource } from "@/service/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 
 type SortOrder = "none" | "ascending" | "descending";

@@ -4,17 +4,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, Tabs, Tab, TabHeader, TabBody, CardNoResults, CardLinks, Icon, StatusCard, Button, InputSearchBar, InputText, InputTextArea, DropdownSection, DropdownOption, usePopupContext } from '@ama-pt/agora-design-system';
-import { Dataset, Discussion, DiscussionCreatePayload, Reuse, CommunityResource } from '@/types/api';
+import { Dataset, Discussion, DiscussionCreatePayload, Reuse, CommunityResource } from '@/service/types/api';
 import IsolatedSelect from '@/components/admin/IsolatedSelect';
 import EditDiscussionPopup from '@/components/discussions/EditDiscussionPopup';
 import DeleteDiscussionPopup from '@/components/discussions/DeleteDiscussionPopup';
-import { fetchReuses } from "@/api/reuses/route";
+import { fetchReuses } from "@/app/api/reuses";
 import {
   fetchDiscussions,
   createDiscussion,
   replyToDiscussion,
-} from "@/api/discussions-topics/route";
-import { fetchCommunityResourcesByDataset } from "@/api/community-resources/route";
+} from "@/app/api/discussions-topics";
+import { fetchCommunityResourcesByDataset } from "@/app/api/community-resources";
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { DatasetResourcesTable } from './DatasetResourcesTable';

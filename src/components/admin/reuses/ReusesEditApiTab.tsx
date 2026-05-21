@@ -7,7 +7,7 @@ import {
   InputSelect,
   InputText,
 } from "@ama-pt/agora-design-system";
-import type { Reuse } from "@/types/api";
+import type { Reuse } from "@/service/types/api";
 
 type ApiLink = { url: string };
 

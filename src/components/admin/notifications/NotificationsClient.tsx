@@ -9,11 +9,11 @@ import {
   CardNoResults,
   Icon,
 } from "@ama-pt/agora-design-system";
-import { fetchNotifications, markNotificationRead } from "@/api/notifications/route";
+import { fetchNotifications, markNotificationRead } from "@/app/api/notifications";
 import type {
   Notification,
   ValidateHarvesterNotificationDetails,
-} from "@/types/api";
+} from "@/service/types/api";
 import {
   harvesterValidationLink,
   isHarvesterValidation,

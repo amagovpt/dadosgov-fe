@@ -17,7 +17,7 @@ import {
   TabHeader,
   TabBody,
 } from "@ama-pt/agora-design-system";
-import { Resource, CommunityResource } from "@/types/api";
+import { Resource, CommunityResource } from "@/service/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE || "https://dados.gov.pt/api/1";
 

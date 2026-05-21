@@ -24,8 +24,8 @@ import {
   fetchHarvesters,
   rejectHarvestSource,
   validateHarvestSource,
-} from "@/api/harvesters/route";
-import type { HarvestSource } from "@/types/api";
+} from "@/app/api/harvesters";
+import type { HarvestSource } from "@/service/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import {
   ApproveHarvesterPopupContent,

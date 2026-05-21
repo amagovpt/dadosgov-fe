@@ -19,8 +19,8 @@ import {
   Button,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchMyReuses } from "@/api/reuses/route";
-import { Reuse } from "@/types/api";
+import { fetchMyReuses } from "@/app/api/reuses";
+import { Reuse } from "@/service/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";

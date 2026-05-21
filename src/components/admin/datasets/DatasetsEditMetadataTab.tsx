@@ -13,7 +13,7 @@ import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import type { Dataset, SpatialZone } from "@/types/api";
+import type { Dataset, SpatialZone } from "@/service/types/api";
 
 const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEditor"), {
   ssr: false,

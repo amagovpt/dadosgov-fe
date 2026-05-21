@@ -13,11 +13,11 @@ import {
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { Organization } from "@/types/api";
+import { Organization } from "@/service/types/api";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { useAuth } from "@/context/AuthContext";
-import { requestMembership } from "@/api/organizations/route";
-import { followEntity, unfollowEntity, isFollowing } from "@/api/followers/route";
+import { requestMembership } from "@/app/api/organizations";
+import { followEntity, unfollowEntity, isFollowing } from "@/app/api/followers";
 import { formatMetricValue } from "@/utils/formatNumber";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";

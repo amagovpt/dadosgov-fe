@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { APIResponse, Organization, Reuse } from "@/types/api";
+import { APIResponse, Organization, Reuse } from "@/service/types/api";
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";

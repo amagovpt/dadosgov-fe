@@ -19,8 +19,8 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
-import { createHarvester, previewHarvestSource } from "@/api/harvesters/route";
-import { HarvestSourceCreatePayload, HarvestPreviewJob } from "@/types/api";
+import { createHarvester, previewHarvestSource } from "@/app/api/harvesters";
+import { HarvestSourceCreatePayload, HarvestPreviewJob } from "@/service/types/api";
 
 export default function HarvestersNewClient() {
   const { user } = useAuth();

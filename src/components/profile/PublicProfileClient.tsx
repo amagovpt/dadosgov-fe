@@ -18,14 +18,14 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import { Dataset, Reuse, Follow, UserFollowing, UserPublic } from "@/types/api";
+import { Dataset, Reuse, Follow, UserFollowing, UserPublic } from "@/service/types/api";
 import {
   fetchDatasets,
   fetchMyDatasets,
-} from "@/api/datasets/route";
-import { fetchReuses, fetchMyReuses } from "@/api/reuses/route";
-import { fetchUserProfile } from "@/api/users/route";
-import { fetchUserFollowers, fetchMyFollowing } from "@/api/followers/route";
+} from "@/app/api/datasets";
+import { fetchReuses, fetchMyReuses } from "@/app/api/reuses";
+import { fetchUserProfile } from "@/app/api/users";
+import { fetchUserFollowers, fetchMyFollowing } from "@/app/api/followers";
 import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";

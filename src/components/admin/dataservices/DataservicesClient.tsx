@@ -18,8 +18,8 @@ import {
   Button,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchMyDataservices } from "@/api/dataservices/route";
-import { Dataservice } from "@/types/api";
+import { fetchMyDataservices } from "@/app/api/dataservices";
+import { Dataservice } from "@/service/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";

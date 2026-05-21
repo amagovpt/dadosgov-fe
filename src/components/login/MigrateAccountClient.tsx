@@ -15,7 +15,7 @@ import {
   sendMigrationCode,
   confirmMigration,
   skipMigration,
-} from "@/api/migration/route";
+} from "@/app/api/migration";
 
 type Step =
   | "loading"

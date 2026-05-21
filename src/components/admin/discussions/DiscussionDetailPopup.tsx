@@ -5,16 +5,16 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Avatar, Button, Icon, InputTextArea, usePopupContext } from "@ama-pt/agora-design-system";
-import { Discussion, Dataset, Reuse } from "@/types/api";
+import { Discussion, Dataset, Reuse } from "@/service/types/api";
 import {
   fetchReuse,
-} from "@/api/reuses/route";
-import { fetchDataset } from "@/api/datasets/route";
+} from "@/app/api/reuses";
+import { fetchDataset } from "@/app/api/datasets";
 import {
   replyToDiscussion,
   closeDiscussion,
   deleteDiscussion,
-} from "@/api/discussions-topics/route";
+} from "@/app/api/discussions-topics";
 
 interface DiscussionDetailPopupProps {
   discussion: Discussion;

@@ -7,7 +7,7 @@ import Button from "@/components/Primitives/Button";
 import apolloClient from "@/service/utils/apollo-client";
 import { getCoursesPage } from "@/service/queries/courses/courses";
 import { flattenData } from "@/utils/flattenObject";
-import { PageCourses } from "@/service/types/courses";
+import { PageCourses } from "@/service/types/courses/courses";
 import dayjs from "dayjs";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getAssets } from "@/utils/getAssets";

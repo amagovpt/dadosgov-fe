@@ -18,8 +18,8 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchHarvestJob, fetchHarvester } from "@/api/harvesters/route";
-import type { HarvestJob, HarvestItem, HarvestSource } from "@/types/api";
+import { fetchHarvestJob, fetchHarvester } from "@/app/api/harvesters";
+import type { HarvestJob, HarvestItem, HarvestSource } from "@/service/types/api";
 
 interface HarvestJobDetailClientProps {
   slug: string;

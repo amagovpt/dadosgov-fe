@@ -21,8 +21,8 @@ import {
   fetchLicenses,
   fetchGranularities,
   suggestFormats,
-} from "@/api/datasets/route";
-import { fetchOrganizations } from "@/api/organizations/route";
+} from "@/app/api/datasets";
+import { fetchOrganizations } from "@/app/api/organizations";
 import {
   searchDatasets,
   searchOrganizations,
@@ -30,7 +30,7 @@ import {
   searchDataservices,
   suggestTags,
   suggestSpatialZones,
-} from "@/api/search/route";
+} from "@/app/api/search";
 import {
   Dataset,
   Organization,
@@ -38,7 +38,7 @@ import {
   Dataservice,
   License,
   Granularity,
-} from "@/types/api";
+} from "@/service/types/api";
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";
 

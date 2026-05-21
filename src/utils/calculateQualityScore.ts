@@ -1,4 +1,4 @@
-import { Dataset } from "@/types/api";
+import { Dataset } from "@/service/types/api";
 
 export function calculateQualityScore(
   qualityCriteria: [keyof NonNullable<Dataset["quality"]>, string][],
