@@ -30,6 +30,7 @@ import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
 
 interface OrgStatisticsClientProps {
   orgId: string;
@@ -126,16 +127,11 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
 
   if (!isOrgLoading && !org) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="admin-page__empty"
-          position="center"
-          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-buildings"
+        title="Sem organizações"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 

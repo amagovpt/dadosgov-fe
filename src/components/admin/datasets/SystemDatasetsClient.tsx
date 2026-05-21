@@ -21,8 +21,9 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
-import TextLink from "@/components/Primitives/TextLink";import { createPaginationProps } from "@/utils/createPaginationProps";
-
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
@@ -299,18 +300,11 @@ export default function SystemDatasetsClient() {
           </TableBody>
         </Table>
       ) : (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-              title="Sem publicações"
-              description="Nenhum conjunto de dados encontrado."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-edit"
+          title="Sem publicações"
+          description="Nenhum conjunto de dados encontrado."
+        />
       )}
     </div>
   );

@@ -30,6 +30,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import AppIcon from "@/components/Primitives/AppIcon";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminEmptyState from "../AdminEmptyState";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -117,16 +118,11 @@ export default function OrgReusesClient() {
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="admin-page__empty"
-          position="center"
-          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-user-buildings"
+        title="Sem organizações"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 
@@ -191,108 +187,86 @@ export default function OrgReusesClient() {
       {isLoading ? (
         <p>A carregar...</p>
       ) : reuses.length > 0 ? (
-          <Table
-            paginationProps={createPaginationProps(
-              itemsPerPage,
-              reuses.length,
-              currentPage,
-              setCurrentPage,
-              setItemsPerPage
-            )}
-          >
-            <TableHeader>
-              <TableRow>
-                <TableHeaderCell
-                  sortType="numeric"
-                  sortOrder={getSortOrder("title")}
-                  onSortChange={handleSort("title")}
-                >
-                  Título da reutilização
-                </TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell
-                  sortType="date"
-                  sortOrder={getSortOrder("created_at")}
-                  onSortChange={handleSort("created_at")}
-                >
-                  Criado em
-                </TableHeaderCell>
-                <TableHeaderCell
-                  sortType="numeric"
-                  sortOrder={getSortOrder("datasets")}
-                  onSortChange={handleSort("datasets")}
-                >
-                  Conjuntos de dados
-                </TableHeaderCell>
-                <TableHeaderCell>Ações</TableHeaderCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedReuses.map((reuse, index) => (
-                <TableRow key={index}>
-                  <TableCell headerLabel="Título">
-                    <a
-                      href={`/pages/reuses/${reuse.slug}`}
-                      className="text-primary-600 underline"
-                    >
-                      {reuse.title}
+        <Table
+          paginationProps={createPaginationProps(
+            itemsPerPage,
+            reuses.length,
+            currentPage,
+            setCurrentPage,
+            setItemsPerPage
+          )}
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHeaderCell
+                sortType="numeric"
+                sortOrder={getSortOrder("title")}
+                onSortChange={handleSort("title")}
+              >
+                Título da reutilização
+              </TableHeaderCell>
+              <TableHeaderCell>Estado</TableHeaderCell>
+              <TableHeaderCell
+                sortType="date"
+                sortOrder={getSortOrder("created_at")}
+                onSortChange={handleSort("created_at")}
+              >
+                Criado em
+              </TableHeaderCell>
+              <TableHeaderCell
+                sortType="numeric"
+                sortOrder={getSortOrder("datasets")}
+                onSortChange={handleSort("datasets")}
+              >
+                Conjuntos de dados
+              </TableHeaderCell>
+              <TableHeaderCell>Ações</TableHeaderCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedReuses.map((reuse, index) => (
+              <TableRow key={index}>
+                <TableCell headerLabel="Título">
+                  <a href={`/pages/reuses/${reuse.slug}`} className="text-primary-600 underline">
+                    {reuse.title}
+                  </a>
+                </TableCell>
+                <TableCell headerLabel="Estado">
+                  {reuse.deleted ? (
+                    <StatusDot variant="danger">Excluído</StatusDot>
+                  ) : reuse.archived ? (
+                    <StatusDot variant="neutral">Arquivado</StatusDot>
+                  ) : reuse.private ? (
+                    <StatusDot variant="warning">Rascunho</StatusDot>
+                  ) : (
+                    <StatusDot variant="success">Público</StatusDot>
+                  )}
+                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDateToDMY(reuse.created_at)}</TableCell>
+                <TableCell headerLabel="Conjuntos de dados">
+                  {reuse.datasets?.length ?? 0}
+                </TableCell>
+                <TableCell headerLabel="Ações">
+                  <div className="flex gap-8">
+                    <a href={`/pages/reuses/${reuse.slug}`}>
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                     </a>
-                  </TableCell>
-                  <TableCell headerLabel="Estado">
-                    {reuse.deleted ? (
-                      <StatusDot variant="danger">Excluído</StatusDot>
-                    ) : reuse.archived ? (
-                      <StatusDot variant="neutral">Arquivado</StatusDot>
-                    ) : reuse.private ? (
-                      <StatusDot variant="warning">Rascunho</StatusDot>
-                    ) : (
-                      <StatusDot variant="success">Público</StatusDot>
-                    )}
-                  </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDateToDMY(reuse.created_at)}
-                  </TableCell>
-                  <TableCell headerLabel="Conjuntos de dados">
-                    {reuse.datasets?.length ?? 0}
-                  </TableCell>
-                  <TableCell headerLabel="Ações">
-                    <div className="flex gap-8">
-                      <a href={`/pages/reuses/${reuse.slug}`}>
-                        <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                      </a>
-                      <a href={`/pages/admin/org/reuses/edit?slug=${reuse.slug}`}>
-                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                      </a>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    <a href={`/pages/admin/org/reuses/edit?slug=${reuse.slug}`}>
+                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
+                    </a>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       ) : (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-              title="Sem publicações"
-              description="A organização ainda não publicou uma reutilização."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => (window.location.href = "/pages/admin/reuses/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-edit"
+          title="Sem publicações"
+          description="A organização ainda não publicou uma reutilização."
+          createUrl="/pages/admin/reuses/new"
+        />
       )}
     </div>
   );

@@ -19,6 +19,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import AppIcon from "@/components/Primitives/AppIcon";
+import AdminEmptyState from "../AdminEmptyState";
 
 export default function DiscussionsClient() {
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -75,16 +76,10 @@ export default function DiscussionsClient() {
       </div>
 
       {discussions.length === 0 ? (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={<Icon name="agora-line-chat" className="admin-page__empty-icon" />}
-              description="Ainda não há discussões sobre esta organização."
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-chat"
+          description="Ainda não há discussões sobre esta organização."
+        />
       ) : (
         <>
           <p className="text-sm mb-24 font-semibold uppercase text-neutral-700">

@@ -26,6 +26,7 @@ import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created" | "last_update";
@@ -280,29 +281,12 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
           </TableBody>
         </Table>
       ) : (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-              title="Sem publicações"
-              description="A organização ainda não publicou conjuntos de dados."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => (window.location.href = "/pages/admin/datasets/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-edit"
+          title="Sem publicações"
+          description="A organização ainda não publicou conjuntos de dados."
+          createUrl="/pages/admin/datasets/new"
+        />
       )}
     </div>
   );

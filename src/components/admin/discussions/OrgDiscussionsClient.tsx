@@ -22,6 +22,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
+import AdminEmptyState from "../AdminEmptyState";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -124,26 +125,14 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
       {isLoading ? (
         <p>A carregar...</p>
       ) : discussions.length === 0 ? (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={
-                <Icon
-                  name="agora-line-chat"
-                  className="w-12 h-12 text-primary-500 icon-xl"
-                />
-              }
-              title="Sem discussões"
-              description="Ainda não há discussões sobre esta organização."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-chat"
+          title="Sem discussões"
+          description="Ainda não há discussões sobre esta organização."
+        />
       ) : (
         <>
-          <p className="text-neutral-700 text-sm font-semibold uppercase mb-24">
+          <p className="text-sm mb-24 font-semibold uppercase text-neutral-700">
             {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
           </p>
 
@@ -184,7 +173,7 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
                 >
                   <TableCell headerLabel="Título">
                     <button
-                      className="text-primary-600 underline text-left"
+                      className="text-left text-primary-600 underline"
                       onClick={(e) => {
                         e.stopPropagation();
                         openDiscussion(discussion);
@@ -193,9 +182,7 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
                       {discussion.title}
                     </button>
                   </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDate(discussion.created)}
-                  </TableCell>
+                  <TableCell headerLabel="Criado em">{formatDate(discussion.created)}</TableCell>
                   <TableCell headerLabel="Fechado em">
                     {discussion.closed ? formatDate(discussion.closed) : "-"}
                   </TableCell>
@@ -203,7 +190,6 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
               ))}
             </TableBody>
           </Table>
-
         </>
       )}
     </div>

@@ -14,12 +14,18 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { fetchOrganization, updateOrganization, uploadOrgLogo, deleteOrganization } from "@/services/api";
+import {
+  fetchOrganization,
+  updateOrganization,
+  uploadOrgLogo,
+  deleteOrganization,
+} from "@/services/api";
 import { Organization } from "@/types/api";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
+import AdminEmptyState from "../AdminEmptyState";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -114,11 +120,13 @@ export default function OrgProfileClient() {
     if (hasDescriptionError) setDescriptionError(true);
     if (hasNameError || hasDescriptionError) {
       requestAnimationFrame(() => {
-        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document
+          .querySelector('[aria-invalid="true"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
       });
       return;
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setNameError(false);
     setDescriptionError(false);
     setIsSaving(true);
@@ -181,18 +189,11 @@ export default function OrgProfileClient() {
 
   if (!isOrgLoading && !orgId) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="admin-page__empty"
-          position="center"
-          icon={
-            <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />
-          }
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-user-buildings"
+        title="Sem organizações"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 
@@ -208,14 +209,12 @@ export default function OrgProfileClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-64 mb-32">
-        Perfil da organização
-      </h1>
+      <h1 className="admin-page__title mb-32 mt-64">Perfil da organização</h1>
 
       {org && (
         <div className="profile-card">
           <div className="profile-card__avatar-container">
-            {(logoPreview || org.logo_thumbnail) ? (
+            {logoPreview || org.logo_thumbnail ? (
               <img
                 src={logoPreview ?? org.logo_thumbnail!}
                 alt={org.name}
@@ -233,26 +232,33 @@ export default function OrgProfileClient() {
 
           <div className="profile-card__body">
             <div className="profile-card__info">
-              <p className="text-neutral-900 text-xl font-semibold leading-8">
-                {org.name}
-              </p>
+              <p className="text-xl font-semibold leading-8 text-neutral-900">{org.name}</p>
               {org.acronym && (
-                <p className="text-neutral-900 text-base font-light leading-7">
-                  {org.acronym}
-                </p>
+                <p className="text-base font-light leading-7 text-neutral-900">{org.acronym}</p>
               )}
-              <div className="flex items-center gap-16 text-neutral-900 text-sm">
+              <div className="text-sm flex items-center gap-16 text-neutral-900">
                 <span className="flex items-center gap-4">
-                  <Icon name="agora-line-user-group" className="w-16 h-16" />
+                  <Icon name="agora-line-user-group" className="h-16 w-16" />
                   {org.metrics.members} membros
                 </span>
                 <span className="flex items-center gap-4">
-                  <Icon name="agora-line-layers-menu" className="w-16 h-16" />
+                  <Icon name="agora-line-layers-menu" className="h-16 w-16" />
                   {org.metrics.datasets} conjuntos de dados
                 </span>
                 <span className="flex items-center gap-4">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="text-primary-500">
-                    <path d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z" fill="currentColor" />
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                    className="text-primary-500"
+                  >
+                    <path
+                      d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z"
+                      fill="currentColor"
+                    />
                   </svg>
                   {org.metrics.reuses} reutilizações
                 </span>
@@ -328,10 +334,8 @@ export default function OrgProfileClient() {
               />
 
               <div>
-                <span className="text-primary-900 text-base font-medium leading-7">
-                  Logotipo
-                </span>
-                <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
+                <span className="text-base font-medium leading-7 text-primary-900">Logotipo</span>
+                <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
                   <DragAndDropUploader
                     label="Ficheiro"
                     dragAndDropLabel="Arraste e largue o ficheiro aqui"
@@ -355,7 +359,7 @@ export default function OrgProfileClient() {
                 </div>
               </div>
 
-              <div className="flex justify-end mt-16">
+              <div className="mt-16 flex justify-end">
                 <Button
                   variant="primary"
                   hasIcon
@@ -368,7 +372,8 @@ export default function OrgProfileClient() {
                 </Button>
               </div>
 
-              {(isAdmin || org?.members?.some((m) => m.user.id === user?.id && m.role === "admin")) && (
+              {(isAdmin ||
+                org?.members?.some((m) => m.user.id === user?.id && m.role === "admin")) && (
                 <div className="dataset-edit-danger-actions">
                   {deleteError && (
                     <StatusCard
@@ -394,15 +399,12 @@ export default function OrgProfileClient() {
                             e.preventDefault();
                             e.stopPropagation();
                             show(
-                              <DeleteOrgPopupContent
-                                onClose={hide}
-                                onConfirm={handleDeleteOrg}
-                              />,
+                              <DeleteOrgPopupContent onClose={hide} onConfirm={handleDeleteOrg} />,
                               {
                                 title: "Tem a certeza que quer eliminar esta organização?",
                                 closeAriaLabel: "Fechar",
                                 dimensions: "m",
-                              },
+                              }
                             );
                           }}
                           disabled={isDeleting}

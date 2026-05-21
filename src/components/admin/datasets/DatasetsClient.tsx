@@ -27,6 +27,7 @@ import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminEmptyState from "../AdminEmptyState";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],
@@ -314,29 +315,12 @@ export default function DatasetsClient() {
           </TableBody>
         </Table>
       ) : (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-              title="Sem conjuntos de dados"
-              description="Não publicou conjuntos de dados."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => (window.location.href = "/pages/admin/datasets/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-edit"
+          title="Sem conjuntos de dados"
+          description="Não publicou conjuntos de dados."
+          createUrl="/pages/admin/datasets/new"
+        />
       )}
     </div>
   );

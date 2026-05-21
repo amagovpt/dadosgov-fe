@@ -29,6 +29,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminEmptyState from "../AdminEmptyState";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -55,10 +56,7 @@ export default function OrgDataservicesClient() {
   const getSortOrder = (field: DataserviceSortField): SortOrder =>
     sortField === field ? sortOrder : "none";
 
-  const filteredApis = useMemo(
-    () => filterByStatus(apis, statusFilter),
-    [apis, statusFilter]
-  );
+  const filteredApis = useMemo(() => filterByStatus(apis, statusFilter), [apis, statusFilter]);
 
   const sortedApis = useMemo(() => {
     if (!sortField || sortOrder === "none") return filteredApis;
@@ -97,16 +95,11 @@ export default function OrgDataservicesClient() {
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="admin-page__empty"
-          position="center"
-          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-buildings"
+        title="Sem organizações"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 
@@ -171,14 +164,9 @@ export default function OrgDataservicesClient() {
         <p>A carregar...</p>
       ) : filteredApis.length > 0 ? (
         <Table
-          paginationProps={createPaginationProps(
-            5,
-            filteredApis.length,
-            0,
-            undefined,
-            undefined,
-            { currentPageIsZeroBased: true }
-          )}
+          paginationProps={createPaginationProps(5, filteredApis.length, 0, undefined, undefined, {
+            currentPageIsZeroBased: true,
+          })}
         >
           <TableHeader>
             <TableRow>
@@ -248,29 +236,12 @@ export default function OrgDataservicesClient() {
           </TableBody>
         </Table>
       ) : (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-              title="Sem publicações"
-              description="A organização ainda não publicou uma API."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => (window.location.href = "/pages/admin/dataservices/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-edit"
+          title="Sem publicações"
+          description="A organização ainda não publicou uma API."
+          createUrl="/pages/admin/dataservices/new"
+        />
       )}
     </div>
   );

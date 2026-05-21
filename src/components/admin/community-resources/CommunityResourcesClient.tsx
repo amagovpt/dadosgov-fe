@@ -23,6 +23,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -224,31 +225,11 @@ export default function CommunityResourcesClient() {
           </TableBody>
         </Table>
       ) : (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={
-                <Icon name="agora-line-user-group" className="icon-xl h-12 w-12 text-primary-500" />
-              }
-              title="Sem publicações"
-              description="Ainda não publicou um recurso comunitário."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => router.push("/pages/admin/community-resources/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-user-group"
+          description="Ainda não publicou um recurso comunitário."
+          createUrl="/pages/admin/community-resources/new"
+        />
       )}
     </div>
   );

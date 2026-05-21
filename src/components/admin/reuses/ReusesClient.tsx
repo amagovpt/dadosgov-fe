@@ -27,6 +27,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminEmptyState from "../AdminEmptyState";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -275,29 +276,12 @@ export default function ReusesClient() {
           </TableBody>
         </Table>
       ) : (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={<img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />}
-              title="Sem reutilizações"
-              description="Não publicou reutilizações"
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => (window.location.href = "/pages/admin/reuses/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="bar_chart"
+          title="Sem reutilizações"
+          description="Não publicou reutilizações"
+          createUrl="/pages/admin/reuses/new"
+        />
       )}
     </div>
   );

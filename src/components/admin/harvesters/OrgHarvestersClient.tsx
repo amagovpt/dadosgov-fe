@@ -28,6 +28,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
+import AdminEmptyState from "../AdminEmptyState";
 
 type StatusInfo = {
   label: string;
@@ -164,16 +165,11 @@ export default function OrgHarvestersClient() {
 
   if (!isOrgLoading && !orgId) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="admin-page__empty"
-          position="center"
-          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-buildings"
+        title="Sem organizações"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 
@@ -331,20 +327,11 @@ export default function OrgHarvestersClient() {
           </Table>
         </>
       ) : (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={
-                <Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />
-              }
-              title="Sem harvesters"
-              description="A organização ainda não tem harvesters."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-buildings"
+          title="Sem harvesters"
+          description="A organização ainda não tem harvesters."
+        />
       )}
     </div>
   );

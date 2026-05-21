@@ -24,6 +24,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AppIcon from "@/components/Primitives/AppIcon";
+import AdminEmptyState from "../AdminEmptyState";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
@@ -98,16 +99,10 @@ export default function OrgCommunityResourcesClient() {
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="admin-page__empty"
-          position="center"
-          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-buildings"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 
@@ -217,9 +212,9 @@ export default function OrgCommunityResourcesClient() {
                   </TableCell>
                   <TableCell headerLabel="Ações">
                     <div className="flex gap-8">
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
                       <a href={`/pages/admin/community-resources/edit?resource_id=${resource.id}`}>
-                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
                       </a>
                     </div>
                   </TableCell>
@@ -229,20 +224,11 @@ export default function OrgCommunityResourcesClient() {
           </Table>
         </>
       ) : (
-        <div className="admin-page__body">
-          <div className="admin-page__content">
-            <CardNoResults
-              className="admin-page__empty"
-              position="center"
-              icon={
-                <Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />
-              }
-              title="Sem recursos comunitários"
-              description="A organização ainda não tem recursos comunitários."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-buildings"
+          title="Sem recursos comunitários"
+          description="A organização ainda não tem recursos comunitários."
+        />
       )}
     </div>
   );
