@@ -27,18 +27,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminLayout from "@/components/Layout/AdminLayout";
-
-const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
-  ["dataset_description_quality", "Descrição"],
-  ["has_resources", "Recursos"],
-  ["license", "Licença"],
-  ["has_open_format", "Formato aberto"],
-  ["all_resources_available", "Recursos disponíveis"],
-  ["resources_documentation", "Documentação"],
-  ["spatial", "Cobertura espacial"],
-  ["temporal_coverage", "Cobertura temporal"],
-  ["update_frequency", "Frequência de atualização"],
-];
+import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";

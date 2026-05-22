@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Icon, CardArticle } from "@ama-pt/agora-design-system";
+import { Button, CardArticle } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import { Dataset, Post, Reuse, SiteMetrics } from "@/types/api";
 import { format } from "date-fns";
