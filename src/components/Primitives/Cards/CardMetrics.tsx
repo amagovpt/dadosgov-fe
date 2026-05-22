@@ -55,8 +55,8 @@ export default function CardMetrics({
                 image={{
                     src: organization?.logo || "/images/placeholders/organization.png",
                     alt: organization?.name || "Organização",
-                    height: "56px",
-                    className: "bg-primary-100 !object-contain !h-[56px]",
+                    height: "250px",
+                    className: "bg-primary-100 !object-contain !max-w-[250px] !max-h-[250px]",
                 }}
                 subtitleText={
                     <div className="flex flex-col">
