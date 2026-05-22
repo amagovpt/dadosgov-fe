@@ -4,12 +4,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import {
   Breadcrumb,
-  CardNoResults,
   Icon,
-  InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   StatusCard,
   Table,
   TableHeader,
@@ -30,6 +26,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
+import StatusFilterSelect from "../StatusFilterSelect";
 
 type StatusInfo = {
   label: string;
@@ -128,6 +125,7 @@ export default function OrgHarvestersClient() {
 
   const filteredHarvesters = useMemo(() => {
     if (!statusFilter) return harvesters;
+
     return harvesters.filter((h) => {
       if (statusFilter === "failed") {
         return h.last_job?.status === "failed";
@@ -202,37 +200,21 @@ export default function OrgHarvestersClient() {
             aria-label="Pesquisar harvesters"
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+        <StatusFilterSelect
+          value={statusFilter}
+          onChange={(v) => {
+            setStatusFilter(v);
             setCurrentPage(1);
           }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="pending" selected={statusFilter === "pending"}>
-              Em espera de validação
-            </DropdownOption>
-            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>
-              Validado
-            </DropdownOption>
-            <DropdownOption value="refused" selected={statusFilter === "refused"}>
-              Recusado
-            </DropdownOption>
-            <DropdownOption value="done" selected={statusFilter === "done"}>
-              Terminado
-            </DropdownOption>
-            <DropdownOption value="failed" selected={statusFilter === "failed"}>
-              Falhado
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+          options={[
+            { value: "", label: "Todos" },
+            { value: "pending", label: "Em espera de validação" },
+            { value: "accepted", label: "Validado" },
+            { value: "refused", label: "Recusado" },
+            { value: "done", label: "Terminado" },
+            { value: "failed", label: "Falhado" },
+          ]}
+        />
       </div>
 
       {statusFilter === "accepted" && (

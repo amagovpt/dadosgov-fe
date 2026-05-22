@@ -27,6 +27,7 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
+import StatusFilterSelect from "../StatusFilterSelect";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -153,35 +154,14 @@ export default function ReusesClient() {
             }}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
+        <StatusFilterSelect
+          value={statusFilter}
           defaultValue={statusFilter || undefined}
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+          onChange={(v) => {
+            setStatusFilter(v);
             setCurrentPage(1);
           }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>
-              Público
-            </DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>
-              Arquivado
-            </DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>
-              Rascunho
-            </DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
-              Excluído
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+        />
       </div>
 
       {isLoading ? (

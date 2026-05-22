@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
   Icon,
-  InputSelect,
   InputSearchBar,
   Table,
   TableHeader,
@@ -15,12 +14,12 @@ import {
   TableCell,
   ProgressBar,
 } from "@ama-pt/agora-design-system";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -172,35 +171,14 @@ export default function DatasetsClient() {
             }}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
+        <StatusFilterSelect
+          value={statusFilter}
           defaultValue={statusFilter || undefined}
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+          onChange={(v) => {
+            setStatusFilter(v);
             setCurrentPage(1);
           }}
-        >
-          <Dropdown.Section name="status">
-            <Dropdown.Option value="" selected={statusFilter === ""}>
-              Todos
-            </Dropdown.Option>
-            <Dropdown.Option value="public" selected={statusFilter === "public"}>
-              Público
-            </Dropdown.Option>
-            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>
-              Arquivado
-            </Dropdown.Option>
-            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>
-              Rascunho
-            </Dropdown.Option>
-            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>
-              Excluído
-            </Dropdown.Option>
-          </Dropdown.Section>
-        </InputSelect>
+        />
       </div>
 
       {!isLoading && totalItems > 0 ? (

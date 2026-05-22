@@ -8,16 +8,15 @@ import {
   CardNoResults,
   Icon,
   InputSearchBar,
-  InputSelect,
-  DropdownSection,
-  DropdownOption,
   Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
+  InputSelect,
 } from "@ama-pt/agora-design-system";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -25,6 +24,8 @@ import { fetchAdminPosts } from "@/services/api";
 import { Post } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
+import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
+import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "name" | "created_at" | "last_modified";
@@ -187,28 +188,18 @@ export default function SystemPostsClient() {
             </DropdownOption>
           </DropdownSection>
         </InputSelect>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+        <StatusFilterSelect
+          value={statusFilter}
+          onChange={(v) => {
+            setStatusFilter(v);
             setCurrentPage(1);
           }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="published" selected={statusFilter === "published"}>
-              Publicado
-            </DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>
-              Despublicado
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+          options={[
+            { value: "", label: "Todos" },
+            { value: "published", label: "Publicado" },
+            { value: "draft", label: "Despublicado" },
+          ]}
+        />
         <Button
           variant="primary"
           appearance="outline"

@@ -32,6 +32,7 @@ import { format } from "date-fns";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import ResultsCount from "../ResultsCount";
+import StatusFilterSelect from "../StatusFilterSelect";
 
 const VALIDATION_STATUS: Record<
   string,
@@ -173,7 +174,6 @@ export default function SystemHarvestersClient() {
   useEffect(() => {
     loadData();
   }, [loadData]);
-
   const handleSearch = (value: string) => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
@@ -234,36 +234,18 @@ export default function SystemHarvestersClient() {
             }}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
-          }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="pending" selected={statusFilter === "pending"}>
-              Em espera de validação
-            </DropdownOption>
-            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>
-              Validado
-            </DropdownOption>
-            <DropdownOption value="refused" selected={statusFilter === "refused"}>
-              Recusado
-            </DropdownOption>
-            <DropdownOption value="done" selected={statusFilter === "done"}>
-              Terminado
-            </DropdownOption>
-            <DropdownOption value="failed" selected={statusFilter === "failed"}>
-              Falhado
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+        <StatusFilterSelect
+          value={statusFilter}
+          onChange={(v) => setStatusFilter(v)}
+          options={[
+            { value: "", label: "Todos" },
+            { value: "pending", label: "Em espera de validação" },
+            { value: "accepted", label: "Validado" },
+            { value: "refused", label: "Recusado" },
+            { value: "done", label: "Terminado" },
+            { value: "failed", label: "Falhado" },
+          ]}
+        />
       </div>
 
       {statusFilter === "accepted" && (

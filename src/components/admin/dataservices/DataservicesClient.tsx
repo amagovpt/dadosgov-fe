@@ -4,10 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Breadcrumb,
   Icon,
-  InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -15,6 +12,7 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
@@ -108,33 +106,7 @@ export default function DataservicesClient() {
             aria-label="Pesquisar APIs"
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
-          }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>
-              Público
-            </DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>
-              Arquivado
-            </DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>
-              Rascunho
-            </DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
-              Excluído
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+        <StatusFilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v)} />
       </div>
 
       {!isLoading && filteredApis.length > 0 ? (

@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   Icon,
-  InputSelect,
   InputSearchBar,
   Table,
   TableHeader,
@@ -19,7 +18,6 @@ import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
-import { Dropdown } from "@/components/Primitives/Dropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
@@ -27,6 +25,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created" | "last_update";
@@ -154,31 +153,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={handleStatusChange}
-        >
-          <Dropdown.Section name="status">
-            <Dropdown.Option value="" selected={statusFilter === ""}>
-              Todos
-            </Dropdown.Option>
-            <Dropdown.Option value="public" selected={statusFilter === "public"}>
-              Público
-            </Dropdown.Option>
-            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>
-              Arquivado
-            </Dropdown.Option>
-            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>
-              Rascunho
-            </Dropdown.Option>
-            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>
-              Excluído
-            </Dropdown.Option>
-          </Dropdown.Section>
-        </InputSelect>
+        <StatusFilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v)} />
         <a href={`/api/1/organizations/${orgId}/catalog`} download>
           <Button
             variant="primary"
