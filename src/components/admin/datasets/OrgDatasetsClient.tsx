@@ -6,7 +6,6 @@ import {
   Icon,
   InputSelect,
   InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -25,9 +24,9 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created" | "last_update";
 
 interface OrgDatasetsClientProps {
@@ -45,13 +44,14 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [sortField, setSortField] = useState<SortField>("created");
+  const [sortField, setSortField] = useState<SortField | null>("created");
   const [sortOrder, setSortOrder] = useState<SortOrder>("descending");
 
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const buildSortParam = (field: SortField, order: SortOrder): string => {
+  const buildSortParam = (field: SortField | null, order: SortOrder): string => {
     if (order === "none") return "-created";
+    if (!field) return "-created";
     return order === "ascending" ? field : `-${field}`;
   };
 
@@ -114,15 +114,13 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
     setCurrentPage(1);
   };
 
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   return (
     <div className="admin-page">
@@ -194,14 +192,12 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
       {isLoading ? (
         <p>A carregar...</p>
       ) : datasets.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            itemsPerPage,
-            total,
-            currentPage,
-            setCurrentPage,
-            setItemsPerPage
-          )}
+        <AdminPaginatedTable
+          pageSize={itemsPerPage}
+          totalItems={total}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setItemsPerPage}
         >
           <TableHeader>
             <TableRow>
@@ -278,7 +274,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">

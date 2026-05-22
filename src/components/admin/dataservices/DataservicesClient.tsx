@@ -9,7 +9,6 @@ import {
   InputSearchBar,
   DropdownSection,
   DropdownOption,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -24,49 +23,57 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import {
+  SortOrder,
+  useClientTableState,
+  useSortControls,
+} from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
+
+const DATASERVICE_SORTERS: Record<DataserviceSortField, (api: Dataservice) => string | number> = {
+  title: (api) => api.title ?? "",
+  created_at: (api) => (api.created_at ? Date.parse(api.created_at) : 0),
+  last_modified: (api) => (api.last_modified ? Date.parse(api.last_modified) : 0),
+};
 
 export default function DataservicesClient() {
   const { displayName } = useCurrentUser();
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<DataserviceSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-
-  const handleSort = (field: DataserviceSortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-  };
-
-  const getSortOrder = (field: DataserviceSortField): SortOrder =>
-    sortField === field ? sortOrder : "none";
 
   const filteredApis = useMemo(
     () => filterByStatus(apis, statusFilter),
     [apis, statusFilter]
   );
 
-  const sortedApis = useMemo(() => {
-    if (!sortField || sortOrder === "none") return filteredApis;
-    const dir = sortOrder === "ascending" ? 1 : -1;
-    const collator = new Intl.Collator("pt", { sensitivity: "base" });
-    return [...filteredApis].sort((a, b) => {
-      if (sortField === "title") {
-        return collator.compare(a.title ?? "", b.title ?? "") * dir;
-      }
-      const av = sortField === "created_at" ? a.created_at : a.last_modified;
-      const bv = sortField === "created_at" ? b.created_at : b.last_modified;
-      const at = av ? Date.parse(av) : 0;
-      const bt = bv ? Date.parse(bv) : 0;
-      return (at - bt) * dir;
-    });
-  }, [filteredApis, sortField, sortOrder]);
+  const { totalItems, paginatedItems: paginatedApis } = useClientTableState<
+    Dataservice,
+    DataserviceSortField
+  >({
+    items: filteredApis,
+    currentPage,
+    pageSize,
+    sortField,
+    sortOrder,
+    sorters: DATASERVICE_SORTERS,
+  });
+
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   useEffect(() => {
     async function loadDataservices() {
@@ -132,6 +139,7 @@ export default function DataservicesClient() {
           id="filter-status"
           onChange={(options) => {
             setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+            setCurrentPage(1);
           }}
         >
           <DropdownSection name="status">
@@ -155,15 +163,12 @@ export default function DataservicesClient() {
       </div>
 
       {!isLoading && filteredApis.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            5,
-            filteredApis.length,
-            0,
-            undefined,
-            undefined,
-            { currentPageIsZeroBased: true }
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -193,8 +198,8 @@ export default function DataservicesClient() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedApis.map((api, index) => (
-              <TableRow key={index}>
+            {paginatedApis.map((api) => (
+              <TableRow key={api.id}>
                 <TableCell headerLabel="Título">
                   <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
@@ -223,7 +228,7 @@ export default function DataservicesClient() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">

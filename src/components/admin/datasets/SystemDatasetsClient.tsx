@@ -6,7 +6,6 @@ import {
   Icon,
   InputSelect,
   InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -21,10 +20,11 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
-import TextLink from "@/components/Primitives/TextLink";import { createPaginationProps } from "@/utils/createPaginationProps";
+import TextLink from "@/components/Primitives/TextLink";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 
 
-type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
@@ -119,15 +119,13 @@ export default function SystemDatasetsClient() {
     }, 400);
   };
 
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const formatDate = (dateStr: string) => {
     try {
@@ -204,14 +202,12 @@ export default function SystemDatasetsClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : datasets.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -297,7 +293,7 @@ export default function SystemDatasetsClient() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">

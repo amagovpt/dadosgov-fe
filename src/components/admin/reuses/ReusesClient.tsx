@@ -10,7 +10,6 @@ import {
   InputSearchBar,
   DropdownSection,
   DropdownOption,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -25,11 +24,21 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import {
+  SortOrder,
+  useClientTableState,
+  useSortControls,
+} from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
+
+const REUSE_SORTERS: Record<ReuseSortField, (reuse: Reuse) => string | number> = {
+  title: (reuse) => reuse.title ?? "",
+  created_at: (reuse) => (reuse.created_at ? Date.parse(reuse.created_at) : 0),
+  datasets: (reuse) => reuse.datasets?.length ?? 0,
+};
 
 export default function ReusesClient() {
   const { displayName } = useCurrentUser();
@@ -45,14 +54,13 @@ export default function ReusesClient() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleSort = (field: ReuseSortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: ReuseSortField): SortOrder =>
-    sortField === field ? sortOrder : "none";
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -98,29 +106,17 @@ export default function ReusesClient() {
     return result;
   }, [reuses, searchQuery, statusFilter]);
 
-  const sortedReuses = useMemo(() => {
-    if (!sortField || sortOrder === "none") return filteredReuses;
-    const dir = sortOrder === "ascending" ? 1 : -1;
-    const collator = new Intl.Collator("pt", { sensitivity: "base" });
-    return [...filteredReuses].sort((a, b) => {
-      if (sortField === "title") {
-        return collator.compare(a.title ?? "", b.title ?? "") * dir;
-      }
-      if (sortField === "created_at") {
-        const at = a.created_at ? Date.parse(a.created_at) : 0;
-        const bt = b.created_at ? Date.parse(b.created_at) : 0;
-        return (at - bt) * dir;
-      }
-      const ad = a.datasets?.length ?? 0;
-      const bd = b.datasets?.length ?? 0;
-      return (ad - bd) * dir;
-    });
-  }, [filteredReuses, sortField, sortOrder]);
-
-  const paginatedReuses = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sortedReuses.slice(start, start + itemsPerPage);
-  }, [sortedReuses, currentPage, itemsPerPage]);
+  const { totalItems, paginatedItems: paginatedReuses } = useClientTableState<
+    Reuse,
+    ReuseSortField
+  >({
+    items: filteredReuses,
+    currentPage,
+    pageSize: itemsPerPage,
+    sortField,
+    sortOrder,
+    sorters: REUSE_SORTERS,
+  });
 
   const getStatus = (reuse: Reuse) => {
     if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
@@ -196,14 +192,12 @@ export default function ReusesClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filteredReuses.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            itemsPerPage,
-            sortedReuses.length,
-            currentPage,
-            setCurrentPage,
-            setItemsPerPage
-          )}
+        <AdminPaginatedTable
+          pageSize={itemsPerPage}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setItemsPerPage}
         >
           <TableHeader>
             <TableRow>
@@ -273,7 +267,7 @@ export default function ReusesClient() {
               );
             })}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">

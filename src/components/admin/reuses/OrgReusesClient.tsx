@@ -10,7 +10,6 @@ import {
   InputSearchBar,
   DropdownSection,
   DropdownOption,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -27,12 +26,21 @@ import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import AppIcon from "@/components/Primitives/AppIcon";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import {
+  SortOrder,
+  useClientTableState,
+  useSortControls,
+} from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
+
+const REUSE_SORTERS: Record<ReuseSortField, (reuse: Reuse) => string | number> = {
+  title: (reuse) => reuse.title ?? "",
+  created_at: (reuse) => (reuse.created_at ? Date.parse(reuse.created_at) : 0),
+  datasets: (reuse) => reuse.datasets?.length ?? 0,
+};
 
 export default function OrgReusesClient() {
   const params = useParams();
@@ -50,14 +58,13 @@ export default function OrgReusesClient() {
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
-  const handleSort = (field: ReuseSortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: ReuseSortField): SortOrder =>
-    sortField === field ? sortOrder : "none";
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   useEffect(() => {
     if (!resolvedOrgId) {
@@ -90,30 +97,17 @@ export default function OrgReusesClient() {
     [reuses, statusFilter]
   );
 
-  const sortedReuses = useMemo(() => {
-    if (!sortField || sortOrder === "none") return filteredReuses;
-    const dir = sortOrder === "ascending" ? 1 : -1;
-    const collator = new Intl.Collator("pt", { sensitivity: "base" });
-    return [...filteredReuses].sort((a, b) => {
-      if (sortField === "title") {
-        return collator.compare(a.title ?? "", b.title ?? "") * dir;
-      }
-      if (sortField === "created_at") {
-        const at = a.created_at ? Date.parse(a.created_at) : 0;
-        const bt = b.created_at ? Date.parse(b.created_at) : 0;
-        return (at - bt) * dir;
-      }
-      // datasets count
-      const ad = a.datasets?.length ?? 0;
-      const bd = b.datasets?.length ?? 0;
-      return (ad - bd) * dir;
-    });
-  }, [filteredReuses, sortField, sortOrder]);
-
-  const paginatedReuses = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sortedReuses.slice(start, start + itemsPerPage);
-  }, [sortedReuses, currentPage, itemsPerPage]);
+  const { totalItems, paginatedItems: paginatedReuses } = useClientTableState<
+    Reuse,
+    ReuseSortField
+  >({
+    items: filteredReuses,
+    currentPage,
+    pageSize: itemsPerPage,
+    sortField,
+    sortOrder,
+    sorters: REUSE_SORTERS,
+  });
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
@@ -191,14 +185,12 @@ export default function OrgReusesClient() {
       {isLoading ? (
         <p>A carregar...</p>
       ) : reuses.length > 0 ? (
-          <Table
-            paginationProps={createPaginationProps(
-              itemsPerPage,
-              reuses.length,
-              currentPage,
-              setCurrentPage,
-              setItemsPerPage
-            )}
+          <AdminPaginatedTable
+            pageSize={itemsPerPage}
+            totalItems={totalItems}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            setPageSize={setItemsPerPage}
           >
             <TableHeader>
               <TableRow>
@@ -228,15 +220,10 @@ export default function OrgReusesClient() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedReuses.map((reuse, index) => (
-                <TableRow key={index}>
+              {paginatedReuses.map((reuse) => (
+                <TableRow key={reuse.id}>
                   <TableCell headerLabel="Título">
-                    <a
-                      href={`/pages/reuses/${reuse.slug}`}
-                      className="text-primary-600 underline"
-                    >
-                      {reuse.title}
-                    </a>
+                    <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     {reuse.deleted ? (
@@ -268,7 +255,7 @@ export default function OrgReusesClient() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </AdminPaginatedTable>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">

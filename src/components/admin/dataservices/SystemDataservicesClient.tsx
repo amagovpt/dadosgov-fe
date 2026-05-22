@@ -9,7 +9,6 @@ import {
   InputSearchBar,
   DropdownSection,
   DropdownOption,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -22,10 +21,13 @@ import { Dataservice } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import {
+  SortOrder,
+  useSortControls,
+} from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
 
 const SORT_FIELD_MAP: Record<DataserviceSortField, string> = {
@@ -52,14 +54,13 @@ export default function SystemDataservicesClient() {
     return `${sortOrder === "descending" ? "-" : ""}${apiField}`;
   }, [sortField, sortOrder]);
 
-  const handleSort = (field: DataserviceSortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: DataserviceSortField): SortOrder =>
-    sortField === field ? sortOrder : "none";
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -157,14 +158,12 @@ export default function SystemDataservicesClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filteredApis.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -235,7 +234,7 @@ export default function SystemDataservicesClient() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <CardNoResults
           position="center"

@@ -9,7 +9,6 @@ import {
   Icon,
   InputSelect,
   InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -25,8 +24,13 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import {
+  SortOrder,
+  useClientTableState,
+  useSortControls,
+} from "@/components/admin/lists/useClientTableState";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],
@@ -40,8 +44,14 @@ const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["update_frequency", "Frequência de atualização"],
 ];
 
-type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
+
+const DATASET_SORTERS: Record<SortField, (dataset: Dataset) => string | number> = {
+  title: (dataset) => dataset.title ?? "",
+  created_at: (dataset) => Date.parse(dataset.created_at),
+  last_modified: (dataset) => Date.parse(dataset.last_modified),
+  resources: (dataset) => dataset.resources?.length ?? 0,
+};
 
 export default function DatasetsClient() {
   const { displayName } = useCurrentUser();
@@ -94,42 +104,22 @@ export default function DatasetsClient() {
     return result;
   }, [allDatasets, searchQuery, statusFilter]);
 
-  const sortedDatasets = useMemo(() => {
-    if (sortOrder === "none") return filteredDatasets;
+  const { totalItems, paginatedItems: datasets } = useClientTableState<Dataset, SortField>({
+    items: filteredDatasets,
+    currentPage,
+    pageSize,
+    sortField,
+    sortOrder,
+    sorters: DATASET_SORTERS,
+  });
 
-    return [...filteredDatasets].sort((a, b) => {
-      let cmp = 0;
-      switch (sortField) {
-        case "title":
-          cmp = (a.title || "").localeCompare(b.title || "");
-          break;
-        case "created_at":
-          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
-        case "last_modified":
-          cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
-          break;
-        case "resources":
-          cmp = (a.resources?.length || 0) - (b.resources?.length || 0);
-          break;
-      }
-      return sortOrder === "descending" ? -cmp : cmp;
-    });
-  }, [filteredDatasets, sortField, sortOrder]);
-
-  const totalItems = sortedDatasets.length;
-  const start = (currentPage - 1) * pageSize;
-  const datasets = sortedDatasets.slice(start, start + pageSize);
-
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const formatDate = (dateStr: string) => {
     try {
@@ -206,14 +196,12 @@ export default function DatasetsClient() {
       </div>
 
       {!isLoading && totalItems > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -312,7 +300,7 @@ export default function DatasetsClient() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">

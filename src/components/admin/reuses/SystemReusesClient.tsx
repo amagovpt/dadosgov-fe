@@ -9,7 +9,6 @@ import {
   InputSearchBar,
   DropdownSection,
   DropdownOption,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -22,10 +21,10 @@ import { Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at";
 
 const SORT_FIELD_MAP: Record<ReuseSortField, string> = {
@@ -51,14 +50,13 @@ export default function SystemReusesClient() {
     return `${sortOrder === "descending" ? "-" : ""}${apiField}`;
   }, [sortField, sortOrder]);
 
-  const handleSort = (field: ReuseSortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: ReuseSortField): SortOrder =>
-    sortField === field ? sortOrder : "none";
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -142,6 +140,7 @@ export default function SystemReusesClient() {
           id="filter-status"
           onChange={(options) => {
             setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+            setCurrentPage(1);
           }}
         >
           <DropdownSection name="status">
@@ -167,14 +166,12 @@ export default function SystemReusesClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filteredReuses.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -226,7 +223,7 @@ export default function SystemReusesClient() {
               );
             })}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <CardNoResults
           position="center"
