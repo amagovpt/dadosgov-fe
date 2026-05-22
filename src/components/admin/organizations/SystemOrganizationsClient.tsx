@@ -7,7 +7,6 @@ import {
   CardNoResults,
   Icon,
   InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -16,10 +15,12 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { useSortControls } from "@/components/admin/lists/useClientTableState";
+import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -50,7 +51,6 @@ function DeleteOrgPopupContent({
 }
 
 type SortField = "name" | "created_at";
-type SortOrder = "ascending" | "descending" | "none";
 
 const SORT_FIELD_MAP: Record<SortField, string> = {
   name: "name",
@@ -113,15 +113,13 @@ export default function SystemOrganizationsClient() {
     }, 400);
   };
 
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const handleDeleteOrg = (org: Organization) => {
     show(
@@ -185,14 +183,12 @@ export default function SystemOrganizationsClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : organizations.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -247,7 +243,7 @@ export default function SystemOrganizationsClient() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <CardNoResults
           position="center"

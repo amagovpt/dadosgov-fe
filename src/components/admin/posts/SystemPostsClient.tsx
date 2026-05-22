@@ -11,7 +11,6 @@ import {
   InputSelect,
   DropdownSection,
   DropdownOption,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -20,12 +19,13 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchAdminPosts } from "@/services/api";
 import { Post } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { useSortControls } from "@/components/admin/lists/useClientTableState";
+import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type SortField = "name" | "created_at" | "last_modified";
 
 const formatDate = (dateStr: string) => {
@@ -123,15 +123,13 @@ export default function SystemPostsClient() {
     }, 400);
   };
 
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   return (
     <div className="admin-page">
@@ -223,14 +221,12 @@ export default function SystemPostsClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : posts.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -289,7 +285,7 @@ export default function SystemPostsClient() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <CardNoResults
           position="center"

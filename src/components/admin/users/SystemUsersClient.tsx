@@ -9,7 +9,6 @@ import {
   Icon,
   InputSearchBar,
   InputSelect,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -17,13 +16,13 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchUsers } from "@/services/api";
 import { UserAdmin } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 
 type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
-type SortOrder = "ascending" | "descending" | "none";
 
 const SORT_FIELD_MAP: Record<SortField, string> = {
   name: "first_name",
@@ -175,14 +174,12 @@ export default function SystemUsersClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : users.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -259,7 +256,7 @@ export default function SystemUsersClient() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <CardNoResults
           position="center"

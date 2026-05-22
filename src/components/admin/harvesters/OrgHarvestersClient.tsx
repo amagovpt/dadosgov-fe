@@ -11,7 +11,6 @@ import {
   DropdownSection,
   DropdownOption,
   StatusCard,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -25,9 +24,9 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 
 type StatusInfo = {
   label: string;
@@ -252,14 +251,12 @@ export default function OrgHarvestersClient() {
         <p>A carregar...</p>
       ) : harvesters.length > 0 ? (
         <>
-          <Table
-            paginationProps={createPaginationProps(
-              itemsPerPage,
-              harvesters.length,
-              currentPage,
-              setCurrentPage,
-              undefined
-            )}
+          <AdminPaginatedTable
+            pageSize={itemsPerPage}
+            totalItems={harvesters.length}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            setPageSize={setItemsPerPage}
           >
             <TableHeader>
               <TableRow>
@@ -328,7 +325,7 @@ export default function OrgHarvestersClient() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </AdminPaginatedTable>
         </>
       ) : (
         <div className="datasets-page__body">

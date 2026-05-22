@@ -11,7 +11,6 @@ import {
   DropdownSection,
   DropdownOption,
   StatusCard,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -30,7 +29,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 
 const VALIDATION_STATUS: Record<
   string,
@@ -286,14 +285,12 @@ export default function SystemHarvestersClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filtered.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -383,7 +380,7 @@ export default function SystemHarvestersClient() {
               );
             })}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <CardNoResults
           position="center"
