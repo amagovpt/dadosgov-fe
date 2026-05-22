@@ -6,10 +6,7 @@ import {
   Breadcrumb,
   CardNoResults,
   Icon,
-  InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   StatusCard,
   TableHeader,
   TableHeaderCell,
@@ -31,6 +28,7 @@ import { format } from "date-fns";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
+import HarvestersStatusFilterSelect from "@/components/admin/lists/HarvestersStatusFilterSelect";
 
 const VALIDATION_STATUS: Record<
   string,
@@ -231,36 +229,12 @@ export default function SystemHarvestersClient() {
             }}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+        <HarvestersStatusFilterSelect
+          statusFilter={statusFilter}
+          onChange={(nextStatus) => {
+            setStatusFilter(nextStatus);
           }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="pending" selected={statusFilter === "pending"}>
-              Em espera de validação
-            </DropdownOption>
-            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>
-              Validado
-            </DropdownOption>
-            <DropdownOption value="refused" selected={statusFilter === "refused"}>
-              Recusado
-            </DropdownOption>
-            <DropdownOption value="done" selected={statusFilter === "done"}>
-              Terminado
-            </DropdownOption>
-            <DropdownOption value="failed" selected={statusFilter === "failed"}>
-              Falhado
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+        />
       </div>
 
       {statusFilter === "accepted" && (

@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import {
   CardNoResults,
   Icon,
-  InputSelect,
   InputSearchBar,
   TableHeader,
   TableHeaderCell,
@@ -19,12 +18,12 @@ import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
-import { Dropdown } from "@/components/Primitives/Dropdown";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import DatasetsStatusFilterSelect from "@/components/admin/lists/DatasetsStatusFilterSelect";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
@@ -105,12 +104,6 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
       setCurrentPage(1);
     });
 
-  const handleStatusChange = (options: { value?: string }[]) => {
-    const value = options?.[0]?.value || "";
-    setStatusFilter(value);
-    setCurrentPage(1);
-  };
-
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
     sortOrder,
@@ -148,31 +141,13 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={handleStatusChange}
-        >
-          <Dropdown.Section name="status">
-            <Dropdown.Option value="" selected={statusFilter === ""}>
-              Todos
-            </Dropdown.Option>
-            <Dropdown.Option value="public" selected={statusFilter === "public"}>
-              Público
-            </Dropdown.Option>
-            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>
-              Arquivado
-            </Dropdown.Option>
-            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>
-              Rascunho
-            </Dropdown.Option>
-            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>
-              Excluído
-            </Dropdown.Option>
-          </Dropdown.Section>
-        </InputSelect>
+        <DatasetsStatusFilterSelect
+          statusFilter={statusFilter}
+          onChange={(nextStatus) => {
+            setStatusFilter(nextStatus);
+            setCurrentPage(1);
+          }}
+        />
         <a href={`/api/1/organizations/${orgId}/catalog`} download>
           <Button
             variant="primary"

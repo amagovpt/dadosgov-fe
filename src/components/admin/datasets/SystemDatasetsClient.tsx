@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   CardNoResults,
   Icon,
-  InputSelect,
   InputSearchBar,
   TableHeader,
   TableHeaderCell,
@@ -18,10 +17,10 @@ import { fetchAdminDatasets, fetchDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
-import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import DatasetsStatusFilterSelect from "@/components/admin/lists/DatasetsStatusFilterSelect";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
@@ -166,34 +165,13 @@ export default function SystemDatasetsClient() {
             }}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+        <DatasetsStatusFilterSelect
+          statusFilter={statusFilter}
+          onChange={(nextStatus) => {
+            setStatusFilter(nextStatus);
             setCurrentPage(1);
           }}
-        >
-          <Dropdown.Section name="status">
-            <Dropdown.Option value="" selected={statusFilter === ""}>
-              Todos
-            </Dropdown.Option>
-            <Dropdown.Option value="public" selected={statusFilter === "public"}>
-              Público
-            </Dropdown.Option>
-            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>
-              Arquivado
-            </Dropdown.Option>
-            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>
-              Rascunho
-            </Dropdown.Option>
-            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>
-              Excluído
-            </Dropdown.Option>
-          </Dropdown.Section>
-        </InputSelect>
+        />
       </div>
 
       {isLoading ? (

@@ -6,10 +6,7 @@ import {
   Breadcrumb,
   CardNoResults,
   Icon,
-  InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   StatusCard,
   TableHeader,
   TableHeaderCell,
@@ -27,6 +24,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import HarvestersStatusFilterSelect from "@/components/admin/lists/HarvestersStatusFilterSelect";
 
 type StatusInfo = {
   label: string;
@@ -204,37 +202,13 @@ export default function OrgHarvestersClient() {
             aria-label="Pesquisar harvesters"
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+        <HarvestersStatusFilterSelect
+          statusFilter={statusFilter}
+          onChange={(nextStatus) => {
+            setStatusFilter(nextStatus);
             setCurrentPage(1);
           }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="pending" selected={statusFilter === "pending"}>
-              Em espera de validação
-            </DropdownOption>
-            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>
-              Validado
-            </DropdownOption>
-            <DropdownOption value="refused" selected={statusFilter === "refused"}>
-              Recusado
-            </DropdownOption>
-            <DropdownOption value="done" selected={statusFilter === "done"}>
-              Terminado
-            </DropdownOption>
-            <DropdownOption value="failed" selected={statusFilter === "failed"}>
-              Falhado
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+        />
       </div>
 
       {statusFilter === "accepted" && (
