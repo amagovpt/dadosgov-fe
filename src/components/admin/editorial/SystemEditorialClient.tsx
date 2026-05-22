@@ -26,6 +26,7 @@ import {
 } from "@/services/api";
 import type { Dataset, Reuse } from "@/types/api";
 import { formatMetricValue } from "@/utils/formatNumber";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
 // ─── Block types & definitions ───────────────────────────────────────────────
 
@@ -452,7 +453,6 @@ function FeaturedDatasetsEditor({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Dataset[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const handleRemoveDataset = (index: number) => {
@@ -482,27 +482,26 @@ function FeaturedDatasetsEditor({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showSearch]);
 
+  const runSearch = useDebouncedSearch(async (query: string) => {
+    try {
+      const response = await searchDatasets(query, 1, 8);
+      setSearchResults(response.data.filter((d) => !data.datasetIds.includes(d.id)));
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, 300);
+
   useEffect(() => {
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     if (searchQuery.length < 2) {
       setSearchResults([]);
+      setIsSearching(false);
       return;
     }
     setIsSearching(true);
-    searchTimeoutRef.current = setTimeout(async () => {
-      try {
-        const response = await searchDatasets(searchQuery, 1, 8);
-        setSearchResults(response.data.filter((d) => !data.datasetIds.includes(d.id)));
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 300);
-    return () => {
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    };
-  }, [searchQuery, data.datasetIds]);
+    void runSearch(searchQuery);
+  }, [searchQuery, runSearch]);
 
   const handleSelectDataset = (dataset: Dataset) => {
     onChange({ ...data, datasetIds: [...data.datasetIds, dataset.id] });
@@ -756,7 +755,6 @@ function FeaturedReusesEditor({
       { title: "Remover reutilização", closeAriaLabel: "Fechar", dimensions: "m" }
     );
   };
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -772,27 +770,26 @@ function FeaturedReusesEditor({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showSearch]);
 
+  const runSearch = useDebouncedSearch(async (query: string) => {
+    try {
+      const response = await searchReuses(query, 1, 8);
+      setSearchResults(response.data.filter((r) => !data.reuseIds.includes(r.id)));
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, 300);
+
   useEffect(() => {
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     if (searchQuery.length < 2) {
       setSearchResults([]);
+      setIsSearching(false);
       return;
     }
     setIsSearching(true);
-    searchTimeoutRef.current = setTimeout(async () => {
-      try {
-        const response = await searchReuses(searchQuery, 1, 8);
-        setSearchResults(response.data.filter((r) => !data.reuseIds.includes(r.id)));
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 300);
-    return () => {
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    };
-  }, [searchQuery, data.reuseIds]);
+    void runSearch(searchQuery);
+  }, [searchQuery, runSearch]);
 
   const handleSelectReuse = (reuse: Reuse) => {
     onChange({ ...data, reuseIds: [...data.reuseIds, reuse.id] });
