@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   InputSelect,
@@ -22,11 +21,11 @@ import StatusDot from "@/components/admin/StatusDot";
 import { fetchMyReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -130,21 +129,13 @@ export default function ReusesClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Reutilizações", url: "/pages/admin/me/reuses" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Reutilizações</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: displayName || "...", url: "#" },
+      { label: "Reutilizações", url: "/pages/admin/me/reuses" },
+    ]}
+      title="Reutilizações"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">
         {isLoading ? "A carregar..." : `${filteredReuses.length} resultados`}
@@ -299,6 +290,6 @@ export default function ReusesClient() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }

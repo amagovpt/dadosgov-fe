@@ -28,6 +28,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 type StatusInfo = {
   label: string;
@@ -178,22 +179,14 @@ export default function OrgHarvestersClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            { label: "Harvesters", url: "/pages/admin/org/harvesters" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Harvesters</h1>
-        <PublishDropdown />
-      </div>
-
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Harvesters", url: "/pages/admin/org/harvesters" },
+      ]}
+      title="Harvesters"
+    >
       <p className="text-sm mb-16 text-neutral-700">{harvesters.length} resultados</p>
 
       <div className="mb-24 flex items-end gap-16">
@@ -312,8 +305,8 @@ export default function OrgHarvestersClient() {
                   <TableCell headerLabel="Última execução">
                     {harvester.last_job
                       ? formatDateToDMY(
-                          harvester.last_job.started ?? harvester.last_job.ended ?? ""
-                        )
+                        harvester.last_job.started ?? harvester.last_job.ended ?? ""
+                      )
                       : "Ainda não"}
                   </TableCell>
                   <TableCell headerLabel="Conjuntos de dados">
@@ -346,6 +339,6 @@ export default function OrgHarvestersClient() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }

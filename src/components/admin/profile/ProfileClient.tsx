@@ -25,7 +25,6 @@ import { pt } from "date-fns/locale";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
@@ -44,6 +43,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
 import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
@@ -354,18 +354,15 @@ export default function ProfileClient() {
     : "";
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Perfil", url: "/pages/admin/me/profile" },
-          ]}
-        />
-      </div>
-
-      <h1 className="admin-page__title mb-32 mt-64">Perfil</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: displayName || "...", url: "#" },
+        { label: "Perfil", url: "/pages/admin/me/profile" },
+      ]}
+      title="Perfil"
+      headerAction={null}
+    >
 
       <div className="profile-card">
         <div className="profile-card__avatar-container">
@@ -967,6 +964,6 @@ export default function ProfileClient() {
           </Tab>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

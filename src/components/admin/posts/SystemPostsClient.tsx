@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
@@ -19,7 +18,7 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchAdminPosts } from "@/services/api";
 import { Post } from "@/types/api";
@@ -134,21 +133,14 @@ export default function SystemPostsClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Artigos", url: "/pages/admin/system/posts" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Artigos</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Artigos", url: "/pages/admin/system/posts" },
+      ]}
+      title="Artigos"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
@@ -299,6 +291,6 @@ export default function SystemPostsClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

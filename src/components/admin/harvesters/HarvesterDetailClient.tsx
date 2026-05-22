@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   Icon,
   StatusCard,
@@ -28,7 +27,6 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import {
@@ -51,6 +49,7 @@ import { useAuth } from "@/context/AuthContext";
 import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/types/api";
 import AppIcon from "@/components/Primitives/AppIcon";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 interface HarvesterDetailClientProps {
   slug: string;
@@ -177,7 +176,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
       }
     }
     load();
-  }, [slug]);
+  }, [jobsPage, jobsPageSize, slug]);
 
   const jobsInitialLoadDone = useRef(false);
 
@@ -452,21 +451,12 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const validationInfo = VALIDATION_LABELS[validationState] || VALIDATION_LABELS.pending;
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Sistema", url: "/pages/admin/system/harvesters" },
-            { label: source.name, url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">{source.name}</h1>
-        <PublishDropdown />
-      </div>
-
+    <AdminLayout breadcrumbItems={[
+      { label: "Sistema", url: "/pages/admin/system/harvesters" },
+      { label: source.name, url: "#" },
+    ]}
+      title={source.name}
+    >
       {/* Metadata info */}
       <div className="flex flex-col gap-8 text-sm text-neutral-800 mb-24">
         <div className="flex items-center gap-8">
@@ -603,69 +593,69 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                     const archivedCount = items.filter((i) => i.status === "archived").length;
                     const failedCount = items.filter((i) => i.status === "failed").length;
                     return (
-                    <TableRow key={job.id}>
-                      <TableCell headerLabel="ID de tarefa">
-                        <a
-                          href={`/pages/admin/harvesters/${slug}/jobs/${job.id}`}
-                          className="text-primary-600 underline uppercase text-xs"
-                        >
-                          {job.id}
-                        </a>
-                      </TableCell>
-                      <TableCell headerLabel="Status">
-                        <StatusDot
-                          variant={
-                            job.status === "done"
-                              ? "success"
-                              : job.status === "failed" || job.status === "done-errors"
-                                ? "danger"
-                                : "informative"
-                          }
-                        >
-                          {JOB_STATUS_LABELS[job.status] || job.status}
-                        </StatusDot>
-                      </TableCell>
-                      <TableCell headerLabel="Começou em">
-                        {job.started
-                          ? new Date(job.started).toLocaleString("pt-PT", {
+                      <TableRow key={job.id}>
+                        <TableCell headerLabel="ID de tarefa">
+                          <a
+                            href={`/pages/admin/harvesters/${slug}/jobs/${job.id}`}
+                            className="text-primary-600 underline uppercase text-xs"
+                          >
+                            {job.id}
+                          </a>
+                        </TableCell>
+                        <TableCell headerLabel="Status">
+                          <StatusDot
+                            variant={
+                              job.status === "done"
+                                ? "success"
+                                : job.status === "failed" || job.status === "done-errors"
+                                  ? "danger"
+                                  : "informative"
+                            }
+                          >
+                            {JOB_STATUS_LABELS[job.status] || job.status}
+                          </StatusDot>
+                        </TableCell>
+                        <TableCell headerLabel="Começou em">
+                          {job.started
+                            ? new Date(job.started).toLocaleString("pt-PT", {
                               day: "numeric",
                               month: "long",
                               year: "numeric",
                               hour: "2-digit",
                               minute: "2-digit",
                             })
-                          : "—"}
-                      </TableCell>
-                      <TableCell headerLabel="Concluído em">
-                        {job.ended
-                          ? new Date(job.ended).toLocaleString("pt-PT", {
+                            : "—"}
+                        </TableCell>
+                        <TableCell headerLabel="Concluído em">
+                          {job.ended
+                            ? new Date(job.ended).toLocaleString("pt-PT", {
                               day: "numeric",
                               month: "long",
                               year: "numeric",
                               hour: "2-digit",
                               minute: "2-digit",
                             })
-                          : "—"}
-                      </TableCell>
-                      <TableCell headerLabel="Conjuntos de dados">
-                        {items.length}
-                      </TableCell>
-                      <TableCell headerLabel="API">
-                        {job.errors?.length || 0}
-                      </TableCell>
-                      <TableCell headerLabel="Concluídos">
-                        {doneCount}
-                      </TableCell>
-                      <TableCell headerLabel="Ignorados">
-                        {skippedCount}
-                      </TableCell>
-                      <TableCell headerLabel="Arquivados">
-                        {archivedCount}
-                      </TableCell>
-                      <TableCell headerLabel="Falhados">
-                        {failedCount}
-                      </TableCell>
-                    </TableRow>
+                            : "—"}
+                        </TableCell>
+                        <TableCell headerLabel="Conjuntos de dados">
+                          {items.length}
+                        </TableCell>
+                        <TableCell headerLabel="API">
+                          {job.errors?.length || 0}
+                        </TableCell>
+                        <TableCell headerLabel="Concluídos">
+                          {doneCount}
+                        </TableCell>
+                        <TableCell headerLabel="Ignorados">
+                          {skippedCount}
+                        </TableCell>
+                        <TableCell headerLabel="Arquivados">
+                          {archivedCount}
+                        </TableCell>
+                        <TableCell headerLabel="Falhados">
+                          {failedCount}
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
                 </TableBody>
@@ -927,9 +917,9 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                                 <strong>Iniciado em:</strong>{" "}
                                 {previewJob.started
                                   ? new Date(previewJob.started).toLocaleString("pt-PT", {
-                                      day: "numeric", month: "long", year: "numeric",
-                                      hour: "2-digit", minute: "2-digit",
-                                    })
+                                    day: "numeric", month: "long", year: "numeric",
+                                    hour: "2-digit", minute: "2-digit",
+                                  })
                                   : "—"}
                               </span>
                             </p>
@@ -939,9 +929,9 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                                 <strong>Terminado em:</strong>{" "}
                                 {previewJob.ended
                                   ? new Date(previewJob.ended).toLocaleString("pt-PT", {
-                                      day: "numeric", month: "long", year: "numeric",
-                                      hour: "2-digit", minute: "2-digit",
-                                    })
+                                    day: "numeric", month: "long", year: "numeric",
+                                    hour: "2-digit", minute: "2-digit",
+                                  })
                                   : "—"}
                               </span>
                             </p>
@@ -1055,6 +1045,6 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }

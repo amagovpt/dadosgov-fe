@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
@@ -13,6 +12,7 @@ import {
   StatusCard,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchOrganization, updateOrganization, uploadOrgLogo, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
@@ -197,20 +197,15 @@ export default function OrgProfileClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: org?.name || cachedOrgName || "Organização", url: "#" },
-            { label: "Perfil", url: "#" },
-          ]}
-        />
-      </div>
-
-      <h1 className="admin-page__title mt-64 mb-32">
-        Perfil da organização
-      </h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: org?.name || cachedOrgName || "Organização", url: "#" },
+        { label: "Perfil" },
+      ]}
+      title="Perfil da organização"
+      headerAction={null}
+    >
 
       {org && (
         <div className="profile-card">
@@ -420,6 +415,6 @@ export default function OrgProfileClient() {
 
         <aside className="admin-page__auxiliar" />
       </div>
-    </div>
+    </AdminLayout>
   );
 }

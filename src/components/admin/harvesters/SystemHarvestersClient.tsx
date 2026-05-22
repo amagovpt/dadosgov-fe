@@ -31,6 +31,7 @@ import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 const VALIDATION_STATUS: Record<
   string,
@@ -170,7 +171,9 @@ export default function SystemHarvestersClient() {
   }, [currentPage, pageSize]);
 
   useEffect(() => {
-    loadData();
+    void (async () => {
+      await loadData();
+    })();
   }, [loadData]);
 
   const handleSearch = (value: string) => {
@@ -203,21 +206,13 @@ export default function SystemHarvestersClient() {
   }, [harvesters, searchQuery, statusFilter]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Harvesters", url: "/pages/admin/system/harvesters" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Harvesters</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: "Sistema", url: "#" },
+      { label: "Harvesters", url: "/pages/admin/system/harvesters" },
+    ]}
+      title="Harvesters"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">
         {isLoading ? "A carregar..." : `${totalItems} resultados`}
@@ -393,6 +388,6 @@ export default function SystemHarvestersClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

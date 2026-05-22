@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   Table,
@@ -14,7 +13,7 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { fetchAllCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
@@ -103,24 +102,14 @@ export default function SystemCommunityResourcesClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            {
-              label: "Recursos comunitários",
-              url: "/pages/admin/system/community-resources",
-            },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Recursos comunitários</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Recursos comunitários", url: "/pages/admin/system/community-resources" },
+      ]}
+      title="Recursos comunitários"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">{resources.length} resultados</p>
 
@@ -233,6 +222,6 @@ export default function SystemCommunityResourcesClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

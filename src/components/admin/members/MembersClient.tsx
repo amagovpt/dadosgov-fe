@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
-  Breadcrumb,
   Button,
   Icon,
   RadioButton,
@@ -34,7 +33,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -531,21 +530,14 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   }, [sortedMembers, currentPage, itemsPerPage]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: cachedOrgName || viewedOrg?.name || "Organização", url: "#" },
-            { label: "Membros", url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Membros</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: cachedOrgName || viewedOrg?.name || "Organização", url: "#" },
+        { label: "Membros" },
+      ]}
+      title="Membros"
+    >
 
       {pendingRequests.length > 0 && (
         <div className="mb-32">
@@ -744,6 +736,6 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </AdminLayout>
   );
 }

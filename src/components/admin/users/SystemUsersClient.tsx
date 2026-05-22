@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   DropdownOption,
   DropdownSection,
@@ -16,7 +15,7 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchUsers } from "@/services/api";
 import { UserAdmin } from "@/types/api";
@@ -118,21 +117,14 @@ export default function SystemUsersClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Utilizadores", url: "/pages/admin/system/users" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Utilizadores</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Utilizadores", url: "/pages/admin/system/users" },
+      ]}
+      title="Utilizadores"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
@@ -269,6 +261,6 @@ export default function SystemUsersClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

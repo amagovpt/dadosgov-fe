@@ -17,8 +17,7 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchAdminDatasets, fetchDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -139,21 +138,14 @@ export default function SystemDatasetsClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Conjuntos de dados", url: "/pages/admin/system/datasets" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Conjuntos de dados</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Conjuntos de dados", url: "/pages/admin/system/datasets" },
+      ]}
+      title="Conjuntos de dados"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">
         {isLoading ? "A carregar..." : `${totalItems} resultados`}
@@ -312,6 +304,6 @@ export default function SystemDatasetsClient() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }

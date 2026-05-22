@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   Table,
@@ -12,7 +11,7 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchTopics } from "@/services/api";
 import { Topic } from "@/types/api";
@@ -52,21 +51,14 @@ export default function SystemTopicsClient() {
   }, [loadData]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Temas", url: "/pages/admin/system/topics" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Temas</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Temas", url: "/pages/admin/system/topics" },
+      ]}
+      title="Temas"
+    >
 
       <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
 
@@ -120,6 +112,6 @@ export default function SystemTopicsClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }
