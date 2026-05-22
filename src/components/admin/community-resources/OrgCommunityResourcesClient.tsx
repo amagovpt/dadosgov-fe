@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Breadcrumb,
   CardNoResults,
   Icon,
   InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -22,11 +21,20 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { createPaginationProps } from "@/utils/createPaginationProps";
-import AppIcon from "@/components/Primitives/AppIcon";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import {
+  SortOrder,
+  useClientTableState,
+  useSortControls,
+} from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
+
+const RESOURCE_SORTERS: Record<SortField, (resource: CommunityResource) => string | number> = {
+  title: (resource) => resource.title || "",
+  created_at: (resource) => new Date(resource.created_at).getTime(),
+  last_modified: (resource) => new Date(resource.last_modified).getTime(),
+};
 
 export default function OrgCommunityResourcesClient() {
   const params = useParams();
@@ -43,15 +51,13 @@ export default function OrgCommunityResourcesClient() {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   useEffect(() => {
     if (!resolvedOrgId) {
@@ -72,29 +78,17 @@ export default function OrgCommunityResourcesClient() {
     loadResources();
   }, [resolvedOrgId]);
 
-  const sortedResources = useMemo(() => {
-    if (sortOrder === "none") return resources;
-    return [...resources].sort((a, b) => {
-      let cmp = 0;
-      switch (sortField) {
-        case "title":
-          cmp = (a.title || "").localeCompare(b.title || "");
-          break;
-        case "created_at":
-          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
-        case "last_modified":
-          cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
-          break;
-      }
-      return sortOrder === "descending" ? -cmp : cmp;
-    });
-  }, [resources, sortField, sortOrder]);
-
-  const paginatedResources = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sortedResources.slice(start, start + itemsPerPage);
-  }, [sortedResources, currentPage, itemsPerPage]);
+  const { totalItems, paginatedItems: paginatedResources } = useClientTableState<
+    CommunityResource,
+    SortField
+  >({
+    items: resources,
+    currentPage,
+    pageSize: itemsPerPage,
+    sortField,
+    sortOrder,
+    sorters: RESOURCE_SORTERS,
+  });
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
@@ -148,14 +142,12 @@ export default function OrgCommunityResourcesClient() {
         <p>A carregar...</p>
       ) : resources.length > 0 ? (
         <>
-          <Table
-            paginationProps={createPaginationProps(
-              itemsPerPage,
-              resources.length,
-              currentPage,
-              setCurrentPage,
-              setItemsPerPage
-            )}
+          <AdminPaginatedTable
+            pageSize={itemsPerPage}
+            totalItems={totalItems}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            setPageSize={setItemsPerPage}
           >
             <TableHeader>
               <TableRow>
@@ -226,7 +218,7 @@ export default function OrgCommunityResourcesClient() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </AdminPaginatedTable>
         </>
       ) : (
         <div className="datasets-page__body">

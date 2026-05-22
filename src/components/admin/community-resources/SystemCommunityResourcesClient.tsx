@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
   CardNoResults,
   Icon,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -19,10 +18,21 @@ import { fetchAllCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import {
+  SortOrder,
+  useClientTableState,
+  useSortControls,
+} from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
+
+const RESOURCE_SORTERS: Record<SortField, (resource: CommunityResource) => string | number> = {
+  title: (resource) => resource.title || "",
+  format: (resource) => resource.format || "",
+  created_at: (resource) => new Date(resource.created_at).getTime(),
+  last_modified: (resource) => new Date(resource.last_modified).getTime(),
+};
 
 const formatDate = (dateStr: string) => {
   try {
@@ -57,42 +67,25 @@ export default function SystemCommunityResourcesClient() {
     }
   }, [resourceId]);
 
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
-
-  const sortedResources = useMemo(() => {
-    if (sortOrder === "none") return resources;
-    return [...resources].sort((a, b) => {
-      let cmp = 0;
-      switch (sortField) {
-        case "title":
-          cmp = (a.title || "").localeCompare(b.title || "");
-          break;
-        case "format":
-          cmp = (a.format || "").localeCompare(b.format || "");
-          break;
-        case "created_at":
-          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
-        case "last_modified":
-          cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
-          break;
-      }
-      return sortOrder === "descending" ? -cmp : cmp;
-    });
-  }, [resources, sortField, sortOrder]);
-
-  const paginatedResources = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return sortedResources.slice(start, start + pageSize);
-  }, [sortedResources, currentPage, pageSize]);
+  const { totalItems, paginatedItems: paginatedResources } = useClientTableState<
+    CommunityResource,
+    SortField
+  >({
+    items: resources,
+    currentPage,
+    pageSize,
+    sortField,
+    sortOrder,
+    sorters: RESOURCE_SORTERS,
+  });
 
   useEffect(() => {
     loadData();
@@ -127,14 +120,12 @@ export default function SystemCommunityResourcesClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : resources.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            resources.length,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -221,7 +212,7 @@ export default function SystemCommunityResourcesClient() {
               );
             })}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <CardNoResults
           position="center"

@@ -7,7 +7,6 @@ import {
   CardNoResults,
   Icon,
   InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -22,10 +21,21 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import {
+  SortOrder,
+  useClientTableState,
+  useSortControls,
+} from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
+
+const RESOURCE_SORTERS: Record<SortField, (resource: CommunityResource) => string | number> = {
+  title: (resource) => resource.title || "",
+  format: (resource) => resource.format || "",
+  created_at: (resource) => new Date(resource.created_at).getTime(),
+  last_modified: (resource) => new Date(resource.last_modified).getTime(),
+};
 
 export default function CommunityResourcesClient() {
   const { displayName } = useCurrentUser();
@@ -67,42 +77,25 @@ export default function CommunityResourcesClient() {
     return result;
   }, [allResources, searchQuery]);
 
-  const sortedResources = useMemo(() => {
-    if (sortOrder === "none") return filteredResources;
+  const { totalItems, paginatedItems: resources } = useClientTableState<
+    CommunityResource,
+    SortField
+  >({
+    items: filteredResources,
+    currentPage,
+    pageSize,
+    sortField,
+    sortOrder,
+    sorters: RESOURCE_SORTERS,
+  });
 
-    return [...filteredResources].sort((a, b) => {
-      let cmp = 0;
-      switch (sortField) {
-        case "title":
-          cmp = (a.title || "").localeCompare(b.title || "");
-          break;
-        case "format":
-          cmp = (a.format || "").localeCompare(b.format || "");
-          break;
-        case "created_at":
-          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
-        case "last_modified":
-          cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
-          break;
-      }
-      return sortOrder === "descending" ? -cmp : cmp;
-    });
-  }, [filteredResources, sortField, sortOrder]);
-
-  const totalItems = sortedResources.length;
-  const start = (currentPage - 1) * pageSize;
-  const resources = sortedResources.slice(start, start + pageSize);
-
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   return (
     <div className="admin-page">
@@ -141,14 +134,12 @@ export default function CommunityResourcesClient() {
       </div>
 
       {!isLoading && resources.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
         >
           <TableHeader>
             <TableRow>
@@ -222,7 +213,7 @@ export default function CommunityResourcesClient() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <div className="datasets-page__body">
           <div className="datasets-page__content">
