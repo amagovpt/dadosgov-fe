@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
-  Button,
-  CardNoResults,
   Icon,
   InputSelect,
   InputSearchBar,
@@ -17,7 +15,7 @@ import {
   TableCell,
   ProgressBar,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -258,15 +256,7 @@ export default function DatasetsClient() {
                   <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {dataset.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : dataset.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : dataset.private ? (
-                    <StatusDot variant="warning">Rascunho</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <ResourceStatusBadge item={dataset} />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDate(dataset.created_at)}</TableCell>
                 <TableCell headerLabel="Última modificação">

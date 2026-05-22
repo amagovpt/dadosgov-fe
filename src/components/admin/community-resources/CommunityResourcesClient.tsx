@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Breadcrumb,
-  CardNoResults,
   Icon,
   InputSearchBar,
   Table,
@@ -13,9 +12,8 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -200,13 +198,7 @@ export default function CommunityResourcesClient() {
                   )}
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {resource.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : resource.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <ResourceStatusBadge item={resource} />
                 </TableCell>
                 <TableCell headerLabel="Formato">{resource.format || "—"}</TableCell>
                 <TableCell headerLabel="Criado em">

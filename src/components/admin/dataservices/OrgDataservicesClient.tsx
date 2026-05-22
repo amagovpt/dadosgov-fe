@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Breadcrumb,
-  CardNoResults,
   Icon,
   InputSelect,
   InputSearchBar,
@@ -16,9 +15,8 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchOrgDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -202,15 +200,7 @@ export default function OrgDataservicesClient() {
                   <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {api.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : api.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : api.private ? (
-                    <StatusDot variant="warning">Rascunho</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <ResourceStatusBadge item={api} />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
                 <TableCell headerLabel="Modificado em">

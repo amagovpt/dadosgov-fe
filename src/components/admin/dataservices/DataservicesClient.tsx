@@ -15,7 +15,7 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -79,19 +79,7 @@ export default function DataservicesClient() {
     loadDataservices();
   }, []);
 
-  const getStatusLabel = (api: Dataservice) => {
-    if (api.deleted) return "Excluído";
-    if (api.archived) return "Arquivado";
-    if (api.private) return "Rascunho";
-    return "Público";
-  };
 
-  const getStatusVariant = (api: Dataservice) => {
-    if (api.deleted) return "danger" as const;
-    if (api.archived) return "neutral" as const;
-    if (api.private) return "warning" as const;
-    return "success" as const;
-  };
 
   return (
     <div className="admin-page">
@@ -190,7 +178,7 @@ export default function DataservicesClient() {
                   <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot variant={getStatusVariant(api)}>{getStatusLabel(api)}</StatusDot>
+                  <ResourceStatusBadge item={api} />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
                 <TableCell headerLabel="Modificado em">

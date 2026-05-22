@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
-  CardNoResults,
   Icon,
   InputSelect,
   InputSearchBar,
@@ -16,9 +15,8 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -123,12 +121,7 @@ export default function ReusesClient() {
     return sortedReuses.slice(start, start + itemsPerPage);
   }, [sortedReuses, currentPage, itemsPerPage]);
 
-  const getStatus = (reuse: Reuse) => {
-    if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
-    if (reuse.archived) return { label: "Arquivado", variant: "neutral" as const };
-    if (reuse.private) return { label: "Rascunho", variant: "warning" as const };
-    return { label: "Público", variant: "success" as const };
-  };
+
 
   return (
     <div className="admin-page">
@@ -235,14 +228,13 @@ export default function ReusesClient() {
           </TableHeader>
           <TableBody>
             {paginatedReuses.map((reuse) => {
-              const status = getStatus(reuse);
               return (
                 <TableRow key={reuse.id}>
                   <TableCell headerLabel="Título">
                     <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant={status.variant}>{status.label}</StatusDot>
+                    <ResourceStatusBadge item={reuse} />
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDateToDMY(reuse.created_at)}

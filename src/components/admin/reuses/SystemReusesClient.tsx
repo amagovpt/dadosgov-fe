@@ -16,7 +16,7 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -96,13 +96,6 @@ export default function SystemReusesClient() {
     () => filterByStatus(reuses, statusFilter),
     [reuses, statusFilter]
   );
-
-  const getStatus = (reuse: Reuse) => {
-    if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
-    if (reuse.archived) return { label: "Arquivado", variant: "neutral" as const };
-    if (reuse.private) return { label: "Rascunho", variant: "warning" as const };
-    return { label: "Público", variant: "success" as const };
-  };
 
   return (
     <div className="admin-page">
@@ -199,14 +192,13 @@ export default function SystemReusesClient() {
           </TableHeader>
           <TableBody>
             {filteredReuses.map((reuse) => {
-              const status = getStatus(reuse);
               return (
                 <TableRow key={reuse.id}>
                   <TableCell headerLabel="Título">
                     <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant={status.variant}>{status.label}</StatusDot>
+                    <ResourceStatusBadge item={reuse} />
                   </TableCell>
                   <TableCell headerLabel="Criado em">{formatDateToDMY(reuse.created_at)}</TableCell>
                   <TableCell headerLabel="Conjuntos de dados">

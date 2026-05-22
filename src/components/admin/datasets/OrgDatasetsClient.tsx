@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
-  CardNoResults,
   Icon,
   InputSelect,
   InputSearchBar,
@@ -15,7 +14,7 @@ import {
   Button,
 } from "@ama-pt/agora-design-system";
 
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -238,15 +237,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {dataset.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : dataset.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : dataset.private ? (
-                    <StatusDot variant="warning">Rascunho</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <ResourceStatusBadge item={dataset} />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(dataset.created_at)}</TableCell>
                 <TableCell headerLabel="Última modificação">

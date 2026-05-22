@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import {
   Breadcrumb,
-  CardNoResults,
   Icon,
   InputSelect,
   InputSearchBar,
@@ -16,9 +15,8 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchOrgReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -26,8 +24,6 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
-import TextLink from "@/components/Primitives/TextLink";
-import AppIcon from "@/components/Primitives/AppIcon";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminEmptyState from "../AdminEmptyState";
@@ -232,15 +228,7 @@ export default function OrgReusesClient() {
                   </a>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {reuse.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : reuse.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : reuse.private ? (
-                    <StatusDot variant="warning">Rascunho</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <ResourceStatusBadge item={reuse} />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(reuse.created_at)}</TableCell>
                 <TableCell headerLabel="Conjuntos de dados">
