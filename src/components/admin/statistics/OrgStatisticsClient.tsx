@@ -12,7 +12,6 @@ import {
   Tab,
   TabHeader,
   TabBody,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -29,7 +28,7 @@ import {
 import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 
 interface OrgStatisticsClientProps {
   orgId: string;
@@ -272,13 +271,11 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   }
                 />
               ) : (
-                <Table
-                  paginationProps={createPaginationProps(
-                    PAGE_SIZE,
-                    datasetsTotal,
-                    datasetsPage,
-                    setDatasetsPage
-                  )}
+                <AdminPaginatedTable
+                  pageSize={PAGE_SIZE}
+                  totalItems={datasetsTotal}
+                  currentPage={datasetsPage}
+                  setCurrentPage={setDatasetsPage}
                 >
                   <TableHeader>
                     <TableRow>
@@ -325,7 +322,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                </AdminPaginatedTable>
               )}
             </div>
           </TabBody>
@@ -379,13 +376,11 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   }
                 />
               ) : (
-                <Table
-                  paginationProps={createPaginationProps(
-                    PAGE_SIZE,
-                    dataservicesTotal,
-                    dataservicesPage,
-                    setDataservicesPage
-                  )}
+                <AdminPaginatedTable
+                  pageSize={PAGE_SIZE}
+                  totalItems={dataservicesTotal}
+                  currentPage={dataservicesPage}
+                  setCurrentPage={setDataservicesPage}
                 >
                   <TableHeader>
                     <TableRow>
@@ -413,7 +408,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                </AdminPaginatedTable>
               )}
             </div>
           </TabBody>
@@ -458,13 +453,11 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   }
                 />
               ) : (
-                <Table
-                  paginationProps={createPaginationProps(
-                    PAGE_SIZE,
-                    reuses.length,
-                    reusesPage,
-                    setReusesPage
-                  )}
+                <AdminPaginatedTable
+                  pageSize={PAGE_SIZE}
+                  totalItems={reuses.length}
+                  currentPage={reusesPage}
+                  setCurrentPage={setReusesPage}
                 >
                   <TableHeader>
                     <TableRow>
@@ -496,7 +489,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                </AdminPaginatedTable>
               )}
             </div>
           </TabBody>

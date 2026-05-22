@@ -11,7 +11,6 @@ import {
   Tab,
   TabHeader,
   TabBody,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -50,7 +49,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/types/api";
 import AppIcon from "@/components/Primitives/AppIcon";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 
 interface HarvesterDetailClientProps {
   slug: string;
@@ -564,14 +563,12 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                 }
               />
             ) : (
-              <Table
-                paginationProps={createPaginationProps(
-                  jobsPageSize,
-                  jobsTotal,
-                  jobsPage,
-                  setJobsPage,
-                  setJobsPageSize
-                )}
+              <AdminPaginatedTable
+                pageSize={jobsPageSize}
+                totalItems={jobsTotal}
+                currentPage={jobsPage}
+                setCurrentPage={setJobsPage}
+                setPageSize={setJobsPageSize}
               >
                 <TableHeader>
                   <TableRow>
@@ -669,7 +666,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                     );
                   })}
                 </TableBody>
-              </Table>
+              </AdminPaginatedTable>
             )}
           </TabBody>
         </Tab>

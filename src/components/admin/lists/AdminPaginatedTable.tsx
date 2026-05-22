@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Table } from "@ama-pt/agora-design-system";
+import type { CreatePaginationPropsOptions } from "@/utils/createPaginationProps";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
 interface AdminPaginatedTableProps {
@@ -8,7 +9,8 @@ interface AdminPaginatedTableProps {
   totalItems: number;
   currentPage: number;
   setCurrentPage: (page: number) => void;
-  setPageSize: (pageSize: number) => void;
+  setPageSize?: (pageSize: number) => void;
+  paginationOptions?: CreatePaginationPropsOptions;
 }
 
 export default function AdminPaginatedTable({
@@ -18,6 +20,7 @@ export default function AdminPaginatedTable({
   currentPage,
   setCurrentPage,
   setPageSize,
+  paginationOptions,
 }: AdminPaginatedTableProps) {
   return (
     <Table
@@ -26,7 +29,8 @@ export default function AdminPaginatedTable({
         totalItems,
         currentPage,
         setCurrentPage,
-        setPageSize
+        setPageSize,
+        paginationOptions
       )}
     >
       {children}

@@ -12,7 +12,6 @@ import {
   Tab,
   TabHeader,
   TabBody,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -23,7 +22,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { fetchMyDatasets, fetchMyReuses } from "@/services/api";
 import { Dataset, Reuse } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 
 const PAGE_SIZE = 10;
 
@@ -145,13 +144,11 @@ export default function StatisticsClient() {
                   }
                 />
               ) : (
-                <Table
-                  paginationProps={createPaginationProps(
-                    PAGE_SIZE,
-                    datasetsTotal,
-                    datasetsPage,
-                    setDatasetsPage
-                  )}
+                <AdminPaginatedTable
+                  pageSize={PAGE_SIZE}
+                  totalItems={datasetsTotal}
+                  currentPage={datasetsPage}
+                  setCurrentPage={setDatasetsPage}
                 >
                   <TableHeader>
                     <TableRow>
@@ -198,7 +195,7 @@ export default function StatisticsClient() {
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                </AdminPaginatedTable>
               )}
             </div>
           </TabBody>
@@ -238,13 +235,11 @@ export default function StatisticsClient() {
               ) : (
                 <>
                   <p className="text-sm mb-16 text-neutral-700">{reusesTotal} resultados</p>
-                  <Table
-                  paginationProps={createPaginationProps(
-                    PAGE_SIZE,
-                    reusesTotal,
-                    reusesPage,
-                    setReusesPage
-                  )}
+                  <AdminPaginatedTable
+                    pageSize={PAGE_SIZE}
+                    totalItems={reusesTotal}
+                    currentPage={reusesPage}
+                    setCurrentPage={setReusesPage}
                   >
                     <TableHeader>
                       <TableRow>
@@ -276,7 +271,7 @@ export default function StatisticsClient() {
                         </TableRow>
                       ))}
                     </TableBody>
-                  </Table>
+                  </AdminPaginatedTable>
                 </>
               )}
             </div>

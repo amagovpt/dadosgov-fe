@@ -8,7 +8,6 @@ import {
   InputSearchBar,
   DropdownSection,
   DropdownOption,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -17,11 +16,11 @@ import {
   CardNoResults,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchHarvestJob, fetchHarvester } from "@/services/api";
 import type { HarvestJob, HarvestItem, HarvestSource } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 
 interface HarvestJobDetailClientProps {
   slug: string;
@@ -275,15 +274,13 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
       </div>
 
       {paginatedItems.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            filteredItems.length,
-            currentPage,
-            setCurrentPage,
-            setPageSize,
-            { currentPageIsZeroBased: true }
-          )}
+        <AdminPaginatedTable
+          pageSize={pageSize}
+          totalItems={filteredItems.length}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
+          paginationOptions={{ currentPageIsZeroBased: true }}
         >
           <TableHeader>
             <TableRow>
@@ -335,7 +332,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </AdminPaginatedTable>
       ) : (
         <CardNoResults
           position="center"

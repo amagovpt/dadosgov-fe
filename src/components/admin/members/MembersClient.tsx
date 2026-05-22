@@ -37,7 +37,7 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 
 const roleLabels: Record<string, string> = {
   admin: "Administrador",
@@ -649,14 +649,12 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
         </Button>
       </div>
 
-      <Table
-        paginationProps={createPaginationProps(
-          itemsPerPage,
-          members.length,
-          currentPage,
-          setCurrentPage,
-          setItemsPerPage
-        )}
+      <AdminPaginatedTable
+        pageSize={itemsPerPage}
+        totalItems={members.length}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        setPageSize={setItemsPerPage}
       >
         <TableHeader>
           <TableRow>
@@ -743,7 +741,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </AdminPaginatedTable>
     </div>
   );
 }
