@@ -25,6 +25,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -79,8 +80,6 @@ export default function DataservicesClient() {
     loadDataservices();
   }, []);
 
-
-
   return (
     <div className="admin-page">
       <div className="admin-page__breadcrumb">
@@ -98,7 +97,7 @@ export default function DataservicesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">{filteredApis.length} resultados</p>
+      <ResultsCount count={filteredApis.length} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">

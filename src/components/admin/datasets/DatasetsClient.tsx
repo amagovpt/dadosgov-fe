@@ -26,6 +26,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],
@@ -156,9 +157,7 @@ export default function DatasetsClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">
-        {isLoading ? "A carregar..." : `${totalItems} resultados`}
-      </p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">

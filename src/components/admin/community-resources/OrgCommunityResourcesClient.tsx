@@ -23,6 +23,7 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
@@ -124,7 +125,7 @@ export default function OrgCommunityResourcesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">{resources.length} resultados</p>
+      <ResultsCount count={resources.length} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">

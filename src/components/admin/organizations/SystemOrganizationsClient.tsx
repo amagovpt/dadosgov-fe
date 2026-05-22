@@ -20,6 +20,7 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import ResultsCount from "../ResultsCount";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -166,7 +167,7 @@ export default function SystemOrganizationsClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">

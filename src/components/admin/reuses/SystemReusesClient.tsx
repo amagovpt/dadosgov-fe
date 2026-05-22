@@ -24,6 +24,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import ResultsCount from "../ResultsCount";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at";
@@ -114,7 +115,7 @@ export default function SystemReusesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">

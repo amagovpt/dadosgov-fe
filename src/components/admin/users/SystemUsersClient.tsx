@@ -21,6 +21,7 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchUsers } from "@/services/api";
 import { UserAdmin } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import ResultsCount from "../ResultsCount";
 
 type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
 type SortOrder = "ascending" | "descending" | "none";
@@ -134,7 +135,7 @@ export default function SystemUsersClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">

@@ -29,6 +29,7 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
 
 type StatusInfo = {
   label: string;
@@ -190,7 +191,7 @@ export default function OrgHarvestersClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">{harvesters.length} resultados</p>
+      <ResultsCount count={harvesters.length} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">

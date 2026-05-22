@@ -31,6 +31,7 @@ import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import ResultsCount from "../ResultsCount";
 
 const VALIDATION_STATUS: Record<
   string,
@@ -219,9 +220,7 @@ export default function SystemHarvestersClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">
-        {isLoading ? "A carregar..." : `${totalItems} resultados`}
-      </p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">

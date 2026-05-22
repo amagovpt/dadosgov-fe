@@ -26,6 +26,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -121,8 +122,6 @@ export default function ReusesClient() {
     return sortedReuses.slice(start, start + itemsPerPage);
   }, [sortedReuses, currentPage, itemsPerPage]);
 
-
-
   return (
     <div className="admin-page">
       <div className="admin-page__breadcrumb">
@@ -140,9 +139,7 @@ export default function ReusesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">
-        {isLoading ? "A carregar..." : `${filteredReuses.length} resultados`}
-      </p>
+      <ResultsCount count={filteredReuses.length} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">

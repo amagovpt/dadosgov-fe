@@ -18,6 +18,7 @@ import { fetchPosts } from "@/services/api";
 import { Post } from "@/types/api";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import ResultsCount from "../admin/ResultsCount";
 
 const PAGE_SIZE = 12;
 
@@ -38,9 +39,9 @@ function SortSelect({
   const lastValue = useRef(currentSortKey);
 
   const mounted = useSyncExternalStore(
-    () => () => { },
+    () => () => {},
     () => true,
-    () => false,
+    () => false
   );
 
   useEffect(() => {
@@ -63,8 +64,8 @@ function SortSelect({
     };
     return (
       <div className="selectArticle">
-        <label className="text-s-regular text-neutral-700 mb-4 block">Ordenar por :</label>
-        <div className="w-full border border-neutral-300 rounded-8 px-16 py-12 text-m-regular text-neutral-900 bg-white">
+        <label className="mb-4 block text-s-regular text-neutral-700">Ordenar por :</label>
+        <div className="w-full rounded-8 border border-neutral-300 bg-white px-16 py-12 text-m-regular text-neutral-900">
           {labels[currentSortKey] || "Mais recentes"}
         </div>
       </div>
@@ -72,12 +73,7 @@ function SortSelect({
   }
 
   return (
-    <InputSelect
-      label="Ordenar por :"
-      id="sort-articles"
-      className="selectArticle"
-      ref={selectRef}
-    >
+    <InputSelect label="Ordenar por :" id="sort-articles" className="selectArticle" ref={selectRef}>
       <DropdownSection name="order">
         <DropdownOption value="recentes" selected={currentSortKey === "recentes"}>
           Mais recentes
@@ -137,7 +133,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
   };
 
   return (
-    <main className="w-full flex justify-center items-center flex-col bg-primary-50">
+    <main className="flex w-full flex-col items-center justify-center bg-primary-50">
       <HeroGeneral
         title="Últimas novidades"
         backgroundImageUrl="/Banner/hero-bg.png"
@@ -157,39 +153,43 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
           minLength={1}
           value={searchInput}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
-          onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter") handleSearch(); }}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === "Enter") handleSearch();
+          }}
           onSearchActivate={() => handleSearch()}
         />
         <div className="mt-8 text-s-regular text-neutral-200">
           Exemplos: &quot;webinar&quot;, &quot;estudos&quot;, &quot;eventos&quot;
         </div>
       </HeroGeneral>
-      <div className="container flex flex-col gap-32 justify-center items-center py-32">
-        <div className="w-full flex items-center justify-end flex-col ">
-          <div className="w-full flex items-end gap-16">
-            <span className="text-neutral-900 font-medium text-base w-full">
-              {isLoading ? "A carregar..." : `${total} Resultados`}
-            </span>
-            <div className="w-full flex items-end gap-16 justify-end">
-              <div className=" max-w-256">
+      <div className="container flex flex-col items-center justify-center gap-32 py-32">
+        <div className="flex w-full flex-col items-center justify-end">
+          <div className="flex w-full items-end gap-16">
+            <ResultsCount
+              count={total}
+              isLoading={isLoading}
+              className="w-full text-base font-medium text-neutral-900"
+            />
+            <div className="flex w-full items-end justify-end gap-16">
+              <div className="max-w-256">
                 <SortSelect currentSortKey={sortKey} onSortChange={setSortKey} />
               </div>
             </div>
           </div>
 
-          <div className="divider-neutral-200 mt-12 mb-24" />
+          <div className="divider-neutral-200 mb-24 mt-12" />
           {isLoading ? null : posts.length === 0 ? (
             <div className="flex justify-center py-64">
               <span className="text-neutral-600">Nenhum artigo encontrado.</span>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
+            <div className="grid grid-cols-1 gap-32 lg:grid-cols-2">
               {posts.map((post) => {
                 return (
                   <Link
                     key={post.id}
                     href={`/pages/posts/${post.slug}`}
-                    className="card-general-listing rounded-4 overflow-hidden h-full flex flex-col"
+                    className="card-general-listing flex h-full flex-col overflow-hidden rounded-4"
                   >
                     <CardGeneral
                       variant="neutral-100"
@@ -209,17 +209,17 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
                       titleText={post.name}
                       descriptionText={
                         (
-                          <div className="flex flex-col grow">
+                          <div className="flex grow flex-col">
                             {post.headline && (
-                              <p className="text-m-regular text-neutral-800 line-clamp-3 mb-16">
+                              <p className="mb-16 line-clamp-3 text-m-regular text-neutral-800">
                                 {post.headline}
                               </p>
                             )}
                             <div className="mt-auto">
-                              <div className="flex items-center gap-8 text-primary-600 mt-16">
+                              <div className="mt-16 flex items-center gap-8 text-primary-600">
                                 <Icon
                                   name="agora-line-arrow-right-circle"
-                                  className="w-32 h-32"
+                                  className="h-32 w-32"
                                   aria-hidden="true"
                                 />
                               </div>

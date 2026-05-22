@@ -24,6 +24,7 @@ import { fetchMyDatasets, fetchMyReuses } from "@/services/api";
 import { Dataset, Reuse } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import ResultsCount from "../ResultsCount";
 
 const PAGE_SIZE = 10;
 
@@ -237,14 +238,15 @@ export default function StatisticsClient() {
                 </>
               ) : (
                 <>
-                  <p className="text-sm mb-16 text-neutral-700">{reusesTotal} resultados</p>
+                  <ResultsCount count={reusesTotal} isLoading={isReusesLoading} />
+
                   <Table
-                  paginationProps={createPaginationProps(
-                    PAGE_SIZE,
-                    reusesTotal,
-                    reusesPage,
-                    setReusesPage
-                  )}
+                    paginationProps={createPaginationProps(
+                      PAGE_SIZE,
+                      reusesTotal,
+                      reusesPage,
+                      setReusesPage
+                    )}
                   >
                     <TableHeader>
                       <TableRow>

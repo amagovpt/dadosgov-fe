@@ -20,6 +20,7 @@ import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import ResultsCount from "../ResultsCount";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -122,7 +123,7 @@ export default function SystemCommunityResourcesClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">{resources.length} resultados</p>
+      <ResultsCount count={resources.length} isLoading={isLoading} />
 
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>

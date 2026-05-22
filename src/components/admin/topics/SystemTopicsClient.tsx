@@ -17,6 +17,7 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchTopics } from "@/services/api";
 import { Topic } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import ResultsCount from "../ResultsCount";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -68,7 +69,7 @@ export default function SystemTopicsClient() {
         <PublishDropdown />
       </div>
 
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
