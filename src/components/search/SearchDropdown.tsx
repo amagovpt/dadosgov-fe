@@ -49,11 +49,13 @@ export default function SearchDropdown({
 
   // Close and reset on every navigation (pathname OR query string change)
   useEffect(() => {
-    setIsOpen(false);
-    setQuery("");
-    queryRef.current = "";
     const input = wrapperRef.current?.querySelector("input");
+    queryRef.current = "";
     if (input) input.value = "";
+    setTimeout(() => {
+      setIsOpen(false);
+      setQuery("");
+    }, 0);
   }, [fullPath]);
 
   useEffect(() => {

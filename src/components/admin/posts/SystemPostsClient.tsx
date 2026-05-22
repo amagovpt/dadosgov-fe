@@ -21,20 +21,12 @@ import StatusDot from "@/components/admin/StatusDot";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchAdminPosts } from "@/services/api";
-import { Post } from "@/types/api";
+import type { Post } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "name" | "created_at" | "last_modified";
-
-const formatDate = (dateStr: string) => {
-  try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-  } catch {
-    return dateStr;
-  }
-};
 
 export default function SystemPostsClient() {
   const FETCH_PAGE_SIZE = 100;
@@ -266,8 +258,8 @@ export default function SystemPostsClient() {
                     {post.published ? "Publicado" : "Despublicado"}
                   </StatusDot>
                 </TableCell>
-                <TableCell headerLabel="Criado em">{formatDate(post.created_at)}</TableCell>
-                <TableCell headerLabel="Atualizado em">{formatDate(post.last_modified)}</TableCell>
+                <TableCell headerLabel="Criado em">{formatDateToDMY(post.created_at)}</TableCell>
+                <TableCell headerLabel="Atualizado em">{formatDateToDMY(post.last_modified)}</TableCell>
                 <TableCell headerLabel="Ação">
                   <div className="flex gap-8">
                     <a href={`/pages/posts/${post.slug}`}>

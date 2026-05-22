@@ -3,13 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
-  InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   StatusCard,
   Table,
   TableHeader,
@@ -22,53 +18,18 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/services/api";
 import type { HarvestSource } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import { getHarvesterStatus } from "@/utils/harvesterStatus";
+import { HarvesterStatusFilter } from "./HarvesterStatusFilter";
+import { formatDateToDMY } from "@/utils/formatDate";
 import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
-import { format } from "date-fns";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminLayout from "@/components/Layout/AdminLayout";
 
-const VALIDATION_STATUS: Record<
-  string,
-  { label: string; variant: "success" | "warning" | "danger" | "informative" }
-> = {
-  pending: { label: "Em espera de validação", variant: "warning" },
-  accepted: { label: "Validado", variant: "success" },
-  refused: { label: "Recusado", variant: "danger" },
-};
-
-const JOB_STATUS: Record<
-  string,
-  { label: string; variant: "success" | "warning" | "danger" | "informative" }
-> = {
-  pending: { label: "Pendente", variant: "informative" },
-  initializing: { label: "A inicializar", variant: "informative" },
-  initialized: { label: "Inicializado", variant: "informative" },
-  processing: { label: "Em processamento", variant: "informative" },
-  done: { label: "Terminado", variant: "success" },
-  "done-errors": { label: "Terminado com erros", variant: "warning" },
-  failed: { label: "Falhado", variant: "danger" },
-};
-
-function getStatus(source: HarvestSource) {
-  if (source.validation?.state && source.validation.state !== "accepted") {
-    return VALIDATION_STATUS[source.validation.state] || VALIDATION_STATUS.pending;
-  }
-  if (source.last_job?.status) {
-    return (
-      JOB_STATUS[source.last_job.status] || {
-        label: "Sem tarefa de momento",
-        variant: "informative" as const,
-      }
-    );
-  }
-  return { label: "Sem tarefa de momento", variant: "informative" as const };
-}
 
 export default function SystemHarvestersClient() {
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
@@ -230,47 +191,14 @@ export default function SystemHarvestersClient() {
             }}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+        <HarvesterStatusFilter
+          value={statusFilter}
+          onChange={(v) => {
+            setStatusFilter(v);
+            setCurrentPage(1);
           }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="pending" selected={statusFilter === "pending"}>
-              Em espera de validação
-            </DropdownOption>
-            <DropdownOption value="accepted" selected={statusFilter === "accepted"}>
-              Validado
-            </DropdownOption>
-            <DropdownOption value="refused" selected={statusFilter === "refused"}>
-              Recusado
-            </DropdownOption>
-            <DropdownOption value="done" selected={statusFilter === "done"}>
-              Terminado
-            </DropdownOption>
-            <DropdownOption value="failed" selected={statusFilter === "failed"}>
-              Falhado
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+        />
       </div>
-
-      {statusFilter === "accepted" && (
-        <div className="mb-24">
-          <StatusCard
-            variant="informative"
-            showIcon
-            description="O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução — a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
-          />
-        </div>
-      )}
 
       {feedback && (
         <div className="mb-[24px]">
@@ -304,7 +232,7 @@ export default function SystemHarvestersClient() {
           </TableHeader>
           <TableBody>
             {filtered.map((harvester) => {
-              const status = getStatus(harvester);
+              const status = getHarvesterStatus(harvester);
               return (
                 <TableRow
                   key={harvester.id}
@@ -321,11 +249,11 @@ export default function SystemHarvestersClient() {
                   </TableCell>
                   <TableCell headerLabel="Implementação">{harvester.backend}</TableCell>
                   <TableCell headerLabel="Criado em">
-                    {format(new Date(harvester.created_at), "dd/MM/yyyy")}
+                    {formatDateToDMY(harvester.created_at)}
                   </TableCell>
                   <TableCell headerLabel="Última execução">
                     {harvester.last_job?.ended
-                      ? format(new Date(harvester.last_job.ended), "dd/MM/yyyy")
+                      ? formatDateToDMY(harvester.last_job.ended)
                       : "Ainda não"}
                   </TableCell>
                   <TableCell headerLabel="Conjuntos de dados">

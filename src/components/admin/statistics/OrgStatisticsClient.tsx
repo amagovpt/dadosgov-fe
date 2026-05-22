@@ -25,10 +25,11 @@ import {
   fetchOrgReuses,
   fetchOrganization,
 } from "@/services/api";
-import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
+import type { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import { DatasetMetricsTable } from "./DatasetMetricsTable";
+import { ReuseMetricsTable } from "./ReuseMetricsTable";
 
 interface OrgStatisticsClientProps {
   orgId: string;
@@ -264,60 +265,12 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   }
                 />
               ) : (
-                <Table
-                  paginationProps={createPaginationProps(
-                    PAGE_SIZE,
-                    datasetsTotal,
-                    datasetsPage,
-                    setDatasetsPage
-                  )}
-                >
-                  <TableHeader>
-                    <TableRow>
-                      <TableHeaderCell>TÍTULO DO CONJUNTO DE DADOS</TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-chat" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-eye" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-download" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-star" className="h-16 w-16" />
-                      </TableHeaderCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {datasets.map((dataset) => (
-                      <TableRow key={dataset.id}>
-                        <TableCell headerLabel="Título">
-                          <TextLink href={dataset.page}>{dataset.title}</TextLink>
-                        </TableCell>
-                        <TableCell headerLabel="Discussões">
-                          {dataset.metrics?.discussions ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Visualizações">
-                          {dataset.metrics?.views ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Downloads">
-                          {dataset.metrics?.resources_downloads ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Reutilizações">
-                          {dataset.metrics?.reuses ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Favoritos">
-                          {dataset.metrics?.followers ?? 0}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <DatasetMetricsTable
+                  datasets={datasets}
+                  total={datasetsTotal}
+                  page={datasetsPage}
+                  onPageChange={setDatasetsPage}
+                />
               )}
             </div>
           </TabBody>
@@ -450,45 +403,12 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   }
                 />
               ) : (
-                <Table
-                  paginationProps={createPaginationProps(
-                    PAGE_SIZE,
-                    reuses.length,
-                    reusesPage,
-                    setReusesPage
-                  )}
-                >
-                  <TableHeader>
-                    <TableRow>
-                      <TableHeaderCell>TÍTULO DA REUTILIZAÇÃO</TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-eye" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-star" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>ESTADO</TableHeaderCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {reusesPagedData.map((reuse) => (
-                      <TableRow key={reuse.id}>
-                        <TableCell headerLabel="Título">
-                          <TextLink href={reuse.url}>{reuse.title}</TextLink>
-                        </TableCell>
-                        <TableCell headerLabel="Visualizações">
-                          {reuse.metrics?.views ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Favoritos">
-                          {reuse.metrics?.followers ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Estado">
-                          {reuse.private ? "Privado" : reuse.archived ? "Arquivado" : "Público"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <ReuseMetricsTable
+                  reuses={reusesPagedData}
+                  total={reuses.length}
+                  page={reusesPage}
+                  onPageChange={setReusesPage}
+                />
               )}
             </div>
           </TabBody>

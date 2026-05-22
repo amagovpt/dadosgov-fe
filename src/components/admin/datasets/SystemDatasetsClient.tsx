@@ -20,23 +20,12 @@ import { Dataset } from "@/types/api";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
-import TextLink from "@/components/Primitives/TextLink";import { createPaginationProps } from "@/utils/createPaginationProps";
-
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
-
-const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
-  ["dataset_description_quality", "Descrição"],
-  ["has_resources", "Recursos"],
-  ["license", "Licença"],
-  ["has_open_format", "Formato aberto"],
-  ["all_resources_available", "Recursos disponíveis"],
-  ["resources_documentation", "Documentação"],
-  ["update_frequency", "Frequência de atualização"],
-  ["temporal_coverage", "Cobertura temporal"],
-  ["spatial", "Cobertura espacial"],
-];
 
 const SORT_FIELD_MAP: Record<SortField, string | null> = {
   title: "title",
