@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   CardNoResults,
   Icon,
@@ -23,6 +23,7 @@ import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
 
 type SortField = "title" | "created_at" | "last_modified" | "resources";
@@ -56,7 +57,6 @@ export default function SystemDatasetsClient() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadDatasets = useCallback(async () => {
     setIsLoading(true);
@@ -111,13 +111,10 @@ export default function SystemDatasetsClient() {
     loadDatasets();
   }, [loadDatasets]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
+  const handleSearch = useDebouncedSearch((value: string) => {
       setSearchQuery(value);
       setCurrentPage(1);
-    }, 400);
-  };
+    });
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,

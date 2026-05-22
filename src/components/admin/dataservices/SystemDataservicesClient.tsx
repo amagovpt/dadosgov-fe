@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Breadcrumb,
   CardNoResults,
@@ -27,6 +27,7 @@ import {
   SortOrder,
   useSortControls,
 } from "@/components/admin/lists/useClientTableState";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
 type DataserviceSortField = "title" | "created_at" | "last_modified";
 
@@ -46,7 +47,6 @@ export default function SystemDataservicesClient() {
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<DataserviceSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const sortParam = useMemo(() => {
     if (!sortField || sortOrder === "none") return undefined;
@@ -82,13 +82,10 @@ export default function SystemDataservicesClient() {
     loadData();
   }, [loadData]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
+  const handleSearch = useDebouncedSearch((value: string) => {
       setSearchQuery(value);
       setCurrentPage(1);
-    }, 400);
-  };
+    });
 
   const filteredApis = useMemo(
     () => filterByStatus(apis, statusFilter),

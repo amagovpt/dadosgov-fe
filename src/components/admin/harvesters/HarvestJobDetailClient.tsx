@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Breadcrumb,
   Icon,
@@ -21,6 +21,7 @@ import { fetchHarvestJob, fetchHarvester } from "@/services/api";
 import type { HarvestJob, HarvestItem, HarvestSource } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
 interface HarvestJobDetailClientProps {
   slug: string;
@@ -64,7 +65,6 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -84,13 +84,10 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
     load();
   }, [jobId, slug]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
+  const handleSearch = useDebouncedSearch((value: string) => {
       setSearchQuery(value);
       setCurrentPage(1);
-    }, 400);
-  };
+    });
 
   const items = job?.items || [];
 

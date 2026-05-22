@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Breadcrumb,
@@ -30,6 +30,7 @@ import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
 const VALIDATION_STATUS: Record<
   string,
@@ -81,7 +82,6 @@ export default function SystemHarvestersClient() {
     message: string;
   } | null>(null);
   const router = useRouter();
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { isAdmin } = useAuth();
   const { show, hide } = usePopupContext();
 
@@ -172,13 +172,10 @@ export default function SystemHarvestersClient() {
     loadData();
   }, [loadData]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
+  const handleSearch = useDebouncedSearch((value: string) => {
       setSearchQuery(value);
       setCurrentPage(1);
-    }, 400);
-  };
+    });
 
   const filtered = useMemo(() => {
     let result = harvesters;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Breadcrumb,
   Button,
@@ -19,6 +19,7 @@ import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 import { useSortControls } from "@/components/admin/lists/useClientTableState";
 import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 
@@ -77,7 +78,6 @@ export default function SystemOrganizationsClient() {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [deletingOrgId, setDeletingOrgId] = useState<string | null>(null);
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -105,13 +105,10 @@ export default function SystemOrganizationsClient() {
     loadData();
   }, [loadData]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
+  const handleSearch = useDebouncedSearch((value: string) => {
       setSearchQuery(value);
       setCurrentPage(1);
-    }, 400);
-  };
+    });
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,

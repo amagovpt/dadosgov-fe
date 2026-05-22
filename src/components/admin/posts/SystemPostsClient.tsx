@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Breadcrumb,
@@ -24,6 +24,7 @@ import { Post } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import { useSortControls } from "@/components/admin/lists/useClientTableState";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 
 type SortField = "name" | "created_at" | "last_modified";
@@ -50,7 +51,6 @@ export default function SystemPostsClient() {
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -115,13 +115,10 @@ export default function SystemPostsClient() {
     loadData();
   }, [loadData]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
+  const handleSearch = useDebouncedSearch((value: string) => {
       setSearchQuery(value);
       setCurrentPage(1);
-    }, 400);
-  };
+    });
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,

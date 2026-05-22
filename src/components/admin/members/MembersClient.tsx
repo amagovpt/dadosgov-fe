@@ -524,7 +524,6 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     });
   }, [members, sortField, sortOrder]);
 
-  const totalPages = Math.ceil(sortedMembers.length / itemsPerPage);
   const paginatedMembers = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return sortedMembers.slice(start, start + itemsPerPage);

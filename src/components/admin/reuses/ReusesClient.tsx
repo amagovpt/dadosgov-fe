@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
@@ -31,6 +31,7 @@ import {
   useClientTableState,
   useSortControls,
 } from "@/components/admin/lists/useClientTableState";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
 type ReuseSortField = "title" | "created_at" | "datasets";
 
@@ -52,7 +53,6 @@ export default function ReusesClient() {
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
@@ -82,13 +82,10 @@ export default function ReusesClient() {
     return () => clearTimeout(timeoutId);
   }, [loadData]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
+  const handleSearch = useDebouncedSearch((value: string) => {
       setSearchQuery(value);
       setCurrentPage(1);
-    }, 400);
-  };
+    });
 
   const filteredReuses = useMemo(() => {
     let result = reuses;

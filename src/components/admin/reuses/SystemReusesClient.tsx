@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Breadcrumb,
   CardNoResults,
@@ -24,6 +24,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
 type ReuseSortField = "title" | "created_at";
 
@@ -42,7 +43,6 @@ export default function SystemReusesClient() {
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const sortParam = useMemo(() => {
     if (!sortField || sortOrder === "none") return undefined;
@@ -82,13 +82,10 @@ export default function SystemReusesClient() {
     return () => clearTimeout(timeoutId);
   }, [loadData]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
+  const handleSearch = useDebouncedSearch((value: string) => {
       setSearchQuery(value);
       setCurrentPage(1);
-    }, 400);
-  };
+    });
 
   const filteredReuses = useMemo(
     () => filterByStatus(reuses, statusFilter),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   CardNoResults,
   Icon,
@@ -26,6 +26,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
+import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
 type SortField = "title" | "created" | "last_update";
 
@@ -47,7 +48,6 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
   const [sortField, setSortField] = useState<SortField | null>("created");
   const [sortOrder, setSortOrder] = useState<SortOrder>("descending");
 
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const buildSortParam = (field: SortField | null, order: SortOrder): string => {
     if (order === "none") return "-created";
@@ -100,13 +100,10 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
     loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
   }, [currentPage, itemsPerPage, searchQuery, statusFilter, sortField, sortOrder, loadDatasets]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    searchTimeoutRef.current = setTimeout(() => {
+  const handleSearch = useDebouncedSearch((value: string) => {
       setSearchQuery(value);
       setCurrentPage(1);
-    }, 400);
-  };
+    });
 
   const handleStatusChange = (options: { value?: string }[]) => {
     const value = options?.[0]?.value || "";
