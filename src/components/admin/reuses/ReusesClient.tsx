@@ -6,10 +6,7 @@ import {
   Breadcrumb,
   CardNoResults,
   Icon,
-  InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -26,6 +23,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import PublicationStatusFilterSelect from "@/components/admin/lists/PublicationStatusFilterSelect";
 import {
   SortOrder,
   useClientTableState,
@@ -155,35 +153,14 @@ export default function ReusesClient() {
             }}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
+        <PublicationStatusFilterSelect
+          statusFilter={statusFilter}
           defaultValue={statusFilter || undefined}
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+          onChange={(nextStatus) => {
+            setStatusFilter(nextStatus);
             setCurrentPage(1);
           }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>
-              Público
-            </DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>
-              Arquivado
-            </DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>
-              Rascunho
-            </DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
-              Excluído
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+        />
       </div>
 
       {isLoading ? (
