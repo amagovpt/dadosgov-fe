@@ -725,7 +725,6 @@ export default function DatasetsEditClient() {
         datasetId={dataset.id}
         resourceTypes={resourceTypes}
         onSaved={async () => {
-          hide();
           await refreshDataset();
           setApiSuccess("Recurso atualizado com sucesso.");
           setTimeout(() => setApiSuccess(null), 10000);
@@ -751,7 +750,6 @@ export default function DatasetsEditClient() {
             datasetId={dataset.id}
             resourceTypes={resourceTypes}
             onSaved={async () => {
-              hide();
               await refreshDataset();
               setApiSuccess("Recurso atualizado com sucesso.");
               setTimeout(() => setApiSuccess(null), 10000);
