@@ -1,24 +1,22 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Button,
-  DropdownSection,
-  DropdownOption,
   InputText,
   InputTextArea,
   RadioButton,
   Tag,
 } from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { suggestTags, createPost, uploadPostImage, publishPost } from "@/services/api";
-import type { TagSuggestion } from "@/types/api";
+import { createPost, uploadPostImage, publishPost } from "@/services/api";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import type { PostCreatePayload } from "@/types/api";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
+import { ImageUploadField } from "@/components/admin/posts/ImageUploadField";
 
 export default function PostsNewClient() {
   const searchParams = useSearchParams();
@@ -31,85 +29,15 @@ export default function PostsNewClient() {
   const [articleHeader, setArticleHeader] = useState("");
   const [articleContent, setArticleContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const selectedKeywordsRef = useRef("");
-  const [keywordSearch, setKeywordSearch] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
-  const [tags, setTags] = useState<TagSuggestion[]>([]);
-  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
   const [pendingAction, setPendingAction] = useState<"draft" | "publish" | null>(null);
   const isSaving = pendingAction !== null;
   const [saveError, setSaveError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
 
-  useEffect(() => {
-    suggestTags("", 50).then(setTags);
-  }, []);
-
-  useEffect(() => {
-    const q = keywordSearch.trim();
-    if (q.length < 2) return;
-
-    const timer = setTimeout(async () => {
-      try {
-        const res = await suggestTags(q, 20);
-        setTagSearch(res);
-      } catch {
-        setTagSearch([]);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [keywordSearch]);
-
-  const keywordOptions = useMemo(() => {
-    const trimmed = keywordSearch.trim();
-    const trimmedLower = trimmed.toLowerCase();
-    // Selected tags stay visible regardless of query so the InputSelect keeps
-    // tracking them across searches; otherwise typing a new query would drop
-    // them from the children and the next onChange would lose those selections.
-    const selectedLowerSet = new Set(selectedTags.map((k) => k.toLowerCase()));
-    const seen = new Set<string>();
-    const visibleTagSearch = trimmed.length < 2 ? [] : tagSearch;
-    const uniqueTags = [...tags, ...visibleTagSearch].filter((t) => {
-      const key = t.text.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      if (selectedLowerSet.has(key)) return true;
-      if (trimmedLower && !key.includes(trimmedLower)) return false;
-      return true;
-    });
-    const selectedNotInSuggestions = selectedTags.filter(
-      (keyword) => !seen.has(keyword.toLowerCase()),
-    );
-    const showCreate =
-      trimmed.length > 0 &&
-      ![...tags, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
-      !selectedLowerSet.has(trimmedLower);
-    const options = [
-      ...(showCreate
-        ? [
-            <DropdownOption key={`__create__${trimmedLower}`} value={trimmed} selected={false}>
-              Criar &quot;{trimmed}&quot;
-            </DropdownOption>,
-          ]
-        : []),
-      ...selectedNotInSuggestions.map((keyword) => (
-        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
-          {keyword}
-        </DropdownOption>
-      )),
-      ...uniqueTags.map((tag) => (
-        <DropdownOption
-          key={tag.text.toLowerCase()}
-          value={tag.text}
-          selected={selectedLowerSet.has(tag.text.toLowerCase())}
-        >
-          {tag.text}
-        </DropdownOption>
-      )),
-    ];
-    return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, tagSearch, selectedTags, keywordSearch]);
+  const { keywordSearch, setKeywordSearch, keywordOptions, selectedKeywordsRef, addCustomTag } =
+    usePostKeywords(selectedTags);
 
   const clearError = (field: string) => {
     if (formErrors[field]) {
@@ -310,18 +238,8 @@ export default function PostsNewClient() {
                     setSelectedTags(selected);
                     let addedNew = false;
                     selected.forEach((v) => {
-                      const lower = v.toLowerCase();
-                      const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
-                      const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
-                      if (!existsInTags && !existsInSearch) {
-                        addedNew = true;
-                        setTags((prev) => {
-                          if (prev.some((t) => t.text.toLowerCase() === lower)) {
-                            return prev;
-                          }
-                          return [...prev, { text: v }];
-                        });
-                      }
+                      addedNew = true;
+                      addCustomTag(v);
                     });
                     if (addedNew) {
                       setKeywordSearch("");
@@ -351,42 +269,12 @@ export default function PostsNewClient() {
                   </div>
                 )}
 
-                <div>
-                  <span className="text-primary-900 text-base font-medium leading-7">
-                    Imagem de capa
-                  </span>
-                  <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
-                    <DragAndDropUploader
-                      label="Ficheiros"
-                      dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                      inputLabel="Selecione ou arraste o ficheiro"
-                      selectedFilesLabel="ficheiro selecionado"
-                      removeFileButtonLabel="Remover ficheiro"
-                      replaceFileButtonLabel="Substituir ficheiro"
-                      extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-                      accept=".jpg,.jpeg,.png"
-                      maxSize={4194304}
-                      maxCount={1}
-                      maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-                      forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                      hasError={!!imageError}
-                      hasFeedback={!!imageError}
-                      feedbackState="danger"
-                      feedbackText={imageError ?? undefined}
-                      onChange={handleImageChange}
-                      onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
-                    />
-                  </div>
-                </div>
-                {imageFile && (
-                  <div className="mt-4 flex justify-center">
-                    <img
-                      src={imageFile ? URL.createObjectURL(imageFile) : undefined}
-                      alt="Cobertura do artigo"
-                      className="max-w-[200px] max-h-[150px] object-contain border border-neutral-200 rounded"
-                    />
-                  </div>
-                )}
+                <ImageUploadField
+                  onChange={handleImageChange}
+                  onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
+                  error={imageError}
+                  previewSrc={imageFile ? URL.createObjectURL(imageFile) : undefined}
+                />
               </div>
 
               <div className="admin-page__actions">
