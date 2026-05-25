@@ -23,10 +23,12 @@ type PublicationVariants = {
   public: StatusDotVariant;
 };
 
+type PublicationStateFlag = boolean | string | null | undefined;
+
 type PublicationStateDotProps = {
-  deleted?: boolean;
-  archived?: boolean;
-  isPrivate?: boolean;
+  deleted?: PublicationStateFlag;
+  archived?: PublicationStateFlag;
+  isPrivate?: PublicationStateFlag;
   labels?: Partial<PublicationLabels>;
   variants?: Partial<PublicationVariants>;
 };
@@ -54,14 +56,17 @@ export default function PublicationStateDot({
 }: PublicationStateDotProps) {
   const mergedLabels = { ...DEFAULT_LABELS, ...labels };
   const mergedVariants = { ...DEFAULT_VARIANTS, ...variants };
+  const deletedFlag = Boolean(deleted);
+  const archivedFlag = Boolean(archived);
+  const privateFlag = Boolean(isPrivate);
 
-  if (deleted) {
+  if (deletedFlag) {
     return <StatusDot variant={mergedVariants.deleted}>{mergedLabels.deleted}</StatusDot>;
   }
-  if (archived) {
+  if (archivedFlag) {
     return <StatusDot variant={mergedVariants.archived}>{mergedLabels.archived}</StatusDot>;
   }
-  if (isPrivate) {
+  if (privateFlag) {
     return <StatusDot variant={mergedVariants.private}>{mergedLabels.private}</StatusDot>;
   }
   return <StatusDot variant={mergedVariants.public}>{mergedLabels.public}</StatusDot>;

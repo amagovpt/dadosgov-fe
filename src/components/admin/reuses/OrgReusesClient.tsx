@@ -204,9 +204,9 @@ export default function OrgReusesClient() {
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     <PublicationStateDot
-                      deleted={Boolean(reuse.deleted)}
-                      archived={Boolean(reuse.archived)}
-                      isPrivate={Boolean(reuse.private)}
+                      deleted={reuse.deleted}
+                      archived={reuse.archived}
+                      isPrivate={reuse.private}
                     />
                   </TableCell>
                   <TableCell headerLabel="Criado em">

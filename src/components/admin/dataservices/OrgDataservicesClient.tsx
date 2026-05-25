@@ -197,9 +197,9 @@ export default function OrgDataservicesClient() {
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   <PublicationStateDot
-                    deleted={Boolean(api.deleted)}
-                    archived={Boolean(api.archived)}
-                    isPrivate={Boolean(api.private)}
+                    deleted={api.deleted}
+                    archived={api.archived}
+                    isPrivate={api.private}
                   />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>

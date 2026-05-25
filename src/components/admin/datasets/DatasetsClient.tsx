@@ -224,9 +224,9 @@ export default function DatasetsClient() {
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   <PublicationStateDot
-                    deleted={Boolean(dataset.deleted)}
-                    archived={Boolean(dataset.archived)}
-                    isPrivate={Boolean(dataset.private)}
+                    deleted={dataset.deleted}
+                    archived={dataset.archived}
+                    isPrivate={dataset.private}
                   />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDate(dataset.created_at)}</TableCell>
