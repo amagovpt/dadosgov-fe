@@ -561,7 +561,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     description={
                       <span>
                         A sua questão não é sobre a reutilização?{" "}
-                        <TextLink href="https://dados.gov.pt/pt/">Visite o nosso fórum.</TextLink>
+                        <TextLink href="/">Visite o nosso fórum.</TextLink>
                       </span>
                     }
                   />

@@ -92,7 +92,7 @@ export function GitHubMarkdownPage({
                           isPortalLink || isExternal
                             ? (href ?? "#")
                             : href
-                              ? `https://dados.gov.pt/pt${href}`
+                              ? `${href}`
                               : "#";
                         const openInNewTab = isExternal;
                         return (
