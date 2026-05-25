@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -11,11 +11,12 @@ import {
   Tabs,
   Tab,
   TabHeader,
-  TabBody,
   CardArticle,
-  SearchPagination,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
+import { TabPagination } from "@/components/Shared/TabPagination";
+import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 import { Reuse, Dataset } from "@/types/api";
 import {
   fetchDataset,
@@ -30,10 +31,6 @@ import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 import { localizeReuseTypeId } from "@/lib/reuse-labels";
 import { normalizeRemoteDatasets } from "@/lib/reuse-remote-datasets";
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { formatMetricValue } from "@/utils/formatNumber";
@@ -65,44 +62,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
-  const [descExpanded, setDescExpanded] = useState(false);
-  const [descOverflowing, setDescOverflowing] = useState(false);
-  const [descAvailableHeight, setDescAvailableHeight] = useState<number | undefined>(undefined);
-  const descMeasureRef = useRef<HTMLDivElement>(null);
   const descTitleRef = useRef<HTMLDivElement>(null);
   const descSidebarRef = useRef<HTMLDivElement>(null);
-  const READMORE_BUTTON_HEIGHT = 48;
-
-  const checkDescOverflow = useCallback(() => {
-    if (descMeasureRef.current && descSidebarRef.current && descTitleRef.current) {
-      const sidebarHeight = descSidebarRef.current.offsetHeight;
-      const titleHeight = descTitleRef.current.offsetHeight;
-      const fullHeight = descMeasureRef.current.offsetHeight;
-      const maxDescHeight = sidebarHeight - titleHeight;
-      const overflows = fullHeight > maxDescHeight;
-      if (overflows) {
-        const lineHeight = parseFloat(getComputedStyle(descMeasureRef.current).lineHeight) || 24;
-        const usable = maxDescHeight - READMORE_BUTTON_HEIGHT;
-        const snapped = Math.floor(usable / lineHeight) * lineHeight;
-        setDescAvailableHeight(snapped);
-      } else {
-        setDescAvailableHeight(maxDescHeight);
-      }
-      setDescOverflowing(overflows);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkDescOverflow();
-    window.addEventListener("resize", checkDescOverflow);
-    const observer = new ResizeObserver(checkDescOverflow);
-    if (descSidebarRef.current) observer.observe(descSidebarRef.current);
-    if (descMeasureRef.current) observer.observe(descMeasureRef.current);
-    return () => {
-      window.removeEventListener("resize", checkDescOverflow);
-      observer.disconnect();
-    };
-  }, [checkDescOverflow, reuse]);
 
   const reuseTags = reuse?.tags ?? [];
 
@@ -192,41 +153,9 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
     }
   };
 
-  const totalDatasetsPages = Math.ceil(fullDatasets.length / datasetsPageSize);
   const paginatedDatasets = fullDatasets.slice(
     (datasetsPage - 1) * datasetsPageSize,
     datasetsPage * datasetsPageSize
-  );
-
-  const renderDatasetsPagination = () => {
-    if (totalDatasetsPages <= 1) return null;
-    return (
-      <div className="mt-32 flex justify-center">
-        <SearchPagination
-          totalPages={totalDatasetsPages}
-          onChange={(page: number) => setDatasetsPage(page + 1)}
-          label="Paginação"
-          nextPageAriaLabel="Próxima página"
-          previousPageAriaLabel="Página anterior"
-          boundaryCount={1}
-          siblingCount={1}
-        />
-      </div>
-    );
-  };
-
-  const renderTabBody = (content: React.ReactNode) => (
-    <TabBody>
-      <div className="relative">
-        <div
-          className="absolute inset-y-0 z-0 -mx-4 bg-neutral-50 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64"
-          aria-hidden="true"
-        />
-        <div className="relative z-10">
-          <div className="container mx-auto">{content}</div>
-        </div>
-      </div>
-    </TabBody>
   );
 
   return (
@@ -383,7 +312,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
         <Tabs>
           <Tab>
             <TabHeader>Descrição</TabHeader>
-            {renderTabBody(
+            <TabBodyWrapper bleedClassName="bg-neutral-50">
               <div className="mt-6 grid gap-32 xl:grid-cols-12">
                 {/* Main Content */}
                 <div className="max-w-ch xl:col-span-8">
@@ -393,52 +322,12 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                         Descrição
                       </h2>
                     </div>
-                    {/* Hidden measure element */}
-                    <div
-                      ref={descMeasureRef}
-                      className="pointer-events-none invisible absolute"
-                      style={{ top: 0, left: 0, right: 0 }}
-                      aria-hidden="true"
-                    >
-                      <div className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                        >
-                          {reuse.description}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                    <div
-                      className="overflow-hidden"
-                      style={
-                        !descExpanded && descOverflowing && descAvailableHeight
-                          ? { maxHeight: descAvailableHeight }
-                          : undefined
-                      }
-                    >
-                      <div className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                        >
-                          {reuse.description}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                    {descOverflowing && (
-                      <button
-                        onClick={() => setDescExpanded(!descExpanded)}
-                        className="mt-8 flex cursor-pointer items-center gap-8 text-primary-600 hover:underline"
-                      >
-                        {descExpanded ? "Ler menos" : "Ler mais"}
-                        {descExpanded ? (
-                          <Icon name="agora-line-arrow-up-circle" className="h-24 w-24" />
-                        ) : (
-                          <Icon name="agora-line-arrow-down-circle" className="h-24 w-24" />
-                        )}
-                      </button>
-                    )}
+                    <DescriptionWithReadMore
+                      text={reuse.description}
+                      sidebarRef={descSidebarRef}
+                      titleRef={descTitleRef}
+                      className="[&_.content-wrapper]:mb-32 [&_.content-wrapper]:text-neutral-900 [&_.content-wrapper>a]:[&_a]:text-primary-600 [&_.content-wrapper]:[&_a]:underline"
+                    />
                   </div>
                 </div>
 
@@ -470,11 +359,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   </div>
                 </aside>
               </div>
-            )}
+            </TabBodyWrapper>
           </Tab>
           <Tab active={tabParam === "discussions" || undefined}>
             <TabHeader>Discussões</TabHeader>
-            {renderTabBody(
+            <TabBodyWrapper bleedClassName="bg-neutral-50">
               <div>
                 <div className="mb-24">
                   <StatusCard
@@ -490,7 +379,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 </div>
                 <DiscussionSection entityId={reuse.id} entityClass="Reuse" />
               </div>
-            )}
+            </TabBodyWrapper>
           </Tab>
         </Tabs>
       </section>
@@ -522,7 +411,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     return <CardMetrics key={`dataset-${index}`} {...cardProps} />;
                   })}
                 </div>
-                {renderDatasetsPagination()}
+                <TabPagination
+                  total={fullDatasets.length}
+                  pageSize={datasetsPageSize}
+                  onChange={setDatasetsPage}
+                />
               </>
             ) : (
               <div className="text-neutral-900">

@@ -9,17 +9,15 @@ import {
   Tabs,
   Tab,
   TabHeader,
-  TabBody,
   CardLinks,
   CardNoResults,
   CardFrame,
   Avatar,
   Icon,
-  Pill,
-  SearchPagination,
-  StatusCard,
-  Button,
 } from "@ama-pt/agora-design-system";
+import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
+import { TabPagination } from "@/components/Shared/TabPagination";
+import { ReuseCardLinks } from "@/components/Shared/ReuseCardLinks";
 import {
   Organization,
   Dataset,
@@ -111,53 +109,13 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
   const datasets = datasetsResponse?.data || [];
 
-  const renderTabBody = (content: React.ReactNode) => {
-    return (
-      <TabBody>
-        <div className="relative">
-          <div
-            className="absolute inset-y-0 z-0 -mx-4 bg-primary-100 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64"
-            aria-hidden="true"
-          />
-          <div className="relative z-10">
-            <div className="container">{content}</div>
-          </div>
-        </div>
-      </TabBody>
-    );
-  };
-
-  const renderPagination = (
-    currentPage: number,
-    total: number,
-    pageSize: number,
-    _hasNext: boolean,
-    onPageChange: (page: number) => void
-  ) => {
-    const totalPages = Math.ceil(total / pageSize);
-    if (totalPages <= 1) return null;
-    return (
-      <div className="mt-32 flex justify-center">
-        <SearchPagination
-          totalPages={totalPages}
-          onChange={(page: number) => onPageChange(page + 1)}
-          label="Paginação"
-          nextPageAriaLabel="Próxima página"
-          previousPageAriaLabel="Página anterior"
-          boundaryCount={1}
-          siblingCount={1}
-        />
-      </div>
-    );
-  };
-
   return (
     <div className="w-full">
       <Tabs>
         {/* Tab 1: Descrição */}
         <Tab>
           <TabHeader>Descrição</TabHeader>
-          {renderTabBody(
+          <TabBodyWrapper>
             <div className="mt-6 grid gap-32 xl:grid-cols-12">
               {/* Main Content */}
               <div className="max-w-ch xl:col-span-8">
@@ -219,13 +177,13 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                 </div>
               </aside>
             </div>
-          )}
+          </TabBodyWrapper>
         </Tab>
 
         {/* Tab 2: Conjuntos de dados */}
         <Tab>
           <TabHeader> Conjuntos de dados ({organization.metrics?.datasets || 0})</TabHeader>
-          {renderTabBody(
+          <TabBodyWrapper>
             <div>
               <h3 className="mb-24 text-base font-medium text-neutral-900">
                 {datasetsResponse?.total || 0}{" "}
@@ -292,14 +250,13 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                       </div>
                     ))}
                   </div>
-                  {datasetsResponse &&
-                    renderPagination(
-                      datasetsPage,
-                      datasetsResponse.total,
-                      datasetsResponse.page_size,
-                      !!datasetsResponse.next_page,
-                      setDatasetsPage
-                    )}
+                  {datasetsResponse && (
+                    <TabPagination
+                      total={datasetsResponse.total}
+                      pageSize={datasetsResponse.page_size}
+                      onChange={setDatasetsPage}
+                    />
+                  )}
                 </>
               ) : (
                 <CardNoResults
@@ -313,14 +270,14 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                 />
               )}
             </div>
-          )}
+          </TabBodyWrapper>
         </Tab>
 
         {/* Tab 3: Reutilizações */}
         <Tab>
           <TabHeader>Reutilizações ({organization.metrics?.reuses || 0})</TabHeader>
 
-          {renderTabBody(
+          <TabBodyWrapper>
             <div>
               <h3 className="mb-16 text-base font-medium text-neutral-900">
                 {reuses.length} {reuses.length === 1 ? "REUTILIZAÇÃO" : "REUTILIZAÇÕES"}
@@ -328,74 +285,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               {!isLoadingReuses && reuses.length > 0 ? (
                 <div className="agora-card-links-datasets-px0 grid grid-cols-1 gap-32 md:grid-cols-2">
                   {reuses.map((reuse) => (
-                    <div key={reuse.id} className="h-full">
-                      <CardLinks
-                        onClick={() => router.push(`/pages/reuses/${reuse.slug}`)}
-                        className="cursor-pointer text-neutral-900"
-                        variant="transparent"
-                        image={{
-                          src: reuse.image_thumbnail || reuse.image || "/laptop.png",
-                          alt: sanitizeUserMarkdown(reuse.title),
-                        }}
-                        category={
-                          reuse.organization?.name ||
-                          (reuse.owner
-                            ? `${reuse.owner.first_name} ${reuse.owner.last_name}`.trim()
-                            : "Reutilização")
-                        }
-                        title={
-                          <div className="text-xl-bold underline">
-                            {sanitizeUserMarkdown(reuse.title)}
-                          </div>
-                        }
-                        description={
-                          reuse.description ? (
-                            <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
-                              {sanitizeUserMarkdown(reuse.description)}
-                            </p>
-                          ) : undefined
-                        }
-                        date={
-                          <span className="font-[300]">
-                            {`Atualizado ${format(new Date(reuse.last_modified || reuse.created_at), "dd MM yyyy", { locale: pt })}`}
-                          </span>
-                        }
-                        links={[
-                          {
-                            href: "#",
-                            hasIcon: true,
-                            leadingIcon: "agora-line-eye",
-                            leadingIconHover: "agora-solid-eye",
-                            trailingIcon: "",
-                            trailingIconHover: "",
-                            trailingIconActive: "",
-                            children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
-                            title: "Visualizações",
-                            onClick: (e: React.MouseEvent) => e.preventDefault(),
-                            className: "text-[#034AD8]",
-                          },
-                          {
-                            href: "#",
-                            hasIcon: true,
-                            leadingIcon: "agora-line-star",
-                            leadingIconHover: "agora-solid-star",
-                            trailingIcon: "",
-                            trailingIconHover: "",
-                            trailingIconActive: "",
-                            children: reuse.metrics?.followers || 0,
-                            title: "Favoritos",
-                            onClick: (e: React.MouseEvent) => e.preventDefault(),
-                            className: "text-[#034AD8]",
-                          },
-                        ]}
-                        mainLink={
-                          <Link href={`/pages/reuses/${reuse.slug}`}>
-                            <span className="underline">{sanitizeUserMarkdown(reuse.title)}</span>
-                          </Link>
-                        }
-                        blockedLink={true}
-                      />
-                    </div>
+                    <ReuseCardLinks key={reuse.id} reuse={reuse} />
                   ))}
                 </div>
               ) : (
@@ -410,23 +300,23 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                 />
               )}
             </div>
-          )}
+          </TabBodyWrapper>
         </Tab>
 
 
         {/* Tab 5: Discussões */}
         <Tab>
           <TabHeader>Discussões</TabHeader>
-          {renderTabBody(
+          <TabBodyWrapper>
             <DiscussionSection entityId={organization.id} entityClass="Organization" />
-          )}
+          </TabBodyWrapper>
         </Tab>
 
 
         {/* Tab 6: Informações (Statistics, Members, Technical Info) */}
         <Tab>
           <TabHeader>Informações</TabHeader>
-          {renderTabBody(
+          <TabBodyWrapper>
             <div className="rounded-8 bg-white p-32">
               {/* Statistics Section */}
               <div>
@@ -537,7 +427,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                 </div>
               </div>
             </div>
-          )}
+          </TabBodyWrapper>
         </Tab>
       </Tabs>
     </div>
