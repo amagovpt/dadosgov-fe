@@ -33,6 +33,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import ResultsCount from "../ResultsCount";
 import StatusFilterSelect from "../StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
 
 const VALIDATION_STATUS: Record<
   string,
@@ -352,12 +353,11 @@ export default function SystemHarvestersClient() {
                           </button>
                         </>
                       )}
-                      <a
-                        href={`/pages/admin/harvesters/${harvester.id}?tab=config`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                      </a>
+                      <TableActionsCell
+                        editAction={{
+                          href: `/pages/admin/harvesters/${harvester.id}?tab=config`,
+                        }}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>

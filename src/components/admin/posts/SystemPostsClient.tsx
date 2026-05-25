@@ -26,6 +26,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "name" | "created_at" | "last_modified";
@@ -269,14 +270,14 @@ export default function SystemPostsClient() {
                 <TableCell headerLabel="Criado em">{formatDate(post.created_at)}</TableCell>
                 <TableCell headerLabel="Atualizado em">{formatDate(post.last_modified)}</TableCell>
                 <TableCell headerLabel="Ação">
-                  <div className="flex gap-8">
-                    <a href={`/pages/posts/${post.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/posts/${post.id}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/posts/${post.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/posts/${post.id}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

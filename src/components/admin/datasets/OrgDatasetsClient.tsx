@@ -26,6 +26,7 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created" | "last_update";
@@ -234,14 +235,14 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   </div>
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/org/datasets/edit?slug=${dataset.slug}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/datasets/${dataset.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/org/datasets/edit?slug=${dataset.slug}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

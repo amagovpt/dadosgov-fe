@@ -28,6 +28,7 @@ import { filterByStatus } from "@/utils/filterByStatus";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
 import StatusFilterSelect from "../StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at" | "datasets";
@@ -230,14 +231,10 @@ export default function ReusesClient() {
                     {reuse.datasets?.length ?? 0}
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-8">
-                      <a href={`/pages/reuses/${reuse.slug}`}>
-                        <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                      </a>
-                      <a href={`/pages/admin/me/reuses/edit?id=${reuse.id}`}>
-                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                      </a>
-                    </div>
+                    <TableActionsCell
+                      viewAction={{ href: `/pages/reuses/${reuse.slug}` }}
+                      editAction={{ href: `/pages/admin/me/reuses/edit?id=${reuse.id}` }}
+                    />
                   </TableCell>
                 </TableRow>
               );

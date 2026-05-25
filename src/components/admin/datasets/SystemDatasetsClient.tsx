@@ -23,6 +23,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
@@ -254,14 +255,14 @@ export default function SystemDatasetsClient() {
                   </span>
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/datasets/${dataset.id}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/datasets/${dataset.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/datasets/${dataset.id}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

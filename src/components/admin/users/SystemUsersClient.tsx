@@ -22,6 +22,7 @@ import { fetchUsers } from "@/services/api";
 import { UserAdmin } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
 type SortOrder = "ascending" | "descending" | "none";
@@ -248,14 +249,14 @@ export default function SystemUsersClient() {
                 <TableCell headerLabel="Seguidores">{user.metrics?.followers ?? 0}</TableCell>
                 <TableCell headerLabel="Perfis">{getUserProfile(user)}</TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/users/${user.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/users/${user.id}/profile`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/users/${user.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/users/${user.id}/profile`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

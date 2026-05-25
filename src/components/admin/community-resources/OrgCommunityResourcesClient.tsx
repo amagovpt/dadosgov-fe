@@ -24,6 +24,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
@@ -204,12 +205,11 @@ export default function OrgCommunityResourcesClient() {
                     </div>
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-8">
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                      <a href={`/pages/admin/community-resources/edit?resource_id=${resource.id}`}>
-                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                      </a>
-                    </div>
+                    <TableActionsCell
+                      editAction={{
+                        href: `/pages/admin/community-resources/edit?resource_id=${resource.id}`,
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

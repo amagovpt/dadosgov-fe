@@ -26,6 +26,7 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],
@@ -268,14 +269,10 @@ export default function DatasetsClient() {
                   </span>
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{ href: `/pages/datasets/${dataset.slug}` }}
+                    editAction={{ href: `/pages/admin/me/datasets/edit?id=${dataset.id}` }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

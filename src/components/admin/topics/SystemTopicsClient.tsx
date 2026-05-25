@@ -18,6 +18,7 @@ import { fetchTopics } from "@/services/api";
 import { Topic } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -102,11 +103,11 @@ export default function SystemTopicsClient() {
                 <TableCell headerLabel="Conjuntos de dados">{topic.datasets_count ?? 0}</TableCell>
                 <TableCell headerLabel="Reutilizações">{topic.reuses_count ?? 0}</TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/themes/${topic.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/themes/${topic.slug}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

@@ -3,7 +3,9 @@
 import { Icon, IconProps } from "@ama-pt/agora-design-system";
 import { twMerge } from "tailwind-merge";
 
-export default function AppIcon(args: IconProps) {
+export type AppIconI = IconProps;
+
+export default function AppIcon(args: AppIconI) {
   const isAgoraIcon: boolean = args.name ? args.name.startsWith("agora-") : false;
 
   return isAgoraIcon ? (

@@ -23,6 +23,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -207,9 +208,11 @@ export default function CommunityResourcesClient() {
                   {formatDateToDMY(resource.last_modified)}
                 </TableCell>
                 <TableCell headerLabel="Ação">
-                  <a href={`/pages/admin/me/community-resources/edit?id=${resource.id}`}>
-                    <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                  </a>
+                  <TableActionsCell
+                    editAction={{
+                      href: `/pages/admin/me/community-resources/edit?id=${resource.id}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

@@ -27,6 +27,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
 import StatusFilterSelect from "../StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
 
 type StatusInfo = {
   label: string;
@@ -300,9 +301,11 @@ export default function OrgHarvestersClient() {
                   </TableCell>
                   <TableCell headerLabel="API">{harvester.backend}</TableCell>
                   <TableCell headerLabel="Ações">
-                    <a href={`/pages/admin/harvesters/${harvester.id}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
+                    <TableActionsCell
+                      editAction={{
+                        href: `/pages/admin/harvesters/${harvester.id}`,
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

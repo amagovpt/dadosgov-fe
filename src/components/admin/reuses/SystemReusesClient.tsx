@@ -23,6 +23,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type ReuseSortField = "title" | "created_at";
@@ -178,14 +179,14 @@ export default function SystemReusesClient() {
                     {reuse.datasets?.length ?? 0}
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-8">
-                      <a href={`/pages/reuses/${reuse.slug}`}>
-                        <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                      </a>
-                      <a href={`/pages/admin/reuses/${reuse.id}`}>
-                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                      </a>
-                    </div>
+                    <TableActionsCell
+                      viewAction={{
+                        href: `/pages/reuses/${reuse.slug}`,
+                      }}
+                      editAction={{
+                        href: `/pages/admin/reuses/${reuse.id}`,
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               );

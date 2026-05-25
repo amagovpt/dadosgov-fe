@@ -23,6 +23,7 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import ResultsCount from "../ResultsCount";
 import StatusFilterSelect from "../StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -190,14 +191,14 @@ export default function SystemDataservicesClient() {
                   )}
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/dataservices/${api.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/dataservices/edit?slug=${api.slug}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/dataservices/${api.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/dataservices/edit?slug=${api.slug}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
