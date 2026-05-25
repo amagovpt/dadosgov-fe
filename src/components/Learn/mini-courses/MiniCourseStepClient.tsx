@@ -95,7 +95,8 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
       <div className='container '>
         <Breadcrumb
           items={[
-            { label: 'Início', url: '/' },
+            { label: 'Home', url: '/' },
+            { label: "Conhecimento", url: "#" },
             { label: 'Aprender', url: '/pages/learn/' },
             { label: 'Minicursos', url: '/pages/learn/mini-courses/' },
             { label: title, url: '#' },

@@ -56,7 +56,8 @@ export default async function Page({
           title: hero.title,
           description: hero.description,
           breadcrumbItems: [
-            { label: 'Início', url: '/' },
+            { label: 'Home', url: '/' },
+            { label: "Conhecimento", url: "#" },
             { label: 'Aprender', url: '/pages/learn/' },
             { label: 'Minicursos', url: '/pages/learn/mini-courses/' }
           ]
