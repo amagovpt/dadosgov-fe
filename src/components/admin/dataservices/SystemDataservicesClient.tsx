@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   InputSearchBar,
@@ -16,7 +15,7 @@ import {
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -91,21 +90,14 @@ export default function SystemDataservicesClient() {
 
   const filteredApis = useMemo(() => filterByStatus(apis, statusFilter), [apis, statusFilter]);
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "API", url: "/pages/admin/system/dataservices" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">API</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "API", url: "/pages/admin/system/dataservices" },
+      ]}
+      title="API"
+    >
 
       <ResultsCount count={totalItems} isLoading={isLoading} />
 
@@ -213,6 +205,6 @@ export default function SystemDataservicesClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

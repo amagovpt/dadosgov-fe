@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
@@ -18,27 +17,19 @@ import {
 } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import StatusDot from "@/components/admin/StatusDot";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchAdminPosts } from "@/services/api";
-import { Post } from "@/types/api";
+import type { Post } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 import TableActionsCell from "../TableActionsCell";
+import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "name" | "created_at" | "last_modified";
-
-const formatDate = (dateStr: string) => {
-  try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-  } catch {
-    return dateStr;
-  }
-};
 
 export default function SystemPostsClient() {
   const FETCH_PAGE_SIZE = 100;
@@ -137,21 +128,14 @@ export default function SystemPostsClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Artigos", url: "/pages/admin/system/posts" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Artigos</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Artigos", url: "/pages/admin/system/posts" },
+      ]}
+      title="Artigos"
+    >
 
       <ResultsCount count={totalItems} isLoading={isLoading} />
 
@@ -267,8 +251,8 @@ export default function SystemPostsClient() {
                     {post.published ? "Publicado" : "Despublicado"}
                   </StatusDot>
                 </TableCell>
-                <TableCell headerLabel="Criado em">{formatDate(post.created_at)}</TableCell>
-                <TableCell headerLabel="Atualizado em">{formatDate(post.last_modified)}</TableCell>
+                <TableCell headerLabel="Criado em">{formatDateToDMY(post.created_at)}</TableCell>
+                <TableCell headerLabel="Atualizado em">{formatDateToDMY(post.last_modified)}</TableCell>
                 <TableCell headerLabel="Ação">
                   <TableActionsCell
                     viewAction={{
@@ -292,6 +276,6 @@ export default function SystemPostsClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

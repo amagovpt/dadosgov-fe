@@ -3,7 +3,6 @@
 import React, { useState, useRef, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   DropdownSection,
   DropdownOption,
@@ -15,13 +14,14 @@ import {
   Pill,
 } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { createHarvester, previewHarvestSource } from "@/services/api";
 import { HarvestSourceCreatePayload, HarvestPreviewJob } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import { AdminStepper } from "../AdminStepper";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 export default function HarvestersNewClient() {
   const { user } = useAuth();
@@ -29,8 +29,6 @@ export default function HarvestersNewClient() {
   const router = useRouter();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
-  const totalSegments = 12;
-  const filledSegments = Math.round((currentStep / totalSteps) * totalSegments);
 
   const [harvesterName, setHarvesterName] = useState("");
   const [harvesterDescription, setHarvesterDescription] = useState("");
@@ -55,23 +53,6 @@ export default function HarvestersNewClient() {
 
   const selectedProducerRef = useRef("");
   const selectedTypeRef = useRef("");
-  const filterModeRefs = useRef<Record<number, React.MutableRefObject<string>>>({});
-  const filterTypeRefs = useRef<Record<number, React.MutableRefObject<string>>>({});
-
-  const getFilterModeRef = (index: number) => {
-    if (!filterModeRefs.current[index]) {
-      filterModeRefs.current[index] = { current: "include" };
-    }
-    return filterModeRefs.current[index];
-  };
-
-  const getFilterTypeRef = (index: number) => {
-    if (!filterTypeRefs.current[index]) {
-      filterTypeRefs.current[index] = { current: "organization" };
-    }
-    return filterTypeRefs.current[index];
-  };
-
   const producerOptions = useMemo(() => {
     const options = (user?.organizations || []).map((org) => (
       <DropdownOption key={org.id} value={org.id}>
@@ -272,52 +253,25 @@ export default function HarvestersNewClient() {
   ];
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Harvesters", url: "/pages/admin/system/harvesters" },
-            {
-              label: "Formulário de publicação de um harvester",
-              url: "/pages/admin/harvesters/new",
-            },
-          ]}
-        />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: "Harvesters", url: "/pages/admin/system/harvesters" },
+      {
+        label: "Formulário de publicação de um harvester",
+        url: "/pages/admin/harvesters/new",
+      },
+    ]}
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de publicação de um harvester</h1>
-        <PublishDropdown />
-      </div>
-
+      title="Formulário de publicação de um harvester"
+    >
       {/* Step indicator */}
-      <div className="admin-page__step-header">
-        <p className="admin-page__step-text">
-          <span className="font-bold text-primary-600">Passo {currentStep} - </span>
-          <span className="font-bold text-primary-900">{stepTitles[currentStep]}</span>
-        </p>
-      </div>
-
-      {/* Progress bar */}
-      <div className="admin-page__stepper">
-        <div className="admin-page__stepper-bar">
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--start" />
-          {Array.from({ length: totalSegments }).map((_, i) => (
-            <div
-              key={i}
-              className={`admin-page__stepper-segment ${
-                i < filledSegments ? "admin-page__stepper-segment--filled" : ""
-              }`}
-            />
-          ))}
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--end" />
-        </div>
-        <span className="admin-page__stepper-label">
-          Passo {currentStep}/{totalSteps}
-        </span>
-      </div>
-
+      <AdminStepper
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        labelWord="Passo"
+        labelFormat="slash"
+        stepTitle={stepTitles[currentStep] || ""}
+      />
       {/* Main content area */}
       <div className="admin-page__body">
         <div className="admin-page__form-area">
@@ -445,7 +399,7 @@ export default function HarvestersNewClient() {
                               hideLabel
                               placeholder="Incluir"
                               id={`filter-mode-${index}`}
-                              onChangeRef={getFilterModeRef(index)}
+                              onChangeCallback={(value) => updateFilter(index, "mode", value)}
                             >
                               {filterModeOptions}
                             </IsolatedSelect>
@@ -454,7 +408,7 @@ export default function HarvestersNewClient() {
                               hideLabel
                               placeholder="Organização"
                               id={`filter-type-${index}`}
-                              onChangeRef={getFilterTypeRef(index)}
+                              onChangeCallback={(value) => updateFilter(index, "type", value)}
                             >
                               {filterTypeSelectOptions}
                             </IsolatedSelect>
@@ -667,12 +621,12 @@ export default function HarvestersNewClient() {
                   Iniciado em:{" "}
                   {previewJob?.started
                     ? new Date(previewJob.started).toLocaleString("pt-PT", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
                     : isPreviewing
                       ? "..."
                       : "—"}
@@ -682,12 +636,12 @@ export default function HarvestersNewClient() {
                   Terminado em:{" "}
                   {previewJob?.ended
                     ? new Date(previewJob.ended).toLocaleString("pt-PT", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
                     : isPreviewing
                       ? "..."
                       : "—"}
@@ -883,6 +837,6 @@ export default function HarvestersNewClient() {
           </aside>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 }

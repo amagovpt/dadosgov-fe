@@ -16,29 +16,17 @@ import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchAdminDatasets, fetchDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";
+
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
-import TableActionsCell from "../TableActionsCell";
+import TableActionsCell from "../TableActionsCell";import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
-
-const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
-  ["dataset_description_quality", "Descrição"],
-  ["has_resources", "Recursos"],
-  ["license", "Licença"],
-  ["has_open_format", "Formato aberto"],
-  ["all_resources_available", "Recursos disponíveis"],
-  ["resources_documentation", "Documentação"],
-  ["update_frequency", "Frequência de atualização"],
-  ["temporal_coverage", "Cobertura temporal"],
-  ["spatial", "Cobertura espacial"],
-];
 
 const SORT_FIELD_MAP: Record<SortField, string | null> = {
   title: "title",
@@ -140,21 +128,14 @@ export default function SystemDatasetsClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Conjuntos de dados", url: "/pages/admin/system/datasets" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Conjuntos de dados</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Conjuntos de dados", url: "/pages/admin/system/datasets" },
+      ]}
+      title="Conjuntos de dados"
+    >
 
       <ResultsCount count={totalItems} isLoading={isLoading} />
 
@@ -275,6 +256,6 @@ export default function SystemDatasetsClient() {
           description="Nenhum conjunto de dados encontrado."
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

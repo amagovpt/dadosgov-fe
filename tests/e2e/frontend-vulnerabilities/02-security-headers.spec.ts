@@ -1,19 +1,26 @@
 import { test, expect } from "playwright/test";
 
 /**
- * Security headers + CSP regression — VULN-2075 / VULN-2076 / TICKET-47.
+ * Security headers + CSP regression — VULN-2075 / VULN-2076 / TICKET-47 /
+ * TICKET-56b (LEDG-1718).
  *
- * `next.config.ts` declares `securityHeaders` and a `Content-Security-Policy`
- * inside `headers()`. The TICKET-47 audit report ("docs/testsprite-
- * vulnerability-frontend-report.md") lists 7 missing headers that were
- * subsequently added. This spec asserts every header is still served on the
- * routes that matter (public homepage, public detail, login, admin entry).
+ * Static security headers come from `next.config.ts -> headers()`. The CSP
+ * is built per-request in `src/proxy.ts` so it can carry a fresh nonce.
  *
- * It also asserts the CSP no longer allows `'unsafe-eval'` (removed alongside
- * VULN-2075/2076) and that the `Permissions-Policy` denies camera/microphone
- * /geolocation/interest-cohort. `'unsafe-inline'` in script-src is
- * intentionally retained pending TICKET-56b (Next.js 16 nonce middleware),
- * so the test asserts presence with a TODO comment rather than absence.
+ * Hard requirements asserted below:
+ *   - The static security headers (X-Frame-Options, HSTS, etc.) are served
+ *     on every public route, regardless of whether the response goes
+ *     through the proxy or not.
+ *   - On HTML routes, the CSP includes `'nonce-<random>'` in `script-src`
+ *     and explicitly does NOT include `'unsafe-inline'` or `'unsafe-eval'`
+ *     in `script-src` (closes the XSS vector that TICKET-56b targeted).
+ *   - On backend-proxied routes (`/api/*`, `/saml/*`), the Next.js CSP is
+ *     skipped so the upstream Flask CSP (auto-submit SAML forms, etc.)
+ *     is preserved.
+ *
+ * `style-src 'unsafe-inline'` is intentionally retained — Tailwind 4 and the
+ * Agora design system inject runtime <style> tags. Tracked as a TICKET-56c
+ * follow-up; the script-src vector (the real XSS risk) is closed here.
  */
 
 const ROUTES = [
@@ -103,16 +110,50 @@ test.describe("Security headers (TICKET-47 / VULN-2075-2076)", () => {
       expect(csp).toMatch(/frame-ancestors\s+'none'/);
       expect(csp).toMatch(/default-src\s+'self'/);
 
-      // Soft requirement (documented in next.config.ts comment): script-src
-      // currently includes 'unsafe-inline' pending the Next.js 16 nonce
-      // middleware. We assert presence so a future tightening that removes
-      // it triggers a deliberate review of this test rather than a silent
-      // pass.
+      // LEDG-1718 / TICKET-56b: script-src must carry a runtime nonce and
+      // must NOT fall back to 'unsafe-inline'. The nonce token shape comes
+      // from `generateNonce()` in `src/proxy.ts` (16 random bytes,
+      // base64-encoded, so always [A-Za-z0-9+/=] of length ~24).
+      const scriptSrcMatch = csp.match(/script-src([^;]*)/);
+      expect(scriptSrcMatch, `${route} missing a script-src directive`).not.toBeNull();
+      const scriptSrc = scriptSrcMatch?.[1] ?? "";
+      expect(
+        scriptSrc,
+        `${route} script-src still contains 'unsafe-inline' — LEDG-1718 regressed`,
+      ).not.toContain("'unsafe-inline'");
+      expect(
+        scriptSrc,
+        `${route} script-src is missing a runtime 'nonce-...' token`,
+      ).toMatch(/'nonce-[A-Za-z0-9+/=]+'/);
+    });
+  }
+
+  // -----------------------------------------------------------------
+  // Skip-CSP routes — proxied to Flask, must keep the upstream CSP.
+  // -----------------------------------------------------------------
+
+  const BACKEND_PROXIED_ROUTES = ["/api/1/site/", "/saml/login"];
+
+  for (const route of BACKEND_PROXIED_ROUTES) {
+    test(`CSP-skip-${route}: Next.js must not inject its nonce CSP on backend-proxied routes`, async ({
+      request,
+    }) => {
+      const res = await request.get(route, {
+        maxRedirects: 0,
+        failOnStatusCode: false,
+      });
+      expect(res.status(), `unexpected 5xx on ${route}`).toBeLessThan(500);
+
+      // The upstream Flask response may carry its own CSP (the SAML
+      // auto-submit form needs `'unsafe-inline'` in script-src). What we
+      // assert here is the *negative*: our nonce token (only emitted by
+      // src/proxy.ts) must NOT be present. If it were, both CSPs would
+      // overlay and the stricter (ours) would break Flask's inline script.
+      const csp = res.headers()["content-security-policy"] ?? "";
       expect(
         csp,
-        "script-src 'unsafe-inline' was removed — update TICKET-56b status, " +
-          "then loosen this assertion to expect absence.",
-      ).toMatch(/script-src[^;]*'unsafe-inline'/);
+        `${route} unexpectedly got a Next.js-issued nonce CSP — proxy.ts NO_CSP_PATHS regressed`,
+      ).not.toMatch(/script-src[^;]*'nonce-[A-Za-z0-9+/=]+'/);
     });
   }
 

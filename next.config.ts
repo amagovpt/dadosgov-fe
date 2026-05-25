@@ -34,6 +34,9 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
   async headers() {
+    // Content-Security-Policy is emitted per-request from `src/proxy.ts`
+    // (TICKET-56b) so it can carry a fresh nonce on each response. The
+    // remaining static security headers stay here.
     const securityHeaders = [
       { key: "X-Frame-Options", value: "DENY" },
       { key: "X-Content-Type-Options", value: "nosniff" },
@@ -51,24 +54,8 @@ const nextConfig: NextConfig = {
 
     return [
       {
-        // SAML routes return auto-submit forms from the backend with their
-        // own CSP — do not add a second, stricter CSP from Next.js.
-        source: "/saml/:path*",
-        headers: securityHeaders,
-      },
-      {
         source: "/(.*)",
-        headers: [
-          ...securityHeaders,
-          {
-            key: "Content-Security-Policy",
-            value:
-              // VULN-2075/2076: 'unsafe-eval' removed (no consumer in src/).
-              // 'unsafe-inline' is intentionally kept here pending TICKET-56b
-              // (nonce middleware required for Next.js 16 hydration scripts).
-              `default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: blob: http://localhost:7000 ${API_URL} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com; frame-src 'self' https://app.powerbi.com; font-src 'self' data:; connect-src 'self' http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt; frame-ancestors 'none';`,
-          },
-        ],
+        headers: securityHeaders,
       },
     ];
   },

@@ -3,8 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import {
-  Breadcrumb,
-  Icon,
   InputSearchBar,
   Table,
   TableHeader,
@@ -19,7 +17,7 @@ import { CommunityResource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
@@ -107,24 +105,14 @@ export default function OrgCommunityResourcesClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            {
-              label: "Recursos comunitários",
-              url: "#",
-            },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Recursos comunitários</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Recursos comunitários" },
+      ]}
+      title="Recursos comunitários"
+    >
 
       <ResultsCount count={resources.length} isLoading={isLoading} />
 
@@ -223,6 +211,6 @@ export default function OrgCommunityResourcesClient() {
           description="A organização ainda não tem recursos comunitários."
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

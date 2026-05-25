@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import {
-  Breadcrumb,
   Icon,
   InputSearchBar,
   StatusCard,
@@ -16,11 +15,12 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgHarvesters } from "@/services/api";
-import { HarvestSource } from "@/types/api";
+import type { HarvestSource } from "@/types/api";
+import { getHarvesterStatus } from "@/utils/harvesterStatus";
+import { HarvesterStatusFilter } from "./HarvesterStatusFilter";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
@@ -28,40 +28,8 @@ import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
 import StatusFilterSelect from "../StatusFilterSelect";
 import TableActionsCell from "../TableActionsCell";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
-type StatusInfo = {
-  label: string;
-  variant: "informative" | "success" | "danger" | "warning";
-};
-
-const VALIDATION_STATUS: Record<string, StatusInfo> = {
-  pending: { label: "Em espera de validação", variant: "warning" },
-  refused: { label: "Recusado", variant: "danger" },
-};
-
-const JOB_STATUS: Record<string, StatusInfo> = {
-  done: { label: "Terminado", variant: "success" },
-  failed: { label: "Falhado", variant: "danger" },
-  started: { label: "Em execução", variant: "warning" },
-};
-
-const getStatus = (source: HarvestSource): StatusInfo => {
-  // Show validation state when it isn't "accepted" — matches the
-  // dropdown filter options (Pendente / Validado / Recusado).
-  if (source.validation?.state && source.validation.state !== "accepted") {
-    return VALIDATION_STATUS[source.validation.state] || VALIDATION_STATUS.pending;
-  }
-  // Otherwise show the latest job execution status.
-  if (source.last_job?.status) {
-    return (
-      JOB_STATUS[source.last_job.status] || {
-        label: "Sem tarefa de momento",
-        variant: "informative",
-      }
-    );
-  }
-  return { label: "Sem execução", variant: "informative" };
-};
 
 type SortOrder = "none" | "ascending" | "descending";
 type HarvesterSortField = "name" | "created_at" | "last_job";
@@ -76,7 +44,7 @@ export default function OrgHarvestersClient() {
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
 
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !!orgId);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
@@ -107,7 +75,6 @@ export default function OrgHarvestersClient() {
 
   useEffect(() => {
     if (!orgId) {
-      setIsLoading(false);
       return;
     }
     async function loadHarvesters() {
@@ -174,22 +141,14 @@ export default function OrgHarvestersClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            { label: "Harvesters", url: "/pages/admin/org/harvesters" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Harvesters</h1>
-        <PublishDropdown />
-      </div>
-
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Harvesters", url: "/pages/admin/org/harvesters" },
+      ]}
+      title="Harvesters"
+    >
       <ResultsCount count={harvesters.length} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
@@ -207,26 +166,8 @@ export default function OrgHarvestersClient() {
             setStatusFilter(v);
             setCurrentPage(1);
           }}
-          options={[
-            { value: "", label: "Todos" },
-            { value: "pending", label: "Em espera de validação" },
-            { value: "accepted", label: "Validado" },
-            { value: "refused", label: "Recusado" },
-            { value: "done", label: "Terminado" },
-            { value: "failed", label: "Falhado" },
-          ]}
         />
       </div>
-
-      {statusFilter === "accepted" && (
-        <div className="mb-24">
-          <StatusCard
-            variant="informative"
-            showIcon
-            description="O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução — a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
-          />
-        </div>
-      )}
 
       {isLoading ? (
         <p>A carregar...</p>
@@ -281,7 +222,7 @@ export default function OrgHarvestersClient() {
                   </TableCell>
                   <TableCell headerLabel="Estado">
                     {(() => {
-                      const status = getStatus(harvester);
+                      const status = getHarvesterStatus(harvester);
                       return <StatusDot variant={status.variant}>{status.label}</StatusDot>;
                     })()}
                   </TableCell>
@@ -292,8 +233,8 @@ export default function OrgHarvestersClient() {
                   <TableCell headerLabel="Última execução">
                     {harvester.last_job
                       ? formatDateToDMY(
-                          harvester.last_job.started ?? harvester.last_job.ended ?? ""
-                        )
+                        harvester.last_job.started ?? harvester.last_job.ended ?? ""
+                      )
                       : "Ainda não"}
                   </TableCell>
                   <TableCell headerLabel="Conjuntos de dados">
@@ -319,6 +260,6 @@ export default function OrgHarvestersClient() {
           description="A organização ainda não tem harvesters."
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

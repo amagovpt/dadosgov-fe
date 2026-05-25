@@ -27,7 +27,7 @@ interface IsolatedSelectProps {
   label: string;
   placeholder: string;
   id: string;
-  onChangeRef: React.MutableRefObject<string>;
+  onChangeRef?: React.RefObject<string>;
   defaultValue?: string;
   type?: "checkbox" | "text";
   hasError?: boolean;
@@ -90,7 +90,7 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
   React.useEffect(() => {
     if (defaultValue !== undefined) {
       setInternalValue(defaultValue);
-      onChangeRef.current = defaultValue;
+      if (onChangeRef) onChangeRef.current = defaultValue;
     }
   }, [defaultValue, onChangeRef]);
 
@@ -129,7 +129,7 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
       onChange={(options) => {
         const value = options.map((o) => o.value as string).join(",");
         setInternalValue(value);
-        onChangeRef.current = value;
+        if (onChangeRef) onChangeRef.current = value;
         onChangeCallback?.(value);
       }}
       hasError={hasError}

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   Table,
@@ -14,11 +13,11 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDiscussions } from "@/services/api";
-import { Discussion } from "@/types/api";
+import type { Discussion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
-import AppIcon from "@/components/Primitives/AppIcon";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 
 export default function DiscussionsClient() {
@@ -48,7 +47,6 @@ export default function DiscussionsClient() {
     loadDiscussions();
   }, [activeOrg]);
 
-  const totalPages = Math.ceil(discussions.length / itemsPerPage);
   const paginatedDiscussions = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return discussions.slice(start, start + itemsPerPage);
@@ -59,21 +57,14 @@ export default function DiscussionsClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: activeOrg?.name || "Organização", url: "#" },
-            { label: "Discussões", url: "/pages/admin/org/discussions" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Discussões</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: activeOrg?.name || "Organização", url: "#" },
+        { label: "Discussões", url: "/pages/admin/org/discussions" },
+      ]}
+      title="Discussões"
+    >
 
       {discussions.length === 0 ? (
         <AdminEmptyState
@@ -86,17 +77,21 @@ export default function DiscussionsClient() {
             {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
           </p>
 
-          <Table>
+          <Table
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              discussions.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage
+            )}
+          >
             <TableHeader>
               <TableRow>
-                <TableHeaderCell sortType="date" sortOrder="none">
-                  Título
-                </TableHeaderCell>
+                <TableHeaderCell sortType="date" sortOrder="none">Título</TableHeaderCell>
                 <TableHeaderCell>Autor</TableHeaderCell>
                 <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none">
-                  Data
-                </TableHeaderCell>
+                <TableHeaderCell sortType="date" sortOrder="none" >Data</TableHeaderCell>
                 <TableHeaderCell>Mensagens</TableHeaderCell>
               </TableRow>
             </TableHeader>
@@ -137,48 +132,8 @@ export default function DiscussionsClient() {
               ))}
             </TableBody>
           </Table>
-
-          <div className="mt-16 flex items-center justify-between border-t border-neutral-200 py-12">
-            <div className="flex items-center gap-8">
-              <span className="text-sm text-neutral-600">Linhas por página</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="rounded text-sm border border-neutral-300 px-8 py-4"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-8">
-              <span className="text-sm text-neutral-600">
-                {(currentPage - 1) * itemsPerPage + 1}–
-                {Math.min(currentPage * itemsPerPage, discussions.length)} de {discussions.length}
-              </span>
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="p-4 text-primary-600 disabled:text-neutral-300"
-                aria-label="Página anterior"
-              >
-                <AppIcon name="agora-line-arrow-left" />
-              </button>
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="p-4 text-primary-600 disabled:text-neutral-300"
-                aria-label="Próxima página"
-              >
-                <AppIcon name="agora-line-arrow-right" />
-              </button>
-            </div>
-          </div>
         </>
       )}
-    </div>
+    </AdminLayout>
   );
 }

@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  Breadcrumb,
-  Icon,
   InputSearchBar,
   Table,
   TableHeader,
@@ -19,7 +17,6 @@ import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -27,18 +24,8 @@ import { filterByStatus } from "@/utils/filterByStatus";
 import AdminEmptyState from "../AdminEmptyState";
 import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";
-
-const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
-  ["dataset_description_quality", "Descrição"],
-  ["has_resources", "Recursos"],
-  ["license", "Licença"],
-  ["has_open_format", "Formato aberto"],
-  ["all_resources_available", "Recursos disponíveis"],
-  ["resources_documentation", "Documentação"],
-  ["spatial", "Cobertura espacial"],
-  ["temporal_coverage", "Cobertura temporal"],
-  ["update_frequency", "Frequência de atualização"],
-];
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
@@ -141,21 +128,13 @@ export default function DatasetsClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
-          ]}
-        />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: displayName || "...", url: "#" },
+      { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
+    ]}
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Conjuntos de dados</h1>
-        <PublishDropdown />
-      </div>
+      title="Conjuntos de Dados">
 
       <ResultsCount count={totalItems} isLoading={isLoading} />
 
@@ -286,6 +265,6 @@ export default function DatasetsClient() {
           createUrl="/pages/admin/datasets/new"
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

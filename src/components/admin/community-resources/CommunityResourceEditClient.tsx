@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   InputText,
   InputTextArea,
@@ -12,6 +11,7 @@ import {
   Icon,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import {
   fetchCommunityResource,
   updateCommunityResource,
@@ -390,24 +390,16 @@ export default function CommunityResourceEditClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administracao", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            {
-              label: "Recursos comunitários",
-              url: "/pages/admin/system/community-resources",
-            },
-            { label: "Editar", url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Metadados do arquivo</h1>
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administracao", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Recursos comunitários", url: "/pages/admin/system/community-resources" },
+        { label: "Editar" },
+      ]}
+      title="Metadados do arquivo"
+      headerAction={null}
+    >
 
       <div className="admin-page__body">
         <div className="admin-page__form-area">
@@ -706,6 +698,6 @@ export default function CommunityResourceEditClient() {
           </div>
         </aside>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

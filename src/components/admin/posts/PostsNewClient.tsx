@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   DropdownSection,
   DropdownOption,
@@ -15,7 +14,8 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { suggestTags, createPost, uploadPostImage, publishPost } from "@/services/api";
 import type { TagSuggestion } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { AdminStepper } from "@/components/admin/AdminStepper";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import type { PostCreatePayload } from "@/types/api";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
@@ -25,9 +25,6 @@ export default function PostsNewClient() {
   const router = useRouter();
   const totalSteps = 2;
   const currentStep = Number(searchParams.get("step")) || 1;
-  const totalSegments = 12;
-  const filledSegments = Math.round((currentStep / totalSteps) * totalSegments);
-
   const [articleType, setArticleType] = useState("news");
   const [contentType, setContentType] = useState("markdown");
   const [articleTitle, setArticleTitle] = useState("");
@@ -193,51 +190,19 @@ export default function PostsNewClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Bem-vindo", url: "/pages/admin" },
-            { label: "Artigos", url: "/pages/admin/system/posts" },
-            {
-              label: "Formulário de publicação de um artigo",
-              url: "/pages/admin/system/posts/new",
-            },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de publicação de um artigo</h1>
-        <PublishDropdown />
-      </div>
-
-      {/* Step indicator */}
-      <div className="admin-page__step-header">
-        <p className="admin-page__step-text">
-          <span className="text-primary-600 font-bold">Passo {currentStep} - </span>
-          <span className="text-primary-900 font-bold">{stepTitles[currentStep]}</span>
-        </p>
-      </div>
-
-      {/* Progress bar */}
-      <div className="admin-page__stepper">
-        <div className="admin-page__stepper-bar">
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--start" />
-          {Array.from({ length: totalSegments }).map((_, i) => (
-            <div
-              key={i}
-              className={`admin-page__stepper-segment ${
-                i < filledSegments ? "admin-page__stepper-segment--filled" : ""
-              }`}
-            />
-          ))}
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--end" />
-        </div>
-        <span className="admin-page__stepper-label">
-          Passo {currentStep}/{totalSteps}
-        </span>
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Bem-vindo", url: "/pages/admin" },
+        { label: "Artigos", url: "/pages/admin/system/posts" },
+        { label: "Formulário de publicação de um artigo", url: "/pages/admin/system/posts/new" },
+      ]}
+      title="Formulário de publicação de um artigo"
+    >
+      <AdminStepper
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        stepTitle={stepTitles[currentStep]}
+      />
 
       {/* Main content area: form + auxiliar sidebar */}
       <div className="admin-page__body">
@@ -498,6 +463,6 @@ export default function PostsNewClient() {
           )}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

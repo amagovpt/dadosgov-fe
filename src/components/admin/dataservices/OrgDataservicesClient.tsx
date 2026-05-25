@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import {
-  Breadcrumb,
-  Icon,
   InputSearchBar,
   Table,
   TableHeader,
@@ -19,7 +17,7 @@ import { Dataservice } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -92,21 +90,14 @@ export default function OrgDataservicesClient() {
   }, [resolvedOrgId]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            { label: "API", url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">API</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "API" },
+      ]}
+      title="API"
+    >
 
       <ResultsCount count={filteredApis.length} isLoading={isLoading} />
 
@@ -197,6 +188,6 @@ export default function OrgDataservicesClient() {
           createUrl="/pages/admin/dataservices/new"
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

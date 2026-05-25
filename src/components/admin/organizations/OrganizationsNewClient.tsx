@@ -19,6 +19,8 @@ import type { OrganizationSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { AdminStepper } from "../AdminStepper";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 export default function OrganizationsNewClient() {
   const searchParams = useSearchParams();
@@ -151,51 +153,25 @@ export default function OrganizationsNewClient() {
   ));
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Organizações", url: "/pages/admin/system/organizations" },
-            {
-              label: "Formulário de registo de uma organização",
-              url: "/pages/admin/organizations/new",
-            },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de registo de uma organização</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: "Organizações", url: "/pages/admin/system/organizations" },
+      {
+        label: "Formulário de registo de uma organização",
+        url: "/pages/admin/organizations/new",
+      },
+    ]}
+      title="Formulário de registo de uma organização"
+    >
 
       {/* Step indicator */}
-      <div className="admin-page__step-header">
-        <p className="admin-page__step-text">
-          <span className="font-bold text-primary-600">Passo {currentStep} - </span>
-          <span className="font-bold text-primary-900">{stepTitles[currentStep]}</span>
-        </p>
-      </div>
-
-      {/* Progress bar */}
-      <div className="admin-page__stepper">
-        <div className="admin-page__stepper-bar">
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--start" />
-          {Array.from({ length: totalSegments }).map((_, i) => (
-            <div
-              key={i}
-              className={`admin-page__stepper-segment ${
-                i < filledSegments ? "admin-page__stepper-segment--filled" : ""
-              }`}
-            />
-          ))}
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--end" />
-        </div>
-        <span className="admin-page__stepper-label">
-          Passo {currentStep}/{totalSteps}
-        </span>
-      </div>
+      <AdminStepper
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        labelWord="Passo"
+        labelFormat="slash"
+        stepTitle={stepTitles[currentStep] || ""}
+      />
 
       {/* Main content area */}
       <div className="admin-page__body">
@@ -449,6 +425,6 @@ export default function OrganizationsNewClient() {
           </aside>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 }

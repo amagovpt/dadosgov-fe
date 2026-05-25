@@ -17,8 +17,8 @@ const linkColumns = [
   {
     title: "Dados abertos",
     links: [
-      { href: "/pages/datasets/catalogo-de-dados-dos-dados-gov-pt", label: "Catálogo dos dados" },
-      { href: "https://data.europa.eu/en", label: "Portal de dados europeu" },
+      { href: "/pages/datasets/catalogo-de-dados-dos-dados-gov-pt", label: "Catálogo de dados" },
+      { href: "https://data.europa.eu/pt", label: "Portal de dados europeu" },
     ],
   },
   {

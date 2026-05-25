@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  Breadcrumb,
-  Icon,
   InputSearchBar,
   Table,
   TableHeader,
@@ -17,7 +15,7 @@ import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
@@ -80,21 +78,14 @@ export default function DataservicesClient() {
   }, []);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "API", url: "/pages/admin/dataservices" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">API</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: displayName || "...", url: "#" },
+        { label: "API", url: "/pages/admin/dataservices" },
+      ]}
+      title="API"
+    >
 
       <ResultsCount count={filteredApis.length} isLoading={isLoading} />
 
@@ -178,6 +169,6 @@ export default function DataservicesClient() {
       ) : (
         <AdminEmptyState icon="agora-line-edit" createUrl="/pages/admin/dataservices/new" />
       )}
-    </div>
+    </AdminLayout>
   );
 }
