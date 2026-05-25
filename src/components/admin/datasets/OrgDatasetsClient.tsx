@@ -13,7 +13,6 @@ import {
   Button,
 } from "@ama-pt/agora-design-system";
 
-import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -24,6 +23,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import DatasetsStatusFilterSelect from "@/components/admin/lists/DatasetsStatusFilterSelect";
+import PublicationStateDot from "@/components/admin/lists/PublicationStateDot";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
@@ -205,15 +205,11 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {dataset.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : dataset.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : dataset.private ? (
-                    <StatusDot variant="warning">Rascunho</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <PublicationStateDot
+                    deleted={Boolean(dataset.deleted)}
+                    archived={Boolean(dataset.archived)}
+                    isPrivate={Boolean(dataset.private)}
+                  />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(dataset.created_at)}</TableCell>
                 <TableCell headerLabel="Última modificação">

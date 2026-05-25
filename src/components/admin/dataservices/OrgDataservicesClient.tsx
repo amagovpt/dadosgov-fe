@@ -14,7 +14,6 @@ import {
   TableCell,
   Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -26,6 +25,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import PublicationStatusFilterSelect from "@/components/admin/lists/PublicationStatusFilterSelect";
+import PublicationStateDot from "@/components/admin/lists/PublicationStateDot";
 import {
   SortOrder,
   useClientTableState,
@@ -196,15 +196,11 @@ export default function OrgDataservicesClient() {
                   <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {api.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : api.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : api.private ? (
-                    <StatusDot variant="warning">Rascunho</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <PublicationStateDot
+                    deleted={Boolean(api.deleted)}
+                    archived={Boolean(api.archived)}
+                    isPrivate={Boolean(api.private)}
+                  />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
                 <TableCell headerLabel="Modificado em">

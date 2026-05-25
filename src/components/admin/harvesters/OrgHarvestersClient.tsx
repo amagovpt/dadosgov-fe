@@ -7,7 +7,6 @@ import {
   CardNoResults,
   Icon,
   InputSearchBar,
-  StatusCard,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -25,6 +24,7 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import HarvestersStatusFilterSelect from "@/components/admin/lists/HarvestersStatusFilterSelect";
+import HarvestersAcceptedStatusInfoCard from "@/components/admin/harvesters/HarvestersAcceptedStatusInfoCard";
 
 type StatusInfo = {
   label: string;
@@ -211,15 +211,7 @@ export default function OrgHarvestersClient() {
         />
       </div>
 
-      {statusFilter === "accepted" && (
-        <div className="mb-24">
-          <StatusCard
-            variant="informative"
-            showIcon
-            description="O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução — a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
-          />
-        </div>
-      )}
+      {statusFilter === "accepted" && <HarvestersAcceptedStatusInfoCard />}
 
       {isLoading ? (
         <p>A carregar...</p>

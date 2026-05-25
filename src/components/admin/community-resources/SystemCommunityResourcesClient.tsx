@@ -12,13 +12,13 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchAllCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import PublicationStateDot from "@/components/admin/lists/PublicationStateDot";
 import {
   SortOrder,
   useClientTableState,
@@ -184,17 +184,12 @@ export default function SystemCommunityResourcesClient() {
                     </div>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot
-                      variant={
-                        resource.deleted ? "danger" : resource.archived ? "warning" : "success"
-                      }
-                    >
-                      {resource.deleted
-                        ? "Eliminado"
-                        : resource.archived
-                          ? "Arquivado"
-                          : "Publicado"}
-                    </StatusDot>
+                    <PublicationStateDot
+                      deleted={resource.deleted}
+                      archived={resource.archived}
+                      labels={{ deleted: "Eliminado", public: "Publicado" }}
+                      variants={{ archived: "warning" }}
+                    />
                   </TableCell>
                   <TableCell headerLabel="Formato">
                     {resource.format ? resource.format.toUpperCase() : "—"}

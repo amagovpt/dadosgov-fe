@@ -13,7 +13,6 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -22,6 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import PublicationStateDot from "@/components/admin/lists/PublicationStateDot";
 import {
   SortOrder,
   useClientTableState,
@@ -183,13 +183,10 @@ export default function OrgCommunityResourcesClient() {
                     <span className="text-primary-600">{resource.title}</span>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    {resource.deleted ? (
-                      <StatusDot variant="danger">Excluído</StatusDot>
-                    ) : resource.archived ? (
-                      <StatusDot variant="neutral">Arquivado</StatusDot>
-                    ) : (
-                      <StatusDot variant="success">Público</StatusDot>
-                    )}
+                    <PublicationStateDot
+                      deleted={resource.deleted}
+                      archived={resource.archived}
+                    />
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDateToDMY(resource.created_at)}

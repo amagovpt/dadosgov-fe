@@ -14,7 +14,6 @@ import {
   TableCell,
   Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -26,6 +25,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import PublicationStatusFilterSelect from "@/components/admin/lists/PublicationStatusFilterSelect";
+import PublicationStateDot from "@/components/admin/lists/PublicationStateDot";
 import {
   SortOrder,
   useClientTableState,
@@ -203,15 +203,11 @@ export default function OrgReusesClient() {
                     <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    {reuse.deleted ? (
-                      <StatusDot variant="danger">Excluído</StatusDot>
-                    ) : reuse.archived ? (
-                      <StatusDot variant="neutral">Arquivado</StatusDot>
-                    ) : reuse.private ? (
-                      <StatusDot variant="warning">Rascunho</StatusDot>
-                    ) : (
-                      <StatusDot variant="success">Público</StatusDot>
-                    )}
+                    <PublicationStateDot
+                      deleted={Boolean(reuse.deleted)}
+                      archived={Boolean(reuse.archived)}
+                      isPrivate={Boolean(reuse.private)}
+                    />
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDateToDMY(reuse.created_at)}

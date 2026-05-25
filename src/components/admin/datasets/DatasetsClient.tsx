@@ -15,7 +15,6 @@ import {
   TableCell,
   ProgressBar,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
 import { fetchMyDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -25,6 +24,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { filterByStatus } from "@/utils/filterByStatus";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import DatasetsStatusFilterSelect from "@/components/admin/lists/DatasetsStatusFilterSelect";
+import PublicationStateDot from "@/components/admin/lists/PublicationStateDot";
 import {
   SortOrder,
   useClientTableState,
@@ -223,15 +223,11 @@ export default function DatasetsClient() {
                   <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {dataset.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : dataset.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : dataset.private ? (
-                    <StatusDot variant="warning">Rascunho</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <PublicationStateDot
+                    deleted={Boolean(dataset.deleted)}
+                    archived={Boolean(dataset.archived)}
+                    isPrivate={Boolean(dataset.private)}
+                  />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDate(dataset.created_at)}</TableCell>
                 <TableCell headerLabel="Última modificação">
