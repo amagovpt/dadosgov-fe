@@ -2,21 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  CardNoResults,
-  Icon,
-  InputSelect,
   InputSearchBar,
-  DropdownSection,
-  DropdownOption,
   Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
-  Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -25,6 +20,9 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -46,10 +44,7 @@ export default function DataservicesClient() {
   const getSortOrder = (field: DataserviceSortField): SortOrder =>
     sortField === field ? sortOrder : "none";
 
-  const filteredApis = useMemo(
-    () => filterByStatus(apis, statusFilter),
-    [apis, statusFilter]
-  );
+  const filteredApis = useMemo(() => filterByStatus(apis, statusFilter), [apis, statusFilter]);
 
   const sortedApis = useMemo(() => {
     if (!sortField || sortOrder === "none") return filteredApis;
@@ -82,20 +77,6 @@ export default function DataservicesClient() {
     loadDataservices();
   }, []);
 
-  const getStatusLabel = (api: Dataservice) => {
-    if (api.deleted) return "Excluído";
-    if (api.archived) return "Arquivado";
-    if (api.private) return "Rascunho";
-    return "Público";
-  };
-
-  const getStatusVariant = (api: Dataservice) => {
-    if (api.deleted) return "danger" as const;
-    if (api.archived) return "neutral" as const;
-    if (api.private) return "warning" as const;
-    return "success" as const;
-  };
-
   return (
     <AdminLayout
       breadcrumbItems={[
@@ -106,7 +87,7 @@ export default function DataservicesClient() {
       title="API"
     >
 
-      <p className="text-sm mb-16 text-neutral-700">{filteredApis.length} resultados</p>
+      <ResultsCount count={filteredApis.length} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -117,45 +98,14 @@ export default function DataservicesClient() {
             aria-label="Pesquisar APIs"
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
-          }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="public" selected={statusFilter === "public"}>
-              Público
-            </DropdownOption>
-            <DropdownOption value="archived" selected={statusFilter === "archived"}>
-              Arquivado
-            </DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>
-              Rascunho
-            </DropdownOption>
-            <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
-              Excluído
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+        <StatusFilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v)} />
       </div>
 
       {!isLoading && filteredApis.length > 0 ? (
         <Table
-          paginationProps={createPaginationProps(
-            5,
-            filteredApis.length,
-            0,
-            undefined,
-            undefined,
-            { currentPageIsZeroBased: true }
-          )}
+          paginationProps={createPaginationProps(5, filteredApis.length, 0, undefined, undefined, {
+            currentPageIsZeroBased: true,
+          })}
         >
           <TableHeader>
             <TableRow>
@@ -191,7 +141,7 @@ export default function DataservicesClient() {
                   <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <StatusDot variant={getStatusVariant(api)}>{getStatusLabel(api)}</StatusDot>
+                  <ResourceStatusBadge item={api} />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
                 <TableCell headerLabel="Modificado em">
@@ -203,43 +153,21 @@ export default function DataservicesClient() {
                   </span>
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/dataservices/${api.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/dataservices/edit?slug=${api.slug}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/dataservices/${api.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/dataservices/edit?slug=${api.slug}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-              title="Sem publicações"
-              description="Ainda não publicou uma API."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => (window.location.href = "/pages/admin/dataservices/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState icon="agora-line-edit" createUrl="/pages/admin/dataservices/new" />
       )}
     </AdminLayout>
   );

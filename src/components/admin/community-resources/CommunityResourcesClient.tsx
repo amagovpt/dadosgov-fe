@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  CardNoResults,
   Icon,
   InputSearchBar,
   Table,
@@ -12,9 +11,8 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -22,6 +20,9 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -113,9 +114,7 @@ export default function CommunityResourcesClient() {
       title="Recursos comunitários"
     >
 
-      <p className="text-sm mb-16 text-neutral-700">
-        {isLoading ? "A carregar..." : `${totalItems} resultados`}
-      </p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -191,13 +190,7 @@ export default function CommunityResourcesClient() {
                   )}
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {resource.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : resource.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <ResourceStatusBadge item={resource} />
                 </TableCell>
                 <TableCell headerLabel="Formato">{resource.format || "—"}</TableCell>
                 <TableCell headerLabel="Criado em">
@@ -207,40 +200,22 @@ export default function CommunityResourcesClient() {
                   {formatDateToDMY(resource.last_modified)}
                 </TableCell>
                 <TableCell headerLabel="Ação">
-                  <a href={`/pages/admin/me/community-resources/edit?id=${resource.id}`}>
-                    <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                  </a>
+                  <TableActionsCell
+                    editAction={{
+                      href: `/pages/admin/me/community-resources/edit?id=${resource.id}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={
-                <Icon name="agora-line-user-group" className="icon-xl h-12 w-12 text-primary-500" />
-              }
-              title="Sem publicações"
-              description="Ainda não publicou um recurso comunitário."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => router.push("/pages/admin/community-resources/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-user-group"
+          description="Ainda não publicou um recurso comunitário."
+          createUrl="/pages/admin/community-resources/new"
+        />
       )}
     </AdminLayout>
   );

@@ -18,6 +18,8 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 import AdminLayout from "@/components/Layout/AdminLayout";
 
 function DeleteOrgPopupContent({
@@ -158,7 +160,7 @@ export default function SystemOrganizationsClient() {
     ]}
       title="Organizações"
     >
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -219,22 +221,19 @@ export default function SystemOrganizationsClient() {
                 <TableCell headerLabel="Reutilizações">{org.metrics?.reuses ?? 0}</TableCell>
                 <TableCell headerLabel="Membros">{org.members?.length ?? 0}</TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/organizations/${org.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/org/${org.id}/profile`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                    <button
-                      aria-label={`Eliminar ${org.name}`}
-                      disabled={deletingOrgId === org.id}
-                      onClick={() => handleDeleteOrg(org)}
-                      className="text-danger-600 disabled:opacity-50"
-                    >
-                      <Icon name="agora-line-trash" className="h-[20px] w-[20px]" />
-                    </button>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/organizations/${org.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/org/${org.id}/profile`,
+                    }}
+                    deleteAction={{
+                      ariaLabel: `Eliminar ${org.name}`,
+                      disabled: deletingOrgId === org.id,
+                      handler: () => handleDeleteOrg(org),
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

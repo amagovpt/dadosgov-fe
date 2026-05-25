@@ -28,6 +28,7 @@ import {
 import type { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
 import { DatasetMetricsTable } from "./DatasetMetricsTable";
 import { ReuseMetricsTable } from "./ReuseMetricsTable";
 
@@ -126,16 +127,11 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
 
   if (!isOrgLoading && !org) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="datasets-page__empty"
-          position="center"
-          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-buildings"
+        title="Sem organizações"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 

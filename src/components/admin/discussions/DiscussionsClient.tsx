@@ -18,6 +18,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
 
 export default function DiscussionsClient() {
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -66,16 +67,10 @@ export default function DiscussionsClient() {
     >
 
       {discussions.length === 0 ? (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={<Icon name="agora-line-chat" className="datasets-page__empty-icon" />}
-              description="Ainda não há discussões sobre esta organização."
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-chat"
+          description="Ainda não há discussões sobre esta organização."
+        />
       ) : (
         <>
           <p className="text-sm mb-24 font-semibold uppercase text-neutral-700">

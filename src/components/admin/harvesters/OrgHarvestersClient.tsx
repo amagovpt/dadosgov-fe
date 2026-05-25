@@ -3,9 +3,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import {
-  CardNoResults,
   Icon,
   InputSearchBar,
+  StatusCard,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -24,6 +24,10 @@ import { useAuth } from "@/context/AuthContext";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import StatusFilterSelect from "../StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
 import AdminLayout from "@/components/Layout/AdminLayout";
 
 
@@ -89,6 +93,7 @@ export default function OrgHarvestersClient() {
 
   const filteredHarvesters = useMemo(() => {
     if (!statusFilter) return harvesters;
+
     return harvesters.filter((h) => {
       if (statusFilter === "failed") {
         return h.last_job?.status === "failed";
@@ -127,16 +132,11 @@ export default function OrgHarvestersClient() {
 
   if (!isOrgLoading && !orgId) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="datasets-page__empty"
-          position="center"
-          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-buildings"
+        title="Sem organizações"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 
@@ -149,7 +149,7 @@ export default function OrgHarvestersClient() {
       ]}
       title="Harvesters"
     >
-      <p className="text-sm mb-16 text-neutral-700">{harvesters.length} resultados</p>
+      <ResultsCount count={harvesters.length} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -160,7 +160,7 @@ export default function OrgHarvestersClient() {
             aria-label="Pesquisar harvesters"
           />
         </div>
-        <HarvesterStatusFilter
+        <StatusFilterSelect
           value={statusFilter}
           onChange={(v) => {
             setStatusFilter(v);
@@ -242,9 +242,11 @@ export default function OrgHarvestersClient() {
                   </TableCell>
                   <TableCell headerLabel="API">{harvester.backend}</TableCell>
                   <TableCell headerLabel="Ações">
-                    <a href={`/pages/admin/harvesters/${harvester.id}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
+                    <TableActionsCell
+                      editAction={{
+                        href: `/pages/admin/harvesters/${harvester.id}`,
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
@@ -252,20 +254,11 @@ export default function OrgHarvestersClient() {
           </Table>
         </>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={
-                <Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />
-              }
-              title="Sem harvesters"
-              description="A organização ainda não tem harvesters."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-buildings"
+          title="Sem harvesters"
+          description="A organização ainda não tem harvesters."
+        />
       )}
     </AdminLayout>
   );

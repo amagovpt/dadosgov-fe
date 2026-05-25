@@ -28,6 +28,9 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import ResultsCount from "../ResultsCount";
+import StatusFilterSelect from "../StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
 import AdminLayout from "@/components/Layout/AdminLayout";
 
 
@@ -136,7 +139,6 @@ export default function SystemHarvestersClient() {
       await loadData();
     })();
   }, [loadData]);
-
   const handleSearch = (value: string) => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
@@ -175,9 +177,7 @@ export default function SystemHarvestersClient() {
       title="Harvesters"
     >
 
-      <p className="text-sm mb-16 text-neutral-700">
-        {isLoading ? "A carregar..." : `${totalItems} resultados`}
-      </p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -191,12 +191,17 @@ export default function SystemHarvestersClient() {
             }}
           />
         </div>
-        <HarvesterStatusFilter
+        <StatusFilterSelect
           value={statusFilter}
-          onChange={(v) => {
-            setStatusFilter(v);
-            setCurrentPage(1);
-          }}
+          onChange={(v) => setStatusFilter(v)}
+          options={[
+            { value: "", label: "Todos" },
+            { value: "pending", label: "Em espera de validação" },
+            { value: "accepted", label: "Validado" },
+            { value: "refused", label: "Recusado" },
+            { value: "done", label: "Terminado" },
+            { value: "failed", label: "Falhado" },
+          ]}
         />
       </div>
 
@@ -294,12 +299,11 @@ export default function SystemHarvestersClient() {
                           </button>
                         </>
                       )}
-                      <a
-                        href={`/pages/admin/harvesters/${harvester.id}?tab=config`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                      </a>
+                      <TableActionsCell
+                        editAction={{
+                          href: `/pages/admin/harvesters/${harvester.id}?tab=config`,
+                        }}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>

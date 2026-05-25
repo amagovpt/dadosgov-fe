@@ -71,89 +71,89 @@ export default function OrgDatasetsNewClient() {
               description="Se desejar realizar testes, utilize demo.dados.gov.pt"
             />
 
-            <div className="datasets-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
-              <CardAction
-                variant="neutral-100"
-                titleText="Publique um conjunto de dados"
-                descriptionText="Seja uma entidade da administração pública ou uma empresa pública, todos podem publicar em dados.gov.pt!"
-                icon={{ name: "agora-line-edit" }}
-                button={{
-                  children: "Comece a publicação",
-                  variant: "primary",
-                  appearance: "outline",
-                  onClick: () => router.push(buildStepUrl(2)),
-                }}
-              />
-            </div>
+          <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
+            <CardAction
+              variant="neutral-100"
+              titleText="Publique um conjunto de dados"
+              descriptionText="Seja uma entidade da administração pública ou uma empresa pública, todos podem publicar em dados.gov.pt!"
+              icon={{ name: "agora-line-edit" }}
+              button={{
+                children: "Comece a publicação",
+                variant: "primary",
+                appearance: "outline",
+                onClick: () => router.push(buildStepUrl(2)),
+              }}
+            />
+          </div>
 
-            {/* Admin sections */}
-            <div className="datasets-new-page__admin-sections">
-              <div className="datasets-new-page__admin-section">
-                <p className="text-primary-900 text-base font-bold leading-7">
-                  É administrador e deseja automatizar a publicação dos seus dados?
-                </p>
-                <p className="text-neutral-700 text-sm leading-relaxed">
-                  Pode automatizar a publicação através da API ou ligando o seu portal ao dados.gov.pt
-                  através de um harvester de dados.
-                </p>
-                <div className="flex gap-4 flex-wrap">
-                  <Button
-                    appearance="link"
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-external-link"
-                    trailingIconHover="agora-solid-external-link"
-                    onClick={() => router.push("/pages/faqs/api-documentation")}
-                  >
-                    Consulte a documentação da API
-                  </Button>
-                  <Button
-                    appearance="link"
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-external-link"
-                    trailingIconHover="agora-solid-external-link"
-                    onClick={() => router.push("/pages/faqs/reuse")}
-                  >
-                    Saiba mais sobre o harvester.
-                  </Button>
-                  <Button
-                    appearance="link"
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-external-link"
-                    trailingIconHover="agora-solid-external-link"
-                    onClick={() => router.push("/pages/support")}
-                  >
-                    Contacte-nos
-                  </Button>
-                </div>
-              </div>
-
-              <div className="datasets-new-page__admin-section">
-                <p className="text-primary-900 text-base font-bold leading-7">
-                  É administrador e deseja catalogar os seus dados?
-                </p>
-                <p className="text-neutral-700 text-sm leading-relaxed">
-                  Pode utilizar o serviço de catalogação e publicação do dados.gov.pt, que permite aos
-                  organismos da Administração Pública Central organizarem e disponibilizarem o seu
-                  catálogo de dados abertos.
-                </p>
-                <div className="flex gap-4 flex-wrap">
-                  <Button
-                    appearance="link"
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-external-link"
-                    trailingIconHover="agora-solid-external-link"
-                  >
-                    Aceda à área de catálogo.
-                  </Button>
-                </div>
+          {/* Admin sections */}
+          <div className="admin-new-page__admin-sections">
+            <div className="admin-new-page__admin-section">
+              <p className="text-primary-900 text-base font-bold leading-7">
+                É administrador e deseja automatizar a publicação dos seus dados?
+              </p>
+              <p className="text-neutral-700 text-sm leading-relaxed">
+                Pode automatizar a publicação através da API ou ligando o seu portal ao dados.gov.pt
+                através de um harvester de dados.
+              </p>
+              <div className="flex gap-4 flex-wrap">
+                <Button
+                  appearance="link"
+                  variant="primary"
+                  hasIcon
+                  trailingIcon="agora-line-external-link"
+                  trailingIconHover="agora-solid-external-link"
+                  onClick={() => router.push("/pages/faqs/api-documentation")}
+                >
+                  Consulte a documentação da API
+                </Button>
+                <Button
+                  appearance="link"
+                  variant="primary"
+                  hasIcon
+                  trailingIcon="agora-line-external-link"
+                  trailingIconHover="agora-solid-external-link"
+                  onClick={() => router.push("/pages/faqs/reuse")}
+                >
+                  Saiba mais sobre o harvester.
+                </Button>
+                <Button
+                  appearance="link"
+                  variant="primary"
+                  hasIcon
+                  trailingIcon="agora-line-external-link"
+                  trailingIconHover="agora-solid-external-link"
+                  onClick={() => router.push("/pages/support")}
+                >
+                  Contacte-nos
+                </Button>
               </div>
             </div>
-          </>
-        )}
+
+            <div className="admin-new-page__admin-section">
+              <p className="text-primary-900 text-base font-bold leading-7">
+                É administrador e deseja catalogar os seus dados?
+              </p>
+              <p className="text-neutral-700 text-sm leading-relaxed">
+                Pode utilizar o serviço de catalogação e publicação do dados.gov.pt, que permite aos
+                organismos da Administração Pública Central organizarem e disponibilizarem o seu
+                catálogo de dados abertos.
+              </p>
+              <div className="flex gap-4 flex-wrap">
+                <Button
+                  appearance="link"
+                  variant="primary"
+                  hasIcon
+                  trailingIcon="agora-line-external-link"
+                  trailingIconHover="agora-solid-external-link"
+                >
+                  Aceda à área de catálogo.
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
         {currentStep >= 2 && (
           <DatasetsAdminClient

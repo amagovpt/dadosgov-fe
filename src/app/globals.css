@@ -1318,13 +1318,13 @@ body:has(.admin-wrapper)>div>header.sticky {
   max-width: 654px;
 }
 
-/* Datasets page empty state */
-.datasets-page__body {
+/* Admin page - empty state (no results) */
+.admin-page__body {
   display: flex;
   gap: 32px;
 }
 
-.datasets-page__sidebar {
+.admin-page__sidebar {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1332,21 +1332,21 @@ body:has(.admin-wrapper)>div>header.sticky {
   width: 340px;
 }
 
-.datasets-page__count {
+.admin-page__count {
   font-size: 14px;
   line-height: 24px;
   color: var(--color-neutral-900);
   text-transform: uppercase;
 }
 
-.datasets-page__content {
+.admin-page__content {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.datasets-page__empty .agora-card-no-results__anchor {
+.admin-page__empty .agora-card-no-results__anchor {
   background-color: var(--color-primary-900);
   color: var(--color-white);
   border: none;
@@ -1360,33 +1360,33 @@ body:has(.admin-wrapper)>div>header.sticky {
   transition: background-color 0.2s;
 }
 
-.datasets-page__empty .agora-card-no-results__anchor:hover {
+.admin-page__empty .agora-card-no-results__anchor:hover {
   background-color: var(--color-primary-700);
   text-decoration: none;
 }
 
-.datasets-page__empty-icon {
+.admin-page__empty-icon {
   width: 80px;
   height: 80px;
 }
 
-.datasets-page__empty-icon svg {
+.admin-page__empty-icon svg {
   width: 80px;
   height: 80px;
   fill: var(--color-brand-blue-secondary);
 }
 
-.datasets-new-page__cards {
+.admin-new-page__cards {
   display: flex;
   gap: 32px;
   margin-top: 32px;
 }
 
-.datasets-new-page__cards>* {
+.admin-new-page__cards>* {
   flex: 1;
 }
 
-.datasets-new-page__cards .card-action {
+.admin-new-page__cards .card-action {
   transition:
     box-shadow 0.2s ease,
     border-color 0.2s ease;
@@ -1394,7 +1394,7 @@ body:has(.admin-wrapper)>div>header.sticky {
   cursor: pointer;
 }
 
-.datasets-new-page__cards .card-action:hover {
+.admin-new-page__cards .card-action:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border-color: var(--color-primary-900);
 }
@@ -1932,7 +1932,7 @@ body:has(.admin-wrapper)>div>header.sticky {
 
 /* 7.8 Responsive */
 @media (max-width: 1024px) {
-  .datasets-new-page__cards {
+  .admin-new-page__cards {
     flex-direction: column;
   }
 

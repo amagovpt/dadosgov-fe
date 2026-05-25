@@ -7,22 +7,25 @@ import {
   CardNoResults,
   Icon,
   InputSearchBar,
-  InputSelect,
-  DropdownSection,
-  DropdownOption,
   Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
+  InputSelect,
 } from "@ama-pt/agora-design-system";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import StatusDot from "@/components/admin/StatusDot";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchAdminPosts } from "@/services/api";
 import type { Post } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
+import ResultsCount from "../ResultsCount";
+import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
+import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
+import TableActionsCell from "../TableActionsCell";
 import { formatDateToDMY } from "@/utils/formatDate";
 
 type SortOrder = "none" | "ascending" | "descending";
@@ -134,7 +137,7 @@ export default function SystemPostsClient() {
       title="Artigos"
     >
 
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -170,28 +173,18 @@ export default function SystemPostsClient() {
             </DropdownOption>
           </DropdownSection>
         </InputSelect>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+        <StatusFilterSelect
+          value={statusFilter}
+          onChange={(v) => {
+            setStatusFilter(v);
             setCurrentPage(1);
           }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="published" selected={statusFilter === "published"}>
-              Publicado
-            </DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>
-              Despublicado
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+          options={[
+            { value: "", label: "Todos" },
+            { value: "published", label: "Publicado" },
+            { value: "draft", label: "Despublicado" },
+          ]}
+        />
         <Button
           variant="primary"
           appearance="outline"
@@ -261,14 +254,14 @@ export default function SystemPostsClient() {
                 <TableCell headerLabel="Criado em">{formatDateToDMY(post.created_at)}</TableCell>
                 <TableCell headerLabel="Atualizado em">{formatDateToDMY(post.last_modified)}</TableCell>
                 <TableCell headerLabel="Ação">
-                  <div className="flex gap-8">
-                    <a href={`/pages/posts/${post.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/posts/${post.id}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/posts/${post.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/posts/${post.id}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}

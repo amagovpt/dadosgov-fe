@@ -19,6 +19,8 @@ import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -111,7 +113,7 @@ export default function SystemCommunityResourcesClient() {
       title="Recursos comunitários"
     >
 
-      <p className="text-sm mb-16 text-neutral-700">{resources.length} resultados</p>
+      <ResultsCount count={resources.length} isLoading={isLoading} />
 
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
@@ -202,9 +204,11 @@ export default function SystemCommunityResourcesClient() {
                     {formatDate(resource.last_modified)}
                   </TableCell>
                   <TableCell headerLabel="Ação">
-                    <a href={`/pages/admin/system/community-resources?resource_id=${resource.id}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
+                    <TableActionsCell
+                      editAction={{
+                        href: `/pages/admin/system/community-resources?resource_id=${resource.id}`,
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               );

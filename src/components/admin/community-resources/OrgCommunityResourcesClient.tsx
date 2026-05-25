@@ -3,8 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import {
-  CardNoResults,
-  Icon,
   InputSearchBar,
   Table,
   TableHeader,
@@ -13,7 +11,7 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchOrgCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -22,7 +20,9 @@ import { useAuth } from "@/context/AuthContext";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
-import AppIcon from "@/components/Primitives/AppIcon";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
@@ -97,16 +97,10 @@ export default function OrgCommunityResourcesClient() {
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="datasets-page__empty"
-          position="center"
-          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-buildings"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 
@@ -120,7 +114,7 @@ export default function OrgCommunityResourcesClient() {
       title="Recursos comunitários"
     >
 
-      <p className="text-sm mb-16 text-neutral-700">{resources.length} resultados</p>
+      <ResultsCount count={resources.length} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -180,13 +174,7 @@ export default function OrgCommunityResourcesClient() {
                     <span className="text-primary-600">{resource.title}</span>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    {resource.deleted ? (
-                      <StatusDot variant="danger">Excluído</StatusDot>
-                    ) : resource.archived ? (
-                      <StatusDot variant="neutral">Arquivado</StatusDot>
-                    ) : (
-                      <StatusDot variant="success">Público</StatusDot>
-                    )}
+                    <ResourceStatusBadge item={resource} />
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDateToDMY(resource.created_at)}
@@ -205,12 +193,11 @@ export default function OrgCommunityResourcesClient() {
                     </div>
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-8">
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                      <a href={`/pages/admin/community-resources/edit?resource_id=${resource.id}`}>
-                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                      </a>
-                    </div>
+                    <TableActionsCell
+                      editAction={{
+                        href: `/pages/admin/community-resources/edit?resource_id=${resource.id}`,
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
@@ -218,20 +205,11 @@ export default function OrgCommunityResourcesClient() {
           </Table>
         </>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={
-                <Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />
-              }
-              title="Sem recursos comunitários"
-              description="A organização ainda não tem recursos comunitários."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-buildings"
+          title="Sem recursos comunitários"
+          description="A organização ainda não tem recursos comunitários."
+        />
       )}
     </AdminLayout>
   );
