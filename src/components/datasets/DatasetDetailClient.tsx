@@ -330,7 +330,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     <TextLink
                       href={
                         dataset.license_url ||
-                        `https://dados.gov.pt/pt/licenses/${dataset.license}/`
+                        `/pages/licenses/${dataset.license}/`
                       }
                     >
                       <span className="text-m-semibold">Licença:</span>{" "}
@@ -414,7 +414,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     <div key={label} className="flex items-center gap-8">
                       <Icon
                         name="agora-line-alert-triangle"
-                        className="h-[20px] w-[20px] fill-[#B06112]"
+                        className="h-20 w-20 fill-[#B06112]"
                       />
                       <span className="text-base text-neutral-900">
                         {label} dos dados não preenchidos

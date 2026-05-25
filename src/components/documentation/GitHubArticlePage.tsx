@@ -50,7 +50,7 @@ const markdownComponents = {
           text: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
         },
       "/pt/pages/faqs/about_opendata/": { href: "/pages/about-open-data" },
-      "/pages/faqs/licenses/": { href: "https://dados.gov.pt/pt/" },
+      "/pages/faqs/licenses/": { href: "/" },
     };
     const normalizedHref = href?.trim().replace(/^\/pt/, "");
     const override = linkOverrides[href] ?? linkOverrides[normalizedHref];
