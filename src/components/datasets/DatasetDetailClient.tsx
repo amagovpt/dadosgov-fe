@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -16,109 +16,13 @@ import { fetchDataset, followEntity, isFollowing, unfollowEntity } from "@/servi
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { formatMetricValue } from "@/utils/formatNumber";
 import TextLink from "@/components/Primitives/TextLink";
+import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 
 interface DatasetDetailClientProps {
   slug: string;
-}
-
-const READMORE_BUTTON_HEIGHT = 48;
-
-function DescriptionWithReadMore({
-  text,
-  sidebarRef,
-  titleRef,
-}: {
-  text: string;
-  sidebarRef: React.RefObject<HTMLDivElement | null>;
-  titleRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const [availableHeight, setAvailableHeight] = useState<number | undefined>(undefined);
-  const measureRef = useRef<HTMLDivElement>(null);
-
-  const checkOverflow = useCallback(() => {
-    if (measureRef.current && sidebarRef.current && titleRef.current) {
-      const sidebarHeight = sidebarRef.current.offsetHeight;
-      const titleHeight = titleRef.current.offsetHeight;
-      const fullHeight = measureRef.current.offsetHeight;
-      const maxDescHeight = sidebarHeight - titleHeight;
-      const overflows = fullHeight > maxDescHeight;
-      if (overflows) {
-        const lineHeight = parseFloat(getComputedStyle(measureRef.current).lineHeight) || 24;
-        const usable = maxDescHeight - READMORE_BUTTON_HEIGHT;
-        const snapped = Math.floor(usable / lineHeight) * lineHeight;
-        setAvailableHeight(snapped);
-      } else {
-        setAvailableHeight(maxDescHeight);
-      }
-      setIsOverflowing(overflows);
-    }
-  }, [sidebarRef, titleRef]);
-
-  useEffect(() => {
-    checkOverflow();
-    window.addEventListener("resize", checkOverflow);
-
-    const observer = new ResizeObserver(checkOverflow);
-    if (sidebarRef.current) observer.observe(sidebarRef.current);
-    if (measureRef.current) observer.observe(measureRef.current);
-
-    return () => {
-      window.removeEventListener("resize", checkOverflow);
-      observer.disconnect();
-    };
-  }, [checkOverflow, text]);
-
-  return (
-    <div className="prose max-w-ch text-lg relative mb-12 max-w-none leading-relaxed text-neutral-700">
-      {/* Hidden measure element to get full content height */}
-      <div
-        ref={measureRef}
-        className="pointer-events-none invisible absolute"
-        style={{ top: 0, left: 0, right: 0 }}
-        aria-hidden="true"
-      >
-        <div className="markdown-container text-m-light text-neutral-900">
-          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]}>
-            {text}
-          </ReactMarkdown>
-        </div>
-      </div>
-      <div
-        className="overflow-hidden"
-        style={
-          !expanded && isOverflowing && availableHeight ? { maxHeight: availableHeight } : undefined
-        }
-      >
-        <div className="markdown-container text-m-light text-neutral-900">
-          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]}>
-            {text}
-          </ReactMarkdown>
-        </div>
-      </div>
-      {isOverflowing && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="mt-8 flex cursor-pointer items-center gap-8 text-primary-600 hover:underline"
-        >
-          {expanded ? "Ler menos" : "Ler mais"}
-          {expanded ? (
-            <Icon name="agora-line-arrow-up-circle" className="h-24 w-24" />
-          ) : (
-            <Icon name="agora-line-arrow-down-circle" className="h-24 w-24" />
-          )}
-        </button>
-      )}
-    </div>
-  );
 }
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
@@ -221,6 +125,8 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
     );
   }
 
+  console.log("Dataset:", dataset.organization);
+
   const qualityScore = calculateQualityScore(QUALITY_CRITERIA, dataset.quality);
   const qualityDetails = getQualityDetails(dataset.quality);
   const qualityMissing = getQualityMissing(dataset.quality);
@@ -299,8 +205,8 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                   />
                 </div>
               ) : (
-                <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-6 text-neutral-400">
-                  <Icon name="agora-line-building" className="h-6 w-6" />
+                <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-12 text-neutral-400">
+                  <Icon name="agora-line-buildings" className="h-6 w-6" />
                 </div>
               )}
 

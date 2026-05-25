@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -15,13 +15,10 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Organization } from "@/types/api";
 import { OrganizationTabs } from "./OrganizationTabs";
+import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 import { useAuth } from "@/context/AuthContext";
 import { requestMembership, followEntity, unfollowEntity, isFollowing } from "@/services/api";
 import { formatMetricValue } from "@/utils/formatNumber";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
 
 interface OrganizationDetailClientProps {
   organization: Organization;
@@ -32,7 +29,6 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [requestComment, setRequestComment] = useState("");
   const [isRequesting, setIsRequesting] = useState(false);
@@ -98,46 +94,8 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
       setIsRequesting(false);
     }
   };
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const [availableHeight, setAvailableHeight] = useState<number | undefined>(undefined);
-  const measureRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
-
-  const READMORE_BUTTON_HEIGHT = 48;
-
-  const checkOverflow = useCallback(() => {
-    if (measureRef.current && sidebarRef.current && titleRef.current) {
-      const sidebarHeight = sidebarRef.current.offsetHeight;
-      const titleHeight = titleRef.current.offsetHeight;
-      const fullHeight = measureRef.current.offsetHeight;
-      const maxDescHeight = sidebarHeight - titleHeight;
-      const overflows = fullHeight > maxDescHeight;
-      if (overflows) {
-        const lineHeight = parseFloat(getComputedStyle(measureRef.current).lineHeight) || 24;
-        const usable = maxDescHeight - READMORE_BUTTON_HEIGHT;
-        const snapped = Math.floor(usable / lineHeight) * lineHeight;
-        setAvailableHeight(snapped);
-      } else {
-        setAvailableHeight(maxDescHeight);
-      }
-      setIsOverflowing(overflows);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkOverflow();
-    window.addEventListener("resize", checkOverflow);
-
-    const observer = new ResizeObserver(checkOverflow);
-    if (sidebarRef.current) observer.observe(sidebarRef.current);
-    if (measureRef.current) observer.observe(measureRef.current);
-
-    return () => {
-      window.removeEventListener("resize", checkOverflow);
-      observer.disconnect();
-    };
-  }, [checkOverflow]);
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-24">
@@ -238,101 +196,33 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           </div>
 
           {/* Description Section */}
-          <div className="text-lg relative mb-12 leading-relaxed text-neutral-700">
-            {/* Hidden measure element to get full content height */}
-            <div
-              ref={measureRef}
-              className="pointer-events-none invisible absolute"
-              style={{ top: 0, left: 0, right: 0 }}
-              aria-hidden="true"
-            >
-              <div className="markdown-container max-w-[592px] text-m-light text-neutral-900">
-                {organization.description ? (
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                  >
-                    {organization.description}
-                  </ReactMarkdown>
-                ) : (
-                  <p>Esta organização não possui descrição.</p>
-                )}
-              </div>
-              <div className="mt-8">
-                <h3 className="text-xl mb-16 font-bold text-primary-900">
-                  Observações preliminares
-                </h3>
-                <p className="mb-16 max-w-[592px] text-neutral-900">
-                  Informações adicionais sobre o papel desta organização na gestão e publicação de
-                  dados abertos.
-                </p>
-              </div>
-              <div className="mt-8">
-                <h3 className="text-xl mb-16 font-bold text-primary-900">
-                  Sobre a organização
-                </h3>
-                <p className="max-w-[592px] text-neutral-900">
-                  {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
-                  para a transparência e reutilização de informação pública em Portugal.
-                </p>
-              </div>
-            </div>
-            <div
-              className="overflow-hidden"
-              style={
-                !expanded && isOverflowing && availableHeight
-                  ? { maxHeight: availableHeight }
-                  : undefined
-              }
-            >
-              <div className="markdown-container max-w-[592px] text-m-light text-neutral-900">
-                {organization.description ? (
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                  >
-                    {organization.description}
-                  </ReactMarkdown>
-                ) : (
-                  <p>Esta organização não possui descrição.</p>
-                )}
-              </div>
-
-              {/* Static sections to mirror dataset page as requested (copy) */}
-              <div className="mt-8">
-                <h3 className="text-xl mb-16 font-bold text-primary-900">
-                  Observações preliminares
-                </h3>
-                <p className="mb-16 max-w-[592px] text-neutral-900">
-                  Informações adicionais sobre o papel desta organização na gestão e publicação de
-                  dados abertos.
-                </p>
-              </div>
-
-              <div className="mt-8">
-                <h3 className="text-xl mb-16 font-bold text-primary-900">
-                  Sobre a organização
-                </h3>
-                <p className="max-w-[592px] text-neutral-900">
-                  {organization.name} é um publicador ativo no Portal de Dados Abertos, contribuindo
-                  para a transparência e reutilização de informação pública em Portugal.
-                </p>
-              </div>
-            </div>
-            {isOverflowing && (
-              <button
-                onClick={() => setExpanded(!expanded)}
-                className="mt-8 flex cursor-pointer items-center gap-8 text-primary-600 hover:underline"
-              >
-                {expanded ? "Ler menos" : "Ler mais"}
-                {expanded ? (
-                  <Icon name="agora-line-arrow-up-circle" className="h-24 w-24" />
-                ) : (
-                  <Icon name="agora-line-arrow-down-circle" className="h-24 w-24" />
-                )}
-              </button>
-            )}
-          </div>
+          <DescriptionWithReadMore
+            text={organization.description ?? ""}
+            sidebarRef={sidebarRef}
+            titleRef={titleRef}
+            contentWrapperClassName="markdown-container max-w-[592px] text-m-light text-neutral-900"
+            extraContent={
+              <>
+                <div className="mt-8">
+                  <h3 className="text-xl mb-16 font-bold text-primary-900">
+                    Observações preliminares
+                  </h3>
+                  <p className="mb-16 max-w-[592px] text-neutral-900">
+                    Informações adicionais sobre o papel desta organização na gestão e publicação de
+                    dados abertos.
+                  </p>
+                </div>
+                <div className="mt-8">
+                  <h3 className="text-xl mb-16 font-bold text-primary-900">Sobre a organização</h3>
+                  <p className="max-w-[592px] text-neutral-900">
+                    {organization.name} é um publicador ativo no Portal de Dados Abertos,
+                    contribuindo para a transparência e reutilização de informação pública em
+                    Portugal.
+                  </p>
+                </div>
+              </>
+            }
+          />
         </div>
 
         <div className="w-full">
