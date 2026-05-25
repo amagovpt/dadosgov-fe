@@ -45,9 +45,15 @@ function buildCsp(nonce: string): string {
   // the Agora design system inject inline <style> in runtime. Removing it
   // requires a separate effort (tracked as TICKET-56c follow-up); style
   // injection is a far weaker attack surface than script injection.
+  //
+  // 'unsafe-eval' is only added in development: React uses eval() for
+  // callstack reconstruction and other dev-mode debugging features, but
+  // never in production builds.
+  const scriptSrcExtras =
+    process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
   return [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' https://cdnjs.cloudflare.com`,
+    `script-src 'self' 'nonce-${nonce}' https://cdnjs.cloudflare.com${scriptSrcExtras}`,
     `style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com`,
     `img-src 'self' data: blob: http://localhost:7000 ${API_URL} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com`,
     `frame-src 'self' https://app.powerbi.com`,

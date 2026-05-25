@@ -221,6 +221,8 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
     );
   }
 
+  console.log("Dataset:", dataset.organization);
+
   const qualityScore = calculateQualityScore(QUALITY_CRITERIA, dataset.quality);
   const qualityDetails = getQualityDetails(dataset.quality);
   const qualityMissing = getQualityMissing(dataset.quality);
@@ -299,8 +301,8 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                   />
                 </div>
               ) : (
-                <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-6 text-neutral-400">
-                  <Icon name="agora-line-building" className="h-6 w-6" />
+                <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-12 text-neutral-400">
+                  <Icon name="agora-line-buildings" className="h-6 w-6" />
                 </div>
               )}
 

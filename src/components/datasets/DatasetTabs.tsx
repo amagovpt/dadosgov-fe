@@ -48,11 +48,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                     className="absolute inset-y-0 -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64 bg-primary-100 z-0"
                     aria-hidden="true"
                 />
-                <div className="relative z-10">
-                    <div className="container mx-auto max-w-5xl">
-                        {content}
-                    </div>
-                </div>
+                {content}
             </div>
         </TabBody>
     );
