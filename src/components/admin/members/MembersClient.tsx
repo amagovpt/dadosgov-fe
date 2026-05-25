@@ -404,7 +404,7 @@ interface MembersClientProps {
 
 export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const { show } = usePopupContext();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { activeOrg } = useActiveOrganization();
   // Prefer the orgId from the URL params (passed by the server page). Fall
   // back to the sidebar's active organization when this component is used
@@ -506,6 +506,13 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     );
   };
 
+  const isOrgAdmin = useMemo(
+    () =>
+      isAdmin ||
+      (viewedOrg?.members?.some((m) => m.user.id === user?.id && m.role === "admin") ?? false),
+    [isAdmin, viewedOrg, user],
+  );
+
   const sortedMembers = useMemo(() => {
     if (!sortField || sortOrder === "none") return members;
     const dir = sortOrder === "ascending" ? 1 : -1;
@@ -539,7 +546,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       title="Membros"
     >
 
-      {pendingRequests.length > 0 && (
+      {isOrgAdmin && pendingRequests.length > 0 && (
         <div className="mb-32">
           <h2 className="mb-16 text-base font-semibold text-neutral-900">
             Pedidos de adesão pendentes ({pendingRequests.length})
@@ -614,31 +621,33 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
         <p className="text-sm font-semibold uppercase text-neutral-700">
           {members.length} {members.length === 1 ? "membro" : "membros"}
         </p>
-        <Button
-          variant="primary"
-          appearance="outline"
-          hasIcon={true}
-          leadingIcon="agora-line-plus-circle"
-          leadingIconHover="agora-solid-plus-circle"
-          onClick={() => {
-            const nextKey = addMemberOpenKey + 1;
-            setAddMemberOpenKey(nextKey);
-            show(
-              <AddMemberPopupContent
-                orgId={resolvedOrgId!}
-                onMemberAdded={loadMembers}
-                openKey={nextKey}
-              />,
-              {
-                title: "Adicionar um membro à organização",
-                closeAriaLabel: "Fechar",
-                dimensions: "m",
-              }
-            );
-          }}
-        >
-          Adicionar um membro
-        </Button>
+        {isOrgAdmin && (
+          <Button
+            variant="primary"
+            appearance="outline"
+            hasIcon={true}
+            leadingIcon="agora-line-plus-circle"
+            leadingIconHover="agora-solid-plus-circle"
+            onClick={() => {
+              const nextKey = addMemberOpenKey + 1;
+              setAddMemberOpenKey(nextKey);
+              show(
+                <AddMemberPopupContent
+                  orgId={resolvedOrgId!}
+                  onMemberAdded={loadMembers}
+                  openKey={nextKey}
+                />,
+                {
+                  title: "Adicionar um membro à organização",
+                  closeAriaLabel: "Fechar",
+                  dimensions: "m",
+                }
+              );
+            }}
+          >
+            Adicionar um membro
+          </Button>
+        )}
       </div>
 
       <Table
@@ -667,7 +676,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
             >
               Membro desde
             </TableHeaderCell>
-            <TableHeaderCell>Ações</TableHeaderCell>
+            {isOrgAdmin ? <TableHeaderCell>Ações</TableHeaderCell> : <></>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -697,41 +706,45 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                 </StatusDot>
               </TableCell>
               <TableCell headerLabel="Membro desde">{formatDateToDMY(member.since)}</TableCell>
-              <TableCell headerLabel="Ações">
-                <div className="flex gap-8">
-                  <button
-                    onClick={() => {
-                      const nextKey = editMemberOpenKey + 1;
-                      setEditMemberOpenKey(nextKey);
-                      show(
-                        <EditRolePopupContent
-                          orgId={resolvedOrgId!}
-                          member={member}
-                          onRoleUpdated={loadMembers}
-                          openKey={nextKey}
-                        />,
-                        {
-                          title: "Editar papel do membro",
-                          closeAriaLabel: "Fechar",
-                          dimensions: "m",
-                        }
-                      );
-                    }}
-                    title="Editar papel"
-                  >
-                    <Icon
-                      name="agora-line-edit"
-                      className="h-[20px] w-[20px] cursor-pointer text-primary-600"
-                    />
-                  </button>
-                  <button onClick={() => handleRemoveMember(member)} title="Remover membro">
-                    <Icon
-                      name="agora-line-trash"
-                      className="h-[20px] w-[20px] cursor-pointer text-danger-600"
-                    />
-                  </button>
-                </div>
-              </TableCell>
+              {isOrgAdmin ? (
+                <TableCell headerLabel="Ações">
+                  <div className="flex gap-8">
+                    <button
+                      onClick={() => {
+                        const nextKey = editMemberOpenKey + 1;
+                        setEditMemberOpenKey(nextKey);
+                        show(
+                          <EditRolePopupContent
+                            orgId={resolvedOrgId!}
+                            member={member}
+                            onRoleUpdated={loadMembers}
+                            openKey={nextKey}
+                          />,
+                          {
+                            title: "Editar papel do membro",
+                            closeAriaLabel: "Fechar",
+                            dimensions: "m",
+                          }
+                        );
+                      }}
+                      title="Editar papel"
+                    >
+                      <Icon
+                        name="agora-line-edit"
+                        className="h-[20px] w-[20px] cursor-pointer text-primary-600"
+                      />
+                    </button>
+                    <button onClick={() => handleRemoveMember(member)} title="Remover membro">
+                      <Icon
+                        name="agora-line-trash"
+                        className="h-[20px] w-[20px] cursor-pointer text-danger-600"
+                      />
+                    </button>
+                  </div>
+                </TableCell>
+              ) : (
+                <></>
+              )}
             </TableRow>
           ))}
         </TableBody>
