@@ -439,17 +439,19 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     if (!resolvedOrgId) return;
     setIsLoading(true);
     try {
-      const [orgData, requests] = await Promise.all([
-        fetchOrganization(resolvedOrgId),
-        fetchMembershipRequests(resolvedOrgId),
-      ]);
+      const orgData = await fetchOrganization(resolvedOrgId);
       setViewedOrg(orgData);
       setMembers(orgData?.members || []);
-      setPendingRequests(requests.filter((r: MembershipRequest) => r.status === "pending"));
     } catch (error) {
       console.error("Error loading members:", error);
     } finally {
       setIsLoading(false);
+    }
+    try {
+      const requests = await fetchMembershipRequests(resolvedOrgId);
+      setPendingRequests(requests.filter((r: MembershipRequest) => r.status === "pending"));
+    } catch {
+      setPendingRequests([]);
     }
   }, [resolvedOrgId]);
 
