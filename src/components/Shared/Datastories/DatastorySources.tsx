@@ -6,17 +6,17 @@ import { twMerge } from "tailwind-merge";
 import { DatastorySource } from "@/types/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-export type DataSourcesSectionProps = DatastorySource & {
+export type DatastorySourcesProps = DatastorySource & {
   className?: string;
 };
 
 // eslint-disable-next-line max-len
-export default function DataSourcesSection({
+export default function DatastorySources({
   className,
   title,
   description,
   sources,
-}: DataSourcesSectionProps) {
+}: DatastorySourcesProps) {
   return (
     <Section
       className={twMerge("flex items-center justify-center relative overflow-hidden", className)}

@@ -35,6 +35,7 @@ type Iframe = {
 }
 
 export type DatastorySection = {
+  id: string;
   title: string;
   description: string;
   iframe: Iframe[];

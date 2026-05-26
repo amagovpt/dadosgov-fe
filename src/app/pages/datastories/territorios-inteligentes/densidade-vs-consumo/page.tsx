@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getDatastory, getDatastoryMetadata } from "@/queries/datastories/datastory";
-import DatastoryDetails from "@/components/datastories/DatastoryDetails";
+import DatastoryDetailsPage from "@/components/Shared/Datastories/DatastoryDetailsPage";
 import { BreadcrumbItem } from "@/types/shared";
 
 export async function generateMetadata({
@@ -32,5 +32,5 @@ export default async function DataStoryDetailPage({
 
   const datastory = await getDatastory("territorios-inteligentes/densidade-vs-consumo", "pt");
 
-  return <DatastoryDetails datastory={datastory} breadcrumbItems={breadcrumbItems} />;
+  return <DatastoryDetailsPage datastory={datastory} breadcrumbItems={breadcrumbItems} />;
 }
