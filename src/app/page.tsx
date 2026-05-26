@@ -9,12 +9,12 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   const data = await fetchHomepageData();
 
-  const reachableImages = await probeUrls(
-    data.latest_datasets.map((d) => d.image_url)
+  const reachableLogos = await probeUrls(
+    data.latest_datasets.map((d) => d.organization?.logo)
   );
   data.latest_datasets = data.latest_datasets.map((d) => {
-    if (d.image_url && !reachableImages.has(d.image_url)) {
-      return { ...d, image_url: null };
+    if (d.organization?.logo && !reachableLogos.has(d.organization.logo)) {
+      return { ...d, organization: { ...d.organization, logo: null } };
     }
     return d;
   });
