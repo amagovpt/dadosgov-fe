@@ -10,10 +10,11 @@ export type CardMetricsProps = {
     title: string;
     description: string;
     last_modified?: string;
+    image_url?: string | null;
     organization?: {
         name: string;
-        logo?: string;
-    };
+        logo?: string | null;
+    } | null;
     quality?: {
         score: number;
     };
@@ -31,6 +32,7 @@ export default function CardMetrics({
     title,
     description,
     last_modified,
+    image_url,
     organization,
     quality,
     metrics,
@@ -52,14 +54,16 @@ export default function CardMetrics({
         >
             <CardGeneral
                 variant="white"
-                image={{
-                    src: organization?.logo || "/images/placeholders/organization.png",
-                    alt: organization?.name || "Organização",
-                    height: "250px",
-                    className: "bg-primary-100 !object-contain !max-w-[250px] !max-h-[250px]",
-                }}
+                {...(image_url ? {
+                    image: {
+                        src: image_url,
+                        alt: organization?.name || title,
+                        height: "250px",
+                        className: "bg-primary-100 !object-contain !max-w-[250px] !max-h-[250px]",
+                    }
+                } : {})}
                 subtitleText={
-                    <div className="flex flex-col">
+                    <div className="flex flex-col mt-8">
                         <span style={{ fontSize: "16px" }} className="text-neutral-900">
                             {last_modified}
                         </span>
