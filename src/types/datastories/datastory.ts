@@ -54,6 +54,7 @@ type Source = {
 };
 
 export type DatastorySource = {
+  id: string;
   title: string;
   description: string;
   sources: Source[];

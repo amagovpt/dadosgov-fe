@@ -12,6 +12,7 @@ export type DatastorySourcesProps = DatastorySource & {
 
 // eslint-disable-next-line max-len
 export default function DatastorySources({
+  id,
   className,
   title,
   description,
@@ -19,12 +20,13 @@ export default function DatastorySources({
 }: DatastorySourcesProps) {
   return (
     <Section
-      className={twMerge("flex items-center justify-center relative overflow-hidden", className)}
+      id={id}
+      className={twMerge("relative flex items-center justify-center overflow-hidden", className)}
     >
-      <div className="z-10 container py-96 overflow-hidden">
+      <div className="container z-10 overflow-hidden py-96">
         <InfoBlock.Root>
-          <InfoBlock.Content className="grid grid-cols-1 xl:grid-sols-2 gap-64 ">
-            <div className="w-full flex flex-col gap-32">
+          <InfoBlock.Content className="xl:grid-sols-2 grid grid-cols-1 gap-64">
+            <div className="flex w-full flex-col gap-32">
               <InfoBlock.Header className="gap-8">
                 <InfoBlock.Title
                   titleLevel="h2"
@@ -60,10 +62,10 @@ export default function DatastorySources({
           </InfoBlock.Content>
         </InfoBlock.Root>
       </div>
-      <div className="absolute right-0 top-0 w-full h-full -z-10 hidden xl:block">
-        <div className="absolute bg-primary-300 w-[373px] h-[373px] rounded-[50px] -top-[71px] -right-[55px]" />
-        <div className="absolute bg-primary-300 w-[108px] h-[108px] rounded-[25px] top-[104px] right-[352px]" />
-        <div className="absolute bg-primary-300 w-[216px] h-[216px] rounded-[50px] top-[257px] right-[352px]" />
+      <div className="absolute right-0 top-0 -z-10 hidden h-full w-full xl:block">
+        <div className="absolute -right-[55px] -top-[71px] h-[373px] w-[373px] rounded-[50px] bg-primary-300" />
+        <div className="absolute right-[352px] top-[104px] h-[108px] w-[108px] rounded-[25px] bg-primary-300" />
+        <div className="absolute right-[352px] top-[257px] h-[216px] w-[216px] rounded-[50px] bg-primary-300" />
       </div>
     </Section>
   );
