@@ -200,7 +200,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             text={organization.description ?? ""}
             sidebarRef={sidebarRef}
             titleRef={titleRef}
-            contentWrapperClassName="markdown-container max-w-[592px] text-m-light text-neutral-900"
+            className="[&_.content-wrapper]:markdown-container [&_.content-wrapper]:max-w-[592px] [&_.content-wrapper]:text-m-light [&_.content-wrapper]:text-neutral-900"
             extraContent={
               <>
                 <div className="mt-8">
