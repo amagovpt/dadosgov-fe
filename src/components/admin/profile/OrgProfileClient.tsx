@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Avatar,
@@ -111,6 +111,13 @@ export default function OrgProfileClient() {
     const timer = setTimeout(() => setSaveStatus(null), 5000);
     return () => clearTimeout(timer);
   }, [saveStatus]);
+
+  const canEdit = useMemo(
+    () =>
+      isAdmin ||
+      (org?.members?.some((m) => m.user.id === user?.id && m.role === "admin") ?? false),
+    [isAdmin, org, user],
+  );
 
   const handleSave = async () => {
     if (!org) return;
@@ -296,6 +303,8 @@ export default function OrgProfileClient() {
                 hasFeedback={nameError}
                 feedbackState="danger"
                 errorFeedbackText="Campo obrigatório"
+                readOnly={!canEdit}
+                disabled={!canEdit}
               />
 
               <InputText
@@ -304,6 +313,8 @@ export default function OrgProfileClient() {
                 id="org-acronym"
                 value={acronym}
                 onChange={(e) => setAcronym(e.target.value)}
+                readOnly={!canEdit}
+                disabled={!canEdit}
               />
 
               <InputTextArea
@@ -320,6 +331,8 @@ export default function OrgProfileClient() {
                 hasFeedback={descriptionError}
                 feedbackState="danger"
                 errorFeedbackText="Campo obrigatório"
+                readOnly={!canEdit}
+                disabled={!canEdit}
               />
 
               <InputText
@@ -328,46 +341,54 @@ export default function OrgProfileClient() {
                 id="org-url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
+                readOnly={!canEdit}
+                disabled={!canEdit}
               />
 
-              <div>
-                <span className="text-base font-medium leading-7 text-primary-900">Logotipo</span>
-                <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-                  <DragAndDropUploader
-                    label="Ficheiro"
-                    dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                    inputLabel="Selecione ou arraste o ficheiro"
-                    selectedFilesLabel="ficheiro selecionado"
-                    removeFileButtonLabel="Remover ficheiro"
-                    replaceFileButtonLabel="Substituir ficheiro"
-                    extensionsInstructions="Tamanho máximo: 500 KB. Formatos aceites: JPG, JPEG, PNG."
-                    accept=".jpg,.jpeg,.png"
-                    maxSize={512000}
-                    maxCount={1}
-                    maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 500 KB."
-                    forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                    hasError={!!logoError}
-                    hasFeedback={!!logoError}
-                    feedbackState="danger"
-                    feedbackText={logoError ?? undefined}
-                    onChange={handleLogoUpload}
-                    onSecurityError={() => setLogoError(POISONED_FILE_WARNING)}
-                  />
+              {canEdit && (
+                <div>
+                  <span className="text-base font-medium leading-7 text-primary-900">
+                    Logotipo
+                  </span>
+                  <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
+                    <DragAndDropUploader
+                      label="Ficheiro"
+                      dragAndDropLabel="Arraste e largue o ficheiro aqui"
+                      inputLabel="Selecione ou arraste o ficheiro"
+                      selectedFilesLabel="ficheiro selecionado"
+                      removeFileButtonLabel="Remover ficheiro"
+                      replaceFileButtonLabel="Substituir ficheiro"
+                      extensionsInstructions="Tamanho máximo: 500 KB. Formatos aceites: JPG, JPEG, PNG."
+                      accept=".jpg,.jpeg,.png"
+                      maxSize={512000}
+                      maxCount={1}
+                      maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 500 KB."
+                      forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+                      hasError={!!logoError}
+                      hasFeedback={!!logoError}
+                      feedbackState="danger"
+                      feedbackText={logoError ?? undefined}
+                      onChange={handleLogoUpload}
+                      onSecurityError={() => setLogoError(POISONED_FILE_WARNING)}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="mt-16 flex justify-end">
-                <Button
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-check-circle"
-                  trailingIconHover="agora-solid-check-circle"
-                  onClick={handleSave}
-                  disabled={isSaving}
-                >
-                  {isSaving ? "A guardar..." : "Guardar"}
-                </Button>
-              </div>
+              {canEdit && (
+                <div className="mt-16 flex justify-end">
+                  <Button
+                    variant="primary"
+                    hasIcon
+                    trailingIcon="agora-line-check-circle"
+                    trailingIconHover="agora-solid-check-circle"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "A guardar..." : "Guardar"}
+                  </Button>
+                </div>
+              )}
 
               {(isAdmin ||
                 org?.members?.some((m) => m.user.id === user?.id && m.role === "admin")) && (
