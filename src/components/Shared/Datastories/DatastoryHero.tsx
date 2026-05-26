@@ -10,7 +10,7 @@ export type DatastoryHeroI = DatastoryHeroType & {
   breadcrumbs: BreadcrumbItem[];
 };
 
-export default function DatastoryHero({ breadcrumbs, title, description }: DatastoryHeroI) {
+export default function DatastoryHero({ breadcrumbs, title, description, index }: DatastoryHeroI) {
   return (
     <Section className="flex items-center justify-center bg-primary-900">
       <InfoBlock.Root className="pb-96 pt-64">
@@ -27,14 +27,7 @@ export default function DatastoryHero({ breadcrumbs, title, description }: Datas
             />
           </div>
           <div className="flex-1 self-center">
-            <DatastoryIndex
-              title="Nesta página"
-              anchors={[
-                { children: "item 1 item 1 item 1 item 1 item 1 item 1 item 1 item 1 item 1 item 1 item 1 item 1 item 1", href: "#1" },
-                { children: "item 2", href: "#2" },
-                { children: "item 3", href: "#3" },
-              ]}
-            />
+            <DatastoryIndex {...index} />
           </div>
         </InfoBlock.Content>
       </InfoBlock.Root>

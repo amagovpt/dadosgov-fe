@@ -13,7 +13,7 @@ export default function DatastoryDetailsPage({
 }: DatastoryDetailsPageProps) {
   return (
     <main className="flex flex-col">
-      <Datastory.Hero {...datastory.hero} breadcrumbs={breadcrumbItems} />
+      <Datastory.Hero {...datastory.hero} breadcrumbs={breadcrumbItems}/>
 
       {datastory.sections.map((section, index) => (
         <Datastory.Section {...section} key={`section-${index}-${section.id}`} />

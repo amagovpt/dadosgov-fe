@@ -11,6 +11,7 @@ type BigNumber = {
 type Anchor = {
   children: string;
   href: string;
+  icon: string;
 };
 
 type Card = {
@@ -22,17 +23,23 @@ type Card = {
   anchor: Anchor;
 };
 
+type Index = {
+  title: string;
+  anchors: Anchor[];
+};
+
 export type DatastoryHero = {
   title: string;
   description: string;
   cards: Card[];
   dateReference: DateReference;
+  index: Index;
 };
 
 type Iframe = {
   source: string;
   classNames: string;
-}
+};
 
 export type DatastorySection = {
   id: string;

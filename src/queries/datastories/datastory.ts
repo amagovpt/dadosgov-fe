@@ -82,11 +82,22 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 title
                 date
               }
+              index {
+                title
+                anchors {
+                  anchor {
+                    children
+                    href
+                    icon
+                  }
+                }
+              }
             }
           }
           sections {
             ${locale} {
               section {
+                id
                 title
                 description
                 iframe {
@@ -98,6 +109,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
           }
           dataSource {
             ${locale} {
+              id
               title
               description
               sources {
