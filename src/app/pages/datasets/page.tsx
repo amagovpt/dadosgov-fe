@@ -7,7 +7,6 @@ import {
 } from '@/services/api';
 import { DatasetFilters } from '@/types/api';
 import DatasetsClient from '@/components/datasets/DatasetsClient';
-import { probeUrls } from '@/lib/imageProbe';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,16 +64,6 @@ export default async function Page({
     fetchFrequencies(),
     fetchGranularities(),
   ]);
-
-  const reachableLogos = await probeUrls(
-    initialData.data.map((d) => d.organization?.logo)
-  );
-  initialData.data = initialData.data.map((d) => {
-    if (d.organization?.logo && !reachableLogos.has(d.organization.logo)) {
-      return { ...d, organization: { ...d.organization, logo: null } };
-    }
-    return d;
-  });
 
   const filterCounts: Record<string, number> = {
     formato_all: totalRes.total,

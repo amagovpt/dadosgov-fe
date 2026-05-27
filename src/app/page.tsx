@@ -2,22 +2,11 @@ import { fetchHomepageData } from "@/services/api";
 import HomeClient from "@/components/home/HomeClient";
 import { getHome } from "@/queries/home";
 import { Datastory, UsedDailyBy } from "@/types/home";
-import { probeUrls } from "@/lib/imageProbe";
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const data = await fetchHomepageData();
-
-  const reachableLogos = await probeUrls(
-    data.latest_datasets.map((d) => d.organization?.logo)
-  );
-  data.latest_datasets = data.latest_datasets.map((d) => {
-    if (d.organization?.logo && !reachableLogos.has(d.organization.logo)) {
-      return { ...d, organization: { ...d.organization, logo: null } };
-    }
-    return d;
-  });
 
   let datastories: Datastory[] = [];
   let usedDailyBy: UsedDailyBy[] = [];
