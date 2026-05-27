@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   InputSearchBar,
   StatusCard,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -18,55 +18,21 @@ import {
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/services/api";
 import type { HarvestSource } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import { getHarvesterStatus } from "@/utils/harvesterStatus";
+import { HarvesterStatusFilter } from "./HarvesterStatusFilter";
+import { formatDateToDMY } from "@/utils/formatDate";
 import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
-import { format } from "date-fns";
 import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-import HarvestersStatusFilterSelect from "@/components/admin/lists/HarvestersStatusFilterSelect";
-import HarvestersAcceptedStatusInfoCard from "@/components/admin/harvesters/HarvestersAcceptedStatusInfoCard";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import ResultsCount from "../ResultsCount";
+import StatusFilterSelect from "../StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
-const VALIDATION_STATUS: Record<
-  string,
-  { label: string; variant: "success" | "warning" | "danger" | "informative" }
-> = {
-  pending: { label: "Em espera de validação", variant: "warning" },
-  accepted: { label: "Validado", variant: "success" },
-  refused: { label: "Recusado", variant: "danger" },
-};
-
-const JOB_STATUS: Record<
-  string,
-  { label: string; variant: "success" | "warning" | "danger" | "informative" }
-> = {
-  pending: { label: "Pendente", variant: "informative" },
-  initializing: { label: "A inicializar", variant: "informative" },
-  initialized: { label: "Inicializado", variant: "informative" },
-  processing: { label: "Em processamento", variant: "informative" },
-  done: { label: "Terminado", variant: "success" },
-  "done-errors": { label: "Terminado com erros", variant: "warning" },
-  failed: { label: "Falhado", variant: "danger" },
-};
-
-function getStatus(source: HarvestSource) {
-  if (source.validation?.state && source.validation.state !== "accepted") {
-    return VALIDATION_STATUS[source.validation.state] || VALIDATION_STATUS.pending;
-  }
-  if (source.last_job?.status) {
-    return (
-      JOB_STATUS[source.last_job.status] || {
-        label: "Sem tarefa de momento",
-        variant: "informative" as const,
-      }
-    );
-  }
-  return { label: "Sem tarefa de momento", variant: "informative" as const };
-}
 
 export default function SystemHarvestersClient() {
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
@@ -81,6 +47,7 @@ export default function SystemHarvestersClient() {
     message: string;
   } | null>(null);
   const router = useRouter();
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { isAdmin } = useAuth();
   const { show, hide } = usePopupContext();
 
@@ -168,13 +135,17 @@ export default function SystemHarvestersClient() {
   }, [currentPage, pageSize]);
 
   useEffect(() => {
-    loadData();
+    void (async () => {
+      await loadData();
+    })();
   }, [loadData]);
-
-  const handleSearch = useDebouncedSearch((value: string) => {
+  const handleSearch = (value: string) => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
       setSearchQuery(value);
       setCurrentPage(1);
-    });
+    }, 400);
+  };
 
   const filtered = useMemo(() => {
     let result = harvesters;
@@ -198,25 +169,15 @@ export default function SystemHarvestersClient() {
   }, [harvesters, searchQuery, statusFilter]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Harvesters", url: "/pages/admin/system/harvesters" },
-          ]}
-        />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: "Sistema", url: "#" },
+      { label: "Harvesters", url: "/pages/admin/system/harvesters" },
+    ]}
+      title="Harvesters"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Harvesters</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-sm mb-16 text-neutral-700">
-        {isLoading ? "A carregar..." : `${totalItems} resultados`}
-      </p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -230,15 +191,19 @@ export default function SystemHarvestersClient() {
             }}
           />
         </div>
-        <HarvestersStatusFilterSelect
-          statusFilter={statusFilter}
-          onChange={(nextStatus) => {
-            setStatusFilter(nextStatus);
-          }}
+        <StatusFilterSelect
+          value={statusFilter}
+          onChange={(v) => setStatusFilter(v)}
+          options={[
+            { value: "", label: "Todos" },
+            { value: "pending", label: "Em espera de validação" },
+            { value: "accepted", label: "Validado" },
+            { value: "refused", label: "Recusado" },
+            { value: "done", label: "Terminado" },
+            { value: "failed", label: "Falhado" },
+          ]}
         />
       </div>
-
-      {statusFilter === "accepted" && <HarvestersAcceptedStatusInfoCard />}
 
       {feedback && (
         <div className="mb-[24px]">
@@ -249,12 +214,14 @@ export default function SystemHarvestersClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filtered.length > 0 ? (
-        <AdminPaginatedTable
-          pageSize={pageSize}
-          totalItems={totalItems}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
+        <Table
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -270,7 +237,7 @@ export default function SystemHarvestersClient() {
           </TableHeader>
           <TableBody>
             {filtered.map((harvester) => {
-              const status = getStatus(harvester);
+              const status = getHarvesterStatus(harvester);
               return (
                 <TableRow
                   key={harvester.id}
@@ -287,11 +254,11 @@ export default function SystemHarvestersClient() {
                   </TableCell>
                   <TableCell headerLabel="Implementação">{harvester.backend}</TableCell>
                   <TableCell headerLabel="Criado em">
-                    {format(new Date(harvester.created_at), "dd/MM/yyyy")}
+                    {formatDateToDMY(harvester.created_at)}
                   </TableCell>
                   <TableCell headerLabel="Última execução">
                     {harvester.last_job?.ended
-                      ? format(new Date(harvester.last_job.ended), "dd/MM/yyyy")
+                      ? formatDateToDMY(harvester.last_job.ended)
                       : "Ainda não"}
                   </TableCell>
                   <TableCell headerLabel="Conjuntos de dados">
@@ -332,19 +299,18 @@ export default function SystemHarvestersClient() {
                           </button>
                         </>
                       )}
-                      <a
-                        href={`/pages/admin/harvesters/${harvester.id}?tab=config`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                      </a>
+                      <TableActionsCell
+                        editAction={{
+                          href: `/pages/admin/harvesters/${harvester.id}?tab=config`,
+                        }}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
-        </AdminPaginatedTable>
+        </Table>
       ) : (
         <CardNoResults
           position="center"
@@ -354,6 +320,6 @@ export default function SystemHarvestersClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

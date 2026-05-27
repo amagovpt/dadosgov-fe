@@ -25,7 +25,6 @@ import { pt } from "date-fns/locale";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
@@ -43,6 +42,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
 import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
@@ -353,18 +353,15 @@ export default function ProfileClient() {
     : "";
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Perfil", url: "/pages/admin/me/profile" },
-          ]}
-        />
-      </div>
-
-      <h1 className="admin-page__title mb-32 mt-64">Perfil</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: displayName || "...", url: "#" },
+        { label: "Perfil", url: "/pages/admin/me/profile" },
+      ]}
+      title="Perfil"
+      headerAction={null}
+    >
 
       <div className="profile-card">
         <div className="profile-card__avatar-container">
@@ -808,7 +805,7 @@ export default function ProfileClient() {
                   <p className="text-base text-neutral-900">A carregar subscrições...</p>
                 ) : subscriptions.length === 0 ? (
                   <CardNoResults
-                    className="datasets-page__empty"
+                    className="admin-page__empty"
                     position="center"
                     icon={
                       <Icon name="agora-line-bell" className="icon-xl h-12 w-12 text-primary-500" />
@@ -870,7 +867,7 @@ export default function ProfileClient() {
             <TabBody>
               <div className="mt-24">
                 <CardNoResults
-                  className="datasets-page__empty"
+                  className="admin-page__empty"
                   position="center"
                   icon={
                     <Icon name="agora-line-star" className="icon-xl h-12 w-12 text-primary-500" />
@@ -889,7 +886,7 @@ export default function ProfileClient() {
                 {isLoadingActivities && <p className="text-sm text-neutral-700">A carregar...</p>}
                 {!isLoadingActivities && activities.length === 0 && (
                   <CardNoResults
-                    className="datasets-page__empty"
+                    className="admin-page__empty"
                     position="center"
                     icon={
                       <Icon name="agora-line-time" className="icon-xl h-12 w-12 text-primary-500" />
@@ -964,6 +961,6 @@ export default function ProfileClient() {
           </Tab>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

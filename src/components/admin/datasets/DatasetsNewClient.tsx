@@ -1,6 +1,6 @@
 "use client";
 
-import  { useState } from "react";
+import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Button,
@@ -8,8 +8,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import DatasetsAdminClient from "@/components/admin/datasetsadmin/DatasetsAdminClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublishDropdown from "@/components/admin/PublishDropdown";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { AdminStepper } from "../AdminStepper";
 
 export default function DatasetsNewClient() {
   const searchParams = useSearchParams();
@@ -26,62 +26,36 @@ export default function DatasetsNewClient() {
     const base = `/pages/admin/datasets/new?step=${step}`;
     return id ? `${base}&datasetId=${id}` : base;
   };
-  const totalSegments = 12;
-  const displayStep = currentStep;
-  const filledSegments = Math.round((displayStep / totalSteps) * totalSegments);
+
+  const stepTitles: Record<number, string> = {
+    1: "Inicie a publicação do seu conjunto de dados",
+    2: "Descreva o seu conjunto de dados",
+    3: "Adicione os ficheiros",
+    4: "Finalize a publicação do seu conjunto de dados",
+  };
+
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
-          ]}
-        />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: displayName || "...", url: "#" },
+      { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
+    ]}
+      title="Formulário de publicação de um conjunto de dados"
+    >
+      {/* Stepper*/}
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de publicação de um conjunto de dados</h1>
-        <PublishDropdown />
-      </div>
-
-      {/* Step indicator */}
-      <div className="admin-page__step-header">
-        <p className="admin-page__step-text">
-          <span className="text-primary-600 font-bold">Passo {currentStep} - </span>
-          <span className="text-primary-900 font-bold">
-            {currentStep === 1 && "Inicie a publicação do seu conjunto de dados"}
-            {currentStep === 2 && "Descreva o seu conjunto de dados"}
-            {currentStep === 3 && "Adicione os ficheiros"}
-            {currentStep === 4 && "Finalize a publicação do seu conjunto de dados"}
-          </span>
-        </p>
-      </div>
-
-      {/* Progress bar */}
-      <div className="admin-page__stepper">
-        <div className="admin-page__stepper-bar">
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--start" />
-          {Array.from({ length: totalSegments }).map((_, i) => (
-            <div
-              key={i}
-              className={`admin-page__stepper-segment ${
-                i < filledSegments ? "admin-page__stepper-segment--filled" : ""
-              }`}
-            />
-          ))}
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--end" />
-        </div>
-        <span className="admin-page__stepper-label">
-          Passo {displayStep}/{totalSteps}
-        </span>
-      </div>
+      <AdminStepper
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        labelWord="Passo"
+        labelFormat="slash"
+        stepTitle={stepTitles[currentStep] || ""}
+      />
 
       {currentStep === 1 && (
         <>
-          <div className="datasets-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
+          <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
             <CardAction
               variant="neutral-100"
               titleText="Publique um conjunto de dados"
@@ -92,17 +66,17 @@ export default function DatasetsNewClient() {
                 variant: "primary",
                 appearance: "outline",
                 onClick: () => {
-                setSessionKey((k) => k + 1);
-                setCreatedDatasetId(null);
-                router.push("/pages/admin/datasets/new?step=2");
-              },
+                  setSessionKey((k) => k + 1);
+                  setCreatedDatasetId(null);
+                  router.push("/pages/admin/datasets/new?step=2");
+                },
               }}
             />
           </div>
 
           {/* Admin sections */}
-          <div className="datasets-new-page__admin-sections">
-            <div className="datasets-new-page__admin-section">
+          <div className="admin-new-page__admin-sections">
+            <div className="admin-new-page__admin-section">
               <p className="text-primary-900 text-base font-bold leading-7">
                 É administrador e deseja automatizar a publicação dos seus dados?
               </p>
@@ -121,7 +95,7 @@ export default function DatasetsNewClient() {
                 >
                   Consulte a documentação da API
                 </Button>
-<Button
+                <Button
                   appearance="link"
                   variant="primary"
                   hasIcon
@@ -134,7 +108,7 @@ export default function DatasetsNewClient() {
               </div>
             </div>
 
-            <div className="datasets-new-page__admin-section">
+            <div className="admin-new-page__admin-section">
               <p className="text-primary-900 text-base font-bold leading-7">
                 É administrador e deseja catalogar os seus dados?
               </p>
@@ -164,6 +138,6 @@ export default function DatasetsNewClient() {
           onComplete={() => router.push("/pages/admin/me/datasets")}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

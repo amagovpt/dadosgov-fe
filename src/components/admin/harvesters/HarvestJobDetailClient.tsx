@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Breadcrumb,
   Icon,
   InputSelect,
   InputSearchBar,
   DropdownSection,
   DropdownOption,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -16,12 +16,12 @@ import {
   CardNoResults,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import StatusDot from "@/components/admin/StatusDot";
 import { fetchHarvestJob, fetchHarvester } from "@/services/api";
 import type { HarvestJob, HarvestItem, HarvestSource } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
 interface HarvestJobDetailClientProps {
   slug: string;
@@ -65,6 +65,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -84,10 +85,13 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
     load();
   }, [jobId, slug]);
 
-  const handleSearch = useDebouncedSearch((value: string) => {
+  const handleSearch = (value: string) => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
       setSearchQuery(value);
       setCurrentPage(1);
-    });
+    }, 400);
+  };
 
   const items = job?.items || [];
 
@@ -142,22 +146,16 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
         : "informative";
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Reapers", url: "/pages/admin/system/harvesters" },
-            {
-              label: source?.name || "Harvester",
-              url: `/pages/admin/harvesters/${slug}`,
-            },
-            { label: job.id.toUpperCase(), url: "#" },
-          ]}
-        />
-      </div>
-
-      <h1 className="text-2xl mb-16 mt-16 font-bold text-neutral-900">{job.id.toUpperCase()}</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Reapers", url: "/pages/admin/system/harvesters" },
+        { label: source?.name || "Harvester", url: `/pages/admin/harvesters/${slug}` },
+        { label: job.id.toUpperCase() },
+      ]}
+      title={job.id.toUpperCase()}
+      headerAction={null}
+    >
 
       {/* Metadata */}
       <div className="text-sm mb-24 flex flex-col gap-8 text-neutral-800">
@@ -271,13 +269,15 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
       </div>
 
       {paginatedItems.length > 0 ? (
-        <AdminPaginatedTable
-          pageSize={pageSize}
-          totalItems={filteredItems.length}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
-          paginationOptions={{ currentPageIsZeroBased: true }}
+        <Table
+          paginationProps={createPaginationProps(
+            pageSize,
+            filteredItems.length,
+            currentPage,
+            setCurrentPage,
+            setPageSize,
+            { currentPageIsZeroBased: true }
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -329,7 +329,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
               </TableRow>
             ))}
           </TableBody>
-        </AdminPaginatedTable>
+        </Table>
       ) : (
         <CardNoResults
           position="center"
@@ -339,6 +339,6 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

@@ -3,39 +3,29 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Breadcrumb,
-  CardNoResults,
   Icon,
   InputSearchBar,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
-  Button,
 } from "@ama-pt/agora-design-system";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-import PublicationStateDot from "@/components/admin/lists/PublicationStateDot";
-import {
-  SortOrder,
-  useClientTableState,
-  useSortControls,
-} from "@/components/admin/lists/useClientTableState";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
+type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
-
-const RESOURCE_SORTERS: Record<SortField, (resource: CommunityResource) => string | number> = {
-  title: (resource) => resource.title || "",
-  format: (resource) => resource.format || "",
-  created_at: (resource) => new Date(resource.created_at).getTime(),
-  last_modified: (resource) => new Date(resource.last_modified).getTime(),
-};
 
 export default function CommunityResourcesClient() {
   const { displayName } = useCurrentUser();
@@ -77,46 +67,54 @@ export default function CommunityResourcesClient() {
     return result;
   }, [allResources, searchQuery]);
 
-  const { totalItems, paginatedItems: resources } = useClientTableState<
-    CommunityResource,
-    SortField
-  >({
-    items: filteredResources,
-    currentPage,
-    pageSize,
-    sortField,
-    sortOrder,
-    sorters: RESOURCE_SORTERS,
-  });
+  const sortedResources = useMemo(() => {
+    if (sortOrder === "none") return filteredResources;
 
-  const { handleSort, getSortOrder } = useSortControls(
-    sortField,
-    sortOrder,
-    setSortField,
-    setSortOrder,
-    setCurrentPage
-  );
+    return [...filteredResources].sort((a, b) => {
+      let cmp = 0;
+      switch (sortField) {
+        case "title":
+          cmp = (a.title || "").localeCompare(b.title || "");
+          break;
+        case "format":
+          cmp = (a.format || "").localeCompare(b.format || "");
+          break;
+        case "created_at":
+          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        case "last_modified":
+          cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
+          break;
+      }
+      return sortOrder === "descending" ? -cmp : cmp;
+    });
+  }, [filteredResources, sortField, sortOrder]);
+
+  const totalItems = sortedResources.length;
+  const start = (currentPage - 1) * pageSize;
+  const resources = sortedResources.slice(start, start + pageSize);
+
+  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
+    setSortField(field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: SortField): SortOrder => {
+    return sortField === field ? sortOrder : "none";
+  };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: displayName || "...", url: "#" },
+        { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
+      ]}
+      title="Recursos comunitários"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Recursos comunitários</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-sm mb-16 text-neutral-700">
-        {isLoading ? "A carregar..." : `${totalItems} resultados`}
-      </p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -134,12 +132,14 @@ export default function CommunityResourcesClient() {
       </div>
 
       {!isLoading && resources.length > 0 ? (
-        <AdminPaginatedTable
-          pageSize={pageSize}
-          totalItems={totalItems}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
+        <Table
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -190,10 +190,7 @@ export default function CommunityResourcesClient() {
                   )}
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <PublicationStateDot
-                    deleted={resource.deleted}
-                    archived={resource.archived}
-                  />
+                  <ResourceStatusBadge item={resource} />
                 </TableCell>
                 <TableCell headerLabel="Formato">{resource.format || "—"}</TableCell>
                 <TableCell headerLabel="Criado em">
@@ -203,41 +200,23 @@ export default function CommunityResourcesClient() {
                   {formatDateToDMY(resource.last_modified)}
                 </TableCell>
                 <TableCell headerLabel="Ação">
-                  <a href={`/pages/admin/me/community-resources/edit?id=${resource.id}`}>
-                    <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                  </a>
+                  <TableActionsCell
+                    editAction={{
+                      href: `/pages/admin/me/community-resources/edit?id=${resource.id}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-        </AdminPaginatedTable>
+        </Table>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={
-                <Icon name="agora-line-user-group" className="icon-xl h-12 w-12 text-primary-500" />
-              }
-              title="Sem publicações"
-              description="Ainda não publicou um recurso comunitário."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => router.push("/pages/admin/community-resources/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-user-group"
+          description="Ainda não publicou um recurso comunitário."
+          createUrl="/pages/admin/community-resources/new"
+        />
       )}
-    </div>
+    </AdminLayout>
   );
 }

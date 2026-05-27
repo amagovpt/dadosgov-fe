@@ -1,12 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
-  DropdownSection,
-  DropdownOption,
   InputText,
   InputTextArea,
   RadioButton,
@@ -19,12 +16,14 @@ import {
   Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { fetchPost, updatePost, uploadPostImage, suggestTags, deletePost, unpublishPost, publishPost } from "@/services/api";
-import type { Post, PostUpdatePayload, TagSuggestion } from "@/types/api";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { fetchPost, updatePost, uploadPostImage, deletePost, unpublishPost, publishPost } from "@/services/api";
+import type { Post, PostUpdatePayload } from "@/types/api";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import dynamic from "next/dynamic";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
+import { ImageUploadField } from "@/components/admin/posts/ImageUploadField";
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), {
   ssr: false,
@@ -74,20 +73,19 @@ export default function PostsEditClient() {
   const [articleHeader, setArticleHeader] = useState("");
   const [articleContent, setArticleContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const selectedKeywordsRef = useRef("");
-  const [keywordSearch, setKeywordSearch] = useState("");
-  const [tags, setTags] = useState<TagSuggestion[]>([]);
-  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
 
+  const { keywordSearch, setKeywordSearch, keywordOptions, selectedKeywordsRef, addCustomTag } =
+    usePostKeywords(selectedTags);
+
   useEffect(() => {
     async function loadData() {
       try {
-        const [postData, tagsData] = await Promise.all([fetchPost(postId), suggestTags("", 50)]);
+        const postData = await fetchPost(postId);
 
         if (postData) {
           setPost(postData);
@@ -100,8 +98,6 @@ export default function PostsEditClient() {
           setSelectedTags(initial);
           selectedKeywordsRef.current = initial.join(",");
         }
-
-        setTags(tagsData);
       } catch (error) {
         console.error("Error loading post:", error);
       } finally {
@@ -111,76 +107,6 @@ export default function PostsEditClient() {
 
     loadData();
   }, [postId]);
-
-  useEffect(() => {
-    const q = keywordSearch.trim();
-    if (q.length < 2) {
-      setTagSearch([]);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      try {
-        const res = await suggestTags(q, 20);
-        setTagSearch(res);
-      } catch {
-        setTagSearch([]);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [keywordSearch]);
-
-  const keywordOptions = useMemo(() => {
-    const trimmed = keywordSearch.trim();
-    const trimmedLower = trimmed.toLowerCase();
-    // Selected tags stay visible regardless of query so the InputSelect keeps
-    // tracking them across searches; otherwise typing a new query would drop
-    // them from the children and the next onChange would lose those selections.
-    const selectedLowerSet = new Set(selectedTags.map((k) => k.toLowerCase()));
-    const seen = new Set<string>();
-    const uniqueTags = [...tags, ...tagSearch].filter((t) => {
-      const key = t.text.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      if (selectedLowerSet.has(key)) return true;
-      if (trimmedLower && !key.includes(trimmedLower)) return false;
-      return true;
-    });
-    const selectedNotInSuggestions = selectedTags.filter(
-      (keyword) => !seen.has(keyword.toLowerCase()),
-    );
-    const showCreate =
-      trimmed.length > 0 &&
-      ![...tags, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
-      !selectedLowerSet.has(trimmedLower);
-    const options = [
-      ...(showCreate
-        ? [
-            <DropdownOption
-              key={`__create__${trimmedLower}`}
-              value={trimmed}
-              selected={false}
-            >
-              Criar &quot;{trimmed}&quot;
-            </DropdownOption>,
-          ]
-        : []),
-      ...selectedNotInSuggestions.map((keyword) => (
-        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
-          {keyword}
-        </DropdownOption>
-      )),
-      ...uniqueTags.map((tag) => (
-        <DropdownOption
-          key={tag.text.toLowerCase()}
-          value={tag.text}
-          selected={selectedLowerSet.has(tag.text.toLowerCase())}
-        >
-          {tag.text}
-        </DropdownOption>
-      )),
-    ];
-    return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tags, tagSearch, selectedTags, keywordSearch]);
 
   const handleSaveMetadata = async () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -350,35 +276,26 @@ export default function PostsEditClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Bem-vindo", url: "/pages/admin" },
-            { label: "Artigos", url: "/pages/admin/system/posts" },
-            { label: post.name, url: "#" },
-          ]}
-        />
-      </div>
-
-      <div
-        className="admin-page__header"
-        style={{ flexDirection: "column", alignItems: "flex-start" }}
-      >
-        <div className="flex justify-end w-full">
-          <Button
-            variant="primary"
-            appearance="outline"
-            onClick={() => window.open(`/pages/posts/${post.slug}`, "_blank")}
-          >
-            <span className="admin-edit-info__btn-content">
-              <Icon name="agora-line-eye" className="w-16 h-16" />
-              Veja a página do artigo
-            </span>
-          </Button>
-        </div>
-        <h1 className="admin-page__title">{post.name}</h1>
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Bem-vindo", url: "/pages/admin" },
+        { label: "Artigos", url: "/pages/admin/system/posts" },
+        { label: post.name },
+      ]}
+      title={post.name}
+      headerAction={
+        <Button
+          variant="primary"
+          appearance="outline"
+          onClick={() => window.open(`/pages/posts/${post.slug}`, "_blank")}
+        >
+          <span className="admin-edit-info__btn-content">
+            <Icon name="agora-line-eye" className="w-16 h-16" />
+            Veja a página do artigo
+          </span>
+        </Button>
+      }
+    >
 
       {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
       {apiSuccess && <StatusCard variant="success" showIcon description={apiSuccess} />}
@@ -492,22 +409,8 @@ export default function PostsEditClient() {
                         setSelectedTags(selected);
                         let addedNew = false;
                         selected.forEach((v) => {
-                          const lower = v.toLowerCase();
-                          const existsInTags = tags.some(
-                            (t) => t.text.toLowerCase() === lower,
-                          );
-                          const existsInSearch = tagSearch.some(
-                            (t) => t.text.toLowerCase() === lower,
-                          );
-                          if (!existsInTags && !existsInSearch) {
-                            addedNew = true;
-                            setTags((prev) => {
-                              if (prev.some((t) => t.text.toLowerCase() === lower)) {
-                                return prev;
-                              }
-                              return [...prev, { text: v }];
-                            });
-                          }
+                          addedNew = true;
+                          addCustomTag(v);
                         });
                         if (addedNew) {
                           setKeywordSearch("");
@@ -537,42 +440,12 @@ export default function PostsEditClient() {
                       </div>
                     )}
 
-                    <div>
-                      <span className="text-primary-900 text-base font-medium leading-7">
-                        Imagem de capa
-                      </span>
-                      <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
-                        <DragAndDropUploader
-                          label="Ficheiros"
-                          dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                          inputLabel="Selecione ou arraste o ficheiro"
-                          selectedFilesLabel="ficheiro selecionado"
-                          removeFileButtonLabel="Remover ficheiro"
-                          replaceFileButtonLabel="Substituir ficheiro"
-                          extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-                          accept=".jpg,.jpeg,.png"
-                          maxSize={4194304}
-                          maxCount={1}
-                          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-                          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                          hasError={!!imageError}
-                          hasFeedback={!!imageError}
-                          feedbackState="danger"
-                          feedbackText={imageError ?? undefined}
-                          onChange={handleImageUpload}
-                          onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
-                        />
-                      </div>
-                      {post.image && (
-                        <div className="mt-4 flex justify-center">
-                          <img
-                            src={post.image}
-                            alt="Cobertura do artigo"
-                            className="max-w-[200px] max-h-[150px] object-contain border border-neutral-200 rounded"
-                          />
-                        </div>
-                      )}
-                    </div>
+                    <ImageUploadField
+                      onChange={handleImageUpload}
+                      onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
+                      error={imageError}
+                      previewSrc={post.image ?? undefined}
+                    />
                   </div>
 
                   <div className="admin-page__actions">
@@ -712,6 +585,6 @@ export default function PostsEditClient() {
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }

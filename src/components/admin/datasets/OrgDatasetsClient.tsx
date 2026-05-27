@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import {
-  CardNoResults,
   Icon,
   InputSearchBar,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -13,17 +13,19 @@ import {
   Button,
 } from "@ama-pt/agora-design-system";
 
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
 import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-import DatasetsStatusFilterSelect from "@/components/admin/lists/DatasetsStatusFilterSelect";
-import PublicationStateDot from "@/components/admin/lists/PublicationStateDot";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
@@ -44,13 +46,11 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [sortField, setSortField] = useState<SortField | null>("created");
+  const [sortField, setSortField] = useState<SortField>("created");
   const [sortOrder, setSortOrder] = useState<SortOrder>("descending");
 
-
-  const buildSortParam = (field: SortField | null, order: SortOrder): string => {
+  const buildSortParam = (field: SortField, order: SortOrder): string => {
     if (order === "none") return "-created";
-    if (!field) return "-created";
     return order === "ascending" ? field : `-${field}`;
   };
 
@@ -96,13 +96,21 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
 
   useEffect(() => {
     const sort = buildSortParam(sortField, sortOrder);
-    loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
+    void (async () => {
+      await loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
+    })();
   }, [currentPage, itemsPerPage, searchQuery, statusFilter, sortField, sortOrder, loadDatasets]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
-      setSearchQuery(value);
-      setCurrentPage(1);
-    });
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
+
+  const handleStatusChange = (options: { value?: string }[]) => {
+    const value = options?.[0]?.value || "";
+    setStatusFilter(value);
+    setCurrentPage(1);
+  };
 
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
@@ -113,23 +121,18 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
   );
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            { label: "Conjuntos de dados", url: "#" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={
+        [
+          { label: "Administração", url: "/pages/admin" },
+          { label: orgName || "Organização", url: "#" },
+          { label: "Conjuntos de dados", url: "#" },
+        ]
+      }
+      title="Conjuntos de dados"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Conjuntos de dados</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-sm mb-16 text-neutral-700">{total} resultados</p>
+      <ResultsCount count={total} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -141,13 +144,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
           />
         </div>
-        <DatasetsStatusFilterSelect
-          statusFilter={statusFilter}
-          onChange={(nextStatus) => {
-            setStatusFilter(nextStatus);
-            setCurrentPage(1);
-          }}
-        />
+        <StatusFilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v)} />
         <a href={`/api/1/organizations/${orgId}/catalog`} download>
           <Button
             variant="primary"
@@ -164,12 +161,14 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
       {isLoading ? (
         <p>A carregar...</p>
       ) : datasets.length > 0 ? (
-        <AdminPaginatedTable
-          pageSize={itemsPerPage}
-          totalItems={total}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setItemsPerPage}
+        <Table
+          paginationProps={createPaginationProps(
+            itemsPerPage,
+            total,
+            currentPage,
+            setCurrentPage,
+            setItemsPerPage
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -205,11 +204,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  <PublicationStateDot
-                    deleted={dataset.deleted}
-                    archived={dataset.archived}
-                    isPrivate={dataset.private}
-                  />
+                  <ResourceStatusBadge item={dataset} />
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(dataset.created_at)}</TableCell>
                 <TableCell headerLabel="Última modificação">
@@ -230,44 +225,27 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                   </div>
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/org/datasets/edit?slug=${dataset.slug}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/datasets/${dataset.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/org/datasets/edit?slug=${dataset.slug}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-        </AdminPaginatedTable>
+        </Table>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-              title="Sem publicações"
-              description="A organização ainda não publicou conjuntos de dados."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => (window.location.href = "/pages/admin/datasets/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-edit"
+          title="Sem publicações"
+          description="A organização ainda não publicou conjuntos de dados."
+          createUrl="/pages/admin/datasets/new"
+        />
       )}
-    </div>
+    </AdminLayout>
   );
 }

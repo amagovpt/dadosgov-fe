@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
   InputSearchBar,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -14,14 +14,15 @@ import {
   TableCell,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-import { useSortControls } from "@/components/admin/lists/useClientTableState";
-import type { SortOrder } from "@/components/admin/lists/useClientTableState";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -78,6 +79,13 @@ export default function SystemOrganizationsClient() {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [deletingOrgId, setDeletingOrgId] = useState<string | null>(null);
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -102,21 +110,15 @@ export default function SystemOrganizationsClient() {
   }, [currentPage, pageSize, searchQuery, sortField, sortOrder]);
 
   useEffect(() => {
-    loadData();
+    void (async () => {
+      await loadData();
+    })();
   }, [loadData]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
-      setSearchQuery(value);
-      setCurrentPage(1);
-    });
-
-  const { handleSort, getSortOrder } = useSortControls(
-    sortField,
-    sortOrder,
-    setSortField,
-    setSortOrder,
-    setCurrentPage
-  );
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
 
   const handleDeleteOrg = (org: Organization) => {
     show(
@@ -145,23 +147,14 @@ export default function SystemOrganizationsClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Organizações", url: "/pages/admin/system/organizations" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Organizações</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: "Sistema", url: "#" },
+      { label: "Organizações", url: "/pages/admin/system/organizations" },
+    ]}
+      title="Organizações"
+    >
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -180,12 +173,14 @@ export default function SystemOrganizationsClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : organizations.length > 0 ? (
-        <AdminPaginatedTable
-          pageSize={pageSize}
-          totalItems={totalItems}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
+        <Table
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -220,27 +215,24 @@ export default function SystemOrganizationsClient() {
                 <TableCell headerLabel="Reutilizações">{org.metrics?.reuses ?? 0}</TableCell>
                 <TableCell headerLabel="Membros">{org.members?.length ?? 0}</TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/organizations/${org.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/org/${org.id}/profile`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                    <button
-                      aria-label={`Eliminar ${org.name}`}
-                      disabled={deletingOrgId === org.id}
-                      onClick={() => handleDeleteOrg(org)}
-                      className="text-danger-600 disabled:opacity-50"
-                    >
-                      <Icon name="agora-line-trash" className="h-[20px] w-[20px]" />
-                    </button>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/organizations/${org.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/org/${org.id}/profile`,
+                    }}
+                    deleteAction={{
+                      ariaLabel: `Eliminar ${org.name}`,
+                      disabled: deletingOrgId === org.id,
+                      handler: () => handleDeleteOrg(org),
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-        </AdminPaginatedTable>
+        </Table>
       ) : (
         <CardNoResults
           position="center"
@@ -250,6 +242,6 @@ export default function SystemOrganizationsClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

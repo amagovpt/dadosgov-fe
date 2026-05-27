@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
-  Breadcrumb,
   Button,
   Icon,
   RadioButton,
@@ -34,10 +33,10 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 const roleLabels: Record<string, string> = {
   admin: "Administrador",
@@ -405,7 +404,7 @@ interface MembersClientProps {
 
 export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const { show } = usePopupContext();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { activeOrg } = useActiveOrganization();
   // Prefer the orgId from the URL params (passed by the server page). Fall
   // back to the sidebar's active organization when this component is used
@@ -440,17 +439,19 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     if (!resolvedOrgId) return;
     setIsLoading(true);
     try {
-      const [orgData, requests] = await Promise.all([
-        fetchOrganization(resolvedOrgId),
-        fetchMembershipRequests(resolvedOrgId),
-      ]);
+      const orgData = await fetchOrganization(resolvedOrgId);
       setViewedOrg(orgData);
       setMembers(orgData?.members || []);
-      setPendingRequests(requests.filter((r: MembershipRequest) => r.status === "pending"));
     } catch (error) {
       console.error("Error loading members:", error);
     } finally {
       setIsLoading(false);
+    }
+    try {
+      const requests = await fetchMembershipRequests(resolvedOrgId);
+      setPendingRequests(requests.filter((r: MembershipRequest) => r.status === "pending"));
+    } catch {
+      setPendingRequests([]);
     }
   }, [resolvedOrgId]);
 
@@ -507,6 +508,13 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     );
   };
 
+  const isOrgAdmin = useMemo(
+    () =>
+      isAdmin ||
+      (viewedOrg?.members?.some((m) => m.user.id === user?.id && m.role === "admin") ?? false),
+    [isAdmin, viewedOrg, user],
+  );
+
   const sortedMembers = useMemo(() => {
     if (!sortField || sortOrder === "none") return members;
     const dir = sortOrder === "ascending" ? 1 : -1;
@@ -524,29 +532,23 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     });
   }, [members, sortField, sortOrder]);
 
+  const totalPages = Math.ceil(sortedMembers.length / itemsPerPage);
   const paginatedMembers = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return sortedMembers.slice(start, start + itemsPerPage);
   }, [sortedMembers, currentPage, itemsPerPage]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: cachedOrgName || viewedOrg?.name || "Organização", url: "#" },
-            { label: "Membros", url: "#" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: cachedOrgName || viewedOrg?.name || "Organização", url: "#" },
+        { label: "Membros" },
+      ]}
+      title="Membros"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Membros</h1>
-        <PublishDropdown />
-      </div>
-
-      {pendingRequests.length > 0 && (
+      {isOrgAdmin && pendingRequests.length > 0 && (
         <div className="mb-32">
           <h2 className="mb-16 text-base font-semibold text-neutral-900">
             Pedidos de adesão pendentes ({pendingRequests.length})
@@ -621,39 +623,43 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
         <p className="text-sm font-semibold uppercase text-neutral-700">
           {members.length} {members.length === 1 ? "membro" : "membros"}
         </p>
-        <Button
-          variant="primary"
-          appearance="outline"
-          hasIcon={true}
-          leadingIcon="agora-line-plus-circle"
-          leadingIconHover="agora-solid-plus-circle"
-          onClick={() => {
-            const nextKey = addMemberOpenKey + 1;
-            setAddMemberOpenKey(nextKey);
-            show(
-              <AddMemberPopupContent
-                orgId={resolvedOrgId!}
-                onMemberAdded={loadMembers}
-                openKey={nextKey}
-              />,
-              {
-                title: "Adicionar um membro à organização",
-                closeAriaLabel: "Fechar",
-                dimensions: "m",
-              }
-            );
-          }}
-        >
-          Adicionar um membro
-        </Button>
+        {isOrgAdmin && (
+          <Button
+            variant="primary"
+            appearance="outline"
+            hasIcon={true}
+            leadingIcon="agora-line-plus-circle"
+            leadingIconHover="agora-solid-plus-circle"
+            onClick={() => {
+              const nextKey = addMemberOpenKey + 1;
+              setAddMemberOpenKey(nextKey);
+              show(
+                <AddMemberPopupContent
+                  orgId={resolvedOrgId!}
+                  onMemberAdded={loadMembers}
+                  openKey={nextKey}
+                />,
+                {
+                  title: "Adicionar um membro à organização",
+                  closeAriaLabel: "Fechar",
+                  dimensions: "m",
+                }
+              );
+            }}
+          >
+            Adicionar um membro
+          </Button>
+        )}
       </div>
 
-      <AdminPaginatedTable
-        pageSize={itemsPerPage}
-        totalItems={members.length}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        setPageSize={setItemsPerPage}
+      <Table
+        paginationProps={createPaginationProps(
+          itemsPerPage,
+          members.length,
+          currentPage,
+          setCurrentPage,
+          setItemsPerPage
+        )}
       >
         <TableHeader>
           <TableRow>
@@ -672,7 +678,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
             >
               Membro desde
             </TableHeaderCell>
-            <TableHeaderCell>Ações</TableHeaderCell>
+            {isOrgAdmin ? <TableHeaderCell>Ações</TableHeaderCell> : <></>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -702,45 +708,49 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                 </StatusDot>
               </TableCell>
               <TableCell headerLabel="Membro desde">{formatDateToDMY(member.since)}</TableCell>
-              <TableCell headerLabel="Ações">
-                <div className="flex gap-8">
-                  <button
-                    onClick={() => {
-                      const nextKey = editMemberOpenKey + 1;
-                      setEditMemberOpenKey(nextKey);
-                      show(
-                        <EditRolePopupContent
-                          orgId={resolvedOrgId!}
-                          member={member}
-                          onRoleUpdated={loadMembers}
-                          openKey={nextKey}
-                        />,
-                        {
-                          title: "Editar papel do membro",
-                          closeAriaLabel: "Fechar",
-                          dimensions: "m",
-                        }
-                      );
-                    }}
-                    title="Editar papel"
-                  >
-                    <Icon
-                      name="agora-line-edit"
-                      className="h-[20px] w-[20px] cursor-pointer text-primary-600"
-                    />
-                  </button>
-                  <button onClick={() => handleRemoveMember(member)} title="Remover membro">
-                    <Icon
-                      name="agora-line-trash"
-                      className="h-[20px] w-[20px] cursor-pointer text-danger-600"
-                    />
-                  </button>
-                </div>
-              </TableCell>
+              {isOrgAdmin ? (
+                <TableCell headerLabel="Ações">
+                  <div className="flex gap-8">
+                    <button
+                      onClick={() => {
+                        const nextKey = editMemberOpenKey + 1;
+                        setEditMemberOpenKey(nextKey);
+                        show(
+                          <EditRolePopupContent
+                            orgId={resolvedOrgId!}
+                            member={member}
+                            onRoleUpdated={loadMembers}
+                            openKey={nextKey}
+                          />,
+                          {
+                            title: "Editar papel do membro",
+                            closeAriaLabel: "Fechar",
+                            dimensions: "m",
+                          }
+                        );
+                      }}
+                      title="Editar papel"
+                    >
+                      <Icon
+                        name="agora-line-edit"
+                        className="h-[20px] w-[20px] cursor-pointer text-primary-600"
+                      />
+                    </button>
+                    <button onClick={() => handleRemoveMember(member)} title="Remover membro">
+                      <Icon
+                        name="agora-line-trash"
+                        className="h-[20px] w-[20px] cursor-pointer text-danger-600"
+                      />
+                    </button>
+                  </div>
+                </TableCell>
+              ) : (
+                <></>
+              )}
             </TableRow>
           ))}
         </TableBody>
-      </AdminPaginatedTable>
-    </div>
+      </Table>
+    </AdminLayout>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  Breadcrumb,
   Button,
   CardFrame,
   CardNoResults,
@@ -12,6 +11,7 @@ import {
   Tab,
   TabHeader,
   TabBody,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -25,10 +25,12 @@ import {
   fetchOrgReuses,
   fetchOrganization,
 } from "@/services/api";
-import { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
-import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import type { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
+import { DatasetMetricsTable } from "./DatasetMetricsTable";
+import { ReuseMetricsTable } from "./ReuseMetricsTable";
 
 interface OrgStatisticsClientProps {
   orgId: string;
@@ -125,35 +127,23 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
 
   if (!isOrgLoading && !org) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="datasets-page__empty"
-          position="center"
-          icon={<Icon name="agora-line-buildings" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-buildings"
+        title="Sem organizações"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: org?.name || "Organização", url: "#" },
-            { label: "Estatísticas", url: "/pages/admin/org/statistics" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Estatísticas</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: org?.name || "Organização", url: "#" },
+        { label: "Estatísticas", url: "/pages/admin/org/statistics" },
+      ]}
+      title="Estatísticas"
+    >
 
       <Tabs>
         <Tab active>
@@ -271,58 +261,12 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   }
                 />
               ) : (
-                <AdminPaginatedTable
-                  pageSize={PAGE_SIZE}
-                  totalItems={datasetsTotal}
-                  currentPage={datasetsPage}
-                  setCurrentPage={setDatasetsPage}
-                >
-                  <TableHeader>
-                    <TableRow>
-                      <TableHeaderCell>TÍTULO DO CONJUNTO DE DADOS</TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-chat" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-eye" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-download" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-star" className="h-16 w-16" />
-                      </TableHeaderCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {datasets.map((dataset) => (
-                      <TableRow key={dataset.id}>
-                        <TableCell headerLabel="Título">
-                          <TextLink href={dataset.page}>{dataset.title}</TextLink>
-                        </TableCell>
-                        <TableCell headerLabel="Discussões">
-                          {dataset.metrics?.discussions ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Visualizações">
-                          {dataset.metrics?.views ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Downloads">
-                          {dataset.metrics?.resources_downloads ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Reutilizações">
-                          {dataset.metrics?.reuses ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Favoritos">
-                          {dataset.metrics?.followers ?? 0}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </AdminPaginatedTable>
+                <DatasetMetricsTable
+                  datasets={datasets}
+                  total={datasetsTotal}
+                  page={datasetsPage}
+                  onPageChange={setDatasetsPage}
+                />
               )}
             </div>
           </TabBody>
@@ -376,11 +320,13 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   }
                 />
               ) : (
-                <AdminPaginatedTable
-                  pageSize={PAGE_SIZE}
-                  totalItems={dataservicesTotal}
-                  currentPage={dataservicesPage}
-                  setCurrentPage={setDataservicesPage}
+                <Table
+                  paginationProps={createPaginationProps(
+                    PAGE_SIZE,
+                    dataservicesTotal,
+                    dataservicesPage,
+                    setDataservicesPage
+                  )}
                 >
                   <TableHeader>
                     <TableRow>
@@ -408,7 +354,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                       </TableRow>
                     ))}
                   </TableBody>
-                </AdminPaginatedTable>
+                </Table>
               )}
             </div>
           </TabBody>
@@ -453,48 +399,17 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   }
                 />
               ) : (
-                <AdminPaginatedTable
-                  pageSize={PAGE_SIZE}
-                  totalItems={reuses.length}
-                  currentPage={reusesPage}
-                  setCurrentPage={setReusesPage}
-                >
-                  <TableHeader>
-                    <TableRow>
-                      <TableHeaderCell>TÍTULO DA REUTILIZAÇÃO</TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-eye" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-star" className="h-16 w-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>ESTADO</TableHeaderCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {reusesPagedData.map((reuse) => (
-                      <TableRow key={reuse.id}>
-                        <TableCell headerLabel="Título">
-                          <TextLink href={reuse.url}>{reuse.title}</TextLink>
-                        </TableCell>
-                        <TableCell headerLabel="Visualizações">
-                          {reuse.metrics?.views ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Favoritos">
-                          {reuse.metrics?.followers ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Estado">
-                          {reuse.private ? "Privado" : reuse.archived ? "Arquivado" : "Público"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </AdminPaginatedTable>
+                <ReuseMetricsTable
+                  reuses={reusesPagedData}
+                  total={reuses.length}
+                  page={reusesPage}
+                  onPageChange={setReusesPage}
+                />
               )}
             </div>
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }

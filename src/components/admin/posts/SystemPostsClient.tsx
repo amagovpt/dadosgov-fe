@@ -3,40 +3,34 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
   InputSearchBar,
-  InputSelect,
-  DropdownSection,
-  DropdownOption,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
+  InputSelect,
 } from "@ama-pt/agora-design-system";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import StatusDot from "@/components/admin/StatusDot";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchAdminPosts } from "@/services/api";
-import { Post } from "@/types/api";
+import type { Post } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-import { useSortControls } from "@/components/admin/lists/useClientTableState";
+import ResultsCount from "../ResultsCount";
+import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
+import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
+import TableActionsCell from "../TableActionsCell";
+import { formatDateToDMY } from "@/utils/formatDate";
+import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 
 type SortField = "name" | "created_at" | "last_modified";
-
-const formatDate = (dateStr: string) => {
-  try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-  } catch {
-    return dateStr;
-  }
-};
 
 export default function SystemPostsClient() {
   const FETCH_PAGE_SIZE = 100;
@@ -51,6 +45,13 @@ export default function SystemPostsClient() {
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -116,36 +117,21 @@ export default function SystemPostsClient() {
   }, [loadData]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
-      setSearchQuery(value);
-      setCurrentPage(1);
-    });
-
-  const { handleSort, getSortOrder } = useSortControls(
-    sortField,
-    sortOrder,
-    setSortField,
-    setSortOrder,
-    setCurrentPage
-  );
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Artigos", url: "/pages/admin/system/posts" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Artigos", url: "/pages/admin/system/posts" },
+      ]}
+      title="Artigos"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Artigos</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -181,28 +167,18 @@ export default function SystemPostsClient() {
             </DropdownOption>
           </DropdownSection>
         </InputSelect>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+        <StatusFilterSelect
+          value={statusFilter}
+          onChange={(v) => {
+            setStatusFilter(v);
             setCurrentPage(1);
           }}
-        >
-          <DropdownSection name="status">
-            <DropdownOption value="" selected={statusFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="published" selected={statusFilter === "published"}>
-              Publicado
-            </DropdownOption>
-            <DropdownOption value="draft" selected={statusFilter === "draft"}>
-              Despublicado
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
+          options={[
+            { value: "", label: "Todos" },
+            { value: "published", label: "Publicado" },
+            { value: "draft", label: "Despublicado" },
+          ]}
+        />
         <Button
           variant="primary"
           appearance="outline"
@@ -218,12 +194,14 @@ export default function SystemPostsClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : posts.length > 0 ? (
-        <AdminPaginatedTable
-          pageSize={pageSize}
-          totalItems={totalItems}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
+        <Table
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -267,22 +245,22 @@ export default function SystemPostsClient() {
                     {post.published ? "Publicado" : "Despublicado"}
                   </StatusDot>
                 </TableCell>
-                <TableCell headerLabel="Criado em">{formatDate(post.created_at)}</TableCell>
-                <TableCell headerLabel="Atualizado em">{formatDate(post.last_modified)}</TableCell>
+                <TableCell headerLabel="Criado em">{formatDateToDMY(post.created_at)}</TableCell>
+                <TableCell headerLabel="Atualizado em">{formatDateToDMY(post.last_modified)}</TableCell>
                 <TableCell headerLabel="Ação">
-                  <div className="flex gap-8">
-                    <a href={`/pages/posts/${post.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/posts/${post.id}`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/posts/${post.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/posts/${post.id}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-        </AdminPaginatedTable>
+        </Table>
       ) : (
         <CardNoResults
           position="center"
@@ -292,6 +270,6 @@ export default function SystemPostsClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

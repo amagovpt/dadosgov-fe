@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -15,17 +15,13 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { fetchOrgDiscussions } from "@/services/api";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { Discussion } from "@/types/api";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-import {
-  useClientTableState,
-  useSortControls,
-} from "@/components/admin/lists/useClientTableState";
-import type { SortOrder } from "@/components/admin/lists/useClientTableState";
+import AdminEmptyState from "../AdminEmptyState";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -35,12 +31,8 @@ const formatDate = (dateStr: string) => {
   }
 };
 
+type SortOrder = "none" | "ascending" | "descending";
 type DiscussionSortField = "created" | "closed";
-
-const DISCUSSION_SORTERS: Record<DiscussionSortField, (discussion: Discussion) => number> = {
-  created: (discussion) => (discussion.created ? Date.parse(discussion.created) : 0),
-  closed: (discussion) => (discussion.closed ? Date.parse(discussion.closed) : 0),
-};
 
 interface OrgDiscussionsClientProps {
   orgId: string;
@@ -57,13 +49,14 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
   const [sortField, setSortField] = useState<DiscussionSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
-  const { handleSort, getSortOrder } = useSortControls(
-    sortField,
-    sortOrder,
-    setSortField,
-    setSortOrder,
-    setCurrentPage
-  );
+  const handleSort = (field: DiscussionSortField) => (newOrder: SortOrder) => {
+    setSortField(newOrder === "none" ? null : field);
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+  };
+
+  const getSortOrder = (field: DiscussionSortField): SortOrder =>
+    sortField === field ? sortOrder : "none";
 
   useEffect(() => {
     async function loadDiscussions() {
@@ -81,17 +74,22 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
     loadDiscussions();
   }, [orgId]);
 
-  const { totalItems, paginatedItems: paginatedDiscussions } = useClientTableState<
-    Discussion,
-    DiscussionSortField
-  >({
-    items: discussions,
-    currentPage,
-    pageSize: itemsPerPage,
-    sortField,
-    sortOrder,
-    sorters: DISCUSSION_SORTERS,
-  });
+  const sortedDiscussions = useMemo(() => {
+    if (!sortField || sortOrder === "none") return discussions;
+    const dir = sortOrder === "ascending" ? 1 : -1;
+    return [...discussions].sort((a, b) => {
+      const av = sortField === "created" ? a.created : a.closed;
+      const bv = sortField === "created" ? b.created : b.closed;
+      const at = av ? Date.parse(av) : 0;
+      const bt = bv ? Date.parse(bv) : 0;
+      return (at - bt) * dir;
+    });
+  }, [discussions, sortField, sortOrder]);
+
+  const paginatedDiscussions = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return sortedDiscussions.slice(start, start + itemsPerPage);
+  }, [sortedDiscussions, currentPage, itemsPerPage]);
 
   const openDiscussion = (discussion: Discussion) => {
     show(
@@ -107,54 +105,37 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            { label: "Discussões", url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Discussões</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Discussões" },
+      ]}
+      title="Discussões"
+    >
 
       {isLoading ? (
         <p>A carregar...</p>
       ) : discussions.length === 0 ? (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={
-                <Icon
-                  name="agora-line-chat"
-                  className="w-12 h-12 text-primary-500 icon-xl"
-                />
-              }
-              title="Sem discussões"
-              description="Ainda não há discussões sobre esta organização."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-chat"
+          title="Sem discussões"
+          description="Ainda não há discussões sobre esta organização."
+        />
       ) : (
         <>
-          <p className="text-neutral-700 text-sm font-semibold uppercase mb-24">
+          <p className="text-sm mb-24 font-semibold uppercase text-neutral-700">
             {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
           </p>
 
-          <AdminPaginatedTable
-            pageSize={itemsPerPage}
-            totalItems={totalItems}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            setPageSize={setItemsPerPage}
+          <Table
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              discussions.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage
+            )}
           >
             <TableHeader>
               <TableRow>
@@ -184,7 +165,7 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
                 >
                   <TableCell headerLabel="Título">
                     <button
-                      className="text-primary-600 underline text-left"
+                      className="text-left text-primary-600 underline"
                       onClick={(e) => {
                         e.stopPropagation();
                         openDiscussion(discussion);
@@ -193,19 +174,16 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
                       {discussion.title}
                     </button>
                   </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDate(discussion.created)}
-                  </TableCell>
+                  <TableCell headerLabel="Criado em">{formatDate(discussion.created)}</TableCell>
                   <TableCell headerLabel="Fechado em">
                     {discussion.closed ? formatDate(discussion.closed) : "-"}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
-          </AdminPaginatedTable>
-
+          </Table>
         </>
       )}
-    </div>
+    </AdminLayout>
   );
 }

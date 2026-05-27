@@ -2,20 +2,22 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchTopics } from "@/services/api";
 import { Topic } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -51,33 +53,28 @@ export default function SystemTopicsClient() {
   }, [loadData]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Temas", url: "/pages/admin/system/topics" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Temas", url: "/pages/admin/system/topics" },
+      ]}
+      title="Temas"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Temas</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : topics.length > 0 ? (
-        <AdminPaginatedTable
-          pageSize={pageSize}
-          totalItems={totalItems}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
+        <Table
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -98,16 +95,16 @@ export default function SystemTopicsClient() {
                 <TableCell headerLabel="Conjuntos de dados">{topic.datasets_count ?? 0}</TableCell>
                 <TableCell headerLabel="Reutilizações">{topic.reuses_count ?? 0}</TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/themes/${topic.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/themes/${topic.slug}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-        </AdminPaginatedTable>
+        </Table>
       ) : (
         <CardNoResults
           position="center"
@@ -117,6 +114,6 @@ export default function SystemTopicsClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Breadcrumb, Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
+import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { fetchNotifications, markNotificationRead } from "@/services/api";
 import type { Notification, ValidateHarvesterNotificationDetails } from "@/types/api";
 import {
@@ -49,17 +50,14 @@ export default function NotificationsClient() {
   }, []);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Notificações", url: "/pages/admin/notificacoes" },
-          ]}
-        />
-      </div>
-
-      <h1 className="admin-page__title mb-16 mt-64">Notificações</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Notificações", url: "/pages/admin/notificacoes" },
+      ]}
+      title="Notificações"
+      headerAction={null}
+    >
       <p className="mb-32 text-base text-neutral-700">
         Pedidos de validação de harvesters e outras notificações dirigidas à equipa de
         administração.
@@ -103,7 +101,7 @@ export default function NotificationsClient() {
           ))}
         </ul>
       )}
-    </div>
+    </AdminLayout>
   );
 }
 

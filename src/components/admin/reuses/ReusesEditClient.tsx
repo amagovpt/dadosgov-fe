@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   DropdownOption,
   DropdownSection,
@@ -17,6 +15,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -846,19 +845,14 @@ export default function ReusesEditClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Reutilizações", url: "/pages/admin/me/reuses" },
-            { label: reuse.title, url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">{reuse.title}</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Reutilizações", url: "/pages/admin/me/reuses" },
+        { label: reuse.title },
+      ]}
+      title={reuse.title}
+      headerAction={
         <Button
           variant="primary"
           appearance="outline"
@@ -870,7 +864,8 @@ export default function ReusesEditClient() {
             Ver página pública
           </span>
         </Button>
-      </div>
+      }
+    >
 
       {reuse.deleted && (
         <div className="mb-16">
@@ -1060,6 +1055,6 @@ export default function ReusesEditClient() {
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }

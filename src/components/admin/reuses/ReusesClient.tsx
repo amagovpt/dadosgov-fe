@@ -3,41 +3,31 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  Breadcrumb,
-  CardNoResults,
-  Icon,
   InputSearchBar,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
-  Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchMyReuses } from "@/services/api";
 import { Reuse } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-import PublicationStatusFilterSelect from "@/components/admin/lists/PublicationStatusFilterSelect";
-import {
-  SortOrder,
-  useClientTableState,
-  useSortControls,
-} from "@/components/admin/lists/useClientTableState";
+import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import StatusFilterSelect from "../StatusFilterSelect";
+import TableActionsCell from "../TableActionsCell";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 type ReuseSortField = "title" | "created_at" | "datasets";
-
-const REUSE_SORTERS: Record<ReuseSortField, (reuse: Reuse) => string | number> = {
-  title: (reuse) => reuse.title ?? "",
-  created_at: (reuse) => (reuse.created_at ? Date.parse(reuse.created_at) : 0),
-  datasets: (reuse) => reuse.datasets?.length ?? 0,
-};
 
 export default function ReusesClient() {
   const { displayName } = useCurrentUser();
@@ -51,7 +41,6 @@ export default function ReusesClient() {
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") ?? "");
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
     sortOrder,
@@ -81,9 +70,9 @@ export default function ReusesClient() {
   }, [loadData]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
-      setSearchQuery(value);
-      setCurrentPage(1);
-    });
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
 
   const filteredReuses = useMemo(() => {
     let result = reuses;
@@ -101,45 +90,40 @@ export default function ReusesClient() {
     return result;
   }, [reuses, searchQuery, statusFilter]);
 
-  const { totalItems, paginatedItems: paginatedReuses } = useClientTableState<
-    Reuse,
-    ReuseSortField
-  >({
-    items: filteredReuses,
-    currentPage,
-    pageSize: itemsPerPage,
-    sortField,
-    sortOrder,
-    sorters: REUSE_SORTERS,
-  });
+  const sortedReuses = useMemo(() => {
+    if (!sortField || sortOrder === "none") return filteredReuses;
+    const dir = sortOrder === "ascending" ? 1 : -1;
+    const collator = new Intl.Collator("pt", { sensitivity: "base" });
+    return [...filteredReuses].sort((a, b) => {
+      if (sortField === "title") {
+        return collator.compare(a.title ?? "", b.title ?? "") * dir;
+      }
+      if (sortField === "created_at") {
+        const at = a.created_at ? Date.parse(a.created_at) : 0;
+        const bt = b.created_at ? Date.parse(b.created_at) : 0;
+        return (at - bt) * dir;
+      }
+      const ad = a.datasets?.length ?? 0;
+      const bd = b.datasets?.length ?? 0;
+      return (ad - bd) * dir;
+    });
+  }, [filteredReuses, sortField, sortOrder]);
 
-  const getStatus = (reuse: Reuse) => {
-    if (reuse.deleted) return { label: "Excluído", variant: "danger" as const };
-    if (reuse.archived) return { label: "Arquivado", variant: "neutral" as const };
-    if (reuse.private) return { label: "Rascunho", variant: "warning" as const };
-    return { label: "Público", variant: "success" as const };
-  };
+  const paginatedReuses = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return sortedReuses.slice(start, start + itemsPerPage);
+  }, [sortedReuses, currentPage, itemsPerPage]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Reutilizações", url: "/pages/admin/me/reuses" },
-          ]}
-        />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: displayName || "...", url: "#" },
+      { label: "Reutilizações", url: "/pages/admin/me/reuses" },
+    ]}
+      title="Reutilizações"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Reutilizações</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-sm mb-16 text-neutral-700">
-        {isLoading ? "A carregar..." : `${filteredReuses.length} resultados`}
-      </p>
+      <ResultsCount count={filteredReuses.length} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -153,11 +137,11 @@ export default function ReusesClient() {
             }}
           />
         </div>
-        <PublicationStatusFilterSelect
-          statusFilter={statusFilter}
+        <StatusFilterSelect
+          value={statusFilter}
           defaultValue={statusFilter || undefined}
-          onChange={(nextStatus) => {
-            setStatusFilter(nextStatus);
+          onChange={(v) => {
+            setStatusFilter(v);
             setCurrentPage(1);
           }}
         />
@@ -166,12 +150,14 @@ export default function ReusesClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : filteredReuses.length > 0 ? (
-        <AdminPaginatedTable
-          pageSize={itemsPerPage}
-          totalItems={totalItems}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setItemsPerPage}
+        <Table
+          paginationProps={createPaginationProps(
+            itemsPerPage,
+            sortedReuses.length,
+            currentPage,
+            setCurrentPage,
+            setItemsPerPage
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -202,14 +188,13 @@ export default function ReusesClient() {
           </TableHeader>
           <TableBody>
             {paginatedReuses.map((reuse) => {
-              const status = getStatus(reuse);
               return (
                 <TableRow key={reuse.id}>
                   <TableCell headerLabel="Título">
                     <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    <StatusDot variant={status.variant}>{status.label}</StatusDot>
+                    <ResourceStatusBadge item={reuse} />
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDateToDMY(reuse.created_at)}
@@ -228,45 +213,24 @@ export default function ReusesClient() {
                     {reuse.datasets?.length ?? 0}
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-8">
-                      <a href={`/pages/reuses/${reuse.slug}`}>
-                        <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                      </a>
-                      <a href={`/pages/admin/me/reuses/edit?id=${reuse.id}`}>
-                        <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                      </a>
-                    </div>
+                    <TableActionsCell
+                      viewAction={{ href: `/pages/reuses/${reuse.slug}` }}
+                      editAction={{ href: `/pages/admin/me/reuses/edit?id=${reuse.id}` }}
+                    />
                   </TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
-        </AdminPaginatedTable>
+        </Table>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={<img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />}
-              title="Sem reutilizações"
-              description="Não publicou reutilizações"
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => (window.location.href = "/pages/admin/reuses/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="bar_chart"
+          title="Sem reutilizações"
+          description="Não publicou reutilizações"
+          createUrl="/pages/admin/reuses/new"
+        />
       )}
-    </div>
+    </AdminLayout>
   );
 }

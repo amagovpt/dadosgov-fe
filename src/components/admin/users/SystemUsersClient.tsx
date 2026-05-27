@@ -2,28 +2,30 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   DropdownOption,
   DropdownSection,
   Icon,
   InputSearchBar,
   InputSelect,
+  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 import { fetchUsers } from "@/services/api";
 import { UserAdmin } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 
 type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
+type SortOrder = "ascending" | "descending" | "none";
 
 const SORT_FIELD_MAP: Record<SortField, string> = {
   name: "first_name",
@@ -88,9 +90,9 @@ export default function SystemUsersClient() {
   }, [loadData]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
-      setSearchQuery(value);
-      setCurrentPage(1);
-    });
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
 
   const handleSort = (field: SortField) => (_newOrder: SortOrder) => {
     if (field === "name") {
@@ -114,23 +116,16 @@ export default function SystemUsersClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Utilizadores", url: "/pages/admin/system/users" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Utilizadores", url: "/pages/admin/system/users" },
+      ]}
+      title="Utilizadores"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Utilizadores</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-sm mb-16 text-neutral-700">{totalItems} resultados</p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
@@ -171,12 +166,14 @@ export default function SystemUsersClient() {
       {isLoading ? (
         <p className="text-sm text-neutral-700">A carregar...</p>
       ) : users.length > 0 ? (
-        <AdminPaginatedTable
-          pageSize={pageSize}
-          totalItems={totalItems}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          setPageSize={setPageSize}
+        <Table
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -241,19 +238,19 @@ export default function SystemUsersClient() {
                 <TableCell headerLabel="Seguidores">{user.metrics?.followers ?? 0}</TableCell>
                 <TableCell headerLabel="Perfis">{getUserProfile(user)}</TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/users/${user.slug}`}>
-                      <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/users/${user.id}/profile`}>
-                      <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/users/${user.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/users/${user.id}/profile`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-        </AdminPaginatedTable>
+        </Table>
       ) : (
         <CardNoResults
           position="center"
@@ -263,6 +260,6 @@ export default function SystemUsersClient() {
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

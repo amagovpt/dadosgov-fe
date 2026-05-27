@@ -149,14 +149,24 @@ export default function OrganizationsClient({
                 {organizations.length > 0 ? (
                   organizations.map((org, index) => {
                     const timeAgo = formatDateToTimeAgo(org.last_modified);
-                    const cardProps = {
-                      ...org,
-                      last_modified: timeAgo,
+                    const cardProps: CardMetricsProps = {
                       title: org.name,
+                      description: org.description ?? "",
                       link: `/pages/organizations/${org.slug}`,
-                    } as CardMetricsProps;
+                      last_modified: timeAgo,
+                      organization: {
+                        name: org.name,
+                        logo: org.logo ?? undefined,
+                      },
+                      metrics: {
+                        views: org.metrics.views,
+                        resources_downloads: org.metrics.resource_downloads,
+                        reuses: org.metrics.reuses,
+                        followers: org.metrics.followers,
+                      },
+                    };
                     return (
-                      <CardMetrics key={`dataset-${index}`} {...cardProps} hideProgressBar />
+                      <CardMetrics key={`org-${index}`} {...cardProps} hideProgressBar />
                     );
                   })
                 ) : (
