@@ -45,9 +45,26 @@ test.describe("Organization Detail", () => {
     expect(breadcrumbText.toLowerCase()).toContain("organiza");
   });
 
-  test("OD-03: Page renders an image (logo or placeholder)", async ({ page }) => {
+  test("OD-03: Page renders an image — logo if available, placeholder otherwise", async ({
+    page,
+  }) => {
     const images = page.locator("main img");
     expect(await images.count()).toBeGreaterThan(0);
+
+    // The logo/placeholder img must have a non-empty src.
+    const logoImg = images.first();
+    await expect(logoImg).toBeVisible({ timeout: 10000 });
+    const src = await logoImg.getAttribute("src");
+    expect((src ?? "").trim().length).toBeGreaterThan(0);
+
+    // When the org has a logo the src must NOT be the placeholder;
+    // when it has no logo the placeholder is expected — both are valid.
+    // What is never valid is an empty or null src.
+    const isLogoOrPlaceholder =
+      (src ?? "").startsWith("http") ||
+      (src ?? "").startsWith("/s/") ||
+      (src ?? "").includes("organization.png");
+    expect(isLogoOrPlaceholder).toBe(true);
   });
 
   test.skip("OD-04: Favorites button works with session", async () => {

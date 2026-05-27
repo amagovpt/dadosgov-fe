@@ -4,6 +4,7 @@ import { CardGeneral, ProgressBar } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import Icon from "../../Primitives/Icon";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { useState } from "react";
 
 export type CardMetricsProps = {
     link: string;
@@ -26,6 +27,8 @@ export type CardMetricsProps = {
     hideProgressBar?: boolean;
 };
 
+const PLACEHOLDER = "/images/placeholders/organization.png";
+
 export default function CardMetrics({
     link,
     title,
@@ -37,6 +40,7 @@ export default function CardMetrics({
     hideProgressBar = false,
 }: CardMetricsProps) {
     const qualityScore = quality?.score != null ? Math.round(quality.score * 100) : 0;
+    const [imgSrc, setImgSrc] = useState<string>(organization?.logo || PLACEHOLDER);
 
     const formatMetric = (value: number | undefined) => {
         if (!value) return "0";
@@ -53,10 +57,11 @@ export default function CardMetrics({
             <CardGeneral
                 variant="white"
                 image={{
-                    src: organization?.logo || "/images/placeholders/organization.png",
+                    src: imgSrc,
                     alt: organization?.name || "Organização",
                     height: "250px",
                     className: "bg-primary-100 !object-contain !max-w-[250px] !max-h-[250px]",
+                    onError: () => setImgSrc(PLACEHOLDER),
                 }}
                 subtitleText={
                     <div className="flex flex-col">
