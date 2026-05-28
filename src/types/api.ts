@@ -69,6 +69,8 @@ export interface UserPublic {
   uri: string;
   page: string;
   metrics: UserMetrics;
+  datasets_count: number;
+  reuses_count: number;
   apikey: string | null;
 }
 
@@ -1065,8 +1067,6 @@ export interface HarvestBackend {
 export type UserRole = string;
 
 export interface UserAdmin extends UserPublic {
-  datasets_count: number;
-  reuses_count: number;
   last_login: string | null;
 }
 
