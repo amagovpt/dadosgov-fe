@@ -13,6 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { APIResponse, Organization, Reuse } from "@/types/api";
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -140,7 +141,9 @@ export default function ReusesClient({
               <div
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1" : "grid-cols-1  lg:grid-cols-2")}
               >
-                {reuses.length > 0 ? (
+                {listData.error ? (
+                  <ListingErrorBanner entity="as reutilizações" />
+                ) : reuses.length > 0 ? (
                   reuses.map((reuse) => {
                     const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at);
                     return (
