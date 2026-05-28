@@ -11,7 +11,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
-import type { Dataset } from "@/types/api";
+import type { Dataset } from "@/service/types/dataset";
 
 const PAGE_SIZE = 10;
 

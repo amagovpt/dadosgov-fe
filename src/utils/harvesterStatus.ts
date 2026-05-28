@@ -1,4 +1,4 @@
-import type { HarvestSource } from "@/types/api";
+import type { HarvestSource } from "@/service/types/harvester/harvester";
 
 type StatusVariant = "informative" | "success" | "danger" | "warning";
 
