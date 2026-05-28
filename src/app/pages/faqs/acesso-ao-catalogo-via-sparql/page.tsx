@@ -12,16 +12,19 @@ export async function generateMetadata({
 }: {
     params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-    const { title } = await getFaqs("api-tutorial", "pt");
+    const { title } = await getFaqs("acesso-ao-catalogo-via-sparql", "pt");
 
     return {
         title,
     };
 }
 
+
 export default async function page() {
 
-    const { title, actionTitle, body, actions } = await getFaqs("api-tutorial", "pt")
+
+    const { title, actionTitle, body, actions } = await getFaqs("acesso-ao-catalogo-via-sparql", "pt")
+
 
     return (
         <main className="w-full h-full flex flex-col items-center justify-center">
@@ -44,8 +47,8 @@ export default async function page() {
                                 {children}
                             </Anchor>
                         ),
-                        code: ({ children }) => (<code className="bg-neutral-100 text-wrap">{children}</code>),
-                        pre: ({ children }) => (<pre className="bg-neutral-100 leading-6">{children}</pre>),
+                        code: ({ children }) => (<code className="bg-neutral-100">{children}</code>),
+                        pre: ({ children }) => (<pre className="bg-neutral-100 leading-7">{children}</pre>),
                         ol: ({ children }) => <ol className="list-decimal pl-6 [&_li::marker]:font-bold">{children}</ol>,
                         ul: ({ children }) => <ul className="list-disc pl-6">{children}</ul>,
                         li: ({ children }) => <li className="ml-32">{children}</li>,
@@ -70,6 +73,8 @@ export default async function page() {
 
                 </div>
             )}
+
+
         </main>
     )
 }
