@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   DropdownOption,
   DropdownSection,
@@ -16,9 +15,13 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchUsers } from "@/app/api/users";
 import type { UserAdmin } from '@/service/types/identity';
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import TextLink from "@/components/Primitives/TextLink";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
 type SortOrder = "ascending" | "descending" | "none";
@@ -116,27 +119,18 @@ export default function SystemUsersClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Utilizadores", url: "/pages/admin/system/users" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Utilizadores", url: "/pages/admin/system/users" },
+      ]}
+      title="Utilizadores"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Utilizadores</h1>
-        <PublishDropdown />
-      </div>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {totalItems} resultados
-      </p>
-
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -159,33 +153,30 @@ export default function SystemUsersClient() {
           }}
         >
           <DropdownSection name="profile">
-            <DropdownOption value="" selected={profileFilter === ""}>Todos</DropdownOption>
-            <DropdownOption value="admin" selected={profileFilter === "admin"}>Admin</DropdownOption>
-            <DropdownOption value="editor" selected={profileFilter === "editor"}>Editor</DropdownOption>
+            <DropdownOption value="" selected={profileFilter === ""}>
+              Todos
+            </DropdownOption>
+            <DropdownOption value="admin" selected={profileFilter === "admin"}>
+              Admin
+            </DropdownOption>
+            <DropdownOption value="editor" selected={profileFilter === "editor"}>
+              Editor
+            </DropdownOption>
           </DropdownSection>
         </InputSelect>
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : users.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -233,44 +224,31 @@ export default function SystemUsersClient() {
               <TableRow key={user.id}>
                 <TableCell headerLabel="Nome">
                   <div>
-                    <a
-                      href={`/pages/users/${user.slug}`}
-                      className="text-primary-600 underline"
-                    >
+                    <TextLink href={`/pages/users/${user.slug}`}>
                       {user.first_name} {user.last_name}
-                    </a>
+                    </TextLink>
                     {user.email && (
-                      <div className="text-sm text-neutral-900 flex items-center gap-4">
-                        <Icon name="agora-line-mail" className="w-[14px] h-[14px]" />
+                      <div className="text-sm flex items-center gap-4 text-neutral-900">
+                        <Icon name="agora-line-mail" className="h-[14px] w-[14px]" />
                         {user.email}
                       </div>
                     )}
                   </div>
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDate(user.since)}
-                </TableCell>
-                <TableCell headerLabel="Conjuntos de dados">
-                  {user.datasets_count ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Reutilizações">
-                  {user.reuses_count ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Seguidores">
-                  {user.metrics?.followers ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Perfis">
-                  {getUserProfile(user)}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDate(user.since)}</TableCell>
+                <TableCell headerLabel="Conjuntos de dados">{user.datasets_count ?? 0}</TableCell>
+                <TableCell headerLabel="Reutilizações">{user.reuses_count ?? 0}</TableCell>
+                <TableCell headerLabel="Seguidores">{user.metrics?.followers ?? 0}</TableCell>
+                <TableCell headerLabel="Perfis">{getUserProfile(user)}</TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/users/${user.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/users/${user.id}/profile`}>
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/users/${user.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/users/${user.id}/profile`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -279,17 +257,12 @@ export default function SystemUsersClient() {
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-user"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-user" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem utilizadores"
           description="Nenhum utilizador encontrado."
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

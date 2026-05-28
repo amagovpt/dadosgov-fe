@@ -14,7 +14,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 
 import { format } from "date-fns";
@@ -57,10 +57,8 @@ import DatasetsEditDiscussionsTab from "@/components/admin/datasets/DatasetsEdit
 import DatasetsEditActivitiesTab from "@/components/admin/datasets/DatasetsEditActivitiesTab";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
-import {
-  POISONED_FILE_WARNING,
-  translateUploadError,
-} from "@/lib/security/translateUploadError";
+import { POISONED_FILE_WARNING, translateUploadError } from "@/lib/security/translateUploadError";
+import TextLink from "@/components/Primitives/TextLink";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -320,7 +318,7 @@ export default function DatasetsEditClient() {
       return true;
     });
     const selectedNotInSuggestions = selectedKeywords.filter(
-      (keyword) => !seen.has(keyword.toLowerCase()),
+      (keyword) => !seen.has(keyword.toLowerCase())
     );
     const showCreate =
       trimmed.length > 0 &&
@@ -329,11 +327,7 @@ export default function DatasetsEditClient() {
     const options = [
       ...(showCreate
         ? [
-            <Dropdown.Option
-              key={`__create__${trimmedLower}`}
-              value={trimmed}
-              selected={false}
-            >
+            <Dropdown.Option key={`__create__${trimmedLower}`} value={trimmed} selected={false}>
               Criar &quot;{trimmed}&quot;
             </Dropdown.Option>,
           ]
@@ -384,7 +378,7 @@ export default function DatasetsEditClient() {
       // Pin newly selected zones; unpin deselected ones
       const seen = new Set(prev.map((z) => z.id));
       const additions = spatialZoneSearchRef.current.filter(
-        (z) => ids.has(z.id) && !seen.has(z.id),
+        (z) => ids.has(z.id) && !seen.has(z.id)
       );
       const kept = prev.filter((z) => ids.has(z.id));
       if (additions.length === 0 && kept.length === prev.length) return prev;
@@ -424,11 +418,7 @@ export default function DatasetsEditClient() {
         —
       </Dropdown.Option>,
       ...granularities.map((g) => (
-        <Dropdown.Option
-          key={g.id}
-          value={g.id}
-          selected={g.id === loadedSpatialGranularity}
-        >
+        <Dropdown.Option key={g.id} value={g.id} selected={g.id === loadedSpatialGranularity}>
           {getGranularityLabel(g.id, g.name)}
         </Dropdown.Option>
       )),
@@ -515,7 +505,11 @@ export default function DatasetsEditClient() {
         );
         if (levels.length === 1) {
           resolvedGranularity = levels[0];
-        } else if (levels.length > 1 && resolvedGranularity && !levels.includes(resolvedGranularity)) {
+        } else if (
+          levels.length > 1 &&
+          resolvedGranularity &&
+          !levels.includes(resolvedGranularity)
+        ) {
           resolvedGranularity = levels[0];
         }
         spatialGranularityRef.current = resolvedGranularity || "";
@@ -601,10 +595,7 @@ export default function DatasetsEditClient() {
     }
   };
 
-  const handleTransferDataset = async (
-    recipient: RecipientSelection,
-    comment: string,
-  ) => {
+  const handleTransferDataset = async (recipient: RecipientSelection, comment: string) => {
     if (!dataset) throw new Error("Conjunto de dados não carregado.");
     setApiError(null);
     setApiSuccess(null);
@@ -615,7 +606,7 @@ export default function DatasetsEditClient() {
     });
     hide();
     setApiSuccess(
-      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
+      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`
     );
     setTimeout(() => setApiSuccess(null), 15000);
   };
@@ -732,7 +723,6 @@ export default function DatasetsEditClient() {
         datasetId={dataset.id}
         resourceTypes={resourceTypes}
         onSaved={async () => {
-          hide();
           await refreshDataset();
           setApiSuccess("Recurso atualizado com sucesso.");
           setTimeout(() => setApiSuccess(null), 10000);
@@ -758,7 +748,6 @@ export default function DatasetsEditClient() {
             datasetId={dataset.id}
             resourceTypes={resourceTypes}
             onSaved={async () => {
-              hide();
               await refreshDataset();
               setApiSuccess("Recurso atualizado com sucesso.");
               setTimeout(() => setApiSuccess(null), 10000);
@@ -858,30 +847,26 @@ export default function DatasetsEditClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
-            { label: dataset.title, url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">{dataset.title}</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
+        { label: dataset.title },
+      ]}
+      title={dataset.title}
+      headerAction={
         <Button
           variant="primary"
           appearance="outline"
           onClick={() => window.open(`/pages/datasets/${dataset.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
-            <Icon name="agora-line-eye" className="w-16 h-16" />
+            <Icon name="agora-line-eye" className="h-16 w-16" />
             Ver página pública
           </span>
         </Button>
-      </div>
+      }
+    >
 
       {apiError && (
         <div className="my-24">
@@ -931,12 +916,9 @@ export default function DatasetsEditClient() {
           {latestActivity ? (
             <>
               {" Atividade mais recente: "}
-              <Link
-                href={`/pages/users/${latestActivity.actor.slug}`}
-                className="text-primary-600 underline"
-              >
+              <TextLink href={`/pages/users/${latestActivity.actor.slug}`}>
                 {latestActivity.actor.first_name} {latestActivity.actor.last_name}
-              </Link>
+              </TextLink>
               {" — "}
               {translateActivityLabel(latestActivity.label)}
               {" — "}
@@ -951,12 +933,9 @@ export default function DatasetsEditClient() {
               {" Atividade mais recente: "}
               {dataset.owner && (
                 <>
-                  <Link
-                    href={`/pages/users/${dataset.owner.slug}`}
-                    className="text-primary-600 underline"
-                  >
+                  <TextLink href={`/pages/users/${dataset.owner.slug}`}>
                     {dataset.owner.first_name} {dataset.owner.last_name}
-                  </Link>
+                  </TextLink>
                 </>
               )}
               {" — editou o conjunto de dados — "}
@@ -971,208 +950,206 @@ export default function DatasetsEditClient() {
       </div>
 
       <div ref={tabsRef} tabIndex={-1} className="outline-none">
-      <Tabs
-        onTabActivation={(index: number) => {
-          setApiError(null);
-          setApiSuccess(null);
-          if (index === 2) loadDiscussions();
-          if (index === 3) loadActivities();
-        }}
-      >
-        {/* Metadata Tab */}
-        <Tab>
-          <TabHeader>Metadados</TabHeader>
-          <TabBody>
-            <DatasetsEditMetadataTab
-              dataset={dataset}
-              featured={featured}
-              isSubmitting={isSubmitting}
-              formErrors={formErrors}
-              loadedTitle={loadedTitle}
-              loadedAcronym={loadedAcronym}
-              description={description}
-              loadedKeywords={loadedKeywords}
-              selectedKeywords={selectedKeywords}
-              keywordOptions={keywordOptions}
-              loadedLicense={loadedLicense}
-              licenseOptions={licenseOptions}
-              loadedFrequency={frequencyDefaultValue}
-              frequencyOptions={frequencyOptions}
-              temporalStart={temporalStart}
-              temporalEnd={temporalEnd}
-              loadedSpatialZones={loadedSpatialZones}
-              spatialCoverageValue={selectedSpatialZonesValue}
-              spatialCoverageOptions={spatialCoverageOptions}
-              selectedZoneObjects={selectedZoneObjects}
-              effectiveSpatialIds={effectiveSpatialIds}
-              loadedSpatialGranularity={loadedSpatialGranularity}
-              spatialGranularityOptions={spatialGranularityOptions}
-              keywordsRef={keywordsRef}
-              selectedLicenseRef={selectedLicenseRef}
-              selectedFrequencyRef={selectedFrequencyRef}
-              spatialCoverageRef={spatialCoverageRef}
-              spatialGranularityRef={spatialGranularityRef}
-              onPublishDataset={async () => {
-                try {
-                  const tagsValue = keywordsRef.current;
-                  const tags = tagsValue
-                    ? tagsValue
-                        .split(",")
-                        .map((tag) => tag.trim())
-                        .filter(Boolean)
-                    : dataset.tags || [];
-                  const updated = await updateDataset(dataset.id, {
-                    private: false,
-                    title: dataset.title,
-                    description: dataset.description,
-                    description_short: dataset.description_short || undefined,
-                    acronym: dataset.acronym || undefined,
-                    tags,
-                    license: dataset.license || undefined,
-                    frequency: dataset.frequency || undefined,
-                    temporal_coverage: dataset.temporal_coverage || undefined,
-                    spatial: dataset.spatial || undefined,
-                    organization: dataset.organization?.id,
-                  });
-                  setDataset(updated);
-                  setApiSuccess("Conjunto de dados publicado com sucesso.");
-                  setTimeout(() => setApiSuccess(null), 10000);
-                } catch {
-                  setApiError("Erro ao publicar o conjunto de dados.");
-                }
-              }}
-              onFeaturedChange={(checked) => setFeatured(checked)}
-              onTitleChange={handleTitleChange}
-              onAcronymChange={setAcronym}
-              onDescriptionChange={(html) => {
-                setDescription(html);
-                if (html.trim()) clearError("description");
-              }}
-              onKeywordSearch={(q) => {
-                setKeywordSearch(q);
-                if (!q) {
-                  setTagSearch([]);
-                  return;
-                }
-                suggestTags(q, 20).then(setTagSearch);
-              }}
-              onKeywordsChange={(value) => {
-                setLoadedKeywords(value);
-                const selected = value.split(",").filter(Boolean);
-                let addedNew = false;
-                selected.forEach((v) => {
-                  const lower = v.toLowerCase();
-                  const existsInSuggestions = tagSuggestions.some((t) => t.text.toLowerCase() === lower);
-                  const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
-                  if (!existsInSuggestions && !existsInSearch) {
-                    addedNew = true;
-                    setTagSuggestions((prev) => {
-                      if (prev.some((t) => t.text.toLowerCase() === lower)) return prev;
-                      return [...prev, { text: v }];
+        <Tabs
+          onTabActivation={(index: number) => {
+            setApiError(null);
+            setApiSuccess(null);
+            if (index === 2) loadDiscussions();
+            if (index === 3) loadActivities();
+          }}
+        >
+          {/* Metadata Tab */}
+          <Tab>
+            <TabHeader>Metadados</TabHeader>
+            <TabBody>
+              <DatasetsEditMetadataTab
+                dataset={dataset}
+                featured={featured}
+                isSubmitting={isSubmitting}
+                formErrors={formErrors}
+                loadedTitle={loadedTitle}
+                loadedAcronym={loadedAcronym}
+                description={description}
+                loadedKeywords={loadedKeywords}
+                selectedKeywords={selectedKeywords}
+                keywordOptions={keywordOptions}
+                loadedLicense={loadedLicense}
+                licenseOptions={licenseOptions}
+                loadedFrequency={frequencyDefaultValue}
+                frequencyOptions={frequencyOptions}
+                temporalStart={temporalStart}
+                temporalEnd={temporalEnd}
+                loadedSpatialZones={loadedSpatialZones}
+                spatialCoverageValue={selectedSpatialZonesValue}
+                spatialCoverageOptions={spatialCoverageOptions}
+                selectedZoneObjects={selectedZoneObjects}
+                effectiveSpatialIds={effectiveSpatialIds}
+                loadedSpatialGranularity={loadedSpatialGranularity}
+                spatialGranularityOptions={spatialGranularityOptions}
+                keywordsRef={keywordsRef}
+                selectedLicenseRef={selectedLicenseRef}
+                selectedFrequencyRef={selectedFrequencyRef}
+                spatialCoverageRef={spatialCoverageRef}
+                spatialGranularityRef={spatialGranularityRef}
+                onPublishDataset={async () => {
+                  try {
+                    const tagsValue = keywordsRef.current;
+                    const tags = tagsValue
+                      ? tagsValue
+                          .split(",")
+                          .map((tag) => tag.trim())
+                          .filter(Boolean)
+                      : dataset.tags || [];
+                    const updated = await updateDataset(dataset.id, {
+                      private: false,
+                      title: dataset.title,
+                      description: dataset.description,
+                      description_short: dataset.description_short || undefined,
+                      acronym: dataset.acronym || undefined,
+                      tags,
+                      license: dataset.license || undefined,
+                      frequency: dataset.frequency || undefined,
+                      temporal_coverage: dataset.temporal_coverage || undefined,
+                      spatial: dataset.spatial || undefined,
+                      organization: dataset.organization?.id,
                     });
+                    setDataset(updated);
+                    setApiSuccess("Conjunto de dados publicado com sucesso.");
+                    setTimeout(() => setApiSuccess(null), 10000);
+                  } catch {
+                    setApiError("Erro ao publicar o conjunto de dados.");
                   }
-                });
-                if (addedNew) setKeywordSearch("");
-              }}
-              onRemoveKeyword={(keyword) => {
-                const next = selectedKeywords
-                  .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
-                  .join(",");
-                setLoadedKeywords(next);
-                keywordsRef.current = next;
-              }}
-              onTemporalStartChange={setTemporalStart}
-              onTemporalEndChange={setTemporalEnd}
-              onSpatialCoverageChange={handleSpatialCoverageChange}
-              onSpatialSearch={(q) => {
-                if (q.length < 2) {
-                  spatialZoneSearchRef.current = [];
-                  setSpatialZoneSearch([]);
-                  return;
-                }
-                suggestSpatialZones(q, 50)
-                  .then((results) => {
-                    spatialZoneSearchRef.current = results;
-                    setSpatialZoneSearch(results);
-                  })
-                  .catch(() => {
+                }}
+                onFeaturedChange={(checked) => setFeatured(checked)}
+                onTitleChange={handleTitleChange}
+                onAcronymChange={setAcronym}
+                onDescriptionChange={(html) => {
+                  setDescription(html);
+                  if (html.trim()) clearError("description");
+                }}
+                onKeywordSearch={(q) => {
+                  setKeywordSearch(q);
+                  if (!q) {
+                    setTagSearch([]);
+                    return;
+                  }
+                  suggestTags(q, 20).then(setTagSearch);
+                }}
+                onKeywordsChange={(value) => {
+                  setLoadedKeywords(value);
+                  const selected = value.split(",").filter(Boolean);
+                  let addedNew = false;
+                  selected.forEach((v) => {
+                    const lower = v.toLowerCase();
+                    const existsInSuggestions = tagSuggestions.some(
+                      (t) => t.text.toLowerCase() === lower
+                    );
+                    const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
+                    if (!existsInSuggestions && !existsInSearch) {
+                      addedNew = true;
+                      setTagSuggestions((prev) => {
+                        if (prev.some((t) => t.text.toLowerCase() === lower)) return prev;
+                        return [...prev, { text: v }];
+                      });
+                    }
+                  });
+                  if (addedNew) setKeywordSearch("");
+                }}
+                onRemoveKeyword={(keyword) => {
+                  const next = selectedKeywords
+                    .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+                    .join(",");
+                  setLoadedKeywords(next);
+                  keywordsRef.current = next;
+                }}
+                onTemporalStartChange={setTemporalStart}
+                onTemporalEndChange={setTemporalEnd}
+                onSpatialCoverageChange={handleSpatialCoverageChange}
+                onSpatialSearch={(q) => {
+                  if (q.length < 2) {
                     spatialZoneSearchRef.current = [];
                     setSpatialZoneSearch([]);
-                  });
-              }}
-              onRemoveSpatialZone={(zoneId) => {
-                const next = effectiveSpatialIds.filter((id) => id !== zoneId).join(",");
-                setSelectedSpatialZonesValue(next);
-                spatialCoverageRef.current = next;
-                setSpatialZones((prev) => prev.filter((z) => z.id !== zoneId));
-              }}
-              onSaveMetadata={handleSaveMetadata}
-              onToggleArchive={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dataset.archived ? handleUnarchiveDataset() : handleArchiveDataset();
-              }}
-              onOpenDeletePopup={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                show(
-                  <DatasetsEditDeletePopup onClose={hide} onConfirm={handleDeleteDataset} />,
-                  {
+                    return;
+                  }
+                  suggestSpatialZones(q, 50)
+                    .then((results) => {
+                      spatialZoneSearchRef.current = results;
+                      setSpatialZoneSearch(results);
+                    })
+                    .catch(() => {
+                      spatialZoneSearchRef.current = [];
+                      setSpatialZoneSearch([]);
+                    });
+                }}
+                onRemoveSpatialZone={(zoneId) => {
+                  const next = effectiveSpatialIds.filter((id) => id !== zoneId).join(",");
+                  setSelectedSpatialZonesValue(next);
+                  spatialCoverageRef.current = next;
+                  setSpatialZones((prev) => prev.filter((z) => z.id !== zoneId));
+                }}
+                onSaveMetadata={handleSaveMetadata}
+                onToggleArchive={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  dataset.archived ? handleUnarchiveDataset() : handleArchiveDataset();
+                }}
+                onOpenDeletePopup={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  show(<DatasetsEditDeletePopup onClose={hide} onConfirm={handleDeleteDataset} />, {
                     title: "Elimine o conjunto de dados",
                     closeAriaLabel: "Fechar",
                     dimensions: "m",
-                  },
-                );
-              }}
-            />
-          </TabBody>
-        </Tab>
+                  });
+                }}
+              />
+            </TabBody>
+          </Tab>
 
-        {/* Resources Tab */}
-        <Tab>
-          <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
-          <TabBody>
-            <DatasetsEditResourcesTab
-              dataset={dataset}
-              uploaderKey={uploaderKey}
-              fileUploadError={fileUploadError}
-              isSubmitting={isSubmitting}
-              onFileUpload={handleFileUpload}
-              onSecurityError={() => setFileUploadError(POISONED_FILE_WARNING)}
-              onResourceClick={handleResourceClick}
-              onResourceEdit={handleResourceEdit}
-              onDeleteResource={handleDeleteResource}
-            />
-          </TabBody>
-        </Tab>
+          {/* Resources Tab */}
+          <Tab>
+            <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
+            <TabBody>
+              <DatasetsEditResourcesTab
+                dataset={dataset}
+                uploaderKey={uploaderKey}
+                fileUploadError={fileUploadError}
+                isSubmitting={isSubmitting}
+                onFileUpload={handleFileUpload}
+                onSecurityError={() => setFileUploadError(POISONED_FILE_WARNING)}
+                onResourceClick={handleResourceClick}
+                onResourceEdit={handleResourceEdit}
+                onDeleteResource={handleDeleteResource}
+              />
+            </TabBody>
+          </Tab>
 
-        {/* Discussions Tab */}
-        <Tab>
-          <TabHeader>Discussões ({discussionsTotal ?? 0})</TabHeader>
-          <TabBody>
-            <DatasetsEditDiscussionsTab
-              discussionsLoading={discussionsLoading}
-              discussionsLoaded={discussionsLoaded}
-              discussions={discussions}
-            />
-          </TabBody>
-        </Tab>
+          {/* Discussions Tab */}
+          <Tab>
+            <TabHeader>Discussões ({discussionsTotal ?? 0})</TabHeader>
+            <TabBody>
+              <DatasetsEditDiscussionsTab
+                discussionsLoading={discussionsLoading}
+                discussionsLoaded={discussionsLoaded}
+                discussions={discussions}
+              />
+            </TabBody>
+          </Tab>
 
-        {/* Activities Tab */}
-        <Tab>
-          <TabHeader>Atividades</TabHeader>
-          <TabBody>
-            <DatasetsEditActivitiesTab
-              activitiesLoading={activitiesLoading}
-              activitiesLoaded={activitiesLoaded}
-              activities={activities}
-              translateActivityLabel={translateActivityLabel}
-            />
-          </TabBody>
-        </Tab>
-      </Tabs>
+          {/* Activities Tab */}
+          <Tab>
+            <TabHeader>Atividades</TabHeader>
+            <TabBody>
+              <DatasetsEditActivitiesTab
+                activitiesLoading={activitiesLoading}
+                activitiesLoaded={activitiesLoaded}
+                activities={activities}
+                translateActivityLabel={translateActivityLabel}
+              />
+            </TabBody>
+          </Tab>
+        </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
-

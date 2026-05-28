@@ -45,6 +45,7 @@ import {
   POISONED_FILE_WARNING,
   translateUploadError,
 } from "@/lib/security/translateUploadError";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 interface ReusesFormClientProps {
   currentStep: number;
@@ -574,7 +575,7 @@ export default function ReusesFormClient({
                       className="admin-page__org-card-link"
                     >
                       Crie ou integre uma organização em dados.gov.pt
-                      <Icon
+                      <AppIcon
                         name="agora-line-arrow-right-circle"
                         className="w-24 h-24"
                       />
@@ -875,6 +876,7 @@ export default function ReusesFormClient({
                       placeholder="Nome do conjunto de dados externo"
                       id={`reuse-dataset-title-${index}`}
                       value={link.title ?? ""}
+                      required={false}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleDatasetTitleChange(index, e.target.value)
                       }
@@ -884,6 +886,7 @@ export default function ReusesFormClient({
                       placeholder="Pequena descrição do conjunto de dados"
                       id={`reuse-dataset-description-${index}`}
                       value={link.description ?? ""}
+                      required={false}
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         handleDatasetDescriptionChange(index, e.target.value)
                       }
@@ -1096,7 +1099,7 @@ export default function ReusesFormClient({
                 />
               </div>
 
-              <div className="agora-card-links-datasets-px0">
+              <div className="agora-card-links-admin-px0">
                 <CardLinks
                   onClick={() => {}}
                   className="cursor-pointer text-neutral-900"
@@ -1221,7 +1224,7 @@ export default function ReusesFormClient({
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon
+                <AppIcon
                   name="agora-line-question-mark"
                   className="w-24 h-24"
                 />

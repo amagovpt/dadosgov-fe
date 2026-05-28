@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Breadcrumb,
   Button,
   CardNoResults,
   DropdownOption,
@@ -14,6 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { fetchSystemLogContent, fetchSystemLogs } from "@/app/api/system";
 import type { SystemLogContent, SystemLogFile } from '@/service/types/transfer-system';
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 const AUTO_REFRESH_MS = 10_000;
 
@@ -138,19 +138,14 @@ export default function SystemLogsClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Logs", url: "/pages/admin/system/logs" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Logs</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Logs", url: "/pages/admin/system/logs" },
+      ]}
+      title="Logs"
+      headerAction={
         <div className="flex items-center gap-8">
           <Button
             variant="primary"
@@ -167,7 +162,8 @@ export default function SystemLogsClient() {
             Atualizar
           </Button>
         </div>
-      </div>
+      }
+    >
 
       <p className="text-neutral-700 text-sm mb-16">
         Visualização do conteúdo dos ficheiros de log do servidor. Para ficheiros grandes, é
@@ -315,6 +311,6 @@ export default function SystemLogsClient() {
           </pre>
         </>
       )}
-    </div>
+    </AdminLayout>
   );
 }

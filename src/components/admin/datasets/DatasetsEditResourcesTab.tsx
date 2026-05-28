@@ -15,6 +15,7 @@ import { pt } from "date-fns/locale";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import StatusDot from "@/components/admin/StatusDot";
 import type { Dataset, Resource } from '@/service/types/dataset';
+import AppIcon from "@/components/Primitives/AppIcon";
 
 type DatasetsEditResourcesTabProps = {
   dataset: Dataset;
@@ -41,7 +42,7 @@ export default function DatasetsEditResourcesTab({
 }: DatasetsEditResourcesTabProps) {
   return (
     <div className="mt-24">
-      <div className="flex items-end gap-16 mb-16 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
+      <div className="mb-16 flex items-end gap-16 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
         <DragAndDropUploader
           key={uploaderKey}
           label="Ficheiros"
@@ -65,14 +66,14 @@ export default function DatasetsEditResourcesTab({
         </Button>
       </div>
 
-      <h2 className="font-medium text-neutral-900 text-base mb-16">
+      <h2 className="mb-16 text-base font-medium text-neutral-900">
         {dataset.resources.length} {dataset.resources.length === 1 ? "FICHEIRO" : "FICHEIROS"}
       </h2>
 
       {dataset.resources.length === 0 && (
         <CardNoResults
           position="center"
-          icon={<Icon name="agora-line-document" className="w-12 h-12 text-primary-500 icon-xl" />}
+          icon={<Icon name="agora-line-document" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem ficheiros"
           description="Este conjunto de dados ainda não tem ficheiros. Adicione ficheiros ou links para começar."
           hasAnchor={false}
@@ -97,7 +98,7 @@ export default function DatasetsEditResourcesTab({
               <TableRow key={resource.id}>
                 <TableCell headerLabel="Nome do ficheiro">
                   <button
-                    className="text-primary-600 underline text-left cursor-pointer"
+                    className="cursor-pointer text-left text-primary-600 underline"
                     onClick={() => onResourceClick(resource)}
                   >
                     {resource.title}
@@ -116,9 +117,13 @@ export default function DatasetsEditResourcesTab({
                   {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy", { locale: pt })}
                 </TableCell>
                 <TableCell headerLabel="Atualizado em">
-                  {format(new Date(resource.last_modified || resource.created_at), "d 'de' MMMM 'de' yyyy", {
-                    locale: pt,
-                  })}
+                  {format(
+                    new Date(resource.last_modified || resource.created_at),
+                    "d 'de' MMMM 'de' yyyy",
+                    {
+                      locale: pt,
+                    }
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Ação">
                   <div className="flex items-center gap-8">
@@ -127,14 +132,14 @@ export default function DatasetsEditResourcesTab({
                       title="Ver detalhes"
                       onClick={() => onResourceClick(resource)}
                     >
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <AppIcon name="agora-line-eye" />
                     </button>
                     <button
                       className="text-primary-500 hover:text-primary-700"
                       title="Editar recurso"
                       onClick={() => onResourceEdit(resource)}
                     >
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
+                      <AppIcon name="agora-line-edit" />
                     </button>
                     <button
                       className="text-danger-500 hover:text-danger-700"
@@ -142,7 +147,7 @@ export default function DatasetsEditResourcesTab({
                       onClick={() => onDeleteResource(resource)}
                       disabled={isSubmitting}
                     >
-                      <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
+                      <AppIcon name="agora-line-trash" />
                     </button>
                   </div>
                 </TableCell>

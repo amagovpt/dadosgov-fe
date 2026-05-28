@@ -28,6 +28,7 @@ export default async function Page({
                 <Breadcrumb
                     items={[
                         { label: 'Início', url: '/' },
+                        { label: "Conhecimento", url: "#" },
                         { label: 'Aprender', url: '/pages/learn/' },
                         { label: 'Minicursos', url: '/pages/learn/mini-courses/' },
                         { label: title, url: '#' },

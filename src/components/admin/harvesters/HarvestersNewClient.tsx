@@ -3,7 +3,6 @@
 import React, { useState, useRef, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   DropdownSection,
   DropdownOption,
@@ -15,12 +14,14 @@ import {
   Pill,
 } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { createHarvester, previewHarvestSource } from "@/app/api/harvesters";
 import type { HarvestSourceCreatePayload, HarvestPreviewJob } from '@/service/types/harvester';
+import TextLink from "@/components/Primitives/TextLink";
+import { AdminStepper } from "../AdminStepper";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 export default function HarvestersNewClient() {
   const { user } = useAuth();
@@ -28,8 +29,6 @@ export default function HarvestersNewClient() {
   const router = useRouter();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
-  const totalSegments = 12;
-  const filledSegments = Math.round((currentStep / totalSteps) * totalSegments);
 
   const [harvesterName, setHarvesterName] = useState("");
   const [harvesterDescription, setHarvesterDescription] = useState("");
@@ -54,23 +53,6 @@ export default function HarvestersNewClient() {
 
   const selectedProducerRef = useRef("");
   const selectedTypeRef = useRef("");
-  const filterModeRefs = useRef<Record<number, React.MutableRefObject<string>>>({});
-  const filterTypeRefs = useRef<Record<number, React.MutableRefObject<string>>>({});
-
-  const getFilterModeRef = (index: number) => {
-    if (!filterModeRefs.current[index]) {
-      filterModeRefs.current[index] = { current: "include" };
-    }
-    return filterModeRefs.current[index];
-  };
-
-  const getFilterTypeRef = (index: number) => {
-    if (!filterTypeRefs.current[index]) {
-      filterTypeRefs.current[index] = { current: "organization" };
-    }
-    return filterTypeRefs.current[index];
-  };
-
   const producerOptions = useMemo(() => {
     const options = (user?.organizations || []).map((org) => (
       <DropdownOption key={org.id} value={org.id}>
@@ -232,19 +214,15 @@ export default function HarvestersNewClient() {
       content: (
         <>
           <p className="auxiliar-list__content !p-0">
-            A criação de um harvester de dados deve ser feita em nome de uma organização e requer permissões de administrador.
+            A criação de um harvester de dados deve ser feita em nome de uma organização e requer
+            permissões de administrador.
           </p>
-          <p className="auxiliar-list__content !p-0 mt-8">
+          <p className="auxiliar-list__content mt-8 !p-0">
             Selecione uma organização da qual seja administrador. Se a sua organização ainda não
             existir, terá de a criar primeiro através deste{" "}
-            <a
-              href="/pages/admin/organizations/new"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-600 underline auxiliar-list__content !p-0"
-            >
+            <TextLink href="/pages/admin/organizations/new" className="auxiliar-list__content !p-0">
               link ↗
-            </a>
+            </TextLink>
             .
           </p>
         </>
@@ -275,52 +253,25 @@ export default function HarvestersNewClient() {
   ];
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Harvesters", url: "/pages/admin/system/harvesters" },
-            {
-              label: "Formulário de publicação de um harvester",
-              url: "/pages/admin/harvesters/new",
-            },
-          ]}
-        />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: "Harvesters", url: "/pages/admin/system/harvesters" },
+      {
+        label: "Formulário de publicação de um harvester",
+        url: "/pages/admin/harvesters/new",
+      },
+    ]}
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de publicação de um harvester</h1>
-        <PublishDropdown />
-      </div>
-
+      title="Formulário de publicação de um harvester"
+    >
       {/* Step indicator */}
-      <div className="admin-page__step-header">
-        <p className="admin-page__step-text">
-          <span className="text-primary-600 font-bold">Passo {currentStep} - </span>
-          <span className="text-primary-900 font-bold">{stepTitles[currentStep]}</span>
-        </p>
-      </div>
-
-      {/* Progress bar */}
-      <div className="admin-page__stepper">
-        <div className="admin-page__stepper-bar">
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--start" />
-          {Array.from({ length: totalSegments }).map((_, i) => (
-            <div
-              key={i}
-              className={`admin-page__stepper-segment ${
-                i < filledSegments ? "admin-page__stepper-segment--filled" : ""
-              }`}
-            />
-          ))}
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--end" />
-        </div>
-        <span className="admin-page__stepper-label">
-          Passo {currentStep}/{totalSteps}
-        </span>
-      </div>
-
+      <AdminStepper
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        labelWord="Passo"
+        labelFormat="slash"
+        stepTitle={stepTitles[currentStep] || ""}
+      />
       {/* Main content area */}
       <div className="admin-page__body">
         <div className="admin-page__form-area">
@@ -341,7 +292,7 @@ export default function HarvestersNewClient() {
               />
 
               <form className="admin-page__form">
-                <p className="text-neutral-900 text-base leading-7 pt-32">
+                <p className="pt-32 text-base leading-7 text-neutral-900">
                   Os campos marcados com um asterisco ( * ) são obrigatórios.
                 </p>
 
@@ -435,12 +386,12 @@ export default function HarvestersNewClient() {
                   {/* CKAN / CKANPT: Filtros */}
                   {(selectedType === "ckan" || selectedType === "ckanpt") && (
                     <div>
-                      <p className="text-primary-900 text-base font-medium leading-7">Filtros</p>
+                      <p className="text-base font-medium leading-7 text-primary-900">Filtros</p>
 
                       {filters.map((filter, index) => (
                         <div
                           key={index}
-                          className={`mt-8 pb-16 mb-8 ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
+                          className={`mb-8 mt-8 pb-16 ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
                         >
                           <div className="flex items-center gap-8">
                             <IsolatedSelect
@@ -448,7 +399,7 @@ export default function HarvestersNewClient() {
                               hideLabel
                               placeholder="Incluir"
                               id={`filter-mode-${index}`}
-                              onChangeRef={getFilterModeRef(index)}
+                              onChangeCallback={(value) => updateFilter(index, "mode", value)}
                             >
                               {filterModeOptions}
                             </IsolatedSelect>
@@ -457,12 +408,12 @@ export default function HarvestersNewClient() {
                               hideLabel
                               placeholder="Organização"
                               id={`filter-type-${index}`}
-                              onChangeRef={getFilterTypeRef(index)}
+                              onChangeCallback={(value) => updateFilter(index, "type", value)}
                             >
                               {filterTypeSelectOptions}
                             </IsolatedSelect>
                           </div>
-                          <div className="flex items-center gap-8 mt-8">
+                          <div className="mt-8 flex items-center gap-8">
                             <div className="flex-1">
                               <InputText
                                 label=""
@@ -527,10 +478,10 @@ export default function HarvestersNewClient() {
                         </div>
                       ) : (
                         <div>
-                          <p className="text-primary-900 text-base font-medium leading-7">
+                          <p className="text-base font-medium leading-7 text-primary-900">
                             Prefixo de URL remoto
                           </p>
-                          <div className="flex items-center gap-8 mt-8">
+                          <div className="mt-8 flex items-center gap-8">
                             <div className="flex-1">
                               <InputText
                                 label=""
@@ -580,10 +531,10 @@ export default function HarvestersNewClient() {
                         </div>
                       ) : (
                         <div>
-                          <p className="text-primary-900 text-base font-medium leading-7">
+                          <p className="text-base font-medium leading-7 text-primary-900">
                             Prefixo de URL remoto
                           </p>
-                          <div className="flex items-center gap-8 mt-8">
+                          <div className="mt-8 flex items-center gap-8">
                             <div className="flex-1">
                               <InputText
                                 label=""
@@ -664,38 +615,38 @@ export default function HarvestersNewClient() {
                 />
               )}
 
-              <div className="flex flex-col gap-8 mb-24">
-                <p className="text-neutral-900 text-sm flex items-center gap-6">
-                  <Icon name="agora-line-calendar" className="w-16 h-16" />
+              <div className="mb-24 flex flex-col gap-8">
+                <p className="text-sm flex items-center gap-6 text-neutral-900">
+                  <Icon name="agora-line-calendar" className="h-16 w-16" />
                   Iniciado em:{" "}
                   {previewJob?.started
                     ? new Date(previewJob.started).toLocaleString("pt-PT", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
                     : isPreviewing
                       ? "..."
                       : "—"}
                 </p>
-                <p className="text-neutral-900 text-sm flex items-center gap-6">
-                  <Icon name="agora-line-calendar" className="w-16 h-16" />
+                <p className="text-sm flex items-center gap-6 text-neutral-900">
+                  <Icon name="agora-line-calendar" className="h-16 w-16" />
                   Terminado em:{" "}
                   {previewJob?.ended
                     ? new Date(previewJob.ended).toLocaleString("pt-PT", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
                     : isPreviewing
                       ? "..."
                       : "—"}
                 </p>
-                <p className="text-neutral-900 text-sm flex items-center gap-6">
+                <p className="text-sm flex items-center gap-6 text-neutral-900">
                   Estado:{" "}
                   <Pill
                     variant={
@@ -723,22 +674,22 @@ export default function HarvestersNewClient() {
                         : "Pendente"}
                   </Pill>
                 </p>
-                <p className="text-neutral-900 text-sm flex items-center gap-12">
+                <p className="text-sm flex items-center gap-12 text-neutral-900">
                   Elementos:
                   <span className="flex items-center gap-4">
-                    <Icon name="agora-line-check" className="w-16 h-16" />{" "}
+                    <Icon name="agora-line-check" className="h-16 w-16" />{" "}
                     {previewJob?.items.filter((i) => i.status === "done").length ?? 0}
                   </span>
                   <span className="flex items-center gap-4">
-                    <Icon name="agora-line-alert-triangle" className="w-16 h-16" />{" "}
+                    <Icon name="agora-line-alert-triangle" className="h-16 w-16" />{" "}
                     {previewJob?.items.filter((i) => i.status === "failed").length ?? 0}
                   </span>
                   <span className="flex items-center gap-4">
-                    <Icon name="agora-line-info-mark" className="w-16 h-16" />{" "}
+                    <Icon name="agora-line-info-mark" className="h-16 w-16" />{" "}
                     {previewJob?.items.filter((i) => i.status === "skipped").length ?? 0}
                   </span>
                   <span className="flex items-center gap-4">
-                    <Icon name="agora-line-x" className="w-16 h-16" />{" "}
+                    <Icon name="agora-line-x" className="h-16 w-16" />{" "}
                     {previewJob?.items.filter(
                       (i) => i.status === "pending" || i.status === "started"
                     ).length ?? 0}
@@ -773,10 +724,10 @@ export default function HarvestersNewClient() {
                   }
                 />
               ) : !isPreviewing ? (
-                <p className="text-neutral-700 text-sm">Nenhum erro encontrado.</p>
+                <p className="text-sm text-neutral-700">Nenhum erro encontrado.</p>
               ) : null}
 
-              <p className="text-neutral-700 text-sm font-semibold uppercase mt-24">
+              <p className="text-sm mt-24 font-semibold uppercase text-neutral-700">
                 {previewJob?.items.length ?? 0} itens
               </p>
 
@@ -833,14 +784,14 @@ export default function HarvestersNewClient() {
                         administração.
                       </strong>
                       <br />
-                      Informe-nos através do formulário de contacto abaixo se deseja que validemos
-                      o seu harvester. Será notificado da aprovação (ou rejeição).
+                      Informe-nos através do formulário de contacto abaixo se deseja que validemos o
+                      seu harvester. Será notificado da aprovação (ou rejeição).
                     </>
                   }
                 />
               )}
 
-              <div className="flex justify-start mt-16">
+              <div className="mt-16 flex justify-start">
                 <PublicationFeedbackButton />
               </div>
 
@@ -878,7 +829,7 @@ export default function HarvestersNewClient() {
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="w-24 h-24" />
+                <Icon name="agora-line-question-mark" className="h-24 w-24" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />
@@ -886,6 +837,6 @@ export default function HarvestersNewClient() {
           </aside>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   Table,
@@ -12,9 +11,13 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchTopics } from "@/app/api/discussions-topics";
 import type { Topic } from '@/service/types/topic';
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import TextLink from "@/components/Primitives/TextLink";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -50,46 +53,28 @@ export default function SystemTopicsClient() {
   }, [loadData]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Temas", url: "/pages/admin/system/topics" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Temas", url: "/pages/admin/system/topics" },
+      ]}
+      title="Temas"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Temas</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-neutral-700 text-sm mb-16">
-        {totalItems} resultados
-      </p>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : topics.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -104,28 +89,17 @@ export default function SystemTopicsClient() {
             {topics.map((topic) => (
               <TableRow key={topic.id}>
                 <TableCell headerLabel="Nome">
-                  <a
-                    href={`/pages/themes/${topic.slug}`}
-                    className="text-primary-600 underline"
-                  >
-                    {topic.name}
-                  </a>
+                  <TextLink href={`/pages/themes/${topic.slug}`}>{topic.name}</TextLink>
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDate(topic.created_at)}
-                </TableCell>
-                <TableCell headerLabel="Conjuntos de dados">
-                  {topic.datasets_count ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Reutilizações">
-                  {topic.reuses_count ?? 0}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDate(topic.created_at)}</TableCell>
+                <TableCell headerLabel="Conjuntos de dados">{topic.datasets_count ?? 0}</TableCell>
+                <TableCell headerLabel="Reutilizações">{topic.reuses_count ?? 0}</TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/themes/${topic.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/themes/${topic.slug}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -134,17 +108,12 @@ export default function SystemTopicsClient() {
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-tag"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-tag" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem temas"
           description="Nenhum tema encontrado."
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Breadcrumb,
-  CardNoResults,
   Icon,
   InputSearchBar,
   Table,
@@ -13,14 +11,18 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Button,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
 import { fetchMyCommunityResources } from "@/app/api/community-resources";
 import type { CommunityResource } from '@/service/types/community-resource';
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -58,9 +60,7 @@ export default function CommunityResourcesClient() {
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       result = result.filter(
-        (r) =>
-          r.title.toLowerCase().includes(q) ||
-          (r.format && r.format.toLowerCase().includes(q))
+        (r) => r.title.toLowerCase().includes(q) || (r.format && r.format.toLowerCase().includes(q))
       );
     }
 
@@ -80,14 +80,10 @@ export default function CommunityResourcesClient() {
           cmp = (a.format || "").localeCompare(b.format || "");
           break;
         case "created_at":
-          cmp =
-            new Date(a.created_at).getTime() -
-            new Date(b.created_at).getTime();
+          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
         case "last_modified":
-          cmp =
-            new Date(a.last_modified).getTime() -
-            new Date(b.last_modified).getTime();
+          cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
           break;
       }
       return sortOrder === "descending" ? -cmp : cmp;
@@ -109,27 +105,18 @@ export default function CommunityResourcesClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: displayName || "...", url: "#" },
+        { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
+      ]}
+      title="Recursos comunitários"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Recursos comunitários</h1>
-        <PublishDropdown />
-      </div>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {isLoading ? "A carregar..." : `${totalItems} resultados`}
-      </p>
-
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -146,22 +133,13 @@ export default function CommunityResourcesClient() {
 
       {!isLoading && resources.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Itens por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar itens por página",
-            dropdownListAriaLabel: "Opções de itens por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -205,27 +183,16 @@ export default function CommunityResourcesClient() {
                   {resource.dataset && (
                     <>
                       <br />
-                      <a
-                        href={`/pages/datasets/${resource.dataset.id}`}
-                        className="text-primary-600 underline text-sm"
-                      >
+                      <TextLink href={`/pages/datasets/${resource.dataset.id}`} className="text-sm">
                         {resource.dataset.title}
-                      </a>
+                      </TextLink>
                     </>
                   )}
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {resource.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : resource.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <ResourceStatusBadge item={resource} />
                 </TableCell>
-                <TableCell headerLabel="Formato">
-                  {resource.format || "—"}
-                </TableCell>
+                <TableCell headerLabel="Formato">{resource.format || "—"}</TableCell>
                 <TableCell headerLabel="Criado em">
                   {formatDateToDMY(resource.created_at)}
                 </TableCell>
@@ -233,44 +200,23 @@ export default function CommunityResourcesClient() {
                   {formatDateToDMY(resource.last_modified)}
                 </TableCell>
                 <TableCell headerLabel="Ação">
-                  <a href={`/pages/admin/me/community-resources/edit?id=${resource.id}`}>
-                    <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                  </a>
+                  <TableActionsCell
+                    editAction={{
+                      href: `/pages/admin/me/community-resources/edit?id=${resource.id}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={
-                <Icon
-                  name="agora-line-user-group"
-                  className="w-12 h-12 text-primary-500 icon-xl"
-                />
-              }
-              title="Sem publicações"
-              description="Ainda não publicou um recurso comunitário."
-              hasAnchor={false}
-              extraDescription={
-                <div className="mt-24">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    onClick={() => router.push("/pages/admin/community-resources/new")}
-                  >
-                    Publique no portal
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-user-group"
+          description="Ainda não publicou um recurso comunitário."
+          createUrl="/pages/admin/community-resources/new"
+        />
       )}
-    </div>
+    </AdminLayout>
   );
 }

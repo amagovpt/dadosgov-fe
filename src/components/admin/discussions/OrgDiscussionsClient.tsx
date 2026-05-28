@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   Table,
@@ -17,10 +16,12 @@ import {
 } from "@ama-pt/agora-design-system";
 import { fetchOrgDiscussions } from "@/app/api/discussions-topics";
 import type { Discussion } from '@/service/types/discussion';
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
+import AdminEmptyState from "../AdminEmptyState";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -104,65 +105,37 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            { label: "Discussões", url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Discussões</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Discussões" },
+      ]}
+      title="Discussões"
+    >
 
       {isLoading ? (
         <p>A carregar...</p>
       ) : discussions.length === 0 ? (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={
-                <Icon
-                  name="agora-line-chat"
-                  className="w-12 h-12 text-primary-500 icon-xl"
-                />
-              }
-              title="Sem discussões"
-              description="Ainda não há discussões sobre esta organização."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-chat"
+          title="Sem discussões"
+          description="Ainda não há discussões sobre esta organização."
+        />
       ) : (
         <>
-          <p className="text-neutral-700 text-sm font-semibold uppercase mb-24">
+          <p className="text-sm mb-24 font-semibold uppercase text-neutral-700">
             {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
           </p>
 
           <Table
-            paginationProps={{
-              itemsPerPageLabel: "Linhas por página",
-              itemsPerPage: itemsPerPage,
-              totalItems: discussions.length,
-              availablePageSizes: [5, 10, 20],
-              currentPage: currentPage - 1,
-              buttonDropdownAriaLabel: "Selecionar linhas por página",
-              dropdownListAriaLabel: "Opções de linhas por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => setCurrentPage(page + 1),
-              onPageSizeChange: (size: number) => {
-                setItemsPerPage(size);
-                setCurrentPage(1);
-              },
-            }}
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              discussions.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage
+            )}
           >
             <TableHeader>
               <TableRow>
@@ -192,7 +165,7 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
                 >
                   <TableCell headerLabel="Título">
                     <button
-                      className="text-primary-600 underline text-left"
+                      className="text-left text-primary-600 underline"
                       onClick={(e) => {
                         e.stopPropagation();
                         openDiscussion(discussion);
@@ -201,9 +174,7 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
                       {discussion.title}
                     </button>
                   </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDate(discussion.created)}
-                  </TableCell>
+                  <TableCell headerLabel="Criado em">{formatDate(discussion.created)}</TableCell>
                   <TableCell headerLabel="Fechado em">
                     {discussion.closed ? formatDate(discussion.closed) : "-"}
                   </TableCell>
@@ -211,9 +182,8 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
               ))}
             </TableBody>
           </Table>
-
         </>
       )}
-    </div>
+    </AdminLayout>
   );
 }

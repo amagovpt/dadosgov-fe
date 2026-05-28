@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  Breadcrumb,
   CardNoResults,
   Icon,
   Table,
@@ -14,10 +13,14 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchAllCommunityResources } from "@/app/api/community-resources";
 import type { CommunityResource } from '@/service/types/community-resource';
+import AdminLayout from "@/components/Layout/AdminLayout";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
+import TextLink from "@/components/Primitives/TextLink";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
@@ -101,49 +104,28 @@ export default function SystemCommunityResourcesClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            {
-              label: "Recursos comunitários",
-              url: "/pages/admin/system/community-resources",
-            },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Recursos comunitários", url: "/pages/admin/system/community-resources" },
+      ]}
+      title="Recursos comunitários"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Recursos comunitários</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-neutral-700 text-sm mb-16">
-        {resources.length} resultados
-      </p>
+      <ResultsCount count={resources.length} isLoading={isLoading} />
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : resources.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: pageSize,
-            totalItems: resources.length,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            resources.length,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -194,12 +176,9 @@ export default function SystemCommunityResourcesClient() {
                       <span className="text-neutral-900">{resource.title}</span>
                       {resource.dataset && (
                         <div className="text-sm text-neutral-700">
-                          <a
-                            href={`/pages/datasets/${resource.dataset.id}`}
-                            className="text-primary-600 underline"
-                          >
+                          <TextLink href={`/pages/datasets/${resource.dataset.id}`}>
                             {resource.dataset.title}
-                          </a>
+                          </TextLink>
                         </div>
                       )}
                     </div>
@@ -207,11 +186,7 @@ export default function SystemCommunityResourcesClient() {
                   <TableCell headerLabel="Estado">
                     <StatusDot
                       variant={
-                        resource.deleted
-                          ? "danger"
-                          : resource.archived
-                            ? "warning"
-                            : "success"
+                        resource.deleted ? "danger" : resource.archived ? "warning" : "success"
                       }
                     >
                       {resource.deleted
@@ -224,21 +199,16 @@ export default function SystemCommunityResourcesClient() {
                   <TableCell headerLabel="Formato">
                     {resource.format ? resource.format.toUpperCase() : "—"}
                   </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDate(resource.created_at)}
-                  </TableCell>
+                  <TableCell headerLabel="Criado em">{formatDate(resource.created_at)}</TableCell>
                   <TableCell headerLabel="Modificado em">
                     {formatDate(resource.last_modified)}
                   </TableCell>
                   <TableCell headerLabel="Ação">
-                    <a
-                      href={`/pages/admin/system/community-resources?resource_id=${resource.id}`}
-                    >
-                      <Icon
-                        name="agora-line-edit"
-                        className="w-[20px] h-[20px]"
-                      />
-                    </a>
+                    <TableActionsCell
+                      editAction={{
+                        href: `/pages/admin/system/community-resources?resource_id=${resource.id}`,
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               );
@@ -249,16 +219,13 @@ export default function SystemCommunityResourcesClient() {
         <CardNoResults
           position="center"
           icon={
-            <Icon
-              name="agora-line-user-group"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
+            <Icon name="agora-line-user-group" className="icon-xl h-12 w-12 text-primary-500" />
           }
           title="Sem recursos comunitários"
           description="Nenhum recurso comunitário encontrado."
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

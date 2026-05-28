@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import CardGeneral from "@/components/Primitives/Cards/CardGeneral";
 import SimpleCardImage from "@/components/Primitives/Cards/SimpleCardImage";
 import HeroCourses from "@/components/Learn/Hero";
-import Button from "@/components/Primitives/Button";
 import apolloClient from "@/service/utils/apollo-client";
 import { getCoursesPage } from "@/service/queries/courses/courses";
 import { flattenData } from "@/utils/flattenObject";
@@ -13,85 +12,97 @@ import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getAssets } from "@/utils/getAssets";
 import ButtonNavigate from "@/components/Primitives/ButtonNavigate";
 
-
 export default async function page() {
-
-
   const { data, error } = await apolloClient.query<{
     findPageCursosSingleton: {
-      data: Record<string, unknown>
-    }
+      data: Record<string, unknown>;
+    };
   }>({
-    query: getCoursesPage("pt")
-  })
+    query: getCoursesPage("pt"),
+  });
 
   if (!data && error) {
     console.error("Error fetching courses page data:", error);
     return <div>Error loading page data</div>;
   }
 
-  const { hero, miniCourses, otherCourses } = flattenData(data?.findPageCursosSingleton?.data || {}) as unknown as PageCourses;
+  const { hero, miniCourses, otherCourses } = flattenData(
+    data?.findPageCursosSingleton?.data || {}
+  ) as unknown as PageCourses;
 
-
+  console.log("otherCourses", otherCourses);
 
   return (
-    <main className="w-full h-full">
-      <HeroCourses {...{
-        img: {
-          src: hero.image && hero.image[0].id ? getAssets(hero.image[0].id) : "/card-full-image.png",
-          alt: hero.title ?? "Aprender"
-        },
-        updatedAt: hero.updatedAt,
-        title: hero.title,
-        description: hero.description,
-        breadcrumbItems: [
-          { label: 'Início', url: '/' },
-          { label: 'Aprender', url: '/pages/learn/' },
-        ]
-      }} />
+    <main className="h-full w-full">
+      <HeroCourses
+        {...{
+          img: {
+            src:
+              hero.image && hero.image[0].id ? getAssets(hero.image[0].id) : "/card-full-image.png",
+            alt: hero.title ?? "Aprender",
+          },
+          updatedAt: hero.updatedAt,
+          title: hero.title,
+          description: hero.description,
+          breadcrumbItems: [
+            { label: "Home", url: "/" },
+            { label: "Conhecimento", url: "#" },
+            { label: "Aprender", url: "/pages/learn/" },
+          ],
+        }}
+      />
 
-      <section className="bg-secondary-700 py-64 flex items-center justify-center">
+      <section className="flex items-center justify-center bg-secondary-700 py-64">
         <div className="container flex flex-col items-center justify-center gap-32">
-          <div className="w-full text-white flex flex-col gap-16">
-            <h2 className="text-xl-bold">
-              {formatHtmlParagraphs(miniCourses.title)}
-            </h2>
-            <span>
-              {formatHtmlParagraphs(miniCourses.description)}
-            </span>
+          <div className="flex w-full flex-col gap-16 text-white">
+            <h2 className="text-xl-bold">{formatHtmlParagraphs(miniCourses.title)}</h2>
+            <span>{formatHtmlParagraphs(miniCourses.description)}</span>
           </div>
           {miniCourses.courses.length > 0 && (
             <>
-              <div className="w-full h-full grid gap-32 grid-cols-12 ">
+              <div className="grid h-full w-full grid-cols-12 gap-32">
                 {miniCourses.courses.map((course, index) => (
-                  <div className="col-span-12 lg:col-span-4 bg-wihte [&_.anchor]:hidden [&_p]:hidden [&_.title-text]:!min-h-64 h-full" key={index}>
-                    <CardGeneral {
-                      ...{
+                  <div
+                    className="bg-wihte col-span-12 h-full lg:col-span-4 [&_.anchor]:hidden [&_.title-text]:!min-h-64 [&_p]:hidden"
+                    key={index}
+                  >
+                    <CardGeneral
+                      {...{
                         titleText: course.title,
                         descriptionText: "",
-                        subtitleText: `Publicado a ${dayjs(course.updatedAt).format('DD.MM.YYYY')}`,
+                        subtitleText: `Publicado a ${dayjs(course.updatedAt).format("DD.MM.YYYY")}`,
                         imageIndent: true,
                         className: "",
                         image: {
-                          src: course.cover && course.cover[0] ? getAssets(course.cover[0].id) : "/card-full-image.png",
+                          src:
+                            course.cover && course.cover[0]
+                              ? getAssets(course.cover[0].id)
+                              : "/card-full-image.png",
                           alt: course.title ?? "Curso",
                           width: 352,
-                          height: 208
+                          height: 208,
                         },
                         isBlockedLink: true,
                         anchor: {
                           href: `/pages/learn/mini-courses/${course.id}`,
-                          children: ""
-                        }
-                      }
-                    } />
+                          children: "",
+                        },
+                      }}
+                    />
                   </div>
                 ))}
-
               </div>
-              <div className="w-full ">
+              <div className="w-full">
                 {miniCourses.anchor && (
-                  <ButtonNavigate href={miniCourses.anchor.href} variant="primary" appearance="link" className="!text-white [&_.icon]:hover:!fill-white [&_.icon]:!fill-white hover:!decoration-white" trailingIcon="agora-line-arrow-right-circle" trailingIconHover="agora-solid-arrow-right-circle" hasIcon={true}>
+                  <ButtonNavigate
+                    href={miniCourses.anchor.href}
+                    variant="primary"
+                    appearance="link"
+                    className="!text-white hover:!decoration-white [&_.icon]:!fill-white [&_.icon]:hover:!fill-white"
+                    trailingIcon="agora-line-arrow-right-circle"
+                    trailingIconHover="agora-solid-arrow-right-circle"
+                    hasIcon={true}
+                  >
                     {miniCourses.anchor.children}
                   </ButtonNavigate>
                 )}
@@ -100,35 +111,34 @@ export default async function page() {
           )}
         </div>
       </section>
-      <section className="pt-64 flex items-center justify-center">
+      <section className="flex items-center justify-center pt-64">
         <div className="container flex flex-col items-center justify-center gap-32">
-          <div className="w-full text-primary-900 flex flex-col gap-16">
-            <h2 className="text-xl-bold">
-              {otherCourses.title}
-            </h2>
+          <div className="flex w-full flex-col gap-16 text-primary-900">
+            <h2 className="text-xl-bold">{otherCourses.title}</h2>
             <div>
-              <span className="">
-                {formatHtmlParagraphs(otherCourses.description)}
-              </span>
-              <div className="w-full bg-neutral-200 h-2 mt-12" />
+              <span className="">{formatHtmlParagraphs(otherCourses.description)}</span>
+              <div className="mt-12 h-2 w-full bg-neutral-200" />
             </div>
           </div>
           {otherCourses.courses.length > 0 && (
-            <div className="w-full h-full grid gap-32 grid-cols-12 py-32">
+            <div className="grid h-full w-full grid-cols-12 gap-32 py-32">
               {otherCourses.courses.map((course, index) => (
-                <div className="col-span-12 lg:col-span-4 bg-wihte" key={index}>
+                <div className="bg-wihte col-span-12 lg:col-span-4" key={index}>
                   <SimpleCardImage
                     {...{
                       img: {
-                        src: course.image && course.image[0].id ? getAssets(course.image[0].id) : "courses/academia_portugal.png",
-                        alt: "Academia Portugal Digital"
+                        src:
+                          course.image && course.image[0].id
+                            ? getAssets(course.image[0].id)
+                            : "courses/academia_portugal.png",
+                        alt: "Academia Portugal Digital",
                       },
                       title: course.title,
                       description: formatHtmlParagraphs(course.description),
                       link: {
                         href: course.anchor?.href ?? "#",
-                        text: course.anchor?.children ?? ""
-                      }
+                        text: course.anchor?.children ?? "",
+                      },
                     }}
                   />
                 </div>
@@ -136,8 +146,7 @@ export default async function page() {
             </div>
           )}
         </div>
-
       </section>
     </main>
-  )
+  );
 }

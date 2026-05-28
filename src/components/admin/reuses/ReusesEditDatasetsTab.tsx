@@ -204,6 +204,7 @@ export default function ReusesEditDatasetsTab({
                 placeholder="Nome do conjunto de dados externo"
                 id={`edit-dataset-title-${index}`}
                 value={link.title ?? ""}
+                required={false}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   onDatasetTitleChange(index, e.target.value)
                 }
@@ -213,6 +214,7 @@ export default function ReusesEditDatasetsTab({
                 placeholder="Pequena descrição do conjunto de dados"
                 id={`edit-dataset-description-${index}`}
                 value={link.description ?? ""}
+                required={false}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                   onDatasetDescriptionChange(index, e.target.value)
                 }

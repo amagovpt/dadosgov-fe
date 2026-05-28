@@ -36,6 +36,7 @@ import type { Dataservice } from '@/service/types/dataservice';
 import type { Dataset } from '@/service/types/dataset';
 import type { Organization } from '@/service/types/identity';
 import type { Reuse } from '@/service/types/reuse';
+import AppIcon from "../Primitives/AppIcon";
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";
 
@@ -61,8 +62,7 @@ const TYPES: {
   {
     type: "reuses",
     label: "Reutilizações",
-    icon: (active: boolean) =>
-      active ? "/Icons/bar_char_white.svg" : "/Icons/bar_chart.svg",
+    icon: (active: boolean) => (active ? "/Icons/bar_char_white.svg" : "/Icons/bar_chart.svg"),
     iconHover: "/Icons/bar_char_white.svg",
   },
   {
@@ -78,10 +78,30 @@ const DATASET_FILTERS = {
     title: "Formato dos dados",
     options: [
       { id: "all", label: "Todos", count: "45 mil" },
-      { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet...", count: "14 mil" },
-      { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL...", count: "9,3 mil" },
-      { id: "geographic", label: "Geográfico", description: "geojson, shp, kml...", count: "4,6 mil" },
-      { id: "documents", label: "Documentos", description: "pdf, doc, docx, md, txt, ...", count: "2,8 mil" },
+      {
+        id: "tabular",
+        label: "Tabular",
+        description: "csv, xls, xlsx, ods, parquet...",
+        count: "14 mil",
+      },
+      {
+        id: "structured",
+        label: "Estruturado",
+        description: "JSON, RDF, XML, SQL...",
+        count: "9,3 mil",
+      },
+      {
+        id: "geographic",
+        label: "Geográfico",
+        description: "geojson, shp, kml...",
+        count: "4,6 mil",
+      },
+      {
+        id: "documents",
+        label: "Documentos",
+        description: "pdf, doc, docx, md, txt, ...",
+        count: "2,8 mil",
+      },
       { id: "other", label: "Outro", count: "29 mil" },
     ],
   },
@@ -137,9 +157,7 @@ export default function SearchClient() {
   const tabParam = searchParams.get("type") as SearchType | null;
   const pageParam = Number(searchParams.get("page")) || 1;
 
-  const [activeTab, setActiveTab] = useState<SearchType>(
-    tabParam || "datasets"
-  );
+  const [activeTab, setActiveTab] = useState<SearchType>(tabParam || "datasets");
   const [searchInput, setSearchInput] = useState(query);
 
   const [datasets, setDatasets] = useState<Dataset[]>([]);
@@ -171,7 +189,9 @@ export default function SearchClient() {
   const [filterLicenses, setFilterLicenses] = useState<License[]>([]);
   const [filterGranularities, setFilterGranularities] = useState<Granularity[]>([]);
   const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
-  const [filterFormatOptions, setFilterFormatOptions] = useState<{ id: string; name: string }[]>([]);
+  const [filterFormatOptions, setFilterFormatOptions] = useState<{ id: string; name: string }[]>(
+    []
+  );
   const [filterZoneOptions, setFilterZoneOptions] = useState<{ id: string; name: string }[]>([]);
   const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
   const [isFiltersLoading, setIsFiltersLoading] = useState(true);
@@ -252,27 +272,42 @@ export default function SearchClient() {
   }, []);
 
   const handleTagSearch = useCallback(async (q: string) => {
-    if (q.length < 2) { setFilterTagOptions([]); return; }
+    if (q.length < 2) {
+      setFilterTagOptions([]);
+      return;
+    }
     try {
       const results = await suggestTags(q);
       setFilterTagOptions(results.map((t) => ({ id: t.text, name: t.text })));
-    } catch { setFilterTagOptions([]); }
+    } catch {
+      setFilterTagOptions([]);
+    }
   }, []);
 
   const handleFormatSearch = useCallback(async (q: string) => {
-    if (q.length < 2) { setFilterFormatOptions([]); return; }
+    if (q.length < 2) {
+      setFilterFormatOptions([]);
+      return;
+    }
     try {
       const results = await suggestFormats(q);
       setFilterFormatOptions(results.map((f) => ({ id: f.text, name: f.text })));
-    } catch { setFilterFormatOptions([]); }
+    } catch {
+      setFilterFormatOptions([]);
+    }
   }, []);
 
   const handleZoneSearch = useCallback(async (q: string) => {
-    if (q.length < 2) { setFilterZoneOptions([]); return; }
+    if (q.length < 2) {
+      setFilterZoneOptions([]);
+      return;
+    }
     try {
       const results = await suggestSpatialZones(q);
       setFilterZoneOptions(results.map((z) => ({ id: z.id, name: z.name })));
-    } catch { setFilterZoneOptions([]); }
+    } catch {
+      setFilterZoneOptions([]);
+    }
   }, []);
 
   const handleAdvancedFilterChange = (paramName: string, value: string) => {
@@ -382,7 +417,7 @@ export default function SearchClient() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-neutral-900 bg-neutral-50 filters">
+    <div className="filters flex min-h-screen flex-col bg-neutral-50 font-sans text-neutral-900">
       <main className="flex-grow bg-primary-50">
         <HeroGeneral
           title={titleMap[activeTab]}
@@ -401,9 +436,7 @@ export default function SearchClient() {
             searchActionAltText="Pesquisar"
             darkMode={true}
             value={searchInput}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearchInput(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent) => {
               if (e.key === "Enter") handleSearch();
             }}
@@ -411,18 +444,15 @@ export default function SearchClient() {
           />
         </HeroGeneral>
 
-        <div className="container mx-auto md:gap-32 xl:gap-64 bg-white">
-          <div className="grid md:grid-cols-3 xl:grid-cols-12 grid-filters">
+        <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
+          <div className="grid-filters grid md:grid-cols-3 xl:grid-cols-12">
             {/* Sidebar */}
-            <div className="xl:col-span-4 xl:block p-32 pl-0">
-              <div className="mb-64 pr-32 max-w-[592px] flex flex-col gap-16 mt-32">
-                <h2 className="font-bold text-xl text-neutral-900 mb-16">Tipo</h2>
+            <div className="p-32 pl-0 xl:col-span-4 xl:block">
+              <div className="mb-64 mt-32 flex max-w-[592px] flex-col gap-16 pr-32">
+                <h2 className="text-xl mb-16 font-bold text-neutral-900">Tipo</h2>
                 {TYPES.map((item) => {
                   const isActive = item.type === activeTab;
-                  const icon =
-                    typeof item.icon === "function"
-                      ? item.icon(isActive)
-                      : item.icon;
+                  const icon = typeof item.icon === "function" ? item.icon(isActive) : item.icon;
                   const className =
                     item.type === "reuses" || item.type === "dataservices"
                       ? "w-full agora-toggle agora-toggle-icon agora-toggle-icon-primary full-width has-icon"
@@ -444,12 +474,10 @@ export default function SearchClient() {
                       fullWidth={true}
                       className={className}
                     >
-                      <div className="flex items-center gap-12 font-bold text-sm">
+                      <div className="text-sm flex items-center gap-12 font-bold">
                         <span
                           className={
-                            isActive
-                              ? "text-primary-600 font-bold"
-                              : "text-neutral-900 font-bold"
+                            isActive ? "font-bold text-primary-600" : "font-bold text-neutral-900"
                           }
                         >
                           {item.label}
@@ -458,7 +486,7 @@ export default function SearchClient() {
                           variant="neutral"
                           appearance="outline"
                           circular={false}
-                          className="text-xs font-medium text-neutral-500 ml-16"
+                          className="text-xs ml-16 font-medium text-neutral-500"
                         >
                           {totals[item.type].toLocaleString("pt-PT")}
                         </Pill>
@@ -469,13 +497,13 @@ export default function SearchClient() {
               </div>
 
               {activeTab === "datasets" && (
-                <div className="flex flex-col gap-32 mb-32">
-                  <h2 className="font-bold text-xl text-neutral-900">Filtros</h2>
+                <div className="mb-32 flex flex-col gap-32">
+                  <h2 className="text-xl font-bold text-neutral-900">Filtros</h2>
                   {(Object.keys(DATASET_FILTERS) as FilterKey[]).map((filterKey) => {
                     const section = DATASET_FILTERS[filterKey];
                     return (
-                      <div key={filterKey} className="pr-32 max-w-[592px] flex flex-col gap-8">
-                        <h3 className="font-bold text-base text-neutral-900 mb-8">
+                      <div key={filterKey} className="flex max-w-[592px] flex-col gap-8 pr-32">
+                        <h3 className="mb-8 text-base font-bold text-neutral-900">
                           {section.title}
                         </h3>
                         {section.options.map((option) => {
@@ -494,18 +522,18 @@ export default function SearchClient() {
                               fullWidth={true}
                               className="w-full"
                             >
-                              <div className="flex items-center gap-12 font-bold text-sm">
+                              <div className="text-sm flex items-center gap-12 font-bold">
                                 <span
                                   className={
                                     isSelected
-                                      ? "text-primary-600 font-bold"
-                                      : "text-neutral-900 font-bold"
+                                      ? "font-bold text-primary-600"
+                                      : "font-bold text-neutral-900"
                                   }
                                 >
                                   {option.label}
                                 </span>
                                 {"description" in option && option.description && (
-                                  <span className="text-neutral-900 text-xs font-normal ml-8">
+                                  <span className="text-xs ml-8 font-normal text-neutral-900">
                                     {option.description}
                                   </span>
                                 )}
@@ -513,7 +541,7 @@ export default function SearchClient() {
                                   variant="neutral"
                                   appearance="outline"
                                   circular={false}
-                                  className="text-xs font-medium text-neutral-500 ml-16"
+                                  className="text-xs ml-16 font-medium text-neutral-500"
                                 >
                                   {option.count}
                                 </Pill>
@@ -529,8 +557,8 @@ export default function SearchClient() {
             </div>
 
             {/* Main Content */}
-            <div className="xl:col-span-8 p-32 pr-0">
-              <div className="flex items-center justify-between mb-24">
+            <div className="p-32 pr-0 xl:col-span-8">
+              <div className="mb-24 flex items-center justify-between">
                 <p className="text-m-bold text-neutral-900">
                   {totalForActiveTab} Resultado
                   {totalForActiveTab !== 1 ? "s" : ""}
@@ -546,33 +574,29 @@ export default function SearchClient() {
                           <Link
                             key={dataset.id}
                             href={`/pages/datasets/${dataset.slug}`}
-                            className="block p-20 border border-neutral-200 -mt-px first:rounded-t-8 last:rounded-b-8 hover:border-primary-600 hover:z-10 hover:shadow-sm transition-all relative"
+                            className="-mt-px hover:shadow-sm relative block border border-neutral-200 p-20 transition-all first:rounded-t-8 last:rounded-b-8 hover:z-10 hover:border-primary-600"
                           >
-                            <h3 className="text-m-bold text-primary-700">
-                              {dataset.title}
-                            </h3>
+                            <h3 className="text-m-bold text-primary-700">{dataset.title}</h3>
                             {dataset.organization && (
-                              <p className="text-s-regular text-neutral-500 mt-4">
+                              <p className="mt-4 text-s-regular text-neutral-500">
                                 {dataset.organization.name}
                                 {dataset.last_modified && (
                                   <span className="ml-8">
                                     — Atualizado a{" "}
-                                    {new Date(
-                                      dataset.last_modified
-                                    ).toLocaleDateString("pt-PT")}
+                                    {new Date(dataset.last_modified).toLocaleDateString("pt-PT")}
                                   </span>
                                 )}
                               </p>
                             )}
-                            <p className="text-s-regular text-neutral-700 mt-8 line-clamp-2">
+                            <p className="mt-8 line-clamp-2 text-s-regular text-neutral-700">
                               {dataset.description}
                             </p>
                             {dataset.tags?.length > 0 && (
-                              <div className="flex flex-wrap gap-8 mt-8">
+                              <div className="mt-8 flex flex-wrap gap-8">
                                 {dataset.tags.slice(0, 5).map((tag) => (
                                   <span
                                     key={tag}
-                                    className="text-xs px-8 py-2 bg-neutral-100 text-neutral-600 rounded-full"
+                                    className="text-xs rounded-full bg-neutral-100 px-8 py-2 text-neutral-600"
                                   >
                                     {tag}
                                   </span>
@@ -585,7 +609,7 @@ export default function SearchClient() {
                         <CardNoResults
                           position="center"
                           icon={
-                            <Icon name="agora-line-search" className="w-48 h-48 text-neutral-400" />
+                            <Icon name="agora-line-search" className="h-48 w-48 text-neutral-400" />
                           }
                           title={`Nenhum resultado encontrado para "${query}"`}
                           description="Tente pesquisar com termos diferentes."
@@ -601,17 +625,15 @@ export default function SearchClient() {
                           <Link
                             key={ds.id}
                             href={`/pages/dataservices/${ds.id}`}
-                            className="block p-20 border border-neutral-200 -mt-px first:rounded-t-8 last:rounded-b-8 hover:border-primary-600 hover:z-10 hover:shadow-sm transition-all relative"
+                            className="-mt-px hover:shadow-sm relative block border border-neutral-200 p-20 transition-all first:rounded-t-8 last:rounded-b-8 hover:z-10 hover:border-primary-600"
                           >
-                            <h3 className="text-m-bold text-primary-700">
-                              {ds.title}
-                            </h3>
+                            <h3 className="text-m-bold text-primary-700">{ds.title}</h3>
                             {ds.organization && (
-                              <p className="text-s-regular text-neutral-500 mt-4">
+                              <p className="mt-4 text-s-regular text-neutral-500">
                                 {ds.organization.name}
                               </p>
                             )}
-                            <p className="text-s-regular text-neutral-700 mt-8 line-clamp-2">
+                            <p className="mt-8 line-clamp-2 text-s-regular text-neutral-700">
                               {ds.description}
                             </p>
                           </Link>
@@ -620,7 +642,7 @@ export default function SearchClient() {
                         <CardNoResults
                           position="center"
                           icon={
-                            <Icon name="agora-line-search" className="w-48 h-48 text-neutral-400" />
+                            <Icon name="agora-line-search" className="h-48 w-48 text-neutral-400" />
                           }
                           title={`Nenhum resultado encontrado para "${query}"`}
                           description="Tente pesquisar com termos diferentes."
@@ -636,28 +658,23 @@ export default function SearchClient() {
                           <Link
                             key={org.id}
                             href={`/pages/organizations/${org.slug}`}
-                            className="flex items-center gap-20 p-20 border border-neutral-200 -mt-px first:rounded-t-8 last:rounded-b-8 hover:border-primary-600 hover:z-10 hover:shadow-sm transition-all relative"
+                            className="-mt-px hover:shadow-sm relative flex items-center gap-20 border border-neutral-200 p-20 transition-all first:rounded-t-8 last:rounded-b-8 hover:z-10 hover:border-primary-600"
                           >
                             {org.logo ? (
                               <img
                                 src={org.logo}
                                 alt={org.name}
-                                className="w-48 h-48 object-contain rounded-4 shrink-0"
+                                className="h-48 w-48 shrink-0 rounded-4 object-contain"
                               />
                             ) : (
-                              <div className="w-48 h-48 bg-neutral-100 rounded-4 flex items-center justify-center shrink-0">
-                                <Icon
-                                  name="agora-line-buildings"
-                                  className="w-20 h-20 text-neutral-400"
-                                />
+                              <div className="flex h-48 w-48 shrink-0 items-center justify-center rounded-4 bg-neutral-100">
+                                <AppIcon name="agora-line-buildings" className="text-neutral-400" />
                               </div>
                             )}
                             <div className="flex-1">
-                              <h3 className="text-m-bold text-primary-700">
-                                {org.name}
-                              </h3>
+                              <h3 className="text-m-bold text-primary-700">{org.name}</h3>
                               {org.description && (
-                                <p className="text-s-regular text-neutral-700 mt-4 line-clamp-2">
+                                <p className="mt-4 line-clamp-2 text-s-regular text-neutral-700">
                                   {org.description}
                                 </p>
                               )}
@@ -668,7 +685,10 @@ export default function SearchClient() {
                         <CardNoResults
                           position="center"
                           icon={
-                            <Icon name="agora-line-search" className="w-48 h-48 text-neutral-400" />
+                            <AppIcon
+                              name="agora-line-search"
+                              className="h-48 w-48 text-neutral-400"
+                            />
                           }
                           title={`Nenhum resultado encontrado para "${query}"`}
                           description="Tente pesquisar com termos diferentes."
@@ -684,30 +704,31 @@ export default function SearchClient() {
                           <Link
                             key={reuse.id}
                             href={`/pages/reuses/${reuse.slug}`}
-                            className="flex items-center gap-20 p-20 border border-neutral-200 -mt-px first:rounded-t-8 last:rounded-b-8 hover:border-primary-600 hover:z-10 hover:shadow-sm transition-all relative"
+                            className="-mt-px hover:shadow-sm relative flex items-center gap-20 border border-neutral-200 p-20 transition-all first:rounded-t-8 last:rounded-b-8 hover:z-10 hover:border-primary-600"
                           >
                             {reuse.image_thumbnail || reuse.image ? (
                               <img
                                 src={reuse.image_thumbnail || reuse.image || ""}
                                 alt={reuse.title}
-                                className="w-48 h-48 object-cover rounded-4 shrink-0"
+                                className="h-48 w-48 shrink-0 rounded-4 object-cover"
                               />
                             ) : (
-                              <div className="w-48 h-48 bg-neutral-100 rounded-4 flex items-center justify-center shrink-0">
+                              <div className="flex h-48 w-48 shrink-0 items-center justify-center rounded-4 bg-neutral-100">
                                 <Icon
                                   name="agora-line-bar-chart"
-                                  className="w-20 h-20 text-neutral-400"
+                                  className="h-20 w-20 text-neutral-400"
                                 />
                               </div>
                             )}
                             <div className="flex-1">
-                              <h3 className="text-m-bold text-primary-700">
-                                {reuse.title}
-                              </h3>
-                              <p className="text-s-regular text-neutral-500 mt-4">
-                                {reuse.organization?.name || (reuse.owner ? `${reuse.owner.first_name} ${reuse.owner.last_name}`.trim() : '')}
+                              <h3 className="text-m-bold text-primary-700">{reuse.title}</h3>
+                              <p className="mt-4 text-s-regular text-neutral-500">
+                                {reuse.organization?.name ||
+                                  (reuse.owner
+                                    ? `${reuse.owner.first_name} ${reuse.owner.last_name}`.trim()
+                                    : "")}
                               </p>
-                              <p className="text-s-regular text-neutral-700 mt-4 line-clamp-2">
+                              <p className="mt-4 line-clamp-2 text-s-regular text-neutral-700">
                                 {reuse.description}
                               </p>
                             </div>
@@ -717,7 +738,7 @@ export default function SearchClient() {
                         <CardNoResults
                           position="center"
                           icon={
-                            <Icon name="agora-line-search" className="w-48 h-48 text-neutral-400" />
+                            <Icon name="agora-line-search" className="h-48 w-48 text-neutral-400" />
                           }
                           title={`Nenhum resultado encontrado para "${query}"`}
                           description="Tente pesquisar com termos diferentes."
@@ -744,10 +765,8 @@ export default function SearchClient() {
       </main>
 
       {!query && (
-        <div className="container mx-auto text-center py-48 text-neutral-500">
-          <p className="text-m-regular">
-            Introduza um termo para pesquisar no portal.
-          </p>
+        <div className="container mx-auto py-48 text-center text-neutral-500">
+          <p className="text-m-regular">Introduza um termo para pesquisar no portal.</p>
         </div>
       )}
     </div>

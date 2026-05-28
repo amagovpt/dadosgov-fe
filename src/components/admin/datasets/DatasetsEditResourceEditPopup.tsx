@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Button, InputText, InputTextArea, StatusCard } from "@ama-pt/agora-design-system";
+import { Button, InputText, InputTextArea, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { replaceResourceFile, updateResource } from "@/app/api/datasets";
@@ -23,6 +23,7 @@ export default function DatasetsEditResourceEditPopup({
   onSaved,
   onCancel,
 }: DatasetsEditResourceEditPopupProps) {
+  const { hide } = usePopupContext();
   const [title, setTitle] = useState(resource.title);
   const [description, setDescription] = useState(resource.description || "");
   const [resourceUrl, setResourceUrl] = useState(resource.url || "");
@@ -95,6 +96,7 @@ export default function DatasetsEditResourceEditPopup({
         filesize: filesize ? Number(filesize) : undefined,
         type: resourceTypeRef.current,
       });
+      hide();
       onSaved();
     } catch (err) {
       console.error("Error updating resource:", err);
@@ -111,6 +113,7 @@ export default function DatasetsEditResourceEditPopup({
     setError(null);
     try {
       await replaceResourceFile(datasetId, resource.id, files[0]);
+      hide();
       onSaved();
     } catch (err: unknown) {
       const apiErr = err as { status?: number; data?: Record<string, unknown> };

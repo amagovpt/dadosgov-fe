@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Breadcrumb, Button, Icon } from "@ama-pt/agora-design-system";
+import { Button, Icon } from "@ama-pt/agora-design-system";
 import CommunityResourceFormClient from "@/components/admin/community-resources/CommunityResourceFormClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { AdminStepper } from "@/components/admin/AdminStepper";
 
 export default function CommunityResourceNewClient() {
   const searchParams = useSearchParams();
@@ -14,9 +15,6 @@ export default function CommunityResourceNewClient() {
   const datasetId = searchParams.get("dataset_id") || "";
   const totalSteps = 2;
   const currentStep = Number(searchParams.get("step")) || 1;
-  const totalSegments = 12;
-  const filledSegments = Math.round((currentStep / totalSteps) * totalSegments);
-
   const [publicPageUrl, setPublicPageUrl] = useState<string | null>(null);
 
   const stepTitles: Record<number, string> = {
@@ -25,20 +23,14 @@ export default function CommunityResourceNewClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            {
-              label: "Recursos comunitários",
-              url: "/pages/admin/me/community-resources",
-            },
-          ]}
-        />
-      </div>
-
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: displayName || "...", url: "#" },
+        { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
+      ]}
+      title="Formulário de inscrição"
+    >
       {currentStep === 2 && publicPageUrl && (
         <div className="flex justify-end mb-16">
           <Button
@@ -54,41 +46,13 @@ export default function CommunityResourceNewClient() {
         </div>
       )}
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de inscrição</h1>
-        <PublishDropdown />
-      </div>
-
-      {/* Step indicator */}
-      <div className="admin-page__step-header">
-        <p className="admin-page__step-text">
-          <span className="text-primary-600 font-bold">Etapa {currentStep} de {totalSteps} - </span>
-          <span className="text-primary-900 font-bold">
-            {stepTitles[currentStep]}
-          </span>
-        </p>
-      </div>
-
-      {/* Progress bar */}
-      <div className="admin-page__stepper">
-        <div className="admin-page__stepper-bar">
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--start" />
-          {Array.from({ length: totalSegments }).map((_, i) => (
-            <div
-              key={i}
-              className={`admin-page__stepper-segment ${
-                i < filledSegments
-                  ? "admin-page__stepper-segment--filled"
-                  : ""
-              }`}
-            />
-          ))}
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--end" />
-        </div>
-        <span className="admin-page__stepper-label">
-          Etapa {currentStep}/{totalSteps}
-        </span>
-      </div>
+      <AdminStepper
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        stepTitle={stepTitles[currentStep]}
+        labelWord="Etapa"
+        labelFormat="de"
+      />
 
       <CommunityResourceFormClient
         datasetId={datasetId}
@@ -105,6 +69,6 @@ export default function CommunityResourceNewClient() {
           )
         }
       />
-    </div>
+    </AdminLayout>
   );
 }

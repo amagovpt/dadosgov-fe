@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   DropdownOption,
   DropdownSection,
@@ -17,6 +15,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -44,10 +43,7 @@ import type { Activity, TagSuggestion } from '@/service/types/catalog';
 import type { Dataset } from '@/service/types/dataset';
 import type { Discussion } from '@/service/types/discussion';
 import type { Reuse, ReuseType, ReuseTopic } from '@/service/types/reuse';
-import {
-  normalizeRemoteDatasets,
-  type RemoteDatasetEntry,
-} from "@/lib/reuse-remote-datasets";
+import { normalizeRemoteDatasets, type RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import ReusesEditMetadataTab from "@/components/admin/reuses/ReusesEditMetadataTab";
 import ReusesEditDatasetsTab from "@/components/admin/reuses/ReusesEditDatasetsTab";
@@ -55,6 +51,7 @@ import ReusesEditApiTab from "@/components/admin/reuses/ReusesEditApiTab";
 import ReusesEditDiscussionsTab from "@/components/admin/reuses/ReusesEditDiscussionsTab";
 import ReusesEditActivitiesTab from "@/components/admin/reuses/ReusesEditActivitiesTab";
 import ReusesEditDeletePopup from "@/components/admin/reuses/ReusesEditDeletePopup";
+import TextLink from "@/components/Primitives/TextLink";
 
 const activityLabels: Record<string, string> = {
   "created a dataset": "criou um conjunto de dados",
@@ -93,7 +90,8 @@ export default function ReusesEditClient() {
   const params = useParams();
   const router = useRouter();
   const { show, hide } = usePopupContext();
-  const reuseId = (params?.reuseId as string) || searchParams.get("id") || searchParams.get("slug") || "";
+  const reuseId =
+    (params?.reuseId as string) || searchParams.get("id") || searchParams.get("slug") || "";
 
   const [reuse, setReuse] = useState<Reuse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -198,12 +196,9 @@ export default function ReusesEditClient() {
   // belongs to). The search dropdown still queries the whole portal via
   // searchDatasets() when the user types a query.
   useEffect(() => {
-    const dedupe = (items: Dataset[]) =>
-      Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const dedupe = (items: Dataset[]) => Array.from(new Map(items.map((d) => [d.id, d])).values());
     const personal = fetchMyDatasets(1, 100);
-    const orgs = (user?.organizations || []).map((org) =>
-      fetchOrgDatasets(org.id, 1, 100),
-    );
+    const orgs = (user?.organizations || []).map((org) => fetchOrgDatasets(org.id, 1, 100));
     Promise.all([personal, ...orgs])
       .then((results) => {
         const all = results.flatMap((r) => r.data || []);
@@ -231,7 +226,9 @@ export default function ReusesEditClient() {
 
   // Initial pool of tag suggestions for the keywords dropdown.
   useEffect(() => {
-    suggestTags("", 50).then(setTagSuggestions).catch(() => setTagSuggestions([]));
+    suggestTags("", 50)
+      .then(setTagSuggestions)
+      .catch(() => setTagSuggestions([]));
   }, []);
 
   // Debounced tag search while user types in the keywords dropdown.
@@ -250,8 +247,12 @@ export default function ReusesEditClient() {
   }, [keywordSearch]);
 
   const selectedKeywords = useMemo(
-    () => selectedKeywordsValue.split(",").map((v) => v.trim()).filter(Boolean),
-    [selectedKeywordsValue],
+    () =>
+      selectedKeywordsValue
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean),
+    [selectedKeywordsValue]
   );
 
   const keywordOptions = useMemo(() => {
@@ -271,7 +272,7 @@ export default function ReusesEditClient() {
       return true;
     });
     const selectedNotInSuggestions = selectedKeywords.filter(
-      (keyword) => !seen.has(keyword.toLowerCase()),
+      (keyword) => !seen.has(keyword.toLowerCase())
     );
     const showCreate =
       trimmed.length > 0 &&
@@ -280,11 +281,7 @@ export default function ReusesEditClient() {
     const options = [
       ...(showCreate
         ? [
-            <DropdownOption
-              key={`__create__${trimmedLower}`}
-              value={trimmed}
-              selected={false}
-            >
+            <DropdownOption key={`__create__${trimmedLower}`} value={trimmed} selected={false}>
               Criar &quot;{trimmed}&quot;
             </DropdownOption>,
           ]
@@ -311,12 +308,8 @@ export default function ReusesEditClient() {
     if (!reuse || !reuse.datasets || reuse.datasets.length === 0) return;
     async function loadAssociatedDatasets() {
       try {
-        const slugs = reuse!.datasets.map((d) =>
-          d.uri.split("/").filter(Boolean).pop() || d.id
-        );
-        const results = await Promise.all(
-          slugs.map((s) => fetchDataset(s).catch(() => null))
-        );
+        const slugs = reuse!.datasets.map((d) => d.uri.split("/").filter(Boolean).pop() || d.id);
+        const results = await Promise.all(slugs.map((s) => fetchDataset(s).catch(() => null)));
         setAssociatedDatasets(results.filter((d): d is Dataset => d !== null));
       } catch {
         setAssociatedDatasets([]);
@@ -349,8 +342,9 @@ export default function ReusesEditClient() {
       .finally(() => setDiscussionsLoading(false));
   };
 
-  const discussionsCount =
-    discussionsLoaded ? discussions.length : (reuse?.metrics?.discussions ?? 0);
+  const discussionsCount = discussionsLoaded
+    ? discussions.length
+    : (reuse?.metrics?.discussions ?? 0);
 
   const clearError = (field: string) => {
     if (formErrors[field]) {
@@ -424,12 +418,8 @@ export default function ReusesEditClient() {
     let addedNew = false;
     selected.forEach((keyword) => {
       const lower = keyword.toLowerCase();
-      const existsInSuggestions = tagSuggestions.some(
-        (tag) => tag.text.toLowerCase() === lower,
-      );
-      const existsInSearch = tagSearch.some(
-        (tag) => tag.text.toLowerCase() === lower,
-      );
+      const existsInSuggestions = tagSuggestions.some((tag) => tag.text.toLowerCase() === lower);
+      const existsInSearch = tagSearch.some((tag) => tag.text.toLowerCase() === lower);
       if (!existsInSuggestions && !existsInSearch) {
         addedNew = true;
         setTagSuggestions((prev) => {
@@ -455,23 +445,16 @@ export default function ReusesEditClient() {
 
   const handleOpenDeletePopup = () => {
     if (!reuse) return;
-    show(
-      <ReusesEditDeletePopup onClose={hide} onConfirm={handleDeleteReuse} />,
-      {
-        title: "Elimine a reutilização",
-        closeAriaLabel: "Fechar",
-        dimensions: "m",
-      },
-    );
+    show(<ReusesEditDeletePopup onClose={hide} onConfirm={handleDeleteReuse} />, {
+      title: "Elimine a reutilização",
+      closeAriaLabel: "Fechar",
+      dimensions: "m",
+    });
   };
 
   const handleDatasetSelectChange = (selectedIds: string[]) => {
     const selectedIdsSet = new Set(selectedIds);
-    const pool: Dataset[] = [
-      ...selectedDatasets,
-      ...datasetSearchResults,
-      ...myDatasets,
-    ];
+    const pool: Dataset[] = [...selectedDatasets, ...datasetSearchResults, ...myDatasets];
     const seen = new Set<string>();
     const next: Dataset[] = [];
     for (const dataset of pool) {
@@ -565,7 +548,7 @@ export default function ReusesEditClient() {
 
     if (hasLocal && hasRemote) {
       setApiError(
-        "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
+        "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
       );
       return;
     }
@@ -725,11 +708,13 @@ export default function ReusesEditClient() {
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       requestAnimationFrame(() => {
-        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document
+          .querySelector('[aria-invalid="true"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
       });
       return;
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setFormErrors({});
     setApiError(null);
     setApiSuccess(null);
@@ -801,10 +786,7 @@ export default function ReusesEditClient() {
     }
   };
 
-  const handleTransferReuse = async (
-    recipient: RecipientSelection,
-    comment: string,
-  ) => {
+  const handleTransferReuse = async (recipient: RecipientSelection, comment: string) => {
     if (!reuse) throw new Error("Reutilização não carregada.");
     setApiError(null);
     setApiSuccess(null);
@@ -815,7 +797,7 @@ export default function ReusesEditClient() {
     });
     hide();
     setApiSuccess(
-      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
+      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`
     );
     setTimeout(() => setApiSuccess(null), 15000);
   };
@@ -850,10 +832,7 @@ export default function ReusesEditClient() {
     return (
       <div className="admin-page">
         <StatusCard variant="danger" showIcon description="Reutilização não encontrada." />
-        <Button
-          variant="primary"
-          onClick={() => router.push("/pages/admin/me/reuses")}
-        >
+        <Button variant="primary" onClick={() => router.push("/pages/admin/me/reuses")}>
           Voltar
         </Button>
       </div>
@@ -861,19 +840,14 @@ export default function ReusesEditClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Reutilizações", url: "/pages/admin/me/reuses" },
-            { label: reuse.title, url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">{reuse.title}</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Reutilizações", url: "/pages/admin/me/reuses" },
+        { label: reuse.title },
+      ]}
+      title={reuse.title}
+      headerAction={
         <Button
           variant="primary"
           appearance="outline"
@@ -881,24 +855,41 @@ export default function ReusesEditClient() {
           onClick={() => window.open(`/pages/reuses/${reuse.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
-            <Icon name="agora-line-eye" className="w-16 h-16" />
+            <Icon name="agora-line-eye" className="h-16 w-16" />
             Ver página pública
           </span>
         </Button>
-      </div>
+      }
+    >
 
       {reuse.deleted && (
         <div className="mb-16">
-          <StatusCard variant="warning" showIcon description="Esta reutilização foi excluída e a sua página pública não está disponível." />
+          <StatusCard
+            variant="warning"
+            showIcon
+            description="Esta reutilização foi excluída e a sua página pública não está disponível."
+          />
         </div>
       )}
       {!reuse.deleted && reuse.archived && (
         <div className="mb-16">
-          <StatusCard variant="warning" showIcon description="Esta reutilização está arquivada e a sua página pública não está disponível." />
+          <StatusCard
+            variant="warning"
+            showIcon
+            description="Esta reutilização está arquivada e a sua página pública não está disponível."
+          />
         </div>
       )}
-      {apiError && <div className="mb-16"><StatusCard variant="danger" showIcon description={apiError} /></div>}
-      {apiSuccess && <div className="mb-16"><StatusCard variant="success" showIcon description={apiSuccess} /></div>}
+      {apiError && (
+        <div className="mb-16">
+          <StatusCard variant="danger" showIcon description={apiError} />
+        </div>
+      )}
+      {apiSuccess && (
+        <div className="mb-16">
+          <StatusCard variant="success" showIcon description={apiSuccess} />
+        </div>
+      )}
 
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
@@ -921,12 +912,9 @@ export default function ReusesEditClient() {
           {" Atividade mais recente: "}
           {reuse.owner && (
             <>
-              <Link
-                href={`/pages/users/${reuse.owner.slug}`}
-                className="text-primary-600 underline"
-              >
+              <TextLink href={`/pages/users/${reuse.owner.slug}`}>
                 {reuse.owner.first_name} {reuse.owner.last_name}
-              </Link>
+              </TextLink>
             </>
           )}
           {" — editou a reutilização — "}
@@ -1062,6 +1050,6 @@ export default function ReusesEditClient() {
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }

@@ -3,23 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import {
-  Breadcrumb,
-  Button,
-  CardNoResults,
-  Icon,
-} from "@ama-pt/agora-design-system";
 import { fetchNotifications, markNotificationRead } from "@/app/api/notifications";
 import type { Notification, ValidateHarvesterNotificationDetails } from '@/service/types/notifications-reporting';
+import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import {
   harvesterValidationLink,
   isHarvesterValidation,
 } from "@/components/admin/notifications/notification-helpers";
+import AppIcon from "@/components/Primitives/AppIcon";
 
-const STATUS_LABEL: Record<
-  ValidateHarvesterNotificationDetails["status"],
-  string
-> = {
+const STATUS_LABEL: Record<ValidateHarvesterNotificationDetails["status"], string> = {
   pending: "Pendente",
   accepted: "Validada",
   refused: "Recusada",
@@ -56,20 +50,17 @@ export default function NotificationsClient() {
   }, []);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Notificações", url: "/pages/admin/notificacoes" },
-          ]}
-        />
-      </div>
-
-      <h1 className="admin-page__title mt-64 mb-16">Notificações</h1>
-      <p className="text-neutral-700 text-base mb-32">
-        Pedidos de validação de harvesters e outras notificações dirigidas à
-        equipa de administração.
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Notificações", url: "/pages/admin/notificacoes" },
+      ]}
+      title="Notificações"
+      headerAction={null}
+    >
+      <p className="mb-32 text-base text-neutral-700">
+        Pedidos de validação de harvesters e outras notificações dirigidas à equipa de
+        administração.
       </p>
 
       {isLoading ? (
@@ -83,7 +74,7 @@ export default function NotificationsClient() {
           {items.map((n) => (
             <li
               key={n.id}
-              className={`rounded-8 border border-neutral-200 p-24 flex flex-col gap-12 ${
+              className={`flex flex-col gap-12 rounded-8 border border-neutral-200 p-24 ${
                 n.handled_at ? "bg-neutral-50" : "bg-white"
               }`}
             >
@@ -110,7 +101,7 @@ export default function NotificationsClient() {
           ))}
         </ul>
       )}
-    </div>
+    </AdminLayout>
   );
 }
 
@@ -139,15 +130,15 @@ function HarvesterValidationRow({
     <div className="flex items-start justify-between gap-16">
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-mega-phone" className="w-[20px] h-[20px]" />
+          <AppIcon name="agora-line-mega-phone" />
           <span className="text-base font-medium text-primary-900">
             Validação de harvester — {statusLabel}
           </span>
         </div>
         {details.source ? (
-          <p className="text-neutral-900 text-base">{details.source.name}</p>
+          <p className="text-base text-neutral-900">{details.source.name}</p>
         ) : (
-          <p className="text-neutral-700 text-base italic">
+          <p className="text-base italic text-neutral-700">
             Fonte indisponível (poderá ter sido eliminada).
           </p>
         )}
@@ -156,7 +147,7 @@ function HarvesterValidationRow({
           {handledAt && " · lida"}
         </p>
       </div>
-      <div className="flex items-center gap-8 shrink-0">
+      <div className="flex shrink-0 items-center gap-8">
         {link && (
           <Link href={link}>
             <Button appearance="outline" variant="primary">
@@ -165,11 +156,7 @@ function HarvesterValidationRow({
           </Link>
         )}
         {!handledAt && (
-          <Button
-            appearance="link"
-            variant="neutral"
-            onClick={() => onMarkRead(id)}
-          >
+          <Button appearance="link" variant="neutral" onClick={() => onMarkRead(id)}>
             Marcar como lida
           </Button>
         )}
@@ -183,10 +170,8 @@ function GenericRow({ id, createdAt, handledAt, onMarkRead }: BaseRowProps) {
     <div className="flex items-start justify-between gap-16">
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-8">
-          <Icon name="agora-line-mega-phone" className="w-[20px] h-[20px]" />
-          <span className="text-base font-medium text-primary-900">
-            Nova notificação
-          </span>
+          <Icon name="agora-line-mega-phone" className="h-20 w-20" />
+          <span className="text-base font-medium text-primary-900">Nova notificação</span>
         </div>
         <p className="text-sm text-neutral-500">
           {format(new Date(createdAt), "dd/MM/yyyy HH:mm")}

@@ -2,13 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Button,
-  InputText,
-  InputPassword,
-  Icon,
-  Breadcrumb,
-} from "@ama-pt/agora-design-system";
+import { Button, InputText, InputPassword, Icon, Breadcrumb } from "@ama-pt/agora-design-system";
 import {
   fetchMigrationPending,
   searchMigrationAccount,
@@ -16,7 +10,7 @@ import {
   confirmMigration,
   skipMigration,
 } from "@/app/api/migration";
-
+import AppIcon from "../Primitives/AppIcon";
 type Step =
   | "loading"
   | "search"
@@ -191,8 +185,8 @@ export default function MigrateAccountClient() {
 
   if (step === "loading") {
     return (
-      <main className="flex-grow bg-white min-h-screen">
-        <div className="container mx-auto px-16 pt-32 pb-64 max-w-7xl">
+      <main className="min-h-screen flex-grow bg-white">
+        <div className="container mx-auto max-w-7xl px-16 pb-64 pt-32">
           <p className="text-lg text-neutral-700">A carregar...</p>
         </div>
       </main>
@@ -200,26 +194,26 @@ export default function MigrateAccountClient() {
   }
 
   return (
-    <main className="flex-grow bg-white min-h-screen">
-      <div className="container mx-auto px-16 pt-32 pb-64 max-w-7xl">
+    <main className="min-h-screen flex-grow bg-white">
+      <div className="container mx-auto max-w-7xl px-16 pb-64 pt-32">
         <div>
           <Breadcrumb items={breadcrumbItems} />
         </div>
 
         <div className="mt-64 max-w-[560px]">
-          <h1 className="text-2xl-medium text-brand-blue-dark mb-16">
+          <h1 className="mb-16 text-2xl-medium text-brand-blue-dark">
             Migrar conta para Chave Movel Digital
           </h1>
 
           {step !== "success" && (
-            <p className="text-lg text-neutral-700 mb-32">
-              Detetamos que ja possui uma conta no portal. Para continuar a utilizar os seus
-              dados, precisa de verificar a propriedade da conta.
+            <p className="text-lg mb-32 text-neutral-700">
+              Detetamos que ja possui uma conta no portal. Para continuar a utilizar os seus dados,
+              precisa de verificar a propriedade da conta.
             </p>
           )}
 
           {error && (
-            <div className="p-16 rounded-8 bg-red-50 text-red-700 text-sm font-medium border border-red-200 mb-24">
+            <div className="bg-red-50 text-red-700 text-sm border-red-200 mb-24 rounded-8 border p-16 font-medium">
               {error}
             </div>
           )}
@@ -227,15 +221,15 @@ export default function MigrateAccountClient() {
           {/* Step: Search for legacy account (when no email from SAML) */}
           {step === "search" && (
             <div className="flex flex-col gap-24">
-              <div className="bg-[#E9EBFF] rounded-8 w-fit p-16">
-                <Icon name="agora-line-search" className="w-24 h-24 text-brand-blue-primary" />
+              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
+                <Icon name="agora-line-search" className="h-24 w-24 text-brand-blue-primary" />
               </div>
               <h2 className="text-xl-bold text-brand-blue-dark">Encontre a sua conta</h2>
               <p className="text-neutral-900">
                 Introduza o email ou o nome associado a sua conta anterior.
               </p>
 
-              <div className="flex gap-16 mb-8">
+              <div className="mb-8 flex gap-16">
                 <Button
                   variant={!searchByName ? "primary" : "neutral"}
                   onClick={() => setSearchByName(false)}
@@ -295,7 +289,7 @@ export default function MigrateAccountClient() {
                 </>
               )}
 
-              <div className="flex gap-16 mt-16">
+              <div className="mt-16 flex gap-16">
                 <Button
                   variant="primary"
                   onClick={handleSearch}
@@ -318,24 +312,19 @@ export default function MigrateAccountClient() {
           {/* Step: Confirm legacy account details */}
           {step === "confirm-account" && (
             <div className="flex flex-col gap-24">
-              <div className="bg-[#E9EBFF] rounded-8 w-fit p-16">
-                <Icon name="agora-line-user" className="w-24 h-24 text-brand-blue-primary" />
+              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
+                <Icon name="agora-line-user" className="h-24 w-24 text-brand-blue-primary" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">
-                Esta conta é sua?
-              </h2>
+              <h2 className="text-xl-bold text-brand-blue-dark">Esta conta é sua?</h2>
               <p className="text-neutral-900">
-                Encontramos uma conta existente no portal com os seguintes dados.
-                Confirme se esta conta lhe pertence.
+                Encontramos uma conta existente no portal com os seguintes dados. Confirme se esta
+                conta lhe pertence.
               </p>
 
-              <div className="rounded-8 border border-neutral-300 p-24 flex flex-col gap-16 bg-neutral-50">
+              <div className="flex flex-col gap-16 rounded-8 border border-neutral-300 bg-neutral-50 p-24">
                 {(legacyFirstName || legacyLastName) && (
                   <div className="flex items-center gap-12">
-                    <Icon
-                      name="agora-line-user"
-                      className="w-20 h-20 text-neutral-600 shrink-0"
-                    />
+                    <AppIcon name="agora-line-user" className="shrink-0 text-neutral-600" />
                     <div>
                       <p className="text-xs text-neutral-600">Nome</p>
                       <p className="text-base-bold text-neutral-900">
@@ -346,10 +335,7 @@ export default function MigrateAccountClient() {
                 )}
                 {maskedEmail && (
                   <div className="flex items-center gap-12">
-                    <Icon
-                      name="agora-line-mail"
-                      className="w-20 h-20 text-neutral-600 shrink-0"
-                    />
+                    <AppIcon name="agora-line-mail" className="shrink-0 text-neutral-600" />
                     <div>
                       <p className="text-xs text-neutral-600">Email</p>
                       <p className="text-base-bold text-neutral-900">{maskedEmail}</p>
@@ -358,7 +344,7 @@ export default function MigrateAccountClient() {
                 )}
               </div>
 
-              <div className="flex gap-16 mt-8">
+              <div className="mt-8 flex gap-16">
                 <Button
                   variant="primary"
                   onClick={() => {
@@ -369,11 +355,7 @@ export default function MigrateAccountClient() {
                 >
                   Sim, esta conta e minha
                 </Button>
-                <Button
-                  variant="neutral"
-                  onClick={handleSkip}
-                  disabled={isLoading}
-                >
+                <Button variant="neutral" onClick={handleSkip} disabled={isLoading}>
                   Nao, criar conta nova
                 </Button>
               </div>
@@ -383,8 +365,8 @@ export default function MigrateAccountClient() {
           {/* Step: Choose verification method */}
           {step === "choose-method" && (
             <div className="flex flex-col gap-24">
-              <div className="bg-[#E9EBFF] rounded-8 w-fit p-16">
-                <Icon name="agora-line-shield" className="w-24 h-24 text-brand-blue-primary" />
+              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
+                <Icon name="agora-line-shield" className="h-24 w-24 text-brand-blue-primary" />
               </div>
               <h2 className="text-xl-bold text-brand-blue-dark">Verifique a sua identidade</h2>
               <p className="text-neutral-900">
@@ -395,13 +377,10 @@ export default function MigrateAccountClient() {
                 <button
                   onClick={handleSendCode}
                   disabled={isLoading}
-                  className="flex items-center gap-16 p-24 rounded-8 border-2 border-neutral-300 hover:border-brand-blue-primary transition-colors text-left"
+                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
                 >
-                  <div className="bg-[#E9EBFF] rounded-8 p-12 shrink-0">
-                    <Icon
-                      name="agora-line-mail"
-                      className="w-24 h-24 text-brand-blue-primary"
-                    />
+                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
+                    <Icon name="agora-line-mail" className="h-24 w-24 text-brand-blue-primary" />
                   </div>
                   <div>
                     <p className="text-lg-bold text-brand-blue-dark">
@@ -416,13 +395,10 @@ export default function MigrateAccountClient() {
                 <button
                   onClick={() => setStep("verify-password")}
                   disabled={isLoading}
-                  className="flex items-center gap-16 p-24 rounded-8 border-2 border-neutral-300 hover:border-brand-blue-primary transition-colors text-left"
+                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
                 >
-                  <div className="bg-[#E9EBFF] rounded-8 p-12 shrink-0">
-                    <Icon
-                      name="agora-line-lock"
-                      className="w-24 h-24 text-brand-blue-primary"
-                    />
+                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
+                    <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
                   </div>
                   <div>
                     <p className="text-lg-bold text-brand-blue-dark">
@@ -442,7 +418,7 @@ export default function MigrateAccountClient() {
                   setStep("confirm-account");
                   setError(null);
                 }}
-                className="p-0 h-auto text-sm"
+                className="text-sm h-auto p-0"
               >
                 Voltar
               </Button>
@@ -452,13 +428,13 @@ export default function MigrateAccountClient() {
           {/* Step: Verify by code */}
           {step === "verify-code" && (
             <div className="flex flex-col gap-24">
-              <div className="bg-[#E9EBFF] rounded-8 w-fit p-16">
-                <Icon name="agora-line-mail" className="w-24 h-24 text-brand-blue-primary" />
+              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
+                <Icon name="agora-line-mail" className="h-24 w-24 text-brand-blue-primary" />
               </div>
               <h2 className="text-xl-bold text-brand-blue-dark">Introduza o codigo</h2>
               <p className="text-neutral-900">
-                Enviamos um codigo de 6 digitos para <strong>{maskedEmail}</strong>.
-                Verifique a sua caixa de entrada.
+                Enviamos um codigo de 6 digitos para <strong>{maskedEmail}</strong>. Verifique a sua
+                caixa de entrada.
               </p>
 
               <InputText
@@ -472,7 +448,7 @@ export default function MigrateAccountClient() {
                 disabled={isLoading}
               />
 
-              <div className="flex gap-16 items-center">
+              <div className="flex items-center gap-16">
                 <Button
                   variant="primary"
                   onClick={handleConfirmCode}
@@ -497,7 +473,7 @@ export default function MigrateAccountClient() {
                   setStep("choose-method");
                   setError(null);
                 }}
-                className="p-0 h-auto text-sm"
+                className="text-sm h-auto p-0"
               >
                 Voltar
               </Button>
@@ -507,8 +483,8 @@ export default function MigrateAccountClient() {
           {/* Step: Verify by password */}
           {step === "verify-password" && (
             <div className="flex flex-col gap-24">
-              <div className="bg-[#E9EBFF] rounded-8 w-fit p-16">
-                <Icon name="agora-line-lock" className="w-24 h-24 text-brand-blue-primary" />
+              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
+                <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
               </div>
               <h2 className="text-xl-bold text-brand-blue-dark">
                 Introduza a sua palavra-passe antiga
@@ -524,9 +500,7 @@ export default function MigrateAccountClient() {
                 name="migration-password"
                 className="w-full"
                 value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setPassword(e.target.value)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 disabled={isLoading}
               />
 
@@ -548,7 +522,7 @@ export default function MigrateAccountClient() {
                   setStep("choose-method");
                   setError(null);
                 }}
-                className="p-0 h-auto text-sm"
+                className="text-sm h-auto p-0"
               >
                 Voltar
               </Button>
@@ -557,19 +531,14 @@ export default function MigrateAccountClient() {
 
           {/* Step: Success */}
           {step === "success" && (
-            <div className="flex flex-col gap-24 items-center text-center">
-              <div className="bg-green-100 rounded-full w-fit p-24">
-                <Icon
-                  name="agora-line-check-circle"
-                  className="w-48 h-48 text-green-600"
-                />
+            <div className="flex flex-col items-center gap-24 text-center">
+              <div className="bg-green-100 w-fit rounded-full p-24">
+                <Icon name="agora-line-check-circle" className="text-green-600 h-48 w-48" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">
-                Conta migrada com sucesso!
-              </h2>
+              <h2 className="text-xl-bold text-brand-blue-dark">Conta migrada com sucesso!</h2>
               <p className="text-neutral-900">
-                A sua conta foi migrada para a Chave Movel Digital com sucesso.
-                Sera redirecionado em breve...
+                A sua conta foi migrada para a Chave Movel Digital com sucesso. Sera redirecionado
+                em breve...
               </p>
             </div>
           )}

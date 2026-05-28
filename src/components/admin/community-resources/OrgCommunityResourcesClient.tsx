@@ -3,9 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import {
-  Breadcrumb,
-  CardNoResults,
-  Icon,
   InputSearchBar,
   Table,
   TableHeader,
@@ -14,14 +11,18 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
 import { fetchOrgCommunityResources } from "@/app/api/community-resources";
 import type { CommunityResource } from '@/service/types/community-resource';
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import PublishDropdown from "@/components/admin/PublishDropdown";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
@@ -96,48 +97,29 @@ export default function OrgCommunityResourcesClient() {
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
-      <div className="admin-page">
-        <CardNoResults
-          className="datasets-page__empty"
-          position="center"
-          icon={
-            <Icon name="agora-line-buildings" className="w-12 h-12 text-primary-500 icon-xl" />
-          }
-          title="Sem organizações"
-          description="Não pertence a nenhuma organização."
-          hasAnchor={false}
-        />
-      </div>
+      <AdminEmptyState
+        icon="agora-line-buildings"
+        description="Não pertence a nenhuma organização."
+      />
     );
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: orgName || "Organização", url: "#" },
-            {
-              label: "Recursos comunitários",
-              url: "#",
-            },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Recursos comunitários" },
+      ]}
+      title="Recursos comunitários"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Recursos comunitários</h1>
-        <PublishDropdown />
-      </div>
+      <ResultsCount count={resources.length} isLoading={isLoading} />
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {resources.length} resultados
-      </p>
-
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquisar recursos comunitários"
             aria-label="Pesquisar recursos comunitários"
@@ -150,22 +132,13 @@ export default function OrgCommunityResourcesClient() {
       ) : resources.length > 0 ? (
         <>
           <Table
-            paginationProps={{
-              itemsPerPageLabel: "Itens por página",
-              itemsPerPage: itemsPerPage,
-              totalItems: resources.length,
-              availablePageSizes: [10, 20, 50],
-              currentPage: currentPage - 1,
-              buttonDropdownAriaLabel: "Selecionar itens por página",
-              dropdownListAriaLabel: "Opções de itens por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => setCurrentPage(page + 1),
-              onPageSizeChange: (size: number) => {
-                setItemsPerPage(size);
-                setCurrentPage(1);
-              },
-            }}
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              resources.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage
+            )}
           >
             <TableHeader>
               <TableRow>
@@ -201,13 +174,7 @@ export default function OrgCommunityResourcesClient() {
                     <span className="text-primary-600">{resource.title}</span>
                   </TableCell>
                   <TableCell headerLabel="Estado">
-                    {resource.deleted ? (
-                      <StatusDot variant="danger">Excluído</StatusDot>
-                    ) : resource.archived ? (
-                      <StatusDot variant="neutral">Arquivado</StatusDot>
-                    ) : (
-                      <StatusDot variant="success">Público</StatusDot>
-                    )}
+                    <ResourceStatusBadge item={resource} />
                   </TableCell>
                   <TableCell headerLabel="Criado em">
                     {formatDateToDMY(resource.created_at)}
@@ -218,7 +185,7 @@ export default function OrgCommunityResourcesClient() {
                       {resource.owner && (
                         <a
                           href={`/pages/users/${resource.owner.slug}`}
-                          className="text-primary-600 text-xs underline"
+                          className="text-xs text-primary-600 underline"
                         >
                           {resource.owner.first_name} {resource.owner.last_name}
                         </a>
@@ -226,12 +193,11 @@ export default function OrgCommunityResourcesClient() {
                     </div>
                   </TableCell>
                   <TableCell headerLabel="Ações">
-                    <div className="flex gap-8">
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                      <a href={`/pages/admin/community-resources/edit?resource_id=${resource.id}`}>
-                        <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                      </a>
-                    </div>
+                    <TableActionsCell
+                      editAction={{
+                        href: `/pages/admin/community-resources/edit?resource_id=${resource.id}`,
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
@@ -239,24 +205,12 @@ export default function OrgCommunityResourcesClient() {
           </Table>
         </>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={
-                <Icon
-                  name="agora-line-buildings"
-                  className="w-12 h-12 text-primary-500 icon-xl"
-                />
-              }
-              title="Sem recursos comunitários"
-              description="A organização ainda não tem recursos comunitários."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-buildings"
+          title="Sem recursos comunitários"
+          description="A organização ainda não tem recursos comunitários."
+        />
       )}
-    </div>
+    </AdminLayout>
   );
 }

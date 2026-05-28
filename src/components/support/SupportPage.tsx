@@ -13,7 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import HeroGeneral from "@/components/HeroGeneral";
 import { submitSupportContact, type SupportTopic } from "@/app/api/system";
-import IconAgora from "../Primitives/IconAgora";
+import AppIcon from "../Primitives/AppIcon";
 
 const FAQ_DATA = [
   {
@@ -213,7 +213,7 @@ const SupportPage = () => {
               Antes de nos contactar, recomendamos a consulta das Perguntas Frequentes desta página
               ou da área de Conhecimento do{" "}
               <a
-                href="https://dados.gov.pt/pt/"
+                href="/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline font-bold text-white text-[20px]"
@@ -228,23 +228,23 @@ const SupportPage = () => {
 
             <div className="mt-16 flex flex-col gap-16">
               <a
-                href="https://dados.gov.pt/pt/pages/faqs/about_dadosgov/"
+                href="/pages/faqs/about_dadosgov/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 O que é o dados.gov.pt
-                <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
+                <AppIcon name="agora-line-arrow-right-circle" className="fill-white" />
               </a>
 
               <a
-                href="https://dados.gov.pt/pages/about-open-data"
+                href="/pages/faqs/about_opendata/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
               >
                 Saber mais sobre dados abertos
-                <IconAgora name="agora-line-arrow-right-circle" className="fill-white" />
+                <AppIcon name="agora-line-arrow-right-circle" className="fill-white" />
               </a>
             </div>
           </>
@@ -313,7 +313,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pt/pages/faqs/publish",
+                                            "/pages/faqs/publish",
                                             "_blank"
                                           )
                                         }
@@ -380,7 +380,7 @@ const SupportPage = () => {
                                           minWidth: "auto",
                                         }}
                                         onClick={() =>
-                                          window.open("https://dados.gov.pt/", "_blank")
+                                          window.open("/", "_blank")
                                         }
                                       >
                                         dados.gov.pt
@@ -403,7 +403,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pt/pages/faqs/reuse/",
+                                            "/pages/faqs/reuse/",
                                             "_blank"
                                           )
                                         }
@@ -428,7 +428,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pt/pages/faqs/terms",
+                                            "/pages/faqs/terms",
                                             "_blank"
                                           )
                                         }
@@ -500,7 +500,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pt/pages/api-tutorial/",
+                                            "/pages/api-tutorial/",
                                             "_blank"
                                           )
                                         }
@@ -576,7 +576,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pages/support",
+                                            "/pages/support",
                                             "_blank"
                                           )
                                         }
@@ -602,7 +602,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pages/support",
+                                            "/pages/support",
                                             "_blank"
                                           )
                                         }
@@ -650,7 +650,7 @@ const SupportPage = () => {
                                           minWidth: "auto",
                                         }}
                                         onClick={() =>
-                                          window.open("https://dados.gov.pt/en/contact/", "_blank")
+                                          window.open("/pages/support", "_blank")
                                         }
                                       >
                                         formulário e orientação disponíveis na página de contato
@@ -668,7 +668,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pt/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation",
+                                            "/pages/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation",
                                             "_blank"
                                           )
                                         }
@@ -694,7 +694,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pt/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation",
+                                            "/pages/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation",
                                             "_blank"
                                           )
                                         }
@@ -740,7 +740,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pt/organizations/instituto-nacional-de-estatistica/",
+                                            "/pages/organizations/instituto-nacional-de-estatistica/",
                                             "_blank"
                                           )
                                         }
@@ -764,7 +764,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pt/organizations/direcao-geral-do-territorio/",
+                                            "/pages/organizations/direcao-geral-do-territorio/",
                                             "_blank"
                                           )
                                         }
@@ -833,7 +833,7 @@ const SupportPage = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "https://dados.gov.pt/pt/organizations/ebupi-estrutura-de-missao-para-a-expansao-do-sistema-de-informacao-cadastral-simplificado/#/presentation",
+                                            "/pages/organizations/ebupi-estrutura-de-missao-para-a-expansao-do-sistema-de-informacao-cadastral-simplificado/#/presentation",
                                             "_blank"
                                           )
                                         }

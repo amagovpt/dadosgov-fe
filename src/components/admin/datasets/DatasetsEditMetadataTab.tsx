@@ -15,6 +15,7 @@ import IsolatedInput from "@/components/admin/IsolatedInput";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import type { SpatialZone } from '@/service/types/catalog';
 import type { Dataset } from '@/service/types/dataset';
+import AppIcon from "@/components/Primitives/AppIcon";
 
 const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEditor"), {
   ssr: false,
@@ -425,7 +426,7 @@ export default function DatasetsEditMetadataTab({
       <aside className="admin-page__auxiliar">
         <div className="admin-page__auxiliar-inner">
           <div className="admin-page__auxiliar-header">
-            <Icon name="agora-line-question-mark" className="w-24 h-24" />
+            <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
             <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
           </div>
           <AuxiliarList

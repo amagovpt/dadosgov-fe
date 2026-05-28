@@ -7,7 +7,7 @@ export default function ApiDocumentationClient() {
     <div className="container mx-auto px-16 py-32">
       <Breadcrumb
         items={[
-          { label: "Início", url: "/" },
+          { label: "Home", url: "/" },
           { label: "Referência da API", url: "/pages/faqs/api-documentation" },
         ]}
       />

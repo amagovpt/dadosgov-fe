@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
-  Breadcrumb,
   Button,
   InputText,
   InputTextArea,
@@ -12,6 +11,7 @@ import {
   Icon,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import {
   fetchResourceTypes,
   fetchSchemas,
@@ -26,6 +26,7 @@ import type { CommunityResource } from '@/service/types/community-resource';
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import AppIcon from "@/components/Primitives/AppIcon";
 
 export default function CommunityResourceEditClient() {
   const searchParams = useSearchParams();
@@ -392,24 +393,16 @@ export default function CommunityResourceEditClient() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administracao", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            {
-              label: "Recursos comunitários",
-              url: "/pages/admin/system/community-resources",
-            },
-            { label: "Editar", url: "#" },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Metadados do arquivo</h1>
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administracao", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Recursos comunitários", url: "/pages/admin/system/community-resources" },
+        { label: "Editar" },
+      ]}
+      title="Metadados do arquivo"
+      headerAction={null}
+    >
 
       <div className="admin-page__body">
         <div className="admin-page__form-area">
@@ -701,13 +694,13 @@ export default function CommunityResourceEditClient() {
         <aside className="admin-page__auxiliar">
           <div className="admin-page__auxiliar-inner">
             <div className="admin-page__auxiliar-header">
-              <Icon name="agora-line-question-mark" className="w-24 h-24" />
+              <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
               <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
             </div>
             <AuxiliarList items={auxiliarItems} />
           </div>
         </aside>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

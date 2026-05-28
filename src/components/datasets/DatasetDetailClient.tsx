@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -17,114 +17,13 @@ import { followEntity, isFollowing, unfollowEntity } from "@/app/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { formatMetricValue } from "@/utils/formatNumber";
+import TextLink from "@/components/Primitives/TextLink";
+import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 
 interface DatasetDetailClientProps {
   slug: string;
-}
-
-const READMORE_BUTTON_HEIGHT = 48;
-
-function DescriptionWithReadMore({
-  text,
-  sidebarRef,
-  titleRef,
-}: {
-  text: string;
-  sidebarRef: React.RefObject<HTMLDivElement | null>;
-  titleRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const [availableHeight, setAvailableHeight] = useState<number | undefined>(undefined);
-  const measureRef = useRef<HTMLDivElement>(null);
-
-  const checkOverflow = useCallback(() => {
-    if (measureRef.current && sidebarRef.current && titleRef.current) {
-      const sidebarHeight = sidebarRef.current.offsetHeight;
-      const titleHeight = titleRef.current.offsetHeight;
-      const fullHeight = measureRef.current.offsetHeight;
-      const maxDescHeight = sidebarHeight - titleHeight;
-      const overflows = fullHeight > maxDescHeight;
-      if (overflows) {
-        const lineHeight = parseFloat(getComputedStyle(measureRef.current).lineHeight) || 24;
-        const usable = maxDescHeight - READMORE_BUTTON_HEIGHT;
-        const snapped = Math.floor(usable / lineHeight) * lineHeight;
-        setAvailableHeight(snapped);
-      } else {
-        setAvailableHeight(maxDescHeight);
-      }
-      setIsOverflowing(overflows);
-    }
-  }, [sidebarRef, titleRef]);
-
-  useEffect(() => {
-    checkOverflow();
-    window.addEventListener("resize", checkOverflow);
-
-    const observer = new ResizeObserver(checkOverflow);
-    if (sidebarRef.current) observer.observe(sidebarRef.current);
-    if (measureRef.current) observer.observe(measureRef.current);
-
-    return () => {
-      window.removeEventListener("resize", checkOverflow);
-      observer.disconnect();
-    };
-  }, [checkOverflow, text]);
-
-  return (
-    <div className="prose max-w-none max-w-ch text-neutral-700 text-lg leading-relaxed mb-12 relative">
-      {/* Hidden measure element to get full content height */}
-      <div
-        ref={measureRef}
-        className="absolute invisible pointer-events-none"
-        style={{ top: 0, left: 0, right: 0 }}
-        aria-hidden="true"
-      >
-        <div className="text-neutral-900 text-m-light  markdown-container">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw, rehypeSanitize]}
-          >
-            {text}
-          </ReactMarkdown>
-        </div>
-      </div>
-      <div
-        className="overflow-hidden"
-        style={
-          !expanded && isOverflowing && availableHeight ? { maxHeight: availableHeight } : undefined
-        }
-      >
-        <div className="text-neutral-900 text-m-light  markdown-container">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw, rehypeSanitize]}
-          >
-            {text}
-          </ReactMarkdown>
-        </div>
-      </div>
-      {isOverflowing && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-8 text-primary-600 cursor-pointer hover:underline mt-8"
-        >
-          {expanded ? "Ler menos" : "Ler mais"}
-          {expanded ? (
-            <Icon name="agora-line-arrow-up-circle" className="w-24 h-24" />
-          ) : (
-            <Icon name="agora-line-arrow-down-circle" className="w-24 h-24" />
-          )}
-        </button>
-      )}
-    </div>
-  );
 }
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
@@ -221,20 +120,22 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
 
   if (!dataset) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <p className="text-neutral-500">Conjunto de dados não encontrado.</p>
       </div>
     );
   }
+
+  console.log("Dataset:", dataset.organization);
 
   const qualityScore = calculateQualityScore(QUALITY_CRITERIA, dataset.quality);
   const qualityDetails = getQualityDetails(dataset.quality);
   const qualityMissing = getQualityMissing(dataset.quality);
 
   return (
-    <main className="w-full flex flex-col gap-64 justify-center items-center ">
+    <main className="flex w-full flex-col items-center justify-center gap-64">
       {/* Breadcrumb */}
-      <div className="container flex justify-between items-center py-64">
+      <div className="container flex items-center justify-between py-64">
         <Breadcrumb
           items={[
             { label: "Home", url: "/" },
@@ -245,7 +146,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
       </div>
 
       {/* Actions */}
-      <div className="container flex justify-end items-center gap-16">
+      <div className="container flex items-center justify-end gap-16">
         {dataset.private && <Pill variant="warning">Rascunho</Pill>}
         {dataset.archived && <Pill variant="neutral">Arquivado</Pill>}
         <Button
@@ -264,24 +165,24 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
           (user && dataset.owner?.id === user.id) ||
           (dataset.organization &&
             organizations.some((org) => org.id === dataset.organization?.id))) && (
-            <Link href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
-              <Button
-                variant="primary"
-                hasIcon={true}
-                leadingIcon="agora-line-edit"
-                leadingIconHover="agora-solid-edit"
-              >
-                Editar
-              </Button>
-            </Link>
-          )}
+          <Link href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
+            <Button
+              variant="primary"
+              hasIcon={true}
+              leadingIcon="agora-line-edit"
+              leadingIconHover="agora-solid-edit"
+            >
+              Editar
+            </Button>
+          </Link>
+        )}
       </div>
 
-      <div className="container grid xl:grid-cols-12 gap-32 ">
+      <div className="container grid gap-32 xl:grid-cols-12">
         {/* Main Content Column */}
         <div className="xl:col-span-6 xl:block">
           <div className="flex flex-col gap-4" ref={titleRef}>
-            <h1 className="text-xl-bold text-primary-900 leading-tight mb-24">{dataset.title}</h1>
+            <h1 className="mb-24 text-xl-bold leading-tight text-primary-900">{dataset.title}</h1>
           </div>
 
           {/* Description */}
@@ -294,10 +195,10 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
 
         {/* Sidebar */}
         <div className="xl:col-span-6">
-          <div className="flex flex-col h-fit" ref={sidebarRef}>
-            <div className="flex flex-col gap-16 bg-[#F2F6FF] rounded-4 p-32 mb-16">
+          <div className="flex h-fit flex-col" ref={sidebarRef}>
+            <div className="mb-16 flex flex-col gap-16 rounded-4 bg-[#F2F6FF] p-32">
               {dataset.organization?.logo ? (
-                <div className="w-fit h-48 card-article-3_2-img py-8 rounded-8 border-2 border-primary-300 flex items-center justify-center">
+                <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
                   <img
                     src={dataset.organization.logo}
                     alt={dataset.organization.name}
@@ -305,13 +206,13 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                   />
                 </div>
               ) : (
-                <div className="w-fit px-12 py-6 bg-neutral-100 rounded-8 border border-neutral-200 flex items-center justify-center text-neutral-400">
-                  <Icon name="agora-line-building" className="w-6 h-6" />
+                <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-12 text-neutral-400">
+                  <Icon name="agora-line-buildings" className="h-6 w-6" />
                 </div>
               )}
 
               <div className="space-y-16">
-                <div className="text-neutral-900 text-m-light mb-8">
+                <div className="mb-8 text-m-light text-neutral-900">
                   {dataset.organization ? (
                     <Link
                       href={`/pages/organizations/${dataset.organization.slug}`}
@@ -323,7 +224,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     "Organização Desconhecida"
                   )}
                 </div>
-                <div className="text-neutral-900 text-sm mb-16">
+                <div className="text-sm mb-16 text-neutral-900">
                   <span className="text-m-semibold">Última atualização:</span>{" "}
                   {new Date(dataset.last_modified).toLocaleDateString("pt-PT", {
                     day: "numeric",
@@ -333,45 +234,34 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                 </div>
                 {dataset.license && (
                   <div className="text-sm">
-                    <a
+                    <TextLink
                       href={
                         dataset.license_url ||
-                        `https://dados.gov.pt/pt/licenses/${dataset.license}/`
+                        `/pages/licenses/${dataset.license}/`
                       }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-600 underline"
                     >
                       <span className="text-m-semibold">Licença:</span>{" "}
                       {dataset.license_title || dataset.license}
-                    </a>
+                    </TextLink>
                   </div>
                 )}
                 {dataset.contact_points && dataset.contact_points.length > 0 && (
-                  <div className="border-t border-neutral-200 pt-16 flex flex-col gap-12">
+                  <div className="flex flex-col gap-12 border-t border-neutral-200 pt-16">
                     {dataset.contact_points.map((cp) => (
                       <div key={cp.id} className="text-sm">
-                        <div className="text-m-semibold mb-4">
+                        <div className="mb-4 text-m-semibold">
                           {CONTACT_ROLE_LABELS[cp.role] ?? cp.role}
                         </div>
-                        <div className="text-neutral-900 mb-4">{cp.name}</div>
+                        <div className="mb-4 text-neutral-900">{cp.name}</div>
                         {cp.email && (
-                          <a
-                            href={`mailto:${cp.email}`}
-                            className="text-primary-600 underline break-all block"
-                          >
+                          <TextLink href={`mailto:${cp.email}`} className="block break-all">
                             {cp.email}
-                          </a>
+                          </TextLink>
                         )}
                         {cp.contact_form && (
-                          <a
-                            href={cp.contact_form}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary-600 underline block"
-                          >
+                          <TextLink href={cp.contact_form} className="block">
                             Formulário de contacto
-                          </a>
+                          </TextLink>
                         )}
                       </div>
                     ))}
@@ -381,16 +271,16 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
             </div>
 
             {/* Metrics */}
-            <div className="grid grid-cols-2 gap-16 mb-16">
-              <div className="bg-[#F2F6FF] rounded-4 p-32">
+            <div className="mb-16 grid grid-cols-2 gap-16">
+              <div className="rounded-4 bg-[#F2F6FF] p-32">
                 <div className="text-sm mb-8">Visualizações</div>
-                <div className="text-l-semibold font-bold text-neutral-900 mb-8">
+                <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(dataset.metrics?.views)}
                 </div>
               </div>
-              <div className="bg-[#F2F6FF] rounded-4 p-32">
+              <div className="rounded-4 bg-[#F2F6FF] p-32">
                 <div className="text-sm mb-8">Downloads</div>
-                <div className="text-l-semibold font-bold text-neutral-900 mb-8">
+                <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(dataset.metrics?.resources_downloads)}
                 </div>
               </div>
@@ -402,7 +292,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
               cardTitle="Qualidade dos metadados"
               cardHeadingLevel="h3"
               cardSubtitle={
-                <div className="flex flex-col gap-4 mt-8">
+                <div className="mt-8 flex flex-col gap-4">
                   <div
                     className={
                       qualityScore <= 45
@@ -415,14 +305,11 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     <ProgressBar value={qualityScore} max={100} hidePercentageValue={true} />
                   </div>
                   <div className="text-xs text-neutral-700">
-                    {qualityScore}%
-                    {qualityDetails.length > 0 && ` (${qualityDetails.join(", ")})`}
+                    {qualityScore}%{qualityDetails.length > 0 && ` (${qualityDetails.join(", ")})`}
                   </div>
                 </div>
               }
-              accordionHeadingTitle={
-                qualityExpanded ? "Fechar informação" : "Ver mais informação"
-              }
+              accordionHeadingTitle={qualityExpanded ? "Fechar informação" : "Ver mais informação"}
               accordionHeadingLevel="h4"
               expanded={qualityExpanded}
               onExpanded={() => setQualityExpanded(true)}
@@ -434,9 +321,9 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     <div key={label} className="flex items-center gap-8">
                       <Icon
                         name="agora-line-alert-triangle"
-                        className="w-[20px] h-[20px] fill-[#B06112]"
+                        className="h-20 w-20 fill-[#B06112]"
                       />
-                      <span className="text-neutral-900 text-base">
+                      <span className="text-base text-neutral-900">
                         {label} dos dados não preenchidos
                       </span>
                     </div>

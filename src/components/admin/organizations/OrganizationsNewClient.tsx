@@ -12,8 +12,6 @@ import {
   InputSelect,
   Icon,
   StatusCard,
-  Accordion,
-  AccordionGroup,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { createOrganization, uploadOrgLogo } from "@/app/api/organizations";
@@ -22,6 +20,8 @@ import type { OrganizationSuggestion } from '@/service/types/identity';
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { AdminStepper } from "../AdminStepper";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 export default function OrganizationsNewClient() {
   const searchParams = useSearchParams();
@@ -123,9 +123,9 @@ export default function OrganizationsNewClient() {
           </p>
           <p className="mt-2">
             Pode encontrar o seu número SIRET no{" "}
-            <a href="#" className="text-primary-600 underline">
+            <TextLink href="#">
               Diretório Comercial.
-            </a>
+            </TextLink>
           </p>
         </>
       ),
@@ -154,51 +154,25 @@ export default function OrganizationsNewClient() {
   ));
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Organizações", url: "/pages/admin/system/organizations" },
-            {
-              label: "Formulário de registo de uma organização",
-              url: "/pages/admin/organizations/new",
-            },
-          ]}
-        />
-      </div>
-
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Formulário de registo de uma organização</h1>
-        <PublishDropdown />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: "Organizações", url: "/pages/admin/system/organizations" },
+      {
+        label: "Formulário de registo de uma organização",
+        url: "/pages/admin/organizations/new",
+      },
+    ]}
+      title="Formulário de registo de uma organização"
+    >
 
       {/* Step indicator */}
-      <div className="admin-page__step-header">
-        <p className="admin-page__step-text">
-          <span className="text-primary-600 font-bold">Passo {currentStep} - </span>
-          <span className="text-primary-900 font-bold">{stepTitles[currentStep]}</span>
-        </p>
-      </div>
-
-      {/* Progress bar */}
-      <div className="admin-page__stepper">
-        <div className="admin-page__stepper-bar">
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--start" />
-          {Array.from({ length: totalSegments }).map((_, i) => (
-            <div
-              key={i}
-              className={`admin-page__stepper-segment ${
-                i < filledSegments ? "admin-page__stepper-segment--filled" : ""
-              }`}
-            />
-          ))}
-          <div className="admin-page__stepper-mark admin-page__stepper-mark--end" />
-        </div>
-        <span className="admin-page__stepper-label">
-          Passo {currentStep}/{totalSteps}
-        </span>
-      </div>
+      <AdminStepper
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        labelWord="Passo"
+        labelFormat="slash"
+        stepTitle={stepTitles[currentStep] || ""}
+      />
 
       {/* Main content area */}
       <div className="admin-page__body">
@@ -246,7 +220,7 @@ export default function OrganizationsNewClient() {
                   <span className="admin-page__divider-or-text">ou</span>
                 </div>
 
-                <div className="flex justify-center mt-16">
+                <div className="mt-16 flex justify-center">
                   <Button
                     variant="primary"
                     onClick={() => router.push("/pages/admin/organizations/new?step=2")}
@@ -276,7 +250,7 @@ export default function OrganizationsNewClient() {
               />
 
               <form className="admin-page__form">
-                <p className="text-neutral-900 text-base leading-7 pt-32">
+                <p className="pt-32 text-base leading-7 text-neutral-900">
                   Os campos marcados com um asterisco ( * ) são obrigatórios.
                 </p>
 
@@ -337,7 +311,7 @@ export default function OrganizationsNewClient() {
 
                 <h2 className="admin-page__section-title">Logotipo</h2>
 
-                <div className="admin-page__fields-group [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
+                <div className="admin-page__fields-group [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
                   <DragAndDropUploader
                     label="Ficheiro"
                     dragAndDropLabel="Arraste e largue o ficheiro aqui"
@@ -376,11 +350,11 @@ export default function OrganizationsNewClient() {
                   />
                   {orgLogoPreview && (
                     <div className="mt-12">
-                      <p className="text-sm text-neutral-600 mb-8">Pré-visualização:</p>
+                      <p className="text-sm mb-8 text-neutral-600">Pré-visualização:</p>
                       <img
                         src={orgLogoPreview}
                         alt="Pré-visualização do logotipo"
-                        className="max-h-[120px] max-w-[240px] object-contain border border-neutral-200 rounded-8 p-8"
+                        className="max-h-[120px] max-w-[240px] rounded-8 border border-neutral-200 object-contain p-8"
                       />
                     </div>
                   )}
@@ -430,9 +404,7 @@ export default function OrganizationsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-check-circle"
                   trailingIconHover="agora-solid-check-circle"
-                  onClick={() =>
-                    router.push("/pages/admin/system/organizations")
-                  }
+                  onClick={() => router.push("/pages/admin/system/organizations")}
                 >
                   Guardar
                 </Button>
@@ -446,7 +418,7 @@ export default function OrganizationsNewClient() {
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
               <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="w-24 h-24" />
+                <Icon name="agora-line-question-mark" className="h-24 w-24" />
                 <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
               </div>
               <AuxiliarList items={auxiliarItems} />
@@ -454,6 +426,6 @@ export default function OrganizationsNewClient() {
           </aside>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 }

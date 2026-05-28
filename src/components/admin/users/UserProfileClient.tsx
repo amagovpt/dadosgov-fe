@@ -11,7 +11,6 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
@@ -25,6 +24,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import Link from "next/link";
 
 function DeleteUserPopupContent({
@@ -224,18 +224,15 @@ export default function UserProfileClient() {
     : "";
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Utilizadores", url: "/pages/admin/system/users" },
-            { label: displayName || "...", url: "#" },
-          ]}
-        />
-      </div>
-
-      <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Utilizadores", url: "/pages/admin/system/users" },
+        { label: displayName || "..." },
+      ]}
+      title="Perfil"
+      headerAction={null}
+    >
 
       <div className="profile-card">
         <Avatar
@@ -507,7 +504,7 @@ export default function UserProfileClient() {
                   <p className="text-neutral-900 text-base">A carregar atividades...</p>
                 ) : activities.length === 0 ? (
                   <CardNoResults
-                    className="datasets-page__empty"
+                    className="admin-page__empty"
                     position="center"
                     icon={
                       <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
@@ -604,7 +601,7 @@ export default function UserProfileClient() {
                   <p className="text-neutral-900 text-base">A carregar subscrições...</p>
                 ) : subscriptions.length === 0 ? (
                   <CardNoResults
-                    className="datasets-page__empty"
+                    className="admin-page__empty"
                     position="center"
                     icon={
                       <Icon name="agora-line-bell" className="w-12 h-12 text-primary-500 icon-xl" />
@@ -668,7 +665,7 @@ export default function UserProfileClient() {
             <TabBody>
               <div className="mt-24">
                 <CardNoResults
-                  className="datasets-page__empty"
+                  className="admin-page__empty"
                   position="center"
                   icon={
                     <Icon name="agora-line-star" className="w-12 h-12 text-primary-500 icon-xl" />
@@ -682,6 +679,6 @@ export default function UserProfileClient() {
           </Tab>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

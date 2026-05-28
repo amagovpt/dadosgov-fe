@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  CardNoResults,
   Icon,
-  InputSelect,
   InputSearchBar,
   Table,
   TableHeader,
@@ -14,29 +12,21 @@ import {
   TableCell,
   ProgressBar,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import { fetchAdminDatasets, fetchDatasets } from "@/app/api/datasets";
-import type { Dataset } from '@/service/types/dataset';
-import PublishDropdown from "@/components/admin/PublishDropdown";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
-import { Dropdown } from "@/components/Primitives/Dropdown";
+import { Dataset } from "@/service/types/dataset";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
+import TextLink from "@/components/Primitives/TextLink";
 
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminEmptyState from "../AdminEmptyState";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
 
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified" | "resources";
-
-const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
-  ["dataset_description_quality", "Descrição"],
-  ["has_resources", "Recursos"],
-  ["license", "Licença"],
-  ["has_open_format", "Formato aberto"],
-  ["all_resources_available", "Recursos disponíveis"],
-  ["resources_documentation", "Documentação"],
-  ["update_frequency", "Frequência de atualização"],
-  ["temporal_coverage", "Cobertura temporal"],
-  ["spatial", "Cobertura espacial"],
-];
 
 const SORT_FIELD_MAP: Record<SortField, string | null> = {
   title: "title",
@@ -46,7 +36,6 @@ const SORT_FIELD_MAP: Record<SortField, string | null> = {
 };
 
 export default function SystemDatasetsClient() {
-
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,10 +57,23 @@ export default function SystemDatasetsClient() {
           : `${sortOrder === "descending" ? "-" : ""}${apiSort}`;
 
       const statusFilters: { private?: boolean; archived?: boolean; deleted?: boolean } = {};
-      if (statusFilter === "public")   { statusFilters.private = false; statusFilters.archived = false; statusFilters.deleted = false; }
-      if (statusFilter === "draft")    { statusFilters.private = true; statusFilters.archived = false; statusFilters.deleted = false; }
-      if (statusFilter === "archived") { statusFilters.archived = true; statusFilters.deleted = false; }
-      if (statusFilter === "deleted")  { statusFilters.deleted = true; }
+      if (statusFilter === "public") {
+        statusFilters.private = false;
+        statusFilters.archived = false;
+        statusFilters.deleted = false;
+      }
+      if (statusFilter === "draft") {
+        statusFilters.private = true;
+        statusFilters.archived = false;
+        statusFilters.deleted = false;
+      }
+      if (statusFilter === "archived") {
+        statusFilters.archived = true;
+        statusFilters.deleted = false;
+      }
+      if (statusFilter === "deleted") {
+        statusFilters.deleted = true;
+      }
 
       const filters = {
         q: searchQuery.trim() || undefined,
@@ -126,29 +128,21 @@ export default function SystemDatasetsClient() {
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Conjuntos de dados", url: "/pages/admin/system/datasets" },
-          ]}
-        />
-      </div>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Conjuntos de dados", url: "/pages/admin/system/datasets" },
+      ]}
+      title="Conjuntos de dados"
+    >
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Conjuntos de dados</h1>
-        <PublishDropdown />
-      </div>
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
-      <p className="text-neutral-700 text-sm mb-16">
-        {isLoading ? "A carregar..." : `${totalItems} resultados`}
-      </p>
-
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
-          <InputSearchBar hasVoiceActionButton={false}
+          <InputSearchBar
+            hasVoiceActionButton={false}
             label="Pesquisar"
             placeholder="Pesquise o nome, código ou sigla da entidade"
             aria-label="Pesquisar conjuntos de dados"
@@ -157,46 +151,26 @@ export default function SystemDatasetsClient() {
             }}
           />
         </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por estado"
-          id="filter-status"
-          onChange={(options) => {
-            setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
+        <StatusFilterSelect
+          value={statusFilter}
+          onChange={(v) => {
+            setStatusFilter(v);
             setCurrentPage(1);
           }}
-        >
-          <Dropdown.Section name="status">
-            <Dropdown.Option value="" selected={statusFilter === ""}>Todos</Dropdown.Option>
-            <Dropdown.Option value="public" selected={statusFilter === "public"}>Público</Dropdown.Option>
-            <Dropdown.Option value="archived" selected={statusFilter === "archived"}>Arquivado</Dropdown.Option>
-            <Dropdown.Option value="draft" selected={statusFilter === "draft"}>Rascunho</Dropdown.Option>
-            <Dropdown.Option value="deleted" selected={statusFilter === "deleted"}>Excluído</Dropdown.Option>
-          </Dropdown.Section>
-        </InputSelect>
+        />
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : datasets.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Itens por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar itens por página",
-            dropdownListAriaLabel: "Opções de itens por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -231,33 +205,16 @@ export default function SystemDatasetsClient() {
             {datasets.map((dataset) => (
               <TableRow key={dataset.id}>
                 <TableCell headerLabel="Título">
-                  <a
-                    href={`/pages/datasets/${dataset.slug}`}
-                    className="text-primary-600 underline"
-                  >
-                    {dataset.title}
-                  </a>
+                  <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
-                  {dataset.deleted ? (
-                    <StatusDot variant="danger">Excluído</StatusDot>
-                  ) : dataset.archived ? (
-                    <StatusDot variant="neutral">Arquivado</StatusDot>
-                  ) : dataset.private ? (
-                    <StatusDot variant="warning">Rascunho</StatusDot>
-                  ) : (
-                    <StatusDot variant="success">Público</StatusDot>
-                  )}
+                  <ResourceStatusBadge item={dataset} />
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDate(dataset.created_at)}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDate(dataset.created_at)}</TableCell>
                 <TableCell headerLabel="Última modificação">
                   {formatDate(dataset.last_modified)}
                 </TableCell>
-                <TableCell headerLabel="Ficheiros">
-                  {dataset.resources?.length || 0}
-                </TableCell>
+                <TableCell headerLabel="Ficheiros">{dataset.resources?.length || 0}</TableCell>
                 <TableCell headerLabel="Pontuação">
                   <div
                     className={
@@ -279,35 +236,26 @@ export default function SystemDatasetsClient() {
                   </span>
                 </TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/datasets/${dataset.id}`}>
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                    </a>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/datasets/${dataset.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/datasets/${dataset.id}`,
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       ) : (
-        <div className="datasets-page__body">
-          <div className="datasets-page__content">
-            <CardNoResults
-              className="datasets-page__empty"
-              position="center"
-              icon={
-                <Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />
-              }
-              title="Sem publicações"
-              description="Nenhum conjunto de dados encontrado."
-              hasAnchor={false}
-            />
-          </div>
-        </div>
+        <AdminEmptyState
+          icon="agora-line-edit"
+          title="Sem publicações"
+          description="Nenhum conjunto de dados encontrado."
+        />
       )}
-    </div>
+    </AdminLayout>
   );
 }

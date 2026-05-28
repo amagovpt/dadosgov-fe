@@ -27,7 +27,7 @@ export default function MiniCourseDetailClient({ slug }: Props) {
       <div className="container flex flex-col gap-64">
         <Breadcrumb
           items={[
-            { label: 'Início', url: '/' },
+            { label: 'Home', url: '/' },
             { label: 'Aprender', url: '/pages/learn/' },
             { label: 'Minicursos', url: '/pages/learn/mini-courses/' },
             { label: course.title, url: '#' },

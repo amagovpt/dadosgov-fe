@@ -2,28 +2,23 @@
 
 import { useEffect, useState } from "react";
 import {
-  Breadcrumb,
   Button,
   CardFrame,
   CardNoResults,
-  Icon,
   InputSearchBar,
   Tabs,
   Tab,
   TabHeader,
   TabBody,
-  Table,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
 } from "@ama-pt/agora-design-system";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { fetchMyDatasets } from "@/app/api/datasets";
 import { fetchMyReuses } from "@/app/api/reuses";
 import type { Dataset } from '@/service/types/dataset';
 import type { Reuse } from '@/service/types/reuse';
+import AdminLayout from "@/components/Layout/AdminLayout";
+import { DatasetMetricsTable } from "./DatasetMetricsTable";
+import { ReuseMetricsTable } from "./ReuseMetricsTable";
 
 const PAGE_SIZE = 10;
 
@@ -73,32 +68,29 @@ export default function StatisticsClient() {
   }, [reusesPage]);
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: displayName || "...", url: "#" },
-            { label: "Estatísticas", url: "/pages/admin/me/statistics" },
-          ]}
-        />
-      </div>
-
-      <h1 className="admin-page__title mt-64 mb-16">Estatísticas</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: displayName || "...", url: "#" },
+        { label: "Estatísticas", url: "/pages/admin/me/statistics" },
+      ]}
+      title="Estatísticas"
+      headerAction={null}
+    >
 
       <Tabs>
         <Tab active>
           <TabHeader>Utilizador</TabHeader>
           <TabBody>
-            <div className="flex gap-24 mt-48">
+            <div className="mt-48 flex gap-24">
               <div className="flex-1">
                 <CardFrame label={isDatasetsLoading ? "..." : String(datasetsTotal)}>
-                  <p className="text-neutral-700 text-base">Conjuntos de dados</p>
+                  <p className="text-base text-neutral-700">Conjuntos de dados</p>
                 </CardFrame>
               </div>
               <div className="flex-1">
                 <CardFrame label={isReusesLoading ? "..." : String(reusesTotal)}>
-                  <p className="text-neutral-700 text-base">Reutilizar</p>
+                  <p className="text-base text-neutral-700">Reutilizar</p>
                 </CardFrame>
               </div>
             </div>
@@ -109,7 +101,7 @@ export default function StatisticsClient() {
           <TabHeader>Conjuntos de dados</TabHeader>
           <TabBody>
             <div className="mt-24">
-              <div className="flex items-end gap-16 mb-24">
+              <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
@@ -121,13 +113,13 @@ export default function StatisticsClient() {
               </div>
 
               {isDatasetsLoading ? (
-                <p className="text-neutral-500 text-sm">A carregar...</p>
+                <p className="text-sm text-neutral-500">A carregar...</p>
               ) : datasets.length === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src="/Icons/reduce.svg" alt="" className="w-40 h-40" />
+                    <img src="/Icons/reduce.svg" alt="" className="h-40 w-40" />
                   }
                   title="Sem publicações"
                   description="Ainda não publicou um conjunto de dados."
@@ -145,68 +137,12 @@ export default function StatisticsClient() {
                   }
                 />
               ) : (
-                <Table
-                  paginationProps={{
-                    itemsPerPageLabel: "Itens por página",
-                    itemsPerPage: PAGE_SIZE,
-                    totalItems: datasetsTotal,
-                    availablePageSizes: [5, 10, 20],
-                    currentPage: datasetsPage - 1,
-                    buttonDropdownAriaLabel: "Selecionar itens por página",
-                    dropdownListAriaLabel: "Opções de itens por página",
-                    prevButtonAriaLabel: "Página anterior",
-                    nextButtonAriaLabel: "Próxima página",
-                    onPageChange: (page: number) => setDatasetsPage(page + 1),
-                  }}
-                >
-                  <TableHeader>
-                    <TableRow>
-                      <TableHeaderCell>TÍTULO DO CONJUNTO DE DADOS</TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-chat" className="w-16 h-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-eye" className="w-16 h-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-download" className="w-16 h-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="w-16 h-16" />
-                      </TableHeaderCell>
-                      <TableHeaderCell>
-                        <Icon name="agora-line-star" className="w-16 h-16" />
-                      </TableHeaderCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {datasets.map((dataset) => (
-                      <TableRow key={dataset.id}>
-                        <TableCell headerLabel="Título">
-                          <a href={dataset.page} className="text-primary-600 underline">
-                            {dataset.title}
-                          </a>
-                        </TableCell>
-                        <TableCell headerLabel="Discussões">
-                          {dataset.metrics?.discussions ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Visualizações">
-                          {dataset.metrics?.views ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Downloads">
-                          {dataset.metrics?.resources_downloads ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Reutilizações">
-                          {dataset.metrics?.reuses ?? 0}
-                        </TableCell>
-                        <TableCell headerLabel="Favoritos">
-                          {dataset.metrics?.followers ?? 0}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <DatasetMetricsTable
+                  datasets={datasets}
+                  total={datasetsTotal}
+                  page={datasetsPage}
+                  onPageChange={setDatasetsPage}
+                />
               )}
             </div>
           </TabBody>
@@ -217,15 +153,15 @@ export default function StatisticsClient() {
           <TabBody>
             <div className="mt-24">
               {isReusesLoading ? (
-                <p className="text-neutral-500 text-sm">A carregar...</p>
+                <p className="text-sm text-neutral-500">A carregar...</p>
               ) : reuses.length === 0 ? (
                 <>
-                  <p className="text-neutral-700 text-sm mb-16">0 resultados</p>
+                  <p className="text-sm mb-16 text-neutral-700">0 resultados</p>
                   <CardNoResults
                     position="center"
                     icon={
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src="/Icons/bar_chart.svg" alt="" className="w-40 h-40" />
+                      <img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />
                     }
                     title="Sem publicações"
                     description="Ainda não publicou uma reutilização."
@@ -245,60 +181,19 @@ export default function StatisticsClient() {
                 </>
               ) : (
                 <>
-                  <p className="text-neutral-700 text-sm mb-16">{reusesTotal} resultados</p>
-                  <Table
-                    paginationProps={{
-                      itemsPerPageLabel: "Itens por página",
-                      itemsPerPage: PAGE_SIZE,
-                      totalItems: reusesTotal,
-                      availablePageSizes: [5, 10, 20],
-                      currentPage: reusesPage - 1,
-                      buttonDropdownAriaLabel: "Selecionar itens por página",
-                      dropdownListAriaLabel: "Opções de itens por página",
-                      prevButtonAriaLabel: "Página anterior",
-                      nextButtonAriaLabel: "Próxima página",
-                      onPageChange: (page: number) => setReusesPage(page + 1),
-                    }}
-                  >
-                    <TableHeader>
-                      <TableRow>
-                        <TableHeaderCell>TÍTULO DA REUTILIZAÇÃO</TableHeaderCell>
-                        <TableHeaderCell>
-                          <Icon name="agora-line-eye" className="w-16 h-16" />
-                        </TableHeaderCell>
-                        <TableHeaderCell>
-                          <Icon name="agora-line-star" className="w-16 h-16" />
-                        </TableHeaderCell>
-                        <TableHeaderCell>ESTADO</TableHeaderCell>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {reuses.map((reuse) => (
-                        <TableRow key={reuse.id}>
-                          <TableCell headerLabel="Título">
-                            <a href={reuse.url} className="text-primary-600 underline">
-                              {reuse.title}
-                            </a>
-                          </TableCell>
-                          <TableCell headerLabel="Visualizações">
-                            {reuse.metrics?.views ?? 0}
-                          </TableCell>
-                          <TableCell headerLabel="Favoritos">
-                            {reuse.metrics?.followers ?? 0}
-                          </TableCell>
-                          <TableCell headerLabel="Estado">
-                            {reuse.private ? "Privado" : reuse.archived ? "Arquivado" : "Público"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                  <p className="text-sm mb-16 text-neutral-700">{reusesTotal} resultados</p>
+                  <ReuseMetricsTable
+                    reuses={reuses}
+                    total={reusesTotal}
+                    page={reusesPage}
+                    onPageChange={setReusesPage}
+                  />
                 </>
               )}
             </div>
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }

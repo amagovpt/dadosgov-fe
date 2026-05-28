@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Breadcrumb,
   Button,
   CardNoResults,
   Icon,
@@ -15,9 +14,13 @@ import {
   TableCell,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import PublishDropdown from "@/components/admin/PublishDropdown";
 import { fetchOrganizations, deleteOrganization } from "@/app/api/organizations";
 import type { Organization } from '@/service/types/identity';
+import { createPaginationProps } from "@/utils/createPaginationProps";
+import TextLink from "@/components/Primitives/TextLink";
+import ResultsCount from "../ResultsCount";
+import TableActionsCell from "../TableActionsCell";
+import AdminLayout from "@/components/Layout/AdminLayout";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -100,7 +103,9 @@ export default function SystemOrganizationsClient() {
   }, [currentPage, pageSize, searchQuery, sortField, sortOrder]);
 
   useEffect(() => {
-    loadData();
+    void (async () => {
+      await loadData();
+    })();
   }, [loadData]);
 
   const handleSearch = (value: string) => {
@@ -143,32 +148,21 @@ export default function SystemOrganizationsClient() {
         title: "Tem a certeza que quer eliminar esta organização?",
         closeAriaLabel: "Fechar",
         dimensions: "m",
-      },
+      }
     );
   };
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Sistema", url: "#" },
-            { label: "Organizações", url: "/pages/admin/system/organizations" },
-          ]}
-        />
-      </div>
+    <AdminLayout breadcrumbItems={[
+      { label: "Administração", url: "/pages/admin" },
+      { label: "Sistema", url: "#" },
+      { label: "Organizações", url: "/pages/admin/system/organizations" },
+    ]}
+      title="Organizações"
+    >
+      <ResultsCount count={totalItems} isLoading={isLoading} />
 
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Organizações</h1>
-        <PublishDropdown />
-      </div>
-
-      <p className="text-neutral-700 text-sm mb-16">
-        {totalItems} resultados
-      </p>
-
-      <div className="flex items-end gap-16 mb-24">
+      <div className="mb-24 flex items-end gap-16">
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
@@ -183,25 +177,16 @@ export default function SystemOrganizationsClient() {
       </div>
 
       {isLoading ? (
-        <p className="text-neutral-700 text-sm">A carregar...</p>
+        <p className="text-sm text-neutral-700">A carregar...</p>
       ) : organizations.length > 0 ? (
         <Table
-          paginationProps={{
-            itemsPerPageLabel: "Linhas por página",
-            itemsPerPage: pageSize,
-            totalItems: totalItems,
-            availablePageSizes: [5, 10, 20],
-            currentPage: currentPage - 1,
-            buttonDropdownAriaLabel: "Selecionar linhas por página",
-            dropdownListAriaLabel: "Opções de linhas por página",
-            prevButtonAriaLabel: "Página anterior",
-            nextButtonAriaLabel: "Próxima página",
-            onPageChange: (page: number) => setCurrentPage(page + 1),
-            onPageSizeChange: (size: number) => {
-              setPageSize(size);
-              setCurrentPage(1);
-            },
-          }}
+          paginationProps={createPaginationProps(
+            pageSize,
+            totalItems,
+            currentPage,
+            setCurrentPage,
+            setPageSize
+          )}
         >
           <TableHeader>
             <TableRow>
@@ -229,42 +214,26 @@ export default function SystemOrganizationsClient() {
             {organizations.map((org) => (
               <TableRow key={org.id}>
                 <TableCell headerLabel="Nome">
-                  <a
-                    href={`/pages/admin/org/${org.id}/profile`}
-                    className="text-primary-600 underline"
-                  >
-                    {org.name}
-                  </a>
+                  <TextLink href={`/pages/admin/org/${org.id}/profile`}>{org.name}</TextLink>
                 </TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDate(org.created_at)}
-                </TableCell>
-                <TableCell headerLabel="Conjuntos de dados">
-                  {org.metrics?.datasets ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Reutilizações">
-                  {org.metrics?.reuses ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Membros">
-                  {org.members?.length ?? 0}
-                </TableCell>
+                <TableCell headerLabel="Criado em">{formatDate(org.created_at)}</TableCell>
+                <TableCell headerLabel="Conjuntos de dados">{org.metrics?.datasets ?? 0}</TableCell>
+                <TableCell headerLabel="Reutilizações">{org.metrics?.reuses ?? 0}</TableCell>
+                <TableCell headerLabel="Membros">{org.members?.length ?? 0}</TableCell>
                 <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <a href={`/pages/organizations/${org.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
-                    </a>
-                    <a href={`/pages/admin/org/${org.id}/profile`}>
-                      <Icon name="agora-line-edit" className="w-[20px] h-[20px]" />
-                    </a>
-                    <button
-                      aria-label={`Eliminar ${org.name}`}
-                      disabled={deletingOrgId === org.id}
-                      onClick={() => handleDeleteOrg(org)}
-                      className="text-danger-600 disabled:opacity-50"
-                    >
-                      <Icon name="agora-line-trash" className="w-[20px] h-[20px]" />
-                    </button>
-                  </div>
+                  <TableActionsCell
+                    viewAction={{
+                      href: `/pages/organizations/${org.slug}`,
+                    }}
+                    editAction={{
+                      href: `/pages/admin/org/${org.id}/profile`,
+                    }}
+                    deleteAction={{
+                      ariaLabel: `Eliminar ${org.name}`,
+                      disabled: deletingOrgId === org.id,
+                      handler: () => handleDeleteOrg(org),
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -273,17 +242,12 @@ export default function SystemOrganizationsClient() {
       ) : (
         <CardNoResults
           position="center"
-          icon={
-            <Icon
-              name="agora-line-building"
-              className="w-12 h-12 text-primary-500 icon-xl"
-            />
-          }
+          icon={<Icon name="agora-line-building" className="icon-xl h-12 w-12 text-primary-500" />}
           title="Sem organizações"
           description="Nenhuma organização encontrada."
           hasAnchor={false}
         />
       )}
-    </div>
+    </AdminLayout>
   );
 }

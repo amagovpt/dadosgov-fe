@@ -31,6 +31,8 @@ import { fetchUserFollowers, fetchMyFollowing } from "@/app/api/followers";
 import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
+import AppIcon from "../Primitives/AppIcon";
+import { createPaginationProps } from "@/utils/createPaginationProps";
 
 export default function PublicProfileClient() {
   const { user } = useAuth();
@@ -186,7 +188,7 @@ export default function PublicProfileClient() {
 
   return (
     <div className="container mx-auto mb-64">
-      <div className="admin-page__breadcrumb">
+      <div className="pb-64">
         <Breadcrumb
           items={[
             { label: "Início", url: "/" },
@@ -195,7 +197,7 @@ export default function PublicProfileClient() {
         />
       </div>
 
-      <h1 className="admin-page__title mt-64 mb-32">Perfil</h1>
+      <h1 className="text-2xl-bold text-brand-blue-secondary mt-64 mb-32 max-w-[696px]">Perfil</h1>
 
       {/* Profile Card */}
       <div className="profile-card">
@@ -342,8 +344,8 @@ export default function PublicProfileClient() {
                       children: org.metrics?.views
                         ? org.metrics.views >= 1000000
                           ? (org.metrics.views / 1000000)
-                              .toFixed(1)
-                              .replace(".", ",") + " M"
+                            .toFixed(1)
+                            .replace(".", ",") + " M"
                           : org.metrics.views >= 1000
                             ? (org.metrics.views / 1000).toFixed(0) + " mil"
                             : String(org.metrics.views)
@@ -538,20 +540,18 @@ export default function PublicProfileClient() {
           />
         ) : (
           <Table
-            paginationProps={{
-              itemsPerPageLabel: "Linhas por página",
-              itemsPerPage: itemsPerPage,
-              totalItems: datasets.length,
-              availablePageSizes: [5, 10, 20],
-              currentPage: currentPage,
-              buttonDropdownAriaLabel: "Selecionar linhas por página",
-              dropdownListAriaLabel: "Opções de linhas por página",
-              prevButtonAriaLabel: "Página anterior",
-              nextButtonAriaLabel: "Próxima página",
-              onPageChange: (page: number) => handlePageChange(page),
-              onPageSizeChange: (size: number) =>
-                handleItemsPerPageChange(String(size)),
-            }}
+            paginationProps={createPaginationProps(
+              itemsPerPage,
+              datasets.length,
+              currentPage,
+              setCurrentPage,
+              setItemsPerPage,
+              {
+                currentPageIsZeroBased: true,
+                onPageChange: (page) => handlePageChange(page),
+                onPageSizeChange: (size) => handleItemsPerPageChange(String(size)),
+              }
+            )}
           >
             <TableHeader>
               <TableRow>
@@ -599,7 +599,7 @@ export default function PublicProfileClient() {
                   </TableCell>
                   <TableCell headerLabel="">
                     <a href={`/pages/datasets/${dataset.slug}`}>
-                      <Icon name="agora-line-eye" className="w-[20px] h-[20px]" />
+                      <AppIcon name="agora-line-eye" />
                     </a>
                   </TableCell>
                 </TableRow>

@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
-  Breadcrumb,
   Button,
   CardGeneral,
   Icon,
@@ -14,6 +13,7 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
@@ -1676,17 +1676,13 @@ export default function SystemEditorialClient() {
 
   if (isLoading) {
     return (
-      <div className="admin-page">
-        <div className="admin-page__breadcrumb">
-          <Breadcrumb
-            items={[
-              { label: "Administração", url: "/pages/admin" },
-              { label: "Editorial", url: "/pages/admin/system/editorial" },
-            ]}
-          />
-        </div>
-        <div className="mb-24 flex items-center justify-between">
-          <h1 className="admin-page__title">Editorial</h1>
+      <AdminLayout
+        breadcrumbItems={[
+          { label: "Administração", url: "/pages/admin" },
+          { label: "Editorial", url: "/pages/admin/system/editorial" },
+        ]}
+        title="Editorial"
+        headerAction={
           <div className="flex items-center gap-8">
             <Button
               appearance="outline"
@@ -1708,25 +1704,21 @@ export default function SystemEditorialClient() {
               Editar na página pública
             </Button>
           </div>
-        </div>
+        }
+      >
         <p className="text-neutral-500">A carregar...</p>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__breadcrumb">
-        <Breadcrumb
-          items={[
-            { label: "Administração", url: "/pages/admin" },
-            { label: "Editorial", url: "/pages/admin/system/editorial" },
-          ]}
-        />
-      </div>
-
-      <div className="mb-24 flex items-center justify-between">
-        <h1 className="admin-page__title">Editorial</h1>
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Editorial", url: "/pages/admin/system/editorial" },
+      ]}
+      title="Editorial"
+      headerAction={
         <div className="flex items-center gap-8">
           <a href="/" target="_blank" rel="noopener noreferrer">
             <Button
@@ -1750,7 +1742,8 @@ export default function SystemEditorialClient() {
             </Button>
           </a>
         </div>
-      </div>
+      }
+    >
 
       {saveMessage && (
         <div
@@ -1832,6 +1825,6 @@ export default function SystemEditorialClient() {
           </TabBody>
         </Tab>
       </Tabs>
-    </div>
+    </AdminLayout>
   );
 }

@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Icon } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
+import AppIcon from "../Primitives/AppIcon";
 
 interface PublishDropdownProps {
   darkMode?: boolean;
@@ -81,7 +82,7 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
               }}
             >
               {item.icon ? (
-                <Icon name={item.icon} className="w-24 h-24 text-primary-600" />
+                <AppIcon name={item.icon} className="w-24 h-24 text-primary-600" />
               ) : (
                 <img
                   src={item.customIcon!}
