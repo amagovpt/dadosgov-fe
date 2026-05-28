@@ -1,5 +1,5 @@
 import AboutOpenData from "@/components/articles/AboutOpenData";
-import { fetchGitHubMarkdown } from "@/service/utils/github";
+import { fetchGitHubMarkdown } from "@/app/api/github-markdown";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
