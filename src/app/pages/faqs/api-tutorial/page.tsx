@@ -3,9 +3,23 @@ import ReactMarkdown from 'react-markdown';
 import { getFaqs } from '@/services/queries/faqs';
 import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
 import Anchor from '@/components/Shared/Anchor';
+import { Metadata } from 'next';
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+    //params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { title } = await getFaqs("api-tutorial", "pt");
+
+    return {
+        title,
+    };
+}
 
 export default async function page() {
-
 
     const { title, actionTitle, body, actions } = await getFaqs("api-tutorial", "pt")
 
