@@ -36,7 +36,7 @@ import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 
 const roleLabels: Record<string, string> = {
   admin: "Administrador",
@@ -532,7 +532,6 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     });
   }, [members, sortField, sortOrder]);
 
-  const totalPages = Math.ceil(sortedMembers.length / itemsPerPage);
   const paginatedMembers = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return sortedMembers.slice(start, start + itemsPerPage);
@@ -652,14 +651,12 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
         )}
       </div>
 
-      <Table
-        paginationProps={createPaginationProps(
-          itemsPerPage,
-          members.length,
-          currentPage,
-          setCurrentPage,
-          setItemsPerPage
-        )}
+      <AdminPaginatedTable
+        pageSize={itemsPerPage}
+        totalItems={members.length}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        setPageSize={setItemsPerPage}
       >
         <TableHeader>
           <TableRow>
@@ -750,7 +747,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </AdminPaginatedTable>
     </AdminLayout>
   );
 }

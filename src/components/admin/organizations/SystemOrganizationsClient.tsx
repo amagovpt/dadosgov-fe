@@ -5,8 +5,6 @@ import {
   Button,
   CardNoResults,
   Icon,
-  InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -14,15 +12,13 @@ import {
   TableCell,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
 import { Organization } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";
-import AdminLayout from "@/components/Layout/AdminLayout";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -79,6 +75,7 @@ export default function SystemOrganizationsClient() {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [deletingOrgId, setDeletingOrgId] = useState<string | null>(null);
+
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
     sortOrder,
@@ -110,9 +107,7 @@ export default function SystemOrganizationsClient() {
   }, [currentPage, pageSize, searchQuery, sortField, sortOrder]);
 
   useEffect(() => {
-    void (async () => {
-      await loadData();
-    })();
+    void loadData();
   }, [loadData]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
@@ -147,93 +142,26 @@ export default function SystemOrganizationsClient() {
   };
 
   return (
-    <AdminLayout breadcrumbItems={[
-      { label: "Administração", url: "/pages/admin" },
-      { label: "Sistema", url: "#" },
-      { label: "Organizações", url: "/pages/admin/system/organizations" },
-    ]}
+    <AdminListPage
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Sistema", url: "#" },
+        { label: "Organizações", url: "/pages/admin/system/organizations" },
+      ]}
       title="Organizações"
-    >
-      <ResultsCount count={totalItems} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome da organização"
-            aria-label="Pesquisar organizações"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleSearch(e.target.value);
-            }}
-          />
-        </div>
-      </div>
-
-      {isLoading ? (
-        <p className="text-sm text-neutral-700">A carregar...</p>
-      ) : organizations.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("name")}
-                onSortChange={handleSort("name")}
-              >
-                Nome
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("created_at")}
-                onSortChange={handleSort("created_at")}
-              >
-                Criado em
-              </TableHeaderCell>
-              <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
-              <TableHeaderCell>Reutilizações</TableHeaderCell>
-              <TableHeaderCell>Membros</TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {organizations.map((org) => (
-              <TableRow key={org.id}>
-                <TableCell headerLabel="Nome">
-                  <TextLink href={`/pages/admin/org/${org.id}/profile`}>{org.name}</TextLink>
-                </TableCell>
-                <TableCell headerLabel="Criado em">{formatDate(org.created_at)}</TableCell>
-                <TableCell headerLabel="Conjuntos de dados">{org.metrics?.datasets ?? 0}</TableCell>
-                <TableCell headerLabel="Reutilizações">{org.metrics?.reuses ?? 0}</TableCell>
-                <TableCell headerLabel="Membros">{org.members?.length ?? 0}</TableCell>
-                <TableCell headerLabel="Ações">
-                  <TableActionsCell
-                    viewAction={{
-                      href: `/pages/organizations/${org.slug}`,
-                    }}
-                    editAction={{
-                      href: `/pages/admin/org/${org.id}/profile`,
-                    }}
-                    deleteAction={{
-                      ariaLabel: `Eliminar ${org.name}`,
-                      disabled: deletingOrgId === org.id,
-                      handler: () => handleDeleteOrg(org),
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
+      isLoading={isLoading}
+      count={totalItems}
+      hasItems={organizations.length > 0}
+      currentPage={currentPage}
+      pageSize={pageSize}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
+      search={{
+        placeholder: "Pesquise o nome da organização",
+        ariaLabel: "Pesquisar organizações",
+        onChange: handleSearch,
+      }}
+      emptyState={
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-building" className="icon-xl h-12 w-12 text-primary-500" />}
@@ -241,7 +169,58 @@ export default function SystemOrganizationsClient() {
           description="Nenhuma organização encontrada."
           hasAnchor={false}
         />
-      )}
-    </AdminLayout>
+      }
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell
+            sortType="numeric"
+            sortOrder={getSortOrder("name")}
+            onSortChange={handleSort("name")}
+          >
+            Nome
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="numeric"
+            sortOrder={getSortOrder("created_at")}
+            onSortChange={handleSort("created_at")}
+          >
+            Criado em
+          </TableHeaderCell>
+          <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
+          <TableHeaderCell>Reutilizações</TableHeaderCell>
+          <TableHeaderCell>Membros</TableHeaderCell>
+          <TableHeaderCell>Ações</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {organizations.map((org) => (
+          <TableRow key={org.id}>
+            <TableCell headerLabel="Nome">
+              <TextLink href={`/pages/admin/org/${org.id}/profile`}>{org.name}</TextLink>
+            </TableCell>
+            <TableCell headerLabel="Criado em">{formatDate(org.created_at)}</TableCell>
+            <TableCell headerLabel="Conjuntos de dados">{org.metrics?.datasets ?? 0}</TableCell>
+            <TableCell headerLabel="Reutilizações">{org.metrics?.reuses ?? 0}</TableCell>
+            <TableCell headerLabel="Membros">{org.members?.length ?? 0}</TableCell>
+            <TableCell headerLabel="Ações">
+              <TableActionsCell
+                viewAction={{
+                  href: `/pages/organizations/${org.slug}`,
+                }}
+                editAction={{
+                  href: `/pages/admin/org/${org.id}/profile`,
+                }}
+                deleteAction={{
+                  ariaLabel: `Eliminar ${org.name}`,
+                  disabled: deletingOrgId === org.id,
+                  handler: () => handleDeleteOrg(org),
+                }}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </AdminListPage>
   );
 }

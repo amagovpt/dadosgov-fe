@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import {
-  Icon,
-  InputSearchBar,
-  StatusCard,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -14,31 +10,26 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgHarvesters } from "@/services/api";
 import type { HarvestSource } from "@/types/api";
 import { getHarvesterStatus } from "@/utils/harvesterStatus";
-import { HarvesterStatusFilter } from "./HarvesterStatusFilter";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminEmptyState from "../AdminEmptyState";
-import ResultsCount from "../ResultsCount";
 import StatusFilterSelect from "../StatusFilterSelect";
 import TableActionsCell from "../TableActionsCell";
-import AdminLayout from "@/components/Layout/AdminLayout";
+import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 
-
-type SortOrder = "none" | "ascending" | "descending";
 type HarvesterSortField = "name" | "created_at" | "last_job";
 
 export default function OrgHarvestersClient() {
   const params = useParams();
   const orgIdFromUrl = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading, selectOrganization } = useActiveOrganization();
-
   const orgId = orgIdFromUrl || activeOrg?.id;
   const { user } = useAuth();
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
@@ -46,19 +37,18 @@ export default function OrgHarvestersClient() {
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
   const [isLoading, setIsLoading] = useState(() => !!orgId);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<HarvesterSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
-  const handleSort = (field: HarvesterSortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: HarvesterSortField): SortOrder =>
-    sortField === field ? sortOrder : "none";
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const lastJobTimestamp = (h: HarvestSource): number => {
     const j = h.last_job;
@@ -119,8 +109,6 @@ export default function OrgHarvestersClient() {
         const bt = b.created_at ? Date.parse(b.created_at) : 0;
         return (at - bt) * dir;
       }
-      // last_job: prefer started, fall back to ended/created (matches the
-      // value rendered in the cell)
       return (lastJobTimestamp(a) - lastJobTimestamp(b)) * dir;
     });
   }, [filteredHarvesters, sortField, sortOrder]);
@@ -141,125 +129,105 @@ export default function OrgHarvestersClient() {
   }
 
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
         { label: orgName || "Organização", url: "#" },
         { label: "Harvesters", url: "/pages/admin/org/harvesters" },
       ]}
       title="Harvesters"
-    >
-      <ResultsCount count={harvesters.length} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome do harvester"
-            aria-label="Pesquisar harvesters"
-          />
-        </div>
+      isLoading={isLoading}
+      count={filteredHarvesters.length}
+      currentPage={currentPage}
+      pageSize={itemsPerPage}
+      setCurrentPage={setCurrentPage}
+      search={{
+        placeholder: "Pesquise o nome do harvester",
+        ariaLabel: "Pesquisar harvesters",
+      }}
+      filters={
         <StatusFilterSelect
           value={statusFilter}
-          onChange={(v) => {
-            setStatusFilter(v);
+          onChange={(value) => {
+            setStatusFilter(value);
             setCurrentPage(1);
           }}
         />
-      </div>
-
-      {isLoading ? (
-        <p>A carregar...</p>
-      ) : harvesters.length > 0 ? (
-        <>
-          <Table
-            paginationProps={createPaginationProps(
-              itemsPerPage,
-              harvesters.length,
-              currentPage,
-              setCurrentPage,
-              undefined
-            )}
-          >
-            <TableHeader>
-              <TableRow>
-                <TableHeaderCell
-                  sortType="numeric"
-                  sortOrder={getSortOrder("name")}
-                  onSortChange={handleSort("name")}
-                >
-                  Nome
-                </TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell>Implementação</TableHeaderCell>
-                <TableHeaderCell
-                  sortType="date"
-                  sortOrder={getSortOrder("created_at")}
-                  onSortChange={handleSort("created_at")}
-                >
-                  Criado em
-                </TableHeaderCell>
-                <TableHeaderCell
-                  sortType="date"
-                  sortOrder={getSortOrder("last_job")}
-                  onSortChange={handleSort("last_job")}
-                >
-                  Última execução
-                </TableHeaderCell>
-                <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
-                <TableHeaderCell>API</TableHeaderCell>
-                <TableHeaderCell>Ações</TableHeaderCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedHarvesters.map((harvester, index) => (
-                <TableRow key={index}>
-                  <TableCell headerLabel="Nome">
-                    <TextLink href={`/pages/admin/org/harvesters/${harvester.id}`}>
-                      {harvester.name}
-                    </TextLink>
-                  </TableCell>
-                  <TableCell headerLabel="Estado">
-                    {(() => {
-                      const status = getHarvesterStatus(harvester);
-                      return <StatusDot variant={status.variant}>{status.label}</StatusDot>;
-                    })()}
-                  </TableCell>
-                  <TableCell headerLabel="Implementação">{harvester.backend}</TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDateToDMY(harvester.created_at)}
-                  </TableCell>
-                  <TableCell headerLabel="Última execução">
-                    {harvester.last_job
-                      ? formatDateToDMY(
-                        harvester.last_job.started ?? harvester.last_job.ended ?? ""
-                      )
-                      : "Ainda não"}
-                  </TableCell>
-                  <TableCell headerLabel="Conjuntos de dados">
-                    {harvester.datasets_count ?? 0}
-                  </TableCell>
-                  <TableCell headerLabel="API">{harvester.backend}</TableCell>
-                  <TableCell headerLabel="Ações">
-                    <TableActionsCell
-                      editAction={{
-                        href: `/pages/admin/harvesters/${harvester.id}`,
-                      }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
-      ) : (
+      }
+      emptyState={
         <AdminEmptyState
           icon="agora-line-buildings"
           title="Sem harvesters"
           description="A organização ainda não tem harvesters."
         />
-      )}
-    </AdminLayout>
+      }
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell
+            sortType="numeric"
+            sortOrder={getSortOrder("name")}
+            onSortChange={handleSort("name")}
+          >
+            Nome
+          </TableHeaderCell>
+          <TableHeaderCell>Estado</TableHeaderCell>
+          <TableHeaderCell>Implementação</TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("created_at")}
+            onSortChange={handleSort("created_at")}
+          >
+            Criado em
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("last_job")}
+            onSortChange={handleSort("last_job")}
+          >
+            Última execução
+          </TableHeaderCell>
+          <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
+          <TableHeaderCell>API</TableHeaderCell>
+          <TableHeaderCell>Ações</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {paginatedHarvesters.map((harvester) => {
+          const status = getHarvesterStatus(harvester);
+
+          return (
+            <TableRow key={harvester.id}>
+              <TableCell headerLabel="Nome">
+                <TextLink href={`/pages/admin/org/harvesters/${harvester.id}`}>
+                  {harvester.name}
+                </TextLink>
+              </TableCell>
+              <TableCell headerLabel="Estado">
+                <StatusDot variant={status.variant}>{status.label}</StatusDot>
+              </TableCell>
+              <TableCell headerLabel="Implementação">{harvester.backend}</TableCell>
+              <TableCell headerLabel="Criado em">{formatDateToDMY(harvester.created_at)}</TableCell>
+              <TableCell headerLabel="Última execução">
+                {harvester.last_job
+                  ? formatDateToDMY(harvester.last_job.started ?? harvester.last_job.ended ?? "")
+                  : "Ainda não"}
+              </TableCell>
+              <TableCell headerLabel="Conjuntos de dados">
+                {harvester.datasets_count ?? 0}
+              </TableCell>
+              <TableCell headerLabel="API">{harvester.backend}</TableCell>
+              <TableCell headerLabel="Ações">
+                <TableActionsCell
+                  editAction={{
+                    href: `/pages/admin/harvesters/${harvester.id}`,
+                  }}
+                />
+              </TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </AdminListPage>
   );
 }

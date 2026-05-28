@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -12,17 +10,15 @@ import {
 } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchMyDataservices } from "@/services/api";
 import { Dataservice } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import AdminEmptyState from "../AdminEmptyState";
-import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";
 
 type DataserviceSortField = "title" | "created_at" | "last_modified";
@@ -32,6 +28,8 @@ export default function DataservicesClient() {
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<DataserviceSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
@@ -40,7 +38,8 @@ export default function DataservicesClient() {
     sortField,
     sortOrder,
     setSortField,
-    setSortOrder
+    setSortOrder,
+    setCurrentPage
   );
 
   const filteredApis = useMemo(() => filterByStatus(apis, statusFilter), [apis, statusFilter]);
@@ -61,6 +60,11 @@ export default function DataservicesClient() {
     });
   }, [filteredApis, sortField, sortOrder]);
 
+  const paginatedApis = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return sortedApis.slice(start, start + pageSize);
+  }, [sortedApis, currentPage, pageSize]);
+
   useEffect(() => {
     async function loadDataservices() {
       setIsLoading(true);
@@ -77,97 +81,92 @@ export default function DataservicesClient() {
   }, []);
 
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
         { label: displayName || "...", url: "#" },
         { label: "API", url: "/pages/admin/dataservices" },
       ]}
       title="API"
+      isLoading={isLoading}
+      count={filteredApis.length}
+      currentPage={currentPage}
+      pageSize={pageSize}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
+      search={{
+        placeholder: "Pesquise o nome da API",
+        ariaLabel: "Pesquisar APIs",
+      }}
+      filters={
+        <StatusFilterSelect
+          value={statusFilter}
+          onChange={(value) => {
+            setStatusFilter(value);
+            setCurrentPage(1);
+          }}
+        />
+      }
+      emptyState={<AdminEmptyState icon="agora-line-edit" createUrl="/pages/admin/dataservices/new" />}
     >
-
-      <ResultsCount count={filteredApis.length} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome da API"
-            aria-label="Pesquisar APIs"
-          />
-        </div>
-        <StatusFilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v)} />
-      </div>
-
-      {!isLoading && filteredApis.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(5, filteredApis.length, 0, undefined, undefined, {
-            currentPageIsZeroBased: true,
-          })}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("title")}
-                onSortChange={handleSort("title")}
-              >
-                Título da API
-              </TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("created_at")}
-                onSortChange={handleSort("created_at")}
-              >
-                Criado em
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("last_modified")}
-                onSortChange={handleSort("last_modified")}
-              >
-                Modificado em
-              </TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedApis.map((api, index) => (
-              <TableRow key={index}>
-                <TableCell headerLabel="Título">
-                  <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
-                </TableCell>
-                <TableCell headerLabel="Estado">
-                  <ResourceStatusBadge item={api} />
-                </TableCell>
-                <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
-                <TableCell headerLabel="Modificado em">
-                  {formatDateToDMY(api.last_modified)}
-                  <br />
-                  <span className="text-sm text-neutral-500">
-                    sobre <span className="text-success-600">●</span>{" "}
-                    {api.owner ? `${api.owner.first_name} ${api.owner.last_name}` : "—"}
-                  </span>
-                </TableCell>
-                <TableCell headerLabel="Ações">
-                  <TableActionsCell
-                    viewAction={{
-                      href: `/pages/dataservices/${api.slug}`,
-                    }}
-                    editAction={{
-                      href: `/pages/admin/dataservices/edit?slug=${api.slug}`,
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <AdminEmptyState icon="agora-line-edit" createUrl="/pages/admin/dataservices/new" />
-      )}
-    </AdminLayout>
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell
+            sortType="numeric"
+            sortOrder={getSortOrder("title")}
+            onSortChange={handleSort("title")}
+          >
+            Título da API
+          </TableHeaderCell>
+          <TableHeaderCell>Estado</TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("created_at")}
+            onSortChange={handleSort("created_at")}
+          >
+            Criado em
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("last_modified")}
+            onSortChange={handleSort("last_modified")}
+          >
+            Modificado em
+          </TableHeaderCell>
+          <TableHeaderCell>Ações</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {paginatedApis.map((api) => (
+          <TableRow key={api.id}>
+            <TableCell headerLabel="Título">
+              <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
+            </TableCell>
+            <TableCell headerLabel="Estado">
+              <ResourceStatusBadge item={api} />
+            </TableCell>
+            <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
+            <TableCell headerLabel="Modificado em">
+              {formatDateToDMY(api.last_modified)}
+              <br />
+              <span className="text-sm text-neutral-500">
+                sobre <span className="text-success-600">●</span>{" "}
+                {api.owner ? `${api.owner.first_name} ${api.owner.last_name}` : "—"}
+              </span>
+            </TableCell>
+            <TableCell headerLabel="Ações">
+              <TableActionsCell
+                viewAction={{
+                  href: `/pages/dataservices/${api.slug}`,
+                }}
+                editAction={{
+                  href: `/pages/admin/dataservices/edit?slug=${api.slug}`,
+                }}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </AdminListPage>
   );
 }

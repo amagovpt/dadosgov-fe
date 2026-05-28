@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
-  Icon,
-  InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -13,23 +9,20 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchMyCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
-import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";
+import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "format" | "created_at" | "last_modified";
 
 export default function CommunityResourcesClient() {
   const { displayName } = useCurrentUser();
-  const router = useRouter();
 
   const [allResources, setAllResources] = useState<CommunityResource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +31,14 @@ export default function CommunityResourcesClient() {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   useEffect(() => {
     async function loadResources() {
@@ -90,133 +91,107 @@ export default function CommunityResourcesClient() {
     });
   }, [filteredResources, sortField, sortOrder]);
 
-  const totalItems = sortedResources.length;
-  const start = (currentPage - 1) * pageSize;
-  const resources = sortedResources.slice(start, start + pageSize);
-
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const resources = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return sortedResources.slice(start, start + pageSize);
+  }, [sortedResources, currentPage, pageSize]);
 
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
         { label: displayName || "...", url: "#" },
         { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
       ]}
       title="Recursos comunitários"
-    >
-
-      <ResultsCount count={totalItems} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquisar recursos comunitários"
-            aria-label="Pesquisar recursos comunitários"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-        </div>
-      </div>
-
-      {!isLoading && resources.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("title")}
-                onSortChange={handleSort("title")}
-              >
-                Título
-              </TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("format")}
-                onSortChange={handleSort("format")}
-              >
-                Formato
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("created_at")}
-                onSortChange={handleSort("created_at")}
-              >
-                Criado em
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("last_modified")}
-                onSortChange={handleSort("last_modified")}
-              >
-                Modificado em
-              </TableHeaderCell>
-              <TableHeaderCell>Ação</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {resources.map((resource) => (
-              <TableRow key={resource.id}>
-                <TableCell headerLabel="Título">
-                  <span className="text-neutral-900">{resource.title}</span>
-                  {resource.dataset && (
-                    <>
-                      <br />
-                      <TextLink href={`/pages/datasets/${resource.dataset.id}`} className="text-sm">
-                        {resource.dataset.title}
-                      </TextLink>
-                    </>
-                  )}
-                </TableCell>
-                <TableCell headerLabel="Estado">
-                  <ResourceStatusBadge item={resource} />
-                </TableCell>
-                <TableCell headerLabel="Formato">{resource.format || "—"}</TableCell>
-                <TableCell headerLabel="Criado em">
-                  {formatDateToDMY(resource.created_at)}
-                </TableCell>
-                <TableCell headerLabel="Modificado em">
-                  {formatDateToDMY(resource.last_modified)}
-                </TableCell>
-                <TableCell headerLabel="Ação">
-                  <TableActionsCell
-                    editAction={{
-                      href: `/pages/admin/me/community-resources/edit?id=${resource.id}`,
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
+      isLoading={isLoading}
+      count={sortedResources.length}
+      currentPage={currentPage}
+      pageSize={pageSize}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
+      search={{
+        placeholder: "Pesquisar recursos comunitários",
+        ariaLabel: "Pesquisar recursos comunitários",
+        onChange: (value) => {
+          setSearchQuery(value);
+          setCurrentPage(1);
+        },
+      }}
+      emptyState={
         <AdminEmptyState
           icon="agora-line-user-group"
           description="Ainda não publicou um recurso comunitário."
           createUrl="/pages/admin/community-resources/new"
         />
-      )}
-    </AdminLayout>
+      }
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("title")}
+            onSortChange={handleSort("title")}
+          >
+            Título
+          </TableHeaderCell>
+          <TableHeaderCell>Estado</TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("format")}
+            onSortChange={handleSort("format")}
+          >
+            Formato
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("created_at")}
+            onSortChange={handleSort("created_at")}
+          >
+            Criado em
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("last_modified")}
+            onSortChange={handleSort("last_modified")}
+          >
+            Modificado em
+          </TableHeaderCell>
+          <TableHeaderCell>Ação</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {resources.map((resource) => (
+          <TableRow key={resource.id}>
+            <TableCell headerLabel="Título">
+              <span className="text-neutral-900">{resource.title}</span>
+              {resource.dataset && (
+                <>
+                  <br />
+                  <TextLink href={`/pages/datasets/${resource.dataset.id}`} className="text-sm">
+                    {resource.dataset.title}
+                  </TextLink>
+                </>
+              )}
+            </TableCell>
+            <TableCell headerLabel="Estado">
+              <ResourceStatusBadge item={resource} />
+            </TableCell>
+            <TableCell headerLabel="Formato">{resource.format || "—"}</TableCell>
+            <TableCell headerLabel="Criado em">{formatDateToDMY(resource.created_at)}</TableCell>
+            <TableCell headerLabel="Modificado em">
+              {formatDateToDMY(resource.last_modified)}
+            </TableCell>
+            <TableCell headerLabel="Ação">
+              <TableActionsCell
+                editAction={{
+                  href: `/pages/admin/me/community-resources/edit?id=${resource.id}`,
+                }}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </AdminListPage>
   );
 }

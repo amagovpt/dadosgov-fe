@@ -2,9 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import {
-  CardNoResults,
   Icon,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -12,12 +10,11 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgDiscussions } from "@/services/api";
 import type { Discussion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 
 export default function DiscussionsClient() {
@@ -57,83 +54,73 @@ export default function DiscussionsClient() {
   }
 
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
         { label: activeOrg?.name || "Organização", url: "#" },
         { label: "Discussões", url: "/pages/admin/org/discussions" },
       ]}
       title="Discussões"
-    >
-
-      {discussions.length === 0 ? (
+      isLoading={false}
+      count={discussions.length}
+      currentPage={currentPage}
+      pageSize={itemsPerPage}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setItemsPerPage}
+      emptyState={
         <AdminEmptyState
           icon="agora-line-chat"
           description="Ainda não há discussões sobre esta organização."
         />
-      ) : (
-        <>
-          <p className="text-sm mb-24 font-semibold uppercase text-neutral-700">
-            {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
-          </p>
-
-          <Table
-            paginationProps={createPaginationProps(
-              itemsPerPage,
-              discussions.length,
-              currentPage,
-              setCurrentPage,
-              setItemsPerPage
-            )}
-          >
-            <TableHeader>
-              <TableRow>
-                <TableHeaderCell sortType="date" sortOrder="none">Título</TableHeaderCell>
-                <TableHeaderCell>Autor</TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none" >Data</TableHeaderCell>
-                <TableHeaderCell>Mensagens</TableHeaderCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedDiscussions.map((discussion) => (
-                <TableRow key={discussion.id}>
-                  <TableCell headerLabel="Título">
-                    <span className="font-medium">{discussion.title}</span>
-                  </TableCell>
-                  <TableCell headerLabel="Autor">
-                    <div className="flex items-center gap-8">
-                      {discussion.user?.avatar_thumbnail ? (
-                        <img
-                          src={discussion.user.avatar_thumbnail}
-                          alt={`${discussion.user.first_name} ${discussion.user.last_name}`}
-                          className="h-24 w-24 rounded-full"
-                        />
-                      ) : (
-                        <Icon name="agora-line-user" className="h-24 w-24" />
-                      )}
-                      <span>
-                        {discussion.user?.first_name} {discussion.user?.last_name}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell headerLabel="Estado">
-                    {discussion.closed ? (
-                      <StatusDot variant="success">FECHADA</StatusDot>
-                    ) : (
-                      <StatusDot variant="informative">ABERTA</StatusDot>
-                    )}
-                  </TableCell>
-                  <TableCell headerLabel="Data">{formatDateToDMY(discussion.created)}</TableCell>
-                  <TableCell headerLabel="Mensagens">
-                    {discussion.discussion?.length || 0}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
-      )}
-    </AdminLayout>
+      }
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell sortType="date" sortOrder="none">
+            Título
+          </TableHeaderCell>
+          <TableHeaderCell>Autor</TableHeaderCell>
+          <TableHeaderCell>Estado</TableHeaderCell>
+          <TableHeaderCell sortType="date" sortOrder="none">
+            Data
+          </TableHeaderCell>
+          <TableHeaderCell>Mensagens</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {paginatedDiscussions.map((discussion) => (
+          <TableRow key={discussion.id}>
+            <TableCell headerLabel="Título">
+              <span className="font-medium">{discussion.title}</span>
+            </TableCell>
+            <TableCell headerLabel="Autor">
+              <div className="flex items-center gap-8">
+                {discussion.user?.avatar_thumbnail ? (
+                  <img
+                    src={discussion.user.avatar_thumbnail}
+                    alt={`${discussion.user.first_name} ${discussion.user.last_name}`}
+                    className="h-24 w-24 rounded-full"
+                  />
+                ) : (
+                  <Icon name="agora-line-user" className="h-24 w-24" />
+                )}
+                <span>
+                  {discussion.user?.first_name} {discussion.user?.last_name}
+                </span>
+              </div>
+            </TableCell>
+            <TableCell headerLabel="Estado">
+              {discussion.closed ? (
+                <StatusDot variant="success">FECHADA</StatusDot>
+              ) : (
+                <StatusDot variant="informative">ABERTA</StatusDot>
+              )}
+            </TableCell>
+            <TableCell headerLabel="Data">{formatDateToDMY(discussion.created)}</TableCell>
+            <TableCell headerLabel="Mensagens">{discussion.discussion?.length || 0}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </AdminListPage>
   );
 }

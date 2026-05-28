@@ -6,21 +6,17 @@ import {
   DropdownOption,
   DropdownSection,
   Icon,
-  InputSearchBar,
   InputSelect,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import AdminLayout from "@/components/Layout/AdminLayout";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchUsers } from "@/services/api";
 import { UserAdmin } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
-import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 
@@ -94,7 +90,7 @@ export default function SystemUsersClient() {
     setCurrentPage(1);
   });
 
-  const handleSort = (field: SortField) => (_newOrder: SortOrder) => {
+  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
     if (field === "name") {
       if (sortField !== "name") {
         setSortField("name");
@@ -105,8 +101,8 @@ export default function SystemUsersClient() {
         setSortOrder("descending");
       }
     } else {
-      setSortField(_newOrder === "none" ? null : field);
-      setSortOrder(_newOrder);
+      setSortField(newOrder === "none" ? null : field);
+      setSortOrder(newOrder);
     }
     setCurrentPage(1);
   };
@@ -116,29 +112,26 @@ export default function SystemUsersClient() {
   };
 
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
         { label: "Sistema", url: "#" },
         { label: "Utilizadores", url: "/pages/admin/system/users" },
       ]}
       title="Utilizadores"
-    >
-
-      <ResultsCount count={totalItems} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome do utilizador"
-            aria-label="Pesquisar utilizadores"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleSearch(e.target.value);
-            }}
-          />
-        </div>
+      isLoading={isLoading}
+      count={totalItems}
+      hasItems={users.length > 0}
+      currentPage={currentPage}
+      pageSize={pageSize}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
+      search={{
+        placeholder: "Pesquise o nome do utilizador",
+        ariaLabel: "Pesquisar utilizadores",
+        onChange: handleSearch,
+      }}
+      filters={
         <InputSelect
           label=""
           hideLabel
@@ -161,97 +154,8 @@ export default function SystemUsersClient() {
             </DropdownOption>
           </DropdownSection>
         </InputSelect>
-      </div>
-
-      {isLoading ? (
-        <p className="text-sm text-neutral-700">A carregar...</p>
-      ) : users.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("name")}
-                onSortChange={handleSort("name")}
-              >
-                Nome
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("created_at")}
-                onSortChange={handleSort("created_at")}
-              >
-                Criado em
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("datasets")}
-                onSortChange={handleSort("datasets")}
-              >
-                Conjuntos de dados
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("reuses")}
-                onSortChange={handleSort("reuses")}
-              >
-                Reutilizações
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("followers")}
-                onSortChange={handleSort("followers")}
-              >
-                Seguidores
-              </TableHeaderCell>
-              <TableHeaderCell>Perfis</TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell headerLabel="Nome">
-                  <div>
-                    <TextLink href={`/pages/users/${user.slug}`}>
-                      {user.first_name} {user.last_name}
-                    </TextLink>
-                    {user.email && (
-                      <div className="text-sm flex items-center gap-4 text-neutral-900">
-                        <Icon name="agora-line-mail" className="h-[14px] w-[14px]" />
-                        {user.email}
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell headerLabel="Criado em">{formatDate(user.since)}</TableCell>
-                <TableCell headerLabel="Conjuntos de dados">{user.datasets_count ?? 0}</TableCell>
-                <TableCell headerLabel="Reutilizações">{user.reuses_count ?? 0}</TableCell>
-                <TableCell headerLabel="Seguidores">{user.metrics?.followers ?? 0}</TableCell>
-                <TableCell headerLabel="Perfis">{getUserProfile(user)}</TableCell>
-                <TableCell headerLabel="Ações">
-                  <TableActionsCell
-                    viewAction={{
-                      href: `/pages/users/${user.slug}`,
-                    }}
-                    editAction={{
-                      href: `/pages/admin/users/${user.id}/profile`,
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
+      }
+      emptyState={
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-user" className="icon-xl h-12 w-12 text-primary-500" />}
@@ -259,7 +163,83 @@ export default function SystemUsersClient() {
           description="Nenhum utilizador encontrado."
           hasAnchor={false}
         />
-      )}
-    </AdminLayout>
+      }
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell
+            sortType="numeric"
+            sortOrder={getSortOrder("name")}
+            onSortChange={handleSort("name")}
+          >
+            Nome
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="numeric"
+            sortOrder={getSortOrder("created_at")}
+            onSortChange={handleSort("created_at")}
+          >
+            Criado em
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="numeric"
+            sortOrder={getSortOrder("datasets")}
+            onSortChange={handleSort("datasets")}
+          >
+            Conjuntos de dados
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="numeric"
+            sortOrder={getSortOrder("reuses")}
+            onSortChange={handleSort("reuses")}
+          >
+            Reutilizações
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="numeric"
+            sortOrder={getSortOrder("followers")}
+            onSortChange={handleSort("followers")}
+          >
+            Seguidores
+          </TableHeaderCell>
+          <TableHeaderCell>Perfis</TableHeaderCell>
+          <TableHeaderCell>Ações</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {users.map((user) => (
+          <TableRow key={user.id}>
+            <TableCell headerLabel="Nome">
+              <div>
+                <TextLink href={`/pages/users/${user.slug}`}>
+                  {user.first_name} {user.last_name}
+                </TextLink>
+                {user.email && (
+                  <div className="text-sm flex items-center gap-4 text-neutral-900">
+                    <Icon name="agora-line-mail" className="h-[14px] w-[14px]" />
+                    {user.email}
+                  </div>
+                )}
+              </div>
+            </TableCell>
+            <TableCell headerLabel="Criado em">{formatDate(user.since)}</TableCell>
+            <TableCell headerLabel="Conjuntos de dados">{user.datasets_count ?? 0}</TableCell>
+            <TableCell headerLabel="Reutilizações">{user.reuses_count ?? 0}</TableCell>
+            <TableCell headerLabel="Seguidores">{user.metrics?.followers ?? 0}</TableCell>
+            <TableCell headerLabel="Perfis">{getUserProfile(user)}</TableCell>
+            <TableCell headerLabel="Ações">
+              <TableActionsCell
+                viewAction={{
+                  href: `/pages/users/${user.slug}`,
+                }}
+                editAction={{
+                  href: `/pages/admin/users/${user.id}/profile`,
+                }}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </AdminListPage>
   );
 }

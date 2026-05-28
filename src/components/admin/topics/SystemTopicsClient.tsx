@@ -4,19 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 import {
   CardNoResults,
   Icon,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import AdminLayout from "@/components/Layout/AdminLayout";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchTopics } from "@/services/api";
 import { Topic } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
-import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";
 
 const formatDate = (dateStr: string) => {
@@ -53,59 +50,21 @@ export default function SystemTopicsClient() {
   }, [loadData]);
 
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
         { label: "Sistema", url: "#" },
         { label: "Temas", url: "/pages/admin/system/topics" },
       ]}
       title="Temas"
-    >
-
-      <ResultsCount count={totalItems} isLoading={isLoading} />
-
-      {isLoading ? (
-        <p className="text-sm text-neutral-700">A carregar...</p>
-      ) : topics.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell>Nome</TableHeaderCell>
-              <TableHeaderCell>Criado em</TableHeaderCell>
-              <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
-              <TableHeaderCell>Reutilizações</TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {topics.map((topic) => (
-              <TableRow key={topic.id}>
-                <TableCell headerLabel="Nome">
-                  <TextLink href={`/pages/themes/${topic.slug}`}>{topic.name}</TextLink>
-                </TableCell>
-                <TableCell headerLabel="Criado em">{formatDate(topic.created_at)}</TableCell>
-                <TableCell headerLabel="Conjuntos de dados">{topic.datasets_count ?? 0}</TableCell>
-                <TableCell headerLabel="Reutilizações">{topic.reuses_count ?? 0}</TableCell>
-                <TableCell headerLabel="Ações">
-                  <TableActionsCell
-                    viewAction={{
-                      href: `/pages/themes/${topic.slug}`,
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
+      isLoading={isLoading}
+      count={totalItems}
+      hasItems={topics.length > 0}
+      currentPage={currentPage}
+      pageSize={pageSize}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
+      emptyState={
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-tag" className="icon-xl h-12 w-12 text-primary-500" />}
@@ -113,7 +72,36 @@ export default function SystemTopicsClient() {
           description="Nenhum tema encontrado."
           hasAnchor={false}
         />
-      )}
-    </AdminLayout>
+      }
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell>Nome</TableHeaderCell>
+          <TableHeaderCell>Criado em</TableHeaderCell>
+          <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
+          <TableHeaderCell>Reutilizações</TableHeaderCell>
+          <TableHeaderCell>Ações</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {topics.map((topic) => (
+          <TableRow key={topic.id}>
+            <TableCell headerLabel="Nome">
+              <TextLink href={`/pages/themes/${topic.slug}`}>{topic.name}</TextLink>
+            </TableCell>
+            <TableCell headerLabel="Criado em">{formatDate(topic.created_at)}</TableCell>
+            <TableCell headerLabel="Conjuntos de dados">{topic.datasets_count ?? 0}</TableCell>
+            <TableCell headerLabel="Reutilizações">{topic.reuses_count ?? 0}</TableCell>
+            <TableCell headerLabel="Ações">
+              <TableActionsCell
+                viewAction={{
+                  href: `/pages/themes/${topic.slug}`,
+                }}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </AdminListPage>
   );
 }

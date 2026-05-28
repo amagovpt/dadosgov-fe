@@ -6,8 +6,6 @@ import {
   Button,
   CardNoResults,
   Icon,
-  InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -17,12 +15,10 @@ import {
 } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import StatusDot from "@/components/admin/StatusDot";
-import AdminLayout from "@/components/Layout/AdminLayout";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchAdminPosts } from "@/services/api";
 import type { Post } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
-import ResultsCount from "../ResultsCount";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 import TableActionsCell from "../TableActionsCell";
@@ -45,6 +41,7 @@ export default function SystemPostsClient() {
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+
   const { handleSort, getSortOrder } = useSortControls(
     sortField,
     sortOrder,
@@ -100,10 +97,9 @@ export default function SystemPostsClient() {
           return sortOrder === "descending" ? -cmp : cmp;
         });
       }
-      const start = (currentPage - 1) * pageSize;
-      const pagedData = data.slice(start, start + pageSize);
 
-      setPosts(pagedData);
+      const start = (currentPage - 1) * pageSize;
+      setPosts(data.slice(start, start + pageSize));
       setTotalItems(data.length);
     } catch (error) {
       console.error("Error loading posts:", error);
@@ -122,63 +118,64 @@ export default function SystemPostsClient() {
   });
 
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
         { label: "Sistema", url: "#" },
         { label: "Artigos", url: "/pages/admin/system/posts" },
       ]}
       title="Artigos"
-    >
-
-      <ResultsCount count={totalItems} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o título do artigo"
-            aria-label="Pesquisar artigos"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleSearch(e.target.value);
+      isLoading={isLoading}
+      count={totalItems}
+      hasItems={posts.length > 0}
+      currentPage={currentPage}
+      pageSize={pageSize}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
+      search={{
+        placeholder: "Pesquise o título do artigo",
+        ariaLabel: "Pesquisar artigos",
+        onChange: handleSearch,
+      }}
+      filters={
+        <>
+          <InputSelect
+            label=""
+            hideLabel
+            placeholder="Filtrar por tipo"
+            id="filter-type"
+            onChange={(options) => {
+              setTypeFilter(options.length > 0 ? (options[0].value as string) : "");
+              setCurrentPage(1);
             }}
+          >
+            <DropdownSection name="type">
+              <DropdownOption value="" selected={typeFilter === ""}>
+                Todos
+              </DropdownOption>
+              <DropdownOption value="news" selected={typeFilter === "news"}>
+                Notícias
+              </DropdownOption>
+              <DropdownOption value="page" selected={typeFilter === "page"}>
+                Página
+              </DropdownOption>
+            </DropdownSection>
+          </InputSelect>
+          <StatusFilterSelect
+            value={statusFilter}
+            onChange={(value) => {
+              setStatusFilter(value);
+              setCurrentPage(1);
+            }}
+            options={[
+              { value: "", label: "Todos" },
+              { value: "published", label: "Publicado" },
+              { value: "draft", label: "Despublicado" },
+            ]}
           />
-        </div>
-        <InputSelect
-          label=""
-          hideLabel
-          placeholder="Filtrar por tipo"
-          id="filter-type"
-          onChange={(options) => {
-            setTypeFilter(options.length > 0 ? (options[0].value as string) : "");
-            setCurrentPage(1);
-          }}
-        >
-          <DropdownSection name="type">
-            <DropdownOption value="" selected={typeFilter === ""}>
-              Todos
-            </DropdownOption>
-            <DropdownOption value="news" selected={typeFilter === "news"}>
-              Notícias
-            </DropdownOption>
-            <DropdownOption value="page" selected={typeFilter === "page"}>
-              Página
-            </DropdownOption>
-          </DropdownSection>
-        </InputSelect>
-        <StatusFilterSelect
-          value={statusFilter}
-          onChange={(v) => {
-            setStatusFilter(v);
-            setCurrentPage(1);
-          }}
-          options={[
-            { value: "", label: "Todos" },
-            { value: "published", label: "Publicado" },
-            { value: "draft", label: "Despublicado" },
-          ]}
-        />
+        </>
+      }
+      toolbarActions={
         <Button
           variant="primary"
           appearance="outline"
@@ -189,79 +186,8 @@ export default function SystemPostsClient() {
         >
           Criar um artigo
         </Button>
-      </div>
-
-      {isLoading ? (
-        <p className="text-sm text-neutral-700">A carregar...</p>
-      ) : posts.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell
-                sortType="string"
-                sortOrder={getSortOrder("name")}
-                onSortChange={handleSort("name")}
-              >
-                Título
-              </TableHeaderCell>
-              <TableHeaderCell>Tipo</TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("created_at")}
-                onSortChange={handleSort("created_at")}
-              >
-                Criado em
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("last_modified")}
-                onSortChange={handleSort("last_modified")}
-              >
-                Atualizado em
-              </TableHeaderCell>
-              <TableHeaderCell>Ação</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {posts.map((post) => (
-              <TableRow key={post.id}>
-                <TableCell headerLabel="Título">
-                  <TextLink href={`/pages/posts/${post.slug}`}>{post.name}</TextLink>
-                </TableCell>
-                <TableCell headerLabel="Tipo">
-                  {post.kind === "page" ? "Página" : "Notícias"}
-                </TableCell>
-                <TableCell headerLabel="Estado">
-                  <StatusDot variant={post.published ? "success" : "warning"}>
-                    {post.published ? "Publicado" : "Despublicado"}
-                  </StatusDot>
-                </TableCell>
-                <TableCell headerLabel="Criado em">{formatDateToDMY(post.created_at)}</TableCell>
-                <TableCell headerLabel="Atualizado em">{formatDateToDMY(post.last_modified)}</TableCell>
-                <TableCell headerLabel="Ação">
-                  <TableActionsCell
-                    viewAction={{
-                      href: `/pages/posts/${post.slug}`,
-                    }}
-                    editAction={{
-                      href: `/pages/admin/posts/${post.id}`,
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
+      }
+      emptyState={
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
@@ -269,7 +195,63 @@ export default function SystemPostsClient() {
           description="Nenhum artigo encontrado."
           hasAnchor={false}
         />
-      )}
-    </AdminLayout>
+      }
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell
+            sortType="string"
+            sortOrder={getSortOrder("name")}
+            onSortChange={handleSort("name")}
+          >
+            Título
+          </TableHeaderCell>
+          <TableHeaderCell>Tipo</TableHeaderCell>
+          <TableHeaderCell>Estado</TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("created_at")}
+            onSortChange={handleSort("created_at")}
+          >
+            Criado em
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("last_modified")}
+            onSortChange={handleSort("last_modified")}
+          >
+            Atualizado em
+          </TableHeaderCell>
+          <TableHeaderCell>Ação</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {posts.map((post) => (
+          <TableRow key={post.id}>
+            <TableCell headerLabel="Título">
+              <TextLink href={`/pages/posts/${post.slug}`}>{post.name}</TextLink>
+            </TableCell>
+            <TableCell headerLabel="Tipo">{post.kind === "page" ? "Página" : "Notícias"}</TableCell>
+            <TableCell headerLabel="Estado">
+              <StatusDot variant={post.published ? "success" : "warning"}>
+                {post.published ? "Publicado" : "Despublicado"}
+              </StatusDot>
+            </TableCell>
+            <TableCell headerLabel="Criado em">{formatDateToDMY(post.created_at)}</TableCell>
+            <TableCell headerLabel="Atualizado em">{formatDateToDMY(post.last_modified)}</TableCell>
+            <TableCell headerLabel="Ação">
+              <TableActionsCell
+                viewAction={{
+                  href: `/pages/posts/${post.slug}`,
+                }}
+                editAction={{
+                  href: `/pages/admin/posts/${post.id}`,
+                }}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </AdminListPage>
   );
 }

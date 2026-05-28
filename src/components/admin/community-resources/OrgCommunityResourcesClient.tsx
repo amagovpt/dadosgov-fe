@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import {
-  InputSearchBar,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -12,19 +10,17 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
-import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";
+import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 
-type SortOrder = "none" | "ascending" | "descending";
 type SortField = "title" | "created_at" | "last_modified";
 
 export default function OrgCommunityResourcesClient() {
@@ -42,15 +38,13 @@ export default function OrgCommunityResourcesClient() {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   useEffect(() => {
     if (!resolvedOrgId) {
@@ -105,112 +99,91 @@ export default function OrgCommunityResourcesClient() {
   }
 
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
         { label: orgName || "Organização", url: "#" },
         { label: "Recursos comunitários" },
       ]}
       title="Recursos comunitários"
-    >
-
-      <ResultsCount count={resources.length} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquisar recursos comunitários"
-            aria-label="Pesquisar recursos comunitários"
-          />
-        </div>
-      </div>
-
-      {isLoading ? (
-        <p>A carregar...</p>
-      ) : resources.length > 0 ? (
-        <>
-          <Table
-            paginationProps={createPaginationProps(
-              itemsPerPage,
-              resources.length,
-              currentPage,
-              setCurrentPage,
-              setItemsPerPage
-            )}
-          >
-            <TableHeader>
-              <TableRow>
-                <TableHeaderCell
-                  sortType="date"
-                  sortOrder={getSortOrder("title")}
-                  onSortChange={handleSort("title")}
-                >
-                  Título
-                </TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell
-                  sortType="date"
-                  sortOrder={getSortOrder("created_at")}
-                  onSortChange={handleSort("created_at")}
-                >
-                  Criado em
-                </TableHeaderCell>
-                <TableHeaderCell
-                  sortType="date"
-                  sortOrder={getSortOrder("last_modified")}
-                  onSortChange={handleSort("last_modified")}
-                >
-                  Última modificação
-                </TableHeaderCell>
-                <TableHeaderCell>Ações</TableHeaderCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedResources.map((resource) => (
-                <TableRow key={resource.id}>
-                  <TableCell headerLabel="Título">
-                    <span className="text-primary-600">{resource.title}</span>
-                  </TableCell>
-                  <TableCell headerLabel="Estado">
-                    <ResourceStatusBadge item={resource} />
-                  </TableCell>
-                  <TableCell headerLabel="Criado em">
-                    {formatDateToDMY(resource.created_at)}
-                  </TableCell>
-                  <TableCell headerLabel="Última modificação">
-                    <div>
-                      <div>{formatDateToDMY(resource.last_modified)}</div>
-                      {resource.owner && (
-                        <a
-                          href={`/pages/users/${resource.owner.slug}`}
-                          className="text-xs text-primary-600 underline"
-                        >
-                          {resource.owner.first_name} {resource.owner.last_name}
-                        </a>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell headerLabel="Ações">
-                    <TableActionsCell
-                      editAction={{
-                        href: `/pages/admin/community-resources/edit?resource_id=${resource.id}`,
-                      }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
-      ) : (
+      isLoading={isLoading}
+      count={resources.length}
+      currentPage={currentPage}
+      pageSize={itemsPerPage}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setItemsPerPage}
+      search={{
+        placeholder: "Pesquisar recursos comunitários",
+        ariaLabel: "Pesquisar recursos comunitários",
+      }}
+      emptyState={
         <AdminEmptyState
           icon="agora-line-buildings"
           title="Sem recursos comunitários"
           description="A organização ainda não tem recursos comunitários."
         />
-      )}
-    </AdminLayout>
+      }
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("title")}
+            onSortChange={handleSort("title")}
+          >
+            Título
+          </TableHeaderCell>
+          <TableHeaderCell>Estado</TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("created_at")}
+            onSortChange={handleSort("created_at")}
+          >
+            Criado em
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={getSortOrder("last_modified")}
+            onSortChange={handleSort("last_modified")}
+          >
+            Última modificação
+          </TableHeaderCell>
+          <TableHeaderCell>Ações</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {paginatedResources.map((resource) => (
+          <TableRow key={resource.id}>
+            <TableCell headerLabel="Título">
+              <span className="text-primary-600">{resource.title}</span>
+            </TableCell>
+            <TableCell headerLabel="Estado">
+              <ResourceStatusBadge item={resource} />
+            </TableCell>
+            <TableCell headerLabel="Criado em">{formatDateToDMY(resource.created_at)}</TableCell>
+            <TableCell headerLabel="Última modificação">
+              <div>
+                <div>{formatDateToDMY(resource.last_modified)}</div>
+                {resource.owner && (
+                  <a
+                    href={`/pages/users/${resource.owner.slug}`}
+                    className="text-xs text-primary-600 underline"
+                  >
+                    {resource.owner.first_name} {resource.owner.last_name}
+                  </a>
+                )}
+              </div>
+            </TableCell>
+            <TableCell headerLabel="Ações">
+              <TableActionsCell
+                editAction={{
+                  href: `/pages/admin/community-resources/edit?resource_id=${resource.id}`,
+                }}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </AdminListPage>
   );
 }
