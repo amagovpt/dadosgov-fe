@@ -8,12 +8,6 @@ type BigNumber = {
   description: string;
 };
 
-type Anchor = {
-  children: string;
-  href: string;
-  icon: string;
-};
-
 type Card = {
   id: string;
   icon: string;
@@ -21,6 +15,14 @@ type Card = {
   subtitle: string;
   bignumber: BigNumber;
   anchor: Anchor;
+};
+
+// ----------------------------------------------------------------------------------------------
+
+type Anchor = {
+  children: string;
+  href: string;
+  icon: string;
 };
 
 type Index = {
@@ -31,22 +33,34 @@ type Index = {
 export type DatastoryHero = {
   title: string;
   description: string;
-  cards: Card[];
-  dateReference: DateReference;
   index: Index;
 };
+
+// ----------------------------------------------------------------------------------------------
+
+type OverviewType = "bigNumbers" | "cards" | "infographic";
+
+export type DatastoryOverview = {
+  type: OverviewType;
+  data: any;
+};
+
+// ----------------------------------------------------------------------------------------------
 
 type Iframe = {
   source: string;
   classNames: string;
+  classNameIframeBackground: string;
 };
 
-export type DatastorySection = {
+export type DatastoryIframe = {
   id: string;
   title: string;
   description: string;
   iframe: Iframe[];
 };
+
+// ----------------------------------------------------------------------------------------------
 
 type Source = {
   children: string;
@@ -60,8 +74,13 @@ export type DatastorySource = {
   sources: Source[];
 };
 
+// ----------------------------------------------------------------------------------------------
+
 export type Datastory = {
   hero: DatastoryHero;
-  sections: DatastorySection[];
+  overview?: any;
+  sections: DatastoryIframe[];
+  related?: any;
   dataSource: DatastorySource;
+  other?: any;
 };

@@ -27,7 +27,7 @@ export default function DatastoryIndex({ title, anchors, darkMode = true }: Data
         {title}
       </Typograph>
       <ul className="flex w-full flex-col gap-8">
-        {anchors.map((anchor, index) => {
+        {anchors?.map((anchor, index) => {
           return (
             <li key={`anchor-${index}`}>
               <Anchor
@@ -39,11 +39,11 @@ export default function DatastoryIndex({ title, anchors, darkMode = true }: Data
                 className="[&>*]:w-full"
               >
                 <div className="flex w-full flex-row gap-8">
-                  <span className="flex-1 text-m-regular">{anchor.children}</span>
                   <AppIcon
-                    name={anchor?.icon ?? "agora-line-arrow-right-circle"}
+                    name={anchor?.icon ?? "bar_chart_white_slim"}
                     className="h-24 w-24 self-center"
                   />
+                  <span className="flex-1 text-m-regular">{anchor.children}</span>
                 </div>
               </Anchor>
             </li>

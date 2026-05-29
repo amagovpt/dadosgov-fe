@@ -1,9 +1,12 @@
 import DatastoryHero from "./DatastoryHero";
-import DatastorySection from "./DatastorySection";
+import DatastoryIframe from "./DatastoryIframe";
 import DatastorySources from "./DatastorySources";
 
 export const Datastory = {
   Hero: DatastoryHero,
-  Section: DatastorySection,
+  Overview: null,
+  Iframe: DatastoryIframe,
+  Related: null,
   Sources: DatastorySources,
+  Other: null,
 };
