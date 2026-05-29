@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,9 @@ import {
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
-import { APIResponse, Organization, Reuse } from "@/types/api";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Organization } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";

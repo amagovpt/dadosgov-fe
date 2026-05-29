@@ -15,15 +15,13 @@ import {
   Avatar,
   Icon,
 } from "@ama-pt/agora-design-system";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Dataset } from '@/service/types/dataset';
+import type { Organization } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { TabPagination } from "@/components/Shared/TabPagination";
 import { ReuseCardLinks } from "@/components/Shared/ReuseCardLinks";
-import {
-  Organization,
-  Dataset,
-  Reuse,
-  APIResponse,
-} from "@/types/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -31,7 +29,8 @@ import rehypeSanitize from "rehype-sanitize";
 import {
   fetchOrgDatasets,
   fetchOrgReuses,
-} from "@/services/api";
+} from "@/app/api/organizations";
+
 import { formatMetricValue } from "@/utils/formatNumber";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";

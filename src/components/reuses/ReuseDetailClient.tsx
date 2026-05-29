@@ -14,17 +14,16 @@ import {
   CardArticle,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import type { Dataset } from '@/service/types/dataset';
+import type { Reuse } from '@/service/types/reuse';
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { TabPagination } from "@/components/Shared/TabPagination";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
-import { Reuse, Dataset } from "@/types/api";
 import {
-  fetchDataset,
   fetchReuse,
-  followEntity,
-  unfollowEntity,
-  isFollowing,
-} from "@/services/api";
+} from "@/app/api/reuses";
+import { fetchDataset } from "@/app/api/datasets";
+import { followEntity, unfollowEntity, isFollowing } from "@/app/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";

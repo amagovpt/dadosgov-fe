@@ -1,6 +1,6 @@
 "use client";
 
-import type { Organization } from "@/types/api";
+import type { Organization } from '@/service/types/identity';
 
 /**
  * Returns the display name of an organization from a list already loaded

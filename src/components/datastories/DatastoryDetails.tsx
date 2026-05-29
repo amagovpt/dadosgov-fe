@@ -1,12 +1,12 @@
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
-import { Datastory } from "@/types/datastories/datastory";
+import { Datastory } from "@/service/types/datastories/datastory";
 import Section from "../Shared/Section";
 import { InfoBlock } from "../Shared/InfoBlock";
 import { CardCompound } from "../Shared/CardCompound";
 import FooterReference from "../Shared/FooterReference";
 import DataSourcesSection from "../Shared/DataSourcesSection";
 import Breadcrumb from "../Primitives/Breadcrumb/Breadcrumb";
-import { BreadcrumbItem } from "@/types/shared";
+import { BreadcrumbItem } from "@/service/types/shared/breadcrumbItem";
 
 export type DatastoryDetailsProps = {
   breadcrumbItems: BreadcrumbItem[];

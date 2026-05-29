@@ -18,7 +18,7 @@ import {
   InputPassword,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { fetchCsrfToken, login } from "@/services/api";
+import { fetchCsrfToken, login } from "@/app/api/auth";
 import TextLink from "@/components/Primitives/TextLink";
 
 function LoginContent() {

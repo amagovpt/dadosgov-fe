@@ -9,9 +9,8 @@ import {
   sendMigrationCode,
   confirmMigration,
   skipMigration,
-} from "@/services/api";
+} from "@/app/api/migration";
 import AppIcon from "../Primitives/AppIcon";
-
 type Step =
   | "loading"
   | "search"

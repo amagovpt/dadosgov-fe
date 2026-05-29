@@ -17,17 +17,16 @@ import {
 } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import StatusDot from "@/components/admin/StatusDot";
+import { fetchAdminPosts } from "@/app/api/posts";
+import type { Post } from '@/service/types/posts';
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
-import { fetchAdminPosts } from "@/services/api";
-import type { Post } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 import TableActionsCell from "../TableActionsCell";
 import { formatDateToDMY } from "@/utils/formatDate";
-
 type SortOrder = "none" | "ascending" | "descending";
 type SortField = "name" | "created_at" | "last_modified";
 

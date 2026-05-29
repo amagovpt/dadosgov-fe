@@ -14,8 +14,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
-import { fetchAdminDatasets, fetchDatasets } from "@/services/api";
-import { Dataset } from "@/types/api";
+import { fetchAdminDatasets, fetchDatasets } from "@/app/api/datasets";
+import { Dataset } from "@/service/types/dataset";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";

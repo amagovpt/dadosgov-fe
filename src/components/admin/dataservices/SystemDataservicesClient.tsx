@@ -12,9 +12,9 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
+import { fetchDataservices } from "@/app/api/dataservices";
+import type { Dataservice } from '@/service/types/dataservice';
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
-import { fetchDataservices } from "@/services/api";
-import { Dataservice } from "@/types/api";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";

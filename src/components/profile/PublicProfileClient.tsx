@@ -18,16 +18,16 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import { Dataset, Reuse, Follow, UserFollowing, UserPublic } from "@/types/api";
+import type { Dataset } from '@/service/types/dataset';
+import type { Follow, UserFollowing, UserPublic } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import {
-  fetchMyDatasets,
-  fetchMyReuses,
-  fetchUserFollowers,
-  fetchMyFollowing,
-  fetchUserProfile,
   fetchDatasets,
-  fetchReuses,
-} from "@/services/api";
+  fetchMyDatasets,
+} from "@/app/api/datasets";
+import { fetchReuses, fetchMyReuses } from "@/app/api/reuses";
+import { fetchUserProfile } from "@/app/api/users";
+import { fetchUserFollowers, fetchMyFollowing } from "@/app/api/followers";
 import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
@@ -145,23 +145,10 @@ export default function PublicProfileClient() {
     }
   }, [displayUser?.id, isOwnProfile]);
 
-  const totalPages = Math.ceil(datasets.length / itemsPerPage);
-
   const paginatedDatasets = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return datasets.slice(start, start + itemsPerPage);
   }, [datasets, currentPage, itemsPerPage]);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const handleItemsPerPageChange = (value: string) => {
-    setItemsPerPage(Number(value));
-    setCurrentPage(1);
-  };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -545,12 +532,7 @@ export default function PublicProfileClient() {
               datasets.length,
               currentPage,
               setCurrentPage,
-              setItemsPerPage,
-              {
-                currentPageIsZeroBased: true,
-                onPageChange: (page) => handlePageChange(page),
-                onPageSizeChange: (size) => handleItemsPerPageChange(String(size)),
-              }
+              setItemsPerPage
             )}
           >
             <TableHeader>
