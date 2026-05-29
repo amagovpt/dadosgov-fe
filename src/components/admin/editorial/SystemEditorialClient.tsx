@@ -21,10 +21,13 @@ import {
   updateHomeFeaturedDatasets,
   fetchHomeFeaturedReuses,
   updateHomeFeaturedReuses,
+} from "@/app/api/system";
+import {
   searchDatasets,
   searchReuses,
-} from "@/services/api";
-import type { Dataset, Reuse } from "@/types/api";
+} from "@/app/api/search";
+import type { Dataset } from '@/service/types/dataset';
+import type { Reuse } from '@/service/types/reuse';
 import { formatMetricValue } from "@/utils/formatNumber";
 
 // ─── Block types & definitions ───────────────────────────────────────────────

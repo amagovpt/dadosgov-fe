@@ -11,10 +11,10 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
+import { fetchTopics } from "@/app/api/discussions-topics";
+import type { Topic } from '@/service/types/topic';
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
-import { fetchTopics } from "@/services/api";
-import { Topic } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";

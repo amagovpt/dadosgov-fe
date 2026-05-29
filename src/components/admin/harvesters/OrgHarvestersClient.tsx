@@ -14,10 +14,9 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchOrgHarvesters } from "@/services/api";
-import type { HarvestSource } from "@/types/api";
+import { fetchOrgHarvesters } from "@/app/api/harvesters";
+import type { HarvestSource } from '@/service/types/harvester';
 import { getHarvesterStatus } from "@/utils/harvesterStatus";
-import { HarvesterStatusFilter } from "./HarvesterStatusFilter";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";

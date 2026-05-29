@@ -21,32 +21,28 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {
   fetchReuse,
-  fetchDataset,
   updateReuse,
   deleteReuse,
   fetchReuseTypes,
   fetchReuseTopics,
-  fetchMyDatasets,
-  fetchOrgDatasets,
-  searchDatasets,
   linkDatasetToReuse,
   unlinkDatasetFromReuse,
   linkDataserviceToReuse,
-  fetchActivity,
-  fetchDiscussions,
-  suggestTags,
-  requestTransfer,
-} from "@/services/api";
-import { useAuth } from "@/context/AuthContext";
+  uploadReuseImage,
+} from "@/app/api/reuses";
+import { fetchDataset, fetchMyDatasets } from "@/app/api/datasets";
 import {
-  Reuse,
-  ReuseType,
-  ReuseTopic,
-  Dataset,
-  Activity,
-  Discussion,
-  TagSuggestion,
-} from "@/types/api";
+  fetchActivity,
+} from "@/app/api/activity";
+import { requestTransfer } from "@/app/api/transfers";
+import { fetchOrgDatasets } from "@/app/api/organizations";
+import { fetchDiscussions } from "@/app/api/discussions-topics";
+import { searchDatasets, suggestTags } from "@/app/api/search";
+import { useAuth } from "@/context/AuthContext";
+import type { Activity, TagSuggestion } from '@/service/types/catalog';
+import type { Dataset } from '@/service/types/dataset';
+import type { Discussion } from '@/service/types/discussion';
+import type { Reuse, ReuseType, ReuseTopic } from '@/service/types/reuse';
 import { normalizeRemoteDatasets, type RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import ReusesEditMetadataTab from "@/components/admin/reuses/ReusesEditMetadataTab";
@@ -385,7 +381,6 @@ export default function ReusesEditClient() {
     setImageError(null);
     setIsSubmitting(true);
     try {
-      const { uploadReuseImage } = await import("@/services/api");
       await uploadReuseImage(reuse.id, file);
       const updated = await fetchReuse(reuse.id);
       setReuse(updated);

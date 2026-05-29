@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Accordion, AccordionGroup } from "@ama-pt/agora-design-system";
-import { Dataset } from "@/types/api";
+import type { Dataset } from '@/service/types/dataset';
 import { frequencyLabelsMap } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";

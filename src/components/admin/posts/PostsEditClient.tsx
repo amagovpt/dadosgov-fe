@@ -16,9 +16,9 @@ import {
   Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
+import { fetchPost, updatePost, uploadPostImage, deletePost, unpublishPost, publishPost } from "@/app/api/posts";
+import type { Post, PostUpdatePayload } from '@/service/types/posts';
 import AdminLayout from "@/components/Layout/AdminLayout";
-import { fetchPost, updatePost, uploadPostImage, deletePost, unpublishPost, publishPost } from "@/services/api";
-import type { Post, PostUpdatePayload } from "@/types/api";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import dynamic from "next/dynamic";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";

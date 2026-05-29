@@ -18,18 +18,24 @@ import {
 import HeroGeneral from "@/components/HeroGeneral";
 import { Pagination } from "@/components/Pagination";
 import {
+  fetchLicenses,
+  fetchGranularities,
+  suggestFormats,
+} from "@/app/api/datasets";
+import { fetchOrganizations } from "@/app/api/organizations";
+import {
   searchDatasets,
   searchOrganizations,
   searchReuses,
   searchDataservices,
-  fetchOrganizations,
-  fetchLicenses,
-  fetchGranularities,
-  suggestFormats,
   suggestTags,
   suggestSpatialZones,
-} from "@/services/api";
-import { Dataset, Organization, Reuse, Dataservice, License, Granularity } from "@/types/api";
+} from "@/app/api/search";
+import type { License, Granularity } from '@/service/types/catalog';
+import type { Dataservice } from '@/service/types/dataservice';
+import type { Dataset } from '@/service/types/dataset';
+import type { Organization } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import AppIcon from "../Primitives/AppIcon";
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";

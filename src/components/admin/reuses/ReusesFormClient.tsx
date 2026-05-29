@@ -24,12 +24,13 @@ import {
   linkDataserviceToReuse,
   fetchReuseTypes,
   fetchReuseTopics,
-  fetchMyDatasets,
-  fetchOrgDatasets,
-  searchDatasets,
-  suggestTags,
-} from "@/services/api";
-import type { Reuse, ReuseType, ReuseTopic, Dataset, TagSuggestion } from "@/types/api";
+} from "@/app/api/reuses";
+import { fetchMyDatasets } from "@/app/api/datasets";
+import { fetchOrgDatasets } from "@/app/api/organizations";
+import { searchDatasets, suggestTags } from "@/app/api/search";
+import type { TagSuggestion } from '@/service/types/catalog';
+import type { Dataset } from '@/service/types/dataset';
+import type { Reuse, ReuseType, ReuseTopic } from '@/service/types/reuse';
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import { format, formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";

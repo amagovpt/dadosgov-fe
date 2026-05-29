@@ -20,12 +20,15 @@ import {
 } from "@ama-pt/agora-design-system";
 import {
   fetchOrgDatasets,
-  fetchOrgDataservices,
   fetchOrgMetrics,
   fetchOrgReuses,
   fetchOrganization,
-} from "@/services/api";
-import type { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
+} from "@/app/api/organizations";
+import { fetchOrgDataservices } from "@/app/api/dataservices";
+import type { Dataservice } from '@/service/types/dataservice';
+import type { Dataset } from '@/service/types/dataset';
+import type { Organization, OrganizationMetrics } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
