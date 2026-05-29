@@ -38,11 +38,12 @@ export type DatastoryHero = {
 
 // ----------------------------------------------------------------------------------------------
 
-type OverviewType = "bigNumbers" | "cards" | "infographic";
+export type Bignumbers = {
+
+}
 
 export type DatastoryOverview = {
-  type: OverviewType;
-  data: any;
+  section: Bignumbers;
 };
 
 // ----------------------------------------------------------------------------------------------

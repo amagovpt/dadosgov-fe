@@ -63,25 +63,6 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
             ${locale} {
               title
               description
-              cards {
-                card {
-                  icon
-                  title
-                  subtitle
-                  bignumber {
-                    number
-                    description
-                  }
-                  anchor {
-                    children
-                    href
-                  }
-                }
-              }
-              dateReference {
-                title
-                date
-              }
               index {
                 title
                 anchors {
@@ -90,6 +71,19 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     href
                     icon
                   }
+                }
+              }
+            }
+          }
+          sectionOverview {
+            pt {
+              section {
+                bignumbers {
+                  icon
+                  number
+                  numberLabel
+                  subtitle
+                  title
                 }
               }
             }
