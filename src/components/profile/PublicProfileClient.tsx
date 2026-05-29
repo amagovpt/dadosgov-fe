@@ -145,23 +145,10 @@ export default function PublicProfileClient() {
     }
   }, [displayUser?.id, isOwnProfile]);
 
-  const totalPages = Math.ceil(datasets.length / itemsPerPage);
-
   const paginatedDatasets = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return datasets.slice(start, start + itemsPerPage);
   }, [datasets, currentPage, itemsPerPage]);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const handleItemsPerPageChange = (value: string) => {
-    setItemsPerPage(Number(value));
-    setCurrentPage(1);
-  };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -545,12 +532,7 @@ export default function PublicProfileClient() {
               datasets.length,
               currentPage,
               setCurrentPage,
-              setItemsPerPage,
-              {
-                currentPageIsZeroBased: true,
-                onPageChange: (page) => handlePageChange(page),
-                onPageSizeChange: (size) => handleItemsPerPageChange(String(size)),
-              }
+              setItemsPerPage
             )}
           >
             <TableHeader>
