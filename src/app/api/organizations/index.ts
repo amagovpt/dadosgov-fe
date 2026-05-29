@@ -79,6 +79,7 @@ export async function fetchOrganizations(
       total: 0,
       next_page: null,
       previous_page: null,
+      error: true,
     };
   }
 }

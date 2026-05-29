@@ -12,6 +12,7 @@ import { deleteDataset } from "@/app/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import type { Frequency, Granularity, License } from '@/service/types/catalog';
 import type { APIResponse } from '@/service/types/shared/core';
 import type { Dataset } from '@/service/types/dataset';
@@ -191,7 +192,9 @@ export default function DatasetsClient({
               <div
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3")}
               >
-                {datasets.length > 0 ? (
+                {listData.error ? (
+                  <ListingErrorBanner entity="os conjuntos de dados" />
+                ) : datasets.length > 0 ? (
                   datasets.map((dataset, index) => {
                     const timeAgo = formatDateToTimeAgo(dataset.last_modified);
                     const cardProps = {

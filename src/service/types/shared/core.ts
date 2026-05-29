@@ -39,5 +39,8 @@ export interface APIResponse<T> {
   total: number;
   next_page: string | null;
   previous_page: string | null;
+  // Set to true when the fetch failed (network error, non-2xx, timeout). Lets the
+  // UI distinguish a real "no results" from a backend/transport failure.
+  error?: boolean;
 }
 
