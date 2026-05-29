@@ -60,14 +60,13 @@ export async function fetchReuses(
   pageSize: number = 20,
   filters?: ReuseFilters
 ): Promise<APIResponse<Reuse>> {
-  const emptyError: APIResponse<Reuse> = {
-    data: [],
+  const emptyShape = {
+    data: [] as Reuse[],
     page: 1,
     page_size: pageSize,
     total: 0,
     next_page: null,
     previous_page: null,
-    error: true,
   };
 
   try {
@@ -104,13 +103,13 @@ export async function fetchReuses(
 
     if (!res.ok) {
       console.error(`Error fetching reuses: ${res.status} ${res.statusText}`);
-      return emptyError;
+      return { ...emptyShape, error: true, errorStatus: res.status };
     }
 
     return await res.json();
   } catch (error) {
     console.error("Error fetching reuses:", error);
-    return emptyError;
+    return { ...emptyShape, error: true, errorStatus: "network" };
   }
 }
 

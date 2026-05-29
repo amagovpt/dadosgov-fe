@@ -66,7 +66,17 @@ export async function fetchOrganizations(
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch organizations: ${res.statusText}`);
+      console.error(`Error fetching organizations: ${res.status} ${res.statusText}`);
+      return {
+        data: [],
+        page: 1,
+        page_size: pageSize,
+        total: 0,
+        next_page: null,
+        previous_page: null,
+        error: true,
+        errorStatus: res.status,
+      };
     }
 
     return await res.json();
@@ -80,6 +90,7 @@ export async function fetchOrganizations(
       next_page: null,
       previous_page: null,
       error: true,
+      errorStatus: "network",
     };
   }
 }

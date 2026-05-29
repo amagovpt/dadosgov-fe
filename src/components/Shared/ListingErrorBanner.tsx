@@ -5,9 +5,18 @@ import { Button, Icon } from "@ama-pt/agora-design-system";
 
 interface ListingErrorBannerProps {
   entity?: string;
+  errorStatus?: number | "network";
 }
 
-export default function ListingErrorBanner({ entity = "os resultados" }: ListingErrorBannerProps) {
+function formatErrorStatus(status: number | "network"): string {
+  if (status === "network") return "Erro de rede";
+  return `HTTP ${status}`;
+}
+
+export default function ListingErrorBanner({
+  entity = "os resultados",
+  errorStatus,
+}: ListingErrorBannerProps) {
   const router = useRouter();
 
   return (
@@ -18,6 +27,9 @@ export default function ListingErrorBanner({ entity = "os resultados" }: Listing
         <p className="text-m-regular text-neutral-700">
           Ocorreu um erro ao contactar o servidor. Tente novamente dentro de momentos.
         </p>
+        {errorStatus !== undefined && (
+          <p className="text-s-regular text-neutral-600">{formatErrorStatus(errorStatus)}</p>
+        )}
         <Button variant="primary" appearance="outline" onClick={() => router.refresh()}>
           Tentar novamente
         </Button>

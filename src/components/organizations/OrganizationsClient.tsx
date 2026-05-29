@@ -145,7 +145,10 @@ export default function OrganizationsClient({
 
               >
                 {listData.error ? (
-                  <ListingErrorBanner entity="as organizações" />
+                  <ListingErrorBanner
+                    entity="as organizações"
+                    errorStatus={listData.errorStatus}
+                  />
                 ) : organizations.length > 0 ? (
                   organizations.map((org, index) => {
                     const timeAgo = formatDateToTimeAgo(org.last_modified);

@@ -193,7 +193,10 @@ export default function DatasetsClient({
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3")}
               >
                 {listData.error ? (
-                  <ListingErrorBanner entity="os conjuntos de dados" />
+                  <ListingErrorBanner
+                    entity="os conjuntos de dados"
+                    errorStatus={listData.errorStatus}
+                  />
                 ) : datasets.length > 0 ? (
                   datasets.map((dataset, index) => {
                     const timeAgo = formatDateToTimeAgo(dataset.last_modified);
