@@ -528,6 +528,36 @@ export const Header = () => {
                   />
                 </div>
               </NavigationLink>
+              {/* hidden: api-tutorial */}
+              {false && (
+                <NavigationLink appearance="link">
+                  <div data-group="submenu-desenvolvimento">
+                    <HeaderCard
+                      iconDefault="agora-line-code"
+                      iconHover="agora-solid-code"
+                      title="Tutorial da API"
+                      description="Como usar a API"
+                      href="/pages/faqs/api-tutorial"
+                      onLinkClick={handleLinkClick}
+                    />
+                  </div>
+                </NavigationLink>
+              )}
+              {/* hidden: licences */}
+              {false && (
+                <NavigationLink appearance="link">
+                  <div data-group="submenu-desenvolvimento">
+                    <HeaderCard
+                      iconDefault="agora-line-file-document"
+                      iconHover="agora-solid-file-document"
+                      title="Licenças"
+                      description="Licenças de dados abertos"
+                      href="/pages/faqs/licences"
+                      onLinkClick={handleLinkClick}
+                    />
+                  </div>
+                </NavigationLink>
+              )}
               <NavigationLink appearance="link">
                 <div data-group="main">
                   <HeaderCard
