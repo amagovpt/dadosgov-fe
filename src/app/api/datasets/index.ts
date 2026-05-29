@@ -159,7 +159,17 @@ export async function fetchDatasets(
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch datasets: ${res.statusText}`);
+      console.error(`Error fetching datasets: ${res.status} ${res.statusText}`);
+      return {
+        data: [],
+        page: 1,
+        page_size: pageSize,
+        total: 0,
+        next_page: null,
+        previous_page: null,
+        error: true,
+        errorStatus: res.status,
+      };
     }
 
     return await res.json();
@@ -173,6 +183,7 @@ export async function fetchDatasets(
       next_page: null,
       previous_page: null,
       error: true,
+      errorStatus: "network",
     };
   }
 }

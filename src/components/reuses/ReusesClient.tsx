@@ -144,7 +144,10 @@ export default function ReusesClient({
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1" : "grid-cols-1  lg:grid-cols-2")}
               >
                 {listData.error ? (
-                  <ListingErrorBanner entity="as reutilizações" />
+                  <ListingErrorBanner
+                    entity="as reutilizações"
+                    errorStatus={listData.errorStatus}
+                  />
                 ) : reuses.length > 0 ? (
                   reuses.map((reuse) => {
                     const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at);
