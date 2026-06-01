@@ -1,5 +1,4 @@
 import { translateUploadError } from "@/lib/security/translateUploadError";
-import type { APIResponse } from '@/service/types/shared/core';
 import type { ContactPoint, ContactPointCreatePayload, Dataset } from '@/service/types/dataset';
 import type {
   MembershipRequest,
@@ -15,7 +14,21 @@ import type {
   OrgRole,
 } from '@/service/types/identity';
 import type { Reuse } from '@/service/types/reuse';
+import type { APIResponse } from '@/service/types/shared/core';
 import { getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
+
+/**
+ * Aggregated response for the /pages/organizations listing page (LEDG-1836).
+ * Replaces 3 + N (one per badge) parallel calls with 1; inherits LEDG-1831 error signals.
+ */
+export interface OrganizationsListingResponse {
+  listing: APIResponse<Organization>;
+  badges: OrgBadges;
+  badge_counts: Record<string, number>;
+  organizations: Organization[];
+  error?: boolean;
+  errorStatus?: number | "network";
+}
 
 const API_BASE_URL = getApiBaseUrl(1);
 const API_AUTH_URL = getAuthApiBaseUrl();
@@ -89,6 +102,80 @@ export async function fetchOrganizations(
       total: 0,
       next_page: null,
       previous_page: null,
+      error: true,
+      errorStatus: "network",
+    };
+  }
+}
+
+/**
+ * Aggregated fetch for the /pages/organizations listing page (LEDG-1836).
+ *
+ * Replaces the prior Promise.all of (3 + N badges) calls with one to
+ * /api/1/site/organizations-listing/. On failure surfaces error/errorStatus
+ * so the listing page renders the LEDG-1831 banner with the right status.
+ */
+export async function fetchOrganizationsListing(
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: OrganizationFilters
+): Promise<OrganizationsListingResponse> {
+  const emptyShape: OrganizationsListingResponse = {
+    listing: {
+      data: [],
+      page: 1,
+      page_size: pageSize,
+      total: 0,
+      next_page: null,
+      previous_page: null,
+    },
+    badges: {},
+    badge_counts: {},
+    organizations: [],
+  };
+
+  try {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("page_size", String(pageSize));
+
+    if (filters) {
+      if (filters.q) params.set("q", filters.q);
+      if (filters.sort) params.set("sort", filters.sort);
+
+      const arrayParams: [string, string | string[] | undefined][] = [
+        ["badge", filters.badge],
+        ["organization", filters.organization],
+      ];
+      for (const [key, value] of arrayParams) {
+        if (!value) continue;
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.set(key, value);
+        }
+      }
+    }
+
+    const url = `${API_BASE_URL}/site/organizations-listing/?${params.toString()}`;
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) {
+      console.error(`Error fetching organizations listing: ${res.status} ${res.statusText}`);
+      return {
+        ...emptyShape,
+        listing: { ...emptyShape.listing, error: true, errorStatus: res.status },
+        error: true,
+        errorStatus: res.status,
+      };
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching organizations listing:", error);
+    return {
+      ...emptyShape,
+      listing: { ...emptyShape.listing, error: true, errorStatus: "network" },
       error: true,
       errorStatus: "network",
     };
