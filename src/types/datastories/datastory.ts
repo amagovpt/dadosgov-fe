@@ -39,11 +39,25 @@ export type DatastoryHero = {
 // ----------------------------------------------------------------------------------------------
 
 export type Bignumbers = {
+  icon: string;
+  number: string;
+  numberLabel: string;
+  subtitle: string;
+  title: string;
+};
 
-}
+export type BigNumbersSection = {
+  schemaName: "section-datastory-bignumbers";
+  title: string;
+  bignumbers?: Bignumbers[];
+  dataReference: {
+    title: string;
+    date: string;
+  };
+};
 
 export type DatastoryOverview = {
-  section: Bignumbers;
+  section: BigNumbersSection | any | any;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -79,9 +93,9 @@ export type DatastorySource = {
 
 export type Datastory = {
   hero: DatastoryHero;
-  overview?: any;
+  sectionOverview?: DatastoryOverview;
   sections: DatastoryIframe[];
-  related?: any;
+  sectionRelated?: any;
   dataSource: DatastorySource;
-  other?: any;
+  sectionOther?: any;
 };

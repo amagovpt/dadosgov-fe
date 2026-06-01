@@ -17,12 +17,12 @@ export default function DatastoryDetailsPage({
     <main className="flex flex-col">
       <Datastory.Hero {...datastory.hero} breadcrumbs={breadcrumbItems} />
 
-      {/* Overview - big numbers / cards / infografia */}
+      <Datastory.Overview {...datastory.sectionOverview} />
 
       {datastory.sections.map((section, index) => {
         let iframeClassName = "";
         const startWith: SectionBg =
-          datastory.overview && Object.keys(datastory.overview).length !== 0 ? "primary" : "white";
+          datastory.sectionOverview && Object.keys(datastory.sectionOverview).length !== 0 ? "primary" : "white";
         if (startWith) {
           const isEven = index % 2 === 0;
           const getBg = (startWith: SectionBg) => {

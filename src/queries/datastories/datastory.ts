@@ -78,12 +78,17 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
           sectionOverview {
             pt {
               section {
+                title
                 bignumbers {
                   icon
                   number
                   numberLabel
                   subtitle
                   title
+                }
+                dataReference {
+                  title
+                  date
                 }
               }
             }
