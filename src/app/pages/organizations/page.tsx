@@ -1,4 +1,4 @@
-import { fetchOrganizations, fetchOrgBadges } from "@/app/api/organizations";
+import { fetchOrganizationsListing } from "@/app/api/organizations";
 import OrganizationsClient from '@/components/organizations/OrganizationsClient';
 import type { OrganizationFilters } from '@/service/types/identity';
 import { Metadata } from 'next';
@@ -30,27 +30,16 @@ export default async function OrganizationsPage({
         apiFilters.sort = '-last_modified';
     }
 
-    const [initialData, orgBadges, allOrganizations] = await Promise.all([
-        fetchOrganizations(page, 20, apiFilters),
-        fetchOrgBadges(),
-        fetchOrganizations(1, 100, { sort: "-datasets" }),
-    ]);
-
-    const badgeKeys = Object.keys(orgBadges);
-    const badgeCountResponses = await Promise.all(
-        badgeKeys.map((badge) => fetchOrganizations(1, 1, { badge }))
-    );
-    const orgBadgeCounts = Object.fromEntries(
-        badgeKeys.map((badge, index) => [badge, badgeCountResponses[index].total])
-    ) as Record<string, number>;
+    // LEDG-1836: one aggregated call replaces the prior Promise.all of 3 + N (badge) fetches.
+    const data = await fetchOrganizationsListing(page, 20, apiFilters);
 
     return (
         <OrganizationsClient
-            initialData={initialData}
+            initialData={data.listing}
             currentPage={page}
-            orgBadges={orgBadges}
-            orgBadgeCounts={orgBadgeCounts}
-            allOrganizations={allOrganizations.data}
+            orgBadges={data.badges}
+            orgBadgeCounts={data.badge_counts}
+            allOrganizations={data.organizations}
         />
     );
 }

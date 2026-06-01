@@ -7,7 +7,6 @@ import type {
   ResourceType,
   SpatialZone,
 } from '@/service/types/catalog';
-import type { APIResponse } from '@/service/types/shared/core';
 import type {
   Dataset,
   DatasetCreatePayload,
@@ -18,8 +17,26 @@ import type {
   ResourceCreatePayload,
   ResourceUpdatePayload,
 } from '@/service/types/dataset';
+import type { Organization } from '@/service/types/identity';
+import type { APIResponse } from '@/service/types/shared/core';
 import { translateUploadError } from "@/lib/security/translateUploadError";
 import { authFetch, getApiBaseUrl, getAuthApiBaseUrl } from "@/service/utils/API";
+
+/**
+ * Aggregated response for the /pages/datasets listing page. Replaces the 14
+ * parallel calls (listing + 9 filter counts + sidebar lookups) with one (LEDG-1836).
+ * Inherits the LEDG-1831 error/errorStatus signal when the fetch failed.
+ */
+export interface DatasetsListingResponse {
+  listing: APIResponse<Dataset>;
+  filter_counts: Record<string, number>;
+  organizations: Organization[];
+  licenses: License[];
+  frequencies: Frequency[];
+  granularities: Granularity[];
+  error?: boolean;
+  errorStatus?: number | "network";
+}
 
 const API_BASE_URL = getApiBaseUrl(1);
 const API_AUTH_URL = getAuthApiBaseUrl();
@@ -182,6 +199,94 @@ export async function fetchDatasets(
       total: 0,
       next_page: null,
       previous_page: null,
+      error: true,
+      errorStatus: "network",
+    };
+  }
+}
+
+/**
+ * Aggregated fetch for the /pages/datasets listing page.
+ *
+ * Hits /api/1/site/datasets-listing/ which returns the paginated listing,
+ * sidebar filter counts and metadata in one response — replaces the prior
+ * Promise.all of 14 calls (LEDG-1836). On failure, surfaces `error` and
+ * `errorStatus` on the response itself so the listing page renders the
+ * LEDG-1831 banner with the right status code.
+ */
+export async function fetchDatasetsListing(
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: DatasetFilters
+): Promise<DatasetsListingResponse> {
+  const emptyShape: DatasetsListingResponse = {
+    listing: {
+      data: [],
+      page: 1,
+      page_size: pageSize,
+      total: 0,
+      next_page: null,
+      previous_page: null,
+    },
+    filter_counts: {},
+    organizations: [],
+    licenses: [],
+    frequencies: [],
+    granularities: [],
+  };
+
+  try {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("page_size", String(pageSize));
+
+    if (filters) {
+      if (filters.q) params.set("q", filters.q);
+      if (filters.schema) params.set("schema", filters.schema);
+      if (filters.geozone) params.set("geozone", filters.geozone);
+      if (filters.granularity) params.set("granularity", filters.granularity);
+      if (filters.sort) params.set("sort", filters.sort);
+      if (filters.featured !== undefined) params.set("featured", String(filters.featured));
+      if (filters.owner) params.set("owner", filters.owner);
+      if (filters.modified_since) params.set("modified_since", filters.modified_since);
+
+      const arrayParams: [string, string | string[] | undefined][] = [
+        ["tag", filters.tag],
+        ["license", filters.license],
+        ["format", filters.format],
+        ["frequency", filters.frequency],
+        ["badge", filters.badge],
+        ["organization", filters.organization],
+      ];
+      for (const [key, value] of arrayParams) {
+        if (!value) continue;
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.set(key, value);
+        }
+      }
+    }
+
+    const url = `${API_BASE_URL}/site/datasets-listing/?${params.toString()}`;
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) {
+      console.error(`Error fetching datasets listing: ${res.status} ${res.statusText}`);
+      return {
+        ...emptyShape,
+        listing: { ...emptyShape.listing, error: true, errorStatus: res.status },
+        error: true,
+        errorStatus: res.status,
+      };
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching datasets listing:", error);
+    return {
+      ...emptyShape,
+      listing: { ...emptyShape.listing, error: true, errorStatus: "network" },
       error: true,
       errorStatus: "network",
     };
