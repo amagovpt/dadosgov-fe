@@ -12,7 +12,7 @@ export async function generateMetadata({
 }: {
     params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-    const { title } = await getFaqs("licences", "pt");
+    const { title } = await getFaqs("licenses", "pt");
 
     return {
         title,
@@ -21,7 +21,7 @@ export async function generateMetadata({
 
 export default async function page() {
 
-    const { title, actionTitle, body, actions } = await getFaqs("licences", "pt")
+    const { title, actionTitle, body, actions } = await getFaqs("licenses", "pt")
 
     return (
         <main className="w-full h-full flex flex-col items-center justify-center">
