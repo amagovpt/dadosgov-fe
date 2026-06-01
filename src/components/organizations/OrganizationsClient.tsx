@@ -6,11 +6,9 @@ import { Button, Icon, ToggleGroup, Toggle, CardNoResults } from "@ama-pt/agora-
 import { Pagination } from "@/components/Pagination";
 import { OrganizationsFilters } from "./OrganizationsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import {
-  APIResponse,
-  OrgBadges,
-  Organization,
-} from "@/types/api";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { OrgBadges, Organization } from '@/service/types/identity';
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -146,7 +144,12 @@ export default function OrganizationsClient({
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3")}
 
               >
-                {organizations.length > 0 ? (
+                {listData.error ? (
+                  <ListingErrorBanner
+                    entity="as organizações"
+                    errorStatus={listData.errorStatus}
+                  />
+                ) : organizations.length > 0 ? (
                   organizations.map((org, index) => {
                     const timeAgo = formatDateToTimeAgo(org.last_modified);
                     const cardProps: CardMetricsProps = {

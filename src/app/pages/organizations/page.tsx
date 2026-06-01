@@ -1,7 +1,6 @@
-import { fetchOrganizations, fetchOrgBadges } from '@/services/api';
+import { fetchOrganizations, fetchOrgBadges } from "@/app/api/organizations";
 import OrganizationsClient from '@/components/organizations/OrganizationsClient';
-import { OrganizationFilters } from '@/types/api';
-import { probeUrls } from '@/lib/imageProbe';
+import type { OrganizationFilters } from '@/service/types/identity';
 import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -36,11 +35,6 @@ export default async function OrganizationsPage({
         fetchOrgBadges(),
         fetchOrganizations(1, 100, { sort: "-datasets" }),
     ]);
-
-    const reachableLogos = await probeUrls(initialData.data.map((o) => o.logo));
-    initialData.data = initialData.data.map((o) =>
-        o.logo && !reachableLogos.has(o.logo) ? { ...o, logo: null } : o
-    );
 
     const badgeKeys = Object.keys(orgBadges);
     const badgeCountResponses = await Promise.all(

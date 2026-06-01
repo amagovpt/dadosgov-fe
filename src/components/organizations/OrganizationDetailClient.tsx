@@ -13,11 +13,12 @@ import {
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { Organization } from "@/types/api";
+import type { Organization } from '@/service/types/identity';
 import { OrganizationTabs } from "./OrganizationTabs";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 import { useAuth } from "@/context/AuthContext";
-import { requestMembership, followEntity, unfollowEntity, isFollowing } from "@/services/api";
+import { requestMembership } from "@/app/api/organizations";
+import { followEntity, unfollowEntity, isFollowing } from "@/app/api/followers";
 import { formatMetricValue } from "@/utils/formatNumber";
 
 interface OrganizationDetailClientProps {

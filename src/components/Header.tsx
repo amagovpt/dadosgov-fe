@@ -23,11 +23,11 @@ import {
   NavigationLink,
   NavigationRoot,
   Button,
-} from "@ama-pt/agora-design-system";
+} from '@ama-pt/agora-design-system';
+import { logout } from "@/app/api/auth";
 import SearchDropdown from "@/components/search/SearchDropdown";
 import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
-import { logout } from "@/services/api";
 import TextLink from "@/components/Primitives/TextLink";
 
 export const Header = () => {
@@ -528,6 +528,34 @@ export const Header = () => {
                   />
                 </div>
               </NavigationLink>
+              {/* hidden: api-tutorial
+              <NavigationLink appearance="link">
+                <div data-group="submenu-desenvolvimento">
+                  <HeaderCard
+                    iconDefault="agora-line-code"
+                    iconHover="agora-solid-code"
+                    title="Tutorial da API"
+                    description="Como usar a API"
+                    href="/pages/faqs/api-tutorial"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+              */}
+              {/* hidden: licenses
+              <NavigationLink appearance="link">
+                <div data-group="submenu-desenvolvimento">
+                  <HeaderCard
+                    iconDefault="agora-line-file-document"
+                    iconHover="agora-solid-file-document"
+                    title="Licenças"
+                    description="Licenças de dados abertos"
+                    href="/pages/faqs/licenses"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+              */}
               <NavigationLink appearance="link">
                 <div data-group="main">
                   <HeaderCard

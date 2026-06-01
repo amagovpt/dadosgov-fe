@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,10 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { APIResponse, Organization, Reuse } from "@/types/api";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
+import type { APIResponse } from '@/service/types/shared/core';
+import type { Organization } from '@/service/types/identity';
+import type { Reuse } from '@/service/types/reuse';
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";
@@ -140,7 +143,12 @@ export default function ReusesClient({
               <div
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1" : "grid-cols-1  lg:grid-cols-2")}
               >
-                {reuses.length > 0 ? (
+                {listData.error ? (
+                  <ListingErrorBanner
+                    entity="as reutilizações"
+                    errorStatus={listData.errorStatus}
+                  />
+                ) : reuses.length > 0 ? (
                   reuses.map((reuse) => {
                     const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at);
                     return (

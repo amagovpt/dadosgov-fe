@@ -3,11 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import type { CommunityResource } from '@/service/types/community-resource';
+import type { Dataset } from '@/service/types/dataset';
+import type { Reuse } from '@/service/types/reuse';
+import { fetchReuses } from "@/app/api/reuses";
+import { fetchCommunityResourcesByDataset } from "@/app/api/community-resources";
 import { Tabs, Tab, TabHeader, CardNoResults, Icon, StatusCard, Button } from '@ama-pt/agora-design-system';
 import { TabBodyWrapper } from '@/components/Shared/Wrappers/TabBodyWrapper';
 import { ReuseCardLinks } from '@/components/Shared/ReuseCardLinks';
-import { Dataset, Reuse, CommunityResource } from '@/types/api';
-import { fetchReuses, fetchCommunityResourcesByDataset } from '@/services/api';
 import { DatasetResourcesTable } from './DatasetResourcesTable';
 import { DatasetInfo } from './DatasetInfo';
 import { DiscussionSection } from '@/components/discussions/DiscussionSection';
