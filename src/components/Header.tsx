@@ -542,7 +542,7 @@ export const Header = () => {
                 </div>
               </NavigationLink>
               */}
-              {/* hidden: licences
+              {/* hidden: licenses
               <NavigationLink appearance="link">
                 <div data-group="submenu-desenvolvimento">
                   <HeaderCard
@@ -550,7 +550,7 @@ export const Header = () => {
                     iconHover="agora-solid-file-document"
                     title="Licenças"
                     description="Licenças de dados abertos"
-                    href="/pages/faqs/licences"
+                    href="/pages/faqs/licenses"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
