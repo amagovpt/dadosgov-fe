@@ -1,8 +1,6 @@
 import { Datastory as DatastoryType } from "@/types/datastories/datastory";
-import { BreadcrumbItem } from "@/types/shared";
 import { Datastory } from ".";
-
-type SectionBg = "white" | "primary";
+import { BreadcrumbItem } from "@/service/types/shared/breadcrumbItem";
 
 export type DatastoryDetailsPageProps = {
   breadcrumbItems: BreadcrumbItem[];
@@ -15,35 +13,11 @@ export default function DatastoryDetailsPage({
 }: DatastoryDetailsPageProps) {
   return (
     <main className="flex flex-col">
+      {/* hero section with index */}
       <Datastory.Hero {...datastory.hero} breadcrumbs={breadcrumbItems} />
 
-      <Datastory.Overview {...datastory.sectionOverview} />
-
-      {datastory.sections.map((section, index) => {
-        let iframeClassName = "";
-        const startWith: SectionBg =
-          datastory.sectionOverview && Object.keys(datastory.sectionOverview).length !== 0 ? "primary" : "white";
-        if (startWith) {
-          const isEven = index % 2 === 0;
-          const getBg = (startWith: SectionBg) => {
-            return startWith === "white" ? "bg-white" : "bg-primary-100";
-          };
-          iframeClassName = getBg(isEven ? startWith : startWith === "white" ? "primary" : "white");
-        }
-        return (
-          <Datastory.Iframe
-            key={`section-${index}-${section.id}`}
-            {...section}
-            className={iframeClassName}
-          />
-        );
-      })}
-
-      {/* Related - related datastories */}
-
-      <Datastory.Sources {...datastory.dataSource} />
-
-      {/* Other - other resources */}
+      {/* this component will render the sections dynamically, acording with each schemaName */}
+      <Datastory.Sections {...datastory.sections} />
     </main>
   );
 }

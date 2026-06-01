@@ -50,10 +50,7 @@ export type BigNumbersSection = {
   schemaName: "section-datastory-bignumbers";
   title: string;
   bignumbers?: Bignumbers[];
-  dataReference: {
-    title: string;
-    date: string;
-  };
+  dataReference: DateReference;
 };
 
 export type DatastoryOverview = {
@@ -89,6 +86,7 @@ export type DatastorySource = {
   sources: Source[];
 };
 
+// ----------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------
 
 export type Datastory = {

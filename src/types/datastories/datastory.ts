@@ -1,6 +1,7 @@
-type DateReference = {
-  title: string;
-  date: string;
+type Anchor = {
+  children: string;
+  href: string;
+  icon: string;
 };
 
 type BigNumber = {
@@ -17,13 +18,14 @@ type Card = {
   anchor: Anchor;
 };
 
-// ----------------------------------------------------------------------------------------------
-
-type Anchor = {
-  children: string;
-  href: string;
-  icon: string;
+type DateReference = {
+  title: string;
+  date: string;
 };
+
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
 
 type Index = {
   title: string;
@@ -38,7 +40,7 @@ export type DatastoryHero = {
 
 // ----------------------------------------------------------------------------------------------
 
-export type Bignumbers = {
+type Bignumbers = {
   icon: string;
   number: string;
   numberLabel: string;
@@ -49,15 +51,8 @@ export type Bignumbers = {
 export type BigNumbersSection = {
   schemaName: "section-datastory-bignumbers";
   title: string;
-  bignumbers?: Bignumbers[];
-  dataReference: {
-    title: string;
-    date: string;
-  };
-};
-
-export type DatastoryOverview = {
-  section: BigNumbersSection | any | any;
+  bignumbers: Bignumbers[];
+  dataReference: DateReference;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -68,11 +63,19 @@ type Iframe = {
   classNameIframeBackground: string;
 };
 
-export type DatastoryIframe = {
+export type IframeSection = {
+  schemaName: "section-datastory-iframe";
   id: string;
   title: string;
   description: string;
   iframe: Iframe[];
+};
+
+// ----------------------------------------------------------------------------------------------
+
+type RelatedSection = {
+  schemaName: "section-datastory-related";
+  title: string;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -82,7 +85,8 @@ type Source = {
   href: string;
 };
 
-export type DatastorySource = {
+export type SourceSection = {
+  schemaName: "datasource";
   id: string;
   title: string;
   description: string;
@@ -91,11 +95,34 @@ export type DatastorySource = {
 
 // ----------------------------------------------------------------------------------------------
 
+type OtherSection = {
+  schemaName: "section-datastory-other";
+  title: string;
+};
+
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+
+export type DatastorySection =
+  | BigNumbersSection
+  | IframeSection
+  | RelatedSection
+  | SourceSection
+  | OtherSection;
+
+export type DatastorySections = {
+  isFirstSectionWhite: boolean;
+  sections: DatastorySection[];
+};
+
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+
 export type Datastory = {
   hero: DatastoryHero;
-  sectionOverview?: DatastoryOverview;
-  sections: DatastoryIframe[];
-  sectionRelated?: any;
-  dataSource: DatastorySource;
-  sectionOther?: any;
+  sections: DatastorySections;
 };
+
+// ----------------------------------------------------------------------------------------------

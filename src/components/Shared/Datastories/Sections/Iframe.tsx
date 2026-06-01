@@ -1,18 +1,12 @@
 import { twMerge } from "tailwind-merge";
-import { InfoBlock } from "../InfoBlock";
-import Section from "../Section";
-import { DatastoryIframe as DatastoryIframeType } from "@/types/datastories/datastory";
+import { InfoBlock } from "../../InfoBlock";
+import Section from "../../Section";
+import { IframeSection } from "@/types/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-export type DatastoryIframeI = DatastoryIframeType & { className?: string };
+export type IframeI = IframeSection & { className?: string };
 
-export default function DatastoryIframe({
-  id,
-  title,
-  description,
-  iframe,
-  className,
-}: DatastoryIframeI) {
+export default function Iframe({ id, title, description, iframe, className }: IframeI) {
   return (
     <Section
       className={twMerge("flex flex-col items-center justify-center bg-primary-100", className)}

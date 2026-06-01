@@ -1,23 +1,18 @@
 "use client";
-import Section from "../Section";
-import { InfoBlock } from "../InfoBlock";
+
+import Section from "../../Section";
+import { InfoBlock } from "../../InfoBlock";
 import { Anchor } from "@ama-pt/agora-design-system";
 import { twMerge } from "tailwind-merge";
 import { DatastorySource } from "@/service/types/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-export type DatastorySourcesProps = DatastorySource & {
+export type SourcesI = DatastorySource & {
   className?: string;
 };
 
 // eslint-disable-next-line max-len
-export default function DatastorySources({
-  id,
-  className,
-  title,
-  description,
-  sources,
-}: DatastorySourcesProps) {
+export default function Sources({ id, className, title, description, sources }: SourcesI) {
   return (
     <Section
       id={id}
