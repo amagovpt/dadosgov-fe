@@ -1273,8 +1273,11 @@ export async function fetchLatestDatasets(pageSize: number = 3): Promise<APIResp
 
 export async function fetchLatestReuses(pageSize: number = 3): Promise<APIResponse<Reuse>> {
   try {
+    // Short ISR window so editorial changes (LEDG-1860) are visible within
+    // ~10s instead of up to 60s. The backend still caches /reuses/ heavily,
+    // so this only adds at most one extra upstream call every 10s.
     const res = await fetch(`${API_BASE_URL}/reuses/?sort=-created&page_size=${pageSize}`, {
-      next: { revalidate: 60 },
+      next: { revalidate: 10 },
     });
 
     if (!res.ok) {
@@ -1331,8 +1334,13 @@ export async function fetchPosts(
 
 export async function fetchHomepageData(): Promise<HomepageData> {
   try {
+    // Short ISR window so featured datasets/reuses changes set via
+    // /pages/admin/system/editorial surface on the homepage within ~10s.
+    // The backend already caches /site/home/ for 300s and invalidates that
+    // cache on PUT, so the extra upstream load from a shorter window is
+    // bounded to one call per 10s (LEDG-1860).
     const res = await fetch(`${API_BASE_URL}/site/home/`, {
-      next: { revalidate: 60 },
+      next: { revalidate: 10 },
     });
 
     if (!res.ok) {
