@@ -15,14 +15,28 @@ export async function getRoadmapPage(locale: string = "pt"): Promise<RoadmapPage
                         description
                     }
                 }
+                sitemap {
+                    ${locale} {
+                    title
+                    links {
+                        anchor {
+                        href
+                        children
+                        icon
+                        }
+                    }
+                    }
+                }
                 visionAndPriorities {
                     ${locale} {
+                        id
                         title
                         description
                     }
                 }
                 keyEvolution {
                     ${locale} {
+                        id
                         title
                     }
                 }
@@ -35,18 +49,21 @@ export async function getRoadmapPage(locale: string = "pt"): Promise<RoadmapPage
                 }
                 howWePrioritize {
                     ${locale} {
+                        id
                         title
                         description
                     }
                 }
                 followAlongAndJoinIn {
                     ${locale} {
+                        id
                         title
                         description
                     }
                 }
                 historyOfDevelopment {
                     ${locale} {
+                        id
                         title
                     }
                 }

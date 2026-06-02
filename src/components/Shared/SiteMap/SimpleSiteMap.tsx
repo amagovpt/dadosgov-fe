@@ -12,7 +12,7 @@ export default function SimpleSiteMap(props: SimpleSiteMap) {
             <span className="text-l-bold">{props.title}</span>
             <div className=" flex flex-col gap-16 px-16">
                 {props.anchor.map((anchor, index) => (
-                    <Anchor key={index} {...anchor} className={("!justify-start  [&_.children-wrapper]:!text-m-bold")} variant='neutral' appearance='link' />
+                    <Anchor key={index} {...anchor} className={("!justify-start  [&_.children-wrapper]:!text-m-bold [&_.children-wrapper]:xl:!text-nowrap")} variant='neutral' appearance='link' />
 
                 ))}
             </div>
