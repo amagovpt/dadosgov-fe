@@ -2,6 +2,7 @@ import { DatastorySections as DatastorySectionsType } from "@/types/datastories/
 import BigNumbers from "./Sections/BigNumbers";
 import Iframe from "./Sections/Iframe";
 import Sources from "./Sections/Sources";
+import OtherResources from "./Sections/OtherResources";
 
 type SectionBg = "white" | "primary";
 
@@ -38,6 +39,8 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
         );
       case "datasource":
         return <Sources key={`section-${index}`} {...section} />;
+      case "section-datastory-other-resources":
+        return <OtherResources key={`section-${index}`} {...section} />;
       default:
         return null;
     }

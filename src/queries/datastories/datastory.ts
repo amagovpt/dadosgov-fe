@@ -115,6 +115,19 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     href
                   }
                 }
+                ... on SectionDatastoryOtherResourcesComponent {
+                  schemaName
+                  title
+                  resources {
+                    icon
+                    title
+                    subtitle
+                    anchor {
+                      href
+                      icon
+                    }
+                  }
+                }
               }
             }
           }

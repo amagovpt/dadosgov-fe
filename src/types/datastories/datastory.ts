@@ -9,7 +9,7 @@ type BigNumber = {
   description: string;
 };
 
-type Card = {
+export type Card = {
   id: string;
   icon: string;
   title: string;
@@ -95,9 +95,10 @@ export type SourceSection = {
 
 // ----------------------------------------------------------------------------------------------
 
-type OtherSection = {
-  schemaName: "section-datastory-other";
+export type OtherSection = {
+  schemaName: "section-datastory-other-resources";
   title: string;
+  resources: Card[];
 };
 
 // ----------------------------------------------------------------------------------------------
