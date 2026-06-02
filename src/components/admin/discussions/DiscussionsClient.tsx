@@ -12,8 +12,8 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchOrgDiscussions } from "@/app/api/discussions-topics";
-import type { Discussion } from '@/service/types/discussion';
+import { fetchOrgDiscussions } from "@/services/api";
+import type { Discussion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";

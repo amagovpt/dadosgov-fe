@@ -80,9 +80,8 @@ When fetching dynamic data in a client component (e.g., admin pages), use `useEf
 - `src/app/page.tsx` - Homepage
 - `src/app/layout.tsx` - Root layout (Header + Footer)
 - `src/app/globals.css` - Global styles & design tokens
-- `src/app/api/` - API integration layer
-- `src/service/queries` - Squidex integration layer
-- `src/service/types` - TypeScript type definitions
+- `src/services/api.ts` - API integration layer
+- `src/types/api.ts` - TypeScript type definitions
 - `src/components/Header.tsx` / `Footer.tsx` - Layout components
 - `tailwind.config.ts` - Theme config with Agora design system
 

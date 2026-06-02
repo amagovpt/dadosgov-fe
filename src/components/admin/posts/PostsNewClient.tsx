@@ -9,11 +9,11 @@ import {
   RadioButton,
   Tag,
 } from "@ama-pt/agora-design-system";
-import { createPost, uploadPostImage, publishPost } from "@/app/api/posts";
+import { createPost, uploadPostImage, publishPost } from "@/services/api";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import type { PostCreatePayload } from '@/service/types/posts';
+import type { PostCreatePayload } from "@/types/api";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
 import { ImageUploadField } from "@/components/admin/posts/ImageUploadField";

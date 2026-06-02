@@ -13,16 +13,13 @@ import {
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import {
-  fetchResourceTypes,
-  fetchSchemas,
-} from "@/app/api/datasets";
-import {
   fetchCommunityResource,
   updateCommunityResource,
   deleteCommunityResource,
-} from "@/app/api/community-resources";
-import type { ResourceType } from '@/service/types/catalog';
-import type { CommunityResource } from '@/service/types/community-resource';
+  fetchResourceTypes,
+  fetchSchemas,
+} from "@/services/api";
+import type { CommunityResource, ResourceType } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import AuxiliarList from "@/components/admin/AuxiliarList";

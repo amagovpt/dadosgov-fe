@@ -16,17 +16,13 @@ import {
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import {
+  createCommunityResource,
+  uploadCommunityResourceFile,
   fetchDataset,
   fetchMyDatasets,
   fetchResourceTypes,
-} from "@/app/api/datasets";
-import {
-  createCommunityResource,
-  uploadCommunityResourceFile,
-} from "@/app/api/community-resources";
-import type { ResourceType } from '@/service/types/catalog';
-import type { CommunityResource } from '@/service/types/community-resource';
-import type { Dataset } from '@/service/types/dataset';
+} from "@/services/api";
+import type { Dataset, CommunityResource, ResourceType } from "@/types/api";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";

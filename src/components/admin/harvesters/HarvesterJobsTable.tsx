@@ -14,7 +14,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import { createPaginationProps } from "@/utils/createPaginationProps";
-import type { HarvestJob } from "@/service/types/harvester";
+import type { HarvestJob } from "@/types/api";
 
 const JOB_STATUS_LABELS: Record<string, string> = {
   pending: "Pendente",

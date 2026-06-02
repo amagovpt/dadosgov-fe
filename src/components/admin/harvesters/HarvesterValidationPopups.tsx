@@ -6,7 +6,7 @@ import {
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import type { HarvestSource } from '@/service/types/harvester';
+import type { HarvestSource } from "@/types/api";
 
 interface ValidationPopupProps {
   harvester: HarvestSource;

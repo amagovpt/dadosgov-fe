@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow, format } from "date-fns";
@@ -15,25 +15,15 @@ import {
   Avatar,
   Icon,
 } from "@ama-pt/agora-design-system";
-import type { APIResponse } from '@/service/types/shared/core';
-import type { Dataset } from '@/service/types/dataset';
-import type { Organization } from '@/service/types/identity';
-import type { Reuse } from '@/service/types/reuse';
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { TabPagination } from "@/components/Shared/TabPagination";
 import { ReuseCardLinks } from "@/components/Shared/ReuseCardLinks";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
-import {
-  fetchOrgDatasets,
-  fetchOrgReuses,
-} from "@/app/api/organizations";
-
+import { Organization, Dataset, Reuse, APIResponse } from "@/types/api";
+import { fetchOrgDatasets, fetchOrgReuses } from "@/services/api";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
+import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
 
 interface OrganizationTabsProps {
   organization: Organization;
@@ -47,34 +37,6 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [isLoadingDatasets, setIsLoadingDatasets] = useState(true);
   const [isLoadingReuses, setIsLoadingReuses] = useState(true);
-
-  // Description expand/collapse state
-  const [descExpanded, setDescExpanded] = useState(false);
-  const [descOverflowing, setDescOverflowing] = useState(false);
-  const [descAvailableHeight, setDescAvailableHeight] = useState<number | undefined>(undefined);
-  const descContentRef = useRef<HTMLDivElement>(null);
-  const MAX_DESC_HEIGHT = 400;
-
-  const checkDescOverflow = useCallback(() => {
-    if (descContentRef.current) {
-      const fullHeight = descContentRef.current.scrollHeight;
-      setDescOverflowing(fullHeight > MAX_DESC_HEIGHT);
-      if (!descExpanded) {
-        setDescAvailableHeight(MAX_DESC_HEIGHT);
-      }
-    }
-  }, [descExpanded]);
-
-  useEffect(() => {
-    checkDescOverflow();
-    window.addEventListener("resize", checkDescOverflow);
-    const observer = new ResizeObserver(checkDescOverflow);
-    if (descContentRef.current) observer.observe(descContentRef.current);
-    return () => {
-      window.removeEventListener("resize", checkDescOverflow);
-      observer.disconnect();
-    };
-  }, [checkDescOverflow]);
 
   useEffect(() => {
     async function loadDatasets() {
@@ -124,37 +86,11 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                   </h2>
                   {organization.description ? (
                     <>
-                      <div
-                        ref={descContentRef}
-                        className="overflow-hidden"
-                        style={
-                          !descExpanded && descOverflowing && descAvailableHeight
-                            ? { maxHeight: descAvailableHeight }
-                            : undefined
-                        }
-                      >
-                        <div className="mb-32 text-neutral-900 [&_a]:text-primary-600 [&_a]:underline">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                          >
-                            {organization.description}
-                          </ReactMarkdown>
-                        </div>
-                      </div>
-                      {descOverflowing && (
-                        <button
-                          onClick={() => setDescExpanded(!descExpanded)}
-                          className="mt-8 flex cursor-pointer items-center gap-8 text-primary-600 hover:underline"
-                        >
-                          {descExpanded ? "Ler menos" : "Ler mais"}
-                          {descExpanded ? (
-                            <Icon name="agora-line-arrow-up-circle" className="h-24 w-24" />
-                          ) : (
-                            <Icon name="agora-line-arrow-down-circle" className="h-24 w-24" />
-                          )}
-                        </button>
-                      )}
+                      <ExpandableMarkdownDescription
+                        variant="fixedClamp"
+                        markdown={organization.description}
+                        maxHeightPx={400}
+                      />
                     </>
                   ) : (
                     <p className="text-neutral-500">Esta organização não possui descrição.</p>
@@ -241,7 +177,9 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                           }
                           mainLink={
                             <Link href={`/pages/datasets/${dataset.slug}`}>
-                              <span className="underline">{sanitizeUserMarkdown(dataset.title)}</span>
+                              <span className="underline">
+                                {sanitizeUserMarkdown(dataset.title)}
+                              </span>
                             </Link>
                           }
                           blockedLink={true}
@@ -310,8 +248,6 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
             <DiscussionSection entityId={organization.id} entityClass="Organization" />
           </TabBodyWrapper>
         </Tab>
-
-
         {/* Tab 6: Informações (Statistics, Members, Technical Info) */}
         <Tab>
           <TabHeader>Informações</TabHeader>

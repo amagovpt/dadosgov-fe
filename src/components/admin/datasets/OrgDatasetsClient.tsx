@@ -12,9 +12,10 @@ import {
   TableCell,
   Button,
 } from "@ama-pt/agora-design-system";
-import { fetchOrgDatasets } from "@/app/api/organizations";
-import type { Dataset } from '@/service/types/dataset';
+
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { fetchOrgDatasets } from "@/services/api";
+import { Dataset } from "@/types/api";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";

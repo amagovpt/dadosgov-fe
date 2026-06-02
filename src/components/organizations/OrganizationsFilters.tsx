@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@ama-pt/agora-design-system";
-import type { OrgBadges, Organization } from '@/service/types/identity';
+import { OrgBadges, Organization } from "@/types/api";
 import {
   AdvancedFilterGroup,
   AdvancedFiltersSidebar,
