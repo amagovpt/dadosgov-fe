@@ -22,6 +22,7 @@ import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { DATASET_SORT_LABELS } from "@/utils/datasetsListingQuery";
 import { useDatasetsListing } from "@/hooks/useDatasetsListing";
 import { twJoin } from "tailwind-merge";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -188,7 +189,12 @@ export default function DatasetsClient({
               <div
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3")}
               >
-                {datasets.length > 0 ? (
+                {listData.error ? (
+                  <ListingErrorBanner
+                    entity="os conjuntos de dados"
+                    errorStatus={listData.errorStatus}
+                  />
+                ) : datasets.length > 0 ? (
                   datasets.map((dataset, index) => {
                     const timeAgo = formatDateToTimeAgo(dataset.last_modified);
                     const cardProps = {

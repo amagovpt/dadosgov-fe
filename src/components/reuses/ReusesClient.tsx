@@ -21,6 +21,7 @@ import { useReusesListing } from "@/hooks/useReusesListing";
 import { REUSE_SORT_LABELS } from "@/utils/reusesListingQuery";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { twJoin } from "tailwind-merge";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
@@ -140,7 +141,12 @@ export default function ReusesClient({
               <div
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1" : "grid-cols-1  lg:grid-cols-2")}
               >
-                {reuses.length > 0 ? (
+                {listData.error ? (
+                  <ListingErrorBanner
+                    entity="as reutilizações"
+                    errorStatus={listData.errorStatus}
+                  />
+                ) : reuses.length > 0 ? (
                   reuses.map((reuse) => {
                     const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at);
                     return (

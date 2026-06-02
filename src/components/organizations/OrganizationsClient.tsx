@@ -21,6 +21,7 @@ import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useOrganizationsListing } from "@/hooks/useOrganizationsListing";
 import { ORGANIZATION_SORT_LABELS } from "@/utils/organizationsListingQuery";
 import { twJoin } from "tailwind-merge";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 
 interface OrganizationsClientProps {
   initialData: APIResponse<Organization>;
@@ -146,7 +147,12 @@ export default function OrganizationsClient({
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3")}
 
               >
-                {organizations.length > 0 ? (
+                {listData.error ? (
+                  <ListingErrorBanner
+                    entity="as organizações"
+                    errorStatus={listData.errorStatus}
+                  />
+                ) : organizations.length > 0 ? (
                   organizations.map((org, index) => {
                     const timeAgo = formatDateToTimeAgo(org.last_modified);
                     const cardProps: CardMetricsProps = {

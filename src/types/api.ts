@@ -1100,6 +1100,8 @@ export interface APIResponse<T> {
   total: number;
   next_page: string | null;
   previous_page: string | null;
+  error?: boolean;
+  errorStatus?: number | "network";
 }
 
 export type TransferStatus = "pending" | "accepted" | "refused";
