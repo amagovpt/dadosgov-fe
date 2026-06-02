@@ -6,9 +6,11 @@ import { Button, Icon, ToggleGroup, Toggle, CardNoResults } from "@ama-pt/agora-
 import { Pagination } from "@/components/Pagination";
 import { OrganizationsFilters } from "./OrganizationsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
-import type { APIResponse } from '@/service/types/shared/core';
-import type { OrgBadges, Organization } from '@/service/types/identity';
+import {
+  APIResponse,
+  OrgBadges,
+  Organization,
+} from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -19,6 +21,7 @@ import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useOrganizationsListing } from "@/hooks/useOrganizationsListing";
 import { ORGANIZATION_SORT_LABELS } from "@/utils/organizationsListingQuery";
 import { twJoin } from "tailwind-merge";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 
 interface OrganizationsClientProps {
   initialData: APIResponse<Organization>;

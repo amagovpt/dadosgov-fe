@@ -1,5 +1,5 @@
-import { Datastories } from "@/service/types/datastories";
-import { DataStoriesFilterState } from "@/service/types/datastories/filters";
+import { Datastories } from "@/types/datastories/datastories";
+import { DataStoriesFilterState } from "@/types/datastories/filters";
 
 export const DATA_STORIES_PAGE_SIZE = 12;
 

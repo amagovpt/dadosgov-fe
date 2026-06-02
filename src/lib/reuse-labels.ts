@@ -8,7 +8,7 @@
  * Keys mirror the constants in `backend/udata/core/reuse/constants.py`.
  */
 
-import type { ReuseType, ReuseTopic } from '@/service/types/reuse';
+import type { ReuseType, ReuseTopic } from "@/types/api";
 
 export const REUSE_TYPE_LABELS_PT: Record<string, string> = {
   api: "API",

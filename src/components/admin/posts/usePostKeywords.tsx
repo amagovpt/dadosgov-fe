@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { DropdownOption, DropdownSection } from "@ama-pt/agora-design-system";
-import { suggestTags } from "@/app/api/search";
-import type { TagSuggestion } from "@/service/types/catalog";
+import { suggestTags } from "@/services/api";
+import type { TagSuggestion } from "@/types/api";
 
 export interface UsePostKeywordsReturn {
   keywordSearch: string;

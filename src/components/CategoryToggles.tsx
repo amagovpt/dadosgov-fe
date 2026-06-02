@@ -3,16 +3,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Toggle, Pill } from '@ama-pt/agora-design-system';
-import type { SiteMetrics } from '@/service/types/shared/site-metrics';
-import { fetchDatasets } from "@/app/api/datasets";
-import { fetchReuses } from "@/app/api/reuses";
-import { fetchOrganizations } from "@/app/api/organizations";
+import { SiteMetrics } from '@/types/api';
 import {
   searchDatasets,
   searchOrganizations,
   searchReuses,
   searchDataservices,
-} from "@/app/api/search";
+  fetchDatasets,
+  fetchReuses,
+  fetchOrganizations,
+} from '@/services/api';
 
 interface CategoryToggleItem {
   id: string;

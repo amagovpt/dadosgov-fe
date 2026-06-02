@@ -21,12 +21,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import { CategoryToggles } from "@/components/CategoryToggles";
-import { fetchOrganizations } from "@/app/api/organizations";
-import { suggestTags } from "@/app/api/search";
-import type { APIResponse } from '@/service/types/shared/core';
-import type { Dataservice } from '@/service/types/dataservice';
-import type { Organization } from '@/service/types/identity';
-import type { SiteMetrics } from '@/service/types/shared/site-metrics';
+import { fetchOrganizations, suggestTags } from "@/services/api";
+import { APIResponse, Dataservice, Organization, SiteMetrics } from "@/types/api";
 import HeroGeneral from "@/components/HeroGeneral";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";

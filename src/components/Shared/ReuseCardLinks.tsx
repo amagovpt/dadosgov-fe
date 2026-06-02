@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CardLinks } from "@ama-pt/agora-design-system";
-import { Reuse } from "@/service/types/reuse";
+import { Reuse } from "@/types/api";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";

@@ -23,11 +23,11 @@ import {
   NavigationLink,
   NavigationRoot,
   Button,
-} from '@ama-pt/agora-design-system';
-import { logout } from "@/app/api/auth";
+} from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
 import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
+import { logout } from "@/services/api";
 import TextLink from "@/components/Primitives/TextLink";
 
 export const Header = () => {
@@ -41,7 +41,7 @@ export const Header = () => {
   const [ecosystemBtnPortalNode, setEcosystemBtnPortalNode] = useState<HTMLLIElement | null>(null);
   const [ecosystemPanelNode, setEcosystemPanelNode] = useState<HTMLDivElement | null>(null);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const panelsList = document.querySelector("header.sticky .panels-menu > ul");
     if (!panelsList) return;
 
@@ -53,7 +53,6 @@ export const Header = () => {
       li.style.alignItems = "stretch";
       panelsList.appendChild(li);
     }
-    setEcosystemBtnPortalNode(li);
 
     let panelDiv = document.querySelector(".ecosystem-panel-container") as HTMLDivElement | null;
     if (!panelDiv) {
@@ -61,12 +60,16 @@ export const Header = () => {
       panelDiv.className = "ecosystem-panel-container";
       document.body.appendChild(panelDiv);
     }
-    setEcosystemPanelNode(panelDiv);
+
+    queueMicrotask(() => {
+      setEcosystemBtnPortalNode(li);
+      setEcosystemPanelNode(panelDiv);
+    });
 
     return () => {
       panelsList.querySelector(".ecosystem-panel-menu")?.remove();
-      setEcosystemBtnPortalNode(null);
       document.querySelector(".ecosystem-panel-container")?.remove();
+      setEcosystemBtnPortalNode(null);
       setEcosystemPanelNode(null);
     };
   }, []);
@@ -74,7 +77,7 @@ export const Header = () => {
   // Create DOM nodes for "Administração" and "Desconectar" portals
   const [adminPortalNode, setAdminPortalNode] = useState<HTMLLIElement | null>(null);
   const [logoutPortalNode, setLogoutPortalNode] = useState<HTMLLIElement | null>(null);
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const panelsList = document.querySelector("header.sticky .panels-menu > ul");
     if (!panelsList) return;
 
@@ -86,7 +89,6 @@ export const Header = () => {
         adminLi.className = "admin-panel-menu";
         panelsList.appendChild(adminLi);
       }
-      setAdminPortalNode(adminLi);
 
       // Desconectar portal
       let logoutLi = panelsList.querySelector(".logout-panel-menu") as HTMLLIElement | null;
@@ -95,56 +97,57 @@ export const Header = () => {
         logoutLi.className = "logout-panel-menu";
         panelsList.appendChild(logoutLi);
       }
-      setLogoutPortalNode(logoutLi);
 
       // Keep ecosystem button always rightmost
       const ecosystemLi = panelsList.querySelector(".ecosystem-panel-menu");
       if (ecosystemLi) panelsList.appendChild(ecosystemLi);
-    } else {
-      const existingAdmin = panelsList.querySelector(".admin-panel-menu");
-      if (existingAdmin) existingAdmin.remove();
-      setAdminPortalNode(null);
 
-      const existingLogout = panelsList.querySelector(".logout-panel-menu");
-      if (existingLogout) existingLogout.remove();
-      setLogoutPortalNode(null);
+      queueMicrotask(() => {
+        setAdminPortalNode(adminLi);
+        setLogoutPortalNode(logoutLi);
+      });
+    } else {
+      panelsList.querySelector(".admin-panel-menu")?.remove();
+      panelsList.querySelector(".logout-panel-menu")?.remove();
+      queueMicrotask(() => {
+        setAdminPortalNode(null);
+        setLogoutPortalNode(null);
+      });
     }
 
     return () => {
       panelsList.querySelector(".admin-panel-menu")?.remove();
-      setAdminPortalNode(null);
       panelsList.querySelector(".logout-panel-menu")?.remove();
+      setAdminPortalNode(null);
       setLogoutPortalNode(null);
     };
   }, [user]);
 
   const [selectedLanguage, setSelectedLanguage] = useState("pt");
   const [submenu, setSubmenu] = useState<string | null>(null);
-  const [selectedArea, setSelectedArea] = useState(
-    pathname === "/pages/login" || pathname === "/pages/login" ? "2" : "1"
-  );
-  React.useEffect(() => {
-    if (pathname === "/pages/login" || pathname === "/pages/login") {
-      setSelectedArea("2");
-    } else {
-      setSelectedArea("1");
-    }
-
-    // Force close all menus/panels on route change via design system API
-    if (headerRef.current?.closeAll) {
-      headerRef.current.closeAll();
-    }
+  const selectedArea = pathname === "/pages/login" ? "2" : "1";
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setSubmenu(null);
     setEcosystemOpen(false);
+  }
+
+  React.useEffect(() => {
+    headerRef.current?.closeAll?.();
   }, [pathname]);
 
   // Position ecosystem panel right below the panels-menu bar (covering the nav bar)
   React.useEffect(() => {
-    if (!ecosystemOpen || !ecosystemPanelNode) return;
+    if (!ecosystemOpen) return;
+    const panelDiv = document.querySelector(
+      ".ecosystem-panel-container"
+    ) as HTMLDivElement | null;
+    if (!panelDiv) return;
     const panelsMenu = document.querySelector("header.sticky .panels-menu");
     if (panelsMenu) {
       const rect = panelsMenu.getBoundingClientRect();
-      ecosystemPanelNode.style.top = `${rect.bottom}px`;
+      panelDiv.style.top = `${rect.bottom}px`;
     }
   }, [ecosystemOpen, ecosystemPanelNode]);
 
@@ -309,9 +312,9 @@ export const Header = () => {
           <GeneralBar aria-label="Opções navegação geral">
             <Areas
               aria-label="Áreas do portal"
-              // @ts-ignore - Prop label does exist in component logic
+              // @ts-expect-error - Prop label does exist in component logic
               label={currentAreaLabel}
-              onChange={(area: string) => setSelectedArea(area)}
+              onChange={() => {}}
             >
               <Area
                 value="1"
@@ -331,7 +334,7 @@ export const Header = () => {
 
             <Languages
               aria-label="Selecionar idioma"
-              // @ts-ignore - Prop label does exist in component logic
+              // @ts-expect-error - Prop label does exist in component logic
               label={currentLangLabel}
               onChange={(lang: string) => setSelectedLanguage(lang)}
             >
@@ -528,34 +531,6 @@ export const Header = () => {
                   />
                 </div>
               </NavigationLink>
-              {/* hidden: api-tutorial
-              <NavigationLink appearance="link">
-                <div data-group="submenu-desenvolvimento">
-                  <HeaderCard
-                    iconDefault="agora-line-code"
-                    iconHover="agora-solid-code"
-                    title="Tutorial da API"
-                    description="Como usar a API"
-                    href="/pages/faqs/api-tutorial"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-              */}
-              {/* hidden: licences
-              <NavigationLink appearance="link">
-                <div data-group="submenu-desenvolvimento">
-                  <HeaderCard
-                    iconDefault="agora-line-file-document"
-                    iconHover="agora-solid-file-document"
-                    title="Licenças"
-                    description="Licenças de dados abertos"
-                    href="/pages/faqs/licences"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-              */}
               <NavigationLink appearance="link">
                 <div data-group="main">
                   <HeaderCard

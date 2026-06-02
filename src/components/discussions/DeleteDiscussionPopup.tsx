@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { Avatar, Button, RadioButton, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
-import type { Discussion } from '@/service/types/discussion';
-import { deleteDiscussion, deleteDiscussionComment } from "@/app/api/discussions-topics";
+import { Discussion } from "@/types/api";
+import { deleteDiscussion, deleteDiscussionComment } from "@/services/api";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 

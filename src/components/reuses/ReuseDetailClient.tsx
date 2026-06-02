@@ -14,28 +14,28 @@ import {
   CardArticle,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import type { Dataset } from '@/service/types/dataset';
-import type { Reuse } from '@/service/types/reuse';
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { TabPagination } from "@/components/Shared/TabPagination";
-import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
+import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
+import { Reuse, Dataset } from "@/types/api";
 import {
+  fetchDataset,
   fetchReuse,
-} from "@/app/api/reuses";
-import { fetchDataset } from "@/app/api/datasets";
-import { followEntity, unfollowEntity, isFollowing } from "@/app/api/followers";
+  followEntity,
+  unfollowEntity,
+  isFollowing,
+} from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 import { localizeReuseTypeId } from "@/lib/reuse-labels";
 import { normalizeRemoteDatasets } from "@/lib/reuse-remote-datasets";
-
+import TextLink from "@/components/Primitives/TextLink";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { formatMetricValue } from "@/utils/formatNumber";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { formatMetricValue } from "@/utils/formatNumber";
-import { formatDateToTimeAgo } from "@/utils/formatDate";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
-import TextLink from "@/components/Primitives/TextLink";
 
 interface ReuseDetailClientProps {
   slug: string;
@@ -61,6 +61,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
+  const descMeasureRef = useRef<HTMLDivElement>(null);
   const descTitleRef = useRef<HTMLDivElement>(null);
   const descSidebarRef = useRef<HTMLDivElement>(null);
 
@@ -321,11 +322,14 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                         Descrição
                       </h2>
                     </div>
-                    <DescriptionWithReadMore
-                      text={reuse.description}
-                      sidebarRef={descSidebarRef}
+                    <ExpandableMarkdownDescription
+                      variant="sidebarAlign"
+                      markdown={reuse.description}
+                      asideRef={descSidebarRef}
                       titleRef={descTitleRef}
-                      className="[&_.content-wrapper]:mb-32 [&_.content-wrapper]:text-neutral-900 [&_.content-wrapper>a]:[&_a]:text-primary-600 [&_.content-wrapper]:[&_a]:underline"
+                      measureRef={descMeasureRef}
+                      readMoreReservePx={48}
+                      remeasureDeps={[reuse.slug, reuse.description]}
                     />
                   </div>
                 </div>

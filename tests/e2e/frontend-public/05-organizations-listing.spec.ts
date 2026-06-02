@@ -60,6 +60,21 @@ test.describe("Organizations Listing", () => {
     expect(page.url()).toContain("q=instituto");
   });
 
+  test("OL-04b: Partial search returns results (prefix matching)", async ({ page }) => {
+    const searchInput = page.locator("#organizations-search");
+    await expect(searchInput).toBeVisible({ timeout: 10000 });
+
+    // A prefix of a known org name must return results — not require the full word.
+    await searchInput.fill("instit");
+    await searchInput.press("Enter");
+    await page.waitForURL(/q=instit/, { timeout: 10000 });
+
+    const cards = page.locator("a[href^='/pages/organizations/']");
+    await expect(cards.first()).toBeVisible({ timeout: 15000 });
+    const count = await cards.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
   test("OL-05: Type filter section visible after opening filters", async ({
     page,
   }) => {

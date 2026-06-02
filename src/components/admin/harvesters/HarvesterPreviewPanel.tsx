@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Icon, Pill, StatusCard } from "@ama-pt/agora-design-system";
-import type { HarvestPreviewJob } from "@/service/types/harvester";
+import type { HarvestPreviewJob } from "@/types/api";
 
 interface HarvesterPreviewPanelProps {
   isPreviewing: boolean;

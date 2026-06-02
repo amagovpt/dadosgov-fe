@@ -1,7 +1,7 @@
-import { fetchHomepageData } from "@/app/api/system";
+import { fetchHomepageData } from "@/services/api";
 import HomeClient from "@/components/home/HomeClient";
-import { getHome } from "@/service/queries/home/home";
-import { Datastory, UsedDailyBy } from "@/service/types/home";
+import { getHome } from "@/queries/home";
+import { Datastory, UsedDailyBy } from "@/types/home";
 
 export const dynamic = 'force-dynamic';
 

@@ -1,9 +1,9 @@
 export const dynamic = "force-dynamic";
 import HeroCourses from '@/components/Learn/Hero';
-import apolloClient from '@/service/utils/apollo-client';
+import apolloClient from '@/services/apollo-client';
 import { flattenData } from '@/utils/flattenObject';
-import { getMiniCoursesPages } from '@/service/queries/courses/minicourses';
-import { PageMiniCourses } from '@/service/types/courses';
+import { getMiniCoursesPages } from '@/services/queries/courses/minicourses';
+import { PageMiniCourses } from '@/services/types/courses';
 import { getAssets } from '@/utils/getAssets';
 import MiniCoursesSearchInput from '@/components/Learn/MiniCoursesSearchInput';
 import MiniCoursesResult from '@/components/Learn/mini-courses/MiniCoursesResult';
@@ -83,7 +83,7 @@ export default async function Page({
 
             {/* Results Area */}
             <MiniCoursesResult filteredCourses={filteredCourses} currentPage={currentPage} PAGE_SIZE={PAGE_SIZE} />
-
+            
           </div>
         </div>
       </div>
