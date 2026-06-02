@@ -28,7 +28,7 @@ export default async function page() {
                         h1: ({ children }) => <h1 className="text-2xl-bold">{children}</h1>,
                         h2: ({ children }) => <h2 className="text-xl-bold">{children}</h2>,
                         a: ({ href, children }) => (
-                            <Anchor href={href}>
+                            <Anchor href={href} appearance='link' className="!py-0 !min-h-[12px] !min-w-[12px]">
                                 {children}
                             </Anchor>
                         ),

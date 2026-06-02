@@ -1,19 +1,24 @@
 export interface Image {
-    url: string
-    fileName: string
-    id: string
-    slug: string
+  url: string;
+  fileName: string;
+  id: string;
+  slug: string;
 }
 
 export interface Hero {
-  title: string
-  description: string
-  image: Image[]
-  updatedAt: string
+  title: string;
+  description: string;
+  image: Image[];
+  updatedAt: string;
 }
 
 export interface Anchor {
-  children: string
-  href: string
+  children: string;
+  href: string;
+  icon: string | null;
 }
 
+export interface Sitemap {
+  title: string;
+  links: Anchor[];
+}
