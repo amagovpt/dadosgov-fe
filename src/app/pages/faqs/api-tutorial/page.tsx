@@ -34,13 +34,13 @@ export default async function page() {
                     ]}
                 />
             </div>
-            <div className="container flex flex-col gap-16 py-32 font-sans text-primary-900 leading-3">
+            <div className="container flex flex-col gap-16 py-32 font-sans text-primary-900">
                 <ReactMarkdown
                     components={{
                         h1: ({ children }) => <h1 className="text-2xl-bold">{children}</h1>,
                         h2: ({ children }) => <h2 className="text-xl-bold">{children}</h2>,
                         a: ({ href, children }) => (
-                            <Anchor href={href}>
+                            <Anchor href={href} appearance='link' className="!py-0 !min-h-[12px] !min-w-[12px]" >
                                 {children}
                             </Anchor>
                         ),
