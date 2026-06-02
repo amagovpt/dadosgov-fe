@@ -45,7 +45,7 @@ function Resource({ icon, title, subtitle, anchor }: ResourceI) {
 
 export default function OtherResources({ title, resources }: OtherResourcesI) {
   return (
-    <Section className="flex w-full justify-center py-32">
+    <Section className="flex w-full justify-center py-64 bg-primary-100">
       <InfoBlock.Root className="flex-col gap-32">
         <InfoBlock.Header>
           <InfoBlock.Title

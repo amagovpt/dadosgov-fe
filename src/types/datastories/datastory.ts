@@ -4,20 +4,6 @@ type Anchor = {
   icon: string;
 };
 
-type BigNumber = {
-  number: string;
-  description: string;
-};
-
-export type Card = {
-  id: string;
-  icon: string;
-  title: string;
-  subtitle: string;
-  bignumber: BigNumber;
-  anchor: Anchor;
-};
-
 type DateReference = {
   title: string;
   date: string;
@@ -73,9 +59,18 @@ export type IframeSection = {
 
 // ----------------------------------------------------------------------------------------------
 
-type RelatedSection = {
+  type RelatedDatastory = {
+  tag: string;
+  title: string;
+  subtitle: string;
+  anchor: Anchor;
+};
+
+export type RelatedSection = {
   schemaName: "section-datastory-related";
   title: string;
+  description: string;
+  datastories: RelatedDatastory[];
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -95,10 +90,17 @@ export type SourceSection = {
 
 // ----------------------------------------------------------------------------------------------
 
+type Resource = {
+  icon: string;
+  title: string;
+  subtitle: string;
+  anchor: Anchor;
+};
+
 export type OtherSection = {
   schemaName: "section-datastory-other-resources";
   title: string;
-  resources: Card[];
+  resources: Resource[];
 };
 
 // ----------------------------------------------------------------------------------------------

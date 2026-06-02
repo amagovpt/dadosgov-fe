@@ -43,7 +43,7 @@ function BigNumber({ icon, number, numberLabel, title, subtitle }: BigNumberI) {
 
 export default function BigNumbers({ title, bignumbers, dataReference, className }: BigNumbersI) {
   return (
-    <Section className={twMerge("flex w-full justify-center py-32", className)}>
+    <Section className={twMerge("flex w-full justify-center py-64", className)}>
       <InfoBlock.Root className="flex-col gap-32">
         <InfoBlock.Header>
           <InfoBlock.Title

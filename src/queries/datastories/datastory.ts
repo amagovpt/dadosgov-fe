@@ -128,6 +128,22 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     }
                   }
                 }
+                ... on SectionDatastoryRelatedDatastoryComponent {
+                  schemaName
+                  title
+                  datastories {
+                    data {
+                      metadata {
+                        pt {
+                          createdAt
+                          description
+                          slug
+                          title
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
