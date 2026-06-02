@@ -1,6 +1,6 @@
 import React from 'react';
 import MiniCourseStepClient from '@/components/Learn/mini-courses/MiniCourseStepClient';
-import { getMiniCourseStepsPage } from '@/service/queries/courses/minicourses';
+import { getMiniCourseStepsPage } from '@/services/queries/courses/minicourses';
 
 export default async function Page({
   params,

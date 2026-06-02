@@ -3,9 +3,9 @@ import {
   fetchFrequencies,
   fetchGranularities,
   fetchLicenses,
-} from "@/app/api/datasets";
-import { fetchOrganizations } from "@/app/api/organizations";
-import type { DatasetFilters } from '@/service/types/dataset';
+  fetchOrganizations,
+} from '@/services/api';
+import { DatasetFilters } from '@/types/api';
 import DatasetsClient from '@/components/datasets/DatasetsClient';
 
 export const dynamic = 'force-dynamic';

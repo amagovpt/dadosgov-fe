@@ -1,7 +1,7 @@
 import { Metadata } from "next";
-import { getDatastory, getDatastoryMetadata } from "@/service/queries/datastories/datastory";
+import { getDatastory, getDatastoryMetadata } from "@/queries/datastories/datastory";
 import DatastoryDetails from "@/components/datastories/DatastoryDetails";
-import { BreadcrumbItem } from "@/service/types/shared/breadcrumbItem";
+import { BreadcrumbItem } from "@/types/shared";
 
 
 export async function generateMetadata({

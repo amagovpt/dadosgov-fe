@@ -15,16 +15,9 @@ export function useSearchFilterUrlSync({
 }: UseSearchUrlSyncOptions) {
   const [searchQuery, setSearchQuery] = React.useState(currentQuery);
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const internalNavRef = React.useRef(false);
 
-  // Sync internal state when the URL param changes externally (e.g. header search navigation).
-  // Skip the sync when the URL change was triggered by this hook itself — otherwise fast typing
-  // gets clobbered: the debounced navigation lands after extra characters are already in state.
+  // Sync internal state when the URL param changes externally (e.g. header search navigation)
   React.useEffect(() => {
-    if (internalNavRef.current) {
-      internalNavRef.current = false;
-      return;
-    }
     setSearchQuery(currentQuery);
   }, [currentQuery]);
 
@@ -32,7 +25,6 @@ export function useSearchFilterUrlSync({
     if (searchQuery.trim() === currentQuery) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      internalNavRef.current = true;
       onSearchNavigate(searchQuery.trim());
     }, debounceMs);
 
@@ -43,7 +35,6 @@ export function useSearchFilterUrlSync({
 
   const handleSearch = React.useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    internalNavRef.current = true;
     onSearchNavigate(searchQuery.trim());
   }, [searchQuery, onSearchNavigate]);
 

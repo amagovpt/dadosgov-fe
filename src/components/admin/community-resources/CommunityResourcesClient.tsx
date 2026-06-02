@@ -12,9 +12,9 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import { fetchMyCommunityResources } from "@/app/api/community-resources";
-import type { CommunityResource } from '@/service/types/community-resource';
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { fetchMyCommunityResources } from "@/services/api";
+import { CommunityResource } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";

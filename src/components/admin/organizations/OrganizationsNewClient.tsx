@@ -14,9 +14,8 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { createOrganization, uploadOrgLogo } from "@/app/api/organizations";
-import { suggestOrganizations } from "@/app/api/search";
-import type { OrganizationSuggestion } from '@/service/types/identity';
+import { suggestOrganizations, createOrganization, uploadOrgLogo } from "@/services/api";
+import type { OrganizationSuggestion } from "@/types/api";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";

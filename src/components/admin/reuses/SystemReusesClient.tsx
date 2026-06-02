@@ -12,10 +12,10 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import { fetchReuses } from "@/app/api/reuses";
-import type { Reuse } from '@/service/types/reuse';
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { fetchReuses } from "@/services/api";
+import { Reuse } from "@/types/api";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";

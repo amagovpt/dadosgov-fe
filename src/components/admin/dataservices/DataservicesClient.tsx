@@ -10,10 +10,10 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import { fetchMyDataservices } from "@/app/api/dataservices";
-import type { Dataservice } from '@/service/types/dataservice';
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { fetchMyDataservices } from "@/services/api";
+import { Dataservice } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";

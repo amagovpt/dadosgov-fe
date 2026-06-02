@@ -15,10 +15,10 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import { fetchUsers } from "@/app/api/users";
-import type { UserAdmin } from '@/service/types/identity';
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import { fetchUsers } from "@/services/api";
+import { UserAdmin } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";

@@ -15,7 +15,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
 import { useAuth } from "@/context/AuthContext";
-import { logout } from "@/app/api/auth";
+import { logout } from "@/services/api";
 
 
 function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {

@@ -15,7 +15,7 @@ import AppIcon from "@/components/Primitives/AppIcon";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import { HarvesterPreviewPanel } from "@/components/admin/harvesters/HarvesterPreviewPanel";
-import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
+import type { HarvestBackend, HarvestPreviewJob } from "@/types/api";
 
 const FILTER_KEY_LABELS: Record<string, string> = {
   Organization: "Organização",

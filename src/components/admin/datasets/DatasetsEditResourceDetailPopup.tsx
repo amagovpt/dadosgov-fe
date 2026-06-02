@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import type { Resource } from '@/service/types/dataset';
+import type { Resource } from "@/types/api";
 import TextLink from "@/components/Primitives/TextLink";
 
 type DatasetsEditResourceDetailPopupProps = {

@@ -1,4 +1,4 @@
-import type { DatasetFilters } from '@/service/types/dataset';
+import { DatasetFilters } from "@/types/api";
 
 export const DATASET_SORT_OPTIONS: Record<string, string> = {
   relevancia: "",

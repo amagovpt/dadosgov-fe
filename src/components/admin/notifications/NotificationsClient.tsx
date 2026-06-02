@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { fetchNotifications, markNotificationRead } from "@/app/api/notifications";
-import type { Notification, ValidateHarvesterNotificationDetails } from '@/service/types/notifications-reporting';
 import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { fetchNotifications, markNotificationRead } from "@/services/api";
+import type { Notification, ValidateHarvesterNotificationDetails } from "@/types/api";
 import {
   harvesterValidationLink,
   isHarvesterValidation,

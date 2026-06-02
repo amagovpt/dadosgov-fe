@@ -11,9 +11,9 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import { fetchMyReuses } from "@/app/api/reuses";
-import type { Reuse } from '@/service/types/reuse';
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { fetchMyReuses } from "@/services/api";
+import { Reuse } from "@/types/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
