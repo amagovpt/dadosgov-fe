@@ -48,6 +48,9 @@ export async function generateMetadata({
       type: "website",
       images: [`${siteUrl}/og-images/metadados_dadosgov.jpg`],
     },
+    other:{
+      "google-site-verification": "D63gacp78VxL2YWR2JTOYCE25ZpsdIazq4IR4ojc57k",
+    }
   };
 }
 
