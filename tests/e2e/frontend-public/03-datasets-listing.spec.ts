@@ -308,6 +308,52 @@ test.describe("Datasets Listing", () => {
     }
   });
 
+  test("DL-22: Frequency filter section visible after opening filters", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    const freqBtn = page.getByRole("button", { name: /Frequência/i }).first();
+    await expect(freqBtn).toBeVisible({ timeout: 10000 });
+  });
+
+  test("DL-23: Frequency filter sets frequency param in URL", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    // The Frequência section is a collapsed accordion — expand it first.
+    const freqBtn = page.getByRole("button", { name: /^Frequência/i }).first();
+    await expect(freqBtn).toBeVisible({ timeout: 10000 });
+    await freqBtn.click();
+
+    // The Agora Checkbox component renders a custom element; find by accessible role+name.
+    const mensal = page.getByRole("checkbox", { name: /^Mensal$/i });
+    await expect(mensal).toBeVisible({ timeout: 10000 });
+    await mensal.click();
+
+    await page.waitForURL(/frequency=/, { timeout: 10000 });
+    expect(page.url()).toMatch(/frequency=/);
+  });
+
+  test("DL-24: Frequency filter roundtrip — checkbox is checked when navigating from URL", async ({
+    page,
+  }) => {
+    // Navigate directly with the frequency param already set.
+    await page.goto(DATASETS_URL + "?frequency=monthly");
+    await page.waitForLoadState("networkidle");
+
+    await openFiltersPanel(page);
+
+    // The section shows a pill count when a value is active; expand it.
+    const freqBtn = page.getByRole("button", { name: /^Frequência/i }).first();
+    await expect(freqBtn).toBeVisible({ timeout: 10000 });
+    await freqBtn.click();
+
+    const mensal = page.getByRole("checkbox", { name: /^Mensal$/i });
+    await expect(mensal).toBeChecked({ timeout: 10000 });
+  });
+
   test("DL-21: onError fallback replaces a failed org logo with the placeholder", async ({
     page,
   }) => {

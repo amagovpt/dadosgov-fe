@@ -4002,3 +4002,243 @@ export async function checkUrlReachable(url: string): Promise<boolean> {
     return true;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Aggregated listing responses (LEDG-1836)
+// ---------------------------------------------------------------------------
+
+export interface DatasetsListingResponse {
+  listing: APIResponse<Dataset>;
+  filter_counts: Record<string, number>;
+  organizations: Organization[];
+  licenses: License[];
+  frequencies: Frequency[];
+  granularities: Granularity[];
+  error?: boolean;
+  errorStatus?: number | "network";
+}
+
+/**
+ * Aggregated fetch for the /pages/datasets listing page.
+ * Hits /api/1/site/datasets-listing/ which returns the paginated listing,
+ * sidebar filter counts and metadata in one response (LEDG-1836).
+ */
+export async function fetchDatasetsListing(
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: DatasetFilters
+): Promise<DatasetsListingResponse> {
+  const emptyShape: DatasetsListingResponse = {
+    listing: { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null },
+    filter_counts: {},
+    organizations: [],
+    licenses: [],
+    frequencies: [],
+    granularities: [],
+  };
+
+  try {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("page_size", String(pageSize));
+
+    if (filters) {
+      if (filters.q) params.set("q", filters.q);
+      if (filters.schema) params.set("schema", filters.schema);
+      if (filters.geozone) params.set("geozone", filters.geozone);
+      if (filters.granularity) params.set("granularity", filters.granularity);
+      if (filters.sort) params.set("sort", filters.sort);
+      if (filters.featured !== undefined) params.set("featured", String(filters.featured));
+      if (filters.owner) params.set("owner", filters.owner);
+      if (filters.modified_since) params.set("modified_since", filters.modified_since);
+
+      const arrayParams: [string, string | string[] | undefined][] = [
+        ["tag", filters.tag],
+        ["license", filters.license],
+        ["format", filters.format],
+        ["frequency", filters.frequency],
+        ["badge", filters.badge],
+        ["organization", filters.organization],
+      ];
+      for (const [key, value] of arrayParams) {
+        if (!value) continue;
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.set(key, value);
+        }
+      }
+    }
+
+    const url = `${API_BASE_URL}/site/datasets-listing/?${params.toString()}`;
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) {
+      console.error(`Error fetching datasets listing: ${res.status} ${res.statusText}`);
+      return {
+        ...emptyShape,
+        listing: { ...emptyShape.listing, error: true, errorStatus: res.status },
+        error: true,
+        errorStatus: res.status,
+      };
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching datasets listing:", error);
+    return {
+      ...emptyShape,
+      listing: { ...emptyShape.listing, error: true, errorStatus: "network" },
+      error: true,
+      errorStatus: "network",
+    };
+  }
+}
+
+export interface OrganizationsListingResponse {
+  listing: APIResponse<Organization>;
+  badges: OrgBadges;
+  badge_counts: Record<string, number>;
+  organizations: Organization[];
+  error?: boolean;
+  errorStatus?: number | "network";
+}
+
+/**
+ * Aggregated fetch for the /pages/organizations listing page (LEDG-1836).
+ * Replaces 3 + N (one per badge) parallel calls with 1.
+ */
+export async function fetchOrganizationsListing(
+  page: number = 1,
+  pageSize: number = 20,
+  filters?: OrganizationFilters
+): Promise<OrganizationsListingResponse> {
+  const emptyShape: OrganizationsListingResponse = {
+    listing: { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null },
+    badges: {},
+    badge_counts: {},
+    organizations: [],
+  };
+
+  try {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("page_size", String(pageSize));
+
+    if (filters) {
+      if (filters.q) params.set("q", filters.q);
+      if (filters.sort) params.set("sort", filters.sort);
+
+      const arrayParams: [string, string | string[] | undefined][] = [
+        ["badge", filters.badge],
+        ["organization", filters.organization],
+      ];
+      for (const [key, value] of arrayParams) {
+        if (!value) continue;
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.set(key, value);
+        }
+      }
+    }
+
+    const url = `${API_BASE_URL}/site/organizations-listing/?${params.toString()}`;
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) {
+      console.error(`Error fetching organizations listing: ${res.status} ${res.statusText}`);
+      return {
+        ...emptyShape,
+        listing: { ...emptyShape.listing, error: true, errorStatus: res.status },
+        error: true,
+        errorStatus: res.status,
+      };
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching organizations listing:", error);
+    return {
+      ...emptyShape,
+      listing: { ...emptyShape.listing, error: true, errorStatus: "network" },
+      error: true,
+      errorStatus: "network",
+    };
+  }
+}
+
+export interface ReusesListingResponse {
+  listing: APIResponse<Reuse>;
+  filter_counts: Record<string, number>;
+  organizations: Organization[];
+  error?: boolean;
+  errorStatus?: number | "network";
+}
+
+/**
+ * Aggregated fetch for the /pages/reuses listing page (LEDG-1836).
+ * Replaces 6 parallel calls with 1 to /api/1/site/reuses-listing/.
+ */
+export async function fetchReusesListing(
+  page: number = 1,
+  pageSize: number = 12,
+  filters?: ReuseFilters
+): Promise<ReusesListingResponse> {
+  const emptyShape: ReusesListingResponse = {
+    listing: { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null },
+    filter_counts: {},
+    organizations: [],
+  };
+
+  try {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("page_size", String(pageSize));
+
+    if (filters) {
+      if (filters.q) params.set("q", filters.q);
+      if (filters.type) params.set("type", filters.type);
+      if (filters.owner) params.set("owner", filters.owner);
+      if (filters.dataset) params.set("dataset", filters.dataset);
+      if (filters.sort) params.set("sort", filters.sort);
+      if (filters.modified_since) params.set("modified_since", filters.modified_since);
+
+      const arrayParams: [string, string | string[] | undefined][] = [
+        ["tag", filters.tag],
+        ["organization", filters.organization],
+      ];
+      for (const [key, value] of arrayParams) {
+        if (!value) continue;
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, v));
+        } else {
+          params.set(key, value);
+        }
+      }
+    }
+
+    const url = `${API_BASE_URL}/site/reuses-listing/?${params.toString()}`;
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) {
+      console.error(`Error fetching reuses listing: ${res.status} ${res.statusText}`);
+      return {
+        ...emptyShape,
+        listing: { ...emptyShape.listing, error: true, errorStatus: res.status },
+        error: true,
+        errorStatus: res.status,
+      };
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching reuses listing:", error);
+    return {
+      ...emptyShape,
+      listing: { ...emptyShape.listing, error: true, errorStatus: "network" },
+      error: true,
+      errorStatus: "network",
+    };
+  }
+}

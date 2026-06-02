@@ -43,6 +43,7 @@ export async function getFaqs(slug: string, locale: string = "pt") {
     variables: {
       query: `data/id/iv eq '${slug}'`,
     },
+    fetchPolicy: "network-only",
   });
 
   if (!data || error) {
