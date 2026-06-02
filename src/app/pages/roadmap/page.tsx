@@ -8,6 +8,7 @@ import { getRoadmapPage } from '@/service/queries/roadmap';
 import { parseHtmlToParagraphs } from '@/utils/htmlToParagraphs';
 import ReactMarkdown from 'react-markdown';
 
+export const dynamic = "force-dynamic";
 
 export default async function page() {
 
