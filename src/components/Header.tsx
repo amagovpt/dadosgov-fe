@@ -646,9 +646,9 @@ export const Header = () => {
             <NextImage
               src="/Ecossistema/arte_black_simple.svg"
               alt="arte.gov.pt"
-              width={64}
-              height={32}
-              className="ml-8 self-center"
+              width={170}
+              height={64}
+              className="-ml-4 h-[12px] w-auto self-center"
             />
           </>,
           ecosystemBtnPortalNode
