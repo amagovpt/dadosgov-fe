@@ -17,19 +17,15 @@ import {
 
 import HeroGeneral from "@/components/HeroGeneral";
 import { Pagination } from "@/components/Pagination";
-import {
-  searchDatasets,
-  searchOrganizations,
-  searchReuses,
-  searchDataservices,
-  fetchOrganizations,
-  fetchLicenses,
-  fetchGranularities,
-  suggestFormats,
-  suggestTags,
-  suggestSpatialZones,
-} from "@/services/api";
-import { Dataset, Organization, Reuse, Dataservice, License, Granularity } from "@/types/api";
+import { searchDataservices } from "@/service/api/dataservices";
+import { fetchLicenses, fetchGranularities, suggestFormats } from "@/service/api/datasets";
+import { fetchOrganizations } from "@/service/api/organizations";
+import { searchDatasets, searchOrganizations, searchReuses, suggestTags, suggestSpatialZones } from "@/service/api/search";
+import { License, Granularity } from "@/service/types/catalog";
+import { Dataservice } from "@/service/types/dataservice";
+import { Dataset } from "@/service/types/dataset";
+import { Organization } from "@/service/types/identity";
+import { Reuse } from "@/service/types/reuse";
 import AppIcon from "../Primitives/AppIcon";
 
 type SearchType = "datasets" | "dataservices" | "reuses" | "organizations";

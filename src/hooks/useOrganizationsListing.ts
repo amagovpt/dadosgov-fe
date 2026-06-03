@@ -2,7 +2,8 @@
 
 import { useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { APIResponse, Organization } from "@/types/api";
+import { Organization } from "@/service/types/identity";
+import { APIResponse } from "@/service/types/shared";
 import { useListingUrlState } from "@/hooks/useListingUrlState";
 import { useSearchFilterUrlSync } from "@/hooks/useSearchFilterUrlSync";
 import {

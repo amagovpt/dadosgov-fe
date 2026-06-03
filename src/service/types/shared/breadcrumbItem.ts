@@ -1,4 +1,4 @@
-﻿export type BreadcrumbItem = {
+export type BreadcrumbItem = {
   label: string;
   url: string;
 };

@@ -12,8 +12,8 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
-import { fetchOrgDataservices } from "@/services/api";
-import { Dataservice } from "@/types/api";
+import { fetchOrgDataservices } from "@/service/api/dataservices";
+import { Dataservice } from "@/service/types/dataservice";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";

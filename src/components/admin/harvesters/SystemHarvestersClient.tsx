@@ -16,8 +16,8 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/services/api";
-import type { HarvestSource } from "@/types/api";
+import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
+import type { HarvestSource } from "@/service/types/harvester";
 import { getHarvesterStatus } from "@/utils/harvesterStatus";
 import { HarvesterStatusFilter } from "./HarvesterStatusFilter";
 import { formatDateToDMY } from "@/utils/formatDate";

@@ -4,8 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button, CardGeneral, Icon, ProgressBar, usePopupContext } from "@ama-pt/agora-design-system";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
-import { searchDatasets, searchReuses } from "@/services/api";
-import type { Dataset, Reuse } from "@/types/api";
+import { searchDatasets, searchReuses } from "@/service/api/search";
+import type { Dataset } from "@/service/types/dataset";
+import type { Reuse } from "@/service/types/reuse";
 import { formatMetricValue } from "@/utils/formatNumber";
 import {
   BLOCK_DEFINITIONS,

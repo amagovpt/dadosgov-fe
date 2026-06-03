@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { Discussion } from "@/types/api";
+import type { Discussion } from "@/service/types/discussion";
 
 export function useDiscussionsFeed(
   loadKey: string | null | undefined,

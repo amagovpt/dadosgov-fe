@@ -1,4 +1,4 @@
-import type { SpatialZone } from "@/types/api";
+import type { SpatialZone } from "@/service/types/catalog";
 
 export const ZONE_PT_NAMES: Record<string, string> = {
   "country-group:world": "Mundo",

@@ -1,4 +1,4 @@
-﻿export interface FaqsContent {
+export interface FaqsContent {
   id: string;
   title: string;
   body: string;

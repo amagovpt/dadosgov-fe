@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { fetchOrganization } from '@/services/api';
+import { fetchOrganization } from "@/service/api/organizations";
 import OrganizationDetailClient from '@/components/organizations/OrganizationDetailClient';
 import { sanitizeUserMarkdown } from '@/utils/sanitizeUserMarkdown';
 

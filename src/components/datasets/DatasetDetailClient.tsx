@@ -11,8 +11,9 @@ import {
   ProgressBar,
   CardExpandable,
 } from "@ama-pt/agora-design-system";
-import { Dataset } from "@/types/api";
-import { fetchDataset, followEntity, isFollowing, unfollowEntity } from "@/services/api";
+import { Dataset } from "@/service/types/dataset";
+import { fetchDataset } from "@/service/api/datasets";
+import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";

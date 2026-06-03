@@ -1,4 +1,4 @@
-﻿export interface ApiToken {
+export interface ApiToken {
   id: string;
   token_prefix: string;
   name: string | null;

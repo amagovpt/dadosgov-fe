@@ -1,6 +1,6 @@
-import { fetchReusesListing } from '@/services/api';
+import { fetchReusesListing } from "@/service/api/reuses";
 import ReusesClient from '@/components/reuses/ReusesClient';
-import { ReuseFilters } from '@/types/api';
+import { ReuseFilters } from "@/service/types/reuse";
 import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
