@@ -41,14 +41,14 @@ test.describe("Header and Footer", () => {
     }
   });
 
-  test("NV-03: Conhecimento and Publicar dropdowns are present in header", async ({
+  test("NV-03: Recursos and Publicar dropdowns are present in header", async ({
     page,
   }) => {
     const header = page.locator("header").first();
-    const conhecimento = header.getByText(/^Conhecimento$/i).first();
+    const recursos = header.getByText(/^Recursos$/i).first();
     const publicar = header.getByText(/^Publicar$/i).first();
 
-    await expect(conhecimento).toBeVisible({ timeout: 10000 });
+    await expect(recursos).toBeVisible({ timeout: 10000 });
     await expect(publicar).toBeVisible({ timeout: 10000 });
   });
 
@@ -90,38 +90,57 @@ test.describe("Header and Footer", () => {
     // Skipped: requires authenticated session
   });
 
-  test("NV-13: Conhecimento dropdown opens and shows all main menu items", async ({
+  test("NV-13: Recursos dropdown opens and shows all main menu items", async ({
     page,
   }) => {
     const header = page.locator("header").first();
-    const conhecimentoBtn = header.getByText(/^Conhecimento$/i).first();
+    const recursosBtn = header.getByText(/^Recursos$/i).first();
 
-    await conhecimentoBtn.click();
+    await recursosBtn.click();
+    await page.waitForTimeout(300);
 
-    await expect(
-      page.getByText("O que é o dados.gov.pt", { exact: true })
-    ).toBeVisible({ timeout: 10000 });
-    await expect(
-      page.getByText("Publicar dados", { exact: true })
-    ).toBeVisible({ timeout: 10000 });
-    await expect(
-      page.getByText("Reutilizar dados", { exact: true })
-    ).toBeVisible({ timeout: 10000 });
-    await expect(
-      page.getByText("Sobre dados abertos", { exact: true })
-    ).toBeVisible({ timeout: 10000 });
-    await expect(
-      page.getByText("Desenvolvimento", { exact: true })
-    ).toBeVisible({ timeout: 10000 });
+    const mainCards = page.locator('[data-group="main"]');
+    for (const label of ["Como usar o portal", "Aprender", "Desenvolvimento"]) {
+      await expect(
+        mainCards.filter({ hasText: label }).first()
+      ).toBeVisible({ timeout: 10000 });
+    }
   });
 
-  test("NV-14: Conhecimento > Desenvolvimento submenu shows Documentação da API", async ({
+  test("NV-17: Recursos > Como usar o portal submenu shows the usage guides", async ({
     page,
   }) => {
     const header = page.locator("header").first();
-    const conhecimentoBtn = header.getByText(/^Conhecimento$/i).first();
+    await header.getByText(/^Recursos$/i).first().click();
+    await page.waitForTimeout(300);
 
-    await conhecimentoBtn.click();
+    const usarDadosCard = page
+      .locator('[data-group="main"]')
+      .filter({ hasText: "Como usar o portal" })
+      .first();
+    await expect(usarDadosCard).toBeVisible({ timeout: 10000 });
+    await usarDadosCard.click();
+
+    const submenu = page.locator('[data-group="submenu-usar-dados"]');
+    for (const label of [
+      "O que é o dados.gov.pt",
+      "Sobre dados abertos",
+      "Como publicar dados",
+      "Como reutilizar dados",
+    ]) {
+      await expect(
+        submenu.filter({ hasText: label }).first()
+      ).toBeVisible({ timeout: 10000 });
+    }
+  });
+
+  test("NV-14: Recursos > Desenvolvimento submenu shows Referência API", async ({
+    page,
+  }) => {
+    const header = page.locator("header").first();
+    const recursosBtn = header.getByText(/^Recursos$/i).first();
+
+    await recursosBtn.click();
     await page.waitForTimeout(300);
 
     const desenvolvimentoCard = page
@@ -133,17 +152,17 @@ test.describe("Header and Footer", () => {
 
     const apiDocCard = page
       .locator('[data-group="submenu-desenvolvimento"]')
-      .filter({ hasText: "Documentação da API" })
+      .filter({ hasText: "Referência API" })
       .first();
     await expect(apiDocCard).toBeVisible({ timeout: 10000 });
   });
 
-  test("NV-15: Conhecimento > Desenvolvimento > back button returns to main menu", async ({
+  test("NV-15: Recursos > Desenvolvimento > back button returns to main menu", async ({
     page,
   }) => {
     const header = page.locator("header").first();
 
-    await header.getByText(/^Conhecimento$/i).first().click();
+    await header.getByText(/^Recursos$/i).first().click();
     await page.waitForTimeout(300);
 
     await page
@@ -160,7 +179,7 @@ test.describe("Header and Footer", () => {
     await backBtn.click();
 
     await expect(
-      page.getByText("O que é o dados.gov.pt", { exact: true })
+      page.getByText("Como usar o portal", { exact: true })
     ).toBeVisible({ timeout: 10000 });
   });
 

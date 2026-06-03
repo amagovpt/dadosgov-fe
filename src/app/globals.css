@@ -294,6 +294,15 @@ header[data-submenu="desenvolvimento"] .navigation-links-layout>.links>.link-wra
   display: block;
 }
 
+/* Usar dados submenu: hide main items, reveal submenu items */
+header[data-submenu="usar-dados"] .navigation-links-layout>.links>.link-wrapper:has([data-group="main"]) {
+  display: none;
+}
+
+header[data-submenu="usar-dados"] .navigation-links-layout>.links>.link-wrapper:has([data-group="submenu-usar-dados"]) {
+  display: block;
+}
+
 /* Position the Voltar button absolutely at the top of the submenu layout */
 header[data-submenu] .navigation-links-layout>.links>.link-wrapper:has([data-is-back]) {
   grid-column: 1 / -1 !important;

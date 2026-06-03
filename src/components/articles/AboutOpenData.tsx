@@ -14,7 +14,7 @@ const AboutOpenData = ({ initialContent }: { initialContent?: string }) => {
       initialContent={processedContent}
       breadcrumbItems={[
         { label: "Home", url: "/" },
-        { label: "Conhecimento", url: "#" },
+        { label: "Recursos", url: "#" },
         { label: "Sobre dados abertos", url: "/pages/about-open-data" },
       ]}
     />
