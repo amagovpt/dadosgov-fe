@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendFetch } from "../backend-fetch";
+import { backendFetch, forwardedHeaders } from "../backend-fetch";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const contentType = request.headers.get("content-type") || "application/x-www-form-urlencoded";
+  const forwarded = forwardedHeaders(request);
 
   let backendResponse: Response;
   try {
@@ -12,6 +13,7 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type": contentType,
         Cookie: request.headers.get("cookie") || "",
+        ...forwarded,
       },
       body,
       redirect: "manual",
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Check if this is a legacy user that needs CMD migration
     try {
       const checkResponse = await backendFetch("/saml/migration/check", {
-        headers: { Cookie: allCookies },
+        headers: { Cookie: allCookies, ...forwarded },
       });
 
       if (checkResponse.ok) {
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
         if (checkData.needs_migration) {
           // Log the user out — they must migrate via CMD first
           await backendFetch("/logout/", {
-            headers: { Cookie: allCookies },
+            headers: { Cookie: allCookies, ...forwarded },
             redirect: "manual",
           });
 
