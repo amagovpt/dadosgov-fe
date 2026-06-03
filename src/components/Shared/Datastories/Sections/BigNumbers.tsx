@@ -1,4 +1,4 @@
-import { BigNumbersSection } from "@/types/datastories/datastory";
+import { BigNumbersSection } from "@/service/types/datastories/datastory";
 import { Typograph } from "../../Generics/Typograph";
 import { InfoBlock } from "../../InfoBlock";
 import Section from "../../Section";

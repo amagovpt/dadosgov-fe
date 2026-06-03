@@ -1,7 +1,7 @@
 import Breadcrumb from "../../Primitives/Breadcrumb/Breadcrumb";
 import { InfoBlock } from "../InfoBlock";
 import Section from "../Section";
-import { DatastoryHero as DatastoryHeroType } from "@/types/datastories/datastory";
+import { DatastoryHero as DatastoryHeroType } from "@/service/types/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import DatastoryIndex from "./DatastoryIndex";
 import { BreadcrumbItem } from "@/service/types/shared/breadcrumbItem";

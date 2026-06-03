@@ -4,10 +4,10 @@ import Section from "../../Section";
 import { InfoBlock } from "../../InfoBlock";
 import { Anchor } from "@ama-pt/agora-design-system";
 import { twMerge } from "tailwind-merge";
-import { DatastorySource } from "@/service/types/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { SourceSection } from "@/service/types/datastories/datastory";
 
-export type SourcesI = DatastorySource & {
+export type SourcesI = SourceSection & {
   className?: string;
 };
 

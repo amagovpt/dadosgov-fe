@@ -1,6 +1,6 @@
 "use client";
 
-import { OtherSection } from "@/types/datastories/datastory";
+import { OtherSection } from "@/service/types/datastories/datastory";
 import Section from "../../Section";
 import { InfoBlock } from "../../InfoBlock";
 import { CardAction } from "@ama-pt/agora-design-system";

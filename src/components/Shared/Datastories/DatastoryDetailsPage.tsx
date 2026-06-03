@@ -1,4 +1,4 @@
-import { Datastory as DatastoryType } from "@/types/datastories/datastory";
+import { Datastory as DatastoryType } from "@/service/types/datastories/datastory";
 import { Datastory } from ".";
 import { BreadcrumbItem } from "@/service/types/shared/breadcrumbItem";
 

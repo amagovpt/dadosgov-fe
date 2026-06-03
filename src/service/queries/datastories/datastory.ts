@@ -1,5 +1,5 @@
-import apolloClient from "@/service/utils/apollo-client";
 import { DataStoryMetadata } from "@/service/types/datastories";
+import apolloClient from "@/service/utils/apollo-client";
 import { Datastory } from "@/service/types/datastories/datastory";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
@@ -75,45 +75,76 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
               }
             }
           }
-          sectionOverview {
-            pt {
-              section {
-                title
-                bignumbers {
-                  icon
-                  number
-                  numberLabel
-                  subtitle
-                  title
-                }
-                dataReference {
-                  title
-                  date
-                }
-              }
-            }
-          }
           sections {
             ${locale} {
-              section {
-                id
-                title
-                description
-                iframe {
-                  source
-                  classNames
+              isFirstSectionWhite
+              sections {
+                ... on SectionDatastoryBignumbersComponent {
+                  schemaName
+                  title
+                  bignumbers {
+                    icon
+                    number
+                    numberLabel
+                    subtitle
+                    title
+                  }
+                  dataReference {
+                    date
+                    title
+                  }
                 }
-              }
-            }
-          }
-          dataSource {
-            ${locale} {
-              id
-              title
-              description
-              sources {
-                children
-                href
+                ... on SectionDatastoryIframeComponent {
+                  schemaName
+                  id
+                  description
+                  title
+                  iframe {
+                    classNameIframeBackground
+                    classNames
+                    source
+                  }
+                }
+                ... on DatasourceComponent {
+                  schemaName
+                  id
+                  title
+                  description
+                  sources {
+                    children
+                    href
+                  }
+                }
+                ... on SectionDatastoryOtherResourcesComponent {
+                  schemaName
+                  title
+                  resources {
+                    icon
+                    title
+                    subtitle
+                    anchor {
+                      href
+                      icon
+                    }
+                  }
+                }
+                ... on SectionDatastoryRelatedDatastoryComponent {
+                  schemaName
+                  title
+                  description
+                  datastories {
+                    data {
+                      metadata {
+                        pt {
+                          createdAt
+                          description
+                          slug
+                          title
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }

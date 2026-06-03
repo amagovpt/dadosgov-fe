@@ -21,3 +21,11 @@ export function formatDateToDMY(dateStr: string) {
   const y = date.getFullYear();
   return `${d}/${m}/${y}`;
 }
+
+export function formatDateLong(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString("pt-PT", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}

@@ -1,7 +1,7 @@
 import { twMerge } from "tailwind-merge";
 import { InfoBlock } from "../../InfoBlock";
 import Section from "../../Section";
-import { IframeSection } from "@/types/datastories/datastory";
+import { IframeSection } from "@/service/types/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 export type IframeI = IframeSection & { className?: string };

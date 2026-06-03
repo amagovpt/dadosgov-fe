@@ -655,6 +655,10 @@ li.section-name:empty {
   height: 100%;
 }
 
+.related-datastories .card-general .content {
+  height: 100%;
+}
+
 /* 5.5 Cards (Illustrative) - Mini-courses */
 .mini-courses-cards .agora-card-illustrative.horizontal {
   align-items: center;

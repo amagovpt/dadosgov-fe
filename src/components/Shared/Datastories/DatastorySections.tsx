@@ -1,8 +1,9 @@
-import { DatastorySections as DatastorySectionsType } from "@/types/datastories/datastory";
+import { DatastorySections as DatastorySectionsType } from "@/service/types/datastories/datastory";
 import BigNumbers from "./Sections/BigNumbers";
 import Iframe from "./Sections/Iframe";
 import Sources from "./Sections/Sources";
 import OtherResources from "./Sections/OtherResources";
+import { RelatedDatastories } from "./Sections/RelatedDatastories";
 
 type SectionBg = "white" | "primary";
 
@@ -37,6 +38,8 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
         return (
           <Iframe key={`section-${index}`} {...section} className={getSectionClassname(index)} />
         );
+      case "section-datastory-related-datastory":
+        return <RelatedDatastories key={`section-${index}`} {...section} />;
       case "datasource":
         return <Sources key={`section-${index}`} {...section} />;
       case "section-datastory-other-resources":
