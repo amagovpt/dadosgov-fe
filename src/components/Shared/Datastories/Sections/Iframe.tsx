@@ -27,7 +27,10 @@ export default function Iframe({ id, title, description, iframe, className }: If
       {iframe.map((iframe, index) => {
         return (
           <div
-            className="relative flex w-full flex-col items-center justify-center gap-128"
+            className={twMerge(
+              "relative flex w-full flex-col items-center justify-center gap-128",
+              iframe.classNameIframeBackground ? "bg-white" : null
+            )}
             key={`iframe-${id}-${index}`}
             id={id}
           >

@@ -35,8 +35,16 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
           />
         );
       case "section-datastory-iframe":
+        console.log("section iframe", section);
+
         return (
-          <Iframe key={`section-${index}`} {...section} className={getSectionClassname(index)} />
+          <Iframe
+            key={`section-${index}`}
+            {...section}
+            className={
+              section.iframe[0]?.classNameIframeBackground ? "" : getSectionClassname(index)
+            }
+          />
         );
       case "section-datastory-related-datastory":
         return <RelatedDatastories key={`section-${index}`} {...section} />;
