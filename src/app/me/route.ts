@@ -16,9 +16,22 @@ import { backendFetch, forwardedHeaders } from "../backend-fetch";
  * IP and context instead of `localhost:7000` (which is what `backendFetch`
  * resolves to internally). Without the real client IP the IP-keyed rate limiter
  * collapses every user into one bucket and returns spurious 429s on `/me`.
+ *
+ * Anonymous short-circuit: every page mounts `AuthProvider`, which calls `/me`
+ * on load. Without an auth cookie the backend can only answer 401, so we skip
+ * the round-trip entirely — this also keeps anonymous traffic out of the
+ * backend rate limiter on `/me`. Flask-Security can authenticate via the
+ * `session` cookie or the `remember_token` cookie, so we only forward when at
+ * least one is present.
  */
+const AUTH_COOKIE_RE = /(?:^|;\s*)(?:session|remember_token)=[^;]/;
+
 export async function GET(request: NextRequest) {
   const cookies = request.headers.get("cookie") || "";
+
+  if (!AUTH_COOKIE_RE.test(cookies)) {
+    return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
+  }
 
   let backendResponse: Response;
   try {
