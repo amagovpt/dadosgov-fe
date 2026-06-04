@@ -36,6 +36,17 @@ export function forwardedHeaders(request: NextRequest): Record<string, string> {
     headers["X-Forwarded-Proto"] = proto;
   }
 
+  // Flask-WTF's SSL-strict CSRF check (WTF_CSRF_SSL_STRICT, on by default)
+  // rejects secure POSTs whose Referer doesn't match the public origin with
+  // "400 The referrer header is missing". Server-side fetches send no Referer,
+  // and forwarding `X-Forwarded-Proto: https` (needed by the rate limiter fix)
+  // makes the backend treat them as secure — breaking POST /login/ behind the
+  // F5/WAF. Rebuild the Referer from the forwarded proto + host so the check
+  // passes; harmless on GETs and on plain-HTTP dev requests.
+  if (proto && host) {
+    headers["Referer"] = `${proto}://${host}/`;
+  }
+
   return headers;
 }
 
