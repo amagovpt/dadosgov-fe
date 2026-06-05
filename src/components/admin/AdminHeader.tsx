@@ -149,7 +149,11 @@ export function AdminHeader() {
                     window.location.href = "/saml/logout";
                     return;
                   }
-                  await logout();
+                  try {
+                    await logout();
+                  } catch (error) {
+                    console.error("Logout error:", error);
+                  }
                   window.location.href = "/";
                 }}
               >

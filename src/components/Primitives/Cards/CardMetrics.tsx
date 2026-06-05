@@ -14,7 +14,18 @@ export type CardMetricsProps = {
     organization?: {
         name: string;
         logo?: string;
-    };
+    } | null;
+    /**
+     * Fallback author for user-published datasets that don't belong to an
+     * organization (LEDG-1861). When `organization` is null/undefined we use
+     * this to attribute the card and link to /pages/users/<slug>.
+     */
+    owner?: {
+        slug: string;
+        first_name: string;
+        last_name: string;
+        avatar_thumbnail?: string | null;
+    } | null;
     quality?: {
         score: number;
     };
@@ -29,18 +40,27 @@ export type CardMetricsProps = {
 
 const PLACEHOLDER = "/images/placeholders/organization.png";
 
+function fullName(owner: { first_name: string; last_name: string }) {
+    return `${owner.first_name} ${owner.last_name}`.trim();
+}
+
 export default function CardMetrics({
     link,
     title,
     description,
     last_modified,
     organization,
+    owner,
     quality,
     metrics,
     hideProgressBar = false,
 }: CardMetricsProps) {
     const qualityScore = quality?.score != null ? Math.round(quality.score * 100) : 0;
-    const [imgSrc, setImgSrc] = useState<string>(organization?.logo || PLACEHOLDER);
+    const initialImg = organization?.logo || owner?.avatar_thumbnail || PLACEHOLDER;
+    const [imgSrc, setImgSrc] = useState<string>(initialImg);
+    const ownerName = owner ? fullName(owner) : null;
+    const authorLabel = organization?.name || ownerName || "Sem autor";
+    const authorAlt = organization?.name || ownerName || "Autor";
 
     const formatMetric = (value: number | undefined) => {
         if (!value) return "0";
@@ -58,7 +78,7 @@ export default function CardMetrics({
                 variant="white"
                 image={{
                     src: imgSrc,
-                    alt: organization?.name || "Organização",
+                    alt: authorAlt,
                     height: "250px",
                     className: "bg-primary-100 !object-contain !max-w-[250px] !max-h-[250px]",
                     onError: () => setImgSrc(PLACEHOLDER),
@@ -69,7 +89,7 @@ export default function CardMetrics({
                             {last_modified}
                         </span>
                         <span style={{ fontSize: "16px", fontWeight: 300 }} className="text-neutral-900 mt-4">
-                            {organization?.name || "Sem Organização"}
+                            {authorLabel}
                         </span>
                     </div>
                 }

@@ -18,7 +18,7 @@ import {
   InputPassword,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { fetchCsrfToken, login } from "@/service/api/auth";
+import { login } from "@/services/api";
 import TextLink from "@/components/Primitives/TextLink";
 
 function LoginContent() {
@@ -175,20 +175,18 @@ function LoginContent() {
     }
 
     try {
-      // 1. Get CSRF Token
-      const csrfToken = await fetchCsrfToken();
-
-      // 2. Prepare payload for backend
+      // The /login route handler mints the CSRF token + session server-side
+      // (see src/app/login/route.ts), so the client no longer needs to fetch
+      // one — sending a client-side token alongside a stale SAML/CMD session
+      // cookie was what broke the CSRF check on password login.
       const payload = new FormData();
       payload.append("email", email);
       payload.append("password", password);
-      payload.append("csrf_token", csrfToken);
       payload.append("remember", "y");
 
-      // 3. Login
-      const response = await login(payload);
+      await login(payload);
 
-      // 4. Redirect on success (full reload to update auth state)
+      // Redirect on success (full reload to update auth state)
       window.location.href = nextUrl;
     } catch (err: unknown) {
       const message =

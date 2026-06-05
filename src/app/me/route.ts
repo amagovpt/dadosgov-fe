@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendFetch } from "../backend-fetch";
+import { backendFetch, forwardedHeaders } from "../backend-fetch";
 
 /**
  * Proxies `GET /me` to the backend `/api/1/me/` endpoint.
@@ -11,14 +11,27 @@ import { backendFetch } from "../backend-fetch";
  * sibling `/login` and `/logout` route handlers — strip the `Domain`
  * attribute so the cookie is scoped to the frontend origin.
  *
- * Also forwards `X-Forwarded-Host` and `X-Forwarded-Proto` so Flask's
- * `ProxyFix` middleware sees the original client context instead of
- * `localhost:7000` (which is what `backendFetch` resolves to internally).
+ * Also forwards `X-Forwarded-For`/`X-Forwarded-Host`/`X-Forwarded-Proto` (via
+ * `forwardedHeaders`) so Flask's `ProxyFix` middleware sees the original client
+ * IP and context instead of `localhost:7000` (which is what `backendFetch`
+ * resolves to internally). Without the real client IP the IP-keyed rate limiter
+ * collapses every user into one bucket and returns spurious 429s on `/me`.
+ *
+ * Anonymous short-circuit: every page mounts `AuthProvider`, which calls `/me`
+ * on load. Without an auth cookie the backend can only answer 401, so we skip
+ * the round-trip entirely — this also keeps anonymous traffic out of the
+ * backend rate limiter on `/me`. Flask-Security can authenticate via the
+ * `session` cookie or the `remember_token` cookie, so we only forward when at
+ * least one is present.
  */
+const AUTH_COOKIE_RE = /(?:^|;\s*)(?:session|remember_token)=[^;]/;
+
 export async function GET(request: NextRequest) {
   const cookies = request.headers.get("cookie") || "";
-  const host = request.headers.get("host") ?? "";
-  const proto = request.headers.get("x-forwarded-proto") ?? "https";
+
+  if (!AUTH_COOKIE_RE.test(cookies)) {
+    return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
+  }
 
   let backendResponse: Response;
   try {
@@ -26,8 +39,7 @@ export async function GET(request: NextRequest) {
       headers: {
         Cookie: cookies,
         Accept: "application/json",
-        "X-Forwarded-Host": host,
-        "X-Forwarded-Proto": proto,
+        ...forwardedHeaders(request),
       },
       redirect: "manual",
       cache: "no-store",
