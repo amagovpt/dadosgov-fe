@@ -35,8 +35,6 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
           />
         );
       case "section-datastory-iframe":
-        console.log("section iframe", section);
-
         return (
           <Iframe
             key={`section-${index}`}
