@@ -43,13 +43,13 @@ export function RelatedDatastories({ title, description, datastories }: RelatedD
   return (
     <Section className="related-datastories flex w-full justify-center bg-primary-900 py-64">
       <InfoBlock.Root className="flex-col gap-32 lg:gap-64">
-        <InfoBlock.Header>
+        <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
           <InfoBlock.Title
             titleLevel="h2"
             title={title}
             className="text-2xl font-bold text-white"
           />
-          <InfoBlock.Content className="flex max-w-[500px]">
+          <InfoBlock.Content className="flex">
             <InfoBlock.Description
               className="text-m-regular text-white"
               description={formatHtmlParagraphs(description) as string[]}

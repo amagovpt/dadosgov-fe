@@ -45,7 +45,7 @@ export default function BigNumbers({ title, bignumbers, dataReference, className
   return (
     <Section className={twMerge("flex w-full justify-center py-64", className)}>
       <InfoBlock.Root className="flex-col gap-32">
-        <InfoBlock.Header>
+        <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
           <InfoBlock.Title
             titleLevel="h2"
             title={title}

@@ -12,14 +12,14 @@ export default function Iframe({ id, title, description, iframe, className }: If
       className={twMerge("flex flex-col items-center justify-center bg-primary-100", className)}
     >
       <InfoBlock.Root className={"gap-64 pt-64"}>
-        <InfoBlock.Header className="gap-16">
+        <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
           <InfoBlock.Title
             titleLevel="h2"
             title={title}
             className="text-2xl font-bold text-primary-900"
           />
           <InfoBlock.Description
-            className="max-w-[500px] whitespace-pre-wrap text-m-light text-black"
+            className="whitespace-pre-wrap text-m-light text-black"
             description={formatHtmlParagraphs(description) as string[]}
           />
         </InfoBlock.Header>
