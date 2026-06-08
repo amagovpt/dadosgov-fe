@@ -216,6 +216,14 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
       const newSchedule = harvesterSchedule.trim();
       const oldSchedule = source.schedule || "";
 
+      // Only submit filters whose key is declared by the selected backend.
+      // Orphan filters (e.g. left over from a previous backend type) would be
+      // rejected by the API with a 400 "Unknown filter key" error.
+      const validKeys = new Set(activeBackendFilters.map((f) => f.key));
+      const filtersToSend = filters.filter(
+        (f) => f.value.trim() && f.type && validKeys.has(f.type)
+      );
+
       const [updated] = await Promise.all([
         updateHarvester(source.id, {
           name: harvesterName.trim(),
@@ -224,11 +232,9 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           backend: selectedBackend || source.backend,
           active: isEnabled,
           autoarchive: isAutoArchive,
-          ...(filters.some((f) => f.value.trim() && f.type) && {
+          ...(filtersToSend.length > 0 && {
             config: {
-              filters: filters
-                .filter((f) => f.value.trim() && f.type)
-                .map((f) => ({ key: f.type, value: f.value, type: f.mode })),
+              filters: filtersToSend.map((f) => ({ key: f.type, value: f.value, type: f.mode })),
             },
           }),
         }),
