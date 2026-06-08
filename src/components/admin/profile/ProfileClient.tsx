@@ -8,7 +8,6 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   fetchFullProfile,
   fetchUserActivity,
-  fetchCsrfToken,
   updateProfile,
   uploadAvatar,
   deleteAvatar,
@@ -302,8 +301,7 @@ export default function ProfileClient() {
     setSaveError("");
     setEmailChangeSuccess(false);
     try {
-      const csrfToken = await fetchCsrfToken();
-      await requestEmailChange(newEmail, csrfToken);
+      await requestEmailChange(newEmail);
       setPendingEmail(newEmail);
       setEmailChangeSuccess(true);
       setIsEditingEmail(false);
