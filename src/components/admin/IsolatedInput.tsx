@@ -27,6 +27,8 @@ interface IsolatedInputProps {
   feedbackState?: "danger" | "warning" | "success";
   errorFeedbackText?: string;
   required?: boolean;
+  maxLength?: number;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   onChange?: (value: string) => void;
 }
 
@@ -40,6 +42,8 @@ const IsolatedInput = React.memo(function IsolatedInput({
   feedbackState,
   errorFeedbackText,
   required,
+  maxLength,
+  inputMode,
   onChange,
 }: IsolatedInputProps) {
   const [internalValue, setInternalValue] = React.useState(defaultValue ?? "");
@@ -77,6 +81,8 @@ const IsolatedInput = React.memo(function IsolatedInput({
       feedbackState={feedbackState}
       errorFeedbackText={errorFeedbackText}
       required={required}
+      maxLength={maxLength}
+      inputMode={inputMode}
     />
   );
 });

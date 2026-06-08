@@ -26,6 +26,27 @@ const FILTER_KEY_LABELS: Record<string, string> = {
 
 const localizeFilterLabel = (label: string) => FILTER_KEY_LABELS[label] ?? label;
 
+// Schedule ("Planeamento") is a cron expression with exactly 5 fields
+// (minuto hora dia mês dia-da-semana), each field being a number or "*".
+// Mask: "* * * * *" (e.g. "0 12 * * *"). Max 14 characters (e.g. "59 59 59 59 59").
+const SCHEDULE_MAX_LENGTH = 14;
+const SCHEDULE_FIELD_COUNT = 5;
+const SCHEDULE_FIELD_PATTERN = /^(\d+|\*)$/;
+const SCHEDULE_ERROR_MESSAGE =
+  "O planeamento tem de ter exatamente 5 campos separados por espaços, cada campo sendo um número ou * " +
+  "(minuto  hora  dia-do-mês  mês  dia-da-semana).";
+
+// Returns an error message when the value is a non-empty, invalid cron
+// expression. An empty value is valid (it unschedules the harvester).
+function validateSchedule(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const fields = trimmed.split(/\s+/);
+  if (fields.length !== SCHEDULE_FIELD_COUNT) return SCHEDULE_ERROR_MESSAGE;
+  if (!fields.every((field) => SCHEDULE_FIELD_PATTERN.test(field))) return SCHEDULE_ERROR_MESSAGE;
+  return null;
+}
+
 interface HarvesterConfigFormProps {
   harvesterName: string;
   setHarvesterName: (v: string) => void;
@@ -93,6 +114,13 @@ export function HarvesterConfigForm({
   onPreview,
   onDelete,
 }: HarvesterConfigFormProps) {
+  const [scheduleError, setScheduleError] = React.useState<string | null>(null);
+
+  const handleScheduleChange = (value: string) => {
+    setHarvesterSchedule(value);
+    setScheduleError(validateSchedule(value));
+  };
+
   const typeOptions = useMemo(
     () => (
       <DropdownSection name="types">
@@ -138,6 +166,7 @@ export function HarvesterConfigForm({
           className="admin-page__form"
           onSubmit={(e) => {
             e.preventDefault();
+            if (scheduleError) return;
             onSave();
           }}
         >
@@ -165,7 +194,7 @@ export function HarvesterConfigForm({
             />
 
             <InputTextArea
-              label="Descrição"
+              label="Descrição *"
               placeholder=""
               id="harvester-description"
               rows={6}
@@ -315,10 +344,15 @@ export function HarvesterConfigForm({
           <div className="admin-page__fields-group">
             <IsolatedInput
               label="Planeamento"
-              placeholder=""
+              placeholder="Máscara: * * * * * (exemplo: 0 12 * * *)"
               id="harvester-schedule"
               defaultValue={loadedSchedule}
-              onChange={(value: string) => setHarvesterSchedule(value)}
+              maxLength={SCHEDULE_MAX_LENGTH}
+              onChange={handleScheduleChange}
+              hasError={!!scheduleError}
+              hasFeedback={!!scheduleError}
+              feedbackState="danger"
+              errorFeedbackText={scheduleError ?? undefined}
             />
           </div>
 
@@ -332,7 +366,7 @@ export function HarvesterConfigForm({
               appearance="outline"
               variant="primary"
               type="button"
-              disabled={isPreviewing}
+              disabled={isPreviewing || !!scheduleError}
               onClick={onPreview}
             >
               {isPreviewing ? "A pré-visualizar..." : "Pré-visualizar"}
@@ -343,7 +377,7 @@ export function HarvesterConfigForm({
               hasIcon
               trailingIcon="agora-line-check-circle"
               trailingIconHover="agora-solid-check-circle"
-              disabled={isSaving}
+              disabled={isSaving || !!scheduleError}
             >
               {isSaving ? "A guardar..." : "Guardar"}
             </Button>
