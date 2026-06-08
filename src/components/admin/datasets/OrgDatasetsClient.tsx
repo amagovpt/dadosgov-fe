@@ -1,157 +1,113 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import {
-  Icon,
-  InputSearchBar,
-  Table,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-  Button,
-} from "@ama-pt/agora-design-system";
-
-import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { useParams } from "next/navigation";
+import { Button, TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
 import { fetchOrgDatasets } from "@/services/api";
 import { Dataset } from "@/types/api";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
-import AdminLayout from "@/components/Layout/AdminLayout";
-import { createPaginationProps } from "@/utils/createPaginationProps";
-import AdminEmptyState from "../AdminEmptyState";
-import ResultsCount from "../ResultsCount";
-import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
-import TableActionsCell from "../TableActionsCell";
+import { AdminResourceListPage, type ServerLoadParams } from "@/components/admin/AdminResourceListPage";
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import TableActionsCell from "@/components/admin/TableActionsCell";
 import TextLink from "@/components/Primitives/TextLink";
 
-type SortOrder = "none" | "ascending" | "descending";
-type SortField = "title" | "created" | "last_update";
-
-interface OrgDatasetsClientProps {
-  orgId: string;
+function buildStatusFilters(status: string) {
+  if (status === "public") return { private: false, archived: false, deleted: false };
+  if (status === "draft") return { private: true, archived: false, deleted: false };
+  if (status === "archived") return { archived: true, deleted: false };
+  if (status === "deleted") return { deleted: true };
+  return {};
 }
 
-export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
-  const { user } = useAuth();
-  const orgName = useViewedOrganizationName(orgId, user?.organizations);
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+async function loadOrgDatasets(orgId: string, params: ServerLoadParams) {
+  const { page, pageSize, query, status, sortField, sortOrder } = params;
+  const sort =
+    sortOrder === "none" ? "-created" : sortOrder === "ascending" ? sortField! : `-${sortField!}`;
+  const filters: Record<string, unknown> = { sort, ...buildStatusFilters(status) };
+  if (query) filters.q = query;
+  const response = await fetchOrgDatasets(orgId, page, pageSize, filters);
+  return { data: response.data ?? [], total: response.total ?? 0 };
+}
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [sortField, setSortField] = useState<SortField>("created");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("descending");
-
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const buildSortParam = (field: SortField, order: SortOrder): string => {
-    if (order === "none") return "-created";
-    return order === "ascending" ? field : `-${field}`;
-  };
-
-  const loadDatasets = useCallback(
-    async (page: number, pageSize: number, q: string, status: string, sort: string) => {
-      setIsLoading(true);
-      try {
-        const filters: {
-          q?: string;
-          sort: string;
-          private?: boolean;
-          archived?: boolean;
-          deleted?: boolean;
-        } = { sort };
-
-        if (q.trim()) filters.q = q.trim();
-        if (status === "public") {
-          filters.private = false;
-          filters.archived = false;
-          filters.deleted = false;
-        } else if (status === "draft") {
-          filters.private = true;
-          filters.archived = false;
-          filters.deleted = false;
-        } else if (status === "archived") {
-          filters.archived = true;
-          filters.deleted = false;
-        } else if (status === "deleted") {
-          filters.deleted = true;
-        }
-
-        const response = await fetchOrgDatasets(orgId, page, pageSize, filters);
-        setDatasets(response.data || []);
-        setTotal(response.total || 0);
-      } catch (error) {
-        console.error("Error loading org datasets:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [orgId]
+function renderOrgDatasetRow(dataset: Dataset) {
+  return (
+    <TableRow key={dataset.id}>
+      <TableCell headerLabel="Título">
+        <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
+      </TableCell>
+      <TableCell headerLabel="Estado">
+        <ResourceStatusBadge item={dataset} />
+      </TableCell>
+      <TableCell headerLabel="Criado em">{formatDateToDMY(dataset.created_at)}</TableCell>
+      <TableCell headerLabel="Última modificação">
+        <div>{formatDateToDMY(dataset.last_modified)}</div>
+        {dataset.owner ? (
+          <TextLink href={`/pages/users/${dataset.owner.slug}`} className="text-xs">
+            {dataset.owner.first_name} {dataset.owner.last_name}
+          </TextLink>
+        ) : dataset.organization ? (
+          <TextLink
+            href={`/pages/organizations/${dataset.organization.slug}`}
+            className="text-xs"
+          >
+            {dataset.organization.name}
+          </TextLink>
+        ) : null}
+      </TableCell>
+      <TableCell headerLabel="Ações">
+        <TableActionsCell
+          viewAction={{ href: `/pages/datasets/${dataset.slug}` }}
+          editAction={{ href: `/pages/admin/org/datasets/edit?slug=${dataset.slug}` }}
+        />
+      </TableCell>
+    </TableRow>
   );
+}
 
-  useEffect(() => {
-    const sort = buildSortParam(sortField, sortOrder);
-    void (async () => {
-      await loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
-    })();
-  }, [currentPage, itemsPerPage, searchQuery, statusFilter, sortField, sortOrder, loadDatasets]);
+interface OrgDatasetsClientProps {
+  orgId?: string;
+}
 
-  const handleSearch = (value: string) => {
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    searchTimeoutRef.current = setTimeout(() => {
-      setSearchQuery(value);
-      setCurrentPage(1);
-    }, 400);
-  };
+export default function OrgDatasetsClient({ orgId: propOrgId }: OrgDatasetsClientProps) {
+  const params = useParams();
+  const routeOrgId = (params?.orgId as string | undefined) ?? propOrgId;
+  const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
+  const resolvedOrgId = routeOrgId ?? activeOrg?.id;
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(resolvedOrgId, user?.organizations);
 
-  const handleStatusChange = (options: { value?: string }[]) => {
-    const value = options?.[0]?.value || "";
-    setStatusFilter(value);
-    setCurrentPage(1);
-  };
-
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
-    setSortField(field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  if (!isOrgLoading && !resolvedOrgId) {
+    return (
+      <AdminEmptyState
+        icon="agora-line-user-buildings"
+        title="Sem organizações"
+        description="Não pertence a nenhuma organização."
+      />
+    );
+  }
 
   return (
-    <AdminLayout
-      breadcrumbItems={
-        [
-          { label: "Administração", url: "/pages/admin" },
-          { label: orgName || "Organização", url: "#" },
-          { label: "Conjuntos de dados", url: "#" },
-        ]
-      }
+    <AdminResourceListPage<Dataset>
+      enabled={!!resolvedOrgId}
+      defaultPageSize={50}
+      defaultSortField="created"
+      defaultSortOrder="descending"
+      strategy={{
+        mode: "server",
+        load: (p) => loadOrgDatasets(resolvedOrgId!, p),
+      }}
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Conjuntos de dados", url: "#" },
+      ]}
       title="Conjuntos de dados"
-    >
-
-      <ResultsCount count={total} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome, código ou sigla da entidade"
-            aria-label="Pesquisar conjuntos de dados"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
-          />
-        </div>
-        <StatusFilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v)} />
-        <a href={`/api/1/organizations/${orgId}/catalog`} download>
+      searchPlaceholder="Pesquise o nome, código ou sigla da entidade"
+      toolbarExtra={
+        <a href={`/api/1/organizations/${resolvedOrgId}/catalog`} download>
           <Button
             variant="primary"
             appearance="outline"
@@ -162,96 +118,41 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
             Catálogo
           </Button>
         </a>
-      </div>
-
-      {isLoading ? (
-        <p>A carregar...</p>
-      ) : datasets.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            itemsPerPage,
-            total,
-            currentPage,
-            setCurrentPage,
-            setItemsPerPage
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("title")}
-                onSortChange={handleSort("title")}
-              >
-                Título do conjunto de dados
-              </TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("created")}
-                onSortChange={handleSort("created")}
-              >
-                Criado em
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("last_update")}
-                onSortChange={handleSort("last_update")}
-              >
-                Última modificação
-              </TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {datasets.map((dataset) => (
-              <TableRow key={dataset.id}>
-                <TableCell headerLabel="Título">
-                  <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
-                </TableCell>
-                <TableCell headerLabel="Estado">
-                  <ResourceStatusBadge item={dataset} />
-                </TableCell>
-                <TableCell headerLabel="Criado em">{formatDateToDMY(dataset.created_at)}</TableCell>
-                <TableCell headerLabel="Última modificação">
-                  <div>
-                    <div>{formatDateToDMY(dataset.last_modified)}</div>
-                    {dataset.owner ? (
-                      <TextLink href={`/pages/users/${dataset.owner.slug}`} className="text-xs">
-                        {dataset.owner.first_name} {dataset.owner.last_name}
-                      </TextLink>
-                    ) : dataset.organization ? (
-                      <TextLink
-                        href={`/pages/organizations/${dataset.organization.slug}`}
-                        className="text-xs"
-                      >
-                        {dataset.organization.name}
-                      </TextLink>
-                    ) : null}
-                  </div>
-                </TableCell>
-                <TableCell headerLabel="Ações">
-                  <TableActionsCell
-                    viewAction={{
-                      href: `/pages/datasets/${dataset.slug}`,
-                    }}
-                    editAction={{
-                      href: `/pages/admin/org/datasets/edit?slug=${dataset.slug}`,
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <AdminEmptyState
-          icon="agora-line-edit"
-          title="Sem publicações"
-          description="A organização ainda não publicou conjuntos de dados."
-          createUrl="/pages/admin/datasets/new"
-        />
+      }
+      emptyState={{
+        icon: "agora-line-edit",
+        title: "Sem publicações",
+        description: "A organização ainda não publicou conjuntos de dados.",
+        createUrl: "/pages/admin/datasets/new",
+      }}
+      renderHeaders={(sort) => (
+        <>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={sort.getSortOrder("title")}
+            onSortChange={sort.onSortChange("title")}
+          >
+            Título do conjunto de dados
+          </TableHeaderCell>
+          <TableHeaderCell>Estado</TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={sort.getSortOrder("created")}
+            onSortChange={sort.onSortChange("created")}
+          >
+            Criado em
+          </TableHeaderCell>
+          <TableHeaderCell
+            sortType="date"
+            sortOrder={sort.getSortOrder("last_update")}
+            onSortChange={sort.onSortChange("last_update")}
+          >
+            Última modificação
+          </TableHeaderCell>
+          <TableHeaderCell>Ações</TableHeaderCell>
+        </>
       )}
-    </AdminLayout>
+      renderRow={renderOrgDatasetRow}
+    />
   );
 }
