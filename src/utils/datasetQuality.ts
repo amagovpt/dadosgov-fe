@@ -1,4 +1,4 @@
-import type { Dataset } from "@/types/api";
+import type { Dataset } from "@/service/types/dataset";
 
 export const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
   ["dataset_description_quality", "Descrição"],

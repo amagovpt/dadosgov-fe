@@ -12,7 +12,9 @@ import {
   type DropdownSectionProps,
 } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import type { ContactPoint, SpatialZone, UserRef } from "@/types/api";
+import type { SpatialZone } from "@/service/types/catalog";
+import type { ContactPoint } from "@/service/types/dataset";
+import type { UserRef } from "@/service/types/identity";
 import { getZoneName } from "@/utils/spatialLabels";
 import type { DatasetWizardDraftContact } from "./datasetWizardTypes";
 

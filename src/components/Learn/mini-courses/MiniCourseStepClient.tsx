@@ -4,7 +4,7 @@ import { Breadcrumb, Button } from '@ama-pt/agora-design-system';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { BodyCourse } from '@/services/types/courses';
+import { BodyCourse } from '@/service/types/courses';
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
 import Link from 'next/link';
 import { getAssets } from '@/utils/getAssets';

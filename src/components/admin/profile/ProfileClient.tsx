@@ -5,19 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import {
-  fetchFullProfile,
-  fetchUserActivity,
-  updateProfile,
-  uploadAvatar,
-  deleteAvatar,
-  generateApiKey,
-  fetchApiTokens,
-  revokeApiToken,
-  requestEmailChange,
-  fetchMyFollowing,
-} from "@/services/api";
-import { Activity, ApiToken, UserFollowing, UserPublic } from "@/types/api";
+import { fetchMyFollowing } from "@/service/api/followers";
+import { fetchFullProfile, uploadAvatar, deleteAvatar, generateApiKey, fetchApiTokens, revokeApiToken, requestEmailChange } from "@/service/api/profile";
+import { fetchUserActivity, updateProfile } from "@/service/api/users";
+import { Activity } from "@/service/types/catalog";
+import { ApiToken, UserFollowing, UserPublic } from "@/service/types/identity";
 import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";

@@ -1,7 +1,7 @@
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 import { RoadmapPageData } from "@/service/types/roadmap";
-import apolloClient from "@/services/apollo-client";
+import apolloClient from "@/service/utils/apollo-client";
 
 export async function getRoadmapPage(locale: string = "pt"): Promise<RoadmapPageData> {
   const query = gql(/* GraphQL */ `

@@ -13,24 +13,13 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import {
-  fetchHarvester,
-  fetchHarvestJobs,
-  fetchHarvestBackends,
-  updateHarvester,
-  scheduleHarvester,
-  unscheduleHarvester,
-  previewHarvestSource,
-  deleteHarvester,
-  rejectHarvestSource,
-  validateHarvestSource,
-} from "@/services/api";
+import { fetchHarvester, fetchHarvestJobs, fetchHarvestBackends, updateHarvester, scheduleHarvester, unscheduleHarvester, previewHarvestSource, deleteHarvester, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
 import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
-import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/types/api";
+import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/service/types/harvester";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { HarvesterJobsTable } from "@/components/admin/harvesters/HarvesterJobsTable";
 import { HarvesterConfigForm } from "@/components/admin/harvesters/HarvesterConfigForm";

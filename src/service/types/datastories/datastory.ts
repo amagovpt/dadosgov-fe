@@ -1,4 +1,4 @@
-﻿type DateReference = {
+type DateReference = {
   title: string;
   date: string;
 };

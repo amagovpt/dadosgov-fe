@@ -1,5 +1,5 @@
-﻿import type { Badge, Organization, UserRef } from '@/service/types/identity';
-import type { Checksum, Metric, SchemaRef, SpatialCoverage, TemporalCoverage } from '@/service/types/shared/core';
+import type { Badge, Organization, UserRef } from '@/service/types/identity';
+import type { Checksum, Metric, SchemaRef, SpatialCoverage, TemporalCoverage } from '@/service/types/shared';
 
 export interface Resource {
   id: string;

@@ -18,7 +18,7 @@ import {
   InputPassword,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { login } from "@/services/api";
+import { login } from "@/service/api/auth";
 import TextLink from "@/components/Primitives/TextLink";
 
 function LoginContent() {

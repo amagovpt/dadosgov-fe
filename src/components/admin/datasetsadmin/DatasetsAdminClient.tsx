@@ -3,36 +3,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon, StatusCard, DropdownSection, DropdownOption } from "@ama-pt/agora-design-system";
-import {
-  createDataset,
-  updateDataset,
-  uploadResource,
-  updateResource,
-  createResource,
-  fetchLicenses,
-  fetchFrequencies,
-  fetchGranularities,
-  suggestSpatialZones,
-  fetchSpatialZonesByIds,
-  fetchDataset,
-  fetchMyDatasets,
-  suggestTags,
-  fetchOrgContactPoints,
-  createContactPoint,
-  fetchResourceTypes,
-  fetchAllowedExtensions,
-} from "@/services/api";
-import {
-  License,
-  Frequency,
-  Granularity,
-  SpatialZone,
-  Dataset,
-  TagSuggestion,
-  ContactPoint,
-  ResourceType,
-  DatasetUpdatePayload,
-} from "@/types/api";
+import { createDataset, updateDataset, uploadResource, updateResource, createResource, fetchLicenses, fetchFrequencies, fetchGranularities, fetchSpatialZonesByIds, fetchDataset, fetchMyDatasets, fetchResourceTypes, fetchAllowedExtensions } from "@/service/api/datasets";
+import { fetchOrgContactPoints, createContactPoint } from "@/service/api/organizations";
+import { suggestSpatialZones, suggestTags } from "@/service/api/search";
+import { License, Frequency, Granularity, SpatialZone, TagSuggestion, ResourceType } from "@/service/types/catalog";
+import { Dataset, ContactPoint, DatasetUpdatePayload } from "@/service/types/dataset";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import { PendingResourceMeta } from "@/components/admin/FileUploadModal";

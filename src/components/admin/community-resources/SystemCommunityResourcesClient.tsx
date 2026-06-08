@@ -14,8 +14,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import { fetchAllCommunityResources } from "@/services/api";
-import { CommunityResource } from "@/types/api";
+import { fetchAllCommunityResources } from "@/service/api/community-resources";
+import { CommunityResource } from "@/service/types/community-resource";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";
