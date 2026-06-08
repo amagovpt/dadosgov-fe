@@ -13,6 +13,7 @@ import {
   DropdownSection,
   DropdownOption,
 } from "@ama-pt/agora-design-system";
+import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import HeroGeneral from "@/components/HeroGeneral";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { submitSupportContact, type SupportTopic } from "@/services/api";
@@ -115,7 +116,8 @@ const shouldPreselectFeedbackFromUrl = (): boolean => {
   return params.get("toggle") === "feedback";
 };
 
-const SupportPage = () => {
+const SupportPageContent = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [activeItem, setActiveItem] = React.useState(() =>
     shouldPreselectFeedbackFromUrl() ? "Ajuda" : "Nesta página"
   );
@@ -186,11 +188,21 @@ const SupportPage = () => {
     setErrorMessage("");
     setIsSubmitting(true);
     try {
+      let recaptchaToken: string | null = null;
+      if (executeRecaptcha) {
+        try {
+          recaptchaToken = await executeRecaptcha("support_contact");
+        } catch (err) {
+          console.warn("reCAPTCHA execution failed:", err);
+        }
+      }
+
       await submitSupportContact({
         topic: selectedToggle as SupportTopic,
         email: email.trim(),
         subject: subjectBody.trim(),
         message: composeMessage(selectedToggle),
+        recaptchaToken,
       });
       setSuccessMessage(TOGGLE_SUCCESS_MAP[selectedToggle]);
       resetFormFields();
@@ -1237,6 +1249,19 @@ const SupportPage = () => {
       </div>
     </main>
   );
+};
+
+const RECAPTCHA_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+
+const SupportPage = () => {
+  if (RECAPTCHA_KEY) {
+    return (
+      <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY} language="pt">
+        <SupportPageContent />
+      </GoogleReCaptchaProvider>
+    );
+  }
+  return <SupportPageContent />;
 };
 
 export default SupportPage;
