@@ -71,17 +71,18 @@ export async function revokeApiToken(tokenId: string): Promise<void> {
 
 
 export async function requestEmailChange(
-  newEmail: string,
-  csrfToken: string
+  newEmail: string
 ): Promise<{ message: string }> {
+  // The route handler now mints CSRF server-side on the authenticated session.
+  // Fetching /csrf from the client creates an anonymous session and breaks auth.
   const body = new URLSearchParams({
     new_email: newEmail,
     new_email_confirm: newEmail,
-    csrf_token: csrfToken,
   });
   const res = await fetch("/change-email", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    credentials: "include",
     body,
   });
   const data = await res.json();
@@ -93,18 +94,19 @@ export async function requestEmailChange(
 export async function changePassword(
   currentPassword: string,
   newPassword: string,
-  newPasswordConfirm: string,
-  csrfToken: string
+  newPasswordConfirm: string
 ): Promise<{ message: string }> {
+  // The route handler now mints CSRF server-side on the authenticated session.
+  // Fetching /csrf from the client creates an anonymous session and breaks auth.
   const body = new URLSearchParams({
     password: currentPassword,
     new_password: newPassword,
     new_password_confirm: newPasswordConfirm,
-    csrf_token: csrfToken,
   });
   const res = await fetch("/change", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    credentials: "include",
     body,
   });
   const data = await res.json();

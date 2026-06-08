@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button, InputText, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
-import { fetchCsrfToken } from "@/service/api/auth";
 import { changePassword } from "@/service/api/profile";
 
 export function ChangePasswordPopupContent() {
@@ -40,8 +39,7 @@ export function ChangePasswordPopupContent() {
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      const csrfToken = await fetchCsrfToken();
-      await changePassword(currentPassword, newPassword, confirmPassword, csrfToken);
+      await changePassword(currentPassword, newPassword, confirmPassword);
       setSuccess(true);
       setTimeout(() => hide(), 2000);
     } catch (err) {

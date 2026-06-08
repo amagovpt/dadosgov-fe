@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Button,
   Icon,
@@ -64,6 +64,7 @@ function DeleteHarvesterPopupContent({
 
 export default function HarvesterDetailClient({ slug }: HarvesterDetailClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const isConfigTab = searchParams.get("tab") === "config";
   const { user, isAdmin } = useAuth();
@@ -432,7 +433,25 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
 
       {/* Tabs */}
-      <Tabs>
+      <Tabs
+        onTabActivation={(index: number) => {
+          // Keep the URL in sync with the active tab so that parent re-renders
+          // (e.g. typing in the Planeamento/schedule field) don't snap the active
+          // tab back to whatever the URL-derived `active` prop says. Index 1 is
+          // the "Configuração" tab; index 0 is "Trabalhos".
+          const params = new URLSearchParams(searchParams.toString());
+          if (index === 1) {
+            params.set("tab", "config");
+          } else {
+            params.delete("tab");
+          }
+          const query = params.toString();
+          const nextUrl = query ? `${pathname}?${query}` : pathname;
+          if (nextUrl !== `${pathname}${window.location.search}`) {
+            router.replace(nextUrl, { scroll: false });
+          }
+        }}
+      >
         <Tab active={!isConfigTab}>
           <TabHeader>Trabalhos</TabHeader>
           <TabBody>

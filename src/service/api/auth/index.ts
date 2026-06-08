@@ -1,17 +1,5 @@
 import type { UserRef } from "@/service/types/identity";
 
-
-/**
- * Fetch CSRF token from backend
- */
-export async function fetchCsrfToken(): Promise<string> {
-  const res = await fetch("/csrf", { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch CSRF token");
-  const data = await res.json();
-  return data.csrf_token;
-}
-
-
 /**
  * Perform login using the frontend route handler proxy
  */

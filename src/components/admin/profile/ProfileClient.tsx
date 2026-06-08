@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { fetchCsrfToken } from "@/service/api/auth";
 import { fetchMyFollowing } from "@/service/api/followers";
 import { fetchFullProfile, uploadAvatar, deleteAvatar, generateApiKey, fetchApiTokens, revokeApiToken, requestEmailChange } from "@/service/api/profile";
 import { fetchUserActivity, updateProfile } from "@/service/api/users";
@@ -294,8 +293,7 @@ export default function ProfileClient() {
     setSaveError("");
     setEmailChangeSuccess(false);
     try {
-      const csrfToken = await fetchCsrfToken();
-      await requestEmailChange(newEmail, csrfToken);
+      await requestEmailChange(newEmail);
       setPendingEmail(newEmail);
       setEmailChangeSuccess(true);
       setIsEditingEmail(false);
