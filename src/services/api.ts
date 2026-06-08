@@ -3133,18 +3133,21 @@ export async function requestEmailChange(
 export async function changePassword(
   currentPassword: string,
   newPassword: string,
-  newPasswordConfirm: string,
-  csrfToken: string
+  newPasswordConfirm: string
 ): Promise<{ message: string }> {
+  // No client CSRF token: the /change route handler mints one server-side bound
+  // to the authenticated session. Fetching it from the client (/csrf) would mint
+  // a fresh anonymous session whose cookie overwrites the authenticated one,
+  // making the change request arrive unauthenticated.
   const body = new URLSearchParams({
     password: currentPassword,
     new_password: newPassword,
     new_password_confirm: newPasswordConfirm,
-    csrf_token: csrfToken,
   });
   const res = await fetch("/change", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    credentials: "include",
     body,
   });
   const data = await res.json();

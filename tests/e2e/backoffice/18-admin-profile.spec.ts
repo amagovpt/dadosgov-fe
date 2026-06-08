@@ -93,4 +93,35 @@ test.describe("Backoffice - Admin Profile", () => {
     const heading = page.getByRole("heading", { name: /^Perfil$/i, level: 1 });
     await expect(heading).toBeVisible({ timeout: 10000 });
   });
+
+  // Regression for the "Unexpected token '<', "<!DOCTYPE "... is not valid JSON"
+  // error on the change-password modal. It guards two coupled bugs at once:
+  //   1. Missing /change route handler — the POST fell through to Next.js's 404
+  //      HTML page, which failed JSON parsing.
+  //   2. The client CSRF fetch minted a fresh anonymous session whose cookie
+  //      overwrote the authenticated one, so the change arrived unauthenticated.
+  // Submitting a WRONG current password is non-destructive (the password is not
+  // changed) yet still exercises the full round trip: it must surface the
+  // backend's "Palavra-passe inválida" validation message. A broken route would
+  // crash or show a generic error; a destroyed session would show a
+  // session-expired message instead.
+  test("AP-10: Change-password modal returns the backend error (route + session intact)", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /Alterar senha/i }).first().click();
+
+    const currentInput = page.locator("#current-password");
+    await expect(currentInput).toBeVisible({ timeout: 10000 });
+    await currentInput.fill("WrongCurrentPwd123!");
+    await page.locator("#new-password").fill("NovaSenhaValida123!");
+    await page.locator("#confirm-password").fill("NovaSenhaValida123!");
+
+    await page.getByRole("button", { name: /^Altere a sua senha$/i }).click();
+
+    // The backend rejects the wrong current password; the modal shows that exact
+    // message. Crucially NOT a JSON-parse crash, a generic failure, or a false
+    // success card.
+    await expect(page.getByText(/Palavra-passe inválida/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Senha alterada com sucesso/i)).toHaveCount(0);
+  });
 });
