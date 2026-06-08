@@ -123,16 +123,6 @@ function translateUploadErrorPayload(
 }
 
 /**
- * Fetch CSRF token from backend
- */
-export async function fetchCsrfToken(): Promise<string> {
-  const res = await fetch("/csrf", { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch CSRF token");
-  const data = await res.json();
-  return data.csrf_token;
-}
-
-/**
  * Perform login using the frontend route handler proxy
  */
 export async function login(formData: FormData): Promise<{ message: string; redirect?: string }> {
@@ -3112,17 +3102,20 @@ export async function revokeApiToken(tokenId: string): Promise<void> {
 }
 
 export async function requestEmailChange(
-  newEmail: string,
-  csrfToken: string
+  newEmail: string
 ): Promise<{ message: string }> {
+  // No client CSRF token: the /change-email route handler mints one server-side
+  // bound to the authenticated session. Fetching it from the client (/csrf) would
+  // mint a fresh anonymous session whose cookie overwrites the authenticated one,
+  // making the request arrive unauthenticated.
   const body = new URLSearchParams({
     new_email: newEmail,
     new_email_confirm: newEmail,
-    csrf_token: csrfToken,
   });
   const res = await fetch("/change-email", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    credentials: "include",
     body,
   });
   const data = await res.json();
@@ -3133,18 +3126,21 @@ export async function requestEmailChange(
 export async function changePassword(
   currentPassword: string,
   newPassword: string,
-  newPasswordConfirm: string,
-  csrfToken: string
+  newPasswordConfirm: string
 ): Promise<{ message: string }> {
+  // No client CSRF token: the /change route handler mints one server-side bound
+  // to the authenticated session. Fetching it from the client (/csrf) would mint
+  // a fresh anonymous session whose cookie overwrites the authenticated one,
+  // making the change request arrive unauthenticated.
   const body = new URLSearchParams({
     password: currentPassword,
     new_password: newPassword,
     new_password_confirm: newPasswordConfirm,
-    csrf_token: csrfToken,
   });
   const res = await fetch("/change", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    credentials: "include",
     body,
   });
   const data = await res.json();
