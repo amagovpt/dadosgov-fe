@@ -103,7 +103,24 @@ export function HarvesterConfigForm({
         ))}
       </DropdownSection>
     ),
-    [backends, selectedBackend],
+    [backends, selectedBackend]
+  );
+
+  const activeFilterKeys = useMemo(
+    () => new Set(activeBackendFilters.map((f) => f.key)),
+    [activeBackendFilters]
+  );
+
+  // Filters stored on the harvester whose key is not declared by the selected
+  // backend (e.g. left over after switching backend type). They are surfaced
+  // with a warning so the user can remove them, instead of being hidden and
+  // silently dropped on save. Keep the original index for removeFilter.
+  const orphanFilters = useMemo(
+    () =>
+      filters
+        .map((f, index) => ({ ...f, index }))
+        .filter((f) => f.type && !activeFilterKeys.has(f.type)),
+    [filters, activeFilterKeys]
   );
 
   const auxiliarItems = [
@@ -141,7 +158,7 @@ export function HarvesterConfigForm({
             onSave();
           }}
         >
-          <p className="text-neutral-900 text-base leading-7 pt-32">
+          <p className="pt-32 text-base leading-7 text-neutral-900">
             Os campos marcados com um asterisco ( <span className="text-red-600">*</span> ) são
             obrigatórios.
           </p>
@@ -210,98 +227,148 @@ export function HarvesterConfigForm({
               {typeOptions}
             </InputSelect>
 
-            {activeBackendFilters.length > 0 && (
+            {(activeBackendFilters.length > 0 || orphanFilters.length > 0) && (
               <div>
-                <p className="text-primary-900 text-base font-medium leading-7">Filtros</p>
+                <p className="text-base font-medium leading-7 text-primary-900">Filtros</p>
 
-                {filters.map((filter, index) => (
-                  <div
-                    key={index}
-                    className={`mt-8 pb-16 mb-8 ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
-                  >
-                    <div className="flex items-center gap-8">
-                      <InputSelect
-                        key={`filter-mode-select-${index}`}
-                        label="Modo"
-                        placeholder=""
-                        id={`filter-mode-${index}`}
-                        defaultValue={filter.mode}
-                        onChange={(opts) => {
-                          if (opts.length > 0) updateFilter(index, "mode", opts[0].value as string);
-                        }}
+                {activeBackendFilters.length > 0 &&
+                  filters.map((filter, index) => {
+                    // Orphan filters are shown separately in the warning below.
+                    if (filter.type && !activeFilterKeys.has(filter.type)) return null;
+                    return (
+                      <div
+                        key={index}
+                        className={`mb-8 mt-8 pb-16 ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
                       >
-                        <DropdownSection name="mode">
-                          <DropdownOption value="include" selected={filter.mode === "include"}>
-                            Incluir
-                          </DropdownOption>
-                          <DropdownOption value="exclude" selected={filter.mode === "exclude"}>
-                            Excluir
-                          </DropdownOption>
-                        </DropdownSection>
-                      </InputSelect>
-                      <InputSelect
-                        key={`filter-type-select-${index}-${selectedBackend}`}
-                        label="Chave do filtro"
-                        placeholder="Selecione uma chave"
-                        id={`filter-type-${index}`}
-                        defaultValue={filter.type}
-                        onChange={(opts) => {
-                          if (opts.length > 0) updateFilter(index, "type", opts[0].value as string);
-                        }}
-                      >
-                        <DropdownSection name="type">
-                          {activeBackendFilters.map((f) => (
-                            <DropdownOption key={f.key} value={f.key} selected={filter.type === f.key}>
-                              {localizeFilterLabel(f.label)}
-                            </DropdownOption>
-                          ))}
-                        </DropdownSection>
-                      </InputSelect>
-                    </div>
-                    <div className="flex items-center gap-8 mt-8">
-                      <div className="flex-1">
-                        <InputText
-                          key={`filter-value-${index}`}
-                          label=""
-                          hideLabel
-                          placeholder=""
-                          id={`filter-value-${index}`}
-                          defaultValue={filter.value}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            updateFilter(index, "value", e.target.value)
-                          }
-                        />
+                        <div className="flex items-center gap-8">
+                          <InputSelect
+                            key={`filter-mode-select-${index}`}
+                            label="Modo"
+                            placeholder=""
+                            id={`filter-mode-${index}`}
+                            defaultValue={filter.mode}
+                            onChange={(opts) => {
+                              if (opts.length > 0)
+                                updateFilter(index, "mode", opts[0].value as string);
+                            }}
+                          >
+                            <DropdownSection name="mode">
+                              <DropdownOption value="include" selected={filter.mode === "include"}>
+                                Incluir
+                              </DropdownOption>
+                              <DropdownOption value="exclude" selected={filter.mode === "exclude"}>
+                                Excluir
+                              </DropdownOption>
+                            </DropdownSection>
+                          </InputSelect>
+                          <InputSelect
+                            key={`filter-type-select-${index}-${selectedBackend}`}
+                            label="Chave do filtro"
+                            placeholder="Selecione uma chave"
+                            id={`filter-type-${index}`}
+                            defaultValue={filter.type}
+                            onChange={(opts) => {
+                              if (opts.length > 0)
+                                updateFilter(index, "type", opts[0].value as string);
+                            }}
+                          >
+                            <DropdownSection name="type">
+                              {activeBackendFilters.map((f) => (
+                                <DropdownOption
+                                  key={f.key}
+                                  value={f.key}
+                                  selected={filter.type === f.key}
+                                >
+                                  {localizeFilterLabel(f.label)}
+                                </DropdownOption>
+                              ))}
+                            </DropdownSection>
+                          </InputSelect>
+                        </div>
+                        <div className="mt-8 flex items-center gap-8">
+                          <div className="flex-1">
+                            <InputText
+                              key={`filter-value-${index}`}
+                              label=""
+                              hideLabel
+                              placeholder=""
+                              id={`filter-value-${index}`}
+                              defaultValue={filter.value}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                updateFilter(index, "value", e.target.value)
+                              }
+                            />
+                          </div>
+                          <Button
+                            variant="danger"
+                            hasIcon
+                            iconOnly
+                            leadingIcon="agora-line-trash"
+                            leadingIconHover="agora-solid-trash"
+                            onClick={() => removeFilter(index)}
+                            aria-label="Excluir filtro"
+                          >
+                            {" "}
+                          </Button>
+                        </div>
                       </div>
-                      <Button
-                        variant="danger"
-                        hasIcon
-                        iconOnly
-                        leadingIcon="agora-line-trash"
-                        leadingIconHover="agora-solid-trash"
-                        onClick={() => removeFilter(index)}
-                        aria-label="Excluir filtro"
-                      >
-                        {" "}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
 
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  leadingIcon="agora-line-plus-circle"
-                  leadingIconHover="agora-solid-plus-circle"
-                  onClick={addFilter}
-                >
-                  Adicionar um filtro
-                </Button>
+                {activeBackendFilters.length > 0 && (
+                  <Button
+                    appearance="link"
+                    variant="primary"
+                    hasIcon
+                    leadingIcon="agora-line-plus-circle"
+                    leadingIconHover="agora-solid-plus-circle"
+                    onClick={addFilter}
+                  >
+                    Adicionar um filtro
+                  </Button>
+                )}
+
+                {orphanFilters.length > 0 && (
+                  <div className="mt-16">
+                    <StatusCard
+                      variant="warning"
+                      showIcon
+                      description="Os filtros abaixo não são suportados pela implementação selecionada e não serão guardados. Remova-os ou escolha uma implementação compatível."
+                    />
+                    {orphanFilters.map((filter) => (
+                      <div
+                        key={`orphan-${filter.index}`}
+                        className="rounded mt-8 flex items-center justify-between gap-8 bg-neutral-50 px-12 py-8"
+                      >
+                        <span className="text-sm text-neutral-800">
+                          <strong>{filter.type}</strong>
+                          {filter.value ? `: ${filter.value}` : ""}
+                          {filter.mode === "exclude" ? " (excluir)" : " (incluir)"}
+                        </span>
+                        <Button
+                          variant="danger"
+                          hasIcon
+                          iconOnly
+                          leadingIcon="agora-line-trash"
+                          leadingIconHover="agora-solid-trash"
+                          onClick={() => removeFilter(filter.index)}
+                          aria-label="Remover filtro não suportado"
+                        >
+                          {" "}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             <div className="flex gap-48">
-              <Switch label="Ativado" checked={isEnabled} onChange={() => setIsEnabled((v) => !v)} />
+              <Switch
+                label="Ativado"
+                checked={isEnabled}
+                onChange={() => setIsEnabled((v) => !v)}
+              />
               <Switch
                 label="Arquivamento automático"
                 checked={isAutoArchive}
@@ -389,7 +456,7 @@ export function HarvesterConfigForm({
       <aside className="admin-page__auxiliar">
         <div className="admin-page__auxiliar-inner">
           <div className="admin-page__auxiliar-header">
-            <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
+            <AppIcon name="agora-line-question-mark" className="h-24 w-24" />
             <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
           </div>
           <AuxiliarList items={auxiliarItems} />
