@@ -656,7 +656,11 @@ export async function fetchDatasetsListing(
     }
 
     const url = `${API_BASE_URL}/site/datasets-listing/?${params.toString()}`;
-    const res = await fetch(url, { cache: "no-store" });
+    // SSR listing: cache per-URL in the Next.js Data Cache (matches the backend
+    // @cache.cached(60)). Repeated identical page/query loads are served from
+    // cache and never reach the backend, so they don't consume the per-IP
+    // PUBLIC_SEARCH_LIMIT bucket that the F5 IP-collapse turns site-wide.
+    const res = await fetch(url, { next: { revalidate: 60 } });
 
     if (!res.ok) {
       console.error(`Error fetching datasets listing: ${res.status} ${res.statusText}`);

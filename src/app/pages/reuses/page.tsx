@@ -3,7 +3,10 @@ import ReusesClient from '@/components/reuses/ReusesClient';
 import { ReuseFilters } from "@/service/types/reuse";
 import { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+// The page is already dynamic (it reads searchParams); we intentionally do NOT
+// force-dynamic so the listing fetch can use the Next.js Data Cache
+// (revalidate: 60) — repeated page/query loads are served from cache and don't
+// hit the backend rate-limit (per-IP, collapsed site-wide by the F5).
 
 export const metadata: Metadata = {
     title: 'Reutilizações - dados.gov.pt',

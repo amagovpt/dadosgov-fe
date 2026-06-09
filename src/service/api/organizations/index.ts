@@ -529,7 +529,10 @@ export async function fetchOrganizationsListing(
     }
 
     const url = `${API_BASE_URL}/site/organizations-listing/?${params.toString()}`;
-    const res = await fetch(url, { cache: "no-store" });
+    // SSR listing: cache per-URL in the Next.js Data Cache (matches the backend
+    // @cache.cached(60)) so repeated page/query loads don't hit the backend
+    // PUBLIC_SEARCH_LIMIT bucket that the F5 IP-collapse turns site-wide.
+    const res = await fetch(url, { next: { revalidate: 60 } });
 
     if (!res.ok) {
       console.error(`Error fetching organizations listing: ${res.status} ${res.statusText}`);
