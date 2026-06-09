@@ -263,11 +263,13 @@ export async function submitSupportContact(payload: {
   email: string;
   subject: string;
   message: string;
+  recaptchaToken?: string | null;
 }): Promise<void> {
+  const { recaptchaToken, ...rest } = payload;
   const res = await fetch(`${API_BASE_URL}/site/contact/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...rest, recaptcha_token: recaptchaToken ?? undefined }),
   });
   if (!res.ok) {
     let detail = "";
