@@ -1,4 +1,4 @@
-type Anchor = {
+﻿type Anchor = {
   children: string;
   href: string;
   icon: string;
@@ -7,6 +7,12 @@ type Anchor = {
 type DateReference = {
   title: string;
   date: string;
+};
+
+type Card = {
+  icon: string;
+  title: string;
+  description: string;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -39,6 +45,32 @@ export type BigNumbersSection = {
   title: string;
   bignumbers: Bignumbers[];
   dataReference: DateReference;
+};
+
+// ----------------------------------------------------------------------------------------------
+
+type TimelineEvent = {
+  label: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+  description: string;
+};
+
+type Timeline = {
+  title: string;
+  description: string;
+  events: TimelineEvent[];
+};
+
+export type TimelineSection = {
+  schemaName: "section-datastory-cards-steps";
+  title: string;
+  description: string;
+  cards: Card[];
+  cardsLinkIcon: string;
+  anchor: Anchor;
+  timeline: Timeline;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -109,6 +141,7 @@ export type OtherSection = {
 
 export type DatastorySection =
   | BigNumbersSection
+  | CardsStepsSection
   | IframeSection
   | RelatedSection
   | SourceSection
