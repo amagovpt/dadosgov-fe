@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, InputText, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
-import { changePassword } from "@/services/api";
+import { changePassword } from "@/service/api/profile";
 
 export function ChangePasswordPopupContent() {
   const { hide } = usePopupContext();

@@ -1,4 +1,4 @@
-﻿import { Anchor, Hero, Image } from "../shared/common"
+import { Anchor, Hero, Image } from "../shared/common"
 
 
 export interface CourseDeatil {

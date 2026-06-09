@@ -1,4 +1,4 @@
-﻿
+
 export interface Metric {
   nb_hits?: number;
   nb_uniq_visitors?: number;

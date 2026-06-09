@@ -1,3 +1,3 @@
-﻿export type {
+export type {
   GlobalSearchSuggestion,
 } from './search';

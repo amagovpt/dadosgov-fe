@@ -14,8 +14,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
-import { fetchReuses } from "@/services/api";
-import { Reuse } from "@/types/api";
+import { fetchReuses } from "@/service/api/reuses";
+import { Reuse } from "@/service/types/reuse";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";

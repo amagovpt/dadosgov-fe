@@ -27,7 +27,7 @@ import {
 import SearchDropdown from "@/components/search/SearchDropdown";
 import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
-import { logout } from "@/services/api";
+import { logout } from "@/service/api/auth";
 import TextLink from "@/components/Primitives/TextLink";
 
 export const Header = () => {

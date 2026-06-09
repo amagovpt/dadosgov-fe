@@ -13,8 +13,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
-import { fetchTopics } from "@/services/api";
-import { Topic } from "@/types/api";
+import { fetchTopics } from "@/service/api/discussions-topics";
+import { Topic } from "@/service/types/topic";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";

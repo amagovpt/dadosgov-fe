@@ -3,12 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@ama-pt/agora-design-system";
-import {
-  suggestFormats,
-  suggestSpatialZones,
-  suggestTags,
-} from "@/services/api";
-import { Frequency, Granularity, License, Organization } from "@/types/api";
+import { suggestFormats } from "@/service/api/datasets";
+import { suggestSpatialZones, suggestTags } from "@/service/api/search";
+import { Frequency, Granularity, License } from "@/service/types/catalog";
+import { Organization } from "@/service/types/identity";
 import {
   AdvancedFilterGroup,
   AdvancedFiltersSidebar,

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button, CardGeneral, Icon, ProgressBar, StatusCard } from "@ama-pt/agora-design-system";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
-import type { Dataset } from "@/types/api";
+import type { Dataset } from "@/service/types/dataset";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 export interface DatasetWizardStep4Props {

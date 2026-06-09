@@ -19,36 +19,15 @@ import { Dropdown } from "@/components/Primitives/Dropdown";
 
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import {
-  fetchDataset,
-  updateDataset,
-  deleteDataset,
-  uploadResource,
-  createResource,
-  fetchLicenses,
-  fetchFrequencies,
-  fetchResourceTypes,
-  fetchGranularities,
-  fetchSpatialZonesByIds,
-  suggestSpatialZones,
-  suggestTags,
-  fetchActivity,
-  fetchDiscussions,
-  requestTransfer,
-} from "@/services/api";
+import { fetchActivity } from "@/service/api/activity";
+import { fetchDataset, updateDataset, deleteDataset, uploadResource, createResource, fetchLicenses, fetchFrequencies, fetchResourceTypes, fetchGranularities, fetchSpatialZonesByIds } from "@/service/api/datasets";
+import { fetchDiscussions } from "@/service/api/discussions-topics";
+import { suggestSpatialZones, suggestTags } from "@/service/api/search";
+import { requestTransfer } from "@/service/api/transfers";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
-import {
-  Dataset,
-  License,
-  Frequency,
-  Granularity,
-  SpatialZone,
-  TagSuggestion,
-  Activity,
-  Resource,
-  ResourceType,
-  Discussion,
-} from "@/types/api";
+import { License, Frequency, Granularity, SpatialZone, TagSuggestion, Activity, ResourceType } from "@/service/types/catalog";
+import { Dataset, Resource } from "@/service/types/dataset";
+import { Discussion } from "@/service/types/discussion";
 import DeleteResourcePopup from "@/components/admin/datasets/DeleteResourcePopup";
 import DatasetsEditDeletePopup from "@/components/admin/datasets/DatasetsEditDeletePopup";
 import DatasetsEditResourceDetailPopup from "@/components/admin/datasets/DatasetsEditResourceDetailPopup";

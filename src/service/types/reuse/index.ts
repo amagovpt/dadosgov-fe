@@ -1,4 +1,4 @@
-﻿export type {
+export type {
   ReuseType,
   ReuseSuggestion,
   ReuseFilters,

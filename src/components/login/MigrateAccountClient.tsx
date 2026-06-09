@@ -3,13 +3,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, InputText, InputPassword, Icon, Breadcrumb } from "@ama-pt/agora-design-system";
-import {
-  fetchMigrationPending,
-  searchMigrationAccount,
-  sendMigrationCode,
-  confirmMigration,
-  skipMigration,
-} from "@/services/api";
+import { fetchMigrationPending, searchMigrationAccount, sendMigrationCode, confirmMigration, skipMigration } from "@/service/api/migration";
 import AppIcon from "../Primitives/AppIcon";
 
 type Step =
