@@ -2,7 +2,10 @@ import { fetchDatasetsListing } from "@/service/api/datasets";
 import { DatasetFilters } from "@/service/types/dataset";
 import DatasetsClient from '@/components/datasets/DatasetsClient';
 
-export const dynamic = 'force-dynamic';
+// The page is already dynamic (it reads searchParams); we intentionally do NOT
+// force-dynamic so the listing fetch can use the Next.js Data Cache
+// (revalidate: 60) — repeated page/query loads are served from cache and don't
+// hit the backend rate-limit (per-IP, collapsed site-wide by the F5).
 
 export default async function Page({
   searchParams,
