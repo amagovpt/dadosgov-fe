@@ -1,10 +1,10 @@
-import { ReactNode } from "react";
+import type { ComponentProps } from "react";
 import { Table } from "@ama-pt/agora-design-system";
 import type { CreatePaginationPropsOptions } from "@/utils/createPaginationProps";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
 interface AdminPaginatedTableProps {
-  children: ReactNode;
+  children: ComponentProps<typeof Table>["children"];
   pageSize: number;
   totalItems: number;
   currentPage: number;

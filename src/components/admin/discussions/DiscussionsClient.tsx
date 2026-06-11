@@ -24,10 +24,11 @@ export default function DiscussionsClient() {
       setIsLoading(false);
       return;
     }
+    const orgId = activeOrg.id;
 
     async function loadDiscussions() {
       try {
-        const { data } = await fetchOrgDiscussions(activeOrg.id);
+        const { data } = await fetchOrgDiscussions(orgId);
         if (data) setDiscussions(data);
       } catch (error) {
         console.error("Error loading discussions:", error);

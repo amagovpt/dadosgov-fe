@@ -18,24 +18,24 @@ export function sortCommunityResources<T extends CommunityResource>(
   if (sortOrder === "none") return items;
 
   return [...items].sort((a, b) => {
-    let cmp = 0;
+    let comparison = 0;
     switch (sortField) {
       case "title":
-        cmp = (a.title || "").localeCompare(b.title || "");
+        comparison = (a.title || "").localeCompare(b.title || "");
         break;
       case "format":
-        cmp = (a.format || "").localeCompare(b.format || "");
+        comparison = (a.format || "").localeCompare(b.format || "");
         break;
       case "created_at":
-        cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         break;
       case "last_modified":
-        cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
+        comparison = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
         break;
       default:
-        cmp = 0;
+        comparison = 0;
     }
-    return sortOrder === "descending" ? -cmp : cmp;
+    return sortOrder === "descending" ? -comparison : comparison;
   });
 }
 
@@ -49,27 +49,36 @@ interface CommunityResourceColumnsOptions {
   editHref: (resource: CommunityResource) => string;
 }
 
-export function createCommunityResourceColumns({
-  includeFormat = false,
+type CommunityResourceColumnField<TIncludeFormat extends boolean> = TIncludeFormat extends true
+  ? CommunityResourceSortField
+  : OrgCommunityResourceSortField;
+
+type CommunityResourceColumnsOptionsByFormat<TIncludeFormat extends boolean> =
+  CommunityResourceColumnsOptions & {
+    includeFormat?: TIncludeFormat;
+  };
+
+export function createCommunityResourceColumns<TIncludeFormat extends boolean = false>({
+  includeFormat = false as TIncludeFormat,
   titleHeader = "Título",
   titleCellStyle = "neutral",
   showDatasetLink = false,
   useSystemStatusDot = false,
   showOwnerOnLastModified = false,
   editHref,
-}: CommunityResourceColumnsOptions): AdminListColumn<
+}: CommunityResourceColumnsOptionsByFormat<TIncludeFormat>): AdminListColumn<
   CommunityResource,
-  CommunityResourceSortField | OrgCommunityResourceSortField
+  CommunityResourceColumnField<TIncludeFormat>
 >[] {
   const columns: AdminListColumn<
     CommunityResource,
-    CommunityResourceSortField | OrgCommunityResourceSortField
+    CommunityResourceColumnField<TIncludeFormat>
   >[] = [
     {
       id: "title",
       header: titleHeader,
       headerLabel: "Título",
-      sortField: "title",
+      sortField: "title" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) => (
         <div>
@@ -109,9 +118,10 @@ export function createCommunityResourceColumns({
       id: "format",
       header: "Formato",
       headerLabel: "Formato",
-      sortField: "format",
+      sortField: "format" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
-      renderCell: (resource) => (useSystemStatusDot ? resource.format?.toUpperCase() || "—" : resource.format || "—"),
+      renderCell: (resource) =>
+        useSystemStatusDot ? resource.format?.toUpperCase() || "—" : resource.format || "—",
     });
   }
 
@@ -120,7 +130,7 @@ export function createCommunityResourceColumns({
       id: "created_at",
       header: "Criado em",
       headerLabel: "Criado em",
-      sortField: "created_at",
+      sortField: "created_at" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) => formatDateToDMY(resource.created_at),
     },
@@ -128,7 +138,7 @@ export function createCommunityResourceColumns({
       id: "last_modified",
       header: useSystemStatusDot ? "Modificado em" : "Última modificação",
       headerLabel: useSystemStatusDot ? "Modificado em" : "Última modificação",
-      sortField: "last_modified",
+      sortField: "last_modified" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) =>
         showOwnerOnLastModified ? (

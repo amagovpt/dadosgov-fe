@@ -20,43 +20,50 @@ export function sortReuses(
   sortOrder: SortOrder
 ): Reuse[] {
   if (!sortField || sortOrder === "none") return items;
-  const dir = sortOrder === "ascending" ? 1 : -1;
+  const direction = sortOrder === "ascending" ? 1 : -1;
   const collator = new Intl.Collator("pt", { sensitivity: "base" });
 
   return [...items].sort((a, b) => {
     if (sortField === "title") {
-      return collator.compare(a.title ?? "", b.title ?? "") * dir;
+      return collator.compare(a.title ?? "", b.title ?? "") * direction;
     }
     if (sortField === "created_at") {
-      const at = a.created_at ? Date.parse(a.created_at) : 0;
-      const bt = b.created_at ? Date.parse(b.created_at) : 0;
-      return (at - bt) * dir;
+      const aTime = a.created_at ? Date.parse(a.created_at) : 0;
+      const bTime = b.created_at ? Date.parse(b.created_at) : 0;
+      return (aTime - bTime) * direction;
     }
-    const ad = a.datasets?.length ?? 0;
-    const bd = b.datasets?.length ?? 0;
-    return (ad - bd) * dir;
+    const aDatasets = a.datasets?.length ?? 0;
+    const bDatasets = b.datasets?.length ?? 0;
+    return (aDatasets - bDatasets) * direction;
   });
 }
 
-interface ReuseColumnsOptions {
+type ReuseSortFieldByDatasets<TSortableDatasets extends boolean> = TSortableDatasets extends true
+  ? ReuseSortField
+  : SystemReuseSortField;
+
+interface ReuseColumnsOptions<TSortableDatasets extends boolean = true> {
   showOwner?: boolean;
   linkStyle?: "textLink" | "anchor";
   editHref: (reuse: Reuse) => string;
-  sortableDatasets?: boolean;
+  sortableDatasets?: TSortableDatasets;
 }
 
-export function createReuseColumns({
+export function createReuseColumns<TSortableDatasets extends boolean = true>({
   showOwner = false,
   linkStyle = "textLink",
   editHref,
-  sortableDatasets = true,
-}: ReuseColumnsOptions): AdminListColumn<Reuse, ReuseSortField>[] {
+  sortableDatasets = true as TSortableDatasets,
+}: ReuseColumnsOptions<TSortableDatasets>): AdminListColumn<
+  Reuse,
+  ReuseSortFieldByDatasets<TSortableDatasets>
+>[] {
   return [
     {
       id: "title",
       header: "Título da reutilização",
       headerLabel: "Título",
-      sortField: "title",
+      sortField: "title" as ReuseSortFieldByDatasets<TSortableDatasets>,
       sortType: "numeric",
       renderCell: (reuse) =>
         linkStyle === "textLink" ? (
@@ -75,7 +82,7 @@ export function createReuseColumns({
     {
       id: "created_at",
       header: "Criado em",
-      sortField: "created_at",
+      sortField: "created_at" as ReuseSortFieldByDatasets<TSortableDatasets>,
       sortType: "date",
       renderCell: (reuse) => (
         <>
@@ -101,7 +108,9 @@ export function createReuseColumns({
       id: "datasets",
       header: "Conjuntos de dados",
       headerLabel: "Conjuntos de dados",
-      sortField: sortableDatasets ? "datasets" : undefined,
+      sortField: sortableDatasets
+        ? ("datasets" as ReuseSortFieldByDatasets<TSortableDatasets>)
+        : undefined,
       sortType: sortableDatasets ? "numeric" : undefined,
       renderCell: (reuse) => reuse.datasets?.length ?? 0,
     },

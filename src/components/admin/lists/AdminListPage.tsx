@@ -1,7 +1,7 @@
 "use client";
 
-import type { ChangeEvent, ReactNode } from "react";
-import { InputSearchBar } from "@ama-pt/agora-design-system";
+import type { ChangeEvent, ComponentProps, ReactNode } from "react";
+import { InputSearchBar, Table } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { AdminLayoutProps } from "@/components/Layout/AdminLayout";
 import ResultsCount from "@/components/admin/ResultsCount";
@@ -31,7 +31,7 @@ interface AdminListPageProps {
   toolbarActions?: ReactNode;
   feedback?: ReactNode;
   emptyState: ReactNode;
-  children: ReactNode;
+  children: ComponentProps<typeof Table>["children"];
   loadingContent?: ReactNode;
   resultsCount?: ReactNode;
   paginationOptions?: CreatePaginationPropsOptions;

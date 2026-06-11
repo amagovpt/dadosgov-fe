@@ -26,57 +26,70 @@ export function sortDatasets(
   if (sortOrder === "none") return items;
 
   return [...items].sort((a, b) => {
-    let cmp = 0;
+    let comparison = 0;
     switch (sortField) {
       case "title":
-        cmp = (a.title || "").localeCompare(b.title || "");
+        comparison = (a.title || "").localeCompare(b.title || "");
         break;
       case "created_at":
-        cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         break;
       case "last_modified":
-        cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
+        comparison = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
         break;
       case "resources":
-        cmp = (a.resources?.length || 0) - (b.resources?.length || 0);
+        comparison = (a.resources?.length || 0) - (b.resources?.length || 0);
         break;
       default:
-        cmp = 0;
+        comparison = 0;
     }
-    return sortOrder === "descending" ? -cmp : cmp;
+    return sortOrder === "descending" ? -comparison : comparison;
   });
 }
 
 export function formatDatasetDate(dateStr: string) {
   try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+    const date = new Date(dateStr);
+    return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
   } catch {
     return dateStr;
   }
 }
 
-interface DatasetColumnsOptions {
+type DatasetSortVariant = "system" | "org";
+
+type DatasetColumnField<TVariant extends DatasetSortVariant> = TVariant extends "org"
+  ? OrgDatasetSortField
+  : DatasetSortField;
+
+interface DatasetColumnsOptions<TVariant extends DatasetSortVariant = "system"> {
   editHref: (dataset: Dataset) => string;
   showOwner?: boolean;
   showOrganizationFallback?: boolean;
   showResourceCount?: boolean;
   showQualityScore?: boolean;
+  sortVariant?: TVariant;
 }
 
-export function createDatasetColumns({
+export function createDatasetColumns<TVariant extends DatasetSortVariant = "system">({
   editHref,
   showOwner = false,
   showOrganizationFallback = false,
   showResourceCount = false,
   showQualityScore = false,
-}: DatasetColumnsOptions): AdminListColumn<Dataset, DatasetSortField>[] {
-  const columns: AdminListColumn<Dataset, DatasetSortField>[] = [
+  sortVariant = "system" as TVariant,
+}: DatasetColumnsOptions<TVariant>): AdminListColumn<Dataset, DatasetColumnField<TVariant>>[] {
+  const createdSortField = (sortVariant === "org" ? "created" : "created_at") as DatasetColumnField<TVariant>;
+  const lastModifiedSortField = (
+    sortVariant === "org" ? "last_update" : "last_modified"
+  ) as DatasetColumnField<TVariant>;
+
+  const columns: AdminListColumn<Dataset, DatasetColumnField<TVariant>>[] = [
     {
       id: "title",
       header: "Título do conjunto de dados",
       headerLabel: "Título",
-      sortField: "title",
+      sortField: "title" as DatasetColumnField<TVariant>,
       sortType: "date",
       renderCell: (dataset) => (
         <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
@@ -90,14 +103,14 @@ export function createDatasetColumns({
     {
       id: "created_at",
       header: "Criado em",
-      sortField: "created_at",
+      sortField: createdSortField,
       sortType: "date",
       renderCell: (dataset) => formatDatasetDate(dataset.created_at),
     },
     {
       id: "last_modified",
       header: "Última modificação",
-      sortField: "last_modified",
+      sortField: lastModifiedSortField,
       sortType: "date",
       renderCell: (dataset) => (
         <div>
@@ -122,7 +135,7 @@ export function createDatasetColumns({
       id: "resources",
       header: "Ficheiros",
       headerLabel: "Ficheiros",
-      sortField: "resources",
+      sortField: "resources" as DatasetColumnField<TVariant>,
       sortType: "date",
       renderCell: (dataset) => dataset.resources?.length || 0,
     });

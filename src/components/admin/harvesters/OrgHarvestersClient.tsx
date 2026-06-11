@@ -54,11 +54,12 @@ export default function OrgHarvestersClient() {
     if (!orgId) {
       return;
     }
+    const resolvedOrgId = orgId;
 
     async function loadHarvesters() {
       setIsLoading(true);
       try {
-        const response = await fetchOrgHarvesters(orgId, 1, 9999);
+        const response = await fetchOrgHarvesters(resolvedOrgId, 1, 9999);
         setHarvesters(response.data || []);
       } catch (error) {
         console.error("Error loading org harvesters:", error);

@@ -47,6 +47,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         editHref: (dataset) => `/pages/admin/org/datasets/edit?slug=${dataset.slug}`,
         showOwner: true,
         showOrganizationFallback: true,
+        sortVariant: "org",
       }),
     []
   );
