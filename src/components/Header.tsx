@@ -641,8 +641,8 @@ export const Header = () => {
                   href: "/pages/admin/datasets/new",
                 },
                 {
-                  iconDefault: "agora-line-hardware-settings",
-                  iconHover: "agora-solid-hardware-settings",
+                  iconDefault: "/Icons/api.svg",
+                  iconHover: "/Icons/api-solid.svg",
                   title: "Nova API",
                   description: "Serviços de dados",
                   href: "/pages/admin/dataservices/new",
