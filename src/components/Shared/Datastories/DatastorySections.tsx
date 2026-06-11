@@ -4,6 +4,7 @@ import Iframe from "./Sections/Iframe";
 import Sources from "./Sections/Sources";
 import OtherResources from "./Sections/OtherResources";
 import { RelatedDatastories } from "./Sections/RelatedDatastories";
+import Timeline from "./Sections/Timeline";
 
 type SectionBg = "white" | "primary";
 
@@ -26,6 +27,10 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
 
   return sections?.map((section, index) => {
     switch (section.schemaName) {
+      case "section-datastory-timeline":
+        return (
+          <Timeline key={`section-${index}`} {...section} className={getSectionClassname(index)} />
+        );
       case "section-datastory-bignumbers":
         return (
           <BigNumbers

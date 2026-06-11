@@ -12,7 +12,7 @@ type DateReference = {
 type Card = {
   icon: string;
   title: string;
-  description: string;
+  subtitle: string;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -53,7 +53,6 @@ type TimelineEvent = {
   label: string;
   icon: string;
   title: string;
-  subtitle: string;
   description: string;
 };
 
@@ -64,7 +63,7 @@ type Timeline = {
 };
 
 export type TimelineSection = {
-  schemaName: "section-datastory-cards-steps";
+  schemaName: "section-datastory-timeline";
   title: string;
   description: string;
   cards: Card[];
@@ -141,7 +140,7 @@ export type OtherSection = {
 
 export type DatastorySection =
   | BigNumbersSection
-  | CardsStepsSection
+  | TimelineSection
   | IframeSection
   | RelatedSection
   | SourceSection

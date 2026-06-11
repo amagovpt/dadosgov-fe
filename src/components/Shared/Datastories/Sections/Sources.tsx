@@ -44,7 +44,8 @@ export default function Sources({ id, className, title, description, sources }: 
           <div className="flex flex-col gap-16">
             {sources.map((source, index) => (
               <Anchor
-                href={source.href}
+                /** TODO: remove /pages from the href after refactoring the app routes */
+                href={"/pages" + source.href}
                 className="!justify-start !text-nowrap"
                 target="_blank"
                 key={index}

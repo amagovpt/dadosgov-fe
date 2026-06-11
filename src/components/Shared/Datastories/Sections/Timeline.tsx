@@ -13,40 +13,7 @@ import {
   TimelineVertical,
   useModalContext,
 } from "@ama-pt/agora-design-system";
-
-// ----------------------------------------------------------------------------------------------------------------
-
-export const MOCK: TimelineSection = {
-  schemaName: "section-datastory-cards-steps",
-  title: "section title",
-  description: "section description",
-  cards: [
-    {
-      icon: "",
-      title: "card title 1",
-      description:
-        "card description 1 card description 1 card description 1 card description 1 card description 1 card description 1 card description 1",
-    },
-    {
-      icon: "",
-      title: "card title 2",
-      description:
-        "card description 2 card description 2 card description 2 card description 2 card description 2 card description 2 card description 2 card description 2 card description 2",
-    },
-    {
-      icon: "",
-      title: "card title 3",
-      description:
-        "card description 3 card description 3 card description 3 card description 3 card description 3 card description 3 card description 3 card description 3 card description 3 description 3 card description 3 card description 3",
-    },
-  ],
-  cardsLinkIcon: "agora-line-chevron-right",
-  anchor: {
-    children: "button text",
-    icon: "agora-line-arrow-right-circle",
-    href: "",
-  },
-};
+import { Typograph } from "../../Generics/Typograph";
 
 // ----------------------------------------------------------------------------------------------------------------
 
@@ -69,10 +36,7 @@ function CardsContent({ cards, cardsLinkIcon }: CardsContentI) {
         return (
           <Fragment key={`card-step-${index}`}>
             <div className="flex-1">
-              <CardGeneral
-                titleText={card.title}
-                descriptionText={formatHtmlParagraphs(card.description) as string[]}
-              />
+              <CardGeneral titleText={card.title} descriptionText={card.subtitle} />
             </div>
             {!isLastCard && (
               <AppIcon name={cardsLinkIcon} className="rotate-90 self-center lg:rotate-0" />
@@ -87,50 +51,37 @@ function CardsContent({ cards, cardsLinkIcon }: CardsContentI) {
 // ----------------------------------------------------------------------------------------------------------------
 
 function TimelineModal({ title, description, events }: TimelineModalI) {
-  const { hide } = useModalContext();
-
   return (
-    <TimelineVertical hideLabels={false}>
-      <TimelineEvent label="2023" hasIcon icon="agora-line-calendar" altIcon="">
-        <p className="mb-32 text-m-bold">
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-        </p>
-        <p className="mb-8 text-m-bold">
-          Reprehenderit veniam asperiores, fugiat perferendis unde laborum.
-        </p>
-        <span className="mb-128 text-m-regular">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit veniam asperiores,
-          fugiat perferendis unde laborum quis velit commodi fuga aperiam consequatur recusandae
-          earum omnis quasi in, officia quod sit? Nulla.
-        </span>
-      </TimelineEvent>
-      <TimelineEvent label="2023" hasIcon icon="agora-line-chevron-right" altIcon="">
-        <p className="mb-32 text-m-bold">
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-        </p>
-        <p className="mb-8 text-m-bold">
-          Reprehenderit veniam asperiores, fugiat perferendis unde laborum.
-        </p>
-        <span className="mb-128 text-m-regular">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit veniam asperiores,
-          fugiat perferendis unde laborum quis velit commodi fuga aperiam consequatur recusandae
-          earum omnis quasi in, officia quod sit? Nulla.
-        </span>
-      </TimelineEvent>
-      <TimelineEvent label="2024" hasIcon icon="agora-line-chevron-right" altIcon="">
-        <p className="mb-32 text-m-bold">
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-        </p>
-        <p className="mb-8 text-m-bold">
-          Reprehenderit veniam asperiores, fugiat perferendis unde laborum.
-        </p>
-        <span className="mb-128 text-m-regular">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit veniam asperiores,
-          fugiat perferendis unde laborum quis velit commodi fuga aperiam consequatur recusandae
-          earum omnis quasi in, officia quod sit? Nulla.
-        </span>
-      </TimelineEvent>
-    </TimelineVertical>
+    <div className="datastory-modal flex flex-col gap-64">
+      <div className="ml-0 flex max-w-[592px] flex-col gap-16 lg:ml-128">
+        <Typograph tag="h2" className="text-2xl-bold text-white">
+          {title}
+        </Typograph>
+        <Typograph tag="div" className="flex flex-col gap-8 text-m-regular text-white">
+          {formatHtmlParagraphs(description) as string[]}
+        </Typograph>
+      </div>
+      <TimelineVertical hideLabels={false}>
+        {events.map((e, index) => {
+          return (
+            <TimelineEvent
+              key={`event-${index}`}
+              label={e.label}
+              hasIcon
+              icon={e.icon ?? (index === 0 ? "agora-line-calendar" : "agora-line-chevron-right")}
+              altIcon=""
+            >
+              <Typograph tag="h3" className="mb-32 text-m-bold text-white">
+                {e.title}
+              </Typograph>
+              <Typograph tag="div" className="flex flex-col gap-8 text-m-regular text-white">
+                {formatHtmlParagraphs(e.description) as string[]}
+              </Typograph>
+            </TimelineEvent>
+          );
+        })}
+      </TimelineVertical>
+    </div>
   );
 }
 
@@ -149,8 +100,8 @@ export default function Timeline({
 
   const handleOpenModal = () => {
     show(<TimelineModal {...timeline} />, {
-      title: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
-      closeButtonLabel: "Close",
+      title: timeline.title,
+      closeButtonLabel: "Fechar",
       darkMode: true,
     } as ModalConfiguration);
   };
@@ -181,8 +132,8 @@ export default function Timeline({
           <Button
             appearance="outline"
             hasIcon
-            trailingIcon={anchor.icon}
-            trailingIconHover={anchor.icon}
+            trailingIcon={anchor.icon ?? "agora-line-arrow-right-circle"}
+            trailingIconHover={anchor.icon ?? "agora-line-arrow-right-circle"}
             onClick={handleOpenModal}
           >
             {anchor.children}

@@ -61,6 +61,7 @@
      5.9 Pagination
      5.10 Toggle (Organizations Filters)
      5.11 Popup Dialog
+     5.12 Timeline
   6. PAGES ..................................................... [06]
      6.1 Homepage
      6.2 Login
@@ -1007,6 +1008,25 @@ li.section-name:empty {
 
   mask-size: contain;
   -webkit-mask-size: contain;
+}
+
+/* ------------ 5.12 TIMELINE ------------- */
+
+.datastory-modal .agora-timeline-vertical .timeline-label {
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+.datastory-modal .agora-timeline-vertical .timeline-icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.datastory-modal .agora-timeline-vertical .timeline-icon svg {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
 }
 
 /* ==========================================================================

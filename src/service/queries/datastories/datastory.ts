@@ -145,6 +145,30 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     }
                   }
                 }
+                ... on SectionDatastoryTimelineComponent {
+                  schemaName
+                  title
+                  description
+                  cards {
+                    title
+                    subtitle
+                  }
+                  cardsLinkIcon
+                  anchor {
+                    children
+                    icon
+                  }
+                  timeline {
+                    title
+                    description
+                    events {
+                      label
+                      icon
+                      title
+                      description
+                    }
+                  }
+                }
               }
             }
           }
