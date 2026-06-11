@@ -1,121 +1,91 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Button,
-  CardNoResults,
-  Icon,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-  InputSelect,
-} from "@ama-pt/agora-design-system";
+import { Button, CardNoResults, Icon, InputSelect } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
-import StatusDot from "@/components/admin/StatusDot";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { useAdminListController } from "@/components/admin/lists/useAdminListController";
 import { fetchAdminPosts } from "@/services/api";
 import type { Post } from "@/types/api";
-import TextLink from "@/components/Primitives/TextLink";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
-import TableActionsCell from "../TableActionsCell";
-import { formatDateToDMY } from "@/utils/formatDate";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-
-type SortField = "name" | "created_at" | "last_modified";
+import {
+  createPostColumns,
+  filterPosts,
+  sortPosts,
+  type PostSortField,
+} from "./postsListConfig";
 
 export default function SystemPostsClient() {
-  const FETCH_PAGE_SIZE = 100;
+  const fetchPageSize = 100;
   const router = useRouter();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [totalItems, setTotalItems] = useState(0);
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-
-  const { handleSort, getSortOrder } = useSortControls(
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    searchQuery,
+    handleSearch,
     sortField,
     sortOrder,
-    setSortField,
-    setSortOrder,
-    setCurrentPage
-  );
+    handleSort,
+    getSortOrder,
+    filters,
+    updateFilter,
+  } = useAdminListController<PostSortField, { typeFilter: string; statusFilter: string }>({
+    initialFilters: { typeFilter: "", statusFilter: "" },
+  });
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const firstResponse = await fetchAdminPosts(1, FETCH_PAGE_SIZE);
+      const firstResponse = await fetchAdminPosts(1, fetchPageSize);
       let data = firstResponse.data || [];
       const totalAvailable = firstResponse.total || data.length;
-      const totalPages = Math.ceil(totalAvailable / FETCH_PAGE_SIZE);
+      const totalPages = Math.ceil(totalAvailable / fetchPageSize);
 
       if (totalPages > 1) {
         const remainingResponses = await Promise.all(
           Array.from({ length: totalPages - 1 }, (_, index) =>
-            fetchAdminPosts(index + 2, FETCH_PAGE_SIZE)
+            fetchAdminPosts(index + 2, fetchPageSize)
           )
         );
-        data = data.concat(remainingResponses.flatMap((res) => res.data || []));
+        data = data.concat(remainingResponses.flatMap((response) => response.data || []));
       }
 
-      if (searchQuery.trim()) {
-        const q = searchQuery.trim().toLowerCase();
-        data = data.filter((p) => p.name.toLowerCase().includes(q));
-      }
-      if (typeFilter) {
-        data = data.filter((p) => {
-          if (typeFilter === "news") return p.kind !== "page";
-          if (typeFilter === "page") return p.kind === "page";
-          return true;
-        });
-      }
-      if (statusFilter) {
-        data = data.filter((p) => {
-          if (statusFilter === "published") return !!p.published;
-          if (statusFilter === "draft") return !p.published;
-          return true;
-        });
-      }
-      if (sortField && sortOrder !== "none") {
-        data = [...data].sort((a, b) => {
-          if (sortField === "name") {
-            const cmp = (a.name || "").localeCompare(b.name || "", "pt", { sensitivity: "base" });
-            return sortOrder === "descending" ? -cmp : cmp;
-          }
-          const aTime = new Date(a[sortField] || "").getTime();
-          const bTime = new Date(b[sortField] || "").getTime();
-          const cmp = aTime - bTime;
-          return sortOrder === "descending" ? -cmp : cmp;
-        });
-      }
-
-      const start = (currentPage - 1) * pageSize;
-      setPosts(data.slice(start, start + pageSize));
-      setTotalItems(data.length);
+      setAllPosts(data);
     } catch (error) {
       console.error("Error loading posts:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, searchQuery, typeFilter, statusFilter, sortField, sortOrder]);
+  }, []);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
-  const handleSearch = useDebouncedSearch((value: string) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-  });
+  const filteredPosts = useMemo(
+    () => filterPosts(allPosts, searchQuery, filters.typeFilter, filters.statusFilter),
+    [allPosts, searchQuery, filters.typeFilter, filters.statusFilter]
+  );
+
+  const sortedPosts = useMemo(
+    () => sortPosts(filteredPosts, sortField, sortOrder),
+    [filteredPosts, sortField, sortOrder]
+  );
+
+  const paginatedPosts = useMemo(
+    () => paginateItems(sortedPosts, currentPage, pageSize),
+    [sortedPosts, currentPage, pageSize]
+  );
+
+  const columns = useMemo(() => createPostColumns(), []);
 
   return (
     <AdminListPage
@@ -126,8 +96,8 @@ export default function SystemPostsClient() {
       ]}
       title="Artigos"
       isLoading={isLoading}
-      count={totalItems}
-      hasItems={posts.length > 0}
+      count={sortedPosts.length}
+      hasItems={paginatedPosts.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -145,28 +115,24 @@ export default function SystemPostsClient() {
             placeholder="Filtrar por tipo"
             id="filter-type"
             onChange={(options) => {
-              setTypeFilter(options.length > 0 ? (options[0].value as string) : "");
-              setCurrentPage(1);
+              updateFilter("typeFilter", options.length > 0 ? (options[0].value as string) : "");
             }}
           >
             <DropdownSection name="type">
-              <DropdownOption value="" selected={typeFilter === ""}>
+              <DropdownOption value="" selected={filters.typeFilter === ""}>
                 Todos
               </DropdownOption>
-              <DropdownOption value="news" selected={typeFilter === "news"}>
+              <DropdownOption value="news" selected={filters.typeFilter === "news"}>
                 Notícias
               </DropdownOption>
-              <DropdownOption value="page" selected={typeFilter === "page"}>
+              <DropdownOption value="page" selected={filters.typeFilter === "page"}>
                 Página
               </DropdownOption>
             </DropdownSection>
           </InputSelect>
           <StatusFilterSelect
-            value={statusFilter}
-            onChange={(value) => {
-              setStatusFilter(value);
-              setCurrentPage(1);
-            }}
+            value={filters.statusFilter}
+            onChange={(value) => updateFilter("statusFilter", value)}
             options={[
               { value: "", label: "Todos" },
               { value: "published", label: "Publicado" },
@@ -179,7 +145,7 @@ export default function SystemPostsClient() {
         <Button
           variant="primary"
           appearance="outline"
-          hasIcon={true}
+          hasIcon
           leadingIcon="agora-line-plus-circle"
           leadingIconHover="agora-solid-plus-circle"
           onClick={() => router.push("/pages/admin/system/posts/new")}
@@ -197,61 +163,13 @@ export default function SystemPostsClient() {
         />
       }
     >
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell
-            sortType="string"
-            sortOrder={getSortOrder("name")}
-            onSortChange={handleSort("name")}
-          >
-            Título
-          </TableHeaderCell>
-          <TableHeaderCell>Tipo</TableHeaderCell>
-          <TableHeaderCell>Estado</TableHeaderCell>
-          <TableHeaderCell
-            sortType="date"
-            sortOrder={getSortOrder("created_at")}
-            onSortChange={handleSort("created_at")}
-          >
-            Criado em
-          </TableHeaderCell>
-          <TableHeaderCell
-            sortType="date"
-            sortOrder={getSortOrder("last_modified")}
-            onSortChange={handleSort("last_modified")}
-          >
-            Atualizado em
-          </TableHeaderCell>
-          <TableHeaderCell>Ação</TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {posts.map((post) => (
-          <TableRow key={post.id}>
-            <TableCell headerLabel="Título">
-              <TextLink href={`/pages/posts/${post.slug}`}>{post.name}</TextLink>
-            </TableCell>
-            <TableCell headerLabel="Tipo">{post.kind === "page" ? "Página" : "Notícias"}</TableCell>
-            <TableCell headerLabel="Estado">
-              <StatusDot variant={post.published ? "success" : "warning"}>
-                {post.published ? "Publicado" : "Despublicado"}
-              </StatusDot>
-            </TableCell>
-            <TableCell headerLabel="Criado em">{formatDateToDMY(post.created_at)}</TableCell>
-            <TableCell headerLabel="Atualizado em">{formatDateToDMY(post.last_modified)}</TableCell>
-            <TableCell headerLabel="Ação">
-              <TableActionsCell
-                viewAction={{
-                  href: `/pages/posts/${post.slug}`,
-                }}
-                editAction={{
-                  href: `/pages/admin/posts/${post.id}`,
-                }}
-              />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
+      <AdminListTable
+        items={paginatedPosts}
+        columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+        getRowKey={(post) => post.id}
+      />
     </AdminListPage>
   );
 }

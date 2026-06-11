@@ -1,24 +1,27 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import {
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-  usePopupContext,
-} from "@ama-pt/agora-design-system";
+import { usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import {
+  createDateSorter,
+  paginateItems,
+  sortItems,
+} from "@/components/admin/lists/listHelpers";
+import { useAdminListController } from "@/components/admin/lists/useAdminListController";
 import { fetchOrgDiscussions } from "@/services/api";
-import { Discussion } from "@/types/api";
+import type { Discussion } from "@/types/api";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";
 import AdminEmptyState from "../AdminEmptyState";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
+import {
+  createOrgDiscussionColumns,
+  type DiscussionSortField,
+} from "./discussionsListConfig";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -27,8 +30,6 @@ const formatDate = (dateStr: string) => {
     return dateStr;
   }
 };
-
-type DiscussionSortField = "created" | "closed";
 
 interface OrgDiscussionsClientProps {
   orgId: string;
@@ -40,18 +41,18 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [sortField, setSortField] = useState<DiscussionSortField | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-
-  const { handleSort, getSortOrder } = useSortControls(
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
     sortField,
     sortOrder,
-    setSortField,
-    setSortOrder,
-    setCurrentPage
-  );
+    handleSort,
+    getSortOrder,
+  } = useAdminListController<DiscussionSortField>({
+    initialFilters: {},
+  });
 
   useEffect(() => {
     async function loadDiscussions() {
@@ -66,38 +67,44 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
       }
     }
 
-    loadDiscussions();
+    void loadDiscussions();
   }, [orgId]);
 
-  const sortedDiscussions = useMemo(() => {
-    if (!sortField || sortOrder === "none") return discussions;
-    const dir = sortOrder === "ascending" ? 1 : -1;
-    return [...discussions].sort((a, b) => {
-      const av = sortField === "created" ? a.created : a.closed;
-      const bv = sortField === "created" ? b.created : b.closed;
-      const at = av ? Date.parse(av) : 0;
-      const bt = bv ? Date.parse(bv) : 0;
-      return (at - bt) * dir;
-    });
-  }, [discussions, sortField, sortOrder]);
+  const sortedDiscussions = useMemo(
+    () =>
+      sortItems(discussions, sortField, sortOrder, {
+        created: createDateSorter((discussion) => discussion.created),
+        closed: createDateSorter((discussion) => discussion.closed),
+      }),
+    [discussions, sortField, sortOrder]
+  );
 
-  const paginatedDiscussions = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sortedDiscussions.slice(start, start + itemsPerPage);
-  }, [sortedDiscussions, currentPage, itemsPerPage]);
+  const paginatedDiscussions = useMemo(
+    () => paginateItems(sortedDiscussions, currentPage, pageSize),
+    [sortedDiscussions, currentPage, pageSize]
+  );
 
   const openDiscussion = (discussion: Discussion) => {
     show(
       <DiscussionDetailPopup
         discussion={discussion}
         onUpdated={(updated) =>
-          setDiscussions((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))
+          setDiscussions((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
         }
-        onDeleted={() => setDiscussions((prev) => prev.filter((d) => d.id !== discussion.id))}
+        onDeleted={() => setDiscussions((prev) => prev.filter((item) => item.id !== discussion.id))}
       />,
       { title: "Discussão", closeAriaLabel: "Fechar", dimensions: "l" }
     );
   };
+
+  const columns = useMemo(
+    () =>
+      createOrgDiscussionColumns({
+        onOpenDiscussion: openDiscussion,
+        formatDate,
+      }),
+    []
+  );
 
   return (
     <AdminListPage
@@ -110,9 +117,9 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
       isLoading={isLoading}
       count={discussions.length}
       currentPage={currentPage}
-      pageSize={itemsPerPage}
+      pageSize={pageSize}
       setCurrentPage={setCurrentPage}
-      setPageSize={setItemsPerPage}
+      setPageSize={setPageSize}
       emptyState={
         <AdminEmptyState
           icon="agora-line-chat"
@@ -121,50 +128,15 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
         />
       }
     >
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell>Título</TableHeaderCell>
-          <TableHeaderCell
-            sortType="date"
-            sortOrder={getSortOrder("created")}
-            onSortChange={handleSort("created")}
-          >
-            Criado em
-          </TableHeaderCell>
-          <TableHeaderCell
-            sortType="date"
-            sortOrder={getSortOrder("closed")}
-            onSortChange={handleSort("closed")}
-          >
-            Fechado em
-          </TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {paginatedDiscussions.map((discussion) => (
-          <TableRow
-            key={discussion.id}
-            className="cursor-pointer hover:bg-neutral-50"
-            onClick={() => openDiscussion(discussion)}
-          >
-            <TableCell headerLabel="Título">
-              <button
-                className="text-left text-primary-600 underline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openDiscussion(discussion);
-                }}
-              >
-                {discussion.title}
-              </button>
-            </TableCell>
-            <TableCell headerLabel="Criado em">{formatDate(discussion.created)}</TableCell>
-            <TableCell headerLabel="Fechado em">
-              {discussion.closed ? formatDate(discussion.closed) : "-"}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
+      <AdminListTable
+        items={paginatedDiscussions}
+        columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+        getRowKey={(discussion) => discussion.id}
+        getRowClassName={() => "cursor-pointer hover:bg-neutral-50"}
+        onRowClick={openDiscussion}
+      />
     </AdminListPage>
   );
 }

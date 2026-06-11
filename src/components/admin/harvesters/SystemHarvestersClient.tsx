@@ -2,41 +2,27 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  CardNoResults,
-  Icon,
-  StatusCard,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-  usePopupContext,
-} from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { CardNoResults, Icon, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import { useAdminListController } from "@/components/admin/lists/useAdminListController";
 import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/services/api";
 import type { HarvestSource } from "@/types/api";
-import { getHarvesterStatus } from "@/utils/harvesterStatus";
-import { formatDateToDMY } from "@/utils/formatDate";
 import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
-import TextLink from "@/components/Primitives/TextLink";
 import StatusFilterSelect from "../StatusFilterSelect";
-import TableActionsCell from "../TableActionsCell";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
+import {
+  createSystemHarvesterColumns,
+  filterHarvestersByStatus,
+} from "./harvestersListConfig";
 
 export default function SystemHarvestersClient() {
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [feedback, setFeedback] = useState<{
     variant: "success" | "danger";
     message: string;
@@ -44,11 +30,25 @@ export default function SystemHarvestersClient() {
   const router = useRouter();
   const { isAdmin } = useAuth();
   const { show, hide } = usePopupContext();
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    searchQuery,
+    handleSearch,
+    filters,
+    updateFilter,
+  } = useAdminListController<never, { statusFilter: string }>({
+    initialFilters: { statusFilter: "" },
+  });
 
   const applyValidationUpdate = useCallback((updated: HarvestSource) => {
     setHarvesters((prev) =>
-      prev.map((h) =>
-        h.id === updated.id ? { ...h, validation: updated.validation ?? h.validation } : h
+      prev.map((harvester) =>
+        harvester.id === updated.id
+          ? { ...harvester, validation: updated.validation ?? harvester.validation }
+          : harvester
       )
     );
   }, []);
@@ -85,7 +85,7 @@ export default function SystemHarvestersClient() {
         <ApproveHarvesterPopupContent
           harvester={harvester}
           onClose={hide}
-          onConfirm={(c) => handleApprove(harvester, c)}
+          onConfirm={(comment) => handleApprove(harvester, comment)}
         />,
         {
           title: "Aprovar harvester",
@@ -103,7 +103,7 @@ export default function SystemHarvestersClient() {
         <RejectHarvesterPopupContent
           harvester={harvester}
           onClose={hide}
-          onConfirm={(c) => handleReject(harvester, c)}
+          onConfirm={(comment) => handleReject(harvester, comment)}
         />,
         {
           title: "Rejeitar harvester",
@@ -118,9 +118,9 @@ export default function SystemHarvestersClient() {
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetchHarvesters(currentPage, pageSize);
-      setHarvesters(res.data || []);
-      setTotalItems(res.total || 0);
+      const response = await fetchHarvesters(currentPage, pageSize);
+      setHarvesters(response.data || []);
+      setTotalItems(response.total || 0);
     } catch (error) {
       console.error("Error loading harvesters:", error);
     } finally {
@@ -132,31 +132,24 @@ export default function SystemHarvestersClient() {
     void loadData();
   }, [loadData]);
 
-  const handleSearch = useDebouncedSearch((value: string) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-  });
-
-  const filtered = useMemo(() => {
+  const filteredHarvesters = useMemo(() => {
     let result = harvesters;
     if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter((h) => h.name.toLowerCase().includes(q));
+      const query = searchQuery.trim().toLowerCase();
+      result = result.filter((harvester) => harvester.name.toLowerCase().includes(query));
     }
-    if (statusFilter) {
-      result = result.filter((h) => {
-        if (statusFilter === "failed") {
-          return h.last_job?.status === "failed";
-        }
-        if (statusFilter === "done") {
-          return h.last_job?.status === "done";
-        }
-        const valState = h.validation?.state;
-        return valState === statusFilter;
-      });
-    }
-    return result;
-  }, [harvesters, searchQuery, statusFilter]);
+    return filterHarvestersByStatus(result, filters.statusFilter);
+  }, [harvesters, searchQuery, filters.statusFilter]);
+
+  const columns = useMemo(
+    () =>
+      createSystemHarvesterColumns({
+        isAdmin,
+        onApprove: openApprovePopup,
+        onReject: openRejectPopup,
+      }),
+    [isAdmin, openApprovePopup, openRejectPopup]
+  );
 
   return (
     <AdminListPage
@@ -168,7 +161,7 @@ export default function SystemHarvestersClient() {
       title="Harvesters"
       isLoading={isLoading}
       count={totalItems}
-      hasItems={filtered.length > 0}
+      hasItems={filteredHarvesters.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -180,11 +173,8 @@ export default function SystemHarvestersClient() {
       }}
       filters={
         <StatusFilterSelect
-          value={statusFilter}
-          onChange={(value) => {
-            setStatusFilter(value);
-            setCurrentPage(1);
-          }}
+          value={filters.statusFilter}
+          onChange={(value) => updateFilter("statusFilter", value)}
           options={[
             { value: "", label: "Todos" },
             { value: "pending", label: "Em espera de validação" },
@@ -212,87 +202,13 @@ export default function SystemHarvestersClient() {
         />
       }
     >
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell>Nome</TableHeaderCell>
-          <TableHeaderCell>Estado</TableHeaderCell>
-          <TableHeaderCell>Implementação</TableHeaderCell>
-          <TableHeaderCell>Criado em</TableHeaderCell>
-          <TableHeaderCell>Última execução</TableHeaderCell>
-          <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
-          <TableHeaderCell>API</TableHeaderCell>
-          <TableHeaderCell>Ações</TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {filtered.map((harvester) => {
-          const status = getHarvesterStatus(harvester);
-          return (
-            <TableRow
-              key={harvester.id}
-              onClick={() => router.push(`/pages/admin/harvesters/${harvester.id}`)}
-              style={{ cursor: "pointer" }}
-            >
-              <TableCell headerLabel="Nome">
-                <TextLink href={`/pages/admin/harvesters/${harvester.id}`}>{harvester.name}</TextLink>
-              </TableCell>
-              <TableCell headerLabel="Estado">
-                <StatusDot variant={status.variant}>{status.label}</StatusDot>
-              </TableCell>
-              <TableCell headerLabel="Implementação">{harvester.backend}</TableCell>
-              <TableCell headerLabel="Criado em">{formatDateToDMY(harvester.created_at)}</TableCell>
-              <TableCell headerLabel="Última execução">
-                {harvester.last_job?.ended ? formatDateToDMY(harvester.last_job.ended) : "Ainda não"}
-              </TableCell>
-              <TableCell headerLabel="Conjuntos de dados">
-                {harvester.datasets_count ?? 0}
-              </TableCell>
-              <TableCell headerLabel="API">0</TableCell>
-              <TableCell headerLabel="Ações">
-                <div className="flex items-center gap-[12px]">
-                  {isAdmin && harvester.validation?.state === "pending" && (
-                    <>
-                      <button
-                        type="button"
-                        aria-label={`Aprovar harvester ${harvester.name}`}
-                        title="Aprovar harvester"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openApprovePopup(harvester);
-                        }}
-                      >
-                        <Icon
-                          name="agora-line-check-circle"
-                          className="h-[20px] w-[20px] text-success-600"
-                        />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Rejeitar harvester ${harvester.name}`}
-                        title="Rejeitar harvester"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openRejectPopup(harvester);
-                        }}
-                      >
-                        <Icon
-                          name="agora-line-x-circle"
-                          className="h-[20px] w-[20px] text-danger-600"
-                        />
-                      </button>
-                    </>
-                  )}
-                  <TableActionsCell
-                    editAction={{
-                      href: `/pages/admin/harvesters/${harvester.id}?tab=config`,
-                    }}
-                  />
-                </div>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
+      <AdminListTable
+        items={filteredHarvesters}
+        columns={columns}
+        getRowKey={(harvester) => harvester.id}
+        getRowStyle={() => ({ cursor: "pointer" })}
+        onRowClick={(harvester) => router.push(`/pages/admin/harvesters/${harvester.id}`)}
+      />
     </AdminListPage>
   );
 }

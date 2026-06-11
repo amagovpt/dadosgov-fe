@@ -1,28 +1,23 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import {
-  Icon,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { useEffect, useMemo, useState } from "react";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { useAdminListController } from "@/components/admin/lists/useAdminListController";
 import { fetchOrgDiscussions } from "@/services/api";
 import type { Discussion } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import { formatDateToDMY } from "@/utils/formatDate";
 import AdminEmptyState from "../AdminEmptyState";
+import { createDiscussionColumns } from "./discussionsListConfig";
 
 export default function DiscussionsClient() {
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { currentPage, setCurrentPage, pageSize, setPageSize } = useAdminListController({
+    initialFilters: {},
+  });
 
   useEffect(() => {
     if (!activeOrg) {
@@ -32,7 +27,7 @@ export default function DiscussionsClient() {
 
     async function loadDiscussions() {
       try {
-        const { data } = await fetchOrgDiscussions(activeOrg!.id);
+        const { data } = await fetchOrgDiscussions(activeOrg.id);
         if (data) setDiscussions(data);
       } catch (error) {
         console.error("Error loading discussions:", error);
@@ -41,13 +36,14 @@ export default function DiscussionsClient() {
       }
     }
 
-    loadDiscussions();
+    void loadDiscussions();
   }, [activeOrg]);
 
-  const paginatedDiscussions = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return discussions.slice(start, start + itemsPerPage);
-  }, [discussions, currentPage, itemsPerPage]);
+  const columns = useMemo(() => createDiscussionColumns(), []);
+  const paginatedDiscussions = useMemo(
+    () => paginateItems(discussions, currentPage, pageSize),
+    [discussions, currentPage, pageSize]
+  );
 
   if (isOrgLoading || isLoading) {
     return <div className="admin-page">A carregar...</div>;
@@ -64,9 +60,9 @@ export default function DiscussionsClient() {
       isLoading={false}
       count={discussions.length}
       currentPage={currentPage}
-      pageSize={itemsPerPage}
+      pageSize={pageSize}
       setCurrentPage={setCurrentPage}
-      setPageSize={setItemsPerPage}
+      setPageSize={setPageSize}
       emptyState={
         <AdminEmptyState
           icon="agora-line-chat"
@@ -74,53 +70,11 @@ export default function DiscussionsClient() {
         />
       }
     >
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell sortType="date" sortOrder="none">
-            Título
-          </TableHeaderCell>
-          <TableHeaderCell>Autor</TableHeaderCell>
-          <TableHeaderCell>Estado</TableHeaderCell>
-          <TableHeaderCell sortType="date" sortOrder="none">
-            Data
-          </TableHeaderCell>
-          <TableHeaderCell>Mensagens</TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {paginatedDiscussions.map((discussion) => (
-          <TableRow key={discussion.id}>
-            <TableCell headerLabel="Título">
-              <span className="font-medium">{discussion.title}</span>
-            </TableCell>
-            <TableCell headerLabel="Autor">
-              <div className="flex items-center gap-8">
-                {discussion.user?.avatar_thumbnail ? (
-                  <img
-                    src={discussion.user.avatar_thumbnail}
-                    alt={`${discussion.user.first_name} ${discussion.user.last_name}`}
-                    className="h-24 w-24 rounded-full"
-                  />
-                ) : (
-                  <Icon name="agora-line-user" className="h-24 w-24" />
-                )}
-                <span>
-                  {discussion.user?.first_name} {discussion.user?.last_name}
-                </span>
-              </div>
-            </TableCell>
-            <TableCell headerLabel="Estado">
-              {discussion.closed ? (
-                <StatusDot variant="success">FECHADA</StatusDot>
-              ) : (
-                <StatusDot variant="informative">ABERTA</StatusDot>
-              )}
-            </TableCell>
-            <TableCell headerLabel="Data">{formatDateToDMY(discussion.created)}</TableCell>
-            <TableCell headerLabel="Mensagens">{discussion.discussion?.length || 0}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
+      <AdminListTable
+        items={paginatedDiscussions}
+        columns={columns}
+        getRowKey={(discussion) => discussion.id}
+      />
     </AdminListPage>
   );
 }

@@ -1,36 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  CardNoResults,
-  Icon,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@ama-pt/agora-design-system";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import { useAdminListController } from "@/components/admin/lists/useAdminListController";
 import { fetchTopics } from "@/services/api";
-import { Topic } from "@/types/api";
-import TextLink from "@/components/Primitives/TextLink";
-import TableActionsCell from "../TableActionsCell";
-
-const formatDate = (dateStr: string) => {
-  try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-  } catch {
-    return dateStr;
-  }
-};
+import type { Topic } from "@/types/api";
+import { createTopicColumns } from "./topicsListConfig";
 
 export default function SystemTopicsClient() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const { currentPage, setCurrentPage, pageSize, setPageSize } = useAdminListController({
+    initialFilters: {},
+  });
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -46,8 +31,10 @@ export default function SystemTopicsClient() {
   }, [currentPage, pageSize]);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
+
+  const columns = useMemo(() => createTopicColumns(), []);
 
   return (
     <AdminListPage
@@ -74,34 +61,7 @@ export default function SystemTopicsClient() {
         />
       }
     >
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell>Nome</TableHeaderCell>
-          <TableHeaderCell>Criado em</TableHeaderCell>
-          <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
-          <TableHeaderCell>Reutilizações</TableHeaderCell>
-          <TableHeaderCell>Ações</TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {topics.map((topic) => (
-          <TableRow key={topic.id}>
-            <TableCell headerLabel="Nome">
-              <TextLink href={`/pages/themes/${topic.slug}`}>{topic.name}</TextLink>
-            </TableCell>
-            <TableCell headerLabel="Criado em">{formatDate(topic.created_at)}</TableCell>
-            <TableCell headerLabel="Conjuntos de dados">{topic.datasets_count ?? 0}</TableCell>
-            <TableCell headerLabel="Reutilizações">{topic.reuses_count ?? 0}</TableCell>
-            <TableCell headerLabel="Ações">
-              <TableActionsCell
-                viewAction={{
-                  href: `/pages/themes/${topic.slug}`,
-                }}
-              />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
+      <AdminListTable items={topics} columns={columns} getRowKey={(topic) => topic.id} />
     </AdminListPage>
   );
 }

@@ -2,34 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  CardNoResults,
-  Icon,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import { paginateItems } from "@/components/admin/lists/listHelpers";
 import { fetchAllCommunityResources } from "@/services/api";
 import { CommunityResource } from "@/types/api";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
-import TextLink from "@/components/Primitives/TextLink";
-import TableActionsCell from "../TableActionsCell";
+import {
+  CommunityResourceSortField,
+  createCommunityResourceColumns,
+  sortCommunityResources,
+} from "./communityResourcesListConfig";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
-
-type SortField = "title" | "format" | "created_at" | "last_modified";
-
-const formatDate = (dateStr: string) => {
-  try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-  } catch {
-    return dateStr;
-  }
-};
 
 export default function SystemCommunityResourcesClient() {
   const searchParams = useSearchParams();
@@ -39,7 +24,7 @@ export default function SystemCommunityResourcesClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortField, setSortField] = useState<CommunityResourceSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
   const { handleSort, getSortOrder } = useSortControls(
@@ -63,32 +48,25 @@ export default function SystemCommunityResourcesClient() {
     }
   }, [resourceId]);
 
-  const sortedResources = useMemo(() => {
-    if (sortOrder === "none") return resources;
-    return [...resources].sort((a, b) => {
-      let cmp = 0;
-      switch (sortField) {
-        case "title":
-          cmp = (a.title || "").localeCompare(b.title || "");
-          break;
-        case "format":
-          cmp = (a.format || "").localeCompare(b.format || "");
-          break;
-        case "created_at":
-          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
-        case "last_modified":
-          cmp = new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime();
-          break;
-      }
-      return sortOrder === "descending" ? -cmp : cmp;
-    });
-  }, [resources, sortField, sortOrder]);
-
-  const paginatedResources = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return sortedResources.slice(start, start + pageSize);
-  }, [sortedResources, currentPage, pageSize]);
+  const sortedResources = useMemo(
+    () => sortCommunityResources(resources, sortField, sortOrder),
+    [resources, sortField, sortOrder]
+  );
+  const paginatedResources = useMemo(
+    () => paginateItems(sortedResources, currentPage, pageSize),
+    [sortedResources, currentPage, pageSize]
+  );
+  const columns = useMemo(
+    () =>
+      createCommunityResourceColumns({
+        includeFormat: true,
+        titleHeader: "Título do recurso",
+        showDatasetLink: true,
+        useSystemStatusDot: true,
+        editHref: (resource) => `/pages/admin/system/community-resources?resource_id=${resource.id}`,
+      }),
+    []
+  );
 
   useEffect(() => {
     loadData();
@@ -124,77 +102,13 @@ export default function SystemCommunityResourcesClient() {
         />
       }
     >
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell
-            sortType="date"
-            sortOrder={getSortOrder("title")}
-            onSortChange={handleSort("title")}
-          >
-            Título do recurso
-          </TableHeaderCell>
-          <TableHeaderCell>Estado</TableHeaderCell>
-          <TableHeaderCell
-            sortType="date"
-            sortOrder={getSortOrder("format")}
-            onSortChange={handleSort("format")}
-          >
-            Formato
-          </TableHeaderCell>
-          <TableHeaderCell
-            sortType="date"
-            sortOrder={getSortOrder("created_at")}
-            onSortChange={handleSort("created_at")}
-          >
-            Criado em
-          </TableHeaderCell>
-          <TableHeaderCell
-            sortType="date"
-            sortOrder={getSortOrder("last_modified")}
-            onSortChange={handleSort("last_modified")}
-          >
-            Modificado em
-          </TableHeaderCell>
-          <TableHeaderCell>Ação</TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {paginatedResources.map((resource) => (
-          <TableRow key={resource.id}>
-            <TableCell headerLabel="Título do recurso">
-              <div>
-                <span className="text-neutral-900">{resource.title}</span>
-                {resource.dataset && (
-                  <div className="text-sm text-neutral-700">
-                    <TextLink href={`/pages/datasets/${resource.dataset.id}`}>
-                      {resource.dataset.title}
-                    </TextLink>
-                  </div>
-                )}
-              </div>
-            </TableCell>
-            <TableCell headerLabel="Estado">
-              <StatusDot
-                variant={resource.deleted ? "danger" : resource.archived ? "warning" : "success"}
-              >
-                {resource.deleted ? "Eliminado" : resource.archived ? "Arquivado" : "Publicado"}
-              </StatusDot>
-            </TableCell>
-            <TableCell headerLabel="Formato">
-              {resource.format ? resource.format.toUpperCase() : "—"}
-            </TableCell>
-            <TableCell headerLabel="Criado em">{formatDate(resource.created_at)}</TableCell>
-            <TableCell headerLabel="Modificado em">{formatDate(resource.last_modified)}</TableCell>
-            <TableCell headerLabel="Ação">
-              <TableActionsCell
-                editAction={{
-                  href: `/pages/admin/system/community-resources?resource_id=${resource.id}`,
-                }}
-              />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
+      <AdminListTable
+        items={paginatedResources}
+        columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+        getRowKey={(resource) => resource.id}
+      />
     </AdminListPage>
   );
 }

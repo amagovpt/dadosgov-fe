@@ -1,24 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  Button,
-  CardNoResults,
-  Icon,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-  usePopupContext,
-} from "@ama-pt/agora-design-system";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button, CardNoResults, Icon, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import { useAdminListController } from "@/components/admin/lists/useAdminListController";
 import { fetchOrganizations, deleteOrganization } from "@/services/api";
-import { Organization } from "@/types/api";
-import TextLink from "@/components/Primitives/TextLink";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-import TableActionsCell from "../TableActionsCell";
+import type { Organization } from "@/types/api";
+import {
+  createOrganizationColumns,
+  organizationSortFieldMap,
+  type OrganizationSortField,
+} from "./organizationsListConfig";
 
 function DeleteOrgPopupContent({
   onClose,
@@ -48,51 +41,31 @@ function DeleteOrgPopupContent({
   );
 }
 
-type SortField = "name" | "created_at";
-
-const SORT_FIELD_MAP: Record<SortField, string> = {
-  name: "name",
-  created_at: "created",
-};
-
-const formatDate = (dateStr: string) => {
-  try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-  } catch {
-    return dateStr;
-  }
-};
-
 export default function SystemOrganizationsClient() {
   const { show, hide } = usePopupContext();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [deletingOrgId, setDeletingOrgId] = useState<string | null>(null);
 
-  const { handleSort, getSortOrder } = useSortControls(
-    sortField,
-    sortOrder,
-    setSortField,
-    setSortOrder,
-    setCurrentPage
-  );
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    searchQuery,
+    handleSearch,
+    sortParam,
+    getSortOrder,
+    handleSort,
+  } = useAdminListController<OrganizationSortField>({
+    initialFilters: {},
+    sortFieldMap: organizationSortFieldMap,
+  });
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const apiSort = sortField ? SORT_FIELD_MAP[sortField] : undefined;
-      const sortParam =
-        sortOrder === "none" || !apiSort
-          ? undefined
-          : `${sortOrder === "descending" ? "-" : ""}${apiSort}`;
-
       const response = await fetchOrganizations(currentPage, pageSize, {
         q: searchQuery.trim() || undefined,
         sort: sortParam,
@@ -104,42 +77,49 @@ export default function SystemOrganizationsClient() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, searchQuery, sortField, sortOrder]);
+  }, [currentPage, pageSize, searchQuery, sortParam]);
+
+  const handleDeleteOrg = useCallback(
+    (organization: Organization) => {
+      show(
+        <DeleteOrgPopupContent
+          onClose={hide}
+          onConfirm={async () => {
+            setDeletingOrgId(organization.id);
+            try {
+              await deleteOrganization(organization.id);
+              hide();
+              await loadData();
+            } catch (error) {
+              console.error("Error deleting organization:", error);
+              hide();
+            } finally {
+              setDeletingOrgId(null);
+            }
+          }}
+        />,
+        {
+          title: "Tem a certeza que quer eliminar esta organização?",
+          closeAriaLabel: "Fechar",
+          dimensions: "m",
+        }
+      );
+    },
+    [hide, loadData, show]
+  );
+
+  const columns = useMemo(
+    () =>
+      createOrganizationColumns({
+        deletingOrgId,
+        onDelete: handleDeleteOrg,
+      }),
+    [deletingOrgId, handleDeleteOrg]
+  );
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
-
-  const handleSearch = useDebouncedSearch((value: string) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-  });
-
-  const handleDeleteOrg = (org: Organization) => {
-    show(
-      <DeleteOrgPopupContent
-        onClose={hide}
-        onConfirm={async () => {
-          setDeletingOrgId(org.id);
-          try {
-            await deleteOrganization(org.id);
-            hide();
-            await loadData();
-          } catch (error) {
-            console.error("Error deleting organization:", error);
-            hide();
-          } finally {
-            setDeletingOrgId(null);
-          }
-        }}
-      />,
-      {
-        title: "Tem a certeza que quer eliminar esta organização?",
-        closeAriaLabel: "Fechar",
-        dimensions: "m",
-      }
-    );
-  };
 
   return (
     <AdminListPage
@@ -171,56 +151,13 @@ export default function SystemOrganizationsClient() {
         />
       }
     >
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell
-            sortType="numeric"
-            sortOrder={getSortOrder("name")}
-            onSortChange={handleSort("name")}
-          >
-            Nome
-          </TableHeaderCell>
-          <TableHeaderCell
-            sortType="numeric"
-            sortOrder={getSortOrder("created_at")}
-            onSortChange={handleSort("created_at")}
-          >
-            Criado em
-          </TableHeaderCell>
-          <TableHeaderCell>Conjuntos de dados</TableHeaderCell>
-          <TableHeaderCell>Reutilizações</TableHeaderCell>
-          <TableHeaderCell>Membros</TableHeaderCell>
-          <TableHeaderCell>Ações</TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {organizations.map((org) => (
-          <TableRow key={org.id}>
-            <TableCell headerLabel="Nome">
-              <TextLink href={`/pages/admin/org/${org.id}/profile`}>{org.name}</TextLink>
-            </TableCell>
-            <TableCell headerLabel="Criado em">{formatDate(org.created_at)}</TableCell>
-            <TableCell headerLabel="Conjuntos de dados">{org.metrics?.datasets ?? 0}</TableCell>
-            <TableCell headerLabel="Reutilizações">{org.metrics?.reuses ?? 0}</TableCell>
-            <TableCell headerLabel="Membros">{org.members?.length ?? 0}</TableCell>
-            <TableCell headerLabel="Ações">
-              <TableActionsCell
-                viewAction={{
-                  href: `/pages/organizations/${org.slug}`,
-                }}
-                editAction={{
-                  href: `/pages/admin/org/${org.id}/profile`,
-                }}
-                deleteAction={{
-                  ariaLabel: `Eliminar ${org.name}`,
-                  disabled: deletingOrgId === org.id,
-                  handler: () => handleDeleteOrg(org),
-                }}
-              />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
+      <AdminListTable
+        items={organizations}
+        columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+        getRowKey={(organization) => organization.id}
+      />
     </AdminListPage>
   );
 }

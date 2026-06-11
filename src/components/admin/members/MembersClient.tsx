@@ -1,5 +1,6 @@
 "use client";
 
+import type { ChangeEvent } from "react";
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   Button,
@@ -17,7 +18,6 @@ import {
   TableCell,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
 import {
   fetchOrganization,
   addMember,
@@ -28,7 +28,12 @@ import {
   acceptMembership,
   refuseMembership,
 } from "@/services/api";
-import { Organization, OrganizationMember, MembershipRequest, UserSuggestion } from "@/types/api";
+import type {
+  MembershipRequest,
+  Organization,
+  OrganizationMember,
+  UserSuggestion,
+} from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
@@ -37,22 +42,14 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-
-const roleLabels: Record<string, string> = {
-  admin: "Administrador",
-  editor: "Editor",
-};
-
-const rolePillVariant = (role: string) => {
-  switch (role) {
-    case "admin":
-      return "informative" as const;
-    case "editor":
-      return "success" as const;
-    default:
-      return "neutral" as const;
-  }
-};
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { useAdminListController } from "@/components/admin/lists/useAdminListController";
+import {
+  createMemberColumns,
+  sortMembers,
+  type MemberSortField,
+} from "./membersListConfig";
 
 interface AddMemberPopupProps {
   orgId: string;
@@ -85,42 +82,46 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
           fetchMembershipRequests(orgId),
         ]);
         setInitialSuggestions(users);
-        memberIdsRef.current = (org?.members || []).map((m: OrganizationMember) => m.user.id);
+        memberIdsRef.current = (org?.members || []).map(
+          (member: OrganizationMember) => member.user.id
+        );
         pendingUserIdsRef.current = requests
-          .filter((r: MembershipRequest) => r.status === "pending" && r.user)
-          .map((r: MembershipRequest) => r.user.id);
+          .filter((request: MembershipRequest) => request.status === "pending" && request.user)
+          .map((request: MembershipRequest) => request.user.id);
       } catch (error) {
         console.error("Error loading users:", error);
       }
     }
-    loadData();
+
+    void loadData();
   }, [orgId]);
 
-  // Debounced backend search while the user types in the dropdown input.
   useEffect(() => {
-    const q = searchQuery.trim();
-    if (q.length < 2) {
+    const query = searchQuery.trim();
+    if (query.length < 2) {
       setSearchResults([]);
       setIsSearching(false);
       return;
     }
+
     setIsSearching(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await suggestUsers(q, 50);
-        setSearchResults(res);
+        const response = await suggestUsers(query, 50);
+        setSearchResults(response);
       } catch {
         setSearchResults([]);
       } finally {
         setIsSearching(false);
       }
     }, 300);
+
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
   const userDropdownChildren = useMemo(() => {
-    // When searching show only backend matches; otherwise show the initial list.
     const source = searchQuery.trim().length >= 2 ? searchResults : initialSuggestions;
+
     return (
       <DropdownSection name="users">
         {source.map((user) => (
@@ -134,6 +135,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
 
   const handleAdd = async () => {
     if (!canSubmitRef.current) return;
+
     setAddError(null);
     try {
       await addMember(orgId, selectedUserIdRef.current, selectedRole);
@@ -141,8 +143,8 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
       hide();
     } catch (error) {
       console.error("Error adding member:", error);
-      const msg = error instanceof Error ? error.message : null;
-      setAddError(msg || "Ocorreu um erro ao adicionar o membro. Tente novamente.");
+      const message = error instanceof Error ? error.message : null;
+      setAddError(message || "Ocorreu um erro ao adicionar o membro. Tente novamente.");
     }
   };
 
@@ -152,7 +154,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
     canSubmitRef.current = !!userId && !isMember && !isPending;
     setAlreadyMember(isMember);
     setHasPendingInvite(isPending);
-    forceUpdate((n) => n + 1);
+    forceUpdate((value) => value + 1);
   }, []);
 
   return (
@@ -380,7 +382,7 @@ function RefuseMembershipPopupContent({ orgId, request, onRefused }: RefuseMembe
         rows={3}
         placeholder="Indique o motivo da recusa (opcional)"
         value={comment}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setComment(e.target.value)}
+        onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setComment(event.target.value)}
       />
 
       <div className="flex gap-16">
@@ -395,9 +397,6 @@ function RefuseMembershipPopupContent({ orgId, request, onRefused }: RefuseMembe
   );
 }
 
-type SortOrder = "none" | "ascending" | "descending";
-type MemberSortField = "name" | "since";
-
 interface MembersClientProps {
   orgId?: string;
 }
@@ -406,12 +405,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const { show } = usePopupContext();
   const { user, isAdmin } = useAuth();
   const { activeOrg } = useActiveOrganization();
-  // Prefer the orgId from the URL params (passed by the server page). Fall
-  // back to the sidebar's active organization when this component is used
-  // in contexts that don't have an org in the URL.
   const resolvedOrgId = orgId ?? activeOrg?.id;
-  // Synchronous name lookup (no network) so the breadcrumb is populated
-  // immediately on first render.
   const cachedOrgName = useOrganizationName(resolvedOrgId, user?.organizations);
   const [addMemberOpenKey, setAddMemberOpenKey] = useState(0);
   const [editMemberOpenKey, setEditMemberOpenKey] = useState(0);
@@ -419,24 +413,24 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const [members, setMembers] = useState<OrganizationMember[]>([]);
   const [pendingRequests, setPendingRequests] = useState<MembershipRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [requestAction, setRequestAction] = useState<string | null>(null);
   const [requestError, setRequestError] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<MemberSortField | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-
-  const handleSort = (field: MemberSortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: MemberSortField): SortOrder =>
-    sortField === field ? sortOrder : "none";
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    sortField,
+    sortOrder,
+    handleSort,
+    getSortOrder,
+  } = useAdminListController<MemberSortField>({
+    initialFilters: {},
+  });
 
   const loadMembers = useCallback(async () => {
     if (!resolvedOrgId) return;
+
     setIsLoading(true);
     try {
       const orgData = await fetchOrganization(resolvedOrgId);
@@ -447,9 +441,12 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     } finally {
       setIsLoading(false);
     }
+
     try {
       const requests = await fetchMembershipRequests(resolvedOrgId);
-      setPendingRequests(requests.filter((r: MembershipRequest) => r.status === "pending"));
+      setPendingRequests(
+        requests.filter((request: MembershipRequest) => request.status === "pending")
+      );
     } catch {
       setPendingRequests([]);
     }
@@ -460,7 +457,8 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       setIsLoading(false);
       return;
     }
-    loadMembers();
+
+    void loadMembers();
   }, [resolvedOrgId, loadMembers]);
 
   const handleAcceptRequest = async (request: MembershipRequest) => {
@@ -471,71 +469,97 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       await loadMembers();
     } catch (error) {
       console.error("Error accepting membership:", error);
-      const msg = error instanceof Error ? error.message : null;
-      setRequestError(msg || "Ocorreu um erro ao aceitar o pedido. Tente novamente.");
+      const message = error instanceof Error ? error.message : null;
+      setRequestError(message || "Ocorreu um erro ao aceitar o pedido. Tente novamente.");
     } finally {
       setRequestAction(null);
     }
   };
 
-  const handleRefuseRequest = (request: MembershipRequest) => {
-    show(
-      <RefuseMembershipPopupContent
-        orgId={resolvedOrgId!}
-        request={request}
-        onRefused={loadMembers}
-      />,
-      {
-        title: "Recusar pedido de adesão",
-        closeAriaLabel: "Fechar",
-        dimensions: "m",
-      }
-    );
-  };
+  const handleRefuseRequest = useCallback(
+    (request: MembershipRequest) => {
+      show(
+        <RefuseMembershipPopupContent
+          orgId={resolvedOrgId!}
+          request={request}
+          onRefused={loadMembers}
+        />,
+        {
+          title: "Recusar pedido de adesão",
+          closeAriaLabel: "Fechar",
+          dimensions: "m",
+        }
+      );
+    },
+    [loadMembers, resolvedOrgId, show]
+  );
 
-  const handleRemoveMember = (member: OrganizationMember) => {
-    show(
-      <RemoveMemberPopupContent
-        orgId={resolvedOrgId!}
-        member={member}
-        onMemberRemoved={loadMembers}
-      />,
-      {
-        title: "Eliminar membro",
-        closeAriaLabel: "Fechar",
-        dimensions: "m",
-      }
-    );
-  };
+  const handleRemoveMember = useCallback(
+    (member: OrganizationMember) => {
+      show(
+        <RemoveMemberPopupContent
+          orgId={resolvedOrgId!}
+          member={member}
+          onMemberRemoved={loadMembers}
+        />,
+        {
+          title: "Eliminar membro",
+          closeAriaLabel: "Fechar",
+          dimensions: "m",
+        }
+      );
+    },
+    [loadMembers, resolvedOrgId, show]
+  );
+
+  const handleEditRole = useCallback(
+    (member: OrganizationMember) => {
+      const nextKey = editMemberOpenKey + 1;
+      setEditMemberOpenKey(nextKey);
+      show(
+        <EditRolePopupContent
+          orgId={resolvedOrgId!}
+          member={member}
+          onRoleUpdated={loadMembers}
+          openKey={nextKey}
+        />,
+        {
+          title: "Editar papel do membro",
+          closeAriaLabel: "Fechar",
+          dimensions: "m",
+        }
+      );
+    },
+    [editMemberOpenKey, loadMembers, resolvedOrgId, show]
+  );
 
   const isOrgAdmin = useMemo(
     () =>
       isAdmin ||
-      (viewedOrg?.members?.some((m) => m.user.id === user?.id && m.role === "admin") ?? false),
-    [isAdmin, viewedOrg, user],
+      (viewedOrg?.members?.some((member) => member.user.id === user?.id && member.role === "admin") ??
+        false),
+    [isAdmin, viewedOrg, user]
   );
 
-  const sortedMembers = useMemo(() => {
-    if (!sortField || sortOrder === "none") return members;
-    const dir = sortOrder === "ascending" ? 1 : -1;
-    const collator = new Intl.Collator("pt", { sensitivity: "base" });
-    return [...members].sort((a, b) => {
-      if (sortField === "name") {
-        const an = `${a.user.first_name ?? ""} ${a.user.last_name ?? ""}`.trim();
-        const bn = `${b.user.first_name ?? ""} ${b.user.last_name ?? ""}`.trim();
-        return collator.compare(an, bn) * dir;
-      }
-      // since
-      const at = a.since ? Date.parse(a.since) : 0;
-      const bt = b.since ? Date.parse(b.since) : 0;
-      return (at - bt) * dir;
-    });
-  }, [members, sortField, sortOrder]);
+  const sortedMembers = useMemo(
+    () => sortMembers(members, sortField, sortOrder),
+    [members, sortField, sortOrder]
+  );
 
-  const paginatedMembers = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sortedMembers.slice(start, start + itemsPerPage);
-  }, [sortedMembers, currentPage, itemsPerPage]);
+  const paginatedMembers = useMemo(
+    () => paginateItems(sortedMembers, currentPage, pageSize),
+    [sortedMembers, currentPage, pageSize]
+  );
+
+  const columns = useMemo(
+    () =>
+      createMemberColumns({
+        isOrgAdmin,
+        onEditRole: handleEditRole,
+        onRemoveMember: handleRemoveMember,
+      }),
+    [handleEditRole, handleRemoveMember, isOrgAdmin]
+  );
 
   return (
     <AdminLayout
@@ -546,7 +570,6 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       ]}
       title="Membros"
     >
-
       {isOrgAdmin && pendingRequests.length > 0 && (
         <div className="mb-32">
           <h2 className="mb-16 text-base font-semibold text-neutral-900">
@@ -626,7 +649,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
           <Button
             variant="primary"
             appearance="outline"
-            hasIcon={true}
+            hasIcon
             leadingIcon="agora-line-plus-circle"
             leadingIconHover="agora-solid-plus-circle"
             onClick={() => {
@@ -652,101 +675,19 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
       </div>
 
       <AdminPaginatedTable
-        pageSize={itemsPerPage}
+        pageSize={pageSize}
         totalItems={members.length}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
-        setPageSize={setItemsPerPage}
+        setPageSize={setPageSize}
       >
-        <TableHeader>
-          <TableRow>
-            <TableHeaderCell
-              sortType="numeric"
-              sortOrder={getSortOrder("name")}
-              onSortChange={handleSort("name")}
-            >
-              Membros
-            </TableHeaderCell>
-            <TableHeaderCell>Estatuto</TableHeaderCell>
-            <TableHeaderCell
-              sortType="date"
-              sortOrder={getSortOrder("since")}
-              onSortChange={handleSort("since")}
-            >
-              Membro desde
-            </TableHeaderCell>
-            {isOrgAdmin ? <TableHeaderCell>Ações</TableHeaderCell> : <></>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {paginatedMembers.map((member) => (
-            <TableRow key={member.user.id}>
-              <TableCell headerLabel="Membros">
-                <div className="flex items-center gap-8">
-                  {member.user.avatar_thumbnail ? (
-                    <img
-                      src={member.user.avatar_thumbnail}
-                      alt={`${member.user.first_name} ${member.user.last_name}`}
-                      className="h-32 w-32 rounded-full"
-                    />
-                  ) : (
-                    <Icon name="agora-line-user" className="h-32 w-32" />
-                  )}
-                  <div>
-                    <TextLink href={`/pages/users/${member.user.slug}`}>
-                      {member.user.first_name} {member.user.last_name}
-                    </TextLink>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell headerLabel="Estatuto">
-                <StatusDot variant={rolePillVariant(member.role)}>
-                  {roleLabels[member.role] || member.role}
-                </StatusDot>
-              </TableCell>
-              <TableCell headerLabel="Membro desde">{formatDateToDMY(member.since)}</TableCell>
-              {isOrgAdmin ? (
-                <TableCell headerLabel="Ações">
-                  <div className="flex gap-8">
-                    <button
-                      onClick={() => {
-                        const nextKey = editMemberOpenKey + 1;
-                        setEditMemberOpenKey(nextKey);
-                        show(
-                          <EditRolePopupContent
-                            orgId={resolvedOrgId!}
-                            member={member}
-                            onRoleUpdated={loadMembers}
-                            openKey={nextKey}
-                          />,
-                          {
-                            title: "Editar papel do membro",
-                            closeAriaLabel: "Fechar",
-                            dimensions: "m",
-                          }
-                        );
-                      }}
-                      title="Editar papel"
-                    >
-                      <Icon
-                        name="agora-line-edit"
-                        className="h-[20px] w-[20px] cursor-pointer text-primary-600"
-                      />
-                    </button>
-                    <button onClick={() => handleRemoveMember(member)} title="Remover membro">
-                      <Icon
-                        name="agora-line-trash"
-                        className="h-[20px] w-[20px] cursor-pointer text-danger-600"
-                      />
-                    </button>
-                  </div>
-                </TableCell>
-              ) : (
-                <></>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
+        <AdminListTable
+          items={paginatedMembers}
+          columns={columns}
+          getSortOrder={getSortOrder}
+          handleSort={handleSort}
+          getRowKey={(member) => member.user.id}
+        />
       </AdminPaginatedTable>
     </AdminLayout>
   );

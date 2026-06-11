@@ -1,76 +1,51 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  CardNoResults,
-  DropdownOption,
-  DropdownSection,
-  Icon,
-  InputSelect,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@ama-pt/agora-design-system";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CardNoResults, DropdownOption, DropdownSection, Icon, InputSelect } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import { useAdminListController } from "@/components/admin/lists/useAdminListController";
+import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 import { fetchUsers } from "@/services/api";
-import { UserAdmin } from "@/types/api";
-import TextLink from "@/components/Primitives/TextLink";
-import TableActionsCell from "../TableActionsCell";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-
-type SortField = "name" | "created_at" | "datasets" | "reuses" | "followers";
-type SortOrder = "ascending" | "descending" | "none";
-
-const SORT_FIELD_MAP: Record<SortField, string> = {
-  name: "first_name",
-  created_at: "created",
-  datasets: "datasets",
-  reuses: "reuses",
-  followers: "followers",
-};
-
-const formatDate = (dateStr: string) => {
-  try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-  } catch {
-    return dateStr;
-  }
-};
-
-const getUserProfile = (user: UserAdmin): string => {
-  if (user.roles?.includes("admin")) return "Admin";
-  return "Editor";
-};
+import type { UserAdmin } from "@/types/api";
+import { createUserColumns, userSortFieldMap, type UserSortField } from "./usersListConfig";
 
 export default function SystemUsersClient() {
   const [users, setUsers] = useState<UserAdmin[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-  const [profileFilter, setProfileFilter] = useState("");
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    searchQuery,
+    handleSearch,
+    sortField,
+    setSortField,
+    sortOrder,
+    setSortOrder,
+    sortParam,
+    getSortOrder: getSharedSortOrder,
+    filters,
+    updateFilter,
+  } = useAdminListController<UserSortField, { profileFilter: string }>({
+    initialFilters: { profileFilter: "" },
+    sortFieldMap: userSortFieldMap,
+  });
+
+  const columns = useMemo(() => createUserColumns(), []);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const apiSort = sortField ? SORT_FIELD_MAP[sortField] : undefined;
-      const sortParam =
-        sortOrder === "none" || !apiSort
-          ? undefined
-          : `${sortOrder === "descending" ? "-" : ""}${apiSort}`;
-
       const response = await fetchUsers(
         currentPage,
         searchQuery.trim() || undefined,
         sortParam,
         pageSize,
-        profileFilter || undefined
+        filters.profileFilter || undefined
       );
       setUsers(response.data || []);
       setTotalItems(response.total || 0);
@@ -79,18 +54,13 @@ export default function SystemUsersClient() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, pageSize, searchQuery, sortField, sortOrder, profileFilter]);
+  }, [currentPage, pageSize, searchQuery, sortParam, filters.profileFilter]);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
-  const handleSearch = useDebouncedSearch((value: string) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-  });
-
-  const handleSort = (field: SortField) => (newOrder: SortOrder) => {
+  const handleSort = (field: UserSortField) => (newOrder: SortOrder) => {
     if (field === "name") {
       if (sortField !== "name") {
         setSortField("name");
@@ -107,9 +77,8 @@ export default function SystemUsersClient() {
     setCurrentPage(1);
   };
 
-  const getSortOrder = (field: SortField): SortOrder => {
-    return sortField === field ? sortOrder : "none";
-  };
+  const getSortOrder = (field: UserSortField): SortOrder =>
+    field === "name" ? (sortField === field ? sortOrder : "none") : getSharedSortOrder(field);
 
   return (
     <AdminListPage
@@ -138,18 +107,17 @@ export default function SystemUsersClient() {
           placeholder="Filtrar por perfil"
           id="filter-profile"
           onChange={(options) => {
-            setProfileFilter(options.length > 0 ? (options[0].value as string) : "");
-            setCurrentPage(1);
+            updateFilter("profileFilter", options.length > 0 ? (options[0].value as string) : "");
           }}
         >
           <DropdownSection name="profile">
-            <DropdownOption value="" selected={profileFilter === ""}>
+            <DropdownOption value="" selected={filters.profileFilter === ""}>
               Todos
             </DropdownOption>
-            <DropdownOption value="admin" selected={profileFilter === "admin"}>
+            <DropdownOption value="admin" selected={filters.profileFilter === "admin"}>
               Admin
             </DropdownOption>
-            <DropdownOption value="editor" selected={profileFilter === "editor"}>
+            <DropdownOption value="editor" selected={filters.profileFilter === "editor"}>
               Editor
             </DropdownOption>
           </DropdownSection>
@@ -165,81 +133,13 @@ export default function SystemUsersClient() {
         />
       }
     >
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell
-            sortType="numeric"
-            sortOrder={getSortOrder("name")}
-            onSortChange={handleSort("name")}
-          >
-            Nome
-          </TableHeaderCell>
-          <TableHeaderCell
-            sortType="numeric"
-            sortOrder={getSortOrder("created_at")}
-            onSortChange={handleSort("created_at")}
-          >
-            Criado em
-          </TableHeaderCell>
-          <TableHeaderCell
-            sortType="numeric"
-            sortOrder={getSortOrder("datasets")}
-            onSortChange={handleSort("datasets")}
-          >
-            Conjuntos de dados
-          </TableHeaderCell>
-          <TableHeaderCell
-            sortType="numeric"
-            sortOrder={getSortOrder("reuses")}
-            onSortChange={handleSort("reuses")}
-          >
-            Reutilizações
-          </TableHeaderCell>
-          <TableHeaderCell
-            sortType="numeric"
-            sortOrder={getSortOrder("followers")}
-            onSortChange={handleSort("followers")}
-          >
-            Seguidores
-          </TableHeaderCell>
-          <TableHeaderCell>Perfis</TableHeaderCell>
-          <TableHeaderCell>Ações</TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {users.map((user) => (
-          <TableRow key={user.id}>
-            <TableCell headerLabel="Nome">
-              <div>
-                <TextLink href={`/pages/users/${user.slug}`}>
-                  {user.first_name} {user.last_name}
-                </TextLink>
-                {user.email && (
-                  <div className="text-sm flex items-center gap-4 text-neutral-900">
-                    <Icon name="agora-line-mail" className="h-[14px] w-[14px]" />
-                    {user.email}
-                  </div>
-                )}
-              </div>
-            </TableCell>
-            <TableCell headerLabel="Criado em">{formatDate(user.since)}</TableCell>
-            <TableCell headerLabel="Conjuntos de dados">{user.datasets_count ?? 0}</TableCell>
-            <TableCell headerLabel="Reutilizações">{user.reuses_count ?? 0}</TableCell>
-            <TableCell headerLabel="Seguidores">{user.metrics?.followers ?? 0}</TableCell>
-            <TableCell headerLabel="Perfis">{getUserProfile(user)}</TableCell>
-            <TableCell headerLabel="Ações">
-              <TableActionsCell
-                viewAction={{
-                  href: `/pages/users/${user.slug}`,
-                }}
-                editAction={{
-                  href: `/pages/admin/users/${user.id}/profile`,
-                }}
-              />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
+      <AdminListTable
+        items={users}
+        columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+        getRowKey={(user) => user.id}
+      />
     </AdminListPage>
   );
 }
