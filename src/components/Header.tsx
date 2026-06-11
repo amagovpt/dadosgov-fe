@@ -358,7 +358,6 @@ export const Header = () => {
                     hasVoiceActionButton={false}
                     label="O que procura no Portal?"
                     placeholder="Pesquisar conjunto de dados, organizações, temas..."
-                    excludeTypes={["dataservices"]}
                   />
                 </div>
               </CustomSearch>
