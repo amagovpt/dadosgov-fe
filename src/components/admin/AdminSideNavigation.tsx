@@ -155,6 +155,10 @@ export function AdminSideNavigation() {
       href: `${orgBase}/datasets`,
     },
     {
+      label: "API",
+      href: `${orgBase}/dataservices`,
+    },
+    {
       label: "Reutilizações",
       href: `${orgBase}/reuses`,
     },
