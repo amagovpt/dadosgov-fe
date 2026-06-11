@@ -8,8 +8,8 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { paginateItems } from "@/components/admin/lists/listHelpers";
 import { useAdminListController } from "@/components/admin/lists/useAdminListController";
-import { fetchAdminPosts } from "@/services/api";
-import type { Post } from "@/types/api";
+import { fetchAdminPosts } from "@/service/api/posts";
+import type { Post } from "@/service/types/posts";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
 import DropdownOption from "@/components/Primitives/Dropdown/DropdownOption";
 import {

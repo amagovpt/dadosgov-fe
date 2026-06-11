@@ -6,8 +6,8 @@ import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { paginateItems } from "@/components/admin/lists/listHelpers";
-import { fetchAllCommunityResources } from "@/services/api";
-import { CommunityResource } from "@/types/api";
+import { fetchAllCommunityResources } from "@/service/api/community-resources";
+import { CommunityResource } from "@/service/types/community-resource";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 import {
   CommunityResourceSortField,

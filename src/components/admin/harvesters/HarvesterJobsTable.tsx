@@ -5,7 +5,7 @@ import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
 import AdminListTable, { type AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-import type { HarvestJob } from "@/types/api";
+import type { HarvestJob } from "@/service/types/harvester";
 
 const JOB_STATUS_LABELS: Record<string, string> = {
   pending: "Pendente",

@@ -3,7 +3,7 @@ import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import TextLink from "@/components/Primitives/TextLink";
 import TableActionsCell from "@/components/admin/TableActionsCell";
 import { formatDateToDMY } from "@/utils/formatDate";
-import type { CommunityResource } from "@/types/api";
+import type { CommunityResource } from "@/service/types/community-resource";
 import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 

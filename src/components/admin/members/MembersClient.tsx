@@ -18,22 +18,9 @@ import {
   TableCell,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import {
-  fetchOrganization,
-  addMember,
-  updateMemberRole,
-  removeMember,
-  suggestUsers,
-  fetchMembershipRequests,
-  acceptMembership,
-  refuseMembership,
-} from "@/services/api";
-import type {
-  MembershipRequest,
-  Organization,
-  OrganizationMember,
-  UserSuggestion,
-} from "@/types/api";
+import { fetchOrganization, addMember, updateMemberRole, removeMember, fetchMembershipRequests, acceptMembership, refuseMembership } from "@/service/api/organizations";
+import { suggestUsers } from "@/service/api/search";
+import { Organization, OrganizationMember, MembershipRequest, UserSuggestion } from "@/service/types/identity";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";

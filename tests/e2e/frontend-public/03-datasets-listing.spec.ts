@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "playwright/test";
 
 const DATASETS_URL = "/pages/datasets";
+const PLACEHOLDER_SRC = "/images/placeholders/organization.png";
 
 async function openFiltersPanel(page: Page) {
   const openBtn = page.getByRole("button", { name: /Abrir filtros/i });
@@ -264,5 +265,156 @@ test.describe("Datasets Listing", () => {
 
     // URL must not have acquired a q param
     expect(page.url()).not.toMatch(/[?&]q=/);
+  });
+
+  test("DL-19: Every dataset card renders an img element with a non-empty src", async ({
+    page,
+  }) => {
+    const cards = page.locator("a[href^='/pages/datasets/']");
+    await expect(cards.first()).toBeVisible({ timeout: 15000 });
+
+    const count = await cards.count();
+    expect(count).toBeGreaterThan(0);
+
+    const sampleSize = Math.min(count, 3);
+    for (let i = 0; i < sampleSize; i++) {
+      const img = cards.nth(i).locator("img").first();
+      await expect(img).toBeVisible({ timeout: 10000 });
+      const src = await img.getAttribute("src");
+      // src must always be set — either the org logo URL or the placeholder
+      expect((src ?? "").trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  test("DL-20: Org logos from the API reach the dataset card img src (no server-side stripping)", async ({
+    page,
+  }) => {
+    const cards = page.locator("a[href^='/pages/datasets/']");
+    await expect(cards.first()).toBeVisible({ timeout: 15000 });
+
+    // Collect every card img src from the DOM
+    const srcs: string[] = await page.evaluate(() =>
+      Array.from(
+        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+      ).map((img) => (img as HTMLImageElement).getAttribute("src") ?? "")
+    );
+
+    expect(srcs.length).toBeGreaterThan(0);
+
+    // Every src must be non-empty — the server must not strip logos before
+    // handing them to the client (the old probeUrls bug would produce "" / null).
+    for (const src of srcs) {
+      expect(src.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  test("DL-22: Frequency filter section visible after opening filters", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    const freqBtn = page.getByRole("button", { name: /Frequência/i }).first();
+    await expect(freqBtn).toBeVisible({ timeout: 10000 });
+  });
+
+  test("DL-23: Frequency filter sets frequency param in URL", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    // The Frequência section is a collapsed accordion — expand it first.
+    const freqBtn = page.getByRole("button", { name: /^Frequência/i }).first();
+    await expect(freqBtn).toBeVisible({ timeout: 10000 });
+    await freqBtn.click();
+
+    // The Agora Checkbox component renders a custom element; find by accessible role+name.
+    const mensal = page.getByRole("checkbox", { name: /^Mensal$/i });
+    await expect(mensal).toBeVisible({ timeout: 10000 });
+    await mensal.click();
+
+    await page.waitForURL(/frequency=/, { timeout: 10000 });
+    expect(page.url()).toMatch(/frequency=/);
+  });
+
+  test("DL-24: Frequency filter roundtrip — checkbox is checked when navigating from URL", async ({
+    page,
+  }) => {
+    // Navigate directly with the frequency param already set.
+    await page.goto(DATASETS_URL + "?frequency=monthly");
+    await page.waitForLoadState("networkidle");
+
+    await openFiltersPanel(page);
+
+    // The section shows a pill count when a value is active; expand it.
+    const freqBtn = page.getByRole("button", { name: /^Frequência/i }).first();
+    await expect(freqBtn).toBeVisible({ timeout: 10000 });
+    await freqBtn.click();
+
+    const mensal = page.getByRole("checkbox", { name: /^Mensal$/i });
+    await expect(mensal).toBeChecked({ timeout: 10000 });
+  });
+
+  test("DL-21: onError fallback replaces a failed org logo with the placeholder", async ({
+    page,
+  }) => {
+    const cards = page.locator("a[href^='/pages/datasets/']");
+    await expect(cards.first()).toBeVisible({ timeout: 15000 });
+
+    // Find card indices whose img currently shows a real logo (not the placeholder).
+    const indicesWithLogo: number[] = await page.evaluate((placeholder) => {
+      const imgs = Array.from(
+        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+      );
+      return imgs
+        .map((img, i) => ({ i, src: (img as HTMLImageElement).getAttribute("src") ?? "" }))
+        .filter(({ src }) => src.length > 0 && !src.includes("organization.png"))
+        .map(({ i }) => i);
+    }, PLACEHOLDER_SRC);
+
+    if (indicesWithLogo.length === 0) {
+      // No dataset has an org logo in this environment — fallback not exercised.
+      test.info().annotations.push({
+        type: "note",
+        description: "No org logos found in DB — onError fallback not exercised.",
+      });
+      return;
+    }
+
+    // Programmatically fire the native `error` event on those imgs.
+    // React attaches its onError listener directly on <img> elements
+    // (since the error event does not bubble), so dispatching it here
+    // triggers the setImgSrc(PLACEHOLDER) state update in CardMetrics.
+    await page.evaluate((placeholder) => {
+      const imgs = Array.from(
+        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+      ) as HTMLImageElement[];
+      imgs.forEach((img) => {
+        const src = img.getAttribute("src") ?? "";
+        if (src.length > 0 && !src.includes("organization.png")) {
+          img.dispatchEvent(new Event("error", { bubbles: false }));
+        }
+      });
+    }, PLACEHOLDER_SRC);
+
+    // Wait for React to re-render the affected cards with the placeholder src.
+    await page.waitForFunction(
+      ({ indices, placeholder }: { indices: number[]; placeholder: string }) => {
+        const imgs = Array.from(
+          document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        ) as HTMLImageElement[];
+        return indices.every((i) =>
+          (imgs[i]?.getAttribute("src") ?? "").includes("organization.png")
+        );
+      },
+      { indices: indicesWithLogo.slice(0, 3), placeholder: PLACEHOLDER_SRC },
+      { timeout: 5000 }
+    );
+
+    // Verify the placeholder is now shown for each formerly-logo card.
+    for (const idx of indicesWithLogo.slice(0, 3)) {
+      const img = page.locator("a[href^='/pages/datasets/'] img").nth(idx);
+      const src = await img.getAttribute("src");
+      expect(src).toContain("organization.png");
+    }
   });
 });

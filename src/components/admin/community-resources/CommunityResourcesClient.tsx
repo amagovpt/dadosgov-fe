@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { paginateItems } from "@/components/admin/lists/listHelpers";
-import { fetchMyCommunityResources } from "@/services/api";
-import { CommunityResource } from "@/types/api";
+import { fetchMyCommunityResources } from "@/service/api/community-resources";
+import { CommunityResource } from "@/service/types/community-resource";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import {

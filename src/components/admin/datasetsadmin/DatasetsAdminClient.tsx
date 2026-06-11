@@ -2,75 +2,24 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
-import {
-  Button,
-  CardGeneral,
-  InputText,
-  InputTextArea,
-  Icon,
-  StatusCard,
-  InputDate,
-  DropdownSection,
-  DropdownOption,
-  ProgressBar,
-  Checkbox,
-  Tag,
-} from "@ama-pt/agora-design-system";
-import {
-  createDataset,
-  updateDataset,
-  uploadResource,
-  updateResource,
-  createResource,
-  fetchLicenses,
-  fetchFrequencies,
-  fetchGranularities,
-  suggestSpatialZones,
-  fetchSpatialZonesByIds,
-  fetchDataset,
-  fetchMyDatasets,
-  suggestTags,
-  fetchOrgContactPoints,
-  createContactPoint,
-  fetchResourceTypes,
-  fetchAllowedExtensions,
-} from "@/services/api";
-import {
-  License,
-  Frequency,
-  Granularity,
-  SpatialZone,
-  Dataset,
-  TagSuggestion,
-  ContactPoint,
-  ResourceType,
-  DatasetUpdatePayload,
-} from "@/types/api";
+import { Icon, StatusCard, DropdownSection, DropdownOption } from "@ama-pt/agora-design-system";
+import { createDataset, updateDataset, uploadResource, updateResource, createResource, fetchLicenses, fetchFrequencies, fetchGranularities, fetchSpatialZonesByIds, fetchDataset, fetchMyDatasets, fetchResourceTypes, fetchAllowedExtensions } from "@/service/api/datasets";
+import { fetchOrgContactPoints, createContactPoint } from "@/service/api/organizations";
+import { suggestSpatialZones, suggestTags } from "@/service/api/search";
+import { License, Frequency, Granularity, SpatialZone, TagSuggestion, ResourceType } from "@/service/types/catalog";
+import { Dataset, ContactPoint, DatasetUpdatePayload } from "@/service/types/dataset";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import FileUploadModal, { PendingResourceMeta, PendingResourceTable } from "@/components/admin/FileUploadModal";
-import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
+import { PendingResourceMeta } from "@/components/admin/FileUploadModal";
 import { useAuth } from "@/context/AuthContext";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
-import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { translateUploadError } from "@/lib/security/translateUploadError";
-
-const ZONE_PT_NAMES: Record<string, string> = {
-  "country-group:world": "Mundo",
-  "country-group:ue": "União Europeia",
-  "country:za": "Africa do Sul",
-  "country:dz": "Argelia",
-  "country:ao": "Angola",
-};
-
-function getZoneName(zone: SpatialZone): string {
-  return ZONE_PT_NAMES[zone.id] || zone.name;
-}
+import { getZoneName } from "@/utils/spatialLabels";
+import { DatasetWizardStep2 } from "./DatasetWizardStep2";
+import { DatasetWizardStep3 } from "./DatasetWizardStep3";
+import { DatasetWizardStep4 } from "./DatasetWizardStep4";
+import type { DatasetWizardDraftContact } from "./datasetWizardTypes";
 
 interface DatasetsAdminClientProps {
   currentStep: number;
@@ -98,7 +47,7 @@ export default function DatasetsAdminClient({
   const [datasetTitle, setDatasetTitle] = useState("");
   const [datasetAcronym, setDatasetAcronym] = useState("");
   const [datasetDescription, setDatasetDescription] = useState("");
-  const [datasetShortDescription, setDatasetShortDescription] = useState("");
+  const [datasetShortDescription] = useState("");
   const selectedProducerRef = useRef("");
   const selectedLicenseRef = useRef("");
   const selectedFrequencyRef = useRef("");
@@ -112,16 +61,8 @@ export default function DatasetsAdminClient({
   const [orgContactPoints, setOrgContactPoints] = useState<ContactPoint[]>([]);
   const [selectedContactPointIds, setSelectedContactPointIds] = useState<string[]>([]);
 
-  interface DraftContact {
-    id: number;
-    name: string;
-    email: string;
-    link: string;
-    saved: boolean;
-    errors: Record<string, boolean>;
-  }
   const draftIdRef = useRef(0);
-  const [draftContacts, setDraftContacts] = useState<DraftContact[]>([
+  const [draftContacts, setDraftContacts] = useState<DatasetWizardDraftContact[]>([
     { id: 0, name: "", email: "", link: "", saved: false, errors: {} },
   ]);
 
@@ -135,6 +76,7 @@ export default function DatasetsAdminClient({
   const [createdDataset, setCreatedDataset] = useState<Dataset | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [, setHasDatasets] = useState(true);
 
   // Dropdown data
   const [licenses, setLicenses] = useState<License[]>([]);
@@ -164,10 +106,6 @@ export default function DatasetsAdminClient({
   const spatialCoverageDefaultValue =
     selectedSpatialZonesValue ?? (createdDataset?.spatial?.zones?.join(",") ?? "");
   const spatialGranularityDefaultValue = createdDataset?.spatial?.granularity ?? "";
-  const selectedSpatialZoneIds = (selectedSpatialZonesValue ?? "")
-    .split(",")
-    .map((id) => id.trim())
-    .filter(Boolean);
   const handleSpatialCoverageChange = useCallback((value: string) => {
     const normalized = value
       .split(",")
@@ -406,40 +344,6 @@ export default function DatasetsAdminClient({
     }
   };
 
-  const handleAddNewDraft = async (saveDraftId: number) => {
-    const draft = draftContacts.find((d) => d.id === saveDraftId);
-    if (!draft) return;
-
-    // Validate before saving
-    const errors: Record<string, boolean> = {};
-    if (!draft.name.trim()) errors.name = true;
-    if (!draft.email.trim() && !draft.link.trim()) {
-      errors.email = true;
-      errors.link = true;
-    }
-    if (Object.keys(errors).length > 0) {
-      setDraftContacts((prev) => prev.map((d) => (d.id === saveDraftId ? { ...d, errors } : d)));
-      return;
-    }
-
-    await handleSaveContactDraft(saveDraftId);
-    draftIdRef.current += 1;
-    setDraftContacts((prev) => [
-      ...prev,
-      {
-        id: draftIdRef.current,
-        name: "",
-        email: "",
-        link: "",
-        saved: false,
-        errors: {},
-      },
-    ]);
-  };
-
-  // Whether user has existing datasets
-  const [hasDatasets, setHasDatasets] = useState(true);
-
   useEffect(() => {
     async function loadDropdownData() {
       try {
@@ -527,6 +431,113 @@ export default function DatasetsAdminClient({
       return next;
     });
   };
+
+  const handleProducerFieldChange = useCallback((value: string) => {
+    setOrgContactPoints([]);
+    setSelectedContactPointIds([]);
+    setDraftContacts([{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]);
+    setSelectedProducer(value);
+    if (value) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next.datasetProducer;
+        return next;
+      });
+    }
+  }, []);
+
+  const handleSpatialZonesSearchQuery = useCallback((q: string) => {
+    if (!q) return;
+    suggestSpatialZones(q, 20)
+      .then((results) => {
+        spatialZoneSearchRef.current = results;
+        setSpatialZoneSearch(results);
+      })
+      .catch(() => {
+        spatialZoneSearchRef.current = [];
+        setSpatialZoneSearch([]);
+      });
+  }, []);
+
+  const handleRemoveSpatialZoneTag = useCallback((zoneId: string) => {
+    const savedScroll = window.scrollY;
+    setSelectedSpatialZonesValue((prev) => {
+      const ids = (prev ?? "")
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean);
+      const nextIds = ids.filter((id) => id !== zoneId);
+      const next = nextIds.join(",");
+      spatialCoverageRef.current = next;
+      return next || null;
+    });
+    setSpatialZones((prev) => prev.filter((z) => z.id !== zoneId));
+    setTimeout(() => {
+      document
+        .getElementById("agora-input-select-dataset-spatial-coverage-control")
+        ?.focus({ preventScroll: true });
+      window.scrollTo({ top: savedScroll, behavior: "instant" });
+    }, 50);
+  }, []);
+
+  const handleKeywordsSearchInput = useCallback((q: string) => {
+    setKeywordSearch(q);
+    if (q.trim().length < 2) {
+      setTagSearch([]);
+    }
+  }, []);
+
+  const handleKeywordsSelectValueChange = useCallback(
+    (value: string) => {
+      setSelectedKeywordsValue(value);
+      const selected = value.split(",").filter(Boolean);
+      let addedNew = false;
+      selected.forEach((v) => {
+        const lower = v.toLowerCase();
+        const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
+        const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
+        if (!existsInTags && !existsInSearch) {
+          addedNew = true;
+          setTags((prev) => {
+            if (prev.some((t) => t.text.toLowerCase() === lower)) {
+              return prev;
+            }
+            return [...prev, { text: v }];
+          });
+        }
+      });
+      if (addedNew) {
+        setKeywordSearch("");
+      }
+    },
+    [tags, tagSearch],
+  );
+
+  const handleAddDraftContactRow = useCallback(() => {
+    draftIdRef.current += 1;
+    setDraftContacts((prev) => [
+      ...prev,
+      {
+        id: draftIdRef.current,
+        name: "",
+        email: "",
+        link: "",
+        saved: false,
+        errors: {},
+      },
+    ]);
+  }, []);
+
+  const handleKeywordTagRemove = useCallback(
+    (keyword: string) => {
+      const next = selectedKeywords
+        .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
+        .join(",");
+      setSelectedKeywordsValue(next);
+      selectedKeywordsRef.current = next;
+    },
+    [selectedKeywords],
+  );
 
   const parseInputDateToTime = (value: string): number | null => {
     const raw = (value || "").trim();
@@ -1012,12 +1023,6 @@ export default function DatasetsAdminClient({
 
   const auxiliarItems =
     currentStep === 3 || currentStep === 4 ? auxiliarItemsStep3 : auxiliarItemsStep2;
-  const hasTemporalCoverageError =
-    !!formErrors.temporalCoverage || !!formErrors.temporalCoverageInvalidFormat;
-  const temporalCoverageErrorText = formErrors.temporalCoverageInvalidFormat
-    ? "Formato de data inválido. Utilize o formato dd/mm/aaaa."
-    : "A data de início não pode ser posterior à data de fim.";
-
   return (
     <>
       {/* Main content area: form + auxiliar sidebar */}
@@ -1026,773 +1031,99 @@ export default function DatasetsAdminClient({
         <div className="admin-page__form-area">
           {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
-          {/* Step 2: Descreva o conjunto de dados */}
           {currentStep === 2 && (
-            <>
-              <StatusCard
-                variant="informative"
-                showIcon
-                description={
-                  <>
-                    <strong>O que é um conjunto de dados?</strong>
-                    <br />
-                    Em dados.gov.pt, um conjunto de dados é um conjunto de ficheiros.
-                  </>
-                }
-              />
-              <p className="pt-32 text-base leading-7 text-neutral-900">
-                Os campos marcados com um asterisco ( * ) são obrigatórios.
-              </p>
-              <h2 className="admin-page__section-title">Produtor</h2>
-
-              <div className="admin-page__fields-group">
-                <span className="text-base font-medium leading-7 text-primary-900">
-                  Confirme a identidade que pretende utilizar na publicação.
-                </span>
-                <IsolatedSelect
-                  label="Produtor*"
-                  placeholder="Selecione o produtor..."
-                  id="dataset-producer"
-                  defaultValue={producerDefaultValue}
-                  onChangeRef={selectedProducerRef}
-                  onChangeCallback={(value) => {
-                    // Reset org-only contact state immediately on producer switches.
-                    // Keeps this logic out of effects and avoids cascading renders warnings.
-                    setOrgContactPoints([]);
-                    setSelectedContactPointIds([]);
-                    setDraftContacts([{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]);
-                    setSelectedProducer(value);
-                    if (value) {
-                      setFormErrors((prev) => {
-                        const next = { ...prev };
-                        delete next.datasetProducer;
-                        return next;
-                      });
-                    }
-                  }}
-                  hasError={!!formErrors.datasetProducer}
-                  errorFeedbackText="Campo obrigatório"
-                >
-                  {producerOptions}
-                </IsolatedSelect>
-              </div>
-
-              {(!user?.organizations || user.organizations.length === 0) && (
-                <div className="admin-page__org-card rounded-lg mt-24 flex flex-col items-center gap-16 bg-neutral-50 p-8 text-center">
-                  <h3 className="text-lg font-bold leading-7 text-primary-900">
-                    Não pertence a uma organização.
-                  </h3>
-                  <p className="text-base leading-7 text-neutral-700">
-                    Quando o conjunto de dados for produzido no contexto de atividade profissional,
-                    é recomendável que seja publicado em nome da organização responsável.
-                  </p>
-                  <Button
-                    variant="primary"
-                    onClick={() => router.push("/pages/admin/organizations/new")}
-                  >
-                    Crie ou integre uma organização em dados.gov.pt
-                  </Button>
-                </div>
-              )}
-
-              <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
-                <h2 className="admin-page__section-title">Descrição</h2>
-
-                <div className="admin-page__fields-group">
-                  {formErrors.datasetTitleTooLong && (
-                    <StatusCard
-                      variant="danger"
-                      showIcon
-                      description="O título não pode ter mais do que 350 caracteres."
-                    />
-                  )}
-                  <InputText
-                    label="Título*"
-                    placeholder="Insira o título aqui"
-                    id="api-name"
-                    value={datasetTitle}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setDatasetTitle(e.target.value);
-                      if (e.target.value.trim()) clearError("datasetTitle");
-                      clearError("datasetTitleTooLong");
-                    }}
-                    hasError={!!formErrors.datasetTitle || !!formErrors.datasetTitleTooLong}
-                    hasFeedback={!!formErrors.datasetTitle || !!formErrors.datasetTitleTooLong}
-                    feedbackState="danger"
-                    errorFeedbackText={
-                      formErrors.datasetTitleTooLong
-                        ? "O título não pode ter mais do que 350 caracteres."
-                        : "Campo obrigatório"
-                    }
-                  />
-                  <InputText
-                    label="Sigla"
-                    placeholder="Insira a sigla aqui"
-                    id="api-acronym"
-                    required={false}
-                    value={datasetAcronym}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setDatasetAcronym(e.target.value);
-                    }}
-                  />
-                  <InputTextArea
-                    label="Descrição *"
-                    placeholder="Insira a descrição aqui"
-                    id="dataset-description"
-                    rows={4}
-                    maxLength={3000}
-                    showCharCounter={true}
-                    value={datasetDescription}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                      setDatasetDescription(e.target.value);
-                      if (e.target.value.trim()) clearError("datasetDescription");
-                    }}
-                    hasError={!!formErrors.datasetDescription}
-                    hasFeedback={
-                      !!formErrors.datasetDescription || datasetDescription.length < 1000
-                    }
-                    feedbackState={formErrors.datasetDescription ? "danger" : "warning"}
-                    feedbackText="Recomenda-se que a descrição tenha pelo menos 1000 caracteres."
-                    errorFeedbackText="Campo obrigatório"
-                  />
-                  {/*<InputTextArea
-                    label="Descrição resumida"
-                    placeholder="Insira a descrição aqui"
-                    id="dataset-short-description"
-                    rows={3}
-                    maxLength={200}
-                    showCharCounter={true}
-                    value={datasetShortDescription}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                      setDatasetShortDescription(e.target.value);
-                      if (e.target.value.trim()) clearError("datasetShortDescription");
-                    }}
-                    hasFeedback
-                    feedbackState="info"
-                    feedbackText="Se este campo for deixado em branco, serão utilizados os primeiros 197 caracteres da sua descrição, seguidos de '...' (máximo de 200 caracteres)."
-                  />*/}
-                  <IsolatedSelect
-                    label="Palavras-chave"
-                    placeholder="Pesquise ou insira palavras-chave..."
-                    id="dataset-keywords"
-                    type="checkbox"
-                    searchable
-                    searchInputPlaceholder="Escreva para pesquisar ou criar..."
-                    searchNoResultsText="Nenhum resultado encontrado"
-                    defaultValue={keywordsDefaultValue}
-                    onChangeRef={selectedKeywordsRef}
-                    onSearchCallback={(q) => {
-                      setKeywordSearch(q);
-                      if (q.trim().length < 2) {
-                        setTagSearch([]);
-                      }
-                    }}
-                    onChangeCallback={(value) => {
-                      setSelectedKeywordsValue(value);
-                      const selected = value.split(",").filter(Boolean);
-                      let addedNew = false;
-                      selected.forEach((v) => {
-                        const lower = v.toLowerCase();
-                        const existsInTags = tags.some((t) => t.text.toLowerCase() === lower);
-                        const existsInSearch = tagSearch.some(
-                          (t) => t.text.toLowerCase() === lower
-                        );
-                        if (!existsInTags && !existsInSearch) {
-                          addedNew = true;
-                          setTags((prev) => {
-                            if (prev.some((t) => t.text.toLowerCase() === lower)) {
-                              return prev;
-                            }
-                            return [...prev, { text: v }];
-                          });
-                        }
-                      });
-                      if (addedNew) {
-                        setKeywordSearch("");
-                      }
-                    }}
-                  >
-                    {tagOptions}
-                  </IsolatedSelect>
-
-                  {selectedKeywords.length > 0 && (
-                    <div className="-mt-8 flex flex-wrap gap-8">
-                      {selectedKeywords.map((keyword) => (
-                        <Tag
-                          key={keyword}
-                          aria-label={`Remover ${keyword}`}
-                          onClick={() => {
-                            const next = selectedKeywords
-                              .filter((v) => v.toLowerCase() !== keyword.toLowerCase())
-                              .join(",");
-                            setSelectedKeywordsValue(next);
-                            selectedKeywordsRef.current = next;
-                          }}
-                        >
-                          {keyword}
-                        </Tag>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <h2 className="admin-page__section-title">Acesso</h2>
-
-                <div className="admin-page__fields-group">
-                  <IsolatedSelect
-                    label="Licença"
-                    placeholder="Selecione uma licença..."
-                    id="dataset-license"
-                    defaultValue={licenseDefaultValue}
-                    onChangeRef={selectedLicenseRef}
-                  >
-                    {licenseOptions}
-                  </IsolatedSelect>
-                </div>
-
-                {selectedProducer && selectedProducer !== "user" && (
-                  <>
-                    <h2 className="admin-page__section-title">
-                      Pontos de contacto *
-                    </h2>
-
-                    <div className="admin-page__fields-group">
-                      {formErrors.contactDrafts && (
-                        <StatusCard
-                          variant="danger"
-                          showIcon
-                          description="É obrigatório adicionar pelo menos um ponto de contacto."
-                        />
-                      )}
-                      {orgContactPoints.length > 0 && (
-                        <div className="flex flex-col gap-2">
-                          {orgContactPoints.map((cp) => (
-                            <Checkbox
-                              key={cp.id}
-                              label={cp.name}
-                              value={cp.id}
-                              name="contact-points"
-                              checked={selectedContactPointIds.includes(cp.id)}
-                              onChange={() => toggleExistingContact(cp.id)}
-                            />
-                          ))}
-                        </div>
-                      )}
-
-                      {draftContacts.map((draft) => (
-                        <div key={draft.id}>
-                          <div
-                            className="text-base font-medium leading-7 text-primary-900"
-                            style={{ paddingBottom: "16px" }}
-                          >
-                            Novo ponto de contacto
-                          </div>
-                          <div style={{ paddingBottom: "24px" }}>
-                            <InputText
-                              label="Nome *"
-                              placeholder="Por exemplo, o nome do serviço."
-                              id={`contact-name-${draft.id}`}
-                              value={draft.name}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                updateDraft(draft.id, "name", e.target.value)
-                              }
-                              hasError={!!draft.errors.name}
-                              hasFeedback={!!draft.errors.name}
-                              feedbackState="danger"
-                              errorFeedbackText="Campo obrigatório"
-                            />
-                          </div>
-                          <div
-                            className="grid grid-cols-2 gap-[18px]"
-                            style={{ paddingBottom: "24px" }}
-                          >
-                            <InputText
-                              label="E-mail"
-                              placeholder="contact@organisation.org"
-                              id={`contact-email-${draft.id}`}
-                              value={draft.email}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                updateDraft(draft.id, "email", e.target.value)
-                              }
-                              hasError={!!draft.errors.email}
-                              hasFeedback={!!draft.errors.email}
-                              feedbackState="danger"
-                              errorFeedbackText="É necessário um endereço de e-mail caso não seja fornecido um link."
-                            />
-                            <InputText
-                              label="Website"
-                              placeholder="https://..."
-                              id={`contact-link-${draft.id}`}
-                              value={draft.link}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                updateDraft(draft.id, "link", e.target.value)
-                              }
-                              hasError={!!draft.errors.link}
-                              hasFeedback={!!draft.errors.link}
-                              feedbackState="danger"
-                              errorFeedbackText="É necessário um link caso não seja fornecido um endereço de e‑mail."
-                            />
-                          </div>
-                          <div style={{ paddingBottom: "24px" }}>
-                            <Button
-                              appearance="outline"
-                              variant="primary"
-                              hasIcon
-                              leadingIcon="agora-line-check-circle"
-                              leadingIconHover="agora-solid-check-circle"
-                              onClick={() => handleSaveContactDraft(draft.id)}
-                            >
-                              Guardar contacto
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-
-                      <div style={{ marginTop: "-16px" }}>
-                        <Button
-                          appearance="outline"
-                          variant="primary"
-                          hasIcon
-                          leadingIcon="agora-line-plus-circle"
-                          leadingIconHover="agora-solid-plus-circle"
-                          onClick={() => {
-                            draftIdRef.current += 1;
-                            setDraftContacts((prev) => [
-                              ...prev,
-                              {
-                                id: draftIdRef.current,
-                                name: "",
-                                email: "",
-                                link: "",
-                                saved: false,
-                                errors: {},
-                              },
-                            ]);
-                          }}
-                        >
-                          Novo contacto
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                <h2 className="admin-page__section-title">Tempo</h2>
-
-                <div className="admin-page__fields-group">
-                  <IsolatedSelect
-                    label="Frequência de atualização *"
-                    placeholder="Selecione uma frequência..."
-                    id="dataset-frequency"
-                    defaultValue={frequencyDefaultValue}
-                    onChangeRef={selectedFrequencyRef}
-                    hasError={!!formErrors.datasetFrequency}
-                    errorFeedbackText="Campo obrigatório"
-                  >
-                    {frequencyOptions}
-                  </IsolatedSelect>
-
-                  <div className="grid grid-cols-2 gap-[18px]">
-                    <InputDate
-                      label="Cobertura temporal (Data de início)"
-                      id="dataset-date-start"
-                      defaultValue={temporalStart}
-                      dayInputPlaceholder="dd"
-                      monthInputPlaceholder="mm"
-                      yearInputPlaceholder="aaaa"
-                      calendarIconAriaLabel="Abrir calendário"
-                      previousYearAriaLabel="Ano anterior"
-                      previousMonthAriaLabel="Mês anterior"
-                      nextMonthAriaLabel="Próximo mês"
-                      nextYearAriaLabel="Próximo ano"
-                      selectedDayAriaLabel="Dia selecionado"
-                      todayDayAriaLabel="Hoje"
-                      todayLabel="Hoje"
-                      cancelLabel="Cancelar"
-                      okLabel="OK"
-                      hasError={hasTemporalCoverageError}
-                      hasFeedback={hasTemporalCoverageError}
-                      feedbackState="danger"
-                      errorFeedbackText={temporalCoverageErrorText}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setTemporalStart(e.target.value);
-                        clearTemporalCoverageErrors();
-                      }}
-                    />
-                    <InputDate
-                      label="Data de fim"
-                      id="dataset-date-end"
-                      defaultValue={temporalEnd}
-                      dayInputPlaceholder="dd"
-                      monthInputPlaceholder="mm"
-                      yearInputPlaceholder="aaaa"
-                      calendarIconAriaLabel="Abrir calendário"
-                      previousYearAriaLabel="Ano anterior"
-                      previousMonthAriaLabel="Mês anterior"
-                      nextMonthAriaLabel="Próximo mês"
-                      nextYearAriaLabel="Próximo ano"
-                      selectedDayAriaLabel="Dia selecionado"
-                      todayDayAriaLabel="Hoje"
-                      todayLabel="Hoje"
-                      cancelLabel="Cancelar"
-                      okLabel="OK"
-                      hasError={hasTemporalCoverageError}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setTemporalEnd(e.target.value);
-                        clearTemporalCoverageErrors();
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <h2 className="admin-page__section-title">Espaço</h2>
-
-                <div className="admin-page__fields-group">
-                  <IsolatedSelect
-                    label="Cobertura espacial"
-                    placeholder="Selecione uma cobertura espacial..."
-                    id="dataset-spatial-coverage"
-                    type="checkbox"
-                    defaultValue={spatialCoverageDefaultValue}
-                    searchable
-                    searchInputPlaceholder="Escreva para pesquisar..."
-                    searchNoResultsText="Nenhum resultado encontrado"
-                    onChangeRef={spatialCoverageRef}
-                    onChangeCallback={handleSpatialCoverageChange}
-                    onSearchCallback={(q) => {
-                      if (!q) return;
-                      suggestSpatialZones(q, 20).then((results) => {
-                        spatialZoneSearchRef.current = results;
-                        setSpatialZoneSearch(results);
-                      }).catch(() => {
-                        spatialZoneSearchRef.current = [];
-                        setSpatialZoneSearch([]);
-                      });
-                    }}
-                  >
-                    {spatialCoverageOptions}
-                  </IsolatedSelect>
-
-                  {selectedZoneObjects.length > 0 && (
-                    <div className="-mt-8 flex flex-wrap gap-8">
-                      {selectedZoneObjects.map((zone) => (
-                        <Tag
-                          key={zone.id}
-                          aria-label={`Remover ${getZoneName(zone)}`}
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => {
-                            const savedScroll = window.scrollY;
-                            const next = selectedSpatialZoneIds
-                              .filter((id) => id !== zone.id)
-                              .join(",");
-                            setSelectedSpatialZonesValue(next);
-                            spatialCoverageRef.current = next;
-                            setSpatialZones((prev) => prev.filter((z) => z.id !== zone.id));
-                            setTimeout(() => {
-                              document
-                                .getElementById(
-                                  "agora-input-select-dataset-spatial-coverage-control"
-                                )
-                                ?.focus({ preventScroll: true });
-                              window.scrollTo({ top: savedScroll, behavior: "instant" });
-                            }, 50);
-                          }}
-                        >
-                          {zone.code ? `${getZoneName(zone)} (${zone.code})` : getZoneName(zone)}
-                        </Tag>
-                      ))}
-                    </div>
-                  )}
-
-                  <IsolatedSelect
-                    label="Granularidade espacial"
-                    placeholder="Selecione uma granularidade espacial..."
-                    id="dataset-spatial-granularity"
-                    defaultValue={spatialGranularityDefaultValue}
-                    searchable
-                    searchInputPlaceholder="Escreva para pesquisar..."
-                    searchNoResultsText="Nenhum resultado encontrado"
-                    onChangeRef={spatialGranularityRef}
-                  >
-                    {granularityOptions}
-                  </IsolatedSelect>
-                </div>
-
-                <div className="admin-page__actions flex justify-between gap-[18px]">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    hasIcon
-                    leadingIcon="agora-line-arrow-left-circle"
-                    leadingIconHover="agora-solid-arrow-left-circle"
-                    onClick={onPreviousStep}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-arrow-right-circle"
-                    trailingIconHover="agora-solid-arrow-right-circle"
-                    onClick={handleStep2Next}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "A criar..." : "Seguinte"}
-                  </Button>
-                </div>
-              </form>
-            </>
+            <DatasetWizardStep2
+              router={router}
+              user={user}
+              producerDefaultValue={producerDefaultValue}
+              selectedProducerRef={selectedProducerRef}
+              onProducerChange={handleProducerFieldChange}
+              producerOptions={producerOptions}
+              formErrors={formErrors}
+              datasetTitle={datasetTitle}
+              onDatasetTitleChange={(e) => {
+                setDatasetTitle(e.target.value);
+                if (e.target.value.trim()) clearError("datasetTitle");
+                clearError("datasetTitleTooLong");
+              }}
+              datasetAcronym={datasetAcronym}
+              onDatasetAcronymChange={(e) => setDatasetAcronym(e.target.value)}
+              datasetDescription={datasetDescription}
+              onDatasetDescriptionChange={(e) => {
+                setDatasetDescription(e.target.value);
+                if (e.target.value.trim()) clearError("datasetDescription");
+              }}
+              keywordsDefaultValue={keywordsDefaultValue}
+              selectedKeywordsRef={selectedKeywordsRef}
+              onKeywordsSearch={handleKeywordsSearchInput}
+              onKeywordsValueChange={handleKeywordsSelectValueChange}
+              tagOptions={tagOptions}
+              selectedKeywords={selectedKeywords}
+              onKeywordTagRemove={handleKeywordTagRemove}
+              licenseDefaultValue={licenseDefaultValue}
+              selectedLicenseRef={selectedLicenseRef}
+              licenseOptions={licenseOptions}
+              selectedProducer={selectedProducer}
+              orgContactPoints={orgContactPoints}
+              selectedContactPointIds={selectedContactPointIds}
+              onToggleExistingContact={toggleExistingContact}
+              draftContacts={draftContacts}
+              onDraftFieldChange={updateDraft}
+              onSaveContactDraft={handleSaveContactDraft}
+              onAddDraftContactRow={handleAddDraftContactRow}
+              frequencyDefaultValue={frequencyDefaultValue}
+              selectedFrequencyRef={selectedFrequencyRef}
+              frequencyOptions={frequencyOptions}
+              temporalStart={temporalStart}
+              temporalEnd={temporalEnd}
+              onTemporalStartChange={(e) => setTemporalStart(e.target.value)}
+              onTemporalEndChange={(e) => setTemporalEnd(e.target.value)}
+              clearTemporalCoverageErrors={clearTemporalCoverageErrors}
+              spatialCoverageDefaultValue={spatialCoverageDefaultValue}
+              spatialCoverageRef={spatialCoverageRef}
+              onSpatialCoverageChange={handleSpatialCoverageChange}
+              onSpatialZoneSearch={handleSpatialZonesSearchQuery}
+              spatialCoverageOptions={spatialCoverageOptions}
+              selectedZoneObjects={selectedZoneObjects}
+              onRemoveSpatialZoneTag={handleRemoveSpatialZoneTag}
+              spatialGranularityDefaultValue={spatialGranularityDefaultValue}
+              spatialGranularityRef={spatialGranularityRef}
+              granularityOptions={granularityOptions}
+              onPreviousStep={onPreviousStep}
+              onStep2Next={handleStep2Next}
+              isSubmitting={isSubmitting}
+            />
           )}
 
-          {/* Step 3: Adicionar ficheiros */}
           {currentStep === 3 && (
-            <>
-              <StatusCard
-                variant="informative"
-                showIcon
-                description={
-                  <>
-                    <strong>O que é um ficheiro?</strong>
-                    <br />
-                    Um conjunto de dados pode conter vários tipos de ficheiros (atualizações,
-                    histórico, documentação, código-fonte, API, links, etc.).
-                  </>
-                }
-              />
-
-              <div className="admin-page__form">
-                <FileUploadModal
-                  uploadedFiles={uploadedFiles}
-                  resourceUrls={resourceUrls}
-                  hasError={showFileError}
-                  onFilesChange={(files) => {
-                    setUploadedFiles(files);
-                    if (files.length > 0) setShowFileError(false);
-                  }}
-                  onUrlAdd={(url) => {
-                    setResourceUrls((prev) => {
-                      if (prev.includes(url)) return prev;
-                      return [...prev, url];
-                    });
-                    setShowFileError(false);
-                  }}
-                  allowedExtensions={allowedExtensions}
-                />
-                {(uploadedFiles.length > 0 || resourceUrls.length > 0) && (
-                  <PendingResourceTable
-                    files={uploadedFiles}
-                    urls={resourceUrls}
-                    onFileReplace={(index, file) => {
-                      const updated = [...uploadedFiles];
-                      updated[index] = file;
-                      setUploadedFiles(updated);
-                    }}
-                    onFileRemove={(index) =>
-                      setUploadedFiles(uploadedFiles.filter((_, i) => i !== index))
-                    }
-                    onUrlRemove={(url) =>
-                      setResourceUrls((prev) => prev.filter((u) => u !== url))
-                    }
-                    resourceTypes={resourceTypes}
-                    resourceMetadata={resourceMetadata}
-                    onEditMeta={handleEditMeta}
-                  />
-                )}
-
-                <div className="admin-page__actions">
-                  <Button
-                    appearance="outline"
-                    variant="neutral"
-                    hasIcon
-                    leadingIcon="agora-line-arrow-left-circle"
-                    leadingIconHover="agora-solid-arrow-left-circle"
-                    onClick={onPreviousStep}
-                    disabled={isSubmitting}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-arrow-right-circle"
-                    trailingIconHover="agora-solid-arrow-right-circle"
-                    onClick={handleStep3Next}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "A carregar..." : "Seguinte"}
-                  </Button>
-                </div>
-              </div>
-            </>
+            <DatasetWizardStep3
+              uploadedFiles={uploadedFiles}
+              setUploadedFiles={setUploadedFiles}
+              resourceUrls={resourceUrls}
+              setResourceUrls={setResourceUrls}
+              showFileError={showFileError}
+              setShowFileError={setShowFileError}
+              allowedExtensions={allowedExtensions}
+              resourceTypes={resourceTypes}
+              resourceMetadata={resourceMetadata}
+              onEditMeta={handleEditMeta}
+              onPreviousStep={onPreviousStep}
+              onStep3Next={handleStep3Next}
+              isSubmitting={isSubmitting}
+            />
           )}
 
-          {/* Step 4: Finalizar a publicação */}
           {currentStep === 4 && (
-            <>
-              <StatusCard
-                variant="success"
-                showIcon
-                description={
-                  <>
-                    <strong>O seu conjunto de dados foi criado!</strong>
-                    <br />
-                    Agora pode publicar ou guardar como rascunho.
-                  </>
-                }
-              />
-
-              {(() => {
-                const qualityScore =
-                  createdDataset?.quality?.score != null
-                    ? Math.round(createdDataset.quality.score * 100)
-                    : 0;
-                const formatMetric = (value: number | undefined) => {
-                  if (!value) return "0";
-                  if (value >= 1_000_000)
-                    return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
-                  if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
-                  return String(value);
-                };
-                const timeAgo = formatDateToTimeAgo(createdDataset?.last_modified, "agora");
-                const href = createdDataset
-                  ? `/pages/datasets/${createdDataset.slug}`
-                  : `/pages/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`;
-                return (
-                  <Link
-                    href={href}
-                    className="card-general-listing flex flex-col overflow-hidden rounded-4"
-                  >
-                    <CardGeneral
-                      variant="neutral-100"
-                      image={{
-                        src:
-                          createdDataset?.organization?.logo ||
-                          "/images/placeholders/organization.png",
-                        alt: createdDataset?.organization?.name || "Organização",
-                        height: "56px",
-                        className: "bg-primary-100 !object-contain !h-[56px]",
-                      }}
-                      subtitleText={
-                        (
-                          <div className="flex flex-col">
-                            <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                              {timeAgo}
-                            </span>
-                            <span
-                              style={{ fontSize: "16px", fontWeight: 300 }}
-                              className="mt-4 text-neutral-900"
-                            >
-                              {createdDataset?.organization?.name || "Sem Organização"}
-                            </span>
-                          </div>
-                        ) as unknown as string
-                      }
-                      titleText={createdDataset?.title || datasetTitle || "Sem título"}
-                      descriptionText={
-                        (
-                          <div className="flex grow flex-col">
-                            <p className="mb-16 line-clamp-3 text-m-regular text-neutral-800">
-                              {createdDataset?.description || datasetDescription || "Sem descrição"}
-                            </p>
-                            <div
-                              className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
-                            >
-                              <ProgressBar
-                                value={qualityScore}
-                                max={100}
-                                hideLabel={true}
-                                hidePercentageValue={true}
-                              />
-                              <span className="mt-4 block text-s-regular text-neutral-900">
-                                {qualityScore}% Qualidade dos metadados
-                              </span>
-                              <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
-                                <div className="flex items-center gap-8" title="Visualizações">
-                                  <Icon
-                                    name={
-                                      createdDataset?.metrics?.views
-                                        ? "agora-solid-eye"
-                                        : "agora-line-eye"
-                                    }
-                                    dimensions="xs"
-                                    className="fill-neutral-700"
-                                    aria-hidden="true"
-                                  />
-                                  <span>{formatMetric(createdDataset?.metrics?.views)}</span>
-                                </div>
-                                <div className="flex items-center gap-8" title="Downloads">
-                                  <Icon
-                                    name={
-                                      createdDataset?.metrics?.resources_downloads
-                                        ? "agora-solid-download"
-                                        : "agora-line-download"
-                                    }
-                                    dimensions="xs"
-                                    className="fill-neutral-700"
-                                    aria-hidden="true"
-                                  />
-                                  <span>
-                                    {formatMetric(createdDataset?.metrics?.resources_downloads)}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-8" title="Reutilizações">
-                                  <img
-                                    src="/Icons/bar_chart.svg"
-                                    className="h-16 w-16"
-                                    alt=""
-                                    aria-hidden="true"
-                                  />
-                                  <span>{createdDataset?.metrics?.reuses || 0}</span>
-                                </div>
-                                <div className="flex items-center gap-8" title="Favoritos">
-                                  <Icon
-                                    name={
-                                      createdDataset?.metrics?.followers
-                                        ? "agora-solid-star"
-                                        : "agora-line-star"
-                                    }
-                                    dimensions="xs"
-                                    className="fill-neutral-700"
-                                    aria-hidden="true"
-                                  />
-                                  <span>{formatMetric(createdDataset?.metrics?.followers)}</span>
-                                </div>
-                              </div>
-                              <div className="mt-16 flex items-center gap-8 text-primary-600">
-                                <Icon
-                                  name="agora-line-arrow-right-circle"
-                                  className="h-32 w-32"
-                                  aria-hidden="true"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        ) as unknown as string
-                      }
-                      isBlockedLink={true}
-                      anchor={{ href }}
-                    />
-                  </Link>
-                );
-              })()}
-
-              <PublicationFeedbackButton />
-
-              <div className="admin-page__actions flex justify-end gap-[18px]">
-                <Button
-                  appearance="outline"
-                  variant="neutral"
-                  onClick={handleSaveDraft}
-                  disabled={isSubmitting}
-                >
-                  Guardar o rascunho
-                </Button>
-                <Button variant="primary" onClick={handlePublish} disabled={isSubmitting}>
-                  {isSubmitting ? "A publicar..." : "Publicar o conjunto de dados"}
-                </Button>
-              </div>
-            </>
+            <DatasetWizardStep4
+              createdDataset={createdDataset}
+              datasetTitle={datasetTitle}
+              datasetDescription={datasetDescription}
+              onPublish={handlePublish}
+              onSaveDraft={handleSaveDraft}
+              isSubmitting={isSubmitting}
+            />
           )}
+
         </div>
 
         {/* Right: Auxiliar sidebar */}

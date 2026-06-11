@@ -4,7 +4,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import TableActionsCell from "@/components/admin/TableActionsCell";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
-import type { Dataset } from "@/types/api";
+import type { Dataset } from "@/service/types/dataset";
 import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 

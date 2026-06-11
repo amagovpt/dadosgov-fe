@@ -1,15 +1,11 @@
-import {
-  fetchDatasets,
-  fetchFrequencies,
-  fetchGranularities,
-  fetchLicenses,
-  fetchOrganizations,
-} from '@/services/api';
-import { DatasetFilters } from '@/types/api';
+import { fetchDatasetsListing } from "@/service/api/datasets";
+import { DatasetFilters } from "@/service/types/dataset";
 import DatasetsClient from '@/components/datasets/DatasetsClient';
-import { probeUrls } from '@/lib/imageProbe';
 
-export const dynamic = 'force-dynamic';
+// The page is already dynamic (it reads searchParams); we intentionally do NOT
+// force-dynamic so the listing fetch can use the Next.js Data Cache
+// (revalidate: 60) — repeated page/query loads are served from cache and don't
+// hit the backend rate-limit (per-IP, collapsed site-wide by the F5).
 
 export default async function Page({
   searchParams,
@@ -40,65 +36,19 @@ export default async function Page({
     apiFilters.sort = '-created';
   }
 
-  const now = new Date();
-  const d30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const d12m = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString().slice(0, 10);
-  const d3y = new Date(now.getFullYear() - 3, now.getMonth(), now.getDate()).toISOString().slice(0, 10);
-
-  const [
-    initialData,
-    totalRes, tabularRes, structuredRes, geoRes, docsRes,
-    hvdRes, d30Res, d12mRes, d3yRes, allOrganizations, allLicenses, allFrequencies, allGranularities,
-  ] = await Promise.all([
-    fetchDatasets(page, 20, apiFilters),
-    fetchDatasets(1, 1),
-    fetchDatasets(1, 1, { format: ["csv", "xls", "xlsx", "ods", "parquet", "tsv"] }),
-    fetchDatasets(1, 1, { format: ["json", "rdf", "xml", "sql", "ndjson", "jsonl"] }),
-    fetchDatasets(1, 1, { format: ["geojson", "shp", "kml", "kmz", "gpx", "wfs", "wms"] }),
-    fetchDatasets(1, 1, { format: ["pdf", "doc", "docx", "md", "txt", "odt", "rtf"] }),
-    fetchDatasets(1, 1, { tag: "hvd" }),
-    fetchDatasets(1, 1, { modified_since: d30 }),
-    fetchDatasets(1, 1, { modified_since: d12m }),
-    fetchDatasets(1, 1, { modified_since: d3y }),
-    fetchOrganizations(1, 100, { sort: "-datasets" }),
-    fetchLicenses(),
-    fetchFrequencies(),
-    fetchGranularities(),
-  ]);
-
-  const reachableLogos = await probeUrls(
-    initialData.data.map((d) => d.organization?.logo)
-  );
-  initialData.data = initialData.data.map((d) => {
-    if (d.organization?.logo && !reachableLogos.has(d.organization.logo)) {
-      return { ...d, organization: { ...d.organization, logo: null } };
-    }
-    return d;
-  });
-
-  const filterCounts: Record<string, number> = {
-    formato_all: totalRes.total,
-    formato_tabular: tabularRes.total,
-    formato_structured: structuredRes.total,
-    formato_geographic: geoRes.total,
-    formato_documents: docsRes.total,
-    atualizacao_all: totalRes.total,
-    atualizacao_30_days: d30Res.total,
-    atualizacao_12_months: d12mRes.total,
-    atualizacao_3_years: d3yRes.total,
-    rotulo_all: totalRes.total,
-    rotulo_high_value: hvdRes.total,
-  };
+  // LEDG-1836: one aggregated call replaces the prior Promise.all of 14 fetches
+  // (listing + 9 filter counts + organizations + licenses + frequencies + granularities).
+  const data = await fetchDatasetsListing(page, 20, apiFilters);
 
   return (
     <DatasetsClient
-      initialData={initialData}
+      initialData={data.listing}
       currentPage={page}
-      filterCounts={filterCounts}
-      allOrganizations={allOrganizations.data}
-      allLicenses={allLicenses}
-      allFrequencies={allFrequencies}
-      allGranularities={allGranularities}
+      filterCounts={data.filter_counts}
+      allOrganizations={data.organizations}
+      allLicenses={data.licenses}
+      allFrequencies={data.frequencies}
+      allGranularities={data.granularities}
     />
   );
 }

@@ -7,7 +7,7 @@ import {
   createLocaleStringSorter,
   sortItems,
 } from "@/components/admin/lists/listHelpers";
-import type { OrganizationMember } from "@/types/api";
+import type { OrganizationMember } from "@/service/types/identity";
 import { formatDateToDMY } from "@/utils/formatDate";
 
 const roleLabels: Record<string, string> = {

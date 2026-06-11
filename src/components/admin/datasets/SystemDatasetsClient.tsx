@@ -5,8 +5,6 @@ import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { buildApiSortParam } from "@/components/admin/lists/listHelpers";
-import { fetchAdminDatasets, fetchDatasets } from "@/services/api";
-import { Dataset } from "@/types/api";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 import {
@@ -14,6 +12,8 @@ import {
   DatasetSortField,
   systemDatasetSortFieldMap,
 } from "./datasetsListConfig";
+import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
+import { Dataset } from "@/service/types/dataset";
 import AdminEmptyState from "../AdminEmptyState";
 
 export default function SystemDatasetsClient() {

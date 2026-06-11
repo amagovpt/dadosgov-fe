@@ -4,13 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { fetchReuses } from "@/services/api";
-import { Reuse } from "@/types/api";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
+import { fetchReuses } from "@/service/api/reuses";
+import { Reuse } from "@/service/types/reuse";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
 import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
 import { buildApiSortParam } from "@/components/admin/lists/listHelpers";
-import StatusFilterSelect from "../StatusFilterSelect";
 import {
   SystemReuseSortField,
   createReuseColumns,

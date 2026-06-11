@@ -9,14 +9,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ message: "Preencha todos os campos obrigatórios" }, { status: 400 });
   }
 
-  // Get CSRF token + session cookie from backend
+  // Get CSRF token + session cookie from backend.
+  // Use a fresh session for the CSRF token — do NOT forward the client's existing
+  // session. Merging it with the /get-csrf session would send duplicate session
+  // cookies; Flask would pick the old one (no matching csrf_token) and the CSRF
+  // check on POST /reset/<token>/ would return 400. (Same fix as /reset-password.)
   let csrfToken: string;
   let sessionCookies: string;
   try {
-    const existingCookies = request.headers.get("cookie") || "";
-    const csrfRes = await backendFetch("/get-csrf", {
-      headers: { Cookie: existingCookies },
-    });
+    const csrfRes = await backendFetch("/get-csrf");
     if (!csrfRes.ok) {
       return NextResponse.json({ message: "Erro ao obter token de segurança" }, { status: 502 });
     }
@@ -25,8 +26,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!csrfToken) {
       return NextResponse.json({ message: "Token de segurança inválido" }, { status: 502 });
     }
-    const newCookies = csrfRes.headers.getSetCookie().map((c) => c.split(";")[0]).join("; ");
-    sessionCookies = [existingCookies, newCookies].filter(Boolean).join("; ");
+    // Use only the fresh session cookie returned by /get-csrf (it always contains csrf_token)
+    sessionCookies = csrfRes.headers.getSetCookie().map((c) => c.split(";")[0]).join("; ");
   } catch {
     return NextResponse.json({ message: "Backend indisponível" }, { status: 502 });
   }

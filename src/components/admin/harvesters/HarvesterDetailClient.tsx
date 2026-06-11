@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Button,
   Icon,
@@ -13,24 +13,13 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import {
-  fetchHarvester,
-  fetchHarvestJobs,
-  fetchHarvestBackends,
-  updateHarvester,
-  scheduleHarvester,
-  unscheduleHarvester,
-  previewHarvestSource,
-  deleteHarvester,
-  rejectHarvestSource,
-  validateHarvestSource,
-} from "@/services/api";
+import { fetchHarvester, fetchHarvestJobs, fetchHarvestBackends, updateHarvester, scheduleHarvester, unscheduleHarvester, previewHarvestSource, deleteHarvester, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
 import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,
 } from "@/components/admin/harvesters/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
-import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/types/api";
+import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/service/types/harvester";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { HarvesterJobsTable } from "@/components/admin/harvesters/HarvesterJobsTable";
 import { HarvesterConfigForm } from "@/components/admin/harvesters/HarvesterConfigForm";
@@ -75,6 +64,7 @@ function DeleteHarvesterPopupContent({
 
 export default function HarvesterDetailClient({ slug }: HarvesterDetailClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const isConfigTab = searchParams.get("tab") === "config";
   const { user, isAdmin } = useAuth();
@@ -215,6 +205,14 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
       const newSchedule = harvesterSchedule.trim();
       const oldSchedule = source.schedule || "";
 
+      // Only submit filters whose key is declared by the selected backend.
+      // Orphan filters (e.g. left over from a previous backend type) would be
+      // rejected by the API with a 400 "Unknown filter key" error.
+      const validKeys = new Set(activeBackendFilters.map((f) => f.key));
+      const filtersToSend = filters.filter(
+        (f) => f.value.trim() && f.type && validKeys.has(f.type)
+      );
+
       const [updated] = await Promise.all([
         updateHarvester(source.id, {
           name: harvesterName.trim(),
@@ -223,11 +221,9 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           backend: selectedBackend || source.backend,
           active: isEnabled,
           autoarchive: isAutoArchive,
-          ...(filters.some((f) => f.value.trim() && f.type) && {
+          ...(filtersToSend.length > 0 && {
             config: {
-              filters: filters
-                .filter((f) => f.value.trim() && f.type)
-                .map((f) => ({ key: f.type, value: f.value, type: f.mode })),
+              filters: filtersToSend.map((f) => ({ key: f.type, value: f.value, type: f.mode })),
             },
           }),
         }),
@@ -443,7 +439,25 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
 
       {/* Tabs */}
-      <Tabs>
+      <Tabs
+        onTabActivation={(index: number) => {
+          // Keep the URL in sync with the active tab so that parent re-renders
+          // (e.g. typing in the Planeamento/schedule field) don't snap the active
+          // tab back to whatever the URL-derived `active` prop says. Index 1 is
+          // the "Configuração" tab; index 0 is "Trabalhos".
+          const params = new URLSearchParams(searchParams.toString());
+          if (index === 1) {
+            params.set("tab", "config");
+          } else {
+            params.delete("tab");
+          }
+          const query = params.toString();
+          const nextUrl = query ? `${pathname}?${query}` : pathname;
+          if (nextUrl !== `${pathname}${window.location.search}`) {
+            router.replace(nextUrl, { scroll: false });
+          }
+        }}
+      >
         <Tab active={!isConfigTab}>
           <TabHeader>Trabalhos</TabHeader>
           <TabBody>

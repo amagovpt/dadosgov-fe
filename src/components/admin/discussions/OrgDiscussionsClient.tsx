@@ -12,8 +12,8 @@ import {
   sortItems,
 } from "@/components/admin/lists/listHelpers";
 import { useAdminListController } from "@/components/admin/lists/useAdminListController";
-import { fetchOrgDiscussions } from "@/services/api";
-import type { Discussion } from "@/types/api";
+import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
+import { Discussion } from "@/service/types/discussion";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import DiscussionDetailPopup from "@/components/admin/discussions/DiscussionDetailPopup";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, usePopupContext } from "@ama-pt/agora-design-system";
-import { logout } from "@/services/api";
+import { logout } from "@/service/api/auth";
 import { useAuth } from "@/context/AuthContext";
 
 export function LogoutPopupContent() {

@@ -1,7 +1,7 @@
 import { Icon } from "@ama-pt/agora-design-system";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import StatusDot from "@/components/admin/StatusDot";
-import type { Discussion } from "@/types/api";
+import type { Discussion } from "@/service/types/discussion";
 import { formatDateToDMY } from "@/utils/formatDate";
 
 export type DiscussionSortField = "created" | "closed";

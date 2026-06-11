@@ -8,7 +8,7 @@ import {
   createLocaleStringSorter,
   sortItems,
 } from "@/components/admin/lists/listHelpers";
-import type { HarvestSource } from "@/types/api";
+import type { HarvestSource } from "@/service/types/harvester";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { getHarvesterStatus } from "@/utils/harvesterStatus";
 

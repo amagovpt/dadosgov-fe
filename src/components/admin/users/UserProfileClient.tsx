@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { fetchUser, fetchUserActivity, updateUser, deleteUser, fetchUserFollowing, uploadUserAvatar } from "@/services/api";
-import { Activity, UserAdmin, UserFollowing } from "@/types/api";
+import { fetchUserFollowing } from "@/service/api/followers";
+import { fetchUser, fetchUserActivity, updateUser, deleteUser, uploadUserAvatar } from "@/service/api/users";
+import { Activity } from "@/service/types/catalog";
+import { UserAdmin, UserFollowing } from "@/service/types/identity";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import {

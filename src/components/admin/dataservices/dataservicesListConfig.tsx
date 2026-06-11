@@ -3,7 +3,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import { createTableActionsColumn } from "@/components/admin/lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
-import type { Dataservice } from "@/types/api";
+import type { Dataservice } from "@/service/types/dataservice";
 import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 
 export type DataserviceSortField = "title" | "created_at" | "last_modified";

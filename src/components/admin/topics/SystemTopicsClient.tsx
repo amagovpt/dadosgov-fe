@@ -5,9 +5,9 @@ import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/components/admin/lists/useAdminListController";
-import { fetchTopics } from "@/services/api";
-import type { Topic } from "@/types/api";
 import { createTopicColumns } from "./topicsListConfig";
+import { fetchTopics } from "@/service/api/discussions-topics";
+import { Topic } from "@/service/types/topic";
 
 export default function SystemTopicsClient() {
   const [topics, setTopics] = useState<Topic[]>([]);

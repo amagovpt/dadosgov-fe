@@ -13,7 +13,9 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { APIResponse, Organization, Reuse } from "@/types/api";
+import { Organization } from "@/service/types/identity";
+import { Reuse } from "@/service/types/reuse";
+import { APIResponse } from "@/service/types/shared";
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";
@@ -21,6 +23,7 @@ import { useReusesListing } from "@/hooks/useReusesListing";
 import { REUSE_SORT_LABELS } from "@/utils/reusesListingQuery";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { twJoin } from "tailwind-merge";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
@@ -140,7 +143,12 @@ export default function ReusesClient({
               <div
                 className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1" : "grid-cols-1  lg:grid-cols-2")}
               >
-                {reuses.length > 0 ? (
+                {listData.error ? (
+                  <ListingErrorBanner
+                    entity="as reutilizações"
+                    errorStatus={listData.errorStatus}
+                  />
+                ) : reuses.length > 0 ? (
                   reuses.map((reuse) => {
                     const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at);
                     return (

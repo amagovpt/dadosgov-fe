@@ -6,8 +6,8 @@ import { CardNoResults, Icon, StatusCard, usePopupContext } from "@ama-pt/agora-
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/components/admin/lists/useAdminListController";
-import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/services/api";
-import type { HarvestSource } from "@/types/api";
+import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
+import type { HarvestSource } from "@/service/types/harvester";
 import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,

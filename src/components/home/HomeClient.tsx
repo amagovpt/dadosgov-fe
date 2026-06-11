@@ -4,12 +4,15 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button, CardArticle } from "@ama-pt/agora-design-system";
 import Link from "next/link";
-import { Dataset, Post, Reuse, SiteMetrics } from "@/types/api";
+import { Dataset } from "@/service/types/dataset";
+import { Post } from "@/service/types/posts";
+import { Reuse } from "@/service/types/reuse";
+import { SiteMetrics } from "@/service/types/shared";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
-import { Datastory, UsedDailyBy } from "@/types/home";
+import { Datastory, UsedDailyBy } from "@/service/types/home";
 import { getAssets } from "@/utils/getAssets";
 import HeroGeneral from "../HeroGeneral";
 import PublishDropdown from "../admin/PublishDropdown";
@@ -319,7 +322,7 @@ export default function HomeClient({
                   <div key={post.id} className="latest-news-card-wrapper h-full">
                     <CardArticle
                       image={{
-                        src: post.image_thumbnail || post.image || undefined,
+                        src: post.image || undefined,
                         alt: post.name,
                       }}
                       subtitle={

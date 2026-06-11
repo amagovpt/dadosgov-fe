@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Breadcrumb } from '@ama-pt/agora-design-system';
+import { twJoin } from 'tailwind-merge';
 
 interface HeroGeneralProps {
   title: React.ReactNode;
@@ -9,7 +10,7 @@ interface HeroGeneralProps {
   subtitle?: React.ReactNode;
   children?: React.ReactNode;
   variant?: 'dark' | 'light';
-  backgroundImageUrl?: string;
+  backgroundImageUrl?: string | null;
   backgroundPosition?: string;
   image?: {
     src: string;
@@ -42,7 +43,7 @@ export default function HeroGeneral({
         backgroundPosition,
       }}
     >
-      <div className='w-full flex flex-col items-center justify-center bg-gradient-to-r from-secondary-900 via-secondary-900/[64%] to-secondary-900/[24%]'>
+      <div className={twJoin('w-full flex flex-col items-center justify-center', backgroundImageUrl && "bg-gradient-to-r from-secondary-900 via-secondary-900/[64%] to-secondary-900/[24%]")}>
 
         <div className="container flex flex-col gap-32 py-64">
           {/* Breadcrumbs Section */}
@@ -54,14 +55,18 @@ export default function HeroGeneral({
           )}
           {/* Content Section (Title & Subtitle) */}
           <div className="max-w-2xl flex flex-col gap-16">
-            <h1 className="text-white flex flex-col items-start leading-tight">
-              <span className="text-2xl-bold">
-                {title}
+            {title && (
+              <h1 className="text-white flex flex-col items-start leading-tight">
+                <span className="text-2xl-bold">
+                  {title}
+                </span>
+              </h1>
+            )}
+            {subtitle && (
+              <span className="text-white text-m-regular">
+                {subtitle}
               </span>
-            </h1>
-            <span className="text-white text-m-regular">
-              {subtitle}
-            </span>
+            )}
           </div>
           {/* Search/Children Section */}
           {(children || image) && (

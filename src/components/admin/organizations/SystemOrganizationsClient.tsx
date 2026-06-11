@@ -5,13 +5,13 @@ import { Button, CardNoResults, Icon, usePopupContext } from "@ama-pt/agora-desi
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/components/admin/lists/useAdminListController";
-import { fetchOrganizations, deleteOrganization } from "@/services/api";
-import type { Organization } from "@/types/api";
 import {
   createOrganizationColumns,
   organizationSortFieldMap,
   type OrganizationSortField,
 } from "./organizationsListConfig";
+import { fetchOrganizations, deleteOrganization } from "@/service/api/organizations";
+import { Organization } from "@/service/types/identity";
 
 function DeleteOrgPopupContent({
   onClose,

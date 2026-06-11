@@ -4,7 +4,7 @@ import { Icon } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminListTable, { type AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
-import type { Dataset } from "@/types/api";
+import type { Dataset } from "@/service/types/dataset";
 
 const PAGE_SIZE = 10;
 

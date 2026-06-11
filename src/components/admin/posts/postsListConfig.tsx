@@ -9,7 +9,7 @@ import {
 } from "@/components/admin/lists/listHelpers";
 import type { SortOrder } from "@/components/admin/lists/useClientTableState";
 import { formatDateToDMY } from "@/utils/formatDate";
-import type { Post } from "@/types/api";
+import type { Post } from "@/service/types/posts";
 
 export type PostSortField = "name" | "created_at" | "last_modified";
 

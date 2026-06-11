@@ -1,9 +1,23 @@
 services:
+  # One-shot init: ensures ./logs (auto-created by Docker as root) is writable
+  # by the app user before the app starts. Runs on every `up`, then exits.
+  init-logs:
+    container_name: udata-frontend-init-logs
+    image: busybox:stable
+    command: sh -c "chown -R ${NEXTJS_UID:-10001}:${NEXTJS_GID:-10001} /logs && chmod 2775 /logs"
+    volumes:
+      - ./logs:/logs
+
   app:
     container_name: udata-frontend-app
+    depends_on:
+      init-logs:
+        condition: service_completed_successfully
     build:
       context: .
       args:
+        NEXTJS_UID: ${NEXTJS_UID:-10001}
+        NEXTJS_GID: ${NEXTJS_GID:-10001}
         NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE}
         NEXT_PUBLIC_API_V2_BASE: ${NEXT_PUBLIC_API_V2_BASE}
         NEXT_PUBLIC_FRONT_BASE: ${NEXT_PUBLIC_FRONT_BASE}
@@ -15,8 +29,13 @@ services:
         NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+    # Pipe stdout/stderr to a bind-mounted log file while keeping `docker logs` working
+    command: sh -c "node server.js 2>&1 | tee -a /logs/app.log"
+    init: true
     ports:
       - "3000:3000"
+    volumes:
+      - ./logs:/logs
     environment:
       BACKEND_URL: http://host.docker.internal:7000
       BACKEND_HOST: localhost:7000
