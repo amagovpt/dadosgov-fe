@@ -150,7 +150,7 @@ export default function OrganizationsClient({
                     errorStatus={listData.errorStatus}
                   />
                 ) : organizations.length > 0 ? (
-                  organizations.map((org, index) => {
+                  organizations.map((org) => {
                     const timeAgo = formatDateToTimeAgo(org.last_modified);
                     const cardProps: CardMetricsProps = {
                       title: org.name,
@@ -169,7 +169,7 @@ export default function OrganizationsClient({
                       },
                     };
                     return (
-                      <CardMetrics key={`org-${index}`} {...cardProps} hideProgressBar />
+                      <CardMetrics key={`org-${org.slug}`} {...cardProps} hideProgressBar />
                     );
                   })
                 ) : (
