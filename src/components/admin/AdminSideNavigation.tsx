@@ -34,11 +34,10 @@ const navGroups: NavGroup[] = [
         label: "Conjunto de dados",
         href: "/pages/admin/me/datasets",
       },
-      // API oculta temporariamente
-      // {
-      //   label: "API",
-      //   href: "/pages/admin/dataservices",
-      // },
+      {
+        label: "API",
+        href: "/pages/admin/me/dataservices",
+      },
       {
         label: "Reutilizações",
         href: "/pages/admin/me/reuses",
@@ -72,11 +71,10 @@ const navGroups: NavGroup[] = [
         label: "Conjunto de dados",
         href: "/pages/admin/system/datasets",
       },
-      // API oculta temporariamente
-      // {
-      //   label: "API",
-      //   href: "/pages/admin/system/dataservices",
-      // },
+      {
+        label: "API",
+        href: "/pages/admin/system/dataservices",
+      },
       {
         label: "Reutilizações",
         href: "/pages/admin/system/reuses",
