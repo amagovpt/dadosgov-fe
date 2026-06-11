@@ -5,6 +5,7 @@ import Sources from "./Sections/Sources";
 import OtherResources from "./Sections/OtherResources";
 import { RelatedDatastories } from "./Sections/RelatedDatastories";
 import Timeline from "./Sections/Timeline";
+import PublicAdminStructure from "./Sections/PublicAdminStructure";
 
 type SectionBg = "white" | "primary";
 
@@ -30,6 +31,14 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
       case "section-datastory-timeline":
         return (
           <Timeline key={`section-${index}`} {...section} className={getSectionClassname(index)} />
+        );
+      case "section-datastory-public-admin-structure":
+        return (
+          <PublicAdminStructure
+            key={`section-${index}`}
+            {...section}
+            className={getSectionClassname(index)}
+          />
         );
       case "section-datastory-bignumbers":
         return (

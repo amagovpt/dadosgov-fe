@@ -13,6 +13,7 @@ type Card = {
   icon: string;
   title: string;
   subtitle: string;
+  description: string;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -70,6 +71,22 @@ export type TimelineSection = {
   cardsLinkIcon: string;
   anchor: Anchor;
   timeline: Timeline;
+};
+
+// ----------------------------------------------------------------------------------------------
+
+type PublicAdminStructure = {
+  centralAdmin: Card;
+  regionalAdmin: Card;
+  localAdmin: Card;
+  socialFunds: Card;
+  publicAdmin: Card;
+};
+
+export type PublicAdminStructureSection = {
+  schemaName: "section-datastory-public-admin-structure";
+  title: string;
+  parts: PublicAdminStructure;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -141,6 +158,7 @@ export type OtherSection = {
 export type DatastorySection =
   | BigNumbersSection
   | TimelineSection
+  | PublicAdminStructureSection
   | IframeSection
   | RelatedSection
   | SourceSection

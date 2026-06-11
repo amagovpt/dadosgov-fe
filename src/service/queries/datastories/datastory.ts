@@ -169,6 +169,42 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     }
                   }
                 }
+                ... on SectionDatastoryPublicAdminStructureComponent {
+                  schemaName
+                  title
+                  parts {
+                    centralAdmin {
+                      icon
+                      title
+                      subtitle
+                      description
+                    }
+                    regionalAdmin {
+                      icon
+                      title
+                      subtitle
+                      description
+                    }
+                    localAdmin {
+                      icon
+                      title
+                      subtitle
+                      description
+                    }
+                    socialFunds {
+                      icon
+                      title
+                      subtitle
+                      description
+                    }
+                    publicAdmin {
+                      icon
+                      title
+                      subtitle
+                      description
+                    }
+                  }
+                }
               }
             }
           }
