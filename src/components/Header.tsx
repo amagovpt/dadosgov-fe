@@ -295,7 +295,7 @@ export const Header = () => {
         data-no-user={!user || undefined}
         onClickCapture={handleHeaderClickCapture}
       >
-        <AgoraHeader ref={headerRef} maxNavigationItems={6}>
+        <AgoraHeader ref={headerRef} maxNavigationItems={7}>
           <Brand>
             <Logo>
               <Link href="/" className="flex items-center">
@@ -406,6 +406,15 @@ export const Header = () => {
             <NavigationLink appearance="link">
               <Link href="/pages/datasets" onClick={(e) => handleLinkClick(e, "/pages/datasets")}>
                 Conjuntos de dados
+              </Link>
+            </NavigationLink>
+
+            <NavigationLink appearance="link">
+              <Link
+                href="/pages/dataservices"
+                onClick={(e) => handleLinkClick(e, "/pages/dataservices")}
+              >
+                API
               </Link>
             </NavigationLink>
 

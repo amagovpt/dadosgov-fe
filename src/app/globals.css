@@ -140,6 +140,12 @@ header.sticky .languages-panel-menu {
   }
 }
 
+/* Center short nav labels (e.g. "API") within the 44px min click-target box,
+   so the leftover space is split symmetrically instead of all on the right. */
+.internal-navigation-list ul li .agora-link-wrapper > a {
+  justify-content: center;
+}
+
 .search-panel-menu .panel-menu-content-children {
   overflow: visible !important;
 }
