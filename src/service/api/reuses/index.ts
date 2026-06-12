@@ -318,7 +318,8 @@ export interface ReusesListingResponse {
 export async function fetchReusesListing(
   page: number = 1,
   pageSize: number = 12,
-  filters?: ReuseFilters
+  filters?: ReuseFilters,
+  forwarded?: Record<string, string>,
 ): Promise<ReusesListingResponse> {
   const emptyShape: ReusesListingResponse = {
     listing: { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null },
@@ -357,7 +358,9 @@ export async function fetchReusesListing(
     // SSR listing: cache per-URL in the Next.js Data Cache (matches the backend
     // @cache.cached(60)) so repeated page/query loads don't hit the backend
     // PUBLIC_SEARCH_LIMIT bucket that the F5 IP-collapse turns site-wide.
-    const res = await fetch(url, { next: { revalidate: 60 } });
+    // On a cache-miss, `forwarded` relays the real client IP so the backend
+    // keys the limiter per visitor instead of the Next.js server IP.
+    const res = await fetch(url, { next: { revalidate: 60 }, headers: forwarded });
 
     if (!res.ok) {
       console.error(`Error fetching reuses listing: ${res.status} ${res.statusText}`);

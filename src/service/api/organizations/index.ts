@@ -100,10 +100,17 @@ export async function fetchOrgBadges(): Promise<OrgBadges> {
 }
 
 
-export async function fetchOrganization(slugOrId: string): Promise<Organization | null> {
+export async function fetchOrganization(
+  slugOrId: string,
+  forwarded?: Record<string, string>,
+): Promise<Organization | null> {
   try {
+    // `forwarded` carries the real client IP (X-Forwarded-For) when called from
+    // a Server Component; without it this SSR fetch reaches the backend as the
+    // Next.js server IP and collapses every visitor into one rate-limit bucket.
     const res = await fetch(`${API_BASE_URL}/organizations/${slugOrId}/`, {
       cache: "no-store",
+      headers: forwarded,
     });
 
     if (res.status === 404) {
@@ -496,7 +503,8 @@ export interface OrganizationsListingResponse {
 export async function fetchOrganizationsListing(
   page: number = 1,
   pageSize: number = 20,
-  filters?: OrganizationFilters
+  filters?: OrganizationFilters,
+  forwarded?: Record<string, string>,
 ): Promise<OrganizationsListingResponse> {
   const emptyShape: OrganizationsListingResponse = {
     listing: { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null },
@@ -532,7 +540,9 @@ export async function fetchOrganizationsListing(
     // SSR listing: cache per-URL in the Next.js Data Cache (matches the backend
     // @cache.cached(60)) so repeated page/query loads don't hit the backend
     // PUBLIC_SEARCH_LIMIT bucket that the F5 IP-collapse turns site-wide.
-    const res = await fetch(url, { next: { revalidate: 60 } });
+    // On a cache-miss, `forwarded` relays the real client IP so the backend
+    // keys the limiter per visitor instead of the Next.js server IP.
+    const res = await fetch(url, { next: { revalidate: 60 }, headers: forwarded });
 
     if (!res.ok) {
       console.error(`Error fetching organizations listing: ${res.status} ${res.statusText}`);
