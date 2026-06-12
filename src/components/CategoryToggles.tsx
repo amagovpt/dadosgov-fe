@@ -40,16 +40,17 @@ const buildItems = (siteMetrics: SiteMetrics): CategoryToggleItem[] => [
     leadingIconHover: 'agora-solid-layers-menu',
     className: 'w-full',
   },
-  {
-    id: 'apis',
-    label: 'APIs',
-    href: '/pages/dataservices',
-    count: siteMetrics.dataservices ?? 0,
-    leadingIcon: (active: boolean) =>
-      active ? '/Icons/api-solid.svg' : '/Icons/api.svg',
-    leadingIconHover: '/Icons/api-solid.svg',
-    className: 'w-full agora-toggle agora-toggle-icon agora-toggle-icon-primary full-width has-icon',
-  },
+  // APIs ocultas temporariamente
+  // {
+  //   id: 'apis',
+  //   label: 'APIs',
+  //   href: '/pages/dataservices',
+  //   count: siteMetrics.dataservices ?? 0,
+  //   leadingIcon: (active: boolean) =>
+  //     active ? '/Icons/api-solid.svg' : '/Icons/api.svg',
+  //   leadingIconHover: '/Icons/api-solid.svg',
+  //   className: 'w-full agora-toggle agora-toggle-icon agora-toggle-icon-primary full-width has-icon',
+  // },
   {
     id: 'reutilizacoes',
     label: 'Reutilizações',

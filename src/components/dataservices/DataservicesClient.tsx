@@ -20,9 +20,8 @@ import {
   InputSearch,
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
-import { CategoryToggles } from "@/components/CategoryToggles";
 import { fetchOrganizations, suggestTags } from "@/services/api";
-import { APIResponse, Dataservice, Organization, SiteMetrics } from "@/types/api";
+import { APIResponse, Dataservice, Organization } from "@/types/api";
 import HeroGeneral from "@/components/HeroGeneral";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";
@@ -127,14 +126,12 @@ type ApiFilterKey = keyof typeof API_TOGGLE_FILTERS;
 interface DataservicesClientProps {
   initialData: APIResponse<Dataservice>;
   currentPage: number;
-  siteMetrics?: SiteMetrics;
   initialFilters?: { q?: string; sort?: string };
 }
 
 export default function DataservicesClient({
   initialData,
   currentPage,
-  siteMetrics,
   initialFilters,
 }: DataservicesClientProps) {
   const router = useRouter();
@@ -332,13 +329,7 @@ export default function DataservicesClient({
           <div className="grid-filters grid md:grid-cols-3 xl:grid-cols-12">
             {/* Sidebar */}
             <div className="p-32 pl-0 xl:col-span-5 xl:block">
-              {siteMetrics && (
-                <div>
-                  <CategoryToggles siteMetrics={siteMetrics} searchQuery={initialFilters?.q} />
-                </div>
-              )}
-
-              <div className="mt-[36px] flex flex-col gap-32">
+              <div className="flex flex-col gap-32">
                 <h2 className="text-xl font-bold text-neutral-900">Filtros</h2>
                 {(Object.keys(API_TOGGLE_FILTERS) as ApiFilterKey[]).map((filterKey) => {
                   const section = API_TOGGLE_FILTERS[filterKey];
