@@ -33,6 +33,7 @@ export default async function DataStoryDetailPage({
   if (datastory && datastory.hero) {
     breadcrumbItems = [
       { label: "Início", url: "/" },
+      /** TODO: remove /pages from the href after refactoring the app routes */
       { label: "Data Stories", url: "/pages/datastories" },
       {
         label: datastory.hero.title,
