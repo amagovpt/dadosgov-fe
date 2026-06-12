@@ -12,7 +12,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
-import type { Dataset } from '@/service/types/dataset';
+import type { Dataset } from "@/service/types/dataset";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 
 type ReusesEditDatasetsTabProps = {

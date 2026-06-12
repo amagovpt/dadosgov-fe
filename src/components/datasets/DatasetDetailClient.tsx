@@ -11,9 +11,9 @@ import {
   ProgressBar,
   CardExpandable,
 } from "@ama-pt/agora-design-system";
-import type { Dataset } from '@/service/types/dataset';
-import { fetchDataset } from "@/app/api/datasets";
-import { followEntity, isFollowing, unfollowEntity } from "@/app/api/followers";
+import { Dataset } from "@/service/types/dataset";
+import { fetchDataset } from "@/service/api/datasets";
+import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";
@@ -126,7 +126,9 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
     );
   }
 
-  console.log("Dataset:", dataset.organization);
+  const ownerFullName = dataset.owner
+    ? `${dataset.owner.first_name} ${dataset.owner.last_name}`.trim()
+    : null;
 
   const qualityScore = calculateQualityScore(QUALITY_CRITERIA, dataset.quality);
   const qualityDetails = getQualityDetails(dataset.quality);
@@ -205,9 +207,20 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     className="max-h-full max-w-full object-contain"
                   />
                 </div>
+              ) : dataset.owner?.avatar_thumbnail ? (
+                <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
+                  <img
+                    src={dataset.owner.avatar_thumbnail}
+                    alt={ownerFullName ?? "Autor"}
+                    className="max-h-full max-w-full rounded-full object-cover"
+                  />
+                </div>
               ) : (
                 <div className="flex w-fit items-center justify-center rounded-8 border border-neutral-200 bg-neutral-100 px-12 py-12 text-neutral-400">
-                  <Icon name="agora-line-buildings" className="h-6 w-6" />
+                  <Icon
+                    name={dataset.owner ? "agora-line-user" : "agora-line-buildings"}
+                    className="h-6 w-6"
+                  />
                 </div>
               )}
 
@@ -220,8 +233,18 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     >
                       {dataset.organization.name}
                     </Link>
+                  ) : dataset.owner ? (
+                    /* LEDG-1861: user-authored datasets link to the public
+                       profile instead of the broken "Organização Desconhecida"
+                       fallback. */
+                    <Link
+                      href={`/pages/users/${dataset.owner.slug}`}
+                      className="hover:underline"
+                    >
+                      {ownerFullName}
+                    </Link>
                   ) : (
-                    "Organização Desconhecida"
+                    "Sem autor"
                   )}
                 </div>
                 <div className="text-sm mb-16 text-neutral-900">

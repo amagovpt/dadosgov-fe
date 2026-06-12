@@ -1,4 +1,4 @@
-﻿export interface ApiToken {
+export interface ApiToken {
   id: string;
   token_prefix: string;
   name: string | null;
@@ -143,6 +143,7 @@ export interface OrganizationUpdatePayload {
   description?: string;
   url?: string | null;
   business_number_id?: string;
+  badges?: Badge[];
 }
 
 export interface OrganizationSuggestion {

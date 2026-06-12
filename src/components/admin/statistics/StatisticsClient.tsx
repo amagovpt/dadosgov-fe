@@ -12,11 +12,11 @@ import {
   TabBody,
 } from "@ama-pt/agora-design-system";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { fetchMyDatasets } from "@/app/api/datasets";
-import { fetchMyReuses } from "@/app/api/reuses";
-import type { Dataset } from '@/service/types/dataset';
-import type { Reuse } from '@/service/types/reuse';
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { fetchMyDatasets } from "@/service/api/datasets";
+import { fetchMyReuses } from "@/service/api/reuses";
+import type { Dataset } from "@/service/types/dataset";
+import type { Reuse } from "@/service/types/reuse";
 import { DatasetMetricsTable } from "./DatasetMetricsTable";
 import { ReuseMetricsTable } from "./ReuseMetricsTable";
 

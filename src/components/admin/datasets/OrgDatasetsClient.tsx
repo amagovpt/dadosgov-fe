@@ -12,9 +12,10 @@ import {
   TableCell,
   Button,
 } from "@ama-pt/agora-design-system";
-import { fetchOrgDatasets } from "@/app/api/organizations";
-import type { Dataset } from '@/service/types/dataset';
+
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { fetchOrgDatasets } from "@/service/api/organizations";
+import { Dataset } from "@/service/types/dataset";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { formatDateToDMY } from "@/utils/formatDate";
@@ -40,7 +41,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -127,16 +128,13 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
 
   return (
     <AdminLayout
-      breadcrumbItems={
-        [
-          { label: "Administração", url: "/pages/admin" },
-          { label: orgName || "Organização", url: "#" },
-          { label: "Conjuntos de dados", url: "#" },
-        ]
-      }
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Conjuntos de dados", url: "#" },
+      ]}
       title="Conjuntos de dados"
     >
-
       <ResultsCount count={total} isLoading={isLoading} />
 
       <div className="mb-24 flex items-end gap-16">
@@ -235,7 +233,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
                       href: `/pages/datasets/${dataset.slug}`,
                     }}
                     editAction={{
-                      href: `/pages/admin/org/datasets/edit?slug=${dataset.slug}`,
+                      href: `/pages/admin/org/${orgId}/datasets/edit?slug=${dataset.slug}`,
                     }}
                   />
                 </TableCell>

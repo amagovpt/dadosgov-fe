@@ -1,25 +1,12 @@
-import React from 'react'
 import ReactMarkdown from 'react-markdown';
 import { getFaqs } from '@/service/queries/faqs/faqs';
 import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
 import Anchor from '@/components/Shared/Anchor';
-import { Metadata } from 'next';
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-    //params,
-}: {
-    params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-    const { title } = await getFaqs("api-tutorial", "pt");
-
-    return {
-        title,
-    };
-}
-
 export default async function page() {
+
 
     const { title, actionTitle, body, actions } = await getFaqs("api-tutorial", "pt")
 
@@ -34,13 +21,13 @@ export default async function page() {
                     ]}
                 />
             </div>
-            <div className="container flex flex-col gap-16 py-32 font-sans text-primary-900 leading-3">
+            <div className="container flex flex-col gap-16 py-32 font-sans text-primary-900">
                 <ReactMarkdown
                     components={{
                         h1: ({ children }) => <h1 className="text-2xl-bold">{children}</h1>,
                         h2: ({ children }) => <h2 className="text-xl-bold">{children}</h2>,
                         a: ({ href, children }) => (
-                            <Anchor href={href}>
+                            <Anchor href={href} appearance='link' className="!py-0 !min-h-[12px] !min-w-[12px]" >
                                 {children}
                             </Anchor>
                         ),

@@ -1,4 +1,4 @@
-import { Image } from "@/service/types/shared/common";
+import { Image } from "@/service/types/shared";
 
 export type DataStoryMetadata = {
   slug: string;

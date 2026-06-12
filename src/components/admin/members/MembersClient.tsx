@@ -18,22 +18,9 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import {
-  fetchOrganization,
-  addMember,
-  updateMemberRole,
-  removeMember,
-  fetchMembershipRequests,
-  acceptMembership,
-  refuseMembership,
-} from "@/app/api/organizations";
-import { suggestUsers } from "@/app/api/search";
-import type {
-  MembershipRequest,
-  Organization,
-  OrganizationMember,
-  UserSuggestion,
-} from '@/service/types/identity';
+import { fetchOrganization, addMember, updateMemberRole, removeMember, fetchMembershipRequests, acceptMembership, refuseMembership } from "@/service/api/organizations";
+import { suggestUsers } from "@/service/api/search";
+import { Organization, OrganizationMember, MembershipRequest, UserSuggestion } from "@/service/types/identity";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";

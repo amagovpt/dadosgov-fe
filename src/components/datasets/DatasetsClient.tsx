@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -8,15 +8,14 @@ import {
   CardNoResults,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { deleteDataset } from "@/app/api/datasets";
+import { deleteDataset } from "@/service/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
-import type { Frequency, Granularity, License } from '@/service/types/catalog';
-import type { APIResponse } from '@/service/types/shared/core';
-import type { Dataset } from '@/service/types/dataset';
-import type { Organization } from '@/service/types/identity';
+import { Frequency, Granularity, License } from "@/service/types/catalog";
+import { Dataset } from "@/service/types/dataset";
+import { Organization } from "@/service/types/identity";
+import { APIResponse } from "@/service/types/shared";
 
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -26,6 +25,7 @@ import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { DATASET_SORT_LABELS } from "@/utils/datasetsListingQuery";
 import { useDatasetsListing } from "@/hooks/useDatasetsListing";
 import { twJoin } from "tailwind-merge";
+import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -198,14 +198,14 @@ export default function DatasetsClient({
                     errorStatus={listData.errorStatus}
                   />
                 ) : datasets.length > 0 ? (
-                  datasets.map((dataset, index) => {
+                  datasets.map((dataset) => {
                     const timeAgo = formatDateToTimeAgo(dataset.last_modified);
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
                       link: `/pages/datasets/${dataset.slug}`
                     } as CardMetricsProps;
-                    return <CardMetrics key={`dataset-${index}`} {...cardProps} />
+                    return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />
                   })
                 ) : (
                   <div className="col-span-full">

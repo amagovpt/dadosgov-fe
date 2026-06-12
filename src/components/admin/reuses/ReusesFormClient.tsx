@@ -16,21 +16,13 @@ import {
   Tag,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import {
-  createReuse,
-  updateReuse,
-  uploadReuseImage,
-  linkDatasetToReuse,
-  linkDataserviceToReuse,
-  fetchReuseTypes,
-  fetchReuseTopics,
-} from "@/app/api/reuses";
-import { fetchMyDatasets } from "@/app/api/datasets";
-import { fetchOrgDatasets } from "@/app/api/organizations";
-import { searchDatasets, suggestTags } from "@/app/api/search";
-import type { TagSuggestion } from '@/service/types/catalog';
-import type { Dataset } from '@/service/types/dataset';
-import type { Reuse, ReuseType, ReuseTopic } from '@/service/types/reuse';
+import { fetchMyDatasets } from "@/service/api/datasets";
+import { fetchOrgDatasets } from "@/service/api/organizations";
+import { createReuse, updateReuse, uploadReuseImage, linkDatasetToReuse, linkDataserviceToReuse, fetchReuseTypes, fetchReuseTopics } from "@/service/api/reuses";
+import { searchDatasets, suggestTags } from "@/service/api/search";
+import type { TagSuggestion } from "@/service/types/catalog";
+import type { Dataset } from "@/service/types/dataset";
+import type { Reuse, ReuseType, ReuseTopic } from "@/service/types/reuse";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import { format, formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";

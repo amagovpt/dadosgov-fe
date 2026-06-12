@@ -13,9 +13,9 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchAllCommunityResources } from "@/app/api/community-resources";
-import type { CommunityResource } from '@/service/types/community-resource';
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { fetchAllCommunityResources } from "@/service/api/community-resources";
+import { CommunityResource } from "@/service/types/community-resource";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 import TextLink from "@/components/Primitives/TextLink";
 import { createPaginationProps } from "@/utils/createPaginationProps";

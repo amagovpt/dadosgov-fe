@@ -20,7 +20,7 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import type { ResourceType } from '@/service/types/catalog';
+import { ResourceType } from "@/service/types/catalog";
 import TextLink from "@/components/Primitives/TextLink";
 
 export interface PendingResourceMeta {
@@ -119,7 +119,7 @@ function ResourceEditPendingPopupContent({
   // The set-state-in-effect lint rule warns about cascading renders, but
   // the alternative (waiting for a remount that never happens) is the bug
   // we are fixing — this prop-sync is the smaller of the two evils.
-   
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
   useEffect(() => {
     const t = initialMeta.title || name;
     setTitle(!isUrl && fileExt && t === name ? baseName : t);

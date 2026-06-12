@@ -14,9 +14,9 @@ import {
   TableCell,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { fetchOrganizations, deleteOrganization } from "@/app/api/organizations";
-import type { Organization } from '@/service/types/identity';
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import { fetchOrganizations, deleteOrganization } from "@/service/api/organizations";
+import { Organization } from "@/service/types/identity";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";

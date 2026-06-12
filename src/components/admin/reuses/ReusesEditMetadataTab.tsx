@@ -16,7 +16,7 @@ import IsolatedInput from "@/components/admin/IsolatedInput";
 import IsolatedTextArea from "@/components/admin/IsolatedTextArea";
 import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
 import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
-import type { Reuse, ReuseTopic, ReuseType } from '@/service/types/reuse';
+import type { Reuse, ReuseTopic, ReuseType } from "@/service/types/reuse";
 import AppIcon from "@/components/Primitives/AppIcon";
 
 type ReusesEditMetadataTabProps = {

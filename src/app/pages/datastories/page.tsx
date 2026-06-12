@@ -1,10 +1,12 @@
 import DataStoriesClient from "@/components/datastories/DataStoriesClient";
 import { getDataStories } from "@/service/queries/datastories/datastories";
 import apolloClient from "@/service/utils/apollo-client";
-import { Datastories } from "@/service/types/datastories";
+import { Datastories } from "@/service/types/datastories/datastories";
 import { flattenData } from "@/utils/flattenObject";
 import { Metadata } from "next";
 
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Data Stories - dados.gov.pt",

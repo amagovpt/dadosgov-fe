@@ -19,8 +19,8 @@ import {
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import StatusDot from "@/components/admin/StatusDot";
-import { fetchHarvestJob, fetchHarvester } from "@/app/api/harvesters";
-import type { HarvestJob, HarvestItem, HarvestSource } from '@/service/types/harvester';
+import { fetchHarvestJob, fetchHarvester } from "@/service/api/harvesters";
+import type { HarvestJob, HarvestItem, HarvestSource } from "@/service/types/harvester";
 import TextLink from "@/components/Primitives/TextLink";
 
 interface HarvestJobDetailClientProps {

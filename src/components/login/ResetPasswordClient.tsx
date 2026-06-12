@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
+import React, { useState } from "react";
 import {
   Button,
   Breadcrumb,
@@ -25,12 +24,9 @@ export function ResetPasswordClient({ token }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
-  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
   const passwordsMatch = password && passwordConfirm && password === passwordConfirm;
-  const canSubmit = passwordsMatch && !isLoading && (!recaptchaSiteKey || !!captchaToken);
+  const canSubmit = passwordsMatch && !isLoading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,13 +49,9 @@ export function ResetPasswordClient({ token }: Props) {
         setSuccess(true);
       } else {
         setError(data.message || "Erro ao redefinir a palavra-passe. Tente novamente.");
-        recaptchaRef.current?.reset();
-        setCaptchaToken(null);
       }
     } catch {
       setError("Erro de ligação. Tente novamente.");
-      recaptchaRef.current?.reset();
-      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -150,16 +142,6 @@ export function ResetPasswordClient({ token }: Props) {
 
                   {passwordConfirm && !passwordsMatch && (
                     <p className="text-sm text-danger-600">As palavras-passe não coincidem.</p>
-                  )}
-
-                  {recaptchaSiteKey && (
-                    <ReCAPTCHA
-                      ref={recaptchaRef}
-                      sitekey={recaptchaSiteKey}
-                      hl="pt"
-                      onChange={(token) => setCaptchaToken(token)}
-                      onExpired={() => setCaptchaToken(null)}
-                    />
                   )}
 
                   <div className="mt-8">

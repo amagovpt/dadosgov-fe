@@ -1,7 +1,7 @@
 import type { Dataset } from '@/service/types/dataset';
 import type { Reuse } from '@/service/types/reuse';
 import type { Post } from '@/service/types/posts';
-import type { SiteMetrics } from '@/service/types/shared/site-metrics';
+import type { SiteMetrics } from '@/service/types/shared';
 
 export interface HomepageData {
   site_metrics: SiteMetrics;

@@ -33,8 +33,8 @@ npm run lint
 
 - **App Router**: routes in `src/app/pages/`
 - **Components**: `src/components/` organized by feature (datasets/, reuses/, organizations/, etc.)
-- **API layer**: `src/services/api.ts` - all backend API calls centralized here
-- **Types**: `src/types/api.ts` - TypeScript interfaces for API responses
+- **API layer**: `src/service/api/<domain>/index.ts` - backend API calls grouped per domain; shared fetch helpers in `src/service/utils/API.ts`
+- **Types**: `src/service/types/<domain>/` - TypeScript interfaces for API responses
 - **Path alias**: `@/*` maps to `./src/*`
 
 ## Component Conventions
@@ -48,7 +48,7 @@ npm run lint
 
 ## API Integration
 
-- Base URL: `https://dados.gov.pt/api/1` (configured in `src/services/api.ts`)
+- Base URL: `https://dados.gov.pt/api/1` (configured in `src/service/utils/API.ts`)
 - Error handling: graceful fallbacks returning empty states
 
 ### Data Fetching — Server Components (preferred for public pages)
@@ -56,7 +56,7 @@ npm run lint
 For public-facing pages, prefer async Server Components with ISR caching:
 
 1. Make `page.tsx` an async Server Component (no `"use client"`).
-2. Fetch data directly in the component body using functions from `src/services/api.ts`.
+2. Fetch data directly in the component body using functions from `src/service/api/<domain>`.
 3. Use `next: { revalidate: N }` on `fetch()` calls for ISR caching (homepage: 60s, posts: 120s, site metadata: 300s).
 4. Pass fetched data as props to a child `*Client.tsx` component for interactivity.
 5. Provide typed empty-state fallbacks in the catch block so the page still renders on error.
@@ -64,7 +64,7 @@ For public-facing pages, prefer async Server Components with ISR caching:
 
 ### Data Fetching — Client Components (for authenticated/dynamic pages)
 
-When fetching dynamic data in a client component (e.g., admin pages), use `useEffect` and `useState` with functions from `src/services/api.ts`:
+When fetching dynamic data in a client component (e.g., admin pages), use `useEffect` and `useState` with functions from `src/service/api/<domain>`:
 
 1. Define state for the data array/object and a loading boolean (`isLoading`).
 2. Inside `useEffect()`, wrap the API call in an `async function`.
@@ -80,9 +80,10 @@ When fetching dynamic data in a client component (e.g., admin pages), use `useEf
 - `src/app/page.tsx` - Homepage
 - `src/app/layout.tsx` - Root layout (Header + Footer)
 - `src/app/globals.css` - Global styles & design tokens
-- `src/app/api/` - API integration layer
-- `src/service/queries` - Squidex integration layer
-- `src/service/types` - TypeScript type definitions
+- `src/service/api/` - API integration layer (per-domain `index.ts`)
+- `src/service/utils/API.ts` - shared fetch helpers & base URLs
+- `src/service/queries/` - Squidex (GraphQL) integration layer
+- `src/service/types/` - TypeScript type definitions
 - `src/components/Header.tsx` / `Footer.tsx` - Layout components
 - `tailwind.config.ts` - Theme config with Agora design system
 

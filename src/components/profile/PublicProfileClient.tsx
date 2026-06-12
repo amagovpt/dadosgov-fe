@@ -18,16 +18,13 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import type { Dataset } from '@/service/types/dataset';
-import type { Follow, UserFollowing, UserPublic } from '@/service/types/identity';
-import type { Reuse } from '@/service/types/reuse';
-import {
-  fetchDatasets,
-  fetchMyDatasets,
-} from "@/app/api/datasets";
-import { fetchReuses, fetchMyReuses } from "@/app/api/reuses";
-import { fetchUserProfile } from "@/app/api/users";
-import { fetchUserFollowers, fetchMyFollowing } from "@/app/api/followers";
+import { Dataset } from "@/service/types/dataset";
+import { Follow, UserFollowing, UserPublic } from "@/service/types/identity";
+import { Reuse } from "@/service/types/reuse";
+import { fetchMyDatasets, fetchDatasets } from "@/service/api/datasets";
+import { fetchUserFollowers, fetchMyFollowing } from "@/service/api/followers";
+import { fetchMyReuses, fetchReuses } from "@/service/api/reuses";
+import { fetchUserProfile } from "@/service/api/users";
 import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
@@ -145,10 +142,23 @@ export default function PublicProfileClient() {
     }
   }, [displayUser?.id, isOwnProfile]);
 
+  const totalPages = Math.ceil(datasets.length / itemsPerPage);
+
   const paginatedDatasets = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return datasets.slice(start, start + itemsPerPage);
   }, [datasets, currentPage, itemsPerPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1);
+  };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -532,7 +542,12 @@ export default function PublicProfileClient() {
               datasets.length,
               currentPage,
               setCurrentPage,
-              setItemsPerPage
+              setItemsPerPage,
+              {
+                currentPageIsZeroBased: true,
+                onPageChange: (page) => handlePageChange(page),
+                onPageSizeChange: (size) => handleItemsPerPageChange(String(size)),
+              }
             )}
           >
             <TableHeader>

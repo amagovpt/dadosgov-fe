@@ -1,9 +1,9 @@
 "use client";
 
-import React, { Suspense, useRef, useState } from "react";
+import React, { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import NextImage from "next/image";
-import ReCAPTCHA from "react-google-recaptcha";
+import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import {
   Button,
   RadioButton,
@@ -18,7 +18,7 @@ import {
   InputPassword,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { fetchCsrfToken, login } from "@/app/api/auth";
+import { login } from "@/service/api/auth";
 import TextLink from "@/components/Primitives/TextLink";
 
 function LoginContent() {
@@ -49,16 +49,22 @@ function LoginContent() {
   const [recoveryLoading, setRecoveryLoading] = useState(false);
   const [recoveryError, setRecoveryError] = useState<string | null>(null);
   const [recoverySuccess, setRecoverySuccess] = useState(false);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleRecoverySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRecoveryLoading(true);
     setRecoveryError(null);
 
-    const recaptchaToken = recaptchaRef.current?.getValue() || null;
+    let recaptchaToken: string | null = null;
+    if (executeRecaptcha) {
+      try {
+        recaptchaToken = await executeRecaptcha("password_reset");
+      } catch (err) {
+        console.warn("reCAPTCHA execution failed:", err);
+      }
+    }
 
     try {
       const res = await fetch("/reset-password", {
@@ -71,11 +77,9 @@ function LoginContent() {
         setRecoverySuccess(true);
       } else {
         setRecoveryError(data.message || "Erro ao enviar pedido. Tente novamente.");
-        recaptchaRef.current?.reset();
       }
     } catch {
       setRecoveryError("Erro de ligação. Tente novamente.");
-      recaptchaRef.current?.reset();
     } finally {
       setRecoveryLoading(false);
     }
@@ -171,20 +175,18 @@ function LoginContent() {
     }
 
     try {
-      // 1. Get CSRF Token
-      const csrfToken = await fetchCsrfToken();
-
-      // 2. Prepare payload for backend
+      // The /login route handler mints the CSRF token + session server-side
+      // (see src/app/login/route.ts), so the client no longer needs to fetch
+      // one — sending a client-side token alongside a stale SAML/CMD session
+      // cookie was what broke the CSRF check on password login.
       const payload = new FormData();
       payload.append("email", email);
       payload.append("password", password);
-      payload.append("csrf_token", csrfToken);
       payload.append("remember", "y");
 
-      // 3. Login
-      const response = await login(payload);
+      await login(payload);
 
-      // 4. Redirect on success (full reload to update auth state)
+      // Redirect on success (full reload to update auth state)
       window.location.href = nextUrl;
     } catch (err: unknown) {
       const message =
@@ -664,16 +666,6 @@ function LoginContent() {
                                     onChange={(e) => setRecoveryEmail(e.target.value)}
                                   />
 
-                                  {recaptchaSiteKey && (
-                                    <div className="mt-8">
-                                      <ReCAPTCHA
-                                        ref={recaptchaRef}
-                                        sitekey={recaptchaSiteKey}
-                                        hl="pt"
-                                      />
-                                    </div>
-                                  )}
-
                                   <div className="mt-8 flex items-center gap-16">
                                     <Button
                                       variant="primary"
@@ -690,7 +682,6 @@ function LoginContent() {
                                         setShowRecovery(false);
                                         setRecoveryError(null);
                                         setRecoveryEmail("");
-                                        recaptchaRef.current?.reset();
                                       }}
                                     >
                                       Voltar ao início de sessão
@@ -863,10 +854,22 @@ function LoginContent() {
   );
 }
 
+const RECAPTCHA_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+
 export default function LoginClient() {
-  return (
+  const content = (
     <Suspense fallback={null}>
       <LoginContent />
     </Suspense>
   );
+
+  if (RECAPTCHA_KEY) {
+    return (
+      <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY} language="pt">
+        {content}
+      </GoogleReCaptchaProvider>
+    );
+  }
+
+  return content;
 }

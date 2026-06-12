@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Button, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
-import type { Resource } from '@/service/types/dataset';
-import { deleteResource } from "@/app/api/datasets";
+import { Resource } from "@/service/types/dataset";
+import { deleteResource } from "@/service/api/datasets";
 
 interface DeleteResourcePopupProps {
   datasetId: string;

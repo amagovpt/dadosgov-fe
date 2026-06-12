@@ -1,4 +1,4 @@
-import type { Notification, NotificationDetails, ValidateHarvesterNotificationDetails } from '@/service/types/notifications-reporting';
+import type { Notification, NotificationDetails, ValidateHarvesterNotificationDetails } from "@/service/types/notifications-reporting";
 
 /**
  * Type-guard for the harvester-validation notification variant. Lets us safely

@@ -1,5 +1,5 @@
 import apolloClient from "@/service/utils/apollo-client";
-import { FaqsContent } from "@/service/types/faqs/faqs";
+import { FaqsContent } from "@/service/types/faqs";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 

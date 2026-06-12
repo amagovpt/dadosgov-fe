@@ -11,9 +11,9 @@ import {
   Pill,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import { fetchSystemLogContent, fetchSystemLogs } from "@/app/api/system";
-import type { SystemLogContent, SystemLogFile } from '@/service/types/transfer-system';
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { fetchSystemLogContent, fetchSystemLogs } from "@/service/api/system";
+import { SystemLogContent, SystemLogFile } from "@/service/types/transfer-system";
 
 const AUTO_REFRESH_MS = 10_000;
 

@@ -83,7 +83,7 @@ export default async function Page({
 
             {/* Results Area */}
             <MiniCoursesResult filteredCourses={filteredCourses} currentPage={currentPage} PAGE_SIZE={PAGE_SIZE} />
-
+            
           </div>
         </div>
       </div>

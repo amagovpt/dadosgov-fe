@@ -25,7 +25,7 @@ export async function getHome(locale: string = "pt"): Promise<Home> {
                                     }
                                 }
                             }
-
+                        
                     }
                 }
                 usedDailyBy {

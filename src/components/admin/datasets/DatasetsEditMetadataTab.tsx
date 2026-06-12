@@ -13,8 +13,8 @@ import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import type { SpatialZone } from '@/service/types/catalog';
-import type { Dataset } from '@/service/types/dataset';
+import type { SpatialZone } from "@/service/types/catalog";
+import type { Dataset } from "@/service/types/dataset";
 import AppIcon from "@/components/Primitives/AppIcon";
 
 const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEditor"), {

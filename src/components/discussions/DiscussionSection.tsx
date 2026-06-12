@@ -14,12 +14,7 @@ import {
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import type { Discussion, DiscussionCreatePayload } from "@/service/types/discussion";
-import {
-  createDiscussion,
-  fetchDiscussions,
-  fetchOrgDiscussions,
-  replyToDiscussion,
-} from "@/app/api/discussions-topics";
+import { createDiscussion, fetchDiscussions, fetchOrgDiscussions, replyToDiscussion } from "@/service/api/discussions-topics";
 import { useAuth } from "@/context/AuthContext";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";

@@ -2220,3 +2220,14 @@ div.max-w-ch,
   margin-top: 10px !important;
   margin-bottom: 1em !important;
 }
+
+.roadmap-block p:has(+ p strong) {
+  margin-bottom: 4px;
+}
+
+.roadmap-block p + p:not(:has(strong)) {
+  margin-bottom: 24px;
+}
+.roadmap-page div[id] {
+  scroll-margin-top: 180px;
+}

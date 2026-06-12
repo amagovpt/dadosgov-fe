@@ -11,9 +11,9 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import { fetchOrgCommunityResources } from "@/app/api/community-resources";
-import type { CommunityResource } from '@/service/types/community-resource';
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { fetchOrgCommunityResources } from "@/service/api/community-resources";
+import { CommunityResource } from "@/service/types/community-resource";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";

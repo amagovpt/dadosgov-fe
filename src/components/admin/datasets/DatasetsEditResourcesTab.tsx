@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import StatusDot from "@/components/admin/StatusDot";
-import type { Dataset, Resource } from '@/service/types/dataset';
+import type { Dataset, Resource } from "@/service/types/dataset";
 import AppIcon from "@/components/Primitives/AppIcon";
 
 type DatasetsEditResourcesTabProps = {

@@ -12,10 +12,10 @@ import {
   TableCell,
   ProgressBar,
 } from "@ama-pt/agora-design-system";
-import { fetchMyDatasets } from "@/app/api/datasets";
-import type { Dataset } from '@/service/types/dataset';
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { fetchMyDatasets } from "@/service/api/datasets";
+import { Dataset } from "@/service/types/dataset";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import TextLink from "@/components/Primitives/TextLink";

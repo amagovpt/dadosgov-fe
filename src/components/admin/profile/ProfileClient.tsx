@@ -5,20 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import {
-  fetchFullProfile,
-  uploadAvatar,
-  deleteAvatar,
-  generateApiKey,
-  fetchApiTokens,
-  revokeApiToken,
-  requestEmailChange,
-} from "@/app/api/profile";
-import { fetchCsrfToken } from "@/app/api/auth";
-import { fetchUserActivity, updateProfile } from "@/app/api/users";
-import { fetchMyFollowing } from "@/app/api/followers";
-import type { Activity } from '@/service/types/catalog';
-import type { ApiToken, UserFollowing, UserPublic } from '@/service/types/identity';
+import { fetchMyFollowing } from "@/service/api/followers";
+import { fetchFullProfile, uploadAvatar, deleteAvatar, generateApiKey, fetchApiTokens, revokeApiToken, requestEmailChange } from "@/service/api/profile";
+import { fetchUserActivity, updateProfile } from "@/service/api/users";
+import { Activity } from "@/service/types/catalog";
+import { ApiToken, UserFollowing, UserPublic } from "@/service/types/identity";
 import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -49,38 +40,7 @@ import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePas
 import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import TextLink from "@/components/Primitives/TextLink";
-
-const activityLabels: Record<string, string> = {
-  "created a dataset": "criou um conjunto de dados",
-  "updated a dataset": "atualizou um conjunto de dados",
-  "deleted a dataset": "eliminou um conjunto de dados",
-  "added a resource to a dataset": "adicionou um recurso a um conjunto de dados",
-  "updated a resource": "atualizou um recurso",
-  "removed a resource from a dataset": "removeu um recurso de um conjunto de dados",
-  "created a dataservice": "criou um serviço de dados",
-  "updated a dataservice": "atualizou um serviço de dados",
-  "deleted a dataservice": "eliminou um serviço de dados",
-  "created a topic": "criou um tema",
-  "updated a topic": "atualizou um tema",
-  "added an element to a topic": "adicionou um elemento a um tema",
-  "updated an element in a topic": "atualizou um elemento num tema",
-  "removed an element from a topic": "removeu um elemento de um tema",
-  "created an organization": "criou uma organização",
-  "updated an organization": "atualizou uma organização",
-  "followed a user": "seguiu um utilizador",
-  "discussed a dataservice": "comentou um serviço de dados",
-  "discussed a dataset": "comentou um conjunto de dados",
-  "discussed a reuse": "comentou uma reutilização",
-  "followed a dataservice": "seguiu um serviço de dados",
-  "followed a dataset": "seguiu um conjunto de dados",
-  "followed a reuse": "seguiu uma reutilização",
-  "followed an organization": "seguiu uma organização",
-  "created a reuse": "criou uma reutilização",
-  "updated a reuse": "atualizou uma reutilização",
-  "deleted a reuse": "eliminou uma reutilização",
-};
-
-const translateActivityLabel = (label: string) => activityLabels[label] ?? label;
+import { translateActivityLabel } from "@/utils/activityLabels";
 
 function toProxiedUrl(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -333,8 +293,7 @@ export default function ProfileClient() {
     setSaveError("");
     setEmailChangeSuccess(false);
     try {
-      const csrfToken = await fetchCsrfToken();
-      await requestEmailChange(newEmail, csrfToken);
+      await requestEmailChange(newEmail);
       setPendingEmail(newEmail);
       setEmailChangeSuccess(true);
       setIsEditingEmail(false);

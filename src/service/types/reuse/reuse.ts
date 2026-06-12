@@ -1,5 +1,5 @@
 import type { Badge, Organization, UserRef } from '@/service/types/identity';
-import type { Metric } from '@/service/types/shared/core';
+import type { Metric } from '@/service/types/shared';
 import type { DatasetRef } from '@/service/types/dataset';
 import type { Dataservice } from '@/service/types/dataservice';
 
