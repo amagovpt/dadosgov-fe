@@ -198,14 +198,14 @@ export default function DatasetsClient({
                     errorStatus={listData.errorStatus}
                   />
                 ) : datasets.length > 0 ? (
-                  datasets.map((dataset, index) => {
+                  datasets.map((dataset) => {
                     const timeAgo = formatDateToTimeAgo(dataset.last_modified);
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
                       link: `/pages/datasets/${dataset.slug}`
                     } as CardMetricsProps;
-                    return <CardMetrics key={`dataset-${index}`} {...cardProps} />
+                    return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />
                   })
                 ) : (
                   <div className="col-span-full">

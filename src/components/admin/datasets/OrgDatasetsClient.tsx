@@ -12,10 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
-import {
-  createDatasetColumns,
-  OrgDatasetSortField,
-} from "./datasetsListConfig";
+import { createDatasetColumns, OrgDatasetSortField } from "./datasetsListConfig";
 import AdminEmptyState from "../AdminEmptyState";
 
 const ORG_DATASET_SORT_MAP: Record<OrgDatasetSortField, string> = {
@@ -35,7 +32,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<OrgDatasetSortField | null>("created");
@@ -44,12 +41,12 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
   const columns = useMemo(
     () =>
       createDatasetColumns({
-        editHref: (dataset) => `/pages/admin/org/datasets/edit?slug=${dataset.slug}`,
+        editHref: (dataset) => `/pages/admin/org/${orgId}/datasets/edit?slug=${dataset.slug}`,
         showOwner: true,
         showOrganizationFallback: true,
         sortVariant: "org",
       }),
-    []
+    [orgId]
   );
 
   const loadDatasets = useCallback(
@@ -172,4 +169,3 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
     </AdminListPage>
   );
 }
-
