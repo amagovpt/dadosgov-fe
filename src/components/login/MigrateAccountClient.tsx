@@ -240,7 +240,7 @@ export default function MigrateAccountClient() {
               </div>
               <h2 className="text-xl-bold text-brand-blue-dark">
                 {hasCandidate
-                  ? "Identificámos uma conta com o seu nome"
+                  ? "Identificámos uma conta que corresponde aos seus dados"
                   : "Já possui uma conta no portal?"}
               </h2>
               <p className="text-neutral-900">
