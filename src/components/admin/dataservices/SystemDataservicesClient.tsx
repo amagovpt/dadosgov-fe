@@ -7,9 +7,9 @@ import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
 import { filterByStatus } from "@/utils/filterByStatus";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-import { buildApiSortParam } from "@/components/admin/lists/listHelpers";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
 import StatusFilterSelect from "../StatusFilterSelect";
 import {
   DataserviceSortField,
@@ -121,3 +121,4 @@ export default function SystemDataservicesClient() {
     </AdminListPage>
   );
 }
+

@@ -8,9 +8,9 @@ import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { fetchReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
 import { filterByStatus } from "@/utils/filterByStatus";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-import { buildApiSortParam } from "@/components/admin/lists/listHelpers";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
 import {
   SystemReuseSortField,
   createReuseColumns,
@@ -132,3 +132,4 @@ export default function SystemReusesClient() {
     </AdminListPage>
   );
 }
+

@@ -5,12 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchMyDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
   createDatasetColumns,
   DatasetSortField,
@@ -146,3 +146,4 @@ export default function DatasetsClient() {
     </AdminListPage>
   );
 }
+

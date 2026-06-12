@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchOrgCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
   createCommunityResourceColumns,
   OrgCommunityResourceSortField,
@@ -123,3 +123,4 @@ export default function OrgCommunityResourcesClient() {
     </AdminListPage>
   );
 }
+

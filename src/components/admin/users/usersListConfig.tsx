@@ -1,7 +1,7 @@
 import { Icon } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
-import { createTableActionsColumn } from "@/components/admin/lists/listColumnHelpers";
+import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
 import type { UserAdmin } from "@/service/types/identity";
 
@@ -84,3 +84,4 @@ export function createUserColumns(): AdminListColumn<UserAdmin, UserSortField>[]
     }),
   ];
 }
+

@@ -6,8 +6,8 @@ import { Button, CardNoResults, Icon, InputSelect } from "@ama-pt/agora-design-s
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
-import { useAdminListController } from "@/components/admin/lists/useAdminListController";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchAdminPosts } from "@/service/api/posts";
 import type { Post } from "@/service/types/posts";
 import DropdownSection from "@/components/Primitives/Dropdown/DropdownSection";
@@ -173,3 +173,4 @@ export default function SystemPostsClient() {
     </AdminListPage>
   );
 }
+

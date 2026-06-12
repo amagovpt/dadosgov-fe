@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, CardNoResults, Icon, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import { useAdminListController } from "@/components/admin/lists/useAdminListController";
+import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import {
   createOrganizationColumns,
   organizationSortFieldMap,
@@ -161,3 +161,4 @@ export default function SystemOrganizationsClient() {
     </AdminListPage>
   );
 }
+

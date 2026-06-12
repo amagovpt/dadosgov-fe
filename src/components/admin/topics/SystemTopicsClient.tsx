@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import { useAdminListController } from "@/components/admin/lists/useAdminListController";
+import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { createTopicColumns } from "./topicsListConfig";
 import { fetchTopics } from "@/service/api/discussions-topics";
 import { Topic } from "@/service/types/topic";
@@ -65,3 +65,4 @@ export default function SystemTopicsClient() {
     </AdminListPage>
   );
 }
+

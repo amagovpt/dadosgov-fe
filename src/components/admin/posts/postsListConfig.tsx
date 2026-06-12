@@ -1,13 +1,13 @@
 import TextLink from "@/components/Primitives/TextLink";
 import StatusDot from "@/components/admin/StatusDot";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
-import { createTableActionsColumn } from "@/components/admin/lists/listColumnHelpers";
+import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import {
   createDateSorter,
   createLocaleStringSorter,
   sortItems,
-} from "@/components/admin/lists/listHelpers";
-import type { SortOrder } from "@/components/admin/lists/useClientTableState";
+} from "@/utils/admin-lists/listHelpers";
+import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import { formatDateToDMY } from "@/utils/formatDate";
 import type { Post } from "@/service/types/posts";
 
@@ -103,3 +103,4 @@ export function createPostColumns(): AdminListColumn<Post, PostSortField>[] {
     }),
   ];
 }
+

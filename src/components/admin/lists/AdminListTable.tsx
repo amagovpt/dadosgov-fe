@@ -6,7 +6,7 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import type { SortOrder } from "./useClientTableState";
+import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
 export interface AdminListColumn<T, F extends string = never> {
   id: string;
@@ -79,3 +79,4 @@ export default function AdminListTable<T, F extends string = never>({
     </>
   );
 }
+

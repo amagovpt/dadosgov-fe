@@ -30,8 +30,8 @@ import { formatDateToDMY } from "@/utils/formatDate";
 import TextLink from "@/components/Primitives/TextLink";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
-import { useAdminListController } from "@/components/admin/lists/useAdminListController";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import {
   createMemberColumns,
   sortMembers,
@@ -679,3 +679,4 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     </AdminLayout>
   );
 }
+

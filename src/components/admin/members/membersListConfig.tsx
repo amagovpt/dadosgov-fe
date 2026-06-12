@@ -6,7 +6,7 @@ import {
   createDateSorter,
   createLocaleStringSorter,
   sortItems,
-} from "@/components/admin/lists/listHelpers";
+} from "@/utils/admin-lists/listHelpers";
 import type { OrganizationMember } from "@/service/types/identity";
 import { formatDateToDMY } from "@/utils/formatDate";
 
@@ -122,3 +122,4 @@ export function createMemberColumns({
 
   return columns;
 }
+

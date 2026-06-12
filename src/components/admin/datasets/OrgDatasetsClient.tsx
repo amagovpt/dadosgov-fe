@@ -4,14 +4,14 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { Button } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { buildApiSortParam } from "@/components/admin/lists/listHelpers";
+import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { Dataset } from "@/service/types/dataset";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
   createDatasetColumns,
   OrgDatasetSortField,
@@ -172,3 +172,4 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
     </AdminListPage>
   );
 }
+

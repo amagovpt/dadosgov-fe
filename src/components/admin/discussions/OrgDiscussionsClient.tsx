@@ -10,8 +10,8 @@ import {
   createDateSorter,
   paginateItems,
   sortItems,
-} from "@/components/admin/lists/listHelpers";
-import { useAdminListController } from "@/components/admin/lists/useAdminListController";
+} from "@/utils/admin-lists/listHelpers";
+import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import { Discussion } from "@/service/types/discussion";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
@@ -140,3 +140,4 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
     </AdminListPage>
   );
 }
+

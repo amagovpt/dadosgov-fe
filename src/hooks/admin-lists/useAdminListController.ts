@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { buildApiSortParam } from "./listHelpers";
-import { useDebouncedSearch } from "./useDebouncedSearch";
-import { SortOrder, useSortControls } from "./useClientTableState";
+import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 
 interface UseAdminListControllerOptions<F extends string, TFilters extends Record<string, string>> {
   initialPageSize?: number;
@@ -78,3 +78,4 @@ export function useAdminListController<
     updateFilter,
   };
 }
+

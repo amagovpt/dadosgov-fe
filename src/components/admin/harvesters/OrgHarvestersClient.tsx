@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
-import { useAdminListController } from "@/components/admin/lists/useAdminListController";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgHarvesters } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -145,3 +145,4 @@ export default function OrgHarvestersClient() {
     </AdminListPage>
   );
 }
+

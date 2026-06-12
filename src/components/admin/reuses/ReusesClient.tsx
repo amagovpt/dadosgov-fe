@@ -8,9 +8,9 @@ import { fetchMyReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
-import { useDebouncedSearch } from "@/components/admin/lists/useDebouncedSearch";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "../AdminEmptyState";
 import StatusFilterSelect from "../StatusFilterSelect";
 import { ReuseSortField, createReuseColumns, sortReuses } from "./reusesListConfig";
@@ -141,3 +141,4 @@ export default function ReusesClient() {
     </AdminListPage>
   );
 }
+

@@ -1,4 +1,4 @@
-import type { SortOrder } from "./useClientTableState";
+import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
 export function paginateItems<T>(items: T[], currentPage: number, pageSize: number): T[] {
   const start = (currentPage - 1) * pageSize;
@@ -48,3 +48,4 @@ export function buildApiSortParam<TField extends string>(
   if (!apiField) return undefined;
   return `${sortOrder === "descending" ? "-" : ""}${apiField}`;
 }
+

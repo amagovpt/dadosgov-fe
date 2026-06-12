@@ -1,5 +1,5 @@
 import TableActionsCell from "@/components/admin/TableActionsCell";
-import type { AdminListColumn } from "./AdminListTable";
+import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 
 type ViewAction = {
   href: string;

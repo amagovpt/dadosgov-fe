@@ -8,8 +8,8 @@ import { fetchMyDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import {
   DataserviceSortField,
   createDataserviceColumns,
@@ -104,3 +104,4 @@ export default function DataservicesClient() {
     </AdminListPage>
   );
 }
+

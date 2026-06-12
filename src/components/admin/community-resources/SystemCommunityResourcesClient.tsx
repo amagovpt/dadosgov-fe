@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchAllCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
@@ -14,7 +14,7 @@ import {
   createCommunityResourceColumns,
   sortCommunityResources,
 } from "./communityResourcesListConfig";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 
 export default function SystemCommunityResourcesClient() {
   const searchParams = useSearchParams();
@@ -112,3 +112,4 @@ export default function SystemCommunityResourcesClient() {
     </AdminListPage>
   );
 }
+

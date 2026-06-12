@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
-import { useAdminListController } from "@/components/admin/lists/useAdminListController";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import type { Discussion } from "@/service/types/discussion";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -79,3 +79,4 @@ export default function DiscussionsClient() {
     </AdminListPage>
   );
 }
+

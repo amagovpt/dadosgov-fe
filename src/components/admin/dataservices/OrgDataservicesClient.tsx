@@ -10,8 +10,8 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import StatusFilterSelect from "../StatusFilterSelect";
 import {
   DataserviceSortField,
@@ -123,3 +123,4 @@ export default function OrgDataservicesClient() {
     </AdminListPage>
   );
 }
+

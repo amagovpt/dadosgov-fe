@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import { paginateItems } from "@/components/admin/lists/listHelpers";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchMyCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { SortOrder, useSortControls } from "@/components/admin/lists/useClientTableState";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
   CommunityResourceSortField,
   createCommunityResourceColumns,
@@ -120,3 +120,4 @@ export default function CommunityResourcesClient() {
     </AdminListPage>
   );
 }
+

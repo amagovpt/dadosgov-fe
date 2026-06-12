@@ -5,7 +5,7 @@ import TableActionsCell from "@/components/admin/TableActionsCell";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
 import type { Dataset } from "@/service/types/dataset";
-import type { SortOrder } from "@/components/admin/lists/useClientTableState";
+import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 
 export type DatasetSortField = "title" | "created_at" | "last_modified" | "resources";
@@ -178,3 +178,4 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
 
   return columns;
 }
+

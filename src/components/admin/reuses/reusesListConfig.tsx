@@ -1,10 +1,10 @@
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import TextLink from "@/components/Primitives/TextLink";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
-import { createTableActionsColumn } from "@/components/admin/lists/listColumnHelpers";
+import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
 import type { Reuse } from "@/service/types/reuse";
-import type { SortOrder } from "@/components/admin/lists/useClientTableState";
+import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
 export type ReuseSortField = "title" | "created_at" | "datasets";
 export type SystemReuseSortField = "title" | "created_at";
@@ -124,3 +124,4 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
     }),
   ];
 }
+

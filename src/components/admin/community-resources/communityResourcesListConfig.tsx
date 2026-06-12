@@ -4,7 +4,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import TableActionsCell from "@/components/admin/TableActionsCell";
 import { formatDateToDMY } from "@/utils/formatDate";
 import type { CommunityResource } from "@/service/types/community-resource";
-import type { SortOrder } from "@/components/admin/lists/useClientTableState";
+import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 
 export type CommunityResourceSortField = "title" | "format" | "created_at" | "last_modified";
@@ -167,3 +167,4 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
 
   return columns;
 }
+

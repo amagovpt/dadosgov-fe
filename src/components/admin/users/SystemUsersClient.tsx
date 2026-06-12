@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { CardNoResults, DropdownOption, DropdownSection, Icon, InputSelect } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import { useAdminListController } from "@/components/admin/lists/useAdminListController";
-import type { SortOrder } from "@/components/admin/lists/useClientTableState";
+import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
+import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import { createUserColumns, userSortFieldMap, type UserSortField } from "./usersListConfig";
 import { fetchUsers } from "@/service/api/users";
 import { UserAdmin } from "@/service/types/identity";
@@ -143,3 +143,4 @@ export default function SystemUsersClient() {
     </AdminListPage>
   );
 }
+
