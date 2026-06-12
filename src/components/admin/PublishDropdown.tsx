@@ -25,6 +25,12 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
     },
     {
       icon: null as string | null,
+      customIcon: "/Icons/api.svg",
+      label: "Uma API",
+      href: "/pages/admin/dataservices/new",
+    },
+    {
+      icon: null as string | null,
       customIcon: "/Icons/bar_chart.svg",
       label: "Uma reutilização",
       href: "/pages/admin/reuses/new",
