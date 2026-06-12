@@ -611,7 +611,8 @@ export interface DatasetsListingResponse {
 export async function fetchDatasetsListing(
   page: number = 1,
   pageSize: number = 20,
-  filters?: DatasetFilters
+  filters?: DatasetFilters,
+  forwarded?: Record<string, string>,
 ): Promise<DatasetsListingResponse> {
   const emptyShape: DatasetsListingResponse = {
     listing: { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null },
@@ -660,7 +661,9 @@ export async function fetchDatasetsListing(
     // @cache.cached(60)). Repeated identical page/query loads are served from
     // cache and never reach the backend, so they don't consume the per-IP
     // PUBLIC_SEARCH_LIMIT bucket that the F5 IP-collapse turns site-wide.
-    const res = await fetch(url, { next: { revalidate: 60 } });
+    // On a cache-miss, `forwarded` relays the real client IP so the backend
+    // keys the limiter per visitor instead of the Next.js server IP.
+    const res = await fetch(url, { next: { revalidate: 60 }, headers: forwarded });
 
     if (!res.ok) {
       console.error(`Error fetching datasets listing: ${res.status} ${res.statusText}`);

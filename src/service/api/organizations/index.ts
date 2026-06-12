@@ -503,7 +503,8 @@ export interface OrganizationsListingResponse {
 export async function fetchOrganizationsListing(
   page: number = 1,
   pageSize: number = 20,
-  filters?: OrganizationFilters
+  filters?: OrganizationFilters,
+  forwarded?: Record<string, string>,
 ): Promise<OrganizationsListingResponse> {
   const emptyShape: OrganizationsListingResponse = {
     listing: { data: [], page: 1, page_size: pageSize, total: 0, next_page: null, previous_page: null },
@@ -539,7 +540,9 @@ export async function fetchOrganizationsListing(
     // SSR listing: cache per-URL in the Next.js Data Cache (matches the backend
     // @cache.cached(60)) so repeated page/query loads don't hit the backend
     // PUBLIC_SEARCH_LIMIT bucket that the F5 IP-collapse turns site-wide.
-    const res = await fetch(url, { next: { revalidate: 60 } });
+    // On a cache-miss, `forwarded` relays the real client IP so the backend
+    // keys the limiter per visitor instead of the Next.js server IP.
+    const res = await fetch(url, { next: { revalidate: 60 }, headers: forwarded });
 
     if (!res.ok) {
       console.error(`Error fetching organizations listing: ${res.status} ${res.statusText}`);
