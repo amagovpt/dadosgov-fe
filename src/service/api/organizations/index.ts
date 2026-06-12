@@ -100,10 +100,17 @@ export async function fetchOrgBadges(): Promise<OrgBadges> {
 }
 
 
-export async function fetchOrganization(slugOrId: string): Promise<Organization | null> {
+export async function fetchOrganization(
+  slugOrId: string,
+  forwarded?: Record<string, string>,
+): Promise<Organization | null> {
   try {
+    // `forwarded` carries the real client IP (X-Forwarded-For) when called from
+    // a Server Component; without it this SSR fetch reaches the backend as the
+    // Next.js server IP and collapses every visitor into one rate-limit bucket.
     const res = await fetch(`${API_BASE_URL}/organizations/${slugOrId}/`, {
       cache: "no-store",
+      headers: forwarded,
     });
 
     if (res.status === 404) {
