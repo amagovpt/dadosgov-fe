@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { CardNoResults, Icon, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
@@ -27,7 +26,6 @@ export default function SystemHarvestersClient() {
     variant: "success" | "danger";
     message: string;
   } | null>(null);
-  const router = useRouter();
   const { isAdmin } = useAuth();
   const { show, hide } = usePopupContext();
   const {
@@ -206,8 +204,6 @@ export default function SystemHarvestersClient() {
         items={filteredHarvesters}
         columns={columns}
         getRowKey={(harvester) => harvester.id}
-        getRowStyle={() => ({ cursor: "pointer" })}
-        onRowClick={(harvester) => router.push(`/pages/admin/harvesters/${harvester.id}`)}
       />
     </AdminListPage>
   );
