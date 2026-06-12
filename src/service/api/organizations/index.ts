@@ -90,7 +90,7 @@ export async function suggestOrganizations(
 
 export async function fetchOrgBadges(): Promise<OrgBadges> {
   try {
-    const res = await fetch(`${API_BASE_URL}/organizations/badges/`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE_URL}/organizations/badges/`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`Failed to fetch org badges: ${res.statusText}`);
     return await res.json();
   } catch (error) {

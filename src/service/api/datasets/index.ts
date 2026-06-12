@@ -260,7 +260,7 @@ export async function fetchDataset(slug: string): Promise<Dataset> {
 
 export async function fetchLicenses(): Promise<License[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/datasets/licenses/`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE_URL}/datasets/licenses/`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`Failed to fetch licenses: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -272,7 +272,7 @@ export async function fetchLicenses(): Promise<License[]> {
 
 export async function fetchFrequencies(): Promise<Frequency[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/datasets/frequencies/`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE_URL}/datasets/frequencies/`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`Failed to fetch frequencies: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -284,7 +284,7 @@ export async function fetchFrequencies(): Promise<Frequency[]> {
 
 export async function fetchSchemas(): Promise<string[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/datasets/schemas/`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE_URL}/datasets/schemas/`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`Failed to fetch schemas: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -296,7 +296,7 @@ export async function fetchSchemas(): Promise<string[]> {
 
 export async function fetchDatasetBadges(): Promise<DatasetBadges> {
   try {
-    const res = await fetch(`${API_BASE_URL}/datasets/badges/`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE_URL}/datasets/badges/`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`Failed to fetch dataset badges: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -308,7 +308,7 @@ export async function fetchDatasetBadges(): Promise<DatasetBadges> {
 
 export async function fetchResourceTypes(): Promise<ResourceType[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/datasets/resource_types/`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE_URL}/datasets/resource_types/`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`Failed to fetch resource types: ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -577,7 +577,7 @@ export async function fetchSpatialZonesByIds(ids: string[]): Promise<SpatialZone
 
 export async function fetchGranularities(): Promise<Granularity[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/spatial/granularities/`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE_URL}/spatial/granularities/`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`Failed to fetch granularities: ${res.statusText}`);
     return await res.json();
   } catch (error) {
