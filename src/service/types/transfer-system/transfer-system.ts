@@ -1,4 +1,4 @@
-﻿import type { UserRef } from '@/service/types/identity';
+import type { UserRef } from '@/service/types/identity';
 
 export type TransferStatus = "pending" | "accepted" | "refused";
 

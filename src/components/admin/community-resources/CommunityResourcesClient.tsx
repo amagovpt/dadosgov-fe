@@ -1,8 +1,8 @@
 "use client";
 
 import { TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
-import { fetchMyCommunityResources } from "@/services/api";
-import { CommunityResource } from "@/types/api";
+import { fetchMyCommunityResources } from "@/service/api/community-resources";
+import { CommunityResource } from "@/service/types/community-resource";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { AdminResourceListPage, type SortOrder } from "@/components/admin/AdminResourceListPage";

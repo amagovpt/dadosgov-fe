@@ -2,12 +2,12 @@
 
 import { useSearchParams } from "next/navigation";
 import { TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
-import { fetchAllCommunityResources } from "@/services/api";
-import { CommunityResource } from "@/types/api";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { AdminResourceListPage, type SortOrder } from "@/components/admin/AdminResourceListPage";
-import StatusDot from "@/components/admin/StatusDot";
 import TableActionsCell from "@/components/admin/TableActionsCell";
+import StatusDot from "@/components/admin/StatusDot";
+import { fetchAllCommunityResources } from "@/service/api/community-resources";
+import { CommunityResource } from "@/service/types/community-resource";
 import TextLink from "@/components/Primitives/TextLink";
 import CommunityResourceEditClient from "./CommunityResourceEditClient";
 

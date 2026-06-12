@@ -10,9 +10,13 @@ import {
   InputTextArea,
   Button,
   StatusCard,
+  DropdownSection,
+  DropdownOption,
 } from "@ama-pt/agora-design-system";
+import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import HeroGeneral from "@/components/HeroGeneral";
-import { submitSupportContact, type SupportTopic } from "@/services/api";
+import { submitSupportContact, type SupportTopic } from "@/service/api/system";
+import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import AppIcon from "../Primitives/AppIcon";
 
 const FAQ_DATA = [
@@ -112,7 +116,8 @@ const shouldPreselectFeedbackFromUrl = (): boolean => {
   return params.get("toggle") === "feedback";
 };
 
-const SupportPage = () => {
+const SupportPageContent = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [activeItem, setActiveItem] = React.useState(() =>
     shouldPreselectFeedbackFromUrl() ? "Ajuda" : "Nesta página"
   );
@@ -123,10 +128,29 @@ const SupportPage = () => {
   const [subjectBody, setSubjectBody] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [errors, setErrors] = React.useState({ email: "", subject: "", description: "" });
+  const [category, setCategory] = React.useState("");
+  const [problemUrl, setProblemUrl] = React.useState("");
+  const [problemDateTime, setProblemDateTime] = React.useState("");
+  const [errors, setErrors] = React.useState({
+    email: "",
+    subject: "",
+    description: "",
+    category: "",
+  });
   const [successMessage, setSuccessMessage] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const resetFormFields = () => {
+    setSelectedToggle(null);
+    setEmail("");
+    setSubjectBody("");
+    setDescription("");
+    setCategory("");
+    setProblemUrl("");
+    setProblemDateTime("");
+    setErrors({ email: "", subject: "", description: "", category: "" });
+  };
 
   const TOGGLE_SUCCESS_MAP: Record<string, string> = {
     question: "Pergunta enviada com sucesso.",
@@ -134,31 +158,54 @@ const SupportPage = () => {
     feedback: "Feedback enviado com sucesso.",
   };
 
+  // Compose the structured fields (category + operational data) into the
+  // message body so the backend email carries them without needing new
+  // server-side fields.
+  const composeMessage = (toggle: string) => {
+    const lines: string[] = [];
+    if (category) lines.push(`Categoria: ${category}`);
+    if (toggle === "bug") {
+      if (problemUrl.trim()) lines.push(`Página/URL: ${problemUrl.trim()}`);
+      if (problemDateTime.trim()) lines.push(`Data/hora aproximada: ${problemDateTime.trim()}`);
+    }
+    const header = lines.join("\n");
+    return header ? `${header}\n\n${description.trim()}` : description.trim();
+  };
+
   const handleSubmit = async () => {
+    if (!selectedToggle || selectedToggle === "dataset") return;
+
     const newErrors = {
       email: email.trim() ? "" : "Campo obrigatório",
       subject: subjectBody.trim() ? "" : "Campo obrigatório",
       description: description.trim() ? "" : "Campo obrigatório",
+      category: category ? "" : "Campo obrigatório",
     };
     setErrors(newErrors);
     const hasErrors = Object.values(newErrors).some(Boolean);
-    if (hasErrors || !selectedToggle) return;
+    if (hasErrors) return;
 
     setErrorMessage("");
     setIsSubmitting(true);
     try {
+      let recaptchaToken: string | null = null;
+      if (executeRecaptcha) {
+        try {
+          recaptchaToken = await executeRecaptcha("support_contact");
+        } catch (err) {
+          console.warn("reCAPTCHA execution failed:", err);
+        }
+      }
+
       await submitSupportContact({
         topic: selectedToggle as SupportTopic,
         email: email.trim(),
         subject: subjectBody.trim(),
-        message: description.trim(),
+        message: composeMessage(selectedToggle),
+        recaptchaToken,
       });
       setSuccessMessage(TOGGLE_SUCCESS_MAP[selectedToggle]);
-      setSelectedToggle(null);
-      setEmail("");
-      setSubjectBody("");
-      setDescription("");
-      setErrors({ email: "", subject: "", description: "" });
+      resetFormFields();
     } catch (err) {
       console.error("Support form submission failed:", err);
       setErrorMessage("Não foi possível enviar o seu pedido. Tente novamente em alguns instantes.");
@@ -189,6 +236,50 @@ const SupportPage = () => {
     question: "A sua pergunta *",
     bug: "Descreva o problema *",
     feedback: "Descreva a situação *",
+  };
+
+  // Category options per toggle type (text from the "Ajuda e Contactos" spec).
+  const TOGGLE_CATEGORIES_MAP: Record<string, string[]> = {
+    question: [
+      "Questão sobre o funcionamento do portal",
+      "Questão sobre publicação de dados",
+      "Questão sobre reutilização de dados",
+      "Questão sobre organizações ou fornecedores de dados",
+      "Questão sobre metadados, formatos ou licenças",
+      "Outra questão geral",
+    ],
+    bug: [
+      "Erro técnico no portal",
+      "Problema no acesso ou autenticação",
+      "Problema ao publicar ou editar um dataset",
+      "Problema com ficheiros, ligações ou APIs",
+      "Problema com uma organização ou reutilização",
+      "Conteúdo incorreto ou indisponível",
+      "Outro problema",
+    ],
+    feedback: [
+      "Sugestão de melhoria do portal",
+      "Sugestão sobre conteúdos de literacia/conhecimento",
+      "Sugestão sobre pesquisa e navegação",
+      "Sugestão sobre datasets ou reutilizações",
+      "Feedback geral sobre a experiência de utilização",
+    ],
+  };
+
+  // Contextual routing / suggested message shown above the form per type.
+  const TOGGLE_INFO_MESSAGE_MAP: Record<string, string> = {
+    question:
+      "Antes de submeter a sua questão, consulte as Perguntas Frequentes e a área de Conhecimento do dados.gov.pt, onde poderá encontrar informação sobre dados abertos, publicação, reutilização, metadados, licenças e funcionamento do portal.",
+    feedback:
+      "O seu feedback é importante para melhorar continuamente o dados.gov.pt. Partilhe connosco sugestões, comentários ou propostas de melhoria relacionadas com o portal e os seus conteúdos.",
+  };
+
+  // "Pedir um dataset" is informative only — no form is submitted.
+  const DATASET_INFO = {
+    description:
+      "Para sugerir ou solicitar a publicação de um conjunto de dados que ainda não esteja disponível no dados.gov.pt, indicando, sempre que possível, a entidade responsável e a finalidade da reutilização.",
+    message:
+      "Para questões relacionadas com um conjunto de dados específico, tais como pedidos de atualização, esclarecimentos sobre conteúdo, formatos, periodicidade, qualidade dos dados ou disponibilização de informação adicional, utilize preferencialmente a área de discussão/comentários disponível na página do respetivo dataset. A resposta é da responsabilidade da entidade publicadora.",
   };
 
   return (
@@ -945,16 +1036,23 @@ const SupportPage = () => {
             Não encontrou o que procurava?
           </h3>
 
+          <p className="mb-8 text-[16px] text-neutral-800">
+            Antes de nos contactar, consulte as Perguntas Frequentes e a área de Conhecimento do
+            dados.gov.pt. A sua questão poderá já estar respondida nos conteúdos disponíveis sobre
+            dados abertos, publicação de datasets, reutilização de dados, metadados, licenças e
+            funcionamento do portal.
+          </p>
+          <p className="mb-24 text-[16px] text-neutral-800">
+            Caso ainda necessite de apoio, selecione a opção mais adequada:
+          </p>
+
           <ToggleGroup
             multiple={false}
             value={selectedToggle ?? ""}
             onChange={(val) => {
               const selected = val.length > 0 ? val[0] : null;
+              resetFormFields();
               setSelectedToggle(selected);
-              setSubjectBody("");
-              setEmail("");
-              setDescription("");
-              setErrors({ email: "", subject: "", description: "" });
               setSuccessMessage("");
               setErrorMessage("");
             }}
@@ -983,13 +1081,31 @@ const SupportPage = () => {
             >
               Envie o seu feedback
             </Toggle>
+            <Toggle
+              value="dataset"
+              leadingIcon="agora-line-plus-circle"
+              leadingIconHover="agora-solid-plus-circle"
+              hasIcon={true}
+            >
+              Pedir um dataset
+            </Toggle>
           </ToggleGroup>
 
-          {selectedToggle && (
+          {selectedToggle && selectedToggle !== "dataset" && (
             <div className="mt-32 max-w-2xl">
               <h3 className="mb-24 text-[20px] font-bold text-[#021C51]">
                 {TOGGLE_TITLE_MAP[selectedToggle]}
               </h3>
+
+              {TOGGLE_INFO_MESSAGE_MAP[selectedToggle] && (
+                <div className="mb-24">
+                  <StatusCard
+                    variant="informative"
+                    showIcon
+                    description={TOGGLE_INFO_MESSAGE_MAP[selectedToggle]}
+                  />
+                </div>
+              )}
 
               <div>
                 <div className="mt-[20px]">
@@ -1005,6 +1121,31 @@ const SupportPage = () => {
                     hasError={!!errors.email}
                     errorFeedbackText={errors.email}
                   />
+                </div>
+
+                <div className="mt-[20px]">
+                  <IsolatedSelect
+                    key={`category-${selectedToggle}`}
+                    label="Categoria *"
+                    placeholder="Selecione uma categoria..."
+                    id="support-category"
+                    defaultValue={category}
+                    required
+                    hasError={!!errors.category}
+                    errorFeedbackText={errors.category}
+                    onChangeCallback={(value) => {
+                      setCategory(value);
+                      if (value) setErrors((prev) => ({ ...prev, category: "" }));
+                    }}
+                  >
+                    <DropdownSection name="categories">
+                      {(TOGGLE_CATEGORIES_MAP[selectedToggle] ?? []).map((cat) => (
+                        <DropdownOption key={cat} value={cat}>
+                          {cat}
+                        </DropdownOption>
+                      ))}
+                    </DropdownSection>
+                  </IsolatedSelect>
                 </div>
 
                 <div className="mt-[20px]">
@@ -1034,6 +1175,32 @@ const SupportPage = () => {
                     required
                   />
                 </div>
+
+                {selectedToggle === "bug" && (
+                  <>
+                    <div className="mt-[20px]">
+                      <InputText
+                        label="Página ou URL onde ocorreu o problema"
+                        placeholder="https://dados.gov.pt/..."
+                        value={problemUrl}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setProblemUrl(e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="mt-[20px]">
+                      <InputText
+                        label="Data/hora aproximada"
+                        placeholder="Ex.: 05/06/2026 14:30"
+                        value={problemDateTime}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setProblemDateTime(e.target.value)
+                        }
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div className="mt-[20px]">
                   <InputTextArea
@@ -1066,6 +1233,13 @@ const SupportPage = () => {
             </div>
           )}
 
+          {selectedToggle === "dataset" && (
+            <div className="mt-32 max-w-2xl">
+              <p className="mb-16 text-[16px] text-neutral-800">{DATASET_INFO.description}</p>
+              <StatusCard variant="informative" showIcon description={DATASET_INFO.message} />
+            </div>
+          )}
+
           {successMessage && (
             <div className="mt-32 max-w-2xl">
               <StatusCard variant="success" description={successMessage} />
@@ -1075,6 +1249,19 @@ const SupportPage = () => {
       </div>
     </main>
   );
+};
+
+const RECAPTCHA_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+
+const SupportPage = () => {
+  if (RECAPTCHA_KEY) {
+    return (
+      <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY} language="pt">
+        <SupportPageContent />
+      </GoogleReCaptchaProvider>
+    );
+  }
+  return <SupportPageContent />;
 };
 
 export default SupportPage;

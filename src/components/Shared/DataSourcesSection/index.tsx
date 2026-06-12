@@ -3,7 +3,7 @@ import Section from "../Section";
 import { InfoBlock } from "../InfoBlock";
 import { Anchor } from "@ama-pt/agora-design-system";
 import { twMerge } from "tailwind-merge";
-import { DatastorySource } from "@/types/datastories/datastory";
+import { DatastorySource } from "@/service/types/datastories/datastory";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 export type DataSourcesSectionProps = DatastorySource & {

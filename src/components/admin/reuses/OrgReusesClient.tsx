@@ -2,8 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
-import { fetchOrgReuses } from "@/services/api";
-import { Reuse } from "@/types/api";
+import { fetchOrgReuses } from "@/service/api/organizations";
+import { Reuse } from "@/service/types/reuse";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";

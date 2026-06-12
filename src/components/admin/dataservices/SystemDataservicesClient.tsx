@@ -1,8 +1,8 @@
 "use client";
 
 import { TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
-import { fetchDataservices } from "@/services/api";
-import { Dataservice } from "@/types/api";
+import { fetchDataservices } from "@/service/api/dataservices";
+import { Dataservice } from "@/service/types/dataservice";
 import { formatDateToDMY } from "@/utils/formatDate";
 import {
   AdminResourceListPage,

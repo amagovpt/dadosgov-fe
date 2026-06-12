@@ -1,8 +1,8 @@
 "use client";
 
 import { TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
-import { fetchReuses } from "@/services/api";
-import { Reuse } from "@/types/api";
+import { fetchReuses } from "@/service/api/reuses";
+import { Reuse } from "@/service/types/reuse";
 import { formatDateToDMY } from "@/utils/formatDate";
 import {
   AdminResourceListPage,

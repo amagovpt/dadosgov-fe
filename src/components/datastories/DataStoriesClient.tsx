@@ -7,8 +7,8 @@ import { CardLinks, Button, Icon, CardNoResults } from "@ama-pt/agora-design-sys
 import { Pagination } from "@/components/Pagination";
 import HeroGeneral from "@/components/HeroGeneral";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { Datastories } from "@/types/datastories/datastories";
-import { DataStoriesFilterState } from "@/types/datastories/filters";
+import { Datastories } from "@/service/types/datastories/datastories";
+import { DataStoriesFilterState } from "@/service/types/datastories/filters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getAssets } from "@/utils/getAssets";
 import { formatDateToTimeAgo } from "@/utils/formatDate";

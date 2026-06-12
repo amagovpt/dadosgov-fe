@@ -2,8 +2,10 @@ import React, { useRef, useState } from "react";
 import { Button, InputText, InputTextArea, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import { checkUrlReachable, replaceResourceFile, updateResource } from "@/services/api";
-import type { Resource, ResourceType } from "@/types/api";
+import { replaceResourceFile, updateResource } from "@/service/api/datasets";
+import { checkUrlReachable } from "@/service/api/system";
+import type { ResourceType } from "@/service/types/catalog";
+import type { Resource } from "@/service/types/dataset";
 import { translateUploadError } from "@/lib/security/translateUploadError";
 
 type DatasetsEditResourceEditPopupProps = {

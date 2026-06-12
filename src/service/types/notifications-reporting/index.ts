@@ -1,4 +1,4 @@
-﻿export type {
+export type {
   DiscussionNotificationDetails,
   MembershipRequestNotificationDetails,
   TransferRequestNotificationDetails,

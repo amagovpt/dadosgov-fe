@@ -2,8 +2,6 @@
 
 import { useParams } from "next/navigation";
 import { TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
-import { fetchOrgCommunityResources } from "@/services/api";
-import { CommunityResource } from "@/types/api";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
@@ -13,6 +11,8 @@ import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import TableActionsCell from "@/components/admin/TableActionsCell";
 import TextLink from "@/components/Primitives/TextLink";
+import { CommunityResource } from "@/service/types/community-resource";
+import { fetchOrgCommunityResources } from "@/service/api/community-resources";
 
 function filterOrgCommunityResources(items: CommunityResource[], query: string): CommunityResource[] {
   if (!query) return items;

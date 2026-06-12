@@ -8,11 +8,14 @@ import {
   CardNoResults,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { deleteDataset } from "@/services/api";
+import { deleteDataset } from "@/service/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { APIResponse, Dataset, Frequency, Granularity, License, Organization } from "@/types/api";
+import { Frequency, Granularity, License } from "@/service/types/catalog";
+import { Dataset } from "@/service/types/dataset";
+import { Organization } from "@/service/types/identity";
+import { APIResponse } from "@/service/types/shared";
 
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
@@ -195,14 +198,14 @@ export default function DatasetsClient({
                     errorStatus={listData.errorStatus}
                   />
                 ) : datasets.length > 0 ? (
-                  datasets.map((dataset, index) => {
+                  datasets.map((dataset) => {
                     const timeAgo = formatDateToTimeAgo(dataset.last_modified);
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
                       link: `/pages/datasets/${dataset.slug}`
                     } as CardMetricsProps;
-                    return <CardMetrics key={`dataset-${index}`} {...cardProps} />
+                    return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />
                   })
                 ) : (
                   <div className="col-span-full">

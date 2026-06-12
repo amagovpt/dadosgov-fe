@@ -2,8 +2,8 @@
 
 import { useSearchParams } from "next/navigation";
 import { ProgressBar, TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
-import { fetchMyDatasets } from "@/services/api";
-import { Dataset } from "@/types/api";
+import { fetchMyDatasets } from "@/service/api/datasets";
+import { Dataset } from "@/service/types/dataset";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { formatDateToDMY } from "@/utils/formatDate";

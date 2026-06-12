@@ -1,6 +1,6 @@
 import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
 import ButtonNavigate from '@/components/Primitives/ButtonNavigate';
-import { getMiniCourseIntroductionPage } from '@/services/queries/courses/minicourses';
+import { getMiniCourseIntroductionPage } from '@/service/queries/courses/minicourses';
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
 import { getAssets } from '@/utils/getAssets';
 import dayjs from 'dayjs';

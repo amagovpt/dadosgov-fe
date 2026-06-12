@@ -19,34 +19,18 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import {
-  fetchReuse,
-  fetchDataset,
-  updateReuse,
-  deleteReuse,
-  fetchReuseTypes,
-  fetchReuseTopics,
-  fetchMyDatasets,
-  fetchOrgDatasets,
-  searchDatasets,
-  linkDatasetToReuse,
-  unlinkDatasetFromReuse,
-  linkDataserviceToReuse,
-  fetchActivity,
-  fetchDiscussions,
-  suggestTags,
-  requestTransfer,
-} from "@/services/api";
+import { fetchActivity } from "@/service/api/activity";
+import { fetchDataset, fetchMyDatasets } from "@/service/api/datasets";
+import { fetchDiscussions } from "@/service/api/discussions-topics";
+import { fetchOrgDatasets } from "@/service/api/organizations";
+import { fetchReuse, updateReuse, deleteReuse, fetchReuseTypes, fetchReuseTopics, linkDatasetToReuse, unlinkDatasetFromReuse, linkDataserviceToReuse } from "@/service/api/reuses";
+import { searchDatasets, suggestTags } from "@/service/api/search";
+import { requestTransfer } from "@/service/api/transfers";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Reuse,
-  ReuseType,
-  ReuseTopic,
-  Dataset,
-  Activity,
-  Discussion,
-  TagSuggestion,
-} from "@/types/api";
+import { Activity, TagSuggestion } from "@/service/types/catalog";
+import { Dataset } from "@/service/types/dataset";
+import { Discussion } from "@/service/types/discussion";
+import { Reuse, ReuseType, ReuseTopic } from "@/service/types/reuse";
 import { normalizeRemoteDatasets, type RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import ReusesEditMetadataTab from "@/components/admin/reuses/ReusesEditMetadataTab";
@@ -355,7 +339,7 @@ export default function ReusesEditClient() {
     setImageError(null);
     setIsSubmitting(true);
     try {
-      const { uploadReuseImage } = await import("@/services/api");
+      const { uploadReuseImage } = await import("@/service/api/reuses");
       await uploadReuseImage(reuse.id, file);
       const updated = await fetchReuse(reuse.id);
       setReuse(updated);

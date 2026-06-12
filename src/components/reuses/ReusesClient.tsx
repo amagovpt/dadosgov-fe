@@ -13,7 +13,9 @@ import {
 } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { APIResponse, Organization, Reuse } from "@/types/api";
+import { Organization } from "@/service/types/identity";
+import { Reuse } from "@/service/types/reuse";
+import { APIResponse } from "@/service/types/shared";
 import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";

@@ -1,4 +1,4 @@
-﻿export interface DataStoriesToggleState {
+export interface DataStoriesToggleState {
   [key: string]: string;
   temas: string;
   atualizacao: string;

@@ -56,8 +56,13 @@ export default function CardMetrics({
     hideProgressBar = false,
 }: CardMetricsProps) {
     const qualityScore = quality?.score != null ? Math.round(quality.score * 100) : 0;
-    const initialImg = organization?.logo || owner?.avatar_thumbnail || PLACEHOLDER;
-    const [imgSrc, setImgSrc] = useState<string>(initialImg);
+    const sourceImg = organization?.logo || owner?.avatar_thumbnail || PLACEHOLDER;
+    // Track only which source failed to load, so the displayed image is always
+    // derived from the current prop. Storing the resolved src in state would go
+    // stale when the card instance is reused for a different org (e.g. when a
+    // list re-renders with index-based keys after clearing a search).
+    const [erroredSrc, setErroredSrc] = useState<string | null>(null);
+    const imgSrc = erroredSrc === sourceImg ? PLACEHOLDER : sourceImg;
     const ownerName = owner ? fullName(owner) : null;
     const authorLabel = organization?.name || ownerName || "Sem autor";
     const authorAlt = organization?.name || ownerName || "Autor";
@@ -81,7 +86,7 @@ export default function CardMetrics({
                     alt: authorAlt,
                     height: "250px",
                     className: "bg-primary-100 !object-contain !max-w-[250px] !max-h-[250px]",
-                    onError: () => setImgSrc(PLACEHOLDER),
+                    onError: () => setErroredSrc(sourceImg),
                 }}
                 subtitleText={
                     <div className="flex flex-col">

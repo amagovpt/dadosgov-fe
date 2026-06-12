@@ -2,8 +2,8 @@
 
 import { useSearchParams } from "next/navigation";
 import { TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
-import { fetchMyDataservices } from "@/services/api";
-import { Dataservice } from "@/types/api";
+import { fetchMyDataservices } from "@/service/api/dataservices";
+import { Dataservice } from "@/service/types/dataservice";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { formatDateToDMY } from "@/utils/formatDate";

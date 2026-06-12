@@ -3,13 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Tabs, Tab, TabHeader, TabBody } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import {
-  fetchHomeFeaturedDatasets,
-  updateHomeFeaturedDatasets,
-  fetchHomeFeaturedReuses,
-  updateHomeFeaturedReuses,
-} from "@/services/api";
-import type { Dataset, Reuse } from "@/types/api";
+import { fetchHomeFeaturedDatasets, updateHomeFeaturedDatasets, fetchHomeFeaturedReuses, updateHomeFeaturedReuses } from "@/service/api/system";
+import type { Dataset } from "@/service/types/dataset";
+import type { Reuse } from "@/service/types/reuse";
 import type { ContentBlock, FeaturedDatasetsData, FeaturedReusesData } from "./editorial-blocks";
 import { EditorialBlockList } from "./EditorialBlockUI";
 

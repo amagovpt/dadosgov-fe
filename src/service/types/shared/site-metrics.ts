@@ -1,4 +1,4 @@
-﻿export interface SiteMetrics {
+export interface SiteMetrics {
   datasets: number;
   dataservices?: number;
   organizations: number;

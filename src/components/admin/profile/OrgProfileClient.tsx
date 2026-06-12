@@ -1,31 +1,50 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
+  Accordion,
+  AccordionGroup,
   Avatar,
   Button,
   CardNoResults,
+  Checkbox,
   Icon,
   InputText,
   InputTextArea,
   StatusCard,
+  Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import {
+  fetchOrgBadges,
   fetchOrganization,
   updateOrganization,
   uploadOrgLogo,
   deleteOrganization,
-} from "@/services/api";
-import { Organization } from "@/types/api";
+} from "@/service/api/organizations";
+import { Organization, type OrgBadges } from "@/service/types/identity";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import AdminEmptyState from "../AdminEmptyState";
+
+function badgeKindsFromOrg(badges: Organization["badges"] | undefined): string[] {
+  return (badges ?? [])
+    .map((badge) => (typeof badge === "string" ? badge : badge.kind))
+    .filter((kind): kind is string => Boolean(kind));
+}
+
+function badgesSelectionChanged(current: string[], saved: string[]): boolean {
+  return (
+    current.length !== saved.length ||
+    current.some((kind) => !saved.includes(kind)) ||
+    saved.some((kind) => !current.includes(kind))
+  );
+}
 
 function DeleteOrgPopupContent({
   onClose,
@@ -72,6 +91,8 @@ export default function OrgProfileClient() {
   const [acronym, setAcronym] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
+  const [availableBadges, setAvailableBadges] = useState<OrgBadges>({});
+  const [selectedBadgeKinds, setSelectedBadgeKinds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
@@ -96,6 +117,7 @@ export default function OrgProfileClient() {
           setAcronym(data.acronym || "");
           setDescription(data.description || "");
           setUrl(data.url || "");
+          setSelectedBadgeKinds(badgeKindsFromOrg(data.badges));
         }
       } catch (error) {
         console.error("Error loading org profile:", error);
@@ -107,6 +129,10 @@ export default function OrgProfileClient() {
   }, [orgId]);
 
   useEffect(() => {
+    fetchOrgBadges().then(setAvailableBadges);
+  }, []);
+
+  useEffect(() => {
     if (!saveStatus) return;
     const timer = setTimeout(() => setSaveStatus(null), 5000);
     return () => clearTimeout(timer);
@@ -114,10 +140,19 @@ export default function OrgProfileClient() {
 
   const canEdit = useMemo(
     () =>
-      isAdmin ||
-      (org?.members?.some((m) => m.user.id === user?.id && m.role === "admin") ?? false),
-    [isAdmin, org, user],
+      isAdmin || (org?.members?.some((m) => m.user.id === user?.id && m.role === "admin") ?? false),
+    [isAdmin, org, user]
   );
+
+  const handleBadgeToggle = (kind: string, checked: boolean) => {
+    setSelectedBadgeKinds((prev) => {
+      return checked
+        ? prev.includes(kind)
+          ? prev
+          : [...prev, kind]
+        : prev.filter((k) => k !== kind);
+    });
+  };
 
   const handleSave = async () => {
     if (!org) return;
@@ -136,15 +171,20 @@ export default function OrgProfileClient() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setNameError(false);
     setDescriptionError(false);
+
     setIsSaving(true);
     setSaveStatus(null);
     try {
-      await updateOrganization(org.id, {
+      const updated = await updateOrganization(org.id, {
         name,
         acronym: acronym || null,
         description,
         url: url || null,
+        badges: selectedBadgeKinds.map((kind) => ({ kind })),
       });
+      setOrg(updated);
+      setSelectedBadgeKinds(badgeKindsFromOrg(updated.badges));
+
       setSaveStatus("success");
     } catch (error) {
       console.error("Error updating org profile:", error);
@@ -214,7 +254,6 @@ export default function OrgProfileClient() {
       title="Perfil da organização"
       headerAction={null}
     >
-
       {org && (
         <div className="profile-card">
           <div className="profile-card__avatar-container">
@@ -345,11 +384,31 @@ export default function OrgProfileClient() {
                 disabled={!canEdit}
               />
 
+              {Object.keys(availableBadges).length > 0 && (
+                <AccordionGroup>
+                  <Accordion headingTitle="Emblemas" headingLevel="h3">
+                    <div className="flex flex-col gap-8 p-16">
+                      {Object.entries(availableBadges).map(([kind, label]) => (
+                        <Checkbox
+                          key={kind}
+                          id={`org-badge-${kind}`}
+                          label={label}
+                          value={kind}
+                          name={`org-badge-${kind}`}
+                          required={false}
+                          checked={selectedBadgeKinds.includes(kind)}
+                          disabled={isSaving}
+                          onChange={(e) => handleBadgeToggle(kind, e.target.checked)}
+                        />
+                      ))}
+                    </div>
+                  </Accordion>
+                </AccordionGroup>
+              )}
+
               {canEdit && (
                 <div>
-                  <span className="text-base font-medium leading-7 text-primary-900">
-                    Logotipo
-                  </span>
+                  <span className="text-base font-medium leading-7 text-primary-900">Logotipo</span>
                   <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
                     <DragAndDropUploader
                       label="Ficheiro"

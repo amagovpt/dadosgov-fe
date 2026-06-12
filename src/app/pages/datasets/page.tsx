@@ -1,8 +1,12 @@
-import { fetchDatasetsListing } from '@/services/api';
-import { DatasetFilters } from '@/types/api';
+import { fetchDatasetsListing } from "@/service/api/datasets";
+import { DatasetFilters } from "@/service/types/dataset";
 import DatasetsClient from '@/components/datasets/DatasetsClient';
+import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 
-export const dynamic = 'force-dynamic';
+// The page is already dynamic (it reads searchParams); we intentionally do NOT
+// force-dynamic so the listing fetch can use the Next.js Data Cache
+// (revalidate: 60) — repeated page/query loads are served from cache and don't
+// hit the backend rate-limit (per-IP, collapsed site-wide by the F5).
 
 export default async function Page({
   searchParams,
@@ -35,7 +39,10 @@ export default async function Page({
 
   // LEDG-1836: one aggregated call replaces the prior Promise.all of 14 fetches
   // (listing + 9 filter counts + organizations + licenses + frequencies + granularities).
-  const data = await fetchDatasetsListing(page, 20, apiFilters);
+  // Relay the real client IP on the SSR fetch (which, on a Data Cache miss,
+  // goes direct to the backend) so the limiter keys per visitor, not the Next IP.
+  const forwarded = await serverForwardedHeaders();
+  const data = await fetchDatasetsListing(page, 20, apiFilters, forwarded);
 
   return (
     <DatasetsClient

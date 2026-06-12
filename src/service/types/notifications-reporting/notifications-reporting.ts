@@ -1,4 +1,4 @@
-﻿import type { Organization, UserRef } from '@/service/types/identity';
+import type { Organization, UserRef } from '@/service/types/identity';
 
 export interface DiscussionNotificationDetails {
   discussion: string | null;

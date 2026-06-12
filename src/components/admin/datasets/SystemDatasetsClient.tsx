@@ -1,9 +1,9 @@
 "use client";
 
 import { ProgressBar, TableCell, TableHeaderCell, TableRow } from "@ama-pt/agora-design-system";
-import { fetchAdminDatasets, fetchDatasets } from "@/services/api";
-import { Dataset } from "@/types/api";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
+import { Dataset } from "@/service/types/dataset";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
 import {

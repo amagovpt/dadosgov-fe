@@ -18,14 +18,12 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
-import {
-  fetchOrgDatasets,
-  fetchOrgDataservices,
-  fetchOrgMetrics,
-  fetchOrgReuses,
-  fetchOrganization,
-} from "@/services/api";
-import type { Dataset, Dataservice, Organization, OrganizationMetrics, Reuse } from "@/types/api";
+import { fetchOrgDataservices } from "@/service/api/dataservices";
+import { fetchOrgDatasets, fetchOrgMetrics, fetchOrgReuses, fetchOrganization } from "@/service/api/organizations";
+import type { Dataservice } from "@/service/types/dataservice";
+import type { Dataset } from "@/service/types/dataset";
+import type { Organization, OrganizationMetrics } from "@/service/types/identity";
+import type { Reuse } from "@/service/types/reuse";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
