@@ -1,27 +1,28 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button, InputText, InputPassword, Icon, Breadcrumb } from "@ama-pt/agora-design-system";
 import { fetchMigrationPending, searchMigrationAccount, sendMigrationCode, confirmMigration, skipMigration } from "@/service/api/migration";
 import AppIcon from "../Primitives/AppIcon";
 
 type Step =
   | "loading"
+  | "choice"
+  | "login"
   | "search"
   | "confirm-account"
   | "choose-method"
   | "verify-code"
-  | "verify-password"
-  | "success";
+  | "success"
+  | "success-new";
 
 export default function MigrateAccountClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const noEmail = searchParams.get("no_email") === "true";
 
   const [step, setStep] = useState<Step>("loading");
   const [maskedEmail, setMaskedEmail] = useState<string | null>(null);
+  const [hasCandidate, setHasCandidate] = useState(false);
   const [legacyFirstName, setLegacyFirstName] = useState<string | null>(null);
   const [legacyLastName, setLegacyLastName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +38,8 @@ export default function MigrateAccountClient() {
   const [code, setCode] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
 
-  // Password verification
+  // Default account login (email + password)
+  const [loginEmail, setLoginEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const breadcrumbItems = [
@@ -55,20 +57,19 @@ export default function MigrateAccountClient() {
           return;
         }
         if (data.email) setMaskedEmail(data.email);
+        setHasCandidate(Boolean(data.candidate));
         if (data.first_name) setLegacyFirstName(data.first_name);
         if (data.last_name) setLegacyLastName(data.last_name);
 
-        if (data.has_email && !noEmail) {
-          setStep("confirm-account");
-        } else {
-          setStep("search");
-        }
+        // The flow always starts by asking the user whether they
+        // already have an account or want to create a new one.
+        setStep("choice");
       } catch {
         router.push("/pages/login");
       }
     }
     check();
-  }, [router, noEmail]);
+  }, [router]);
 
   // Resend countdown timer
   useEffect(() => {
@@ -143,25 +144,32 @@ export default function MigrateAccountClient() {
     }
   }, [code]);
 
-  const handleConfirmPassword = useCallback(async () => {
+  const handleLogin = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      await confirmMigration({ method: "password", password });
+      await confirmMigration({ method: "password", email: loginEmail, password });
       setStep("success");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Palavra-passe incorreta.");
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("Maximum attempts")) {
+        setError(
+          "Número máximo de tentativas excedido. A vinculação foi bloqueada nesta sessão."
+        );
+      } else {
+        setError("Credenciais inválidas. Verifique o email e a palavra-passe e tente novamente.");
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [password]);
+  }, [loginEmail, password]);
 
   const handleSkip = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       await skipMigration();
-      window.location.href = "/";
+      setStep("success-new");
     } catch {
       setError("Erro ao criar conta.");
     } finally {
@@ -169,9 +177,20 @@ export default function MigrateAccountClient() {
     }
   }, []);
 
-  // Redirect after success
+  const handleForgotPassword = useCallback(() => {
+    setError(null);
+    // With a known candidate account we can email a code right away;
+    // otherwise the user must locate the account first.
+    if (hasCandidate) {
+      setStep("confirm-account");
+    } else {
+      setStep("search");
+    }
+  }, [hasCandidate]);
+
+  // Redirect after success (account linked or new account created)
   useEffect(() => {
-    if (step !== "success") return;
+    if (step !== "success" && step !== "success-new") return;
     const timer = setTimeout(() => {
       window.location.href = "/";
     }, 3000);
@@ -197,19 +216,151 @@ export default function MigrateAccountClient() {
 
         <div className="mt-64 max-w-[560px]">
           <h1 className="mb-16 text-2xl-medium text-brand-blue-dark">
-            Migrar conta para Chave Movel Digital
+            Associar conta à Chave Móvel Digital
           </h1>
 
-          {step !== "success" && (
+          {step !== "success" && step !== "success-new" && step !== "choice" && (
             <p className="text-lg mb-32 text-neutral-700">
-              Detetamos que ja possui uma conta no portal. Para continuar a utilizar os seus dados,
-              precisa de verificar a propriedade da conta.
+              Para associar a sua Chave Móvel Digital a uma conta existente no portal, precisa de
+              verificar a propriedade dessa conta.
             </p>
           )}
 
           {error && (
             <div className="bg-red-50 text-red-700 text-sm border-red-200 mb-24 rounded-8 border p-16 font-medium">
               {error}
+            </div>
+          )}
+
+          {/* Step: Initial choice — link an existing account or create a new one */}
+          {step === "choice" && (
+            <div className="flex flex-col gap-24">
+              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
+                <Icon name="agora-line-user" className="h-24 w-24 text-brand-blue-primary" />
+              </div>
+              <h2 className="text-xl-bold text-brand-blue-dark">
+                {hasCandidate
+                  ? "Identificámos uma conta com o seu nome"
+                  : "Já possui uma conta no portal?"}
+              </h2>
+              <p className="text-neutral-900">
+                {hasCandidate
+                  ? "Já possui uma conta no sistema ou deseja criar uma nova conta?"
+                  : "Se já utilizava o portal com email e palavra-passe, pode associar essa conta à sua Chave Móvel Digital, mantendo todos os seus dados e permissões. Caso contrário, será criada uma nova conta."}
+              </p>
+
+              <div className="flex flex-col gap-16">
+                <button
+                  onClick={() => {
+                    setError(null);
+                    setStep("login");
+                  }}
+                  disabled={isLoading}
+                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
+                >
+                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
+                    <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
+                  </div>
+                  <div>
+                    <p className="text-lg-bold text-brand-blue-dark">Já possuo uma conta</p>
+                    <p className="text-sm text-neutral-700">
+                      Inicie sessão com o email e a palavra-passe da sua conta para a associar à
+                      Chave Móvel Digital
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleSkip}
+                  disabled={isLoading}
+                  className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
+                >
+                  <div className="shrink-0 rounded-8 bg-[#E9EBFF] p-12">
+                    <Icon
+                      name="agora-line-add-circle"
+                      className="h-24 w-24 text-brand-blue-primary"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-lg-bold text-brand-blue-dark">Criar nova conta</p>
+                    <p className="text-sm text-neutral-700">
+                      {isLoading
+                        ? "A criar a nova conta..."
+                        : "Será criada uma nova conta associada à sua Chave Móvel Digital"}
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step: Default account login (email + password) */}
+          {step === "login" && (
+            <div className="flex flex-col gap-24">
+              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
+                <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
+              </div>
+              <h2 className="text-xl-bold text-brand-blue-dark">Inicie sessão na sua conta</h2>
+              <p className="text-neutral-900">
+                Introduza o email e a palavra-passe da sua conta do portal. Se as credenciais
+                estiverem corretas, a conta será associada à sua Chave Móvel Digital.
+              </p>
+
+              <InputText
+                label="Email"
+                placeholder="exemplo@email.com"
+                id="login-email"
+                name="login-email"
+                type="email"
+                className="w-full"
+                value={loginEmail}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setLoginEmail(e.target.value)
+                }
+                disabled={isLoading}
+              />
+              <InputPassword
+                label="Palavra-passe"
+                placeholder="Introduza a palavra-passe"
+                id="login-password"
+                name="login-password"
+                className="w-full"
+                value={password}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                disabled={isLoading}
+              />
+
+              <div className="flex items-center gap-16">
+                <Button
+                  variant="primary"
+                  onClick={handleLogin}
+                  disabled={isLoading || !loginEmail || !password}
+                  className="px-48"
+                >
+                  {isLoading ? "A verificar..." : "Associar conta"}
+                </Button>
+              </div>
+
+              <Button
+                variant="primary"
+                appearance="link"
+                onClick={handleForgotPassword}
+                className="text-sm h-auto p-0"
+              >
+                Não se lembra da palavra-passe? Verificar por código de email
+              </Button>
+
+              <Button
+                variant="primary"
+                appearance="link"
+                onClick={() => {
+                  setStep("choice");
+                  setError(null);
+                }}
+                className="text-sm h-auto p-0"
+              >
+                Voltar
+              </Button>
             </div>
           )}
 
@@ -388,7 +539,7 @@ export default function MigrateAccountClient() {
                 </button>
 
                 <button
-                  onClick={() => setStep("verify-password")}
+                  onClick={() => setStep("login")}
                   disabled={isLoading}
                   className="flex items-center gap-16 rounded-8 border-2 border-neutral-300 p-24 text-left transition-colors hover:border-brand-blue-primary"
                 >
@@ -396,11 +547,9 @@ export default function MigrateAccountClient() {
                     <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
                   </div>
                   <div>
-                    <p className="text-lg-bold text-brand-blue-dark">
-                      Sei a minha palavra-passe antiga
-                    </p>
+                    <p className="text-lg-bold text-brand-blue-dark">Sei a minha palavra-passe</p>
                     <p className="text-sm text-neutral-700">
-                      Introduza a palavra-passe da sua conta anterior
+                      Inicie sessão com o email e a palavra-passe da sua conta
                     </p>
                   </div>
                 </button>
@@ -475,64 +624,29 @@ export default function MigrateAccountClient() {
             </div>
           )}
 
-          {/* Step: Verify by password */}
-          {step === "verify-password" && (
-            <div className="flex flex-col gap-24">
-              <div className="w-fit rounded-8 bg-[#E9EBFF] p-16">
-                <Icon name="agora-line-lock" className="h-24 w-24 text-brand-blue-primary" />
-              </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">
-                Introduza a sua palavra-passe antiga
-              </h2>
-              <p className="text-neutral-900">
-                Introduza a palavra-passe que usava para entrar na sua conta anterior.
-              </p>
-
-              <InputPassword
-                label="Palavra-passe"
-                placeholder="Introduza a palavra-passe"
-                id="migration-password"
-                name="migration-password"
-                className="w-full"
-                value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                disabled={isLoading}
-              />
-
-              <div className="flex gap-16">
-                <Button
-                  variant="primary"
-                  onClick={handleConfirmPassword}
-                  disabled={isLoading || !password}
-                  className="px-48"
-                >
-                  {isLoading ? "A verificar..." : "Verificar"}
-                </Button>
-              </div>
-
-              <Button
-                variant="primary"
-                appearance="link"
-                onClick={() => {
-                  setStep("choose-method");
-                  setError(null);
-                }}
-                className="text-sm h-auto p-0"
-              >
-                Voltar
-              </Button>
-            </div>
-          )}
-
-          {/* Step: Success */}
+          {/* Step: Success — existing account linked */}
           {step === "success" && (
             <div className="flex flex-col items-center gap-24 text-center">
               <div className="bg-green-100 w-fit rounded-full p-24">
                 <Icon name="agora-line-check-circle" className="text-green-600 h-48 w-48" />
               </div>
-              <h2 className="text-xl-bold text-brand-blue-dark">Conta migrada com sucesso!</h2>
+              <h2 className="text-xl-bold text-brand-blue-dark">Conta associada com sucesso!</h2>
               <p className="text-neutral-900">
-                A sua conta foi migrada para a Chave Movel Digital com sucesso. Sera redirecionado
+                A sua conta foi associada à Chave Móvel Digital. Os seus dados e permissões foram
+                mantidos. Será redirecionado em breve...
+              </p>
+            </div>
+          )}
+
+          {/* Step: Success — new account created */}
+          {step === "success-new" && (
+            <div className="flex flex-col items-center gap-24 text-center">
+              <div className="bg-green-100 w-fit rounded-full p-24">
+                <Icon name="agora-line-check-circle" className="text-green-600 h-48 w-48" />
+              </div>
+              <h2 className="text-xl-bold text-brand-blue-dark">Nova conta criada!</h2>
+              <p className="text-neutral-900">
+                Foi criada uma nova conta associada à sua Chave Móvel Digital. Será redirecionado
                 em breve...
               </p>
             </div>
