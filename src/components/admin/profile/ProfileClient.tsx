@@ -13,7 +13,7 @@ import { ApiToken, UserFollowing, UserPublic } from "@/service/types/identity";
 import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import {
   Avatar,
   Button,
@@ -22,7 +22,6 @@ import {
   InputText,
   InputTextArea,
   StatusCard,
-  Table,
   TableHeader,
   TableHeaderCell,
   TableBody,
@@ -861,14 +860,12 @@ export default function ProfileClient() {
                     <h2 className="mb-16 text-base font-medium text-neutral-900">
                       {activityTotal} ATIVIDADES
                     </h2>
-                    <Table
-                      paginationProps={createPaginationProps(
-                        activityPageSize,
-                        activityTotal,
-                        activityPage,
-                        setActivityPage,
-                        setActivityPageSize
-                      )}
+                    <AdminPaginatedTable
+                      pageSize={activityPageSize}
+                      totalItems={activityTotal}
+                      currentPage={activityPage}
+                      setCurrentPage={setActivityPage}
+                      setPageSize={setActivityPageSize}
                     >
                       <TableHeader>
                         <TableRow>
@@ -915,7 +912,7 @@ export default function ProfileClient() {
                           </TableRow>
                         ))}
                       </TableBody>
-                    </Table>
+                    </AdminPaginatedTable>
                   </>
                 )}
               </div>

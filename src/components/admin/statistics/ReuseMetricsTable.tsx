@@ -1,19 +1,39 @@
 "use client";
 
-import {
-  Icon,
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableHeaderCell,
-  TableRow,
-} from "@ama-pt/agora-design-system";
+import { Icon } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminListTable, { type AdminListColumn } from "@/components/admin/lists/AdminListTable";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import type { Reuse } from "@/service/types/reuse";
 
 const PAGE_SIZE = 10;
+
+const columns: AdminListColumn<Reuse>[] = [
+  {
+    id: "title",
+    header: "TÍTULO DA REUTILIZAÇÃO",
+    headerLabel: "Título",
+    renderCell: (reuse) => <TextLink href={reuse.url}>{reuse.title}</TextLink>,
+  },
+  {
+    id: "views",
+    header: <Icon name="agora-line-eye" className="h-16 w-16" />,
+    headerLabel: "Visualizações",
+    renderCell: (reuse) => reuse.metrics?.views ?? 0,
+  },
+  {
+    id: "followers",
+    header: <Icon name="agora-line-star" className="h-16 w-16" />,
+    headerLabel: "Favoritos",
+    renderCell: (reuse) => reuse.metrics?.followers ?? 0,
+  },
+  {
+    id: "status",
+    header: "ESTADO",
+    headerLabel: "Estado",
+    renderCell: (reuse) => (reuse.private ? "Privado" : reuse.archived ? "Arquivado" : "Público"),
+  },
+];
 
 interface ReuseMetricsTableProps {
   reuses: Reuse[];
@@ -24,33 +44,13 @@ interface ReuseMetricsTableProps {
 
 export function ReuseMetricsTable({ reuses, total, page, onPageChange }: ReuseMetricsTableProps) {
   return (
-    <Table paginationProps={createPaginationProps(PAGE_SIZE, total, page, onPageChange)}>
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell>TÍTULO DA REUTILIZAÇÃO</TableHeaderCell>
-          <TableHeaderCell>
-            <Icon name="agora-line-eye" className="h-16 w-16" />
-          </TableHeaderCell>
-          <TableHeaderCell>
-            <Icon name="agora-line-star" className="h-16 w-16" />
-          </TableHeaderCell>
-          <TableHeaderCell>ESTADO</TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {reuses.map((reuse) => (
-          <TableRow key={reuse.id}>
-            <TableCell headerLabel="Título">
-              <TextLink href={reuse.url}>{reuse.title}</TextLink>
-            </TableCell>
-            <TableCell headerLabel="Visualizações">{reuse.metrics?.views ?? 0}</TableCell>
-            <TableCell headerLabel="Favoritos">{reuse.metrics?.followers ?? 0}</TableCell>
-            <TableCell headerLabel="Estado">
-              {reuse.private ? "Privado" : reuse.archived ? "Arquivado" : "Público"}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <AdminPaginatedTable
+      pageSize={PAGE_SIZE}
+      totalItems={total}
+      currentPage={page}
+      setCurrentPage={onPageChange}
+    >
+      <AdminListTable items={reuses} columns={columns} getRowKey={(reuse) => reuse.id} />
+    </AdminPaginatedTable>
   );
 }

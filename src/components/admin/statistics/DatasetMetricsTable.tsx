@@ -1,19 +1,51 @@
 "use client";
 
-import {
-  Icon,
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableHeaderCell,
-  TableRow,
-} from "@ama-pt/agora-design-system";
+import { Icon } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
+import AdminListTable, { type AdminListColumn } from "@/components/admin/lists/AdminListTable";
+import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import type { Dataset } from "@/service/types/dataset";
 
 const PAGE_SIZE = 10;
+
+const columns: AdminListColumn<Dataset>[] = [
+  {
+    id: "title",
+    header: "TÍTULO DO CONJUNTO DE DADOS",
+    headerLabel: "Título",
+    renderCell: (dataset) => <TextLink href={dataset.page}>{dataset.title}</TextLink>,
+  },
+  {
+    id: "discussions",
+    header: <Icon name="agora-line-chat" className="h-16 w-16" />,
+    headerLabel: "Discussões",
+    renderCell: (dataset) => dataset.metrics?.discussions ?? 0,
+  },
+  {
+    id: "views",
+    header: <Icon name="agora-line-eye" className="h-16 w-16" />,
+    headerLabel: "Visualizações",
+    renderCell: (dataset) => dataset.metrics?.views ?? 0,
+  },
+  {
+    id: "downloads",
+    header: <Icon name="agora-line-download" className="h-16 w-16" />,
+    headerLabel: "Downloads",
+    renderCell: (dataset) => dataset.metrics?.resources_downloads ?? 0,
+  },
+  {
+    id: "reuses",
+    header: <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="h-16 w-16" />,
+    headerLabel: "Reutilizações",
+    renderCell: (dataset) => dataset.metrics?.reuses ?? 0,
+  },
+  {
+    id: "followers",
+    header: <Icon name="agora-line-star" className="h-16 w-16" />,
+    headerLabel: "Favoritos",
+    renderCell: (dataset) => dataset.metrics?.followers ?? 0,
+  },
+];
 
 interface DatasetMetricsTableProps {
   datasets: Dataset[];
@@ -22,44 +54,20 @@ interface DatasetMetricsTableProps {
   onPageChange: (page: number) => void;
 }
 
-export function DatasetMetricsTable({ datasets, total, page, onPageChange }: DatasetMetricsTableProps) {
+export function DatasetMetricsTable({
+  datasets,
+  total,
+  page,
+  onPageChange,
+}: DatasetMetricsTableProps) {
   return (
-    <Table paginationProps={createPaginationProps(PAGE_SIZE, total, page, onPageChange)}>
-      <TableHeader>
-        <TableRow>
-          <TableHeaderCell>TÍTULO DO CONJUNTO DE DADOS</TableHeaderCell>
-          <TableHeaderCell>
-            <Icon name="agora-line-chat" className="h-16 w-16" />
-          </TableHeaderCell>
-          <TableHeaderCell>
-            <Icon name="agora-line-eye" className="h-16 w-16" />
-          </TableHeaderCell>
-          <TableHeaderCell>
-            <Icon name="agora-line-download" className="h-16 w-16" />
-          </TableHeaderCell>
-          <TableHeaderCell>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/Icons/bar_chart.svg" alt="Reutilizações" className="h-16 w-16" />
-          </TableHeaderCell>
-          <TableHeaderCell>
-            <Icon name="agora-line-star" className="h-16 w-16" />
-          </TableHeaderCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {datasets.map((dataset) => (
-          <TableRow key={dataset.id}>
-            <TableCell headerLabel="Título">
-              <TextLink href={dataset.page}>{dataset.title}</TextLink>
-            </TableCell>
-            <TableCell headerLabel="Discussões">{dataset.metrics?.discussions ?? 0}</TableCell>
-            <TableCell headerLabel="Visualizações">{dataset.metrics?.views ?? 0}</TableCell>
-            <TableCell headerLabel="Downloads">{dataset.metrics?.resources_downloads ?? 0}</TableCell>
-            <TableCell headerLabel="Reutilizações">{dataset.metrics?.reuses ?? 0}</TableCell>
-            <TableCell headerLabel="Favoritos">{dataset.metrics?.followers ?? 0}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <AdminPaginatedTable
+      pageSize={PAGE_SIZE}
+      totalItems={total}
+      currentPage={page}
+      setCurrentPage={onPageChange}
+    >
+      <AdminListTable items={datasets} columns={columns} getRowKey={(dataset) => dataset.id} />
+    </AdminPaginatedTable>
   );
 }

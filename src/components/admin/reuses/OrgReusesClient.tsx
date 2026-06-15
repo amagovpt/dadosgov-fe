@@ -1,35 +1,20 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import {
-  Breadcrumb,
-  Icon,
-  InputSearchBar,
-  Table,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@ama-pt/agora-design-system";
-import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgReuses } from "@/service/api/organizations";
 import { Reuse } from "@/service/types/reuse";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
-import { formatDateToDMY } from "@/utils/formatDate";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "../AdminEmptyState";
-import ResultsCount from "../ResultsCount";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
-import TableActionsCell from "../TableActionsCell";
-import AdminLayout from "@/components/Layout/AdminLayout";
-
-type SortOrder = "none" | "ascending" | "descending";
-type ReuseSortField = "title" | "created_at" | "datasets";
+import { ReuseSortField, createReuseColumns, sortReuses } from "./reusesListConfig";
 
 export default function OrgReusesClient() {
   const params = useParams();
@@ -47,19 +32,16 @@ export default function OrgReusesClient() {
   const [sortField, setSortField] = useState<ReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
 
-  const handleSort = (field: ReuseSortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: ReuseSortField): SortOrder =>
-    sortField === field ? sortOrder : "none";
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   useEffect(() => {
-    if (!resolvedOrgId) {
-      return;
-    }
+    if (!resolvedOrgId) return;
 
     let isCancelled = false;
     const timeoutId = setTimeout(() => {
@@ -86,31 +68,22 @@ export default function OrgReusesClient() {
     () => filterByStatus(reuses, statusFilter),
     [reuses, statusFilter]
   );
-
-  const sortedReuses = useMemo(() => {
-    if (!sortField || sortOrder === "none") return filteredReuses;
-    const dir = sortOrder === "ascending" ? 1 : -1;
-    const collator = new Intl.Collator("pt", { sensitivity: "base" });
-    return [...filteredReuses].sort((a, b) => {
-      if (sortField === "title") {
-        return collator.compare(a.title ?? "", b.title ?? "") * dir;
-      }
-      if (sortField === "created_at") {
-        const at = a.created_at ? Date.parse(a.created_at) : 0;
-        const bt = b.created_at ? Date.parse(b.created_at) : 0;
-        return (at - bt) * dir;
-      }
-      // datasets count
-      const ad = a.datasets?.length ?? 0;
-      const bd = b.datasets?.length ?? 0;
-      return (ad - bd) * dir;
-    });
-  }, [filteredReuses, sortField, sortOrder]);
-
-  const paginatedReuses = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sortedReuses.slice(start, start + itemsPerPage);
-  }, [sortedReuses, currentPage, itemsPerPage]);
+  const sortedReuses = useMemo(
+    () => sortReuses(filteredReuses, sortField, sortOrder),
+    [filteredReuses, sortField, sortOrder]
+  );
+  const paginatedReuses = useMemo(
+    () => paginateItems(sortedReuses, currentPage, itemsPerPage),
+    [sortedReuses, currentPage, itemsPerPage]
+  );
+  const columns = useMemo(
+    () =>
+      createReuseColumns({
+        linkStyle: "anchor",
+        editHref: (reuse) => `/pages/admin/org/reuses/edit?slug=${reuse.slug}`,
+      }),
+    []
+  );
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
@@ -123,109 +96,49 @@ export default function OrgReusesClient() {
   }
 
   return (
-    <AdminLayout breadcrumbItems={[
-      { label: "Administração", url: "/pages/admin" },
-      { label: orgName || "Organização", url: "#" },
-      { label: "Reutilizações", url: "#" },
-    ]}
+    <AdminListPage
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Reutilizações", url: "#" },
+      ]}
       title="Reutilizações"
-    >
-      <ResultsCount count={reuses.length} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome da reutilização"
-            aria-label="Pesquisar reutilizações"
-          />
-        </div>
+      isLoading={isLoading}
+      count={filteredReuses.length}
+      currentPage={currentPage}
+      pageSize={itemsPerPage}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setItemsPerPage}
+      search={{
+        placeholder: "Pesquise o nome da reutilização",
+        ariaLabel: "Pesquisar reutilizações",
+      }}
+      filters={
         <StatusFilterSelect
           value={statusFilter}
-          onChange={(v) => {
-            setStatusFilter(v);
+          onChange={(value) => {
+            setStatusFilter(value);
             setCurrentPage(1);
           }}
         />
-      </div>
-
-      {isLoading ? (
-        <p>A carregar...</p>
-      ) : reuses.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            itemsPerPage,
-            reuses.length,
-            currentPage,
-            setCurrentPage,
-            setItemsPerPage
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("title")}
-                onSortChange={handleSort("title")}
-              >
-                Título da reutilização
-              </TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("created_at")}
-                onSortChange={handleSort("created_at")}
-              >
-                Criado em
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("datasets")}
-                onSortChange={handleSort("datasets")}
-              >
-                Conjuntos de dados
-              </TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedReuses.map((reuse, index) => (
-              <TableRow key={index}>
-                <TableCell headerLabel="Título">
-                  <a href={`/pages/reuses/${reuse.slug}`} className="text-primary-600 underline">
-                    {reuse.title}
-                  </a>
-                </TableCell>
-                <TableCell headerLabel="Estado">
-                  <ResourceStatusBadge item={reuse} />
-                </TableCell>
-                <TableCell headerLabel="Criado em">{formatDateToDMY(reuse.created_at)}</TableCell>
-                <TableCell headerLabel="Conjuntos de dados">
-                  {reuse.datasets?.length ?? 0}
-                </TableCell>
-                <TableCell headerLabel="Ações">
-                  <TableActionsCell
-                    viewAction={{
-                      href: `/pages/reuses/${reuse.slug}`,
-                    }}
-                    editAction={{
-                      href: `/pages/admin/org/reuses/edit?slug=${reuse.slug}`,
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
+      }
+      emptyState={
         <AdminEmptyState
           icon="agora-line-edit"
           title="Sem publicações"
           description="A organização ainda não publicou uma reutilização."
           createUrl="/pages/admin/reuses/new"
         />
-      )}
-    </AdminLayout>
+      }
+    >
+      <AdminListTable
+        items={paginatedReuses}
+        columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+        getRowKey={(reuse) => reuse.id}
+      />
+    </AdminListPage>
   );
 }
+
