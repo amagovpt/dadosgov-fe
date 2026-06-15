@@ -5,7 +5,6 @@ export async function fetchMigrationPending(): Promise<{
   pending: boolean;
   email?: string;
   has_email?: boolean;
-  candidate?: boolean;
   first_name?: string;
   last_name?: string;
 }> {
@@ -42,9 +41,7 @@ export async function sendMigrationCode(): Promise<{ sent: boolean }> {
 
 
 export async function confirmMigration(
-  payload:
-    | { method: "code"; code: string }
-    | { method: "password"; email: string; password: string }
+  payload: { method: "code"; code: string } | { method: "password"; password: string }
 ): Promise<{ success: boolean }> {
   const res = await fetch("/saml/migration/confirm", {
     method: "POST",

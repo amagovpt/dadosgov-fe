@@ -7,10 +7,8 @@ import { PopupProviderWrapper } from "@/components/PopupProviderWrapper";
 import { AuthProvider } from "@/context/AuthContext";
 import { siteConfig } from "@/config/site";
 import ScrollTop from "@/components/ScrollTop";
-import NewAccountNotice from "@/components/login/NewAccountNotice";
 import { ApolloWrapper } from "@/providers/ApolloProvider";
 import { headers } from "next/headers";
-import { Suspense } from "react";
 
 const notoSans = Noto_Sans({
   variable: "--font-noto-sans",
@@ -70,9 +68,6 @@ export default function RootLayout({
               <ScrollTop />
               <div className="flex min-h-screen w-full flex-col">
                 <HeaderWrapper />
-                <Suspense fallback={null}>
-                  <NewAccountNotice />
-                </Suspense>
                 <div className="">{children}</div>
                 <Footer />
               </div>
