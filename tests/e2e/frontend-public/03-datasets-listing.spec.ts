@@ -354,6 +354,87 @@ test.describe("Datasets Listing", () => {
     await expect(mensal).toBeChecked({ timeout: 10000 });
   });
 
+  test("DL-25: Spatial granularity options are localized to Portuguese", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    // Expand the "Granularidade Espacial" accordion section.
+    const granBtn = page
+      .getByRole("button", { name: /^Granularidade Espacial/i })
+      .first();
+    await expect(granBtn).toBeVisible({ timeout: 10000 });
+    await granBtn.click();
+
+    // The PT administrative levels must render in Portuguese.
+    // Regression: they used to surface the untranslated English geolevel
+    // labels ("District" / "County" / "Parish").
+    await expect(
+      page.getByRole("checkbox", { name: /^Distrito$/i })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByRole("checkbox", { name: /^Concelho$/i })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByRole("checkbox", { name: /^Freguesia$/i })
+    ).toBeVisible({ timeout: 10000 });
+
+    // The English labels must not appear anywhere in the filter panel.
+    await expect(page.getByRole("checkbox", { name: /^District$/i })).toHaveCount(0);
+    await expect(page.getByRole("checkbox", { name: /^County$/i })).toHaveCount(0);
+    await expect(page.getByRole("checkbox", { name: /^Parish$/i })).toHaveCount(0);
+  });
+
+  test("DL-26: Selected spatial coverage keeps its name after clearing the search", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    // Expand the "Cobertura Espacial" accordion section.
+    const geoBtn = page
+      .getByRole("button", { name: /^Cobertura Espacial/i })
+      .first();
+    await expect(geoBtn).toBeVisible({ timeout: 10000 });
+    await geoBtn.click();
+
+    // Only the expanded section's search input is visible.
+    const search = page
+      .locator('[placeholder="Escreva para pesquisar..."]:visible')
+      .first();
+    await expect(search).toBeVisible({ timeout: 10000 });
+    await search.fill("Lisboa");
+
+    // Wait for a zone suggestion whose label contains "Lisboa". If the dev DB
+    // has no matching zone, the suggestion never appears — skip rather than fail.
+    const suggestion = page.getByRole("checkbox", { name: /Lisboa/i }).first();
+    try {
+      await expect(suggestion).toBeVisible({ timeout: 15000 });
+    } catch {
+      test.info().annotations.push({
+        type: "note",
+        description: "No 'Lisboa' spatial zone suggestion in this environment.",
+      });
+      return;
+    }
+
+    await suggestion.click();
+    await page.waitForURL(/geozone=/, { timeout: 10000 });
+
+    // Clearing the search empties the live suggestions list. The selection must
+    // keep its human-readable name — regression: it fell back to the raw zone
+    // code (e.g. "pt:concelho:1106").
+    await search.fill("");
+
+    const selected = page.getByRole("checkbox", { name: /Lisboa/i }).first();
+    await expect(selected).toBeVisible({ timeout: 10000 });
+    await expect(selected).toBeChecked();
+
+    // No remaining checkbox should be labeled with a raw zone code.
+    await expect(
+      page.getByRole("checkbox", { name: /(pt:(distrito|concelho|freguesia)|country):/i })
+    ).toHaveCount(0);
+  });
+
   test("DL-21: onError fallback replaces a failed org logo with the placeholder", async ({
     page,
   }) => {

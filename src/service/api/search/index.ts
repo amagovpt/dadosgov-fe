@@ -148,6 +148,28 @@ export async function suggestSpatialZones(
 }
 
 
+export async function getSpatialZones(
+  ids: string[]
+): Promise<Pick<SpatialZone, "id" | "name">[]> {
+  if (ids.length === 0) return [];
+  try {
+    const path = ids.map((id) => encodeURIComponent(id)).join(",");
+    const res = await fetch(`${API_BASE_URL}/spatial/zones/${path}/`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch spatial zones: ${res.statusText}`);
+    const collection = await res.json();
+    return (collection.features ?? []).map(
+      (feature: { id: string; properties?: { name?: string } }) => ({
+        id: feature.id,
+        name: feature.properties?.name ?? feature.id,
+      })
+    );
+  } catch (error) {
+    console.error("Error fetching spatial zones:", error);
+    return [];
+  }
+}
+
+
 export async function suggestUsers(query: string, size: number = 20): Promise<UserSuggestion[]> {
   try {
     const res = await fetch(
