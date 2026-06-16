@@ -10,8 +10,8 @@ export default function PublishFaqClient({ initialContent }: { initialContent?: 
       initialContent={initialContent}
       breadcrumbItems={[
         { label: "Home", url: "/" },
-        { label: "Conhecimento", url: "#" },
-        { label: "Como publicar dados?", url: "/pages/faqs/publish" },
+        { label: "Recursos", url: "#" },
+        { label: "Como publicar dados", url: "/pages/faqs/publish" },
       ]}
     />
   );

@@ -8,11 +8,11 @@ export default function ApiDocumentationClient() {
       <Breadcrumb
         items={[
           { label: "Home", url: "/" },
-          { label: "Referência da API", url: "/pages/faqs/api-documentation" },
+          { label: "Referência API", url: "/pages/faqs/api-documentation" },
         ]}
       />
 
-      <h1 className="text-2xl-bold mt-24 mb-16">Referência da API</h1>
+      <h1 className="text-2xl-bold mt-24 mb-16">Referência API</h1>
 
       <StatusCard
         variant="warning"

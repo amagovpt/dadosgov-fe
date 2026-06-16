@@ -43,8 +43,8 @@ const buildItems = (siteMetrics: SiteMetrics): CategoryToggleItem[] => [
   //   href: '/pages/dataservices',
   //   count: siteMetrics.dataservices ?? 0,
   //   leadingIcon: (active: boolean) =>
-  //     active ? '/Icons/reduce_white.svg' : '/Icons/reduce.svg',
-  //   leadingIconHover: '/Icons/reduce_white.svg',
+  //     active ? '/Icons/api-solid.svg' : '/Icons/api.svg',
+  //   leadingIconHover: '/Icons/api-solid.svg',
   //   className: 'w-full agora-toggle agora-toggle-icon agora-toggle-icon-primary full-width has-icon',
   // },
   {

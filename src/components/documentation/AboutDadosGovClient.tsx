@@ -10,7 +10,7 @@ export default function AboutDadosGovClient({ initialContent }: { initialContent
       initialContent={initialContent}
       breadcrumbItems={[
         { label: "Home", url: "/" },
-        { label: "Conhecimento", url: "#" },
+        { label: "Recursos", url: "#" },
         { label: "Sobre o dados.gov.pt", url: "/pages/faqs/about_dadosgov" },
       ]}
     />

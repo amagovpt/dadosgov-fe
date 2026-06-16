@@ -302,7 +302,7 @@ const SupportPageContent = () => {
           <>
             <label className="mt-48 block text-[20px] font-bold text-white">
               Antes de nos contactar, recomendamos a consulta das Perguntas Frequentes desta página
-              ou da área de Conhecimento do{" "}
+              ou da área de Recursos do{" "}
               <a
                 href="/"
                 target="_blank"
@@ -547,7 +547,7 @@ const SupportPageContent = () => {
                               ) : "richAnswer" in item && item.richAnswer === "apis" ? (
                                 <div className="space-y-16">
                                   <div>
-                                    <p className="font-bold">Documentação da API</p>
+                                    <p className="font-bold">Referência API</p>
                                     <p>
                                       <Button
                                         appearance="link"

@@ -140,6 +140,12 @@ header.sticky .languages-panel-menu {
   }
 }
 
+/* Center short nav labels (e.g. "API") within the 44px min click-target box,
+   so the leftover space is split symmetrically instead of all on the right. */
+.internal-navigation-list ul li .agora-link-wrapper > a {
+  justify-content: center;
+}
+
 .search-panel-menu .panel-menu-content-children {
   overflow: visible !important;
 }
@@ -291,6 +297,15 @@ header[data-submenu="desenvolvimento"] .navigation-links-layout>.links>.link-wra
 }
 
 header[data-submenu="desenvolvimento"] .navigation-links-layout>.links>.link-wrapper:has([data-group="submenu-desenvolvimento"]) {
+  display: block;
+}
+
+/* Usar dados submenu: hide main items, reveal submenu items */
+header[data-submenu="usar-dados"] .navigation-links-layout>.links>.link-wrapper:has([data-group="main"]) {
+  display: none;
+}
+
+header[data-submenu="usar-dados"] .navigation-links-layout>.links>.link-wrapper:has([data-group="submenu-usar-dados"]) {
   display: block;
 }
 

@@ -169,6 +169,7 @@ export const Header = () => {
     const submenuTitles: Record<string, string> = {
       desenvolvimento: "Desenvolvimento",
       publicacoes: "Publicações",
+      "usar-dados": "Como usar o portal",
     };
     const titleEl = document.querySelector(
       ".agora-header .navigation-links-layout > .title"
@@ -176,7 +177,7 @@ export const Header = () => {
     if (!titleEl) return;
     if (submenu && submenuTitles[submenu]) {
       if (!titleEl.dataset.originalTitle) {
-        titleEl.dataset.originalTitle = titleEl.textContent || "Conhecimento";
+        titleEl.dataset.originalTitle = titleEl.textContent || "Recursos";
       }
       titleEl.textContent = submenuTitles[submenu];
     } else if (titleEl.dataset.originalTitle) {
@@ -408,6 +409,17 @@ export const Header = () => {
               </Link>
             </NavigationLink>
 
+            {/* API (dataservices) oculta temporariamente — feature incompleta para PRD
+            <NavigationLink appearance="link">
+              <Link
+                href="/pages/dataservices"
+                onClick={(e) => handleLinkClick(e, "/pages/dataservices")}
+              >
+                API
+              </Link>
+            </NavigationLink>
+            */}
+
             <NavigationLink appearance="link">
               <Link href="/pages/reuses" onClick={(e) => handleLinkClick(e, "/pages/reuses")}>
                 Reutilizações
@@ -423,10 +435,56 @@ export const Header = () => {
               </Link>
             </NavigationLink>
 
-            <NavigationRoot label="Conhecimento">
+            <NavigationRoot label="Recursos">
               {/* Main menu items — always in DOM, hidden via CSS when a submenu is active */}
               <NavigationLink appearance="link">
-                <div data-group="main">
+                <div
+                  data-group="main"
+                  role="button"
+                  tabIndex={0}
+                  onClickCapture={(e) => {
+                    e.preventDefault();
+                    setSubmenu("usar-dados");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSubmenu("usar-dados");
+                    }
+                  }}
+                  className="cursor-pointer"
+                >
+                  <HeaderCard
+                    iconDefault="/Icons/bar_char_white.svg"
+                    iconHover="/Icons/bar_char_white.svg"
+                    title="Como usar o portal"
+                    description="Explorar e reutilizar"
+                    href="#"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+
+              {/* Usar dados submenu items — hidden by default, shown via CSS */}
+              <NavigationLink appearance="link">
+                <div data-group="submenu-usar-dados" data-is-back="true">
+                  <Button
+                    appearance="link"
+                    variant="neutral"
+                    hasIcon
+                    leadingIcon="agora-line-arrow-left-anchor"
+                    leadingIconHover="agora-solid-arrow-left-anchor"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSubmenu(null);
+                    }}
+                  >
+                    Voltar
+                  </Button>
+                </div>
+              </NavigationLink>
+              <NavigationLink appearance="link">
+                <div data-group="submenu-usar-dados">
                   <HeaderCard
                     iconDefault="agora-line-info-mark"
                     iconHover="agora-solid-info-mark"
@@ -438,34 +496,10 @@ export const Header = () => {
                 </div>
               </NavigationLink>
               <NavigationLink appearance="link">
-                <div data-group="main">
+                <div data-group="submenu-usar-dados">
                   <HeaderCard
-                    iconDefault="agora-line-info-mark"
-                    iconHover="agora-solid-info-mark"
-                    title="Publicar dados"
-                    description="Guia de publicação"
-                    href="/pages/faqs/publish"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-              <NavigationLink appearance="link">
-                <div data-group="main">
-                  <HeaderCard
-                    iconDefault="/Icons/bar_char_white.svg"
-                    iconHover="/Icons/bar_char_white.svg"
-                    title="Reutilizar dados"
-                    description="Guia de reutilização"
-                    href="/pages/faqs/reuse"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-              <NavigationLink appearance="link">
-                <div data-group="main">
-                  <HeaderCard
-                    iconDefault="agora-line-info-mark"
-                    iconHover="agora-solid-info-mark"
+                    iconDefault="agora-line-globe"
+                    iconHover="agora-solid-globe"
                     title="Sobre dados abertos"
                     description="Informação geral"
                     href="/pages/about-open-data"
@@ -473,6 +507,56 @@ export const Header = () => {
                   />
                 </div>
               </NavigationLink>
+              <NavigationLink appearance="link">
+                <div data-group="submenu-usar-dados">
+                  <HeaderCard
+                    iconDefault="agora-line-upload"
+                    iconHover="agora-solid-upload"
+                    title="Como publicar dados"
+                    description="Guia de publicação"
+                    href="/pages/faqs/publish"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+              <NavigationLink appearance="link">
+                <div data-group="submenu-usar-dados">
+                  <HeaderCard
+                    iconDefault="agora-line-refresh-ccw"
+                    iconHover="agora-solid-refresh-ccw"
+                    title="Como reutilizar dados"
+                    description="Guia de reutilização"
+                    href="/pages/faqs/reuse"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+              <NavigationLink appearance="link">
+                <div data-group="submenu-usar-dados">
+                  <HeaderCard
+                    iconDefault="agora-line-shield"
+                    iconHover="agora-solid-shield"
+                    title="Licenças"
+                    description="Licenças de dados abertos"
+                    href="/pages/faqs/licenses"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+
+              <NavigationLink appearance="link">
+                <div data-group="main">
+                  <HeaderCard
+                    iconDefault="agora-line-book-open"
+                    iconHover="agora-solid-book-open"
+                    title="Aprender"
+                    description="Cursos e Minicursos"
+                    href="/pages/learn"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+
               <NavigationLink appearance="link">
                 <div
                   data-group="main"
@@ -491,8 +575,8 @@ export const Header = () => {
                   className="cursor-pointer"
                 >
                   <HeaderCard
-                    iconDefault="agora-line-user-group"
-                    iconHover="agora-solid-user-group"
+                    iconDefault="agora-line-plane"
+                    iconHover="agora-solid-plane"
                     title="Desenvolvimento"
                     description="Portal e código"
                     href="#"
@@ -522,27 +606,53 @@ export const Header = () => {
               <NavigationLink appearance="link">
                 <div data-group="submenu-desenvolvimento">
                   <HeaderCard
-                    iconDefault="agora-line-plus-circle"
-                    iconHover="agora-solid-plus-circle"
-                    title="Documentação da API"
+                    iconDefault="agora-line-document"
+                    iconHover="agora-solid-document"
+                    title="Acesso via SPARQL"
+                    description="Consultar o catálogo via SPARQL"
+                    href="/pages/faqs/acesso-ao-catalogo-via-sparql"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+              <NavigationLink appearance="link">
+                <div data-group="submenu-desenvolvimento">
+                  <HeaderCard
+                    iconDefault="agora-line-book-open"
+                    iconHover="agora-solid-book-open"
+                    title="Tutorial API"
+                    description="Guia de utilização da API"
+                    href="/pages/faqs/api-tutorial"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+              <NavigationLink appearance="link">
+                <div data-group="submenu-desenvolvimento">
+                  <HeaderCard
+                    iconDefault="/Icons/reduce_icon.svg"
+                    iconHover="/Icons/reduce_icon.svg"
+                    title="Referência API"
                     description="Documentação técnica"
                     href="/pages/faqs/api-documentation"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
               </NavigationLink>
+              {/* hidden: publicações
               <NavigationLink appearance="link">
                 <div data-group="main">
                   <HeaderCard
-                    iconDefault="agora-line-edit"
-                    iconHover="agora-solid-edit"
-                    title="Aprender"
-                    description="Cursos e Minicursos"
-                    href="/pages/learn"
+                    iconDefault="agora-line-mega-phone"
+                    iconHover="agora-solid-mega-phone"
+                    title="Publicações"
+                    description="Novidades e eventos"
+                    href="/pages/publications"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
               </NavigationLink>
+              */}
             </NavigationRoot>
 
             <NavigationRoot label="Publicar">
@@ -554,9 +664,17 @@ export const Header = () => {
                   description: "Publicar dados",
                   href: "/pages/admin/datasets/new",
                 },
+                // Nova API (dataservices) oculta temporariamente — feature incompleta para PRD
+                // {
+                //   iconDefault: "/Icons/api.svg",
+                //   iconHover: "/Icons/api-solid.svg",
+                //   title: "Nova API",
+                //   description: "Serviços de dados",
+                //   href: "/pages/admin/dataservices/new",
+                // },
                 {
-                  iconDefault: "/Icons/bar_char_white.svg",
-                  iconHover: "/Icons/bar_char_white.svg",
+                  iconDefault: "agora-line-share",
+                  iconHover: "agora-solid-share",
                   title: "Nova Reutilização",
                   description: "Casos de uso",
                   href: "/pages/admin/reuses/new",

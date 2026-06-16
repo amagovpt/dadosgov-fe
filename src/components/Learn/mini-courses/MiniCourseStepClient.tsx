@@ -96,7 +96,7 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
         <Breadcrumb
           items={[
             { label: 'Home', url: '/' },
-            { label: "Conhecimento", url: "#" },
+            { label: "Recursos", url: "#" },
             { label: 'Aprender', url: '/pages/learn/' },
             { label: 'Minicursos', url: '/pages/learn/mini-courses/' },
             { label: title, url: '#' },

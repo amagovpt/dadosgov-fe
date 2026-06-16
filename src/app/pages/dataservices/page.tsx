@@ -1,5 +1,4 @@
 import { fetchDataservices } from "@/service/api/dataservices";
-import { fetchSiteInfo } from "@/service/api/system";
 import DataservicesClient from '@/components/dataservices/DataservicesClient';
 import { Metadata } from 'next';
 
@@ -22,16 +21,12 @@ export default async function DataservicesPage({
   if (resolved?.q) filters.q = String(resolved.q);
   if (resolved?.sort) filters.sort = String(resolved.sort);
 
-  const [initialData, siteInfo] = await Promise.all([
-    fetchDataservices(page, 20, filters),
-    fetchSiteInfo(),
-  ]);
+  const initialData = await fetchDataservices(page, 20, filters);
 
   return (
     <DataservicesClient
       initialData={initialData}
       currentPage={page}
-      siteMetrics={siteInfo.metrics}
       initialFilters={filters}
     />
   );
