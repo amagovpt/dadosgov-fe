@@ -55,3 +55,41 @@ export function buildSchemaItems(schemas: string[], loadedSchema = ""): Dropdown
 
   return [{ value: "", label: "Nenhum" }, ...list.map((item) => ({ value: item, label: item }))];
 }
+
+export function buildResourceTypeItems(types: { id: string; label: string }[]): DropdownItem[] {
+  return types.map((type) => ({ value: type.id, label: type.label }));
+}
+
+export function buildDatasetItems(datasets: { id: string; title: string }[]): DropdownItem[] {
+  return datasets.map((dataset) => ({ value: dataset.id, label: dataset.title }));
+}
+
+export function buildProducerItems(
+  userLabel: string,
+  organizations: { id: string; name: string }[],
+): DropdownItem[] {
+  return [
+    { value: "user", label: userLabel },
+    ...organizations.map((organization) => ({
+      value: organization.id,
+      label: organization.name,
+    })),
+  ];
+}
+
+export function buildFormatItems(currentFormat: string): DropdownItem[] {
+  const normalizedFormat = currentFormat.toLowerCase();
+  const allFormats =
+    normalizedFormat && !COMMUNITY_RESOURCE_FORMATS.includes(normalizedFormat)
+      ? [...COMMUNITY_RESOURCE_FORMATS, normalizedFormat]
+      : COMMUNITY_RESOURCE_FORMATS;
+
+  return allFormats.map((item) => ({ value: item, label: item }));
+}
+
+export function buildChecksumTypeItems(): DropdownItem[] {
+  return COMMUNITY_RESOURCE_CHECKSUM_TYPES.map((item) => ({
+    value: item,
+    label: item.toUpperCase(),
+  }));
+}

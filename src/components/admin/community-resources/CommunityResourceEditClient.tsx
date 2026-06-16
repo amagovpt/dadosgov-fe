@@ -2,16 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import {
-  Button,
-  InputText,
-  InputTextArea,
-  StatusCard,
-} from "@ama-pt/agora-design-system";
+import { StatusCard } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
-import AuxiliarList from "@/components/admin/AuxiliarList";
-import AppIcon from "@/components/Primitives/AppIcon";
 import {
   fetchCommunityResource,
   updateCommunityResource,
@@ -25,11 +17,27 @@ import { normalizeApiError } from "@/service/utils/normalizeApiError";
 import type { ResourceType } from "@/service/types/catalog";
 import type { CommunityResource } from "@/service/types/community-resource";
 import {
+  buildChecksumTypeItems,
+  buildFormatItems,
+  buildResourceTypeItems,
   buildSchemaItems,
-  COMMUNITY_RESOURCE_CHECKSUM_TYPES,
-  COMMUNITY_RESOURCE_FORMATS,
   renderDropdownSection,
 } from "@/components/admin/community-resources/dropdownOptions";
+import {
+  handleRequiredTextFieldChange,
+  handleSchemaUrlFieldChange,
+  handleTextFieldChange,
+} from "@/components/admin/community-resources/communityResourceFieldHandlers";
+import { buildValidationErrors } from "@/components/admin/community-resources/communityResourceValidation";
+import { getEditCommunityResourceAuxiliaryItems } from "@/components/admin/community-resources/communityResourceAuxiliaryContent";
+import ResourceLinkSection from "@/components/admin/community-resources/ResourceLinkSection";
+import ChecksumSection from "@/components/admin/community-resources/ChecksumSection";
+import EditDescriptionSection from "@/components/admin/community-resources/EditDescriptionSection";
+import EditSchemaSection from "@/components/admin/community-resources/EditSchemaSection";
+import DangerZoneSection from "@/components/admin/community-resources/DangerZoneSection";
+import CommunityResourceFormActions from "@/components/admin/community-resources/CommunityResourceFormActions";
+import FormStatusMessages from "@/components/admin/community-resources/FormStatusMessages";
+import CommunityResourceAuxiliarySidebar from "@/components/admin/community-resources/CommunityResourceAuxiliarySidebar";
 
 type CommunityResourceEditField =
   | "url"
@@ -156,15 +164,13 @@ export default function CommunityResourceEditClient() {
   }
 
   function getValidationErrors() {
-    const errors: Partial<Record<CommunityResourceEditField, boolean>> = {};
-
-    if (!title.trim()) errors.title = true;
-    if (!resourceUrl.trim()) errors.url = true;
-    if (!selectedTypeRef.current) errors.type = true;
-    if (!selectedFormatRef.current) errors.format = true;
-    if (showChecksum && !checksumValue.trim()) errors.checksumValue = true;
-
-    return errors;
+    return buildValidationErrors<CommunityResourceEditField>({
+      title: !title.trim(),
+      url: !resourceUrl.trim(),
+      type: !selectedTypeRef.current,
+      format: !selectedFormatRef.current,
+      checksumValue: showChecksum && !checksumValue.trim(),
+    });
   }
 
   function buildSchemaPayload() {
@@ -209,19 +215,11 @@ export default function CommunityResourceEditClient() {
   }
 
   function handleResourceUrlChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const nextValue = event.target.value;
-    setResourceUrl(nextValue);
-    if (nextValue.trim()) {
-      clearError("url");
-    }
+    handleRequiredTextFieldChange(event, setResourceUrl, clearError, "url");
   }
 
   function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const nextValue = event.target.value;
-    setTitle(nextValue);
-    if (nextValue.trim()) {
-      clearError("title");
-    }
+    handleRequiredTextFieldChange(event, setTitle, clearError, "title");
   }
 
   function handleChecksumValueChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -237,19 +235,15 @@ export default function CommunityResourceEditClient() {
   }
 
   function handleSchemaUrlChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const nextValue = event.target.value;
-    setSchemaUrl(nextValue);
-    if (nextValue) {
-      selectedSchemaRef.current = "";
-    }
+    handleSchemaUrlFieldChange(event, setSchemaUrl, selectedSchemaRef);
   }
 
   function handleDescriptionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    setDescription(event.target.value);
+    handleTextFieldChange(event, setDescription);
   }
 
   function handleMimeTypeChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setMimeType(event.target.value);
+    handleTextFieldChange(event, setMimeType);
   }
 
   function handleRemoveChecksum() {
@@ -258,6 +252,17 @@ export default function CommunityResourceEditClient() {
     setChecksumValue("");
     selectedChecksumTypeRef.current = "";
     clearError("checksumValue");
+  }
+
+  function handleShowChecksum() {
+    setShowChecksum(true);
+  }
+
+  function handleChecksumTypeChange(value: string) {
+    if (value !== checksumType) {
+      setChecksumType(value);
+      setChecksumValue("");
+    }
   }
 
   useEffect(() => {
@@ -319,28 +324,14 @@ export default function CommunityResourceEditClient() {
   };
 
   const typeOptions = useMemo(
-    () =>
-      renderDropdownSection(
-        "types",
-        resourceTypes.map((type) => ({ value: type.id, label: type.label })),
-        selectedType,
-      ),
+    () => renderDropdownSection("types", buildResourceTypeItems(resourceTypes), selectedType),
     [resourceTypes, selectedType],
   );
 
-  const formatOptions = useMemo(() => {
-    const currentFormat = format.toLowerCase();
-    const allFormats =
-      currentFormat && !COMMUNITY_RESOURCE_FORMATS.includes(currentFormat)
-        ? [...COMMUNITY_RESOURCE_FORMATS, currentFormat]
-        : COMMUNITY_RESOURCE_FORMATS;
-
-    return renderDropdownSection(
-      "formats",
-      allFormats.map((item) => ({ value: item, label: item })),
-      currentFormat,
-    );
-  }, [format]);
+  const formatOptions = useMemo(
+    () => renderDropdownSection("formats", buildFormatItems(format), format.toLowerCase()),
+    [format],
+  );
 
   const schemaOptions = useMemo(
     () => renderDropdownSection("schemas", buildSchemaItems(schemas, loadedSchema), loadedSchema),
@@ -348,119 +339,15 @@ export default function CommunityResourceEditClient() {
   );
 
   const checksumOptions = useMemo(
-    () =>
-      renderDropdownSection(
-        "checksum-types",
-        COMMUNITY_RESOURCE_CHECKSUM_TYPES.map((item) => ({
-          value: item,
-          label: item.toUpperCase(),
-        })),
-        checksumType,
-      ),
+    () => renderDropdownSection("checksum-types", buildChecksumTypeItems(), checksumType),
     [checksumType],
   );
 
-  const auxiliarItems = [
-    {
-      title: "Escolher o link correto",
-      hasError: hasError("url"),
-      content:
-        "É recomendável criar um link para o próprio arquivo em vez de uma página da web para permitir que o site o analise.",
-    },
-    {
-      title: "Soma de verificação",
-      content:
-        "O checksum permite ao utilizador verificar se os dados descarregados não foram corrompidos ou alterados.",
-    },
-    {
-      title: "Dê um nome ao arquivo",
-      hasError: hasError("title"),
-      content: (
-        <>
-          Recomenda-se a escolha de um título que informe claramente qualquer utilizador sobre o
-          conteúdo do arquivo. Algumas práticas a evitar:
-          <ul className="mt-8 list-disc pl-16">
-            <li>atribuir um título muito genérico (por exemplo, &quot;list.csv&quot;);</li>
-            <li>dar um título muito longo dificultaria a manipulação do arquivo;</li>
-            <li>
-              fornecer um título que contenha acentos ou caracteres especiais (problemas de
-              interoperabilidade de arquivos);
-            </li>
-            <li>
-              dar um título que seja demasiado técnico e derivado de nomenclaturas da indústria.
-            </li>
-          </ul>
-        </>
-      ),
-    },
-    {
-      title: "Publique os tipos de ficheiros corretos.",
-      hasError: hasError("type"),
-      content: (
-        <>
-          Pode escolher entre os seguintes tipos:
-          <ul className="mt-8 list-disc pl-16">
-            <li>Ficheiros principais</li>
-            <li>Documentação</li>
-            <li>Atualização</li>
-            <li>API</li>
-            <li>Código-fonte</li>
-            <li>Outro</li>
-          </ul>
-        </>
-      ),
-    },
-    {
-      title: "Adicionar documentação",
-      content: (
-        <>
-          A descrição de um ficheiro facilita a reutilização de dados. Inclui, entre outras coisas:
-          <ul className="mt-8 list-disc pl-16">
-            <li>uma descrição geral do conjunto de dados;</li>
-            <li>uma descrição do método de produção de dados;</li>
-            <li>uma descrição do modelo de dados;</li>
-            <li>uma descrição do esquema de dados;</li>
-            <li>uma descrição dos metadados;</li>
-            <li>uma descrição das principais alterações.</li>
-          </ul>
-        </>
-      ),
-    },
-    {
-      title: "Escolher o formato certo",
-      content: (
-        <>
-          Os formatos devem ser:
-          <ul className="mt-8 list-disc pl-16">
-            <li>
-              aberto: um formato aberto não adiciona especificações técnicas que restrinjam o uso
-              dos dados (por exemplo, o uso de software pago);
-            </li>
-            <li>
-              facilmente reutilizável: um formato facilmente reutilizável implica que qualquer
-              pessoa ou servidor pode reutilizar facilmente o conjunto de dados;
-            </li>
-            <li>
-              utilizável num sistema de processamento automatizado: um sistema de processamento
-              automatizado permite operações automáticas relacionadas ao processamento de dados (por
-              exemplo, um ficheiro CSV é facilmente utilizável por um sistema automatizado, ao
-              contrário de um ficheiro PDF).
-            </li>
-          </ul>
-        </>
-      ),
-    },
-    {
-      title: "Escolher um tipo de recurso",
-      content:
-        "Especifique o tipo de recurso correspondente ao formato do recurso remoto (por exemplo, application/pdf, text/csv). Se necessário, utilize uma ferramenta online para detetá-lo.",
-    },
-    {
-      title: "Selecione um esquema",
-      content:
-        "É possível identificar um esquema de dados existente ao visitar o site schema.data.gouv.fr, que contém uma lista de esquemas de dados existentes.",
-    },
-  ];
+  const auxiliarItems = getEditCommunityResourceAuxiliaryItems({
+    hasUrlError: hasError("url"),
+    hasTitleError: hasError("title"),
+    hasTypeError: hasError("type"),
+  });
 
   if (isLoading) {
     return (
@@ -495,17 +382,7 @@ export default function CommunityResourceEditClient() {
     >
       <div className="admin-page__body">
         <div className="admin-page__form-area">
-          {successMessage && (
-            <div className="mb-16">
-              <StatusCard variant="success" showIcon description={successMessage} />
-            </div>
-          )}
-
-          {apiError && (
-            <div className="mb-16">
-              <StatusCard variant="danger" showIcon description={apiError} />
-            </div>
-          )}
+          <FormStatusMessages successMessage={successMessage} errorMessage={apiError} />
 
           <form
             className="admin-page__form"
@@ -519,232 +396,78 @@ export default function CommunityResourceEditClient() {
               Os campos marcados com um asterisco ( * ) são obrigatórios.
             </p>
 
-            <h2 className="admin-page__section-title">Reutilização</h2>
+            <ResourceLinkSection
+              resourceUrl={resourceUrl}
+              hasUrlError={hasError("url")}
+              onResourceUrlChange={handleResourceUrlChange}
+            />
 
-            <div className="admin-page__fields-group">
-              <InputText
-                label="Link exato para o ficheiro *"
-                placeholder="Insira o link para o ficheiro"
-                id="resource-url"
-                value={resourceUrl}
-                onChange={handleResourceUrlChange}
-                hasError={hasError("url")}
-                hasFeedback={hasError("url")}
-                feedbackState="danger"
-                errorFeedbackText="Campo obrigatório"
-              />
-            </div>
+            <ChecksumSection
+              resourceId={resource.id}
+              saveCount={saveCount}
+              showChecksum={showChecksum}
+              checksumType={checksumType}
+              checksumValue={checksumValue}
+              checksumOptions={checksumOptions}
+              selectedChecksumTypeRef={selectedChecksumTypeRef}
+              hasChecksumValueError={hasError("checksumValue")}
+              onShowChecksum={handleShowChecksum}
+              onRemoveChecksum={handleRemoveChecksum}
+              onChecksumTypeChange={handleChecksumTypeChange}
+              onChecksumValueChange={handleChecksumValueChange}
+            />
 
-            <div className="flex flex-col items-start gap-12">
-              <h2 className="admin-page__section-title mb-0">Selo de verificação</h2>
-              {showChecksum ? (
-                <Button
-                  variant="danger"
-                  appearance="outline"
-                  hasIcon
-                  leadingIcon="agora-line-trash"
-                  leadingIconHover="agora-solid-trash"
-                  onClick={handleRemoveChecksum}
-                >
-                  Eliminar
-                </Button>
-              ) : (
-                <Button
-                  variant="primary"
-                  appearance="outline"
-                  hasIcon
-                  leadingIcon="agora-line-plus"
-                  leadingIconHover="agora-solid-plus"
-                  onClick={() => setShowChecksum(true)}
-                >
-                  Adicionar
-                </Button>
-              )}
-            </div>
+            <EditDescriptionSection
+              resourceId={resource.id}
+              saveCount={saveCount}
+              resourceTypesCount={resourceTypes.length}
+              title={title}
+              description={description}
+              format={format}
+              selectedType={selectedType}
+              mimeType={mimeType}
+              typeOptions={typeOptions}
+              formatOptions={formatOptions}
+              selectedTypeRef={selectedTypeRef}
+              selectedFormatRef={selectedFormatRef}
+              hasTitleError={hasError("title")}
+              hasTypeError={hasError("type")}
+              hasFormatError={hasError("format")}
+              onTitleChange={handleTitleChange}
+              onDescriptionChange={handleDescriptionChange}
+              onMimeTypeChange={handleMimeTypeChange}
+              onTypeChange={clearTypeError}
+              onFormatChange={clearFormatError}
+            />
 
-            {showChecksum && (
-              <div className="admin-page__fields-group">
-                <AdminSelectAdapter
-                  key={`checksum-${resource.id}-${saveCount}`}
-                  label="Tipo de soma de verificação"
-                  placeholder="SHA1"
-                  id="checksum-type"
-                  initialValue={checksumType}
-                  valueRef={selectedChecksumTypeRef}
-                  onValueChange={(value) => {
-                    if (value !== checksumType) {
-                      setChecksumType(value);
-                      setChecksumValue("");
-                    }
-                  }}
-                >
-                  {checksumOptions}
-                </AdminSelectAdapter>
+            <EditSchemaSection
+              resourceId={resource.id}
+              schemasCount={schemas.length}
+              loadedSchema={loadedSchema}
+              schemaUrl={schemaUrl}
+              schemaOptions={schemaOptions}
+              selectedSchemaRef={selectedSchemaRef}
+              onSchemaSelect={clearSchemaUrl}
+              onSchemaUrlChange={handleSchemaUrlChange}
+            />
 
-                <InputText
-                  label="Valor de checksum *"
-                  placeholder="Introduza o valor do hash"
-                  id="checksum-value"
-                  value={checksumValue}
-                  onChange={handleChecksumValueChange}
-                  hasError={hasError("checksumValue")}
-                  hasFeedback={hasError("checksumValue")}
-                  feedbackState="danger"
-                  errorFeedbackText="Campo obrigatório"
-                />
-              </div>
-            )}
+            <CommunityResourceFormActions
+              previousLabel="Anterior"
+              onPrevious={() => router.push("/pages/admin/system/community-resources")}
+              submitLabel="Guardar"
+              loadingSubmitLabel="A guardar..."
+              isSubmitting={isSubmitting}
+              previousIcon="agora-line-arrow-left-circle"
+              previousIconHover="agora-solid-arrow-left-circle"
+              submitIcon="agora-line-check-circle"
+              submitIconHover="agora-solid-check-circle"
+            />
 
-            <h2 className="admin-page__section-title">Descrição</h2>
-
-            <div className="admin-page__fields-group">
-              <InputText
-                label="Título *"
-                placeholder="Insira o título aqui"
-                id="resource-title"
-                value={title}
-                onChange={handleTitleChange}
-                hasError={hasError("title")}
-                hasFeedback={hasError("title")}
-                feedbackState="danger"
-                errorFeedbackText="Campo obrigatório"
-              />
-
-              <AdminSelectAdapter
-                key={`type-${resource.id}-${resourceTypes.length}`}
-                label="Tipo *"
-                placeholder="Ficheiros principais"
-                id="resource-type"
-                initialValue={selectedType}
-                valueRef={selectedTypeRef}
-                onValueChange={clearTypeError}
-                hasError={hasError("type")}
-                errorMessage="Campo obrigatório"
-                renderErrorBelow
-              >
-                {typeOptions}
-              </AdminSelectAdapter>
-
-              <InputTextArea
-                label="Descrição"
-                placeholder="Insira a descrição aqui"
-                id="resource-description"
-                rows={10}
-                value={description}
-                onChange={handleDescriptionChange}
-              />
-
-              <AdminSelectAdapter
-                key={`format-${resource.id}-${saveCount}`}
-                label="Formato *"
-                placeholder="Selecione o formato"
-                id="resource-format"
-                initialValue={format}
-                valueRef={selectedFormatRef}
-                onValueChange={clearFormatError}
-                hasError={hasError("format")}
-                errorMessage="Campo obrigatório"
-                renderErrorBelow
-              >
-                {formatOptions}
-              </AdminSelectAdapter>
-
-              <InputText
-                label="Tipo de recurso"
-                placeholder="application/pdf"
-                id="resource-mime"
-                value={mimeType}
-                onChange={handleMimeTypeChange}
-              />
-            </div>
-
-            <h2 className="admin-page__section-title">Esquema de dados</h2>
-
-            <div className="admin-page__fields-group">
-              <AdminSelectAdapter
-                key={`schema-${resource.id}-${schemas.length}`}
-                label="Plano"
-                placeholder="Procure um esquema referenciado em dados.gov.pt..."
-                id="resource-schema"
-                searchable
-                searchInputPlaceholder="Escreva para pesquisar..."
-                initialValue={loadedSchema}
-                valueRef={selectedSchemaRef}
-                onValueChange={clearSchemaUrl}
-              >
-                {schemaOptions}
-              </AdminSelectAdapter>
-
-              <div className="admin-page__divider-or">
-                <span className="admin-page__divider-or-text">ou</span>
-              </div>
-
-              <InputText
-                label="Adicione um link para o diagrama"
-                placeholder="Insira o link para o diagrama"
-                id="resource-schema-url"
-                value={schemaUrl}
-                onChange={handleSchemaUrlChange}
-              />
-            </div>
-
-            <div className="admin-page__actions flex gap-[18px]">
-              <Button
-                variant="primary"
-                appearance="outline"
-                hasIcon
-                leadingIcon="agora-line-arrow-left-circle"
-                leadingIconHover="agora-solid-arrow-left-circle"
-                onClick={() => router.push("/pages/admin/system/community-resources")}
-              >
-                Anterior
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                hasIcon
-                trailingIcon="agora-line-check-circle"
-                trailingIconHover="agora-solid-check-circle"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "A guardar..." : "Guardar"}
-              </Button>
-            </div>
-
-            <div className="dataset-edit-danger-actions">
-              <StatusCard
-                variant="danger"
-                description={
-                  <>
-                    <strong>Atenção esta ação é irreversível.</strong>
-                    <br />
-                    <Button
-                      appearance="link"
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-arrow-right-circle"
-                      trailingIconHover="agora-solid-arrow-right-circle"
-                      onClick={handleDelete}
-                      disabled={isSubmitting}
-                    >
-                      Eliminar o recurso comunitário
-                    </Button>
-                  </>
-                }
-              />
-            </div>
+            <DangerZoneSection isSubmitting={isSubmitting} onDelete={handleDelete} />
           </form>
         </div>
 
-        <aside className="admin-page__auxiliar">
-          <div className="admin-page__auxiliar-inner">
-            <div className="admin-page__auxiliar-header">
-              <AppIcon name="agora-line-question-mark" className="h-24 w-24" />
-              <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
-            </div>
-            <AuxiliarList items={auxiliarItems} />
-          </div>
-        </aside>
+        <CommunityResourceAuxiliarySidebar items={auxiliarItems} />
       </div>
     </AdminLayout>
   );

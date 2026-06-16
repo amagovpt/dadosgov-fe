@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
+import { StatusCard } from "@ama-pt/agora-design-system";
 import {
   createCommunityResource,
   uploadCommunityResourceFile,
@@ -11,21 +11,33 @@ import type { ResourceType } from "@/service/types/catalog";
 import type { CommunityResource } from "@/service/types/community-resource";
 import type { Dataset } from "@/service/types/dataset";
 import { useAuth } from "@/context/AuthContext";
-import AuxiliarList from "@/components/admin/AuxiliarList";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useAsyncSubmit } from "@/hooks/forms/useAsyncSubmit";
 import { normalizeApiError } from "@/service/utils/normalizeApiError";
 import {
+  buildDatasetItems,
+  buildProducerItems,
+  buildResourceTypeItems,
   buildSchemaItems,
   renderDropdownSection,
 } from "@/components/admin/community-resources/dropdownOptions";
+import {
+  handleRequiredTextFieldChange,
+  handleSchemaUrlFieldChange,
+  handleTextFieldChange,
+} from "@/components/admin/community-resources/communityResourceFieldHandlers";
+import { buildValidationErrors } from "@/components/admin/community-resources/communityResourceValidation";
+import { getCreateCommunityResourceAuxiliaryItems } from "@/components/admin/community-resources/communityResourceAuxiliaryContent";
 import CreatedResourceCard from "@/components/admin/community-resources/CreatedResourceCard";
 import ProducerSection from "@/components/admin/community-resources/ProducerSection";
 import FileOrLinkSection from "@/components/admin/community-resources/FileOrLinkSection";
 import ResourceDescriptionSection from "@/components/admin/community-resources/ResourceDescriptionSection";
 import SchemaSection from "@/components/admin/community-resources/SchemaSection";
 import DatasetSelectionSection from "@/components/admin/community-resources/DatasetSelectionSection";
+import CommunityResourceFormActions from "@/components/admin/community-resources/CommunityResourceFormActions";
+import FormStatusMessages from "@/components/admin/community-resources/FormStatusMessages";
+import CommunityResourceAuxiliarySidebar from "@/components/admin/community-resources/CommunityResourceAuxiliarySidebar";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -121,14 +133,12 @@ export default function CommunityResourceFormClient({
   }, [datasetId]);
 
   function getValidationErrors() {
-    const errors: Partial<Record<CommunityResourceCreateField, boolean>> = {};
-
-    if (!title.trim()) errors.title = true;
-    if (!file && !resourceUrl.trim()) errors.resourceUrl = true;
-    if (!selectedTypeRef.current) errors.type = true;
-    if (!selectedDatasetId) errors.dataset = true;
-
-    return errors;
+    return buildValidationErrors<CommunityResourceCreateField>({
+      title: !title.trim(),
+      resourceUrl: !file && !resourceUrl.trim(),
+      type: !selectedTypeRef.current,
+      dataset: !selectedDatasetId,
+    });
   }
 
   function getPublicPageUrl() {
@@ -167,27 +177,19 @@ export default function CommunityResourceFormClient({
   }
 
   function handleResourceUrlChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const nextValue = event.target.value;
-    setResourceUrl(nextValue);
-    if (nextValue.trim()) {
-      clearError("resourceUrl");
-    }
+    handleRequiredTextFieldChange(event, setResourceUrl, clearError, "resourceUrl");
   }
 
   function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const nextValue = event.target.value;
-    setTitle(nextValue);
-    if (nextValue.trim()) {
-      clearError("title");
-    }
+    handleRequiredTextFieldChange(event, setTitle, clearError, "title");
   }
 
   function handleSchemaUrlChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setSchemaUrl(event.target.value);
+    handleSchemaUrlFieldChange(event, setSchemaUrl);
   }
 
   function handleDescriptionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    setDescription(event.target.value);
+    handleTextFieldChange(event, setDescription);
   }
 
   function handleTypeChange() {
@@ -226,96 +228,29 @@ export default function CommunityResourceFormClient({
     });
   };
 
-  const auxiliarItems = [
-    {
-      title: "Escolher o link correto",
-      content:
-        "É recomendável criar um link para o próprio arquivo em vez de uma página da web para permitir que o site o analise.",
-      hasError: hasError("resourceUrl"),
-    },
-    {
-      title: "Dê um nome ao arquivo",
-      content: (
-        <>
-          Recomenda-se escolher um título que informe claramente qualquer usuário sobre o conteúdo
-          do arquivo. Algumas práticas a serem evitadas:
-          <ul className="mt-8 list-disc pl-16">
-            <li>atribuir um título muito genérico (por exemplo, &quot;list.csv&quot;);</li>
-            <li>Dar um título muito longo dificultaria a manipulação do arquivo;</li>
-            <li>
-              fornecer um título que contenha acentos ou caracteres especiais (problemas de
-              interoperabilidade de ficheiros);
-            </li>
-            <li>
-              Dar um título que seja demasiado técnico e derivado de nomenclaturas da indústria.
-            </li>
-          </ul>
-        </>
-      ),
-      hasError: hasError("title"),
-    },
-    {
-      title: "Publique os tipos de ficheiros corretos.",
-      content: (
-        <>
-          Você pode escolher entre os seguintes tipos:
-          <ul className="mt-8 list-disc pl-16">
-            <li>Ficheiros principais</li>
-            <li>Documentação</li>
-            <li>Atualizar</li>
-            <li>API</li>
-            <li>Código-fonte</li>
-            <li>Outro</li>
-          </ul>
-        </>
-      ),
-      hasError: hasError("type"),
-    },
-    {
-      title: "Adicionar documentação",
-      content: (
-        <>
-          A descrição de um arquivo facilita a reutilização de dados. Ela inclui, entre outras
-          coisas:
-          <ul className="mt-8 list-disc pl-16">
-            <li>uma descrição geral do conjunto de dados;</li>
-            <li>uma descrição do método de produção de dados;</li>
-            <li>uma descrição do modelo de dados;</li>
-            <li>uma descrição do esquema de dados;</li>
-            <li>uma descrição dos metadados;</li>
-            <li>Uma descrição das principais mudanças.</li>
-          </ul>
-        </>
-      ),
-    },
-    {
-      title: "Selecione um esquema",
-      content:
-        "É possível identificar um esquema de dados existente visitando o site schema.data.gouv.fr, que contém uma lista de esquemas de dados existentes.esquema.dados.gouv.fr",
-    },
-  ];
+  const auxiliarItems = getCreateCommunityResourceAuxiliaryItems({
+    hasResourceUrlError: hasError("resourceUrl"),
+    hasTitleError: hasError("title"),
+    hasTypeError: hasError("type"),
+  });
 
   const producerOptions = useMemo(
     () =>
-      renderDropdownSection("identity", [
-        {
-          value: "user",
-          label: user ? `${user.first_name} ${user.last_name}` : "Eu próprio",
-        },
-        ...(user?.organizations || []).map((organization) => ({
-          value: organization.id,
-          label: organization.name,
-        })),
-      ]),
+      renderDropdownSection(
+        "identity",
+        buildProducerItems(
+          user ? `${user.first_name} ${user.last_name}` : "Eu próprio",
+          (user?.organizations || []).map((organization) => ({
+            id: organization.id,
+            name: organization.name,
+          })),
+        ),
+      ),
     [user],
   );
 
   const typeOptions = useMemo(
-    () =>
-      renderDropdownSection(
-        "types",
-        resourceTypes.map((type) => ({ value: type.id, label: type.label })),
-      ),
+    () => renderDropdownSection("types", buildResourceTypeItems(resourceTypes)),
     [resourceTypes],
   );
 
@@ -325,11 +260,7 @@ export default function CommunityResourceFormClient({
   );
 
   const datasetOptions = useMemo(
-    () =>
-      renderDropdownSection(
-        "datasets",
-        myDatasets.map((item) => ({ value: item.id, label: item.title })),
-      ),
+    () => renderDropdownSection("datasets", buildDatasetItems(myDatasets)),
     [myDatasets],
   );
 
@@ -367,11 +298,7 @@ export default function CommunityResourceFormClient({
                 }
               />
 
-              {apiError && (
-                <div className="mb-16 mt-32">
-                  <StatusCard variant="danger" showIcon description={apiError} />
-                </div>
-              )}
+              <FormStatusMessages errorMessage={apiError} errorClassName="mb-16 mt-32" />
 
               <form
                 className="admin-page__form"
@@ -428,28 +355,18 @@ export default function CommunityResourceFormClient({
                   onRemoveSelectedDataset={handleRemoveSelectedDataset}
                 />
 
-                <div className="admin-page__actions flex justify-between gap-[18px]">
-                  <Button
-                    variant="primary"
-                    appearance="outline"
-                    hasIcon
-                    leadingIcon="agora-line-arrow-left-circle"
-                    leadingIconHover="agora-solid-arrow-left-circle"
-                    onClick={onPreviousStep}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-arrow-right-circle"
-                    trailingIconHover="agora-solid-arrow-right-circle"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "A criar..." : "Seguinte"}
-                  </Button>
-                </div>
+                <CommunityResourceFormActions
+                  previousLabel="Anterior"
+                  onPrevious={onPreviousStep}
+                  submitLabel="Seguinte"
+                  loadingSubmitLabel="A criar..."
+                  isSubmitting={isSubmitting}
+                  previousIcon="agora-line-arrow-left-circle"
+                  previousIconHover="agora-solid-arrow-left-circle"
+                  submitIcon="agora-line-arrow-right-circle"
+                  submitIconHover="agora-solid-arrow-right-circle"
+                  className="admin-page__actions flex justify-between gap-[18px]"
+                />
               </form>
             </>
           )}
@@ -470,25 +387,13 @@ export default function CommunityResourceFormClient({
 
               {createdResource && <CreatedResourceCard resource={createdResource} />}
 
-              {apiError && (
-                <div className="mb-16 mt-32">
-                  <StatusCard variant="danger" showIcon description={apiError} />
-                </div>
-              )}
+              <FormStatusMessages errorMessage={apiError} errorClassName="mb-16 mt-32" />
             </>
           )}
         </div>
 
         {currentStep === 1 && (
-          <aside className="admin-page__auxiliar">
-            <div className="admin-page__auxiliar-inner">
-              <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="h-24 w-24" />
-                <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
-              </div>
-              <AuxiliarList items={auxiliarItems} />
-            </div>
-          </aside>
+          <CommunityResourceAuxiliarySidebar items={auxiliarItems} />
         )}
       </div>
     </>
