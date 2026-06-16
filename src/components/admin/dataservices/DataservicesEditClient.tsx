@@ -36,11 +36,11 @@ export default function DataservicesEditClient() {
   const [accessType, setAccessType] = useState("open");
 
   useEffect(() => {
-    if (!idOrSlug) {
-      setIsLoading(false);
-      return;
-    }
     async function load() {
+      if (!idOrSlug) {
+        setIsLoading(false);
+        return;
+      }
       try {
         const d = await fetchDataservice(idOrSlug);
         setDataservice(d);
