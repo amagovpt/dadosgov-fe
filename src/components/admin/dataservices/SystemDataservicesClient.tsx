@@ -1,37 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  CardNoResults,
-  Icon,
-  InputSearchBar,
-  Table,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@ama-pt/agora-design-system";
-import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
-import AdminLayout from "@/components/Layout/AdminLayout";
-import { formatDateToDMY } from "@/utils/formatDate";
-import TextLink from "@/components/Primitives/TextLink";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import { filterByStatus } from "@/utils/filterByStatus";
-import ResultsCount from "../ResultsCount";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
 import StatusFilterSelect from "../StatusFilterSelect";
-import TableActionsCell from "../TableActionsCell";
-
-type SortOrder = "none" | "ascending" | "descending";
-type DataserviceSortField = "title" | "created_at" | "last_modified";
-
-const SORT_FIELD_MAP: Record<DataserviceSortField, string> = {
-  title: "title",
-  created_at: "created",
-  last_modified: "last_modified",
-};
+import {
+  DataserviceSortField,
+  createDataserviceColumns,
+  dataserviceSortFieldMap,
+} from "./dataservicesListConfig";
 
 export default function SystemDataservicesClient() {
   const [apis, setApis] = useState<Dataservice[]>([]);
@@ -43,22 +27,23 @@ export default function SystemDataservicesClient() {
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<DataserviceSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const sortParam = useMemo(() => {
-    if (!sortField || sortOrder === "none") return undefined;
-    const apiField = SORT_FIELD_MAP[sortField];
-    return `${sortOrder === "descending" ? "-" : ""}${apiField}`;
-  }, [sortField, sortOrder]);
+  const sortParam = useMemo(
+    () => buildApiSortParam(sortField, sortOrder, dataserviceSortFieldMap),
+    [sortField, sortOrder]
+  );
+  const columns = useMemo(
+    () => createDataserviceColumns({ ownerMetaStyle: "by" }),
+    []
+  );
 
-  const handleSort = (field: DataserviceSortField) => (newOrder: SortOrder) => {
-    setSortField(newOrder === "none" ? null : field);
-    setSortOrder(newOrder);
-    setCurrentPage(1);
-  };
-
-  const getSortOrder = (field: DataserviceSortField): SortOrder =>
-    sortField === field ? sortOrder : "none";
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -80,123 +65,43 @@ export default function SystemDataservicesClient() {
     loadData();
   }, [loadData]);
 
-  const handleSearch = (value: string) => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
-      setSearchQuery(value);
-      setCurrentPage(1);
-    }, 400);
-  };
+  const handleSearch = useDebouncedSearch((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
 
   const filteredApis = useMemo(() => filterByStatus(apis, statusFilter), [apis, statusFilter]);
+
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
         { label: "Sistema", url: "#" },
         { label: "API", url: "/pages/admin/system/dataservices" },
       ]}
       title="API"
-    >
-
-      <ResultsCount count={totalItems} isLoading={isLoading} />
-
-      <div className="mb-24 flex items-end gap-16">
-        <div className="admin-search-wrapper">
-          <InputSearchBar
-            hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome da API"
-            aria-label="Pesquisar APIs"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleSearch(e.target.value);
-            }}
-          />
-        </div>
+      isLoading={isLoading}
+      count={totalItems}
+      hasItems={filteredApis.length > 0}
+      currentPage={currentPage}
+      pageSize={pageSize}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
+      search={{
+        placeholder: "Pesquise o nome da API",
+        ariaLabel: "Pesquisar APIs",
+        onChange: handleSearch,
+      }}
+      filters={
         <StatusFilterSelect
           value={statusFilter}
-          onChange={(v) => {
-            setStatusFilter(v);
+          onChange={(value) => {
+            setStatusFilter(value);
             setCurrentPage(1);
           }}
         />
-      </div>
-
-      {isLoading ? (
-        <p className="text-sm text-neutral-700">A carregar...</p>
-      ) : filteredApis.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            totalItems,
-            currentPage,
-            setCurrentPage,
-            setPageSize
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell
-                sortType="numeric"
-                sortOrder={getSortOrder("title")}
-                onSortChange={handleSort("title")}
-              >
-                Título da API
-              </TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("created_at")}
-                onSortChange={handleSort("created_at")}
-              >
-                Criado em
-              </TableHeaderCell>
-              <TableHeaderCell
-                sortType="date"
-                sortOrder={getSortOrder("last_modified")}
-                onSortChange={handleSort("last_modified")}
-              >
-                Modificado em
-              </TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredApis.map((api) => (
-              <TableRow key={api.id}>
-                <TableCell headerLabel="Título">
-                  <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
-                </TableCell>
-                <TableCell headerLabel="Estado">
-                  <ResourceStatusBadge item={api} />
-                </TableCell>
-                <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
-                <TableCell headerLabel="Modificado em">
-                  {formatDateToDMY(api.last_modified)}
-                  {api.owner && (
-                    <>
-                      <br />
-                      <span className="text-sm text-neutral-500">
-                        por {api.owner.first_name} {api.owner.last_name}
-                      </span>
-                    </>
-                  )}
-                </TableCell>
-                <TableCell headerLabel="Ações">
-                  <TableActionsCell
-                    viewAction={{
-                      href: `/pages/dataservices/${api.slug}`,
-                    }}
-                    editAction={{
-                      href: `/pages/admin/dataservices/edit?slug=${api.slug}`,
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
+      }
+      emptyState={
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-code" className="icon-xl h-12 w-12 text-primary-500" />}
@@ -204,7 +109,16 @@ export default function SystemDataservicesClient() {
           description="Nenhuma API encontrada."
           hasAnchor={false}
         />
-      )}
-    </AdminLayout>
+      }
+    >
+      <AdminListTable
+        items={filteredApis}
+        columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+        getRowKey={(api) => api.id}
+      />
+    </AdminListPage>
   );
 }
+
