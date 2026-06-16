@@ -10,11 +10,15 @@ export type SimpleSiteMap = {
 const normalizeId = (href?: string) => (href ?? "").replace(/^#/, "");
 
 export default function SimpleSiteMap(props: SimpleSiteMap) {
-    const [activeId, setActiveId] = useState<string>(() =>
-        typeof window !== "undefined" ? normalizeId(window.location.hash) : ""
-    );
+    const [activeId, setActiveId] = useState<string>("");
 
     const ids = props.anchor.map((anchor) => normalizeId(anchor.href)).filter(Boolean);
+
+    // after mount, sync with the current URL hash (avoids SSR/client mismatch)
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setActiveId(normalizeId(window.location.hash));
+    }, []);
 
     useEffect(() => {
         const elements = ids
@@ -52,7 +56,7 @@ export default function SimpleSiteMap(props: SimpleSiteMap) {
             {props.title && (
                 <span className="text-l-bold">{props.title}</span>
             )}
-            <div className=" flex flex-col gap-16 px-16">
+            <div className=" flex flex-col">
                 {props.anchor.map((anchor, index) => {
                     const isActive = normalizeId(anchor.href) === activeId;
                     return (
@@ -60,7 +64,7 @@ export default function SimpleSiteMap(props: SimpleSiteMap) {
                             key={index}
                             {...anchor}
                             aria-current={isActive ? "page" : undefined}
-                            className={`!justify-start [&_.children-wrapper]:!text-m-bold [&_.children-wrapper]:xl:!text-nowrap${isActive ? " [&_.children-wrapper]:!text-primary-600" : ""}`}
+                            className={`!justify-start !px-16 !py-16 [&_.children-wrapper]:!text-m-bold ${isActive ? " [&_.children-wrapper]:!text-primary-600 bg-primary-100 border-l-4 border-l-primary-600" : ""}`}
                             variant='neutral'
                             appearance='link'
                         />
