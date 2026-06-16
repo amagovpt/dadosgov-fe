@@ -165,7 +165,7 @@ export interface OrganizationFilters {
   organization?: string | string[];
 }
 
-export type FollowableEntityType = "datasets" | "organizations" | "reuses";
+export type FollowableEntityType = "datasets" | "dataservices" | "organizations" | "reuses";
 
 export interface Follow {
   id: string;

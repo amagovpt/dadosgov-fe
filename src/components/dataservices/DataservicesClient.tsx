@@ -141,7 +141,7 @@ export default function DataservicesClient({
               {dataservices.length > 0 ? (
                 dataservices.map((ds) => {
                   const timeAgo = formatDateToTimeAgo(ds.last_modified);
-                  const dsUrl = `/pages/dataservices/preview?title=${encodeURIComponent(ds.title)}&description=${encodeURIComponent(ds.description || "")}`;
+                  const dsUrl = `/pages/dataservices/${ds.slug}`;
 
                   return (
                     <Link
