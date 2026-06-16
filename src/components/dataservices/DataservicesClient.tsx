@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import {
-  InputSearchBar,
   Icon,
   CardNoResults,
   Button,
@@ -15,87 +13,37 @@ import {
 import { twJoin } from "tailwind-merge";
 import { Pagination } from "@/components/Pagination";
 import { DataservicesFilters } from "@/components/dataservices/DataservicesFilters";
+import SearchFilter from "@/components/Shared/SearchFilter";
+import PublishDropdown from "@/components/admin/PublishDropdown";
 import { Dataservice } from "@/service/types/dataservice";
 import { APIResponse } from "@/service/types/shared";
 import HeroGeneral from "@/components/HeroGeneral";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";
-
-const SORT_OPTIONS: Record<string, string> = {
-  relevancia: "",
-  recentes: "-created_at",
-};
-
-const DATASERVICES_SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  recentes: "Mais recentes",
-};
+import { useDataservicesListing } from "@/hooks/useDataservicesListing";
+import { DATASERVICE_SORT_LABELS } from "@/utils/dataservicesListingQuery";
 
 interface DataservicesClientProps {
   initialData: APIResponse<Dataservice>;
   currentPage: number;
-  initialFilters?: { q?: string; sort?: string };
 }
 
 export default function DataservicesClient({
   initialData,
   currentPage,
-  initialFilters,
 }: DataservicesClientProps) {
-  const router = useRouter();
-  const { data: dataservices, total, page_size } = initialData;
-  const [searchQuery, setSearchQuery] = useState(initialFilters?.q || "");
   const [filtersOpen, setFiltersOpen] = useState(false);
-
-  const currentQuery = initialFilters?.q || "";
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const buildUrl = useCallback(
-    (overrides: { q?: string | null; sort?: string | null; page?: number } = {}) => {
-      const params = new URLSearchParams();
-      const q = overrides.q !== undefined ? overrides.q : initialFilters?.q;
-      const sort = overrides.sort !== undefined ? overrides.sort : initialFilters?.sort;
-      const page = overrides.page ?? currentPage;
-
-      if (q) params.set("q", q);
-      if (sort) params.set("sort", sort);
-      if (page > 1) params.set("page", String(page));
-
-      const qs = params.toString();
-      return `/pages/dataservices${qs ? `?${qs}` : ""}`;
-    },
-    [initialFilters, currentPage]
-  );
-
-  useEffect(() => {
-    if (searchQuery === currentQuery) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      router.push(buildUrl({ q: searchQuery.trim() || null, page: 1 }));
-    }, 200);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchQuery, currentQuery, router, buildUrl]);
-
-  const handleSearch = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    router.push(buildUrl({ q: searchQuery.trim() || null, page: 1 }));
-  }, [router, buildUrl, searchQuery]);
-
-  const handleSortChange = useCallback(
-    (value: string) => {
-      router.push(buildUrl({ sort: SORT_OPTIONS[value] || null, page: 1 }));
-    },
-    [router, buildUrl]
-  );
-
-  const sortDefault = (() => {
-    const reverseMap: Record<string, string> = {
-      "-created_at": "recentes",
-    };
-    return reverseMap[initialFilters?.sort || ""] || "relevancia";
-  })();
+  const {
+    activePage,
+    buildUrl,
+    handleSearch,
+    handleSortChange,
+    listData,
+    searchQuery,
+    setSearchQuery,
+    sortDefault,
+  } = useDataservicesListing({ initialData, currentPage });
+  const { data: dataservices, total, page_size } = listData;
 
   return (
     <main className="w-full flex flex-col justify-center items-center bg-primary-50 gap-32">
@@ -113,25 +61,18 @@ export default function DataservicesClient({
           </p>
         }
       >
-        <InputSearchBar
-          label="O que procura nas APIs?"
-          placeholder="Pesquisar APIs..."
-          id="dataservices-search"
-          hasVoiceActionButton={false}
-          voiceActionAltText="Pesquisar por voz"
-          searchActionAltText="Pesquisar"
-          darkMode={true}
-          value={searchQuery}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-          onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === "Enter") handleSearch();
-          }}
-          onSearchActivate={() => handleSearch()}
-        />
-        <div className="mt-8 text-s-regular text-neutral-200">
-          Exemplos: &quot;geolocalização&quot;, &quot;transportes&quot;, &quot;saúde&quot;
-        </div>
+        <PublishDropdown darkMode={true} outline={false} />
       </HeroGeneral>
+
+      {/* Search Filter */}
+      <SearchFilter
+        id="dataservices-search"
+        placeholder="Pesquisar APIs..."
+        value={searchQuery}
+        onChange={setSearchQuery}
+        onSearch={handleSearch}
+        examplesText='Exemplos: "geolocalização", "transportes", "saúde"'
+      />
 
       {/* Main Content */}
       <div className="container flex flex-col gap-24 justify-center items-center py-32">
@@ -170,7 +111,7 @@ export default function DataservicesClient({
                 }
               }}
             >
-              {Object.entries(DATASERVICES_SORT_LABELS).map(([key, label]) => (
+              {Object.entries(DATASERVICE_SORT_LABELS).map(([key, label]) => (
                 <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
                   {label}
                 </Toggle>
@@ -309,7 +250,7 @@ export default function DataservicesClient({
         {/* Pagination */}
         <div className="w-1/2 flex justify-center">
           <Pagination
-            currentPage={currentPage}
+            currentPage={activePage}
             totalItems={total}
             pageSize={page_size}
             baseUrl={buildUrl()}

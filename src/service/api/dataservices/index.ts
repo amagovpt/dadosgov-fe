@@ -43,10 +43,20 @@ export async function fetchMyDataservices(
 /**
  * Fetch all dataservices (paginated, with optional filters)
  */
+export interface DataserviceListFilters {
+  q?: string;
+  sort?: string;
+  tag?: string | string[];
+  organization?: string | string[];
+  access_type?: string;
+  organization_badge?: string;
+  modified_since?: string;
+}
+
 export async function fetchDataservices(
   page: number = 1,
   pageSize: number = 20,
-  filters?: { q?: string; sort?: string }
+  filters?: DataserviceListFilters
 ): Promise<APIResponse<Dataservice>> {
   try {
     const params = new URLSearchParams();
@@ -54,6 +64,17 @@ export async function fetchDataservices(
     params.set("page_size", String(pageSize));
     if (filters?.q) params.set("q", filters.q);
     if (filters?.sort) params.set("sort", filters.sort);
+    if (filters?.access_type) params.set("access_type", filters.access_type);
+    if (filters?.organization_badge) params.set("organization_badge", filters.organization_badge);
+    if (filters?.modified_since) params.set("modified_since", filters.modified_since);
+    // Multi-value filters
+    for (const key of ["tag", "organization"] as const) {
+      const value = filters?.[key];
+      if (!value) continue;
+      for (const item of Array.isArray(value) ? value : [value]) {
+        if (item) params.append(key, item);
+      }
+    }
 
     const res = await fetch(
       `${API_BASE_URL}/dataservices/?${params.toString()}`,
