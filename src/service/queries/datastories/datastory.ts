@@ -3,6 +3,7 @@ import apolloClient from "@/service/utils/apollo-client";
 import { Datastory } from "@/service/types/datastories/datastory";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
+import { notFound } from "next/navigation";
 
 export async function getDatastoryMetadata(
   slug: string,
@@ -231,8 +232,10 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
 
   const datastory = data.queryDataStoriesContents[0]?.data;
 
+  console.log("datastory", datastory);
+
   if (!datastory) {
-    return {} as Datastory;
+    return notFound();
   }
 
   return flattenData(datastory) as Datastory;
