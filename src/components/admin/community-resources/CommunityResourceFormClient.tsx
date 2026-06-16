@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Button,
@@ -15,7 +14,10 @@ import {
   CardLinks,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { createCommunityResource, uploadCommunityResourceFile } from "@/service/api/community-resources";
+import {
+  createCommunityResource,
+  uploadCommunityResourceFile,
+} from "@/service/api/community-resources";
 import { fetchDataset, fetchMyDatasets, fetchResourceTypes } from "@/service/api/datasets";
 import type { ResourceType } from "@/service/types/catalog";
 import type { CommunityResource } from "@/service/types/community-resource";
@@ -24,12 +26,12 @@ import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";
 import AuxiliarList from "@/components/admin/AuxiliarList";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
 import { formatMetricValue } from "@/utils/formatNumber";
-import {
-  POISONED_FILE_WARNING,
-  translateUploadError,
-} from "@/lib/security/translateUploadError";
+import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
+import { useAsyncSubmit } from "@/hooks/forms/useAsyncSubmit";
+import { normalizeApiError } from "@/service/utils/normalizeApiError";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -39,6 +41,8 @@ interface CommunityResourceFormClientProps {
   onPublicPageReady?: (url: string) => void;
 }
 
+type CommunityResourceCreateField = "title" | "resourceUrl" | "type" | "dataset";
+
 export default function CommunityResourceFormClient({
   datasetId,
   currentStep,
@@ -46,10 +50,8 @@ export default function CommunityResourceFormClient({
   onPreviousStep,
   onPublicPageReady,
 }: CommunityResourceFormClientProps) {
-  const router = useRouter();
   const { user } = useAuth();
 
-  // Form state
   const [title, setTitle] = useState("");
   const [resourceUrl, setResourceUrl] = useState("");
   const [description, setDescription] = useState("");
@@ -59,18 +61,34 @@ export default function CommunityResourceFormClient({
   const [schemaUrl, setSchemaUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [apiError, setApiError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdResource, setCreatedResource] = useState<CommunityResource | null>(null);
 
-  // Dataset selection (when datasetId is not provided via URL)
   const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
   const [selectedDatasetId, setSelectedDatasetId] = useState(datasetId);
 
-  // Data from API
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+
+  const {
+    hasError,
+    setErrors,
+    clearError,
+    setError,
+    resetErrors,
+  } = useFormErrors<CommunityResourceCreateField>();
+
+  const { isSubmitting, run } = useAsyncSubmit({
+    clearError: () => setApiError(null),
+    onError: (error) => {
+      const normalized = normalizeApiError(error, "Erro ao criar recurso comunitário.");
+      if (normalized.status === 401) {
+        setApiError("Sessão expirada. Faça login novamente.");
+        return;
+      }
+      setApiError(normalized.message || "Erro ao criar recurso comunitário.");
+    },
+  });
 
   useEffect(() => {
     if (selectedDatasetId) {
@@ -80,41 +98,35 @@ export default function CommunityResourceFormClient({
     } else {
       setDataset(null);
     }
+
     fetchResourceTypes()
       .then(setResourceTypes)
       .catch(() => console.error("Error loading resource types"));
+
     if (!datasetId) {
       fetchMyDatasets(1, 50)
-        .then((res) => setMyDatasets(res.data || []))
+        .then((response) => setMyDatasets(response.data || []))
         .catch(() => console.error("Error loading datasets"));
     }
   }, [datasetId, selectedDatasetId]);
 
-  const clearError = (key: string) => {
-    setFormErrors((prev) => {
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
-  };
-
   const handleStep1Next = async () => {
-    const errors: Record<string, boolean> = {};
+    const errors: Partial<Record<CommunityResourceCreateField, boolean>> = {};
+
     if (!title.trim()) errors.title = true;
     if (!file && !resourceUrl.trim()) errors.resourceUrl = true;
     if (!selectedTypeRef.current) errors.type = true;
-    if (!selectedDatasetId) {
-      setFormErrors((prev) => ({ ...prev, dataset: true }));
-      setApiError("Selecione um conjunto de dados antes de continuar.");
-      return;
-    }
+    if (!selectedDatasetId) errors.dataset = true;
+
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+      setErrors(errors);
+      if (errors.dataset) {
+        setApiError("Selecione um conjunto de dados antes de continuar.");
+      }
       return;
     }
-    setFormErrors({});
-    setApiError(null);
-    setIsSubmitting(true);
+
+    resetErrors();
 
     const finalUrl = file
       ? "https://example.com/placeholder"
@@ -122,7 +134,7 @@ export default function CommunityResourceFormClient({
         ? resourceUrl.trim()
         : `https://${resourceUrl.trim()}`;
 
-    try {
+    await run(async () => {
       const resource = await createCommunityResource({
         title: title.trim(),
         url: finalUrl,
@@ -140,32 +152,10 @@ export default function CommunityResourceFormClient({
       }
 
       setCreatedResource(resource);
-      const url = dataset
-        ? `/pages/datasets/${dataset.slug}`
-        : "/pages/admin/me/community-resources";
-      onPublicPageReady?.(url);
+      const publicUrl = dataset ? `/pages/datasets/${dataset.slug}` : "/pages/admin/me/community-resources";
+      onPublicPageReady?.(publicUrl);
       onNextStep();
-    } catch (err: unknown) {
-      const error = err as { status?: number; data?: Record<string, unknown> };
-      console.error("Error creating community resource:", JSON.stringify(err), error?.status);
-      if (error?.status === 401) {
-        setApiError("Sessão expirada. Faça login novamente.");
-      } else {
-        const backendMessage =
-          error?.data && typeof error.data.message === "string"
-            ? error.data.message
-            : error?.data && Object.keys(error.data).length > 0
-              ? JSON.stringify(error.data)
-              : err instanceof Error
-                ? err.message
-                : "Erro desconhecido";
-        setApiError(
-          `Erro ao criar recurso comunitário: ${translateUploadError(backendMessage)}`,
-        );
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   const auxiliarItems = [
@@ -173,7 +163,7 @@ export default function CommunityResourceFormClient({
       title: "Escolher o link correto",
       content:
         "É recomendável criar um link para o próprio arquivo em vez de uma página da web para permitir que o site o analise.",
-      hasError: !!formErrors.resourceUrl,
+      hasError: hasError("resourceUrl"),
     },
     {
       title: "Dê um nome ao arquivo",
@@ -194,7 +184,7 @@ export default function CommunityResourceFormClient({
           </ul>
         </>
       ),
-      hasError: !!formErrors.title,
+      hasError: hasError("title"),
     },
     {
       title: "Publique os tipos de ficheiros corretos.",
@@ -211,7 +201,7 @@ export default function CommunityResourceFormClient({
           </ul>
         </>
       ),
-      hasError: !!formErrors.type,
+      hasError: hasError("type"),
     },
     {
       title: "Adicionar documentação",
@@ -244,28 +234,28 @@ export default function CommunityResourceFormClient({
           {user ? `${user.first_name} ${user.last_name}` : "Eu próprio"}
         </DropdownOption>
         <>
-          {(user?.organizations || []).map((org) => (
-            <DropdownOption key={org.id} value={org.id}>
-              {org.name}
+          {(user?.organizations || []).map((organization) => (
+            <DropdownOption key={organization.id} value={organization.id}>
+              {organization.name}
             </DropdownOption>
           ))}
         </>
       </DropdownSection>
     ),
-    [user]
+    [user],
   );
 
   const typeOptions = useMemo(
     () => (
       <DropdownSection name="types">
-        {resourceTypes.map((t) => (
-          <DropdownOption key={t.id} value={t.id}>
-            {t.label}
+        {resourceTypes.map((type) => (
+          <DropdownOption key={type.id} value={type.id}>
+            {type.label}
           </DropdownOption>
         ))}
       </DropdownSection>
     ),
-    [resourceTypes]
+    [resourceTypes],
   );
 
   const schemaOptions = useMemo(
@@ -274,15 +264,13 @@ export default function CommunityResourceFormClient({
         <DropdownOption value="">Nenhum</DropdownOption>
       </DropdownSection>
     ),
-    []
+    [],
   );
 
   return (
     <>
       <div className="admin-page__body">
-        {/* Left: Form */}
         <div className="admin-page__form-area">
-          {/* Step 1 */}
           {currentStep === 1 && (
             <>
               <StatusCard
@@ -305,21 +293,28 @@ export default function CommunityResourceFormClient({
                 </div>
               )}
 
-              <form className="admin-page__form">
+              <form
+                className="admin-page__form"
+                noValidate
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void handleStep1Next();
+                }}
+              >
                 <p className="pt-32 text-base leading-7 text-neutral-900">
                   Os campos marcados com um asterisco ( * ) são obrigatórios.
                 </p>
 
                 <h2 className="admin-page__section-title">Produtor</h2>
 
-                <IsolatedSelect
+                <AdminSelectAdapter
                   label="Verifique a identidade que deseja usar na publicação."
                   placeholder="Para pesquisar..."
                   id="producer-identity"
-                  onChangeRef={selectedProducerRef}
+                  valueRef={selectedProducerRef}
                 >
                   {producerOptions}
-                </IsolatedSelect>
+                </AdminSelectAdapter>
 
                 <div className="admin-page__org-card">
                   <p className="admin-page__org-card-title">Não pertence a nenhuma organização.</p>
@@ -333,7 +328,6 @@ export default function CommunityResourceFormClient({
                   </a>
                 </div>
 
-                {/* Arquivo ou Link */}
                 <h2 className="admin-page__section-title">Ficheiro ou link</h2>
 
                 <div className="admin-page__fields-group">
@@ -354,8 +348,8 @@ export default function CommunityResourceFormClient({
                       hasFeedback={!!fileError}
                       feedbackState="danger"
                       feedbackText={fileError ?? undefined}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const files = e.target.files;
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                        const files = event.target.files;
                         const selected = files && files.length > 0 ? files[0] : null;
                         if (selected && selected.size > 440401920) {
                           setFileError("O ficheiro excede o tamanho máximo de 420 MB.");
@@ -379,18 +373,17 @@ export default function CommunityResourceFormClient({
                     placeholder="https://..."
                     id="resource-url"
                     value={resourceUrl}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setResourceUrl(e.target.value);
-                      if (e.target.value.trim()) clearError("resourceUrl");
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      setResourceUrl(event.target.value);
+                      if (event.target.value.trim()) clearError("resourceUrl");
                     }}
-                    hasError={!!formErrors.resourceUrl}
-                    hasFeedback={!!formErrors.resourceUrl}
+                    hasError={hasError("resourceUrl")}
+                    hasFeedback={hasError("resourceUrl")}
                     feedbackState="danger"
                     errorFeedbackText="Forneça um ficheiro ou um link."
                   />
                 </div>
 
-                {/* Descrição */}
                 <h2 className="admin-page__section-title">Descrição</h2>
 
                 <div className="admin-page__fields-group">
@@ -399,26 +392,27 @@ export default function CommunityResourceFormClient({
                     placeholder="Insira o título aqui"
                     id="resource-title"
                     value={title}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setTitle(e.target.value);
-                      if (e.target.value.trim()) clearError("title");
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      setTitle(event.target.value);
+                      if (event.target.value.trim()) clearError("title");
                     }}
-                    hasError={!!formErrors.title}
-                    hasFeedback={!!formErrors.title}
+                    hasError={hasError("title")}
+                    hasFeedback={hasError("title")}
                     feedbackState="danger"
                     errorFeedbackText="Campo obrigatório"
                   />
 
-                  <IsolatedSelect
+                  <AdminSelectAdapter
                     label="Tipo *"
                     placeholder="Ficheiros principais"
                     id="resource-type"
-                    onChangeRef={selectedTypeRef}
-                    hasError={!!formErrors.type}
-                    errorFeedbackText="Campo obrigatório"
+                    valueRef={selectedTypeRef}
+                    hasError={hasError("type")}
+                    errorMessage="Campo obrigatório"
+                    onValueChange={() => clearError("type")}
                   >
                     {typeOptions}
-                  </IsolatedSelect>
+                  </AdminSelectAdapter>
 
                   <InputTextArea
                     label="Descrição"
@@ -426,24 +420,23 @@ export default function CommunityResourceFormClient({
                     id="resource-description"
                     rows={6}
                     value={description}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setDescription(e.target.value)
+                    onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setDescription(event.target.value)
                     }
                   />
                 </div>
 
-                {/* Esquema de dados */}
                 <h2 className="admin-page__section-title">Esquema de dados</h2>
 
                 <div className="admin-page__fields-group">
-                  <IsolatedSelect
+                  <AdminSelectAdapter
                     label="Plano"
                     placeholder="Procure um esquema referenciado em schema.data.gouv.fr..."
                     id="resource-schema"
-                    onChangeRef={selectedSchemaRef}
+                    valueRef={selectedSchemaRef}
                   >
                     {schemaOptions}
-                  </IsolatedSelect>
+                  </AdminSelectAdapter>
 
                   <div className="admin-page__divider-or">
                     <span className="admin-page__divider-or-text">ou</span>
@@ -454,13 +447,12 @@ export default function CommunityResourceFormClient({
                     placeholder="https://..."
                     id="resource-schema-url"
                     value={schemaUrl}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSchemaUrl(e.target.value)
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                      setSchemaUrl(event.target.value)
                     }
                   />
                 </div>
 
-                {/* Associe um conjunto de dados */}
                 <h2 className="admin-page__section-title">
                   Associe um conjunto de dados {!datasetId && "*"}
                 </h2>
@@ -503,21 +495,11 @@ export default function CommunityResourceFormClient({
                               </span>
                             </div>
                             <div className="flex items-center gap-8" title="Reutilizações">
-                              <img
-                                src="/Icons/bar_chart.svg"
-                                className=""
-                                alt=""
-                                aria-hidden="true"
-                              />
+                              <img src="/Icons/bar_chart.svg" className="" alt="" aria-hidden="true" />
                               <span>{dataset.metrics?.reuses || 0}</span>
                             </div>
                             <div className="flex items-center gap-8" title="Favoritos">
-                              <img
-                                src="/Icons/favorite.svg"
-                                className=""
-                                alt=""
-                                aria-hidden="true"
-                              />
+                              <img src="/Icons/favorite.svg" className="" alt="" aria-hidden="true" />
                               <span>{formatMetricValue(dataset.metrics?.followers, 0)}</span>
                             </div>
                           </div>
@@ -525,7 +507,13 @@ export default function CommunityResourceFormClient({
                       }
                       date={
                         <span className="font-[300]">
-                          {`Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt }).replace("aproximadamente ", "").replace("quase ", "").replace("menos de ", "").replace("cerca de ", "")}`}
+                          {`Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), {
+                            locale: pt,
+                          })
+                            .replace("aproximadamente ", "")
+                            .replace("quase ", "")
+                            .replace("menos de ", "")
+                            .replace("cerca de ", "")}`}
                         </span>
                       }
                       mainLink={
@@ -564,20 +552,21 @@ export default function CommunityResourceFormClient({
                     searchable
                     searchInputPlaceholder="Escreva para pesquisar..."
                     searchNoResultsText="Nenhum resultado encontrado"
-                    hasError={!!formErrors.dataset}
+                    hasError={hasError("dataset")}
                     onChange={(options) => {
                       if (options.length > 0) {
                         setSelectedDatasetId(options[0].value);
                         clearError("dataset");
-                      } else {
-                        setSelectedDatasetId("");
+                        return;
                       }
+                      setSelectedDatasetId("");
+                      setError("dataset");
                     }}
                   >
                     <DropdownSection name="datasets">
-                      {myDatasets.map((d) => (
-                        <DropdownOption key={d.id} value={d.id}>
-                          {d.title}
+                      {myDatasets.map((item) => (
+                        <DropdownOption key={item.id} value={item.id}>
+                          {item.title}
                         </DropdownOption>
                       ))}
                     </DropdownSection>
@@ -596,11 +585,11 @@ export default function CommunityResourceFormClient({
                     Anterior
                   </Button>
                   <Button
+                    type="submit"
                     variant="primary"
                     hasIcon
                     trailingIcon="agora-line-arrow-right-circle"
                     trailingIconHover="agora-solid-arrow-right-circle"
-                    onClick={handleStep1Next}
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "A criar..." : "Seguinte"}
@@ -610,7 +599,6 @@ export default function CommunityResourceFormClient({
             </>
           )}
 
-          {/* Step 2: Finalizar a publicação */}
           {currentStep === 2 && (
             <>
               <StatusCard
@@ -631,9 +619,7 @@ export default function CommunityResourceFormClient({
                     onClick={() => {}}
                     className="cursor-pointer text-neutral-900"
                     variant="transparent"
-                    category={
-                      createdResource.format ? createdResource.format.toUpperCase() : "Recurso"
-                    }
+                    category={createdResource.format ? createdResource.format.toUpperCase() : "Recurso"}
                     title={<div className="text-xl-bold underline">{createdResource.title}</div>}
                     description={
                       <div className="mt-8 flex flex-col gap-4 pb-32">
@@ -706,7 +692,6 @@ export default function CommunityResourceFormClient({
           )}
         </div>
 
-        {/* Right: Auxiliar sidebar (only for step 1) */}
         {currentStep === 1 && (
           <aside className="admin-page__auxiliar">
             <div className="admin-page__auxiliar-inner">
