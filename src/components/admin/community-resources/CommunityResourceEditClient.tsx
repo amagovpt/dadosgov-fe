@@ -1,29 +1,31 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams, useRouter, useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   Button,
+  DropdownOption,
+  DropdownSection,
   InputText,
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
+import AuxiliarList from "@/components/admin/AuxiliarList";
+import AppIcon from "@/components/Primitives/AppIcon";
 import {
   fetchCommunityResource,
   updateCommunityResource,
   deleteCommunityResource,
 } from "@/service/api/community-resources";
 import { fetchResourceTypes, fetchSchemas } from "@/service/api/datasets";
-import type { ResourceType } from "@/service/types/catalog";
-import type { CommunityResource } from "@/service/types/community-resource";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
-import AuxiliarList from "@/components/admin/AuxiliarList";
-import AppIcon from "@/components/Primitives/AppIcon";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useAsyncSubmit } from "@/hooks/forms/useAsyncSubmit";
 import { normalizeApiError } from "@/service/utils/normalizeApiError";
+import type { ResourceType } from "@/service/types/catalog";
+import type { CommunityResource } from "@/service/types/community-resource";
 import {
   buildSchemaItems,
   COMMUNITY_RESOURCE_FORMATS,
@@ -42,6 +44,7 @@ export default function CommunityResourceEditClient() {
   const params = useParams();
   const router = useRouter();
   useCurrentUser();
+
   const resourceId =
     (params?.resourceId as string) ||
     searchParams.get("resource_id") ||
@@ -49,24 +52,25 @@ export default function CommunityResourceEditClient() {
     "";
 
   const [resource, setResource] = useState<CommunityResource | null>(null);
+  const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [schemas, setSchemas] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [resourceUrl, setResourceUrl] = useState("");
-  const [checksumType, setChecksumType] = useState("");
-  const [checksumValue, setChecksumValue] = useState("");
-  const [showChecksum, setShowChecksum] = useState(false);
-  const [saveCount, setSaveCount] = useState(0);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [format, setFormat] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [mimeType, setMimeType] = useState("");
   const [schemaUrl, setSchemaUrl] = useState("");
-  const [schemas, setSchemas] = useState<string[]>([]);
   const [loadedSchema, setLoadedSchema] = useState("");
-  const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [checksumType, setChecksumType] = useState("");
+  const [checksumValue, setChecksumValue] = useState("");
+  const [showChecksum, setShowChecksum] = useState(false);
+  const [saveCount, setSaveCount] = useState(0);
+
   const selectedTypeRef = useRef("");
   const selectedFormatRef = useRef("");
   const selectedChecksumTypeRef = useRef("");
@@ -94,61 +98,6 @@ export default function CommunityResourceEditClient() {
     scrollToTopOnStart: true,
   });
 
-  useEffect(() => {
-    if (!resourceId) return;
-
-    async function loadData() {
-      setIsLoading(true);
-      try {
-        const [res, types, availableSchemas] = await Promise.all([
-          fetchCommunityResource(resourceId),
-          fetchResourceTypes(),
-          fetchSchemas(),
-        ]);
-        setResource(res);
-        setResourceUrl(res.url || "");
-        setTitle(res.title);
-        setDescription(res.description || "");
-
-        const normalizedFormat = res.format?.toLowerCase() || "";
-        setFormat(normalizedFormat);
-        setMimeType(res.mime || "");
-        setSelectedType(res.type || "");
-        selectedTypeRef.current = res.type || "";
-        selectedFormatRef.current = normalizedFormat;
-
-        if (res.checksum) {
-          setChecksumType(res.checksum.type || "");
-          setChecksumValue(res.checksum.value || "");
-          selectedChecksumTypeRef.current = res.checksum.type || "";
-          setShowChecksum(true);
-        }
-
-        setResourceTypes(types);
-        setSchemas(availableSchemas);
-
-        if (res.schema) {
-          const schemaName = res.schema.name || "";
-          const schemaLink = res.schema.url || "";
-          if (schemaLink && schemaLink.startsWith("http")) {
-            setSchemaUrl(schemaLink);
-          } else {
-            const schemaValue = schemaName || schemaLink;
-            setLoadedSchema(schemaValue);
-            selectedSchemaRef.current = schemaValue;
-          }
-        }
-      } catch (error) {
-        console.error("Error loading community resource:", error);
-        setApiError("Erro ao carregar recurso comunitário.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadData();
-  }, [resourceId]);
-
   const clearTypeError = React.useCallback(() => {
     clearError("type");
   }, [clearError]);
@@ -161,13 +110,180 @@ export default function CommunityResourceEditClient() {
     setSchemaUrl("");
   }, []);
 
-  const handleSave = async () => {
+  const syncSchemaState = React.useCallback((schema?: CommunityResource["schema"] | null) => {
+    if (schema?.url && schema.url.startsWith("http")) {
+      setSchemaUrl(schema.url);
+      setLoadedSchema("");
+      selectedSchemaRef.current = "";
+      return;
+    }
+
+    const selectedSchema = schema?.name || schema?.url || "";
+    setLoadedSchema(selectedSchema);
+    setSchemaUrl("");
+    selectedSchemaRef.current = selectedSchema;
+  }, []);
+
+  function applyResourceToForm(nextResource: CommunityResource) {
+    setResource(nextResource);
+    setResourceUrl(nextResource.url || "");
+    setTitle(nextResource.title);
+    setDescription(nextResource.description || "");
+
+    const normalizedFormat = nextResource.format?.toLowerCase() || "";
+    setFormat(normalizedFormat);
+    selectedFormatRef.current = normalizedFormat;
+
+    const nextType = nextResource.type || "";
+    setSelectedType(nextType);
+    selectedTypeRef.current = nextType;
+
+    setMimeType(nextResource.mime || "");
+    syncSchemaState(nextResource.schema);
+
+    if (nextResource.checksum) {
+      const nextChecksumType = nextResource.checksum.type || "";
+      setChecksumType(nextChecksumType);
+      setChecksumValue(nextResource.checksum.value || "");
+      selectedChecksumTypeRef.current = nextChecksumType;
+      setShowChecksum(true);
+      return;
+    }
+
+    setChecksumType("");
+    setChecksumValue("");
+    selectedChecksumTypeRef.current = "";
+    setShowChecksum(false);
+  }
+
+  function getValidationErrors() {
     const errors: Partial<Record<CommunityResourceEditField, boolean>> = {};
+
     if (!title.trim()) errors.title = true;
     if (!resourceUrl.trim()) errors.url = true;
     if (!selectedTypeRef.current) errors.type = true;
     if (!selectedFormatRef.current) errors.format = true;
     if (showChecksum && !checksumValue.trim()) errors.checksumValue = true;
+
+    return errors;
+  }
+
+  function buildSchemaPayload() {
+    const schemaUrlValue = schemaUrl.trim();
+    const schemaNameValue = selectedSchemaRef.current;
+
+    return schemaUrlValue
+      ? { url: schemaUrlValue }
+      : schemaNameValue
+        ? { name: schemaNameValue }
+        : null;
+  }
+
+  function buildChecksumPayload() {
+    if (!showChecksum) {
+      return { checksum: null };
+    }
+
+    if (!checksumValue.trim()) {
+      return {};
+    }
+
+    return {
+      checksum: {
+        type: selectedChecksumTypeRef.current || checksumType,
+        value: checksumValue,
+      },
+    };
+  }
+
+  function buildUpdatePayload() {
+    return {
+      title: title.trim(),
+      description: description.trim() || undefined,
+      url: resourceUrl.trim() || undefined,
+      type: selectedTypeRef.current || undefined,
+      format: selectedFormatRef.current.trim() || undefined,
+      mime: mimeType.trim() || undefined,
+      schema: buildSchemaPayload(),
+      ...buildChecksumPayload(),
+    };
+  }
+
+  function handleResourceUrlChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const nextValue = event.target.value;
+    setResourceUrl(nextValue);
+    if (nextValue.trim()) {
+      clearError("url");
+    }
+  }
+
+  function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const nextValue = event.target.value;
+    setTitle(nextValue);
+    if (nextValue.trim()) {
+      clearError("title");
+    }
+  }
+
+  function handleChecksumValueChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (!event.nativeEvent.isTrusted) {
+      return;
+    }
+
+    const nextValue = event.target.value;
+    setChecksumValue(nextValue);
+    if (nextValue.trim()) {
+      clearError("checksumValue");
+    }
+  }
+
+  function handleSchemaUrlChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const nextValue = event.target.value;
+    setSchemaUrl(nextValue);
+    if (nextValue) {
+      selectedSchemaRef.current = "";
+    }
+  }
+
+  function handleRemoveChecksum() {
+    setShowChecksum(false);
+    setChecksumType("");
+    setChecksumValue("");
+    selectedChecksumTypeRef.current = "";
+    clearError("checksumValue");
+  }
+
+  useEffect(() => {
+    if (!resourceId) {
+      return;
+    }
+
+    async function loadData() {
+      setIsLoading(true);
+
+      try {
+        const [res, types, availableSchemas] = await Promise.all([
+          fetchCommunityResource(resourceId),
+          fetchResourceTypes(),
+          fetchSchemas(),
+        ]);
+
+        applyResourceToForm(res);
+        setResourceTypes(types);
+        setSchemas(availableSchemas);
+      } catch (error) {
+        console.error("Error loading community resource:", error);
+        setApiError("Erro ao carregar recurso comunitário.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    void loadData();
+  }, [resourceId]);
+
+  const handleSave = async () => {
+    const errors = getValidationErrors();
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -178,59 +294,9 @@ export default function CommunityResourceEditClient() {
     resetErrors();
 
     await run(async () => {
-      const schemaUrlValue = schemaUrl.trim();
-      const schemaNameValue = selectedSchemaRef.current;
-      const schemaPayload = schemaUrlValue
-        ? { url: schemaUrlValue }
-        : schemaNameValue
-          ? { name: schemaNameValue }
-          : null;
-
-      const updated = await updateCommunityResource(resourceId, {
-        title: title.trim(),
-        description: description.trim() || undefined,
-        url: resourceUrl.trim() || undefined,
-        type: selectedTypeRef.current || undefined,
-        format: selectedFormatRef.current.trim() || undefined,
-        mime: mimeType.trim() || undefined,
-        schema: schemaPayload,
-        ...(showChecksum
-          ? checksumValue
-            ? {
-                checksum: {
-                  type: selectedChecksumTypeRef.current || checksumType,
-                  value: checksumValue,
-                },
-              }
-            : {}
-          : { checksum: null }),
-      });
-
-      setResource(updated);
+      const updated = await updateCommunityResource(resourceId, buildUpdatePayload());
+      applyResourceToForm(updated);
       setSaveCount((count) => count + 1);
-      setSelectedType(updated.type || "");
-
-      const normalizedFormat = updated.format?.toLowerCase() || "";
-      setFormat(normalizedFormat);
-      setMimeType(updated.mime || "");
-
-      if (updated.schema) {
-        if (updated.schema.url && updated.schema.url.startsWith("http")) {
-          setSchemaUrl(updated.schema.url);
-          selectedSchemaRef.current = "";
-        } else {
-          selectedSchemaRef.current = updated.schema.name || updated.schema.url || "";
-          setSchemaUrl("");
-        }
-      } else {
-        selectedSchemaRef.current = "";
-      }
-
-      if (updated.checksum) {
-        setChecksumType(updated.checksum.type || "");
-        setChecksumValue(updated.checksum.value || "");
-      }
-
       setSuccessMessage("Recurso comunitário atualizado com sucesso.");
       setTimeout(() => setSuccessMessage(null), 10000);
     });
@@ -293,7 +359,7 @@ export default function CommunityResourceEditClient() {
         <>
           Recomenda-se a escolha de um título que informe claramente qualquer utilizador sobre o
           conteúdo do arquivo. Algumas práticas a evitar:
-          <ul className="list-disc pl-16 mt-8">
+          <ul className="mt-8 list-disc pl-16">
             <li>atribuir um título muito genérico (por exemplo, &quot;list.csv&quot;);</li>
             <li>dar um título muito longo dificultaria a manipulação do arquivo;</li>
             <li>
@@ -313,7 +379,7 @@ export default function CommunityResourceEditClient() {
       content: (
         <>
           Pode escolher entre os seguintes tipos:
-          <ul className="list-disc pl-16 mt-8">
+          <ul className="mt-8 list-disc pl-16">
             <li>Ficheiros principais</li>
             <li>Documentação</li>
             <li>Atualização</li>
@@ -329,7 +395,7 @@ export default function CommunityResourceEditClient() {
       content: (
         <>
           A descrição de um ficheiro facilita a reutilização de dados. Inclui, entre outras coisas:
-          <ul className="list-disc pl-16 mt-8">
+          <ul className="mt-8 list-disc pl-16">
             <li>uma descrição geral do conjunto de dados;</li>
             <li>uma descrição do método de produção de dados;</li>
             <li>uma descrição do modelo de dados;</li>
@@ -345,7 +411,7 @@ export default function CommunityResourceEditClient() {
       content: (
         <>
           Os formatos devem ser:
-          <ul className="list-disc pl-16 mt-8">
+          <ul className="mt-8 list-disc pl-16">
             <li>
               aberto: um formato aberto não adiciona especificações técnicas que restrinjam o uso
               dos dados (por exemplo, o uso de software pago);
@@ -387,7 +453,11 @@ export default function CommunityResourceEditClient() {
   if (!resource) {
     return (
       <div className="admin-page">
-        <StatusCard variant="danger" showIcon description="Recurso comunitário nao encontrado." />
+        <StatusCard
+          variant="danger"
+          showIcon
+          description="Recurso comunitário não encontrado."
+        />
       </div>
     );
   }
@@ -395,7 +465,7 @@ export default function CommunityResourceEditClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administracao", url: "/pages/admin" },
+        { label: "Administração", url: "/pages/admin" },
         { label: "Sistema", url: "#" },
         { label: "Recursos comunitários", url: "/pages/admin/system/community-resources" },
         { label: "Editar" },
@@ -425,8 +495,8 @@ export default function CommunityResourceEditClient() {
               void handleSave();
             }}
           >
-            <p className="text-neutral-900 text-base leading-7">
-              Os campos marcados com um asterisco ( * ) sao obrigatórios.
+            <p className="text-base leading-7 text-neutral-900">
+              Os campos marcados com um asterisco ( * ) são obrigatórios.
             </p>
 
             <h2 className="admin-page__section-title">Reutilização</h2>
@@ -437,10 +507,7 @@ export default function CommunityResourceEditClient() {
                 placeholder="Insira o link para o ficheiro"
                 id="resource-url"
                 value={resourceUrl}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setResourceUrl(event.target.value);
-                  if (event.target.value.trim()) clearError("url");
-                }}
+                onChange={handleResourceUrlChange}
                 hasError={hasError("url")}
                 hasFeedback={hasError("url")}
                 feedbackState="danger"
@@ -457,12 +524,7 @@ export default function CommunityResourceEditClient() {
                   hasIcon
                   leadingIcon="agora-line-trash"
                   leadingIconHover="agora-solid-trash"
-                  onClick={() => {
-                    setShowChecksum(false);
-                    setChecksumType("");
-                    setChecksumValue("");
-                    clearError("checksumValue");
-                  }}
+                  onClick={handleRemoveChecksum}
                 >
                   Eliminar
                 </Button>
@@ -517,12 +579,7 @@ export default function CommunityResourceEditClient() {
                   placeholder="Introduza o valor do hash"
                   id="checksum-value"
                   value={checksumValue}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    if (event.nativeEvent.isTrusted) {
-                      setChecksumValue(event.target.value);
-                      if (event.target.value.trim()) clearError("checksumValue");
-                    }
-                  }}
+                  onChange={handleChecksumValueChange}
                   hasError={hasError("checksumValue")}
                   hasFeedback={hasError("checksumValue")}
                   feedbackState="danger"
@@ -536,13 +593,10 @@ export default function CommunityResourceEditClient() {
             <div className="admin-page__fields-group">
               <InputText
                 label="Título *"
-                placeholder="Insira o titulo aqui"
+                placeholder="Insira o título aqui"
                 id="resource-title"
                 value={title}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setTitle(event.target.value);
-                  if (event.target.value.trim()) clearError("title");
-                }}
+                onChange={handleTitleChange}
                 hasError={hasError("title")}
                 hasFeedback={hasError("title")}
                 feedbackState="danger"
@@ -627,12 +681,7 @@ export default function CommunityResourceEditClient() {
                 placeholder="Insira o link para o diagrama"
                 id="resource-schema-url"
                 value={schemaUrl}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setSchemaUrl(event.target.value);
-                  if (event.target.value) {
-                    selectedSchemaRef.current = "";
-                  }
-                }}
+                onChange={handleSchemaUrlChange}
               />
             </div>
 
@@ -687,7 +736,7 @@ export default function CommunityResourceEditClient() {
         <aside className="admin-page__auxiliar">
           <div className="admin-page__auxiliar-inner">
             <div className="admin-page__auxiliar-header">
-              <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
+              <AppIcon name="agora-line-question-mark" className="h-24 w-24" />
               <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
             </div>
             <AuxiliarList items={auxiliarItems} />
