@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Button,
-  Icon,
-  InputSelect,
-  InputText,
-  InputTextArea,
-  StatusCard,
-} from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import { Button, Icon, StatusCard } from "@ama-pt/agora-design-system";
 import {
   createCommunityResource,
   uploadCommunityResourceFile,
@@ -20,7 +12,6 @@ import type { CommunityResource } from "@/service/types/community-resource";
 import type { Dataset } from "@/service/types/dataset";
 import { useAuth } from "@/context/AuthContext";
 import AuxiliarList from "@/components/admin/AuxiliarList";
-import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useAsyncSubmit } from "@/hooks/forms/useAsyncSubmit";
@@ -29,8 +20,12 @@ import {
   buildSchemaItems,
   renderDropdownSection,
 } from "@/components/admin/community-resources/dropdownOptions";
-import SelectedDatasetCard from "@/components/admin/community-resources/SelectedDatasetCard";
 import CreatedResourceCard from "@/components/admin/community-resources/CreatedResourceCard";
+import ProducerSection from "@/components/admin/community-resources/ProducerSection";
+import FileOrLinkSection from "@/components/admin/community-resources/FileOrLinkSection";
+import ResourceDescriptionSection from "@/components/admin/community-resources/ResourceDescriptionSection";
+import SchemaSection from "@/components/admin/community-resources/SchemaSection";
+import DatasetSelectionSection from "@/components/admin/community-resources/DatasetSelectionSection";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -390,159 +385,48 @@ export default function CommunityResourceFormClient({
                   Os campos marcados com um asterisco ( * ) são obrigatórios.
                 </p>
 
-                <h2 className="admin-page__section-title">Produtor</h2>
+                <ProducerSection
+                  producerOptions={producerOptions}
+                  selectedProducerRef={selectedProducerRef}
+                />
 
-                <AdminSelectAdapter
-                  label="Verifique a identidade que deseja usar na publicação."
-                  placeholder="Para pesquisar..."
-                  id="producer-identity"
-                  valueRef={selectedProducerRef}
-                >
-                  {producerOptions}
-                </AdminSelectAdapter>
+                <FileOrLinkSection
+                  file={file}
+                  fileError={fileError}
+                  resourceUrl={resourceUrl}
+                  hasResourceUrlError={hasError("resourceUrl")}
+                  onFileChange={handleFileChange}
+                  onSecurityError={() => setFileError(POISONED_FILE_WARNING)}
+                  onResourceUrlChange={handleResourceUrlChange}
+                />
 
-                <div className="admin-page__org-card">
-                  <p className="admin-page__org-card-title">Não pertence a nenhuma organização.</p>
-                  <p className="admin-page__org-card-description">
-                    Quando o conjunto de dados for produzido no contexto de atividade profissional,
-                    é recomendável que seja publicado em nome da organização responsável.
-                  </p>
-                  <a href="/pages/admin/organizations/new" className="admin-page__org-card-link">
-                    Crie ou integre uma organização em dados.gov.pt
-                    <Icon name="agora-line-arrow-right-circle" className="h-24 w-24" />
-                  </a>
-                </div>
+                <ResourceDescriptionSection
+                  title={title}
+                  description={description}
+                  typeOptions={typeOptions}
+                  selectedTypeRef={selectedTypeRef}
+                  hasTitleError={hasError("title")}
+                  hasTypeError={hasError("type")}
+                  onTitleChange={handleTitleChange}
+                  onDescriptionChange={handleDescriptionChange}
+                  onTypeChange={handleTypeChange}
+                />
 
-                <h2 className="admin-page__section-title">Ficheiro ou link</h2>
+                <SchemaSection
+                  schemaOptions={schemaOptions}
+                  selectedSchemaRef={selectedSchemaRef}
+                  schemaUrl={schemaUrl}
+                  onSchemaUrlChange={handleSchemaUrlChange}
+                />
 
-                <div className="admin-page__fields-group">
-                  <div className="[&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-                    <DragAndDropUploader
-                      label="Ficheiros"
-                      dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                      inputLabel="Selecione ou arraste o ficheiro"
-                      selectedFilesLabel="ficheiro selecionado"
-                      removeFileButtonLabel="Remover ficheiro"
-                      replaceFileButtonLabel="Substituir ficheiro"
-                      extensionsInstructions="Tamanho máximo: 420 MB."
-                      maxSize={440401920}
-                      maxCount={1}
-                      maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 420 MB."
-                      forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                      hasError={!!fileError}
-                      hasFeedback={!!fileError}
-                      feedbackState="danger"
-                      feedbackText={fileError ?? undefined}
-                      onChange={handleFileChange}
-                      onSecurityError={() => setFileError(POISONED_FILE_WARNING)}
-                    />
-                  </div>
-
-                  <div className="admin-page__divider-or">
-                    <span className="admin-page__divider-or-text">ou</span>
-                  </div>
-
-                  <InputText
-                    label={file ? "Link exato para o ficheiro" : "Link exato para o ficheiro *"}
-                    placeholder="https://..."
-                    id="resource-url"
-                    value={resourceUrl}
-                    onChange={handleResourceUrlChange}
-                    hasError={hasError("resourceUrl")}
-                    hasFeedback={hasError("resourceUrl")}
-                    feedbackState="danger"
-                    errorFeedbackText="Forneça um ficheiro ou um link."
-                  />
-                </div>
-
-                <h2 className="admin-page__section-title">Descrição</h2>
-
-                <div className="admin-page__fields-group">
-                  <InputText
-                    label="Título *"
-                    placeholder="Insira o título aqui"
-                    id="resource-title"
-                    value={title}
-                    onChange={handleTitleChange}
-                    hasError={hasError("title")}
-                    hasFeedback={hasError("title")}
-                    feedbackState="danger"
-                    errorFeedbackText="Campo obrigatório"
-                  />
-
-                  <AdminSelectAdapter
-                    label="Tipo *"
-                    placeholder="Ficheiros principais"
-                    id="resource-type"
-                    valueRef={selectedTypeRef}
-                    hasError={hasError("type")}
-                    errorMessage="Campo obrigatório"
-                    onValueChange={handleTypeChange}
-                  >
-                    {typeOptions}
-                  </AdminSelectAdapter>
-
-                  <InputTextArea
-                    label="Descrição"
-                    placeholder="Insira a descrição aqui"
-                    id="resource-description"
-                    rows={6}
-                    value={description}
-                    onChange={handleDescriptionChange}
-                  />
-                </div>
-
-                <h2 className="admin-page__section-title">Esquema de dados</h2>
-
-                <div className="admin-page__fields-group">
-                  <AdminSelectAdapter
-                    label="Plano"
-                    placeholder="Procure um esquema referenciado em schema.data.gouv.fr..."
-                    id="resource-schema"
-                    valueRef={selectedSchemaRef}
-                  >
-                    {schemaOptions}
-                  </AdminSelectAdapter>
-
-                  <div className="admin-page__divider-or">
-                    <span className="admin-page__divider-or-text">ou</span>
-                  </div>
-
-                  <InputText
-                    label="Adicione um link para o diagrama"
-                    placeholder="https://..."
-                    id="resource-schema-url"
-                    value={schemaUrl}
-                    onChange={handleSchemaUrlChange}
-                  />
-                </div>
-
-                <h2 className="admin-page__section-title">
-                  Associe um conjunto de dados {!datasetId && "*"}
-                </h2>
-
-                {activeDataset && (
-                  <SelectedDatasetCard
-                    dataset={activeDataset}
-                    canRemove={!datasetId}
-                    onRemove={handleRemoveSelectedDataset}
-                  />
-                )}
-
-                {!datasetId && !activeDataset && (
-                  <InputSelect
-                    label="Pesquisar um conjunto de dados *"
-                    placeholder="Procurando um conjunto de dados..."
-                    id="community-resource-dataset-search"
-                    searchable
-                    searchInputPlaceholder="Escreva para pesquisar..."
-                    searchNoResultsText="Nenhum resultado encontrado"
-                    hasError={hasError("dataset")}
-                    onChange={handleDatasetChange}
-                  >
-                    {datasetOptions}
-                  </InputSelect>
-                )}
+                <DatasetSelectionSection
+                  datasetId={datasetId}
+                  activeDataset={activeDataset}
+                  datasetOptions={datasetOptions}
+                  hasDatasetError={hasError("dataset")}
+                  onDatasetChange={handleDatasetChange}
+                  onRemoveSelectedDataset={handleRemoveSelectedDataset}
+                />
 
                 <div className="admin-page__actions flex justify-between gap-[18px]">
                   <Button
