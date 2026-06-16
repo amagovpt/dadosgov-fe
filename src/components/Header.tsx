@@ -528,20 +528,18 @@ export const Header = () => {
                   />
                 </div>
               </NavigationLink>
-              {/* hidden: licences
               <NavigationLink appearance="link">
                 <div data-group="submenu-usar-dados">
                   <HeaderCard
-                    iconDefault="agora-line-file-document"
-                    iconHover="agora-solid-file-document"
+                    iconDefault="agora-line-shield"
+                    iconHover="agora-solid-shield"
                     title="Licenças"
                     description="Licenças de dados abertos"
-                    href="/pages/faqs/licences"
+                    href="/pages/faqs/licenses"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
               </NavigationLink>
-              */}
 
               <NavigationLink appearance="link">
                 <div data-group="main">
@@ -600,6 +598,30 @@ export const Header = () => {
                   >
                     Voltar
                   </Button>
+                </div>
+              </NavigationLink>
+              <NavigationLink appearance="link">
+                <div data-group="submenu-desenvolvimento">
+                  <HeaderCard
+                    iconDefault="agora-line-document"
+                    iconHover="agora-solid-document"
+                    title="Acesso via SPARQL"
+                    description="Consultar o catálogo via SPARQL"
+                    href="/pages/faqs/acesso-ao-catalogo-via-sparql"
+                    onLinkClick={handleLinkClick}
+                  />
+                </div>
+              </NavigationLink>
+              <NavigationLink appearance="link">
+                <div data-group="submenu-desenvolvimento">
+                  <HeaderCard
+                    iconDefault="agora-line-book-open"
+                    iconHover="agora-solid-book-open"
+                    title="Tutorial API"
+                    description="Guia de utilização da API"
+                    href="/pages/faqs/api-tutorial"
+                    onLinkClick={handleLinkClick}
+                  />
                 </div>
               </NavigationLink>
               <NavigationLink appearance="link">
