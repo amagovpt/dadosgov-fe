@@ -24,7 +24,7 @@ import { pt } from "date-fns/locale";
 
 interface DiscussionSectionProps {
   entityId: string;
-  entityClass: "Reuse" | "Dataset" | "Organization";
+  entityClass: "Reuse" | "Dataset" | "Organization" | "Dataservice";
 }
 
 interface ReplyFormProps {

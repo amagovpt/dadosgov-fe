@@ -12,6 +12,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { formatMetricValue } from "@/utils/formatNumber";
 import TextLink from "@/components/Primitives/TextLink";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
+import { DataserviceTabs } from "@/components/dataservices/DataserviceTabs";
 
 interface DataserviceDetailClientProps {
   slug: string;
@@ -268,23 +269,13 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
               </div>
             </div>
 
-            {/* Linked datasets */}
-            {dataservice.datasets && dataservice.datasets.length > 0 && (
-              <div className="rounded-4 bg-[#F2F6FF] p-32">
-                <div className="mb-16 text-m-semibold text-neutral-900">
-                  Conjuntos de dados associados
-                </div>
-                <ul className="flex flex-col gap-8">
-                  {dataservice.datasets.map((ds) => (
-                    <li key={ds.id}>
-                      <TextLink href={ds.page}>{ds.title}</TextLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         </div>
+      </div>
+
+      {/* Tabs: Informações + Discussões */}
+      <div className="container">
+        <DataserviceTabs dataservice={dataservice} />
       </div>
     </main>
   );
