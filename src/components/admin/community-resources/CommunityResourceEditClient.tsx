@@ -6,8 +6,6 @@ import {
   Button,
   InputText,
   InputTextArea,
-  DropdownSection,
-  DropdownOption,
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
@@ -26,6 +24,11 @@ import AppIcon from "@/components/Primitives/AppIcon";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useAsyncSubmit } from "@/hooks/forms/useAsyncSubmit";
 import { normalizeApiError } from "@/service/utils/normalizeApiError";
+import {
+  buildSchemaItems,
+  COMMUNITY_RESOURCE_FORMATS,
+  renderDropdownSection,
+} from "@/components/admin/community-resources/dropdownOptions";
 
 type CommunityResourceEditField =
   | "url"
@@ -243,74 +246,33 @@ export default function CommunityResourceEditClient() {
   };
 
   const typeOptions = useMemo(
-    () => (
-      <DropdownSection name="types">
-        {resourceTypes.map((type) => (
-          <DropdownOption key={type.id} value={type.id} selected={type.id === selectedType}>
-            {type.label}
-          </DropdownOption>
-        ))}
-      </DropdownSection>
-    ),
+    () =>
+      renderDropdownSection(
+        "types",
+        resourceTypes.map((type) => ({ value: type.id, label: type.label })),
+        selectedType,
+      ),
     [resourceTypes, selectedType],
   );
 
   const formatOptions = useMemo(() => {
-    const standardFormats = [
-      "csv",
-      "json",
-      "xml",
-      "pdf",
-      "xls",
-      "xlsx",
-      "ods",
-      "doc",
-      "docx",
-      "zip",
-      "gz",
-      "tar",
-      "shp",
-      "geojson",
-      "kml",
-      "rdf",
-      "ttl",
-      "txt",
-      "html",
-    ];
     const currentFormat = format.toLowerCase();
     const allFormats =
-      currentFormat && !standardFormats.includes(currentFormat)
-        ? [...standardFormats, currentFormat]
-        : standardFormats;
+      currentFormat && !COMMUNITY_RESOURCE_FORMATS.includes(currentFormat)
+        ? [...COMMUNITY_RESOURCE_FORMATS, currentFormat]
+        : COMMUNITY_RESOURCE_FORMATS;
 
-    return (
-      <DropdownSection name="formats">
-        {allFormats.map((item) => (
-          <DropdownOption key={item} value={item} selected={item === currentFormat}>
-            {item}
-          </DropdownOption>
-        ))}
-      </DropdownSection>
+    return renderDropdownSection(
+      "formats",
+      allFormats.map((item) => ({ value: item, label: item })),
+      currentFormat,
     );
   }, [format]);
 
-  const schemaOptions = useMemo(() => {
-    const list =
-      loadedSchema && !schemas.includes(loadedSchema) ? [loadedSchema, ...schemas] : schemas;
-
-    const options = [
-      <DropdownOption key="none" value="" selected={loadedSchema === ""}>
-        Nenhum
-      </DropdownOption>,
-      ...list.map((item) => (
-        <DropdownOption key={item} value={item} selected={item === loadedSchema}>
-          {item}
-        </DropdownOption>
-      )),
-    ];
-
-    return <DropdownSection name="schemas">{options}</DropdownSection>;
-  }, [schemas, loadedSchema]);
+  const schemaOptions = useMemo(
+    () => renderDropdownSection("schemas", buildSchemaItems(schemas, loadedSchema), loadedSchema),
+    [schemas, loadedSchema],
+  );
 
   const auxiliarItems = [
     {

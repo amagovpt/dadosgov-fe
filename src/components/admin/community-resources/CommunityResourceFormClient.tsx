@@ -7,8 +7,6 @@ import {
   InputText,
   InputTextArea,
   InputSelect,
-  DropdownSection,
-  DropdownOption,
   Icon,
   StatusCard,
   CardLinks,
@@ -32,6 +30,10 @@ import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useAsyncSubmit } from "@/hooks/forms/useAsyncSubmit";
 import { normalizeApiError } from "@/service/utils/normalizeApiError";
+import {
+  buildSchemaItems,
+  renderDropdownSection,
+} from "@/components/admin/community-resources/dropdownOptions";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -246,24 +248,16 @@ export default function CommunityResourceFormClient({
   );
 
   const typeOptions = useMemo(
-    () => (
-      <DropdownSection name="types">
-        {resourceTypes.map((type) => (
-          <DropdownOption key={type.id} value={type.id}>
-            {type.label}
-          </DropdownOption>
-        ))}
-      </DropdownSection>
-    ),
+    () =>
+      renderDropdownSection(
+        "types",
+        resourceTypes.map((type) => ({ value: type.id, label: type.label })),
+      ),
     [resourceTypes],
   );
 
   const schemaOptions = useMemo(
-    () => (
-      <DropdownSection name="schemas">
-        <DropdownOption value="">Nenhum</DropdownOption>
-      </DropdownSection>
-    ),
+    () => renderDropdownSection("schemas", buildSchemaItems([])),
     [],
   );
 
