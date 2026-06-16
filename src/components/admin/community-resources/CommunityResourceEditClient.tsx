@@ -4,8 +4,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   Button,
-  DropdownOption,
-  DropdownSection,
   InputText,
   InputTextArea,
   StatusCard,
@@ -28,6 +26,7 @@ import type { ResourceType } from "@/service/types/catalog";
 import type { CommunityResource } from "@/service/types/community-resource";
 import {
   buildSchemaItems,
+  COMMUNITY_RESOURCE_CHECKSUM_TYPES,
   COMMUNITY_RESOURCE_FORMATS,
   renderDropdownSection,
 } from "@/components/admin/community-resources/dropdownOptions";
@@ -245,6 +244,14 @@ export default function CommunityResourceEditClient() {
     }
   }
 
+  function handleDescriptionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    setDescription(event.target.value);
+  }
+
+  function handleMimeTypeChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setMimeType(event.target.value);
+  }
+
   function handleRemoveChecksum() {
     setShowChecksum(false);
     setChecksumType("");
@@ -338,6 +345,19 @@ export default function CommunityResourceEditClient() {
   const schemaOptions = useMemo(
     () => renderDropdownSection("schemas", buildSchemaItems(schemas, loadedSchema), loadedSchema),
     [schemas, loadedSchema],
+  );
+
+  const checksumOptions = useMemo(
+    () =>
+      renderDropdownSection(
+        "checksum-types",
+        COMMUNITY_RESOURCE_CHECKSUM_TYPES.map((item) => ({
+          value: item,
+          label: item.toUpperCase(),
+        })),
+        checksumType,
+      ),
+    [checksumType],
   );
 
   const auxiliarItems = [
@@ -558,20 +578,7 @@ export default function CommunityResourceEditClient() {
                     }
                   }}
                 >
-                  <DropdownSection name="checksum-types">
-                    <DropdownOption value="sha1" selected={checksumType === "sha1"}>
-                      SHA1
-                    </DropdownOption>
-                    <DropdownOption value="sha256" selected={checksumType === "sha256"}>
-                      SHA256
-                    </DropdownOption>
-                    <DropdownOption value="md5" selected={checksumType === "md5"}>
-                      MD5
-                    </DropdownOption>
-                    <DropdownOption value="crc" selected={checksumType === "crc"}>
-                      CRC
-                    </DropdownOption>
-                  </DropdownSection>
+                  {checksumOptions}
                 </AdminSelectAdapter>
 
                 <InputText
@@ -624,9 +631,7 @@ export default function CommunityResourceEditClient() {
                 id="resource-description"
                 rows={10}
                 value={description}
-                onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setDescription(event.target.value)
-                }
+                onChange={handleDescriptionChange}
               />
 
               <AdminSelectAdapter
@@ -649,9 +654,7 @@ export default function CommunityResourceEditClient() {
                 placeholder="application/pdf"
                 id="resource-mime"
                 value={mimeType}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setMimeType(event.target.value)
-                }
+                onChange={handleMimeTypeChange}
               />
             </div>
 

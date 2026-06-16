@@ -191,6 +191,20 @@ export default function CommunityResourceFormClient({
     setSchemaUrl(event.target.value);
   }
 
+  function handleDescriptionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    setDescription(event.target.value);
+  }
+
+  function handleTypeChange() {
+    clearError("type");
+  }
+
+  function handleRemoveSelectedDataset() {
+    setSelectedDatasetId("");
+    setDataset(null);
+    clearError("dataset");
+  }
+
   const handleStep1Next = async () => {
     const errors = getValidationErrors();
 
@@ -463,7 +477,7 @@ export default function CommunityResourceFormClient({
                     valueRef={selectedTypeRef}
                     hasError={hasError("type")}
                     errorMessage="Campo obrigatório"
-                    onValueChange={() => clearError("type")}
+                    onValueChange={handleTypeChange}
                   >
                     {typeOptions}
                   </AdminSelectAdapter>
@@ -474,9 +488,7 @@ export default function CommunityResourceFormClient({
                     id="resource-description"
                     rows={6}
                     value={description}
-                    onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setDescription(event.target.value)
-                    }
+                    onChange={handleDescriptionChange}
                   />
                 </div>
 
@@ -513,11 +525,7 @@ export default function CommunityResourceFormClient({
                   <SelectedDatasetCard
                     dataset={activeDataset}
                     canRemove={!datasetId}
-                    onRemove={() => {
-                      setSelectedDatasetId("");
-                      setDataset(null);
-                      clearError("dataset");
-                    }}
+                    onRemove={handleRemoveSelectedDataset}
                   />
                 )}
 

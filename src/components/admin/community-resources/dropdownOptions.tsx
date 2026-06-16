@@ -28,6 +28,8 @@ export const COMMUNITY_RESOURCE_FORMATS = [
   "html",
 ];
 
+export const COMMUNITY_RESOURCE_CHECKSUM_TYPES = ["sha1", "sha256", "md5", "crc"];
+
 export function renderDropdownSection(
   name: string,
   items: DropdownItem[],
