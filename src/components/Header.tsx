@@ -295,7 +295,7 @@ export const Header = () => {
         data-no-user={!user || undefined}
         onClickCapture={handleHeaderClickCapture}
       >
-        <AgoraHeader ref={headerRef} maxNavigationItems={6}>
+        <AgoraHeader ref={headerRef} maxNavigationItems={7}>
           <Brand>
             <Logo>
               <Link href="/" className="flex items-center">
@@ -358,7 +358,6 @@ export const Header = () => {
                     hasVoiceActionButton={false}
                     label="O que procura no Portal?"
                     placeholder="Pesquisar conjunto de dados, organizações, temas..."
-                    excludeTypes={["dataservices"]}
                   />
                 </div>
               </CustomSearch>
@@ -409,7 +408,6 @@ export const Header = () => {
               </Link>
             </NavigationLink>
 
-            {/* API (dataservices) oculta temporariamente — feature incompleta para PRD
             <NavigationLink appearance="link">
               <Link
                 href="/pages/dataservices"
@@ -418,7 +416,6 @@ export const Header = () => {
                 API
               </Link>
             </NavigationLink>
-            */}
 
             <NavigationLink appearance="link">
               <Link href="/pages/reuses" onClick={(e) => handleLinkClick(e, "/pages/reuses")}>
@@ -664,14 +661,13 @@ export const Header = () => {
                   description: "Publicar dados",
                   href: "/pages/admin/datasets/new",
                 },
-                // Nova API (dataservices) oculta temporariamente — feature incompleta para PRD
-                // {
-                //   iconDefault: "/Icons/api.svg",
-                //   iconHover: "/Icons/api-solid.svg",
-                //   title: "Nova API",
-                //   description: "Serviços de dados",
-                //   href: "/pages/admin/dataservices/new",
-                // },
+                {
+                  iconDefault: "/Icons/api.svg",
+                  iconHover: "/Icons/api-solid.svg",
+                  title: "Nova API",
+                  description: "Serviços de dados",
+                  href: "/pages/admin/dataservices/new",
+                },
                 {
                   iconDefault: "agora-line-share",
                   iconHover: "agora-solid-share",

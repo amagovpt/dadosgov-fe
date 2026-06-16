@@ -34,11 +34,10 @@ const navGroups: NavGroup[] = [
         label: "Conjunto de dados",
         href: "/pages/admin/me/datasets",
       },
-      // API (dataservices) oculta temporariamente — feature incompleta para PRD
-      // {
-      //   label: "API",
-      //   href: "/pages/admin/me/dataservices",
-      // },
+      {
+        label: "API",
+        href: "/pages/admin/me/dataservices",
+      },
       {
         label: "Reutilizações",
         href: "/pages/admin/me/reuses",
@@ -72,11 +71,10 @@ const navGroups: NavGroup[] = [
         label: "Conjunto de dados",
         href: "/pages/admin/system/datasets",
       },
-      // API (dataservices) oculta temporariamente — feature incompleta para PRD
-      // {
-      //   label: "API",
-      //   href: "/pages/admin/system/dataservices",
-      // },
+      {
+        label: "API",
+        href: "/pages/admin/system/dataservices",
+      },
       {
         label: "Reutilizações",
         href: "/pages/admin/system/reuses",
@@ -156,11 +154,10 @@ export function AdminSideNavigation() {
       label: "Conjunto de dados",
       href: `${orgBase}/datasets`,
     },
-    // API (dataservices) oculta temporariamente — feature incompleta para PRD
-    // {
-    //   label: "API",
-    //   href: `${orgBase}/dataservices`,
-    // },
+    {
+      label: "API",
+      href: `${orgBase}/dataservices`,
+    },
     {
       label: "Reutilizações",
       href: `${orgBase}/reuses`,
