@@ -35,8 +35,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+# UID/GID configurable so files written to bind-mounted volumes (e.g. /logs)
+# are readable on the host — defaults match the host `dadosgov` group (10001)
+ARG NEXTJS_UID=10001
+ARG NEXTJS_GID=10001
+RUN addgroup --system --gid ${NEXTJS_GID} nodejs && \
+    adduser --system --uid ${NEXTJS_UID} --ingroup nodejs nextjs
 
 # Copy built assets
 COPY --from=builder /app/public ./public

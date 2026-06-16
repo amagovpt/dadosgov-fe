@@ -17,14 +17,11 @@ import {
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { TabPagination } from "@/components/Shared/TabPagination";
 import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
-import { Reuse, Dataset } from "@/types/api";
-import {
-  fetchDataset,
-  fetchReuse,
-  followEntity,
-  unfollowEntity,
-  isFollowing,
-} from "@/services/api";
+import { Dataset } from "@/service/types/dataset";
+import { Reuse } from "@/service/types/reuse";
+import { fetchDataset } from "@/service/api/datasets";
+import { followEntity, unfollowEntity, isFollowing } from "@/service/api/followers";
+import { fetchReuse } from "@/service/api/reuses";
 import { useAuth } from "@/context/AuthContext";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";

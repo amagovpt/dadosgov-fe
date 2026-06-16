@@ -1,4 +1,4 @@
-import { Sitemap } from "@/services/types/common";
+import { Sitemap } from "@/service/types/shared";
 
 export type EvolutionState = "finished" | "onProgress" | "toDo";
 

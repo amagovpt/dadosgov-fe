@@ -13,8 +13,8 @@ import {
   TableCell,
 } from "@ama-pt/agora-design-system";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
-import { fetchMyCommunityResources } from "@/services/api";
-import { CommunityResource } from "@/types/api";
+import { fetchMyCommunityResources } from "@/service/api/community-resources";
+import { CommunityResource } from "@/service/types/community-resource";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { formatDateToDMY } from "@/utils/formatDate";

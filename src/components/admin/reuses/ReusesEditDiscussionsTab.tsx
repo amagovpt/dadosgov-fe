@@ -2,7 +2,7 @@ import React from "react";
 import { CardNoResults, Icon, Pill } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import type { Discussion } from "@/types/api";
+import type { Discussion } from "@/service/types/discussion";
 
 type ReusesEditDiscussionsTabProps = {
   discussions: Discussion[];

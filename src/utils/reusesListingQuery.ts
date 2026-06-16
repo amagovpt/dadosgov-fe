@@ -1,4 +1,4 @@
-import { ReuseFilters } from "@/types/api";
+import { ReuseFilters } from "@/service/types/reuse";
 
 export const REUSE_SORT_OPTIONS: Record<string, string> = {
   relevancia: "",

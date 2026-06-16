@@ -3,12 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@ama-pt/agora-design-system";
-import {
-  suggestFormats,
-  suggestSpatialZones,
-  suggestTags,
-} from "@/services/api";
-import { Frequency, Granularity, License, Organization } from "@/types/api";
+import { suggestFormats } from "@/service/api/datasets";
+import { getSpatialZones, suggestSpatialZones, suggestTags } from "@/service/api/search";
+import { Frequency, Granularity, License } from "@/service/types/catalog";
+import { Organization } from "@/service/types/identity";
 import {
   AdvancedFilterGroup,
   AdvancedFiltersSidebar,
@@ -138,6 +136,10 @@ export const DatasetsFilters = ({
   const [tagOptions, setTagOptions] = useState<FilterOption[]>([]);
   const [formatOptions, setFormatOptions] = useState<FilterOption[]>([]);
   const [zoneOptions, setZoneOptions] = useState<FilterOption[]>([]);
+  // Persists the human-readable name of selected zones so a selection keeps its
+  // label after it drops out of the live suggestions list (e.g. clearing the
+  // search input) or after a page reload with a `geozone` already in the URL.
+  const [zoneLabels, setZoneLabels] = useState<Record<string, string>>({});
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
   const selectedToggleFilters = useMemo<Record<ToggleFilterKey, string>>(
     () => ({
@@ -165,6 +167,27 @@ export const DatasetsFilters = ({
   useEffect(() => {
     paramsRef.current = queryString;
   }, [queryString]);
+
+  // Resolve labels for any selected zones whose name we don't know yet (e.g.
+  // on first load or a shared link that already carries a `geozone` filter).
+  useEffect(() => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    const selectedZones = readQueryParamValues(params, "geozone");
+    const missing = selectedZones.filter((id) => !(id in zoneLabels));
+    if (missing.length === 0) return;
+    let cancelled = false;
+    getSpatialZones(missing).then((zones) => {
+      if (cancelled || zones.length === 0) return;
+      setZoneLabels((prev) => {
+        const next = { ...prev };
+        for (const zone of zones) next[zone.id] = zone.name;
+        return next;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, zoneLabels]);
 
   const handleToggleFilterChange = useCallback(
     (filterKey: ToggleFilterKey, optionId: string) => {
@@ -230,6 +253,11 @@ export const DatasetsFilters = ({
     try {
       const results = await suggestSpatialZones(query);
       setZoneOptions(results.map((zone) => ({ id: zone.id, name: zone.name })));
+      setZoneLabels((prev) => {
+        const next = { ...prev };
+        for (const zone of results) next[zone.id] = zone.name;
+        return next;
+      });
     } catch {
       setZoneOptions([]);
     }
@@ -333,6 +361,7 @@ export const DatasetsFilters = ({
         searchPlaceholder: "Escreva para pesquisar...",
         minCharsMessage: "Escreva pelo menos 2 caracteres...",
         emptyMessage: "Nenhum resultado encontrado.",
+        selectedLabels: zoneLabels,
       },
       {
         name: "Granularidade Espacial",
@@ -348,6 +377,7 @@ export const DatasetsFilters = ({
       allLicenses,
       allFrequencies,
       zoneOptions,
+      zoneLabels,
       allGranularities,
     ]
   );

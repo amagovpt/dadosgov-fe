@@ -15,7 +15,8 @@ import {
 import { twJoin } from "tailwind-merge";
 import { Pagination } from "@/components/Pagination";
 import { DataservicesFilters } from "@/components/dataservices/DataservicesFilters";
-import { APIResponse, Dataservice } from "@/types/api";
+import { Dataservice } from "@/service/types/dataservice";
+import { APIResponse } from "@/service/types/shared";
 import HeroGeneral from "@/components/HeroGeneral";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";

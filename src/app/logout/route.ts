@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendFetch } from "../backend-fetch";
+import { backendFetch, forwardedHeaders } from "../backend-fetch";
 
 export async function GET(request: NextRequest) {
   let backendResponse: Response;
@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
       method: "GET",
       headers: {
         Cookie: request.headers.get("cookie") || "",
+        ...forwardedHeaders(request),
       },
       redirect: "manual",
     });
@@ -25,12 +26,18 @@ export async function GET(request: NextRequest) {
     responseHeaders.append("Set-Cookie", cleaned);
   }
 
-  const location = backendResponse.headers.get("location");
-  if (backendResponse.status === 302 && location) {
-    return NextResponse.redirect(new URL(location, request.url), {
-      status: 302,
-      headers: responseHeaders,
-    });
+  // The backend replies 302 with an absolute Location on its own host
+  // (e.g. https://<backend>/?flash=logout). Forwarding that redirect makes the
+  // client-side fetch() follow it cross-origin and fail CORS, so logout()
+  // throws and the UI never updates. Mirror the login route handler instead:
+  // convert the redirect into a 200 JSON response carrying the Set-Cookie
+  // headers — the caller handles navigation itself.
+  if (backendResponse.status === 302) {
+    responseHeaders.set("Content-Type", "application/json");
+    return NextResponse.json(
+      { message: "Logout successful" },
+      { status: 200, headers: responseHeaders }
+    );
   }
 
   return new NextResponse(null, { status: backendResponse.status, headers: responseHeaders });

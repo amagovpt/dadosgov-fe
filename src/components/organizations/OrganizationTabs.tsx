@@ -18,8 +18,11 @@ import {
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { TabPagination } from "@/components/Shared/TabPagination";
 import { ReuseCardLinks } from "@/components/Shared/ReuseCardLinks";
-import { Organization, Dataset, Reuse, APIResponse } from "@/types/api";
-import { fetchOrgDatasets, fetchOrgReuses } from "@/services/api";
+import { Dataset } from "@/service/types/dataset";
+import { Organization } from "@/service/types/identity";
+import { Reuse } from "@/service/types/reuse";
+import { APIResponse } from "@/service/types/shared";
+import { fetchOrgDatasets, fetchOrgReuses } from "@/service/api/organizations";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";

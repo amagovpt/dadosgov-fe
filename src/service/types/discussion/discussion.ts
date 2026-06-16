@@ -1,4 +1,4 @@
-﻿
+
 export interface DiscussionUser {
   id: string;
   first_name: string;

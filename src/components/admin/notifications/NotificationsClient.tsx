@@ -5,8 +5,8 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import { fetchNotifications, markNotificationRead } from "@/services/api";
-import type { Notification, ValidateHarvesterNotificationDetails } from "@/types/api";
+import { fetchNotifications, markNotificationRead } from "@/service/api/notifications";
+import type { Notification, ValidateHarvesterNotificationDetails } from "@/service/types/notifications-reporting";
 import {
   harvesterValidationLink,
   isHarvesterValidation,

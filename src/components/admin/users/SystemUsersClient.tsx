@@ -17,8 +17,8 @@ import {
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { createPaginationProps } from "@/utils/createPaginationProps";
-import { fetchUsers } from "@/services/api";
-import { UserAdmin } from "@/types/api";
+import { fetchUsers } from "@/service/api/users";
+import { UserAdmin } from "@/service/types/identity";
 import TextLink from "@/components/Primitives/TextLink";
 import ResultsCount from "../ResultsCount";
 import TableActionsCell from "../TableActionsCell";

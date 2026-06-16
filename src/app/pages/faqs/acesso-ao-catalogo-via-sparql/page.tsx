@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import { getFaqs } from '@/services/queries/faqs';
+import { getFaqs } from '@/service/queries/faqs/faqs';
 import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
 import Anchor from '@/components/Shared/Anchor';
 

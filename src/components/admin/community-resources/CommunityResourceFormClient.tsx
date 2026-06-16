@@ -15,14 +15,11 @@ import {
   CardLinks,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import {
-  createCommunityResource,
-  uploadCommunityResourceFile,
-  fetchDataset,
-  fetchMyDatasets,
-  fetchResourceTypes,
-} from "@/services/api";
-import type { Dataset, CommunityResource, ResourceType } from "@/types/api";
+import { createCommunityResource, uploadCommunityResourceFile } from "@/service/api/community-resources";
+import { fetchDataset, fetchMyDatasets, fetchResourceTypes } from "@/service/api/datasets";
+import type { ResourceType } from "@/service/types/catalog";
+import type { CommunityResource } from "@/service/types/community-resource";
+import type { Dataset } from "@/service/types/dataset";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/context/AuthContext";

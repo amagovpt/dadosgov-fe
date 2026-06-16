@@ -1,4 +1,4 @@
-import { fetchDataservices } from '@/services/api';
+import { fetchDataservices } from "@/service/api/dataservices";
 import DataservicesClient from '@/components/dataservices/DataservicesClient';
 import { Metadata } from 'next';
 

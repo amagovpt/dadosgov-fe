@@ -15,7 +15,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
 import { useAuth } from "@/context/AuthContext";
-import { logout } from "@/services/api";
+import { logout } from "@/service/api/auth";
 
 
 function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {
@@ -149,7 +149,11 @@ export function AdminHeader() {
                     window.location.href = "/saml/logout";
                     return;
                   }
-                  await logout();
+                  try {
+                    await logout();
+                  } catch (error) {
+                    console.error("Logout error:", error);
+                  }
                   window.location.href = "/";
                 }}
               >

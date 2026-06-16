@@ -1,9 +1,13 @@
-import { fetchReusesListing } from '@/services/api';
+import { fetchReusesListing } from "@/service/api/reuses";
 import ReusesClient from '@/components/reuses/ReusesClient';
-import { ReuseFilters } from '@/types/api';
+import { ReuseFilters } from "@/service/types/reuse";
+import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 import { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+// The page is already dynamic (it reads searchParams); we intentionally do NOT
+// force-dynamic so the listing fetch can use the Next.js Data Cache
+// (revalidate: 60) — repeated page/query loads are served from cache and don't
+// hit the backend rate-limit (per-IP, collapsed site-wide by the F5).
 
 export const metadata: Metadata = {
     title: 'Reutilizações - dados.gov.pt',
@@ -40,7 +44,10 @@ export default async function ReusesPage({
     }
 
     // LEDG-1836: one aggregated call replaces the prior Promise.all of 6 fetches.
-    const data = await fetchReusesListing(page, 12, apiFilters);
+    // Relay the real client IP on the SSR fetch (which, on a Data Cache miss,
+    // goes direct to the backend) so the limiter keys per visitor, not the Next IP.
+    const forwarded = await serverForwardedHeaders();
+    const data = await fetchReusesListing(page, 12, apiFilters, forwarded);
 
     return (
         <ReusesClient

@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@ama-pt/agora-design-system";
-import { fetchOrganizations, suggestTags } from "@/services/api";
-import { Organization } from "@/types/api";
+import { fetchOrganizations } from "@/service/api/organizations";
+import { suggestTags } from "@/service/api/search";
+import { Organization } from "@/service/types/identity";
 import {
   AdvancedFilterGroup,
   AdvancedFiltersSidebar,
