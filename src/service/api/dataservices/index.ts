@@ -4,7 +4,7 @@ import type {
   DataserviceUpdatePayload,
 } from "@/service/types/dataservice";
 import type { APIResponse } from "@/service/types/shared";
-import { API_AUTH_URL, API_BASE_URL } from "@/service/utils/API";
+import { API_AUTH_URL, API_BASE_URL, authFetch } from "@/service/utils/API";
 
 
 /**
@@ -15,18 +15,30 @@ export async function fetchMyDataservices(
   pageSize: number = 20
 ): Promise<APIResponse<Dataservice>> {
   try {
-    const res = await fetch(
-      `${API_AUTH_URL}/me/dataservices/?page=${page}&page_size=${pageSize}`,
-      { cache: "no-store", credentials: "include" }
-    );
+    const res = await authFetch("/me/dataservices/", { cache: "no-store" });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch my dataservices: ${res.statusText}`);
     }
 
-    return await res.json();
+    // The /me/dataservices endpoint returns a plain list; normalise it into the
+    // paginated APIResponse shape and keep only personal entries (owned by the
+    // user, not by an organization), mirroring fetchMyDatasets.
+    const raw: Dataservice[] = await res.json();
+    const personal = raw.filter((d) => !!d.owner && !d.organization);
+    const total = personal.length;
+    const start = (page - 1) * pageSize;
+    const data = personal.slice(start, start + pageSize);
+
+    return {
+      data,
+      page,
+      page_size: pageSize,
+      total,
+      next_page: start + pageSize < total ? String(page + 1) : null,
+      previous_page: page > 1 ? String(page - 1) : null,
+    };
   } catch (error) {
-    console.error("Error fetching discussions:", error);
     console.error("Error fetching my dataservices:", error);
     return {
       data: [],
