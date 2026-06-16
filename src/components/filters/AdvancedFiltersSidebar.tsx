@@ -17,6 +17,12 @@ export interface AdvancedFilterGroup {
   minSearchChars?: number;
   minCharsMessage?: string;
   emptyMessage?: string;
+  /**
+   * Display labels for selected ids (`suggest` groups only). Lets a selected
+   * item keep its human-readable name once it drops out of the live
+   * suggestions list (e.g. after clearing the search input).
+   */
+  selectedLabels?: Record<string, string>;
 }
 
 interface AdvancedFiltersSidebarProps {
@@ -52,7 +58,7 @@ export function AdvancedFiltersSidebar({
         const selectedItems: AdvancedFilterOption[] = group.suggest
           ? activeValues
               .filter((value) => !group.data.some((item) => item.id === value))
-              .map((value) => ({ id: value, name: value }))
+              .map((value) => ({ id: value, name: group.selectedLabels?.[value] ?? value }))
           : [];
 
         const uniqueData = Array.from(
