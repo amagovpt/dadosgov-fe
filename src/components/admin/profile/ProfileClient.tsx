@@ -1,7 +1,7 @@
 "use client";
 
+import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -20,16 +20,9 @@ import type { Activity } from "@/service/types/catalog";
 import type { ApiToken, UserFollowing, UserPublic } from "@/service/types/identity";
 import { format, formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import {
-  Avatar,
   CardNoResults,
   Icon,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableHeaderCell,
-  TableRow,
   Tab,
   TabBody,
   TabHeader,
@@ -41,9 +34,9 @@ import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePas
 import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
 import UserProfileHeaderCard from "@/components/admin/profile/UserProfileHeaderCard";
 import UserProfileMainTab from "@/components/admin/profile/UserProfileMainTab";
+import UserProfileSubscriptionsTab from "@/components/admin/profile/UserProfileSubscriptionsTab";
+import UserProfileActivityTab from "@/components/admin/profile/UserProfileActivityTab";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import TextLink from "@/components/Primitives/TextLink";
-import { translateActivityLabel } from "@/utils/activityLabels";
 
 function toProxiedUrl(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -62,7 +55,6 @@ export default function ProfileClient() {
   const { user, samlLogin, refresh } = useAuth();
 
   const [profile, setProfile] = useState<UserPublic | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const [firstName, setFirstName] = useState("");
@@ -114,8 +106,6 @@ export default function ProfileClient() {
         setEmail(data.email || "");
       } catch (error) {
         console.error("Error loading profile:", error);
-      } finally {
-        setIsLoadingProfile(false);
       }
     }
 
@@ -264,7 +254,7 @@ export default function ProfileClient() {
     }
   };
 
-  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
@@ -431,66 +421,10 @@ export default function ProfileClient() {
           <Tab>
             <TabHeader>Subscrições</TabHeader>
             <TabBody>
-              <div className="mt-24">
-                {isLoadingSubscriptions ? (
-                  <p className="text-base text-neutral-900">A carregar subscrições...</p>
-                ) : subscriptions.length === 0 ? (
-                  <CardNoResults
-                    className="admin-page__empty"
-                    position="center"
-                    icon={
-                      <Icon name="agora-line-bell" className="icon-xl h-12 w-12 text-primary-500" />
-                    }
-                    title="Sem subscrições"
-                    description="Não segue conteúdos"
-                    hasAnchor={false}
-                  />
-                ) : (
-                  <div className="flex flex-col gap-16">
-                    {subscriptions.map((sub) => {
-                      const subName = sub.following.name || sub.following.title || "";
-                      const subAvatar =
-                        sub.following.avatar_thumbnail || sub.following.image_thumbnail;
-                      const initials = subName
-                        .split(" ")
-                        .map((word) => word.charAt(0).toUpperCase())
-                        .slice(0, 2)
-                        .join("");
-                      const classToPath: Record<string, string> = {
-                        Dataset: "/pages/datasets",
-                        Organization: "/pages/organizations",
-                        Reuse: "/pages/reuses",
-                        User: "/pages/users",
-                      };
-                      const basePath = classToPath[sub.following.class];
-                      const href =
-                        basePath && sub.following.slug ? `${basePath}/${sub.following.slug}` : null;
-                      const content = (
-                        <div className="flex items-center gap-16">
-                          <Avatar
-                            avatarType={subAvatar ? "image" : "initials"}
-                            srcPath={(subAvatar || initials) as unknown as undefined}
-                            alt={subName}
-                            className="h-48 w-48"
-                          />
-                          <span className="text-base font-medium text-neutral-900">{subName}</span>
-                        </div>
-                      );
-                      return href ? (
-                        <Link
-                          key={sub.id}
-                          href={href}
-                          className="transition-opacity hover:opacity-80"
-                        >
-                          {content}
-                        </Link>
-                      ) : (
-                        <div key={sub.id}>{content}</div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              <UserProfileSubscriptionsTab
+                subscriptions={subscriptions}
+                isLoading={isLoadingSubscriptions}
+              />
             </TabBody>
           </Tab>
           <Tab>
@@ -513,79 +447,15 @@ export default function ProfileClient() {
           <Tab>
             <TabHeader>Atividades</TabHeader>
             <TabBody>
-              <div className="mt-24">
-                {isLoadingActivities && <p className="text-sm text-neutral-700">A carregar...</p>}
-                {!isLoadingActivities && activities.length === 0 && (
-                  <CardNoResults
-                    className="admin-page__empty"
-                    position="center"
-                    icon={
-                      <Icon name="agora-line-time" className="icon-xl h-12 w-12 text-primary-500" />
-                    }
-                    title="Sem atividades"
-                    description="Nenhuma atividade registada."
-                    hasAnchor={false}
-                  />
-                )}
-                {!isLoadingActivities && activities.length > 0 && (
-                  <>
-                    <h2 className="mb-16 text-base font-medium text-neutral-900">
-                      {activityTotal} ATIVIDADES
-                    </h2>
-                    <AdminPaginatedTable
-                      pageSize={activityPageSize}
-                      totalItems={activityTotal}
-                      currentPage={activityPage}
-                      setCurrentPage={setActivityPage}
-                      setPageSize={setActivityPageSize}
-                    >
-                      <TableHeader>
-                        <TableRow>
-                          <TableHeaderCell>Utilizador</TableHeaderCell>
-                          <TableHeaderCell>Ação</TableHeaderCell>
-                          <TableHeaderCell>Data</TableHeaderCell>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {activities.map((activity, index) => (
-                          <TableRow key={index}>
-                            <TableCell headerLabel="Utilizador">
-                              <div className="flex items-center gap-8">
-                                <Avatar
-                                  avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
-                                  srcPath={
-                                    (activity.actor?.avatar_thumbnail ||
-                                      `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
-                                  }
-                                  alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
-                                />
-                                <TextLink
-                                  href={`/pages/admin/users/${activity.actor?.id}`}
-                                  className="text-sm"
-                                >
-                                  {activity.actor?.first_name} {activity.actor?.last_name}
-                                </TextLink>
-                              </div>
-                            </TableCell>
-                            <TableCell headerLabel="Ação">
-                              {translateActivityLabel(activity.label)}
-                            </TableCell>
-                            <TableCell headerLabel="Data">
-                              {new Date(activity.created_at).toLocaleDateString("pt-PT", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </AdminPaginatedTable>
-                  </>
-                )}
-              </div>
+              <UserProfileActivityTab
+                activities={activities}
+                isLoading={isLoadingActivities}
+                activityTotal={activityTotal}
+                activityPage={activityPage}
+                activityPageSize={activityPageSize}
+                onPageChange={setActivityPage}
+                onPageSizeChange={setActivityPageSize}
+              />
             </TabBody>
           </Tab>
         </Tabs>

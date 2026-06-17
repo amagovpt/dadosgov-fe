@@ -240,7 +240,7 @@ export default function UserProfileMainTab({
           {apiTokens.length > 0 ? (
             <div className="flex flex-col gap-8">
               <p className="text-sm font-medium text-neutral-900">
-                Chaves activas ({apiTokens.length})
+                Chaves ativas ({apiTokens.length})
               </p>
               <div className="flex flex-col divide-y divide-neutral-200 rounded-4 border border-neutral-200">
                 {apiTokens.map((token) => (
@@ -326,7 +326,8 @@ export default function UserProfileMainTab({
 
         {emailChangeSuccess && !isEditingEmail && (
           <p className="text-sm text-neutral-600">
-            Aguarda confirmação por e-mail — até confirmar, o e-mail ativo é <strong>{email}</strong>
+            Aguarda confirmação por e-mail — até confirmar, o e-mail ativo é{" "}
+            <strong>{email}</strong>
           </p>
         )}
 
