@@ -256,6 +256,19 @@ export default function OrgProfileClient() {
     >
       {org && (
         <div className="profile-card">
+          <div className="absolute right-32 top-32">
+            <Button
+              variant="primary"
+              appearance="outline"
+              className="bg-white"
+              hasIcon
+              leadingIcon="agora-line-eye"
+              leadingIconHover="agora-solid-eye"
+              onClick={() => router.push(`/pages/organizations/${org.slug}`)}
+            >
+              Ver perfil público
+            </Button>
+          </div>
           <div className="profile-card__avatar-container">
             {logoPreview || org.logo_thumbnail ? (
               <img
