@@ -1,77 +1,58 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { fetchMyFollowing } from "@/service/api/followers";
-import { fetchFullProfile, uploadAvatar, deleteAvatar, generateApiKey, fetchApiTokens, revokeApiToken, requestEmailChange } from "@/service/api/profile";
+import {
+  fetchFullProfile,
+  uploadAvatar,
+  deleteAvatar,
+  generateApiKey,
+  fetchApiTokens,
+  revokeApiToken,
+  requestEmailChange,
+} from "@/service/api/profile";
 import { fetchUserActivity, updateProfile } from "@/service/api/users";
 import { Activity } from "@/service/types/catalog";
 import { ApiToken, UserFollowing, UserPublic } from "@/service/types/identity";
-import { formatDistanceToNow } from "date-fns";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
-import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import {
-  Avatar,
-  Button,
   CardNoResults,
   Icon,
-  InputText,
-  InputTextArea,
-  StatusCard,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
   Tabs,
   Tab,
   TabHeader,
   TabBody,
-  usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
-import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import TextLink from "@/components/Primitives/TextLink";
-import { translateActivityLabel } from "@/utils/activityLabels";
-
-function toProxiedUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    const parsed = new URL(url);
-    return parsed.pathname + parsed.search;
-  } catch {
-    return url;
-  }
-}
+import { toProxiedUrl } from "./profileUtils";
+import { ProfileCard } from "./ProfileCard";
+import { ProfileFormTab } from "./ProfileFormTab";
+import { SubscriptionsTab } from "./SubscriptionsTab";
+import { ActivitiesTab } from "./ActivitiesTab";
 
 export default function ProfileClient() {
   const router = useRouter();
-  const { show } = usePopupContext();
   const { displayName } = useCurrentUser();
   const { user, samlLogin, refresh } = useAuth();
 
   const [profile, setProfile] = useState<UserPublic | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [about, setAbout] = useState("");
   const [website, setWebsite] = useState("");
+
   const [apiTokens, setApiTokens] = useState<ApiToken[]>([]);
   const [newToken, setNewToken] = useState<string | null>(null);
   const [newTokenName, setNewTokenName] = useState("");
   const [revokingTokenId, setRevokingTokenId] = useState<string | null>(null);
   const [tokenCopied, setTokenCopied] = useState(false);
-  const [email, setEmail] = useState("");
 
+  const [email, setEmail] = useState("");
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
@@ -99,7 +80,6 @@ export default function ProfileClient() {
     async function loadProfile() {
       try {
         const data = await fetchFullProfile();
-        console.log("[ProfileClient] avatar_thumbnail:", data.avatar_thumbnail);
         setProfile(data);
         if (data.avatar_thumbnail) {
           setAvatarPreview(toProxiedUrl(data.avatar_thumbnail));
@@ -111,8 +91,6 @@ export default function ProfileClient() {
         setEmail(data.email || "");
       } catch (error) {
         console.error("Error loading profile:", error);
-      } finally {
-        setIsLoadingProfile(false);
       }
     }
     async function loadApiTokens() {
@@ -165,12 +143,7 @@ export default function ProfileClient() {
     setSaveSuccess(false);
     setSaveError("");
     try {
-      const updated = await updateProfile({
-        first_name: firstName,
-        last_name: lastName,
-        about,
-        website,
-      });
+      const updated = await updateProfile({ first_name: firstName, last_name: lastName, about, website });
       setProfile(updated);
       setSaveSuccess(true);
       await refresh();
@@ -264,14 +237,12 @@ export default function ProfileClient() {
       return;
     }
     setAvatarError(null);
-    // Show image immediately via blob URL, then replace with server URL after upload.
     if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
     const localPreview = URL.createObjectURL(file);
     setAvatarPreview(localPreview);
     try {
       await uploadAvatar(file);
       const updated = await fetchFullProfile();
-      console.log("[ProfileClient] avatar_thumbnail after upload:", updated.avatar_thumbnail);
       if (updated.avatar_thumbnail) {
         if (localPreview.startsWith("blob:")) URL.revokeObjectURL(localPreview);
         setAvatarPreview(toProxiedUrl(updated.avatar_thumbnail));
@@ -307,10 +278,6 @@ export default function ProfileClient() {
     }
   };
 
-  const lastModified = profile?.since
-    ? format(new Date(profile.since), "d 'de' MMMM 'de' yyyy", { locale: pt })
-    : "";
-
   return (
     <AdminLayout
       breadcrumbItems={[
@@ -321,504 +288,74 @@ export default function ProfileClient() {
       title="Perfil"
       headerAction={null}
     >
+      <ProfileCard
+        profile={profile}
+        avatarPreview={avatarPreview}
+        onViewPublic={() => router.push(`/pages/users/${user?.slug || ""}`)}
+      />
 
-      <div className="profile-card">
-        <div className="profile-card__avatar-container">
-          {avatarPreview || profile?.avatar_thumbnail ? (
-            <img
-              src={avatarPreview ?? profile!.avatar_thumbnail!}
-              alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
-              className="profile-card__avatar-img"
-            />
-          ) : (
-            <Avatar
-              avatarType={profile?.first_name || profile?.last_name ? "initials" : "icon"}
-              srcPath={
-                (`${(profile?.first_name || "")[0] || ""}${(profile?.last_name || "")[0] || ""}`.toUpperCase() ||
-                  "agora-line-user") as unknown as undefined
-              }
-              alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
-              className="profile-card__avatar"
-            />
-          )}
-        </div>
-
-        <div className="profile-card__body">
-          <div className="profile-card__info">
-            {profile?.organizations?.[0] && (
-              <p className="text-base font-light leading-7 text-neutral-900">
-                {profile.organizations[0].name}
-              </p>
-            )}
-            <p className="text-xl font-semibold leading-8 text-neutral-900">
-              {profile ? `${profile.first_name} ${profile.last_name}` : "..."}
-            </p>
-            {lastModified && (
-              <p className="text-base leading-7 text-neutral-900">
-                <span className="font-semibold">Membro desde:</span> {lastModified}
-              </p>
-            )}
-          </div>
-
-          <div className="absolute right-32 top-32">
-            <Button
-              variant="primary"
-              appearance="outline"
-              className="bg-white"
-              hasIcon
-              leadingIcon="agora-line-eye"
-              leadingIconHover="agora-solid-eye"
-              onClick={() => router.push(`/pages/users/${user?.slug || ""}`)}
-            >
-              Ver perfil público
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
       <div className="mt-32">
         <Tabs>
           <Tab active>
             <TabHeader>Perfil</TabHeader>
             <TabBody>
-              <div
-                className="admin-page__form mt-24"
-                style={{
-                  maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))",
+              <ProfileFormTab
+                profile={profile}
+                firstName={firstName}
+                lastName={lastName}
+                about={about}
+                website={website}
+                isSaving={isSaving}
+                saveSuccess={saveSuccess}
+                saveError={saveError}
+                samlLogin={!!samlLogin}
+                onFirstNameChange={setFirstName}
+                onLastNameChange={setLastName}
+                onAboutChange={setAbout}
+                onWebsiteChange={setWebsite}
+                onSave={handleSave}
+                avatarError={avatarError}
+                avatarUploaderKey={avatarUploaderKey}
+                isDeletingAvatar={isDeletingAvatar}
+                onAvatarChange={handleAvatarChange}
+                onDeleteAvatar={handleDeleteAvatar}
+                onAvatarSecurityError={() => setAvatarError(POISONED_FILE_WARNING)}
+                apiTokens={apiTokens}
+                newToken={newToken}
+                newTokenName={newTokenName}
+                tokenCopied={tokenCopied}
+                isGeneratingKey={isGeneratingKey}
+                revokingTokenId={revokingTokenId}
+                onTokenNameChange={setNewTokenName}
+                onGenerateApiKey={handleGenerateApiKey}
+                onCopyToken={handleCopyToken}
+                onRevokeToken={handleRevokeToken}
+                email={email}
+                pendingEmail={pendingEmail}
+                newEmail={newEmail}
+                isEditingEmail={isEditingEmail}
+                isChangingEmail={isChangingEmail}
+                emailChangeSuccess={emailChangeSuccess}
+                onStartEditEmail={() => {
+                  setIsEditingEmail(true);
+                  setNewEmail(emailChangeSuccess ? pendingEmail : "");
                 }}
-              >
-                <h2 className="admin-page__section-title">EDITAR PERFIL</h2>
-
-                {saveSuccess && (
-                  <StatusCard
-                    variant="success"
-                    showIcon
-                    description="Perfil guardado com sucesso."
-                  />
-                )}
-                {saveError && <StatusCard variant="danger" showIcon description={saveError} />}
-
-                <div className="admin-page__fields-group">
-                  <div className="flex gap-[18px]">
-                    <div className="flex-1">
-                      <InputText
-                        label="Nome *"
-                        placeholder="Insira o nome aqui"
-                        id="first-name"
-                        value={firstName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setFirstName(e.target.value)
-                        }
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <InputText
-                        label="Último nome *"
-                        placeholder="Insira o apelido aqui"
-                        id="last-name"
-                        value={lastName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setLastName(e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <InputTextArea
-                    label="Biografia"
-                    placeholder="Insira a descrição aqui"
-                    id="biography"
-                    rows={4}
-                    value={about}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setAbout(e.target.value)
-                    }
-                  />
-
-                  <InputText
-                    label="Site da Internet"
-                    placeholder="Insira o URL aqui"
-                    id="website"
-                    value={website}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setWebsite(e.target.value)
-                    }
-                  />
-
-                  <div>
-                    <span className="text-base font-medium leading-7 text-primary-900">
-                      Foto de perfil
-                    </span>
-                    <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-                      <DragAndDropUploader
-                        key={avatarUploaderKey}
-                        label="Ficheiros"
-                        dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                        inputLabel="Selecione ou arraste o ficheiro"
-                        selectedFilesLabel="ficheiro selecionado"
-                        removeFileButtonLabel="Remover ficheiro"
-                        replaceFileButtonLabel="Substituir ficheiro"
-                        extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-                        accept=".jpg,.jpeg,.png"
-                        maxSize={4194304}
-                        maxCount={1}
-                        maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-                        forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                        hasError={!!avatarError}
-                        hasFeedback={!!avatarError}
-                        feedbackState="danger"
-                        feedbackText={avatarError ?? undefined}
-                        onChange={handleAvatarChange}
-                        onSecurityError={() => setAvatarError(POISONED_FILE_WARNING)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-16">
-                    <div>
-                      <p className="mb-8 text-base font-medium text-neutral-900">Chaves da API</p>
-                      <p className="text-sm mb-16 text-neutral-700">
-                        Gere uma chave para autenticar pedidos à API. Por motivos de segurança, a
-                        chave completa só é apresentada uma vez no momento da criação — guarde-a num
-                        local seguro.
-                      </p>
-                    </div>
-
-                    <div className="flex items-end gap-16">
-                      <div className="flex-1">
-                        <InputText
-                          label="Nome da nova chave (opcional)"
-                          placeholder="Ex.: Script backup, Integração X..."
-                          id="new-token-name"
-                          value={newTokenName}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setNewTokenName(e.target.value)
-                          }
-                        />
-                      </div>
-                      <Button
-                        appearance="outline"
-                        variant="primary"
-                        hasIcon
-                        leadingIcon="agora-line-edit"
-                        leadingIconHover="agora-solid-edit"
-                        onClick={handleGenerateApiKey}
-                        disabled={isGeneratingKey}
-                      >
-                        {isGeneratingKey ? "A gerar..." : "Gerar nova chave"}
-                      </Button>
-                    </div>
-
-                    {newToken && (
-                      <StatusCard
-                        variant="warning"
-                        showIcon
-                        description={
-                          <div className="flex flex-col gap-8">
-                            <p>
-                              <strong>Copie esta chave agora.</strong> Não voltará a ser
-                              apresentada.
-                            </p>
-                            <div className="flex items-center gap-8">
-                              <code className="text-xs flex-1 break-all rounded-4 border border-neutral-300 bg-neutral-50 px-12 py-8">
-                                {newToken}
-                              </code>
-                              <Button
-                                appearance="outline"
-                                variant="primary"
-                                hasIcon
-                                leadingIcon={tokenCopied ? "agora-line-check" : "agora-line-copy"}
-                                leadingIconHover={
-                                  tokenCopied ? "agora-solid-check" : "agora-solid-copy"
-                                }
-                                onClick={handleCopyToken}
-                              >
-                                {tokenCopied ? "Copiado" : "Copiar"}
-                              </Button>
-                            </div>
-                          </div>
-                        }
-                      />
-                    )}
-
-                    {apiTokens.length > 0 ? (
-                      <div className="flex flex-col gap-8">
-                        <p className="text-sm font-medium text-neutral-900">
-                          Chaves activas ({apiTokens.length})
-                        </p>
-                        <div className="flex flex-col divide-y divide-neutral-200 rounded-4 border border-neutral-200">
-                          {apiTokens.map((token) => (
-                            <div
-                              key={token.id}
-                              className="flex items-center justify-between gap-16 px-16 py-12"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-8">
-                                  <code className="text-sm font-mono text-neutral-900">
-                                    {token.token_prefix}…
-                                  </code>
-                                  {token.name && (
-                                    <span className="text-sm text-neutral-700">— {token.name}</span>
-                                  )}
-                                </div>
-                                <p className="text-xs mt-4 text-neutral-700">
-                                  Criada em{" "}
-                                  {format(new Date(token.created_at), "dd/MM/yyyy", {
-                                    locale: pt,
-                                  })}
-                                  {token.last_used_at
-                                    ? ` · último uso ${formatDistanceToNow(
-                                        new Date(token.last_used_at),
-                                        { locale: pt, addSuffix: true }
-                                      )}`
-                                    : " · nunca utilizada"}
-                                </p>
-                              </div>
-                              <Button
-                                appearance="outline"
-                                variant="danger"
-                                hasIcon
-                                leadingIcon="agora-line-trash"
-                                leadingIconHover="agora-solid-trash"
-                                onClick={() => handleRevokeToken(token.id)}
-                                disabled={revokingTokenId === token.id}
-                              >
-                                {revokingTokenId === token.id ? "A revogar..." : "Revogar"}
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm italic text-neutral-700">
-                        Ainda não tem chaves de API geradas.
-                      </p>
-                    )}
-                  </div>
-
-                  {emailChangeSuccess && (
-                    <StatusCard
-                      variant="success"
-                      showIcon
-                      description={`E-mail de confirmação enviado para ${pendingEmail}. Verifique a sua caixa de entrada e clique no link para concluir.`}
-                    />
-                  )}
-
-                  <div className="flex items-end gap-16">
-                    <div className="flex-1">
-                      {isEditingEmail ? (
-                        <InputText
-                          label="Novo endereço de e-mail"
-                          placeholder="Insira o novo e-mail aqui"
-                          id="new-email"
-                          value={newEmail}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setNewEmail(e.target.value)
-                          }
-                        />
-                      ) : (
-                        <InputText
-                          label="Endereço de e-mail"
-                          placeholder="Insira o e-mail aqui"
-                          id="email"
-                          value={emailChangeSuccess ? pendingEmail : email}
-                          readOnly
-                        />
-                      )}
-                    </div>
-                    {!samlLogin && !isEditingEmail && (
-                      <Button
-                        appearance="outline"
-                        variant="neutral"
-                        hasIcon
-                        leadingIcon="agora-line-edit"
-                        leadingIconHover="agora-solid-edit"
-                        onClick={() => {
-                          setIsEditingEmail(true);
-                          setNewEmail(emailChangeSuccess ? pendingEmail : "");
-                        }}
-                      >
-                        Alterar e-mail
-                      </Button>
-                    )}
-                  </div>
-                  {emailChangeSuccess && !isEditingEmail && (
-                    <p className="text-sm text-neutral-600">
-                      Aguarda confirmação por e-mail — até confirmar, o e-mail ativo é{" "}
-                      <strong>{email}</strong>
-                    </p>
-                  )}
-                  {!samlLogin && isEditingEmail && (
-                    <div className="flex justify-end gap-8">
-                      <Button
-                        appearance="outline"
-                        variant="primary"
-                        onClick={handleEmailChange}
-                        disabled={
-                          isChangingEmail ||
-                          !newEmail ||
-                          newEmail === email ||
-                          newEmail === pendingEmail
-                        }
-                      >
-                        {isChangingEmail ? "A enviar..." : "Confirmar"}
-                      </Button>
-                      <Button
-                        appearance="outline"
-                        variant="neutral"
-                        onClick={() => {
-                          setIsEditingEmail(false);
-                          setNewEmail("");
-                        }}
-                        disabled={isChangingEmail}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  )}
-
-                  <div className="flex items-end gap-16">
-                    <div className="flex-1">
-                      <InputText
-                        label="Senha"
-                        placeholder="••••••••"
-                        id="password"
-                        type="password"
-                        readOnly
-                      />
-                    </div>
-                    {!samlLogin && (
-                      <Button
-                        appearance="outline"
-                        variant="neutral"
-                        hasIcon
-                        leadingIcon="agora-line-edit"
-                        leadingIconHover="agora-solid-edit"
-                        onClick={() =>
-                          show(<ChangePasswordPopupContent />, {
-                            title: "Altere a sua senha",
-                            closeAriaLabel: "Fechar",
-                            dimensions: "m",
-                          })
-                        }
-                      >
-                        Alterar senha
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-16 flex justify-end">
-                  <Button
-                    variant="primary"
-                    hasIcon={true}
-                    leadingIcon="agora-line-check-circle"
-                    leadingIconHover="agora-solid-check-circle"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? "A guardar..." : "Guardar"}
-                  </Button>
-                </div>
-
-                {profile?.avatar_thumbnail && (
-                  <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
-                    <StatusCard
-                      variant="danger"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Atenção esta ação é irreversível.</strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={() =>
-                              show(<DeleteAvatarPopupContent onConfirm={handleDeleteAvatar} />, {
-                                title: "Eliminar foto de perfil",
-                                closeAriaLabel: "Fechar",
-                                dimensions: "s",
-                              })
-                            }
-                            disabled={isDeletingAvatar}
-                          >
-                            {isDeletingAvatar ? "A eliminar..." : "Eliminar foto de perfil"}
-                          </Button>
-                        </>
-                      }
-                    />
-                  </div>
-                )}
-              </div>
+                onNewEmailChange={setNewEmail}
+                onConfirmEmailChange={handleEmailChange}
+                onCancelEmailChange={() => {
+                  setIsEditingEmail(false);
+                  setNewEmail("");
+                }}
+              />
             </TabBody>
           </Tab>
           <Tab>
             <TabHeader>Subscrições</TabHeader>
             <TabBody>
-              <div className="mt-24">
-                {isLoadingSubscriptions ? (
-                  <p className="text-base text-neutral-900">A carregar subscrições...</p>
-                ) : subscriptions.length === 0 ? (
-                  <CardNoResults
-                    className="admin-page__empty"
-                    position="center"
-                    icon={
-                      <Icon name="agora-line-bell" className="icon-xl h-12 w-12 text-primary-500" />
-                    }
-                    title="Sem subscrições"
-                    description="Não segue conteúdos"
-                    hasAnchor={false}
-                  />
-                ) : (
-                  <div className="flex flex-col gap-16">
-                    {subscriptions.map((sub) => {
-                      const subName = sub.following.name || sub.following.title || "";
-                      const subAvatar =
-                        sub.following.avatar_thumbnail || sub.following.image_thumbnail;
-                      const initials = subName
-                        .split(" ")
-                        .map((w) => w.charAt(0).toUpperCase())
-                        .slice(0, 2)
-                        .join("");
-                      const classToPath: Record<string, string> = {
-                        Dataset: "/pages/datasets",
-                        Organization: "/pages/organizations",
-                        Reuse: "/pages/reuses",
-                        User: "/pages/users",
-                      };
-                      const basePath = classToPath[sub.following.class];
-                      const href =
-                        basePath && sub.following.slug ? `${basePath}/${sub.following.slug}` : null;
-                      const content = (
-                        <div className="flex items-center gap-16">
-                          <Avatar
-                            avatarType={subAvatar ? "image" : "initials"}
-                            srcPath={(subAvatar || initials) as unknown as undefined}
-                            alt={subName}
-                            className="h-48 w-48"
-                          />
-                          <span className="text-base font-medium text-neutral-900">{subName}</span>
-                        </div>
-                      );
-                      return href ? (
-                        <Link
-                          key={sub.id}
-                          href={href}
-                          className="transition-opacity hover:opacity-80"
-                        >
-                          {content}
-                        </Link>
-                      ) : (
-                        <div key={sub.id}>{content}</div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              <SubscriptionsTab
+                subscriptions={subscriptions}
+                isLoading={isLoadingSubscriptions}
+              />
             </TabBody>
           </Tab>
           <Tab>
@@ -841,81 +378,15 @@ export default function ProfileClient() {
           <Tab>
             <TabHeader>Atividades</TabHeader>
             <TabBody>
-              <div className="mt-24">
-                {isLoadingActivities && <p className="text-sm text-neutral-700">A carregar...</p>}
-                {!isLoadingActivities && activities.length === 0 && (
-                  <CardNoResults
-                    className="admin-page__empty"
-                    position="center"
-                    icon={
-                      <Icon name="agora-line-time" className="icon-xl h-12 w-12 text-primary-500" />
-                    }
-                    title="Sem atividades"
-                    description="Nenhuma atividade registada."
-                    hasAnchor={false}
-                  />
-                )}
-                {!isLoadingActivities && activities.length > 0 && (
-                  <>
-                    <h2 className="mb-16 text-base font-medium text-neutral-900">
-                      {activityTotal} ATIVIDADES
-                    </h2>
-                    <AdminPaginatedTable
-                      pageSize={activityPageSize}
-                      totalItems={activityTotal}
-                      currentPage={activityPage}
-                      setCurrentPage={setActivityPage}
-                      setPageSize={setActivityPageSize}
-                    >
-                      <TableHeader>
-                        <TableRow>
-                          <TableHeaderCell>Utilizador</TableHeaderCell>
-                          <TableHeaderCell>Ação</TableHeaderCell>
-                          <TableHeaderCell>Data</TableHeaderCell>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {activities.map((activity, index) => (
-                          <TableRow key={index}>
-                            <TableCell headerLabel="Utilizador">
-                              <div className="flex items-center gap-8">
-                                <Avatar
-                                  avatarType={
-                                    activity.actor?.avatar_thumbnail ? "image" : "initials"
-                                  }
-                                  srcPath={
-                                    (activity.actor?.avatar_thumbnail ||
-                                      `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined
-                                  }
-                                  alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
-                                />
-                                <TextLink
-                                  href={`/pages/admin/users/${activity.actor?.id}`}
-                                  className="text-sm"
-                                >
-                                  {activity.actor?.first_name} {activity.actor?.last_name}
-                                </TextLink>
-                              </div>
-                            </TableCell>
-                            <TableCell headerLabel="Ação">
-                              {translateActivityLabel(activity.label)}
-                            </TableCell>
-                            <TableCell headerLabel="Data">
-                              {new Date(activity.created_at).toLocaleDateString("pt-PT", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </AdminPaginatedTable>
-                  </>
-                )}
-              </div>
+              <ActivitiesTab
+                activities={activities}
+                isLoading={isLoadingActivities}
+                activityPage={activityPage}
+                activityTotal={activityTotal}
+                activityPageSize={activityPageSize}
+                onPageChange={setActivityPage}
+                onPageSizeChange={setActivityPageSize}
+              />
             </TabBody>
           </Tab>
         </Tabs>
