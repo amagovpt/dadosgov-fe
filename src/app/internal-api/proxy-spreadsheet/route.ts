@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 
-import { fetchAllowedResource, logProxyEvent } from "../_lib/fetch-allowed-resource";
+import { fetchResourceBytes, logProxyEvent } from "../_lib/fetch-resource-bytes";
 
 /**
- * Spreadsheet preview proxy — fetches an .xls / .xlsx / .ods resource on
- * behalf of the browser, parses the first worksheet server-side with SheetJS,
- * and returns a small JSON preview (headers + sample rows + totals).
+ * Spreadsheet preview proxy — given a resource UUID, streams the resource
+ * bytes through the backend catalogue resolver, parses the first worksheet
+ * server-side with SheetJS, and returns a small JSON preview (headers +
+ * sample rows + totals).
  *
  * Parsing happens on the server so the binary parser never ships to the
- * client, and the same SSRF hardening as the CSV proxy applies via the shared
- * `fetchAllowedResource` helper (allowlist, DNS pinning, size cap, content-type
- * allowlist, redirect refusal — TICKET-60 / VULN-2079).
+ * client. The browser never supplies a URL, so there is no SSRF surface
+ * here; see the `fetchResourceBytes` helper for the security model.
  */
 
 // Spreadsheets are binary archives, so allow a larger body than the CSV proxy.
@@ -19,15 +19,6 @@ import { fetchAllowedResource, logProxyEvent } from "../_lib/fetch-allowed-resou
 // rather than rendering a partial table.
 const MAX_BYTES = 5_000_000; // 5 MiB
 const MAX_SAMPLE_ROWS = 100; // rows returned for preview + type detection
-
-const ALLOWED_CONTENT_TYPE_PREFIXES = [
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
-  "application/vnd.ms-excel", // .xls
-  "application/vnd.oasis.opendocument.spreadsheet", // .ods
-  "application/octet-stream",
-  "application/zip", // .xlsx is a zip container; some servers report this
-  "application/x-zip-compressed",
-];
 
 /** Normalize a SheetJS cell value to a trimmed string for the preview. */
 function cellToString(value: unknown): string {
@@ -37,23 +28,15 @@ function cellToString(value: unknown): string {
 }
 
 export async function GET(request: NextRequest) {
-  const requesterIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "?";
-  const rawUrl = request.nextUrl.searchParams.get("url");
+  const rid = request.nextUrl.searchParams.get("rid");
 
-  const result = await fetchAllowedResource(rawUrl, {
-    allowedContentTypePrefixes: ALLOWED_CONTENT_TYPE_PREFIXES,
+  const result = await fetchResourceBytes(request, rid, {
     maxBytes: MAX_BYTES,
-    accept:
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, */*",
-    // dados.gov.pt storage serves files with `nosniff` and no content-type;
-    // SheetJS validates the bytes and we reject non-spreadsheets with 422.
-    allowMissingContentType: true,
-    requesterIp,
     logLabel: "proxy-spreadsheet",
   });
 
   if (!result.ok) {
-    return NextResponse.json({ error: result.error, ...result.extra }, { status: result.status });
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
   // A spreadsheet that hit the size cap is almost certainly truncated, and a
@@ -88,11 +71,12 @@ export async function GET(request: NextRequest) {
     headers = matrix[0].map(cellToString);
     const dataRows = matrix.slice(1);
     totalRows = dataRows.length;
-    rows = dataRows.slice(0, MAX_SAMPLE_ROWS).map((row) => headers.map((_, i) => cellToString(row[i])));
+    rows = dataRows
+      .slice(0, MAX_SAMPLE_ROWS)
+      .map((row) => headers.map((_, i) => cellToString(row[i])));
   } catch (err) {
     logProxyEvent("proxy-spreadsheet", {
       level: "warn",
-      ip: requesterIp,
       status: 422,
       reason: "parse-failed",
       detail: err instanceof Error ? err.message : String(err),

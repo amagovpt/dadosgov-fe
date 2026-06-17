@@ -1,48 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { fetchAllowedResource } from "../_lib/fetch-allowed-resource";
+import { fetchResourceBytes } from "../_lib/fetch-resource-bytes";
 
 /**
- * CSV preview proxy — fetches the CSV body of a community/dataset resource on
- * behalf of the browser and serves it back as `text/plain` for client-side
- * tabular preview.
+ * CSV preview proxy — given a resource UUID, streams the resource bytes
+ * through the backend catalogue resolver and serves them back as
+ * `text/plain` for client-side tabular preview.
  *
- * The SSRF hardening (allowlist, DNS pinning, size cap, content-type
- * allowlist, redirect refusal — TICKET-60 / VULN-2079) lives in the shared
- * `fetchAllowedResource` helper, which the spreadsheet proxy reuses too.
+ * The browser never supplies a URL, so there is no SSRF surface here; see
+ * the `fetchResourceBytes` helper for the security model.
  */
 
 const MAX_BYTES = 1_000_000; // 1 MiB cap on preview body
 
-// Loose allowlist of upstream Content-Type prefixes. We accept
-// application/octet-stream because some servers serve plain CSV with a
-// generic binary type; the body is still treated as text and capped.
-const ALLOWED_CONTENT_TYPE_PREFIXES = [
-  "text/csv",
-  "text/plain",
-  "text/tab-separated-values",
-  "application/csv",
-  "application/octet-stream",
-  "application/vnd.ms-excel",
-];
-
 export async function GET(request: NextRequest) {
-  const requesterIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "?";
-  const rawUrl = request.nextUrl.searchParams.get("url");
+  const rid = request.nextUrl.searchParams.get("rid");
 
-  const result = await fetchAllowedResource(rawUrl, {
-    allowedContentTypePrefixes: ALLOWED_CONTENT_TYPE_PREFIXES,
+  const result = await fetchResourceBytes(request, rid, {
     maxBytes: MAX_BYTES,
-    accept: "text/csv, text/plain, */*",
-    // dados.gov.pt storage serves files with `nosniff` and no content-type;
-    // the body is still size-capped and treated as text.
-    allowMissingContentType: true,
-    requesterIp,
     logLabel: "proxy-csv",
   });
 
   if (!result.ok) {
-    return NextResponse.json({ error: result.error, ...result.extra }, { status: result.status });
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
   const text = new TextDecoder("utf-8").decode(result.bytes);

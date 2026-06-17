@@ -291,19 +291,18 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
     async function fetchData() {
       setIsLoading(true);
       try {
+        // The browser sends only the resource id; the proxy resolves and
+        // streams the bytes through the backend catalogue resolver.
+        const rid = encodeURIComponent(resource.id);
         if (isSpreadsheet) {
-          const res = await fetch(
-            `/internal-api/proxy-spreadsheet?url=${encodeURIComponent(resource.url)}`
-          );
+          const res = await fetch(`/internal-api/proxy-spreadsheet?rid=${rid}`);
           if (!res.ok) throw new Error("Erro ao carregar o ficheiro");
           const json: SpreadsheetPreview = await res.json();
           const parsed = buildTabularData(json.headers, json.rows, json.totalRows);
           parsed.lastModified = res.headers.get("last-modified") ?? json.lastModified;
           setTabularData(parsed);
         } else {
-          const res = await fetch(
-            `/internal-api/proxy-csv?url=${encodeURIComponent(resource.url)}`
-          );
+          const res = await fetch(`/internal-api/proxy-csv?rid=${rid}`);
           if (!res.ok) throw new Error("Erro ao carregar o ficheiro");
           const text = await res.text();
           const parsed = parseCsv(text);
@@ -318,7 +317,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
       }
     }
     fetchData();
-  }, [resource.url, isTabular, isSpreadsheet]);
+  }, [resource.id, isTabular, isSpreadsheet]);
 
   // Cast Tabs to accept conditional children (the library type is overly strict)
   const FlexTabs = Tabs as React.FC<Omit<React.ComponentProps<typeof Tabs>, "children"> & { children: React.ReactNode }>;
