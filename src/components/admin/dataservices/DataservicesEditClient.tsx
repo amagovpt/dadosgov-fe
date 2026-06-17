@@ -113,7 +113,7 @@ export default function DataservicesEditClient() {
     setIsSaving(true);
     try {
       const updated = await updateDataservice(dataservice.id, {
-        archived: dataservice.archived ? null : new Date().toISOString(),
+        archived_at: dataservice.archived_at ? null : new Date().toISOString(),
       });
       setDataservice(updated);
     } catch (error) {
@@ -154,7 +154,7 @@ export default function DataservicesEditClient() {
         <Button
           variant="primary"
           appearance="outline"
-          disabled={!!(dataservice?.archived || dataservice?.deleted)}
+          disabled={!!(dataservice?.archived_at || dataservice?.deleted_at)}
           onClick={() =>
             dataservice && window.open(`/pages/dataservices/${dataservice.slug}`, "_blank")
           }
@@ -258,7 +258,7 @@ export default function DataservicesEditClient() {
               description={
                 <>
                   <strong>
-                    {dataservice.archived
+                    {dataservice.archived_at
                       ? "Esta API está arquivada. Pode desarquivar para voltar a indexá-la no portal."
                       : "Uma API arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto."}
                   </strong>
@@ -272,7 +272,7 @@ export default function DataservicesEditClient() {
                     onClick={handleArchive}
                     disabled={isSaving}
                   >
-                    {dataservice.archived ? "Desarquivar a API" : "Arquivar a API"}
+                    {dataservice.archived_at ? "Desarquivar a API" : "Arquivar a API"}
                   </Button>
                 </>
               }

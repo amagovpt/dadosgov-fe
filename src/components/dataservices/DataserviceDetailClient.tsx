@@ -117,7 +117,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
       {/* Actions */}
       <div className="container flex items-center justify-end gap-16">
         {dataservice.private && <Pill variant="warning">Rascunho</Pill>}
-        {dataservice.archived && <Pill variant="neutral">Arquivado</Pill>}
+        {dataservice.archived_at && <Pill variant="neutral">Arquivado</Pill>}
         <Button
           variant="primary"
           appearance={isFavorite ? "solid" : "outline"}

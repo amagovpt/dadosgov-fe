@@ -24,8 +24,8 @@ export interface Dataservice {
   owner: UserRef | null;
   created_at: string;
   last_modified: string;
-  archived: string | null;
-  deleted: string | null;
+  archived_at: string | null;
+  deleted_at: string | null;
   metrics: Metric;
   tags: string[];
   private: boolean;
@@ -70,7 +70,7 @@ export interface DataserviceUpdatePayload {
   tags?: string[];
   organization?: string;
   private?: boolean;
-  archived?: string | null;
+  archived_at?: string | null;
   datasets?: string[];
 }
 

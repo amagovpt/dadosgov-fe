@@ -193,7 +193,7 @@ export async function updateDataservice(
   payload: DataserviceUpdatePayload
 ): Promise<Dataservice> {
   const res = await fetch(`${API_AUTH_URL}/dataservices/${id}/`, {
-    method: "PUT",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify(payload),

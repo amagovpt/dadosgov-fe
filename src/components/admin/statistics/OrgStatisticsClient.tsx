@@ -347,7 +347,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                         <TableCell headerLabel="Visualizações">{ds.metrics?.views ?? 0}</TableCell>
                         <TableCell headerLabel="Favoritos">{ds.metrics?.followers ?? 0}</TableCell>
                         <TableCell headerLabel="Estado">
-                          {ds.private ? "Privado" : ds.archived ? "Arquivado" : "Público"}
+                          {ds.private ? "Privado" : ds.archived_at ? "Arquivado" : "Público"}
                         </TableCell>
                       </TableRow>
                     ))}
