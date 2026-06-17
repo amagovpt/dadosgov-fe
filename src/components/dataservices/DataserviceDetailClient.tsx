@@ -130,6 +130,18 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
         >
           {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         </Button>
+        {dataservice.base_api_url && (
+          <Button
+            variant="primary"
+            hasIcon={true}
+            trailingIcon="agora-line-external-link"
+            trailingIconHover="agora-solid-external-link"
+            className="flex-shrink-0"
+            onClick={() => window.open(dataservice.base_api_url as string, "_blank")}
+          >
+            Aceder à API
+          </Button>
+        )}
         {canEdit && (
           <Link href={`/pages/admin/dataservices/edit?id=${dataservice.id}`}>
             <Button
@@ -158,20 +170,6 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
             sidebarRef={sidebarRef}
             titleRef={titleRef}
           />
-
-          {dataservice.base_api_url && (
-            <div className="mt-24">
-              <Button
-                variant="primary"
-                hasIcon={true}
-                trailingIcon="agora-line-external-link"
-                trailingIconHover="agora-solid-external-link"
-                onClick={() => window.open(dataservice.base_api_url as string, "_blank")}
-              >
-                Aceder à API
-              </Button>
-            </div>
-          )}
         </div>
 
         {/* Sidebar */}
@@ -274,9 +272,9 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
       </div>
 
       {/* Tabs: Informações + Discussões */}
-      <div className="container">
+      <section className="w-full">
         <DataserviceTabs dataservice={dataservice} />
-      </div>
+      </section>
     </main>
   );
 }

@@ -14,9 +14,14 @@ import {
   DropdownSection,
   DropdownOption,
   CardGeneral,
+  Tag,
 } from "@ama-pt/agora-design-system";
-import { createDataservice } from "@/service/api/dataservices";
+import { createDataservice, updateDataservice } from "@/service/api/dataservices";
+import { fetchMyDatasets } from "@/service/api/datasets";
+import { fetchOrgDatasets } from "@/service/api/organizations";
+import { searchDatasets } from "@/service/api/search";
 import type { Dataservice } from "@/service/types/dataservice";
+import type { Dataset } from "@/service/types/dataset";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
@@ -54,10 +59,70 @@ export default function ApiRegistrationClient({
   // Producer identity: "user" (publish in my own name) or an organization id.
   // The Agora InputSelect reports the selected value into this ref's `.current`.
   const producerRef = useRef("user");
+  // Step 2: link internal datasets to the created API.
+  const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
+  const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([]);
+  const [datasetSearch, setDatasetSearch] = useState("");
+  const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
+  const [isLinkingDatasets, setIsLinkingDatasets] = useState(false);
 
   useEffect(() => {
     setDatasetLinkErrors({});
   }, [currentStep]);
+
+  // Preload the dataset pool with the user's own datasets and every dataset
+  // from each organization they belong to. The search bar still queries the
+  // whole portal via searchDatasets().
+  useEffect(() => {
+    const dedupe = (items: Dataset[]) =>
+      Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const personal = fetchMyDatasets(1, 100);
+    const orgs = (user?.organizations || []).map((org) => fetchOrgDatasets(org.id, 1, 100));
+    Promise.all([personal, ...orgs])
+      .then((results) => setMyDatasets(dedupe(results.flatMap((r) => r.data || []))))
+      .catch(() => {});
+  }, [user?.organizations]);
+
+  // Search datasets across the whole portal when the user types (debounced).
+  useEffect(() => {
+    const q = datasetSearch.trim();
+    if (q.length < 2) return;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchDatasets(q, 1, 20);
+        setDatasetSearchResults(res.data || []);
+      } catch {
+        setDatasetSearchResults([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [datasetSearch]);
+
+  const availableDatasets = (() => {
+    const combined: Dataset[] = [...selectedDatasets, ...datasetSearchResults, ...myDatasets];
+    const seen = new Set<string>();
+    return combined.filter((d) => {
+      if (seen.has(d.id) || d.archived || d.deleted) return false;
+      seen.add(d.id);
+      return true;
+    });
+  })();
+
+  const handleStep2Next = async () => {
+    if (createdDataservice && selectedDatasets.length > 0) {
+      setIsLinkingDatasets(true);
+      try {
+        await updateDataservice(createdDataservice.id, {
+          datasets: selectedDatasets.map((d) => d.id),
+        });
+      } catch (error) {
+        console.error("Error linking datasets to dataservice:", error);
+      } finally {
+        setIsLinkingDatasets(false);
+      }
+    }
+    onNextStep();
+  };
 
   const handleStep1Next = async () => {
     const errors: Record<string, boolean> = {};
@@ -463,15 +528,54 @@ export default function ApiRegistrationClient({
               <form className="admin-page__form">
                 <InputSelect
                   label="Pesquisar um conjunto de dados"
-                  placeholder="Procurando um conjunto de dados..."
+                  placeholder="Selecione conjuntos de dados..."
                   id="dataset-search"
+                  type="checkbox"
+                  searchable
+                  searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
+                  searchNoResultsText="Nenhum resultado encontrado"
+                  onSearchInputChange={setDatasetSearch}
+                  onChange={(options) => {
+                    const selectedIds = options.map((o) => String(o.value));
+                    setSelectedDatasets(
+                      availableDatasets.filter((d) => selectedIds.includes(d.id))
+                    );
+                  }}
                 >
                   <DropdownSection name="datasets">
-                    <DropdownOption value="dataset1">
-                      Conjunto de dados 1
-                    </DropdownOption>
+                    {availableDatasets.map((dataset) => (
+                      <DropdownOption
+                        key={dataset.id}
+                        value={dataset.id}
+                        selected={selectedDatasets.some((s) => s.id === dataset.id)}
+                      >
+                        {dataset.title}
+                      </DropdownOption>
+                    ))}
                   </DropdownSection>
                 </InputSelect>
+
+                {selectedDatasets.length > 0 && (
+                  <div className="mt-16 flex flex-wrap gap-8">
+                    {selectedDatasets.map((dataset) => (
+                      <Tag
+                        key={dataset.id}
+                        aria-label={`Remover ${dataset.title}`}
+                        onClick={() =>
+                          setSelectedDatasets((prev) =>
+                            prev.filter((d) => d.id !== dataset.id)
+                          )
+                        }
+                      >
+                        {dataset.title}
+                      </Tag>
+                    ))}
+                  </div>
+                )}
+
+                <div className="admin-page__divider-or">
+                  <span className="admin-page__divider-or-text">ou</span>
+                </div>
 
                 {datasetLinks.map((link, index) => (
                   <div key={index} className="mt-16">
@@ -533,9 +637,10 @@ export default function ApiRegistrationClient({
                     hasIcon
                     trailingIcon="agora-line-arrow-right-circle"
                     trailingIconHover="agora-solid-arrow-right-circle"
-                    onClick={onNextStep}
+                    onClick={handleStep2Next}
+                    disabled={isLinkingDatasets}
                   >
-                    Seguinte
+                    {isLinkingDatasets ? "A vincular..." : "Seguinte"}
                   </Button>
                 </div>
               </form>
