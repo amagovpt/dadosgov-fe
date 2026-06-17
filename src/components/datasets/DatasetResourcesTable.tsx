@@ -140,8 +140,13 @@ const CopyField: React.FC<{ label: string; value: string; mono?: boolean }> = ({
   );
 };
 
-const TABULAR_FORMATS = ["csv", "tsv", "xls", "xlsx", "ods", "parquet"];
+// Formats we can actually render a preview for. csv/tsv are parsed client-side
+// from the text proxy; xls/xlsx/ods are parsed server-side via the spreadsheet
+// proxy and returned as JSON.
+const TABULAR_FORMATS = ["csv", "tsv", "xls", "xlsx", "ods"];
+const SPREADSHEET_FORMATS = ["xls", "xlsx", "ods"];
 const MAX_PREVIEW_ROWS = 5;
+const MAX_SAMPLE_ROWS = 100;
 
 interface ColumnInfo {
   name: string;
@@ -192,6 +197,33 @@ const detectColumnType = (name: string, values: string[]): string => {
   return "string";
 };
 
+// Build the preview model from already-split rows. Shared by the CSV parser
+// and the server-side spreadsheet path so type detection stays consistent.
+const buildTabularData = (
+  headers: string[],
+  dataRows: string[][],
+  totalRows: number
+): TabularData => {
+  const rows = dataRows.slice(0, MAX_PREVIEW_ROWS);
+  const sampleRows = dataRows.slice(0, MAX_SAMPLE_ROWS);
+  const columns: ColumnInfo[] = headers.map((header, i) => ({
+    name: header,
+    type: detectColumnType(
+      header,
+      sampleRows.map((row) => row[i] || "")
+    ),
+  }));
+
+  return {
+    headers,
+    columns,
+    rows,
+    totalRows,
+    totalCols: headers.length,
+    lastModified: null,
+  };
+};
+
 const parseCsv = (text: string, separator = ","): TabularData => {
   const lines = text.trim().split("\n");
   if (lines.length === 0)
@@ -232,46 +264,52 @@ const parseCsv = (text: string, separator = ","): TabularData => {
   const headers = parseLine(lines[0]);
   const dataLines = lines.slice(1).filter((l) => l.trim().length > 0);
   const allRows = dataLines.map(parseLine);
-  const rows = allRows.slice(0, MAX_PREVIEW_ROWS);
 
-  const sampleRows = allRows.slice(0, 100);
-  const columns: ColumnInfo[] = headers.map((header, i) => ({
-    name: header,
-    type: detectColumnType(
-      header,
-      sampleRows.map((row) => row[i] || "")
-    ),
-  }));
-
-  return {
-    headers,
-    columns,
-    rows,
-    totalRows: dataLines.length,
-    totalCols: headers.length,
-    lastModified: null,
-  };
+  return buildTabularData(headers, allRows, dataLines.length);
 };
+
+interface SpreadsheetPreview {
+  headers: string[];
+  rows: string[][];
+  totalRows: number;
+  totalCols: number;
+  lastModified: string | null;
+}
 
 const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource }) => {
   const [tabularData, setTabularData] = useState<TabularData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isTabular = TABULAR_FORMATS.includes(resource.format?.toLowerCase() || "");
+  const format = resource.format?.toLowerCase() || "";
+  const isTabular = TABULAR_FORMATS.includes(format);
+  const isSpreadsheet = SPREADSHEET_FORMATS.includes(format);
 
   useEffect(() => {
-    if (!isTabular || resource.format?.toLowerCase() !== "csv") return;
+    if (!isTabular) return;
 
     async function fetchData() {
       setIsLoading(true);
       try {
-        const res = await fetch(`/internal-api/proxy-csv?url=${encodeURIComponent(resource.url)}`);
-        if (!res.ok) throw new Error("Erro ao carregar o ficheiro");
-        const text = await res.text();
-        const parsed = parseCsv(text);
-        parsed.lastModified = res.headers.get("last-modified");
-        setTabularData(parsed);
+        if (isSpreadsheet) {
+          const res = await fetch(
+            `/internal-api/proxy-spreadsheet?url=${encodeURIComponent(resource.url)}`
+          );
+          if (!res.ok) throw new Error("Erro ao carregar o ficheiro");
+          const json: SpreadsheetPreview = await res.json();
+          const parsed = buildTabularData(json.headers, json.rows, json.totalRows);
+          parsed.lastModified = res.headers.get("last-modified") ?? json.lastModified;
+          setTabularData(parsed);
+        } else {
+          const res = await fetch(
+            `/internal-api/proxy-csv?url=${encodeURIComponent(resource.url)}`
+          );
+          if (!res.ok) throw new Error("Erro ao carregar o ficheiro");
+          const text = await res.text();
+          const parsed = parseCsv(text);
+          parsed.lastModified = res.headers.get("last-modified");
+          setTabularData(parsed);
+        }
       } catch (err) {
         console.error("Preview error:", err);
         setError("Não foi possível carregar os dados.");
@@ -280,7 +318,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
       }
     }
     fetchData();
-  }, [resource.url, resource.format, isTabular]);
+  }, [resource.url, isTabular, isSpreadsheet]);
 
   // Cast Tabs to accept conditional children (the library type is overly strict)
   const FlexTabs = Tabs as React.FC<Omit<React.ComponentProps<typeof Tabs>, "children"> & { children: React.ReactNode }>;
