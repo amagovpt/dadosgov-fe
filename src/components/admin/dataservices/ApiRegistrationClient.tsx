@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Button,
   InputText,
@@ -15,6 +15,7 @@ import {
   DropdownOption,
   CardGeneral,
 } from "@ama-pt/agora-design-system";
+import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { createDataservice } from "@/service/api/dataservices";
 import type { Dataservice } from "@/service/types/dataservice";
 import AuxiliarList from "@/components/admin/AuxiliarList";
@@ -51,6 +52,9 @@ export default function ApiRegistrationClient({
   const [createdDataservice, setCreatedDataservice] = useState<Dataservice | null>(null);
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
+  // Producer identity: "user" (publish in my own name) or an organization id.
+  // The Agora InputSelect reports the selected value into this ref's `.current`.
+  const producerRef = useRef("user");
 
   useEffect(() => {
     setDatasetLinkErrors({});
@@ -69,8 +73,12 @@ export default function ApiRegistrationClient({
     setIsSubmitting(true);
 
     try {
+      const producer = producerRef.current;
+      const organization =
+        producer && producer !== "user" ? producer : undefined;
       const dataservice = await createDataservice({
         title: apiName.trim(),
+        organization,
         description: apiDescription.trim(),
         acronym: apiAcronym.trim() || undefined,
         base_api_url: baseApiUrl.trim() || undefined,
@@ -244,10 +252,12 @@ export default function ApiRegistrationClient({
                 </p>
                 <h2 className="admin-page__section-title">Produtor</h2>
 
-                <InputSelect
+                <IsolatedSelect
                   label="Verifique a identidade que deseja usar na publicação."
                   placeholder="Para pesquisar..."
                   id="producer-identity"
+                  defaultValue="user"
+                  onChangeRef={producerRef}
                 >
                   <DropdownSection name="identity">
                     <DropdownOption value="user">
@@ -263,7 +273,7 @@ export default function ApiRegistrationClient({
                       ))}
                     </>
                   </DropdownSection>
-                </InputSelect>
+                </IsolatedSelect>
 
                 <div className="admin-page__org-card">
                   <p className="admin-page__org-card-title">
