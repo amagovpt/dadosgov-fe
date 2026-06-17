@@ -70,7 +70,7 @@ export interface DataserviceUpdatePayload {
   tags?: string[];
   organization?: string;
   private?: boolean;
-  archived?: string;
+  archived?: string | null;
   datasets?: string[];
 }
 

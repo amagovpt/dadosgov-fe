@@ -2,9 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, InputText, InputTextArea, RadioButton } from "@ama-pt/agora-design-system";
+import {
+  Button,
+  InputText,
+  InputTextArea,
+  RadioButton,
+  Icon,
+  StatusCard,
+} from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import { fetchDataservice, updateDataservice } from "@/service/api/dataservices";
+import {
+  fetchDataservice,
+  updateDataservice,
+  deleteDataservice,
+} from "@/service/api/dataservices";
 import type { Dataservice } from "@/service/types/dataservice";
 
 const ACCESS_TYPES = [
@@ -97,6 +108,40 @@ export default function DataservicesEditClient() {
     }
   };
 
+  const handleArchive = async () => {
+    if (!dataservice) return;
+    setIsSaving(true);
+    try {
+      const updated = await updateDataservice(dataservice.id, {
+        archived: dataservice.archived ? null : new Date().toISOString(),
+      });
+      setDataservice(updated);
+    } catch (error) {
+      console.error("Error archiving dataservice:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!dataservice) return;
+    if (
+      !window.confirm(
+        "Tem a certeza que deseja eliminar esta API? Esta ação é irreversível."
+      )
+    ) {
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await deleteDataservice(dataservice.id);
+      router.push("/pages/admin/me/dataservices");
+    } catch (error) {
+      console.error("Error deleting dataservice:", error);
+      setIsSaving(false);
+    }
+  };
+
   return (
     <AdminLayout
       title="Editar API"
@@ -105,6 +150,21 @@ export default function DataservicesEditClient() {
         { label: "API", url: "/pages/admin/dataservices" },
         { label: dataservice?.title || "Editar", url: "#" },
       ]}
+      headerAction={
+        <Button
+          variant="primary"
+          appearance="outline"
+          disabled={!!(dataservice?.archived || dataservice?.deleted)}
+          onClick={() =>
+            dataservice && window.open(`/pages/dataservices/${dataservice.slug}`, "_blank")
+          }
+        >
+          <span className="admin-edit-info__btn-content">
+            <Icon name="agora-line-eye" className="h-16 w-16" />
+            Ver página API
+          </span>
+        </Button>
+      }
     >
       {isLoading ? null : !dataservice ? (
         <p className="text-neutral-500">API não encontrada.</p>
@@ -175,13 +235,69 @@ export default function DataservicesEditClient() {
               </RadioButton>
             ))}
           </fieldset>
-          <div className="flex gap-16">
-            <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "A guardar..." : "Guardar"}
-            </Button>
+          <div className="admin-page__actions flex justify-end gap-16">
             <Button appearance="outline" variant="neutral" onClick={() => router.back()}>
               Cancelar
             </Button>
+            <Button
+              variant="primary"
+              hasIcon
+              trailingIcon="agora-line-check-circle"
+              trailingIconHover="agora-solid-check-circle"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? "A guardar..." : "Guardar"}
+            </Button>
+          </div>
+
+          <div className="dataset-edit-danger-actions">
+            <StatusCard
+              variant="warning"
+              showIcon
+              description={
+                <>
+                  <strong>
+                    {dataservice.archived
+                      ? "Esta API está arquivada. Pode desarquivar para voltar a indexá-la no portal."
+                      : "Uma API arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto."}
+                  </strong>
+                  <br />
+                  <Button
+                    appearance="link"
+                    variant="primary"
+                    hasIcon
+                    trailingIcon="agora-line-arrow-right-circle"
+                    trailingIconHover="agora-solid-arrow-right-circle"
+                    onClick={handleArchive}
+                    disabled={isSaving}
+                  >
+                    {dataservice.archived ? "Desarquivar a API" : "Arquivar a API"}
+                  </Button>
+                </>
+              }
+            />
+            <StatusCard
+              variant="danger"
+              showIcon
+              description={
+                <>
+                  <strong>Atenção esta ação é irreversível.</strong>
+                  <br />
+                  <Button
+                    appearance="link"
+                    variant="primary"
+                    hasIcon
+                    trailingIcon="agora-line-arrow-right-circle"
+                    trailingIconHover="agora-solid-arrow-right-circle"
+                    onClick={handleDelete}
+                    disabled={isSaving}
+                  >
+                    Eliminar a API
+                  </Button>
+                </>
+              }
+            />
           </div>
         </div>
       )}
