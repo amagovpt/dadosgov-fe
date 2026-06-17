@@ -1,49 +1,30 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import {
-  Accordion,
-  AccordionGroup,
-  Avatar,
-  Button,
-  CardNoResults,
-  Checkbox,
-  Icon,
-  InputText,
-  InputTextArea,
-  StatusCard,
-  Tag,
-  usePopupContext,
-} from "@ama-pt/agora-design-system";
+import { Button, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import {
+  deleteOrganization,
   fetchOrgBadges,
   fetchOrganization,
   updateOrganization,
   uploadOrgLogo,
-  deleteOrganization,
 } from "@/service/api/organizations";
-import { Organization, type OrgBadges } from "@/service/types/identity";
+import { type OrgBadges, type Organization } from "@/service/types/identity";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import AdminEmptyState from "../AdminEmptyState";
+import OrganizationProfileHeaderCard from "@/components/admin/profile/OrganizationProfileHeaderCard";
+import OrganizationProfileFormSection from "@/components/admin/profile/OrganizationProfileFormSection";
+import OrganizationDangerZone from "@/components/admin/profile/OrganizationDangerZone";
 
 function badgeKindsFromOrg(badges: Organization["badges"] | undefined): string[] {
   return (badges ?? [])
     .map((badge) => (typeof badge === "string" ? badge : badge.kind))
     .filter((kind): kind is string => Boolean(kind));
-}
-
-function badgesSelectionChanged(current: string[], saved: string[]): boolean {
-  return (
-    current.length !== saved.length ||
-    current.some((kind) => !saved.includes(kind)) ||
-    saved.some((kind) => !current.includes(kind))
-  );
 }
 
 function DeleteOrgPopupContent({
@@ -86,7 +67,6 @@ export default function OrgProfileClient() {
   const cachedOrgName = useOrganizationName(orgId, user?.organizations);
 
   const [org, setOrg] = useState<Organization | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [name, setName] = useState("");
   const [acronym, setAcronym] = useState("");
   const [description, setDescription] = useState("");
@@ -104,13 +84,14 @@ export default function OrgProfileClient() {
 
   useEffect(() => {
     if (!orgId) {
-      setIsLoading(false);
       return;
     }
-    async function loadOrg() {
-      setIsLoading(true);
+
+    const currentOrgId = orgId;
+
+    async function loadOrganization() {
       try {
-        const data = await fetchOrganization(orgId!);
+        const data = await fetchOrganization(currentOrgId);
         if (data) {
           setOrg(data);
           setName(data.name);
@@ -121,11 +102,10 @@ export default function OrgProfileClient() {
         }
       } catch (error) {
         console.error("Error loading org profile:", error);
-      } finally {
-        setIsLoading(false);
       }
     }
-    loadOrg();
+
+    void loadOrganization();
   }, [orgId]);
 
   useEffect(() => {
@@ -140,26 +120,30 @@ export default function OrgProfileClient() {
 
   const canEdit = useMemo(
     () =>
-      isAdmin || (org?.members?.some((m) => m.user.id === user?.id && m.role === "admin") ?? false),
-    [isAdmin, org, user]
+      isAdmin ||
+      (org?.members?.some((member) => member.user.id === user?.id && member.role === "admin") ??
+        false),
+    [isAdmin, org, user],
   );
 
-  const handleBadgeToggle = (kind: string, checked: boolean) => {
-    setSelectedBadgeKinds((prev) => {
-      return checked
-        ? prev.includes(kind)
-          ? prev
-          : [...prev, kind]
-        : prev.filter((k) => k !== kind);
-    });
-  };
+  function handleBadgeToggle(kind: string, checked: boolean) {
+    setSelectedBadgeKinds((previousKinds) =>
+      checked
+        ? previousKinds.includes(kind)
+          ? previousKinds
+          : [...previousKinds, kind]
+        : previousKinds.filter((currentKind) => currentKind !== kind),
+    );
+  }
 
   const handleSave = async () => {
     if (!org) return;
+
     const hasNameError = !name.trim();
     const hasDescriptionError = !description.trim();
     if (hasNameError) setNameError(true);
     if (hasDescriptionError) setDescriptionError(true);
+
     if (hasNameError || hasDescriptionError) {
       requestAnimationFrame(() => {
         document
@@ -168,12 +152,13 @@ export default function OrgProfileClient() {
       });
       return;
     }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
     setNameError(false);
     setDescriptionError(false);
-
     setIsSaving(true);
     setSaveStatus(null);
+
     try {
       const updated = await updateOrganization(org.id, {
         name,
@@ -184,7 +169,6 @@ export default function OrgProfileClient() {
       });
       setOrg(updated);
       setSelectedBadgeKinds(badgeKindsFromOrg(updated.badges));
-
       setSaveStatus("success");
     } catch (error) {
       console.error("Error updating org profile:", error);
@@ -196,6 +180,7 @@ export default function OrgProfileClient() {
 
   const handleDeleteOrg = async () => {
     if (!org) return;
+
     setIsDeleting(true);
     setDeleteError(false);
     try {
@@ -211,26 +196,29 @@ export default function OrgProfileClient() {
     }
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
     if (!org || !files || files.length === 0) return;
+
     const file = files[0];
     if (file.size > 512000) {
       setLogoError("O ficheiro excede o tamanho máximo de 500 KB.");
       return;
     }
+
     setLogoError(null);
     if (logoPreview) URL.revokeObjectURL(logoPreview);
     const localPreview = URL.createObjectURL(file);
     setLogoPreview(localPreview);
+
     try {
       await uploadOrgLogo(org.id, file);
     } catch (error) {
       console.error("Error uploading org logo:", error);
       URL.revokeObjectURL(localPreview);
       setLogoPreview(null);
-      const serverMsg = (error as { data?: { message?: string } })?.data?.message;
-      setLogoError(serverMsg || "Erro ao carregar o logotipo. Por favor, tente novamente.");
+      const serverMessage = (error as { data?: { message?: string } })?.data?.message;
+      setLogoError(serverMessage || "Erro ao carregar o logotipo. Por favor, tente novamente.");
     }
   };
 
@@ -254,247 +242,59 @@ export default function OrgProfileClient() {
       title="Perfil da organização"
       headerAction={null}
     >
-      {org && (
-        <div className="profile-card">
-          <div className="profile-card__avatar-container">
-            {logoPreview || org.logo_thumbnail ? (
-              <img
-                src={logoPreview ?? org.logo_thumbnail!}
-                alt={org.name}
-                className="profile-card__avatar-img"
-              />
-            ) : (
-              <Avatar
-                avatarType="initials"
-                srcPath={(org.name?.charAt(0).toUpperCase() || "O") as unknown as undefined}
-                alt={org.name}
-                className="profile-card__avatar"
-              />
-            )}
-          </div>
-
-          <div className="profile-card__body">
-            <div className="profile-card__info">
-              <p className="text-xl font-semibold leading-8 text-neutral-900">{org.name}</p>
-              {org.acronym && (
-                <p className="text-base font-light leading-7 text-neutral-900">{org.acronym}</p>
-              )}
-              <div className="text-sm flex items-center gap-16 text-neutral-900">
-                <span className="flex items-center gap-4">
-                  <Icon name="agora-line-user-group" className="h-16 w-16" />
-                  {org.metrics.members} membros
-                </span>
-                <span className="flex items-center gap-4">
-                  <Icon name="agora-line-layers-menu" className="h-16 w-16" />
-                  {org.metrics.datasets} conjuntos de dados
-                </span>
-                <span className="flex items-center gap-4">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                    className="text-primary-500"
-                  >
-                    <path
-                      d="M4 22.9091V15.2727C4 14.6702 4.47969 14.1818 5.07143 14.1818C5.66316 14.1818 6.14286 14.6702 6.14286 15.2727V22.9091C6.14286 23.5116 5.66316 24 5.07143 24C4.47969 24 4 23.5116 4 22.9091ZM10.4286 22.9091V1.09091C10.4286 0.488417 10.9083 0 11.5 0C12.0917 0 12.5714 0.488417 12.5714 1.09091V22.9091C12.5714 23.5116 12.0917 24 11.5 24C10.9083 24 10.4286 23.5116 10.4286 22.9091ZM16.8571 22.9091V9.81818C16.8571 9.21569 17.3368 8.72727 17.9286 8.72727C18.5203 8.72727 19 9.21569 19 9.81818V22.9091C19 23.5116 18.5203 24 17.9286 24C17.3368 24 16.8571 23.5116 16.8571 22.9091Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  {org.metrics.reuses} reutilizações
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {org && <OrganizationProfileHeaderCard organization={org} logoPreview={logoPreview} />}
 
       <div className="admin-page__body mt-32">
         <div className="admin-page__form-area">
-          <div className="admin-page__form">
-            <h2 className="admin-page__section-title hidden">EDITAR ORGANIZAÇÃO</h2>
+          <OrganizationProfileFormSection
+            name={name}
+            acronym={acronym}
+            description={description}
+            url={url}
+            availableBadges={availableBadges}
+            selectedBadgeKinds={selectedBadgeKinds}
+            canEdit={canEdit}
+            isSaving={isSaving}
+            nameError={nameError}
+            descriptionError={descriptionError}
+            logoError={logoError}
+            saveStatus={saveStatus}
+            onNameChange={(event) => {
+              setName(event.target.value);
+              if (event.target.value.trim()) setNameError(false);
+            }}
+            onAcronymChange={(event) => setAcronym(event.target.value)}
+            onDescriptionChange={(event) => {
+              setDescription(event.target.value);
+              if (event.target.value.trim()) setDescriptionError(false);
+            }}
+            onUrlChange={(event) => setUrl(event.target.value)}
+            onBadgeToggle={handleBadgeToggle}
+            onLogoUpload={handleLogoUpload}
+            onLogoSecurityError={() => setLogoError(POISONED_FILE_WARNING)}
+            onSave={() => {
+              void handleSave();
+            }}
+          />
 
-            <div className="admin-page__fields-group pt-32">
-              {saveStatus && (
-                <StatusCard
-                  variant={saveStatus === "success" ? "success" : "danger"}
-                  showIcon
-                  description={
-                    saveStatus === "success"
-                      ? "Perfil da organização atualizado com sucesso."
-                      : "Ocorreu um erro ao guardar. Por favor, tente novamente."
-                  }
-                />
-              )}
-
-              <InputText
-                label="Nome *"
-                placeholder="Insira o nome aqui"
-                id="org-name"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  if (e.target.value.trim()) setNameError(false);
-                }}
-                hasError={nameError}
-                hasFeedback={nameError}
-                feedbackState="danger"
-                errorFeedbackText="Campo obrigatório"
-                readOnly={!canEdit}
-                disabled={!canEdit}
-              />
-
-              <InputText
-                label="Sigla"
-                placeholder="Insira a sigla aqui"
-                id="org-acronym"
-                value={acronym}
-                onChange={(e) => setAcronym(e.target.value)}
-                readOnly={!canEdit}
-                disabled={!canEdit}
-              />
-
-              <InputTextArea
-                label="Descrição *"
-                placeholder="Insira a descrição aqui"
-                id="org-description"
-                rows={4}
-                value={description}
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                  if (e.target.value.trim()) setDescriptionError(false);
-                }}
-                hasError={descriptionError}
-                hasFeedback={descriptionError}
-                feedbackState="danger"
-                errorFeedbackText="Campo obrigatório"
-                readOnly={!canEdit}
-                disabled={!canEdit}
-              />
-
-              <InputText
-                label="Website"
-                placeholder="Insira o URL aqui"
-                id="org-url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                readOnly={!canEdit}
-                disabled={!canEdit}
-              />
-
-              {Object.keys(availableBadges).length > 0 && (
-                <AccordionGroup>
-                  <Accordion headingTitle="Emblemas" headingLevel="h3">
-                    <div className="flex flex-col gap-8 p-16">
-                      {Object.entries(availableBadges).map(([kind, label]) => (
-                        <Checkbox
-                          key={kind}
-                          id={`org-badge-${kind}`}
-                          label={label}
-                          value={kind}
-                          name={`org-badge-${kind}`}
-                          required={false}
-                          checked={selectedBadgeKinds.includes(kind)}
-                          disabled={isSaving}
-                          onChange={(e) => handleBadgeToggle(kind, e.target.checked)}
-                        />
-                      ))}
-                    </div>
-                  </Accordion>
-                </AccordionGroup>
-              )}
-
-              {canEdit && (
-                <div>
-                  <span className="text-base font-medium leading-7 text-primary-900">Logotipo</span>
-                  <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-                    <DragAndDropUploader
-                      label="Ficheiro"
-                      dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                      inputLabel="Selecione ou arraste o ficheiro"
-                      selectedFilesLabel="ficheiro selecionado"
-                      removeFileButtonLabel="Remover ficheiro"
-                      replaceFileButtonLabel="Substituir ficheiro"
-                      extensionsInstructions="Tamanho máximo: 500 KB. Formatos aceites: JPG, JPEG, PNG."
-                      accept=".jpg,.jpeg,.png"
-                      maxSize={512000}
-                      maxCount={1}
-                      maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 500 KB."
-                      forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                      hasError={!!logoError}
-                      hasFeedback={!!logoError}
-                      feedbackState="danger"
-                      feedbackText={logoError ?? undefined}
-                      onChange={handleLogoUpload}
-                      onSecurityError={() => setLogoError(POISONED_FILE_WARNING)}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {canEdit && (
-                <div className="mt-16 flex justify-end">
-                  <Button
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-check-circle"
-                    trailingIconHover="agora-solid-check-circle"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? "A guardar..." : "Guardar"}
-                  </Button>
-                </div>
-              )}
-
-              {(isAdmin ||
-                org?.members?.some((m) => m.user.id === user?.id && m.role === "admin")) && (
-                <div className="dataset-edit-danger-actions">
-                  {deleteError && (
-                    <StatusCard
-                      variant="danger"
-                      showIcon
-                      description="Ocorreu um erro ao eliminar a organização. Por favor, tente novamente."
-                    />
-                  )}
-                  <StatusCard
-                    variant="danger"
-                    showIcon
-                    description={
-                      <>
-                        <strong>Atenção Esta ação é irreversível.</strong>
-                        <br />
-                        <Button
-                          appearance="link"
-                          variant="primary"
-                          hasIcon
-                          trailingIcon="agora-line-arrow-right-circle"
-                          trailingIconHover="agora-solid-arrow-right-circle"
-                          onClick={(e: React.MouseEvent) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            show(
-                              <DeleteOrgPopupContent onClose={hide} onConfirm={handleDeleteOrg} />,
-                              {
-                                title: "Tem a certeza que quer eliminar esta organização?",
-                                closeAriaLabel: "Fechar",
-                                dimensions: "m",
-                              }
-                            );
-                          }}
-                          disabled={isDeleting}
-                        >
-                          Eliminar a organização
-                        </Button>
-                      </>
-                    }
-                  />
-                </div>
-              )}
-            </div>
-          </div>
+          <OrganizationDangerZone
+            canDelete={
+              isAdmin ||
+              (org?.members?.some((member) => member.user.id === user?.id && member.role === "admin") ??
+                false)
+            }
+            isDeleting={isDeleting}
+            deleteError={deleteError}
+            onDeleteClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              show(<DeleteOrgPopupContent onClose={hide} onConfirm={handleDeleteOrg} />, {
+                title: "Tem a certeza que quer eliminar esta organização?",
+                closeAriaLabel: "Fechar",
+                dimensions: "m",
+              });
+            }}
+          />
         </div>
 
         <aside className="admin-page__auxiliar" />
