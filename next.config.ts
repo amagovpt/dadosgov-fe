@@ -165,9 +165,14 @@ const nextConfig: NextConfig = {
           destination: `${BACKEND_URL}/swaggerui/:path*`,
         },
       ],
-      afterFiles: [],
-      fallback: [],
     };
+
+  },
+  async redirects() {
+    return [
+      { source: "/:locale([a-z]{2})/datasets", destination: "/pages/datasets", permanent: true },
+      { source: "/:locale([a-z]{2})/datasets/:path*", destination: "/pages/datasets/:path*", permanent: true },
+    ];
   },
   // TODO: Install @sentry/nextjs and configure
   // TODO: Implement sitemap via app/sitemap.ts or next-sitemap
