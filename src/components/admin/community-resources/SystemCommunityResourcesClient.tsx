@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
@@ -35,19 +35,6 @@ export default function SystemCommunityResourcesClient() {
     setCurrentPage
   );
 
-  const loadData = useCallback(async () => {
-    if (resourceId) return;
-    setIsLoading(true);
-    try {
-      const response = await fetchAllCommunityResources(1, 9999);
-      setResources(response.data || []);
-    } catch (error) {
-      console.error("Error loading community resources:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [resourceId]);
-
   const sortedResources = useMemo(
     () => sortCommunityResources(resources, sortField, sortOrder),
     [resources, sortField, sortOrder]
@@ -69,8 +56,33 @@ export default function SystemCommunityResourcesClient() {
   );
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (resourceId) {
+      return;
+    }
+
+    let isActive = true;
+
+    const run = async () => {
+      try {
+        const response = await fetchAllCommunityResources(1, 9999);
+        if (!isActive) return;
+        setResources(response.data || []);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Error loading community resources:", error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      isActive = false;
+    };
+  }, [resourceId]);
 
   if (resourceId) {
     return <CommunityResourceEditClient />;

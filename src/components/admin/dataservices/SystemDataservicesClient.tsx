@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -45,25 +45,34 @@ export default function SystemDataservicesClient() {
     setCurrentPage
   );
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetchDataservices(currentPage, pageSize, {
-        q: searchQuery.trim() || undefined,
-        sort: sortParam,
-      });
-      setApis(response.data || []);
-      setTotalItems(response.total || 0);
-    } catch (error) {
-      console.error("Error loading dataservices:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, pageSize, searchQuery, sortParam]);
-
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    let isActive = true;
+
+    const run = async () => {
+      try {
+        const response = await fetchDataservices(currentPage, pageSize, {
+          q: searchQuery.trim() || undefined,
+          sort: sortParam,
+        });
+        if (!isActive) return;
+        setApis(response.data || []);
+        setTotalItems(response.total || 0);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Error loading dataservices:", error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentPage, pageSize, searchQuery, sortParam]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
     setSearchQuery(value);

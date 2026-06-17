@@ -1,42 +1,46 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { fetchMyFollowing } from "@/service/api/followers";
-import { fetchFullProfile, uploadAvatar, deleteAvatar, generateApiKey, fetchApiTokens, revokeApiToken, requestEmailChange } from "@/service/api/profile";
+import {
+  deleteAvatar,
+  fetchApiTokens,
+  fetchFullProfile,
+  generateApiKey,
+  requestEmailChange,
+  revokeApiToken,
+  uploadAvatar,
+} from "@/service/api/profile";
 import { fetchUserActivity, updateProfile } from "@/service/api/users";
-import { Activity } from "@/service/types/catalog";
-import { ApiToken, UserFollowing, UserPublic } from "@/service/types/identity";
-import { formatDistanceToNow } from "date-fns";
-import { format } from "date-fns";
+import type { Activity } from "@/service/types/catalog";
+import type { ApiToken, UserFollowing, UserPublic } from "@/service/types/identity";
+import { format, formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import {
   Avatar,
-  Button,
   CardNoResults,
   Icon,
-  InputText,
-  InputTextArea,
-  StatusCard,
+  TableBody,
+  TableCell,
   TableHeader,
   TableHeaderCell,
-  TableBody,
   TableRow,
-  TableCell,
-  Tabs,
   Tab,
-  TabHeader,
   TabBody,
+  TabHeader,
+  Tabs,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
 import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
+import UserProfileHeaderCard from "@/components/admin/profile/UserProfileHeaderCard";
+import UserProfileMainTab from "@/components/admin/profile/UserProfileMainTab";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import TextLink from "@/components/Primitives/TextLink";
 import { translateActivityLabel } from "@/utils/activityLabels";
@@ -99,7 +103,6 @@ export default function ProfileClient() {
     async function loadProfile() {
       try {
         const data = await fetchFullProfile();
-        console.log("[ProfileClient] avatar_thumbnail:", data.avatar_thumbnail);
         setProfile(data);
         if (data.avatar_thumbnail) {
           setAvatarPreview(toProxiedUrl(data.avatar_thumbnail));
@@ -115,6 +118,7 @@ export default function ProfileClient() {
         setIsLoadingProfile(false);
       }
     }
+
     async function loadApiTokens() {
       try {
         const tokens = await fetchApiTokens();
@@ -123,8 +127,9 @@ export default function ProfileClient() {
         console.error("Error loading API tokens:", error);
       }
     }
-    loadProfile();
-    loadApiTokens();
+
+    void loadProfile();
+    void loadApiTokens();
   }, []);
 
   useEffect(() => {
@@ -141,7 +146,8 @@ export default function ProfileClient() {
         setIsLoadingActivities(false);
       }
     }
-    loadActivities();
+
+    void loadActivities();
   }, [user?.id, activityPage, activityPageSize]);
 
   useEffect(() => {
@@ -156,7 +162,8 @@ export default function ProfileClient() {
         setIsLoadingSubscriptions(false);
       }
     }
-    loadSubscriptions();
+
+    void loadSubscriptions();
   }, []);
 
   const handleSave = async () => {
@@ -189,7 +196,7 @@ export default function ProfileClient() {
     try {
       const created = await generateApiKey(newTokenName.trim() || undefined);
       setNewToken(created.token);
-      setApiTokens((prev) => [
+      setApiTokens((previousTokens) => [
         {
           id: created.id,
           token_prefix: created.token_prefix,
@@ -202,7 +209,7 @@ export default function ProfileClient() {
           revoked_at: created.revoked_at,
           expires_at: created.expires_at,
         },
-        ...prev,
+        ...previousTokens,
       ]);
       setNewTokenName("");
     } catch (error) {
@@ -228,7 +235,7 @@ export default function ProfileClient() {
     setRevokingTokenId(tokenId);
     try {
       await revokeApiToken(tokenId);
-      setApiTokens((prev) => prev.filter((t) => t.id !== tokenId));
+      setApiTokens((previousTokens) => previousTokens.filter((token) => token.id !== tokenId));
     } catch (error) {
       console.error("Error revoking API token:", error);
       setSaveError("Erro ao revogar a chave da API. Tente novamente.");
@@ -244,8 +251,10 @@ export default function ProfileClient() {
       await deleteAvatar();
       if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
       setAvatarPreview(null);
-      setAvatarUploaderKey((k) => k + 1);
-      setProfile((prev) => (prev ? { ...prev, avatar_thumbnail: null } : prev));
+      setAvatarUploaderKey((value) => value + 1);
+      setProfile((previousProfile) =>
+        previousProfile ? { ...previousProfile, avatar_thumbnail: null } : previousProfile,
+      );
       await refresh();
     } catch (error) {
       console.error("Error deleting avatar:", error);
@@ -255,23 +264,24 @@ export default function ProfileClient() {
     }
   };
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
     if (!files || files.length === 0) return;
+
     const file = files[0];
     if (file.size > 4194304) {
       setAvatarError("O ficheiro excede o tamanho máximo de 4 MB.");
       return;
     }
+
     setAvatarError(null);
-    // Show image immediately via blob URL, then replace with server URL after upload.
     if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
     const localPreview = URL.createObjectURL(file);
     setAvatarPreview(localPreview);
+
     try {
       await uploadAvatar(file);
       const updated = await fetchFullProfile();
-      console.log("[ProfileClient] avatar_thumbnail after upload:", updated.avatar_thumbnail);
       if (updated.avatar_thumbnail) {
         if (localPreview.startsWith("blob:")) URL.revokeObjectURL(localPreview);
         setAvatarPreview(toProxiedUrl(updated.avatar_thumbnail));
@@ -300,7 +310,7 @@ export default function ProfileClient() {
     } catch (error) {
       console.error("Error requesting email change:", error);
       setSaveError(
-        "Erro ao solicitar a alteração de e-mail. Verifique o endereço e tente novamente."
+        "Erro ao solicitar a alteração de e-mail. Verifique o endereço e tente novamente.",
       );
     } finally {
       setIsChangingEmail(false);
@@ -310,6 +320,16 @@ export default function ProfileClient() {
   const lastModified = profile?.since
     ? format(new Date(profile.since), "d 'de' MMMM 'de' yyyy", { locale: pt })
     : "";
+
+  function formatTokenCreatedAt(value: string) {
+    return format(new Date(value), "dd/MM/yyyy", { locale: pt });
+  }
+
+  function formatLastUsedAt(value: string | null) {
+    return value
+      ? ` · último uso ${formatDistanceToNow(new Date(value), { locale: pt, addSuffix: true })}`
+      : " · nunca utilizada";
+  }
 
   return (
     <AdminLayout
@@ -321,439 +341,91 @@ export default function ProfileClient() {
       title="Perfil"
       headerAction={null}
     >
+      <UserProfileHeaderCard
+        profile={profile}
+        avatarPreview={avatarPreview}
+        memberSinceLabel={lastModified}
+        onViewPublicProfile={() => router.push(`/pages/users/${user?.slug || ""}`)}
+      />
 
-      <div className="profile-card">
-        <div className="profile-card__avatar-container">
-          {avatarPreview || profile?.avatar_thumbnail ? (
-            <img
-              src={avatarPreview ?? profile!.avatar_thumbnail!}
-              alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
-              className="profile-card__avatar-img"
-            />
-          ) : (
-            <Avatar
-              avatarType={profile?.first_name || profile?.last_name ? "initials" : "icon"}
-              srcPath={
-                (`${(profile?.first_name || "")[0] || ""}${(profile?.last_name || "")[0] || ""}`.toUpperCase() ||
-                  "agora-line-user") as unknown as undefined
-              }
-              alt={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
-              className="profile-card__avatar"
-            />
-          )}
-        </div>
-
-        <div className="profile-card__body">
-          <div className="profile-card__info">
-            {profile?.organizations?.[0] && (
-              <p className="text-base font-light leading-7 text-neutral-900">
-                {profile.organizations[0].name}
-              </p>
-            )}
-            <p className="text-xl font-semibold leading-8 text-neutral-900">
-              {profile ? `${profile.first_name} ${profile.last_name}` : "..."}
-            </p>
-            {lastModified && (
-              <p className="text-base leading-7 text-neutral-900">
-                <span className="font-semibold">Membro desde:</span> {lastModified}
-              </p>
-            )}
-          </div>
-
-          <div className="absolute right-32 top-32">
-            <Button
-              variant="primary"
-              appearance="outline"
-              className="bg-white"
-              hasIcon
-              leadingIcon="agora-line-eye"
-              leadingIconHover="agora-solid-eye"
-              onClick={() => router.push(`/pages/users/${user?.slug || ""}`)}
-            >
-              Ver perfil público
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
       <div className="mt-32">
         <Tabs>
           <Tab active>
             <TabHeader>Perfil</TabHeader>
             <TabBody>
-              <div
-                className="admin-page__form mt-24"
-                style={{
-                  maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))",
+              <UserProfileMainTab
+                firstName={firstName}
+                lastName={lastName}
+                about={about}
+                website={website}
+                avatarError={avatarError}
+                avatarUploaderKey={avatarUploaderKey}
+                newTokenName={newTokenName}
+                isGeneratingKey={isGeneratingKey}
+                newToken={newToken}
+                tokenCopied={tokenCopied}
+                apiTokens={apiTokens}
+                revokingTokenId={revokingTokenId}
+                email={email}
+                isEditingEmail={isEditingEmail}
+                newEmail={newEmail}
+                pendingEmail={pendingEmail}
+                emailChangeSuccess={emailChangeSuccess}
+                isChangingEmail={isChangingEmail}
+                samlLogin={samlLogin}
+                isSaving={isSaving}
+                saveSuccess={saveSuccess}
+                saveError={saveError}
+                isDeletingAvatar={isDeletingAvatar}
+                hasAvatar={!!profile?.avatar_thumbnail}
+                onFirstNameChange={(event) => setFirstName(event.target.value)}
+                onLastNameChange={(event) => setLastName(event.target.value)}
+                onAboutChange={(event) => setAbout(event.target.value)}
+                onWebsiteChange={(event) => setWebsite(event.target.value)}
+                onAvatarChange={handleAvatarChange}
+                onAvatarSecurityError={() => setAvatarError(POISONED_FILE_WARNING)}
+                onNewTokenNameChange={(event) => setNewTokenName(event.target.value)}
+                onGenerateApiKey={() => {
+                  void handleGenerateApiKey();
                 }}
-              >
-                <h2 className="admin-page__section-title">EDITAR PERFIL</h2>
-
-                {saveSuccess && (
-                  <StatusCard
-                    variant="success"
-                    showIcon
-                    description="Perfil guardado com sucesso."
-                  />
-                )}
-                {saveError && <StatusCard variant="danger" showIcon description={saveError} />}
-
-                <div className="admin-page__fields-group">
-                  <div className="flex gap-[18px]">
-                    <div className="flex-1">
-                      <InputText
-                        label="Nome *"
-                        placeholder="Insira o nome aqui"
-                        id="first-name"
-                        value={firstName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setFirstName(e.target.value)
-                        }
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <InputText
-                        label="Último nome *"
-                        placeholder="Insira o apelido aqui"
-                        id="last-name"
-                        value={lastName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setLastName(e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <InputTextArea
-                    label="Biografia"
-                    placeholder="Insira a descrição aqui"
-                    id="biography"
-                    rows={4}
-                    value={about}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setAbout(e.target.value)
-                    }
-                  />
-
-                  <InputText
-                    label="Site da Internet"
-                    placeholder="Insira o URL aqui"
-                    id="website"
-                    value={website}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setWebsite(e.target.value)
-                    }
-                  />
-
-                  <div>
-                    <span className="text-base font-medium leading-7 text-primary-900">
-                      Foto de perfil
-                    </span>
-                    <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-                      <DragAndDropUploader
-                        key={avatarUploaderKey}
-                        label="Ficheiros"
-                        dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                        inputLabel="Selecione ou arraste o ficheiro"
-                        selectedFilesLabel="ficheiro selecionado"
-                        removeFileButtonLabel="Remover ficheiro"
-                        replaceFileButtonLabel="Substituir ficheiro"
-                        extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-                        accept=".jpg,.jpeg,.png"
-                        maxSize={4194304}
-                        maxCount={1}
-                        maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-                        forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                        hasError={!!avatarError}
-                        hasFeedback={!!avatarError}
-                        feedbackState="danger"
-                        feedbackText={avatarError ?? undefined}
-                        onChange={handleAvatarChange}
-                        onSecurityError={() => setAvatarError(POISONED_FILE_WARNING)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-16">
-                    <div>
-                      <p className="mb-8 text-base font-medium text-neutral-900">Chaves da API</p>
-                      <p className="text-sm mb-16 text-neutral-700">
-                        Gere uma chave para autenticar pedidos à API. Por motivos de segurança, a
-                        chave completa só é apresentada uma vez no momento da criação — guarde-a num
-                        local seguro.
-                      </p>
-                    </div>
-
-                    <div className="flex items-end gap-16">
-                      <div className="flex-1">
-                        <InputText
-                          label="Nome da nova chave (opcional)"
-                          placeholder="Ex.: Script backup, Integração X..."
-                          id="new-token-name"
-                          value={newTokenName}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setNewTokenName(e.target.value)
-                          }
-                        />
-                      </div>
-                      <Button
-                        appearance="outline"
-                        variant="primary"
-                        hasIcon
-                        leadingIcon="agora-line-edit"
-                        leadingIconHover="agora-solid-edit"
-                        onClick={handleGenerateApiKey}
-                        disabled={isGeneratingKey}
-                      >
-                        {isGeneratingKey ? "A gerar..." : "Gerar nova chave"}
-                      </Button>
-                    </div>
-
-                    {newToken && (
-                      <StatusCard
-                        variant="warning"
-                        showIcon
-                        description={
-                          <div className="flex flex-col gap-8">
-                            <p>
-                              <strong>Copie esta chave agora.</strong> Não voltará a ser
-                              apresentada.
-                            </p>
-                            <div className="flex items-center gap-8">
-                              <code className="text-xs flex-1 break-all rounded-4 border border-neutral-300 bg-neutral-50 px-12 py-8">
-                                {newToken}
-                              </code>
-                              <Button
-                                appearance="outline"
-                                variant="primary"
-                                hasIcon
-                                leadingIcon={tokenCopied ? "agora-line-check" : "agora-line-copy"}
-                                leadingIconHover={
-                                  tokenCopied ? "agora-solid-check" : "agora-solid-copy"
-                                }
-                                onClick={handleCopyToken}
-                              >
-                                {tokenCopied ? "Copiado" : "Copiar"}
-                              </Button>
-                            </div>
-                          </div>
-                        }
-                      />
-                    )}
-
-                    {apiTokens.length > 0 ? (
-                      <div className="flex flex-col gap-8">
-                        <p className="text-sm font-medium text-neutral-900">
-                          Chaves activas ({apiTokens.length})
-                        </p>
-                        <div className="flex flex-col divide-y divide-neutral-200 rounded-4 border border-neutral-200">
-                          {apiTokens.map((token) => (
-                            <div
-                              key={token.id}
-                              className="flex items-center justify-between gap-16 px-16 py-12"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-8">
-                                  <code className="text-sm font-mono text-neutral-900">
-                                    {token.token_prefix}…
-                                  </code>
-                                  {token.name && (
-                                    <span className="text-sm text-neutral-700">— {token.name}</span>
-                                  )}
-                                </div>
-                                <p className="text-xs mt-4 text-neutral-700">
-                                  Criada em{" "}
-                                  {format(new Date(token.created_at), "dd/MM/yyyy", {
-                                    locale: pt,
-                                  })}
-                                  {token.last_used_at
-                                    ? ` · último uso ${formatDistanceToNow(
-                                        new Date(token.last_used_at),
-                                        { locale: pt, addSuffix: true }
-                                      )}`
-                                    : " · nunca utilizada"}
-                                </p>
-                              </div>
-                              <Button
-                                appearance="outline"
-                                variant="danger"
-                                hasIcon
-                                leadingIcon="agora-line-trash"
-                                leadingIconHover="agora-solid-trash"
-                                onClick={() => handleRevokeToken(token.id)}
-                                disabled={revokingTokenId === token.id}
-                              >
-                                {revokingTokenId === token.id ? "A revogar..." : "Revogar"}
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm italic text-neutral-700">
-                        Ainda não tem chaves de API geradas.
-                      </p>
-                    )}
-                  </div>
-
-                  {emailChangeSuccess && (
-                    <StatusCard
-                      variant="success"
-                      showIcon
-                      description={`E-mail de confirmação enviado para ${pendingEmail}. Verifique a sua caixa de entrada e clique no link para concluir.`}
-                    />
-                  )}
-
-                  <div className="flex items-end gap-16">
-                    <div className="flex-1">
-                      {isEditingEmail ? (
-                        <InputText
-                          label="Novo endereço de e-mail"
-                          placeholder="Insira o novo e-mail aqui"
-                          id="new-email"
-                          value={newEmail}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setNewEmail(e.target.value)
-                          }
-                        />
-                      ) : (
-                        <InputText
-                          label="Endereço de e-mail"
-                          placeholder="Insira o e-mail aqui"
-                          id="email"
-                          value={emailChangeSuccess ? pendingEmail : email}
-                          readOnly
-                        />
-                      )}
-                    </div>
-                    {!samlLogin && !isEditingEmail && (
-                      <Button
-                        appearance="outline"
-                        variant="neutral"
-                        hasIcon
-                        leadingIcon="agora-line-edit"
-                        leadingIconHover="agora-solid-edit"
-                        onClick={() => {
-                          setIsEditingEmail(true);
-                          setNewEmail(emailChangeSuccess ? pendingEmail : "");
-                        }}
-                      >
-                        Alterar e-mail
-                      </Button>
-                    )}
-                  </div>
-                  {emailChangeSuccess && !isEditingEmail && (
-                    <p className="text-sm text-neutral-600">
-                      Aguarda confirmação por e-mail — até confirmar, o e-mail ativo é{" "}
-                      <strong>{email}</strong>
-                    </p>
-                  )}
-                  {!samlLogin && isEditingEmail && (
-                    <div className="flex justify-end gap-8">
-                      <Button
-                        appearance="outline"
-                        variant="primary"
-                        onClick={handleEmailChange}
-                        disabled={
-                          isChangingEmail ||
-                          !newEmail ||
-                          newEmail === email ||
-                          newEmail === pendingEmail
-                        }
-                      >
-                        {isChangingEmail ? "A enviar..." : "Confirmar"}
-                      </Button>
-                      <Button
-                        appearance="outline"
-                        variant="neutral"
-                        onClick={() => {
-                          setIsEditingEmail(false);
-                          setNewEmail("");
-                        }}
-                        disabled={isChangingEmail}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  )}
-
-                  <div className="flex items-end gap-16">
-                    <div className="flex-1">
-                      <InputText
-                        label="Senha"
-                        placeholder="••••••••"
-                        id="password"
-                        type="password"
-                        readOnly
-                      />
-                    </div>
-                    {!samlLogin && (
-                      <Button
-                        appearance="outline"
-                        variant="neutral"
-                        hasIcon
-                        leadingIcon="agora-line-edit"
-                        leadingIconHover="agora-solid-edit"
-                        onClick={() =>
-                          show(<ChangePasswordPopupContent />, {
-                            title: "Altere a sua senha",
-                            closeAriaLabel: "Fechar",
-                            dimensions: "m",
-                          })
-                        }
-                      >
-                        Alterar senha
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-16 flex justify-end">
-                  <Button
-                    variant="primary"
-                    hasIcon={true}
-                    leadingIcon="agora-line-check-circle"
-                    leadingIconHover="agora-solid-check-circle"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? "A guardar..." : "Guardar"}
-                  </Button>
-                </div>
-
-                {profile?.avatar_thumbnail && (
-                  <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
-                    <StatusCard
-                      variant="danger"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Atenção esta ação é irreversível.</strong>
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={() =>
-                              show(<DeleteAvatarPopupContent onConfirm={handleDeleteAvatar} />, {
-                                title: "Eliminar foto de perfil",
-                                closeAriaLabel: "Fechar",
-                                dimensions: "s",
-                              })
-                            }
-                            disabled={isDeletingAvatar}
-                          >
-                            {isDeletingAvatar ? "A eliminar..." : "Eliminar foto de perfil"}
-                          </Button>
-                        </>
-                      }
-                    />
-                  </div>
-                )}
-              </div>
+                onCopyToken={() => {
+                  void handleCopyToken();
+                }}
+                onRevokeToken={(tokenId) => {
+                  void handleRevokeToken(tokenId);
+                }}
+                onStartEmailEdit={() => {
+                  setIsEditingEmail(true);
+                  setNewEmail(emailChangeSuccess ? pendingEmail : "");
+                }}
+                onNewEmailChange={(event) => setNewEmail(event.target.value)}
+                onConfirmEmailChange={() => {
+                  void handleEmailChange();
+                }}
+                onCancelEmailEdit={() => {
+                  setIsEditingEmail(false);
+                  setNewEmail("");
+                }}
+                onChangePassword={() =>
+                  show(<ChangePasswordPopupContent />, {
+                    title: "Altere a sua senha",
+                    closeAriaLabel: "Fechar",
+                    dimensions: "m",
+                  })
+                }
+                onSave={() => {
+                  void handleSave();
+                }}
+                onDeleteAvatar={() =>
+                  show(<DeleteAvatarPopupContent onConfirm={handleDeleteAvatar} />, {
+                    title: "Eliminar foto de perfil",
+                    closeAriaLabel: "Fechar",
+                    dimensions: "s",
+                  })
+                }
+                formatTokenCreatedAt={formatTokenCreatedAt}
+                formatLastUsedAt={formatLastUsedAt}
+              />
             </TabBody>
           </Tab>
           <Tab>
@@ -781,7 +453,7 @@ export default function ProfileClient() {
                         sub.following.avatar_thumbnail || sub.following.image_thumbnail;
                       const initials = subName
                         .split(" ")
-                        .map((w) => w.charAt(0).toUpperCase())
+                        .map((word) => word.charAt(0).toUpperCase())
                         .slice(0, 2)
                         .join("");
                       const classToPath: Record<string, string> = {
@@ -880,9 +552,7 @@ export default function ProfileClient() {
                             <TableCell headerLabel="Utilizador">
                               <div className="flex items-center gap-8">
                                 <Avatar
-                                  avatarType={
-                                    activity.actor?.avatar_thumbnail ? "image" : "initials"
-                                  }
+                                  avatarType={activity.actor?.avatar_thumbnail ? "image" : "initials"}
                                   srcPath={
                                     (activity.actor?.avatar_thumbnail ||
                                       `${(activity.actor?.first_name || "")[0] || ""}${(activity.actor?.last_name || "")[0] || ""}`.toUpperCase()) as unknown as undefined

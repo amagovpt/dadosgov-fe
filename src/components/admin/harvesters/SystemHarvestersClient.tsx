@@ -113,22 +113,47 @@ export default function SystemHarvestersClient() {
     [show, hide, handleReject]
   );
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetchHarvesters(currentPage, pageSize);
-      setHarvesters(response.data || []);
-      setTotalItems(response.total || 0);
-    } catch (error) {
-      console.error("Error loading harvesters:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, pageSize]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setIsLoading(true);
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
+
+  const handlePageSizeChange = useCallback(
+    (nextPageSize: number) => {
+      setIsLoading(true);
+      setPageSize(nextPageSize);
+    },
+    [setPageSize]
+  );
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    let isActive = true;
+
+    const run = async () => {
+      try {
+        const response = await fetchHarvesters(currentPage, pageSize);
+        if (!isActive) return;
+        setHarvesters(response.data || []);
+        setTotalItems(response.total || 0);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Error loading harvesters:", error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentPage, pageSize]);
 
   const filteredHarvesters = useMemo(() => {
     let result = harvesters;
@@ -162,8 +187,8 @@ export default function SystemHarvestersClient() {
       hasItems={filteredHarvesters.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
-      setCurrentPage={setCurrentPage}
-      setPageSize={setPageSize}
+      setCurrentPage={handlePageChange}
+      setPageSize={handlePageSizeChange}
       search={{
         placeholder: "Pesquise o nome do harvester",
         ariaLabel: "Pesquisar harvesters",

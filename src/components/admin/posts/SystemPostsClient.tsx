@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, CardNoResults, Icon, InputSelect } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
@@ -41,34 +41,43 @@ export default function SystemPostsClient() {
     initialFilters: { typeFilter: "", statusFilter: "" },
   });
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const firstResponse = await fetchAdminPosts(1, fetchPageSize);
-      let data = firstResponse.data || [];
-      const totalAvailable = firstResponse.total || data.length;
-      const totalPages = Math.ceil(totalAvailable / fetchPageSize);
-
-      if (totalPages > 1) {
-        const remainingResponses = await Promise.all(
-          Array.from({ length: totalPages - 1 }, (_, index) =>
-            fetchAdminPosts(index + 2, fetchPageSize)
-          )
-        );
-        data = data.concat(remainingResponses.flatMap((response) => response.data || []));
-      }
-
-      setAllPosts(data);
-    } catch (error) {
-      console.error("Error loading posts:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    let isActive = true;
+
+    const run = async () => {
+      try {
+        const firstResponse = await fetchAdminPosts(1, fetchPageSize);
+        let data = firstResponse.data || [];
+        const totalAvailable = firstResponse.total || data.length;
+        const totalPages = Math.ceil(totalAvailable / fetchPageSize);
+
+        if (totalPages > 1) {
+          const remainingResponses = await Promise.all(
+            Array.from({ length: totalPages - 1 }, (_, index) =>
+              fetchAdminPosts(index + 2, fetchPageSize)
+            )
+          );
+          data = data.concat(remainingResponses.flatMap((response) => response.data || []));
+        }
+
+        if (!isActive) return;
+        setAllPosts(data);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Error loading posts:", error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      isActive = false;
+    };
+  }, [fetchPageSize]);
 
   const filteredPosts = useMemo(
     () => filterPosts(allPosts, searchQuery, filters.typeFilter, filters.statusFilter),

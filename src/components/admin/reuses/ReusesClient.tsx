@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -36,25 +36,30 @@ export default function ReusesClient() {
     setCurrentPage
   );
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetchMyReuses(1, 9999);
-      setReuses(response.data || []);
-    } catch (error) {
-      console.error("Error loading reuses:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      void loadData();
-    }, 0);
+    let isActive = true;
 
-    return () => clearTimeout(timeoutId);
-  }, [loadData]);
+    const run = async () => {
+      try {
+        const response = await fetchMyReuses(1, 9999);
+        if (!isActive) return;
+        setReuses(response.data || []);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Error loading reuses:", error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const handleSearch = useDebouncedSearch((value: string) => {
     setSearchQuery(value);
