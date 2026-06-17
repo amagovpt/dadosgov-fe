@@ -6,11 +6,14 @@ import Link from 'next/link';
 import { Tabs, Tab, TabHeader, CardNoResults, Icon, StatusCard, Button } from '@ama-pt/agora-design-system';
 import { TabBodyWrapper } from '@/components/Shared/Wrappers/TabBodyWrapper';
 import { ReuseCardLinks } from '@/components/Shared/ReuseCardLinks';
+import { DataserviceCardLinks } from '@/components/Shared/DataserviceCardLinks';
 import { CommunityResource } from "@/service/types/community-resource";
 import { Dataset } from "@/service/types/dataset";
 import { Reuse } from "@/service/types/reuse";
+import { Dataservice } from "@/service/types/dataservice";
 import { fetchCommunityResourcesByDataset } from "@/service/api/community-resources";
 import { fetchReuses } from "@/service/api/reuses";
+import { fetchDataservices } from "@/service/api/dataservices";
 import { DatasetResourcesTable } from './DatasetResourcesTable';
 import { DatasetInfo } from './DatasetInfo';
 import { DiscussionSection } from '@/components/discussions/DiscussionSection';
@@ -24,18 +27,23 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
     const tabParam = searchParams.get('tab');
     const [reuses, setReuses] = useState<Reuse[]>([]);
     const [reuseCount, setReuseCount] = useState(dataset.metrics.reuses || 0);
+    const [dataservices, setDataservices] = useState<Dataservice[]>([]);
+    const [dataserviceCount, setDataserviceCount] = useState(0);
     const [communityResources, setCommunityResources] = useState<CommunityResource[]>([]);
     const [communityCount, setCommunityCount] = useState(0);
 
     useEffect(() => {
         async function loadTabData() {
             try {
-                const [reuseResponse, communityResponse] = await Promise.all([
+                const [reuseResponse, dataserviceResponse, communityResponse] = await Promise.all([
                     fetchReuses(1, 20, { dataset: dataset.id }),
+                    fetchDataservices(1, 20, { dataset: dataset.id }),
                     fetchCommunityResourcesByDataset(dataset.id),
                 ]);
                 setReuses(reuseResponse.data);
                 setReuseCount(reuseResponse.total);
+                setDataservices(dataserviceResponse.data);
+                setDataserviceCount(dataserviceResponse.total);
                 setCommunityResources(communityResponse.data);
                 setCommunityCount(communityResponse.total);
             } catch (error) {
@@ -54,8 +62,20 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                     </TabBodyWrapper>
                 </Tab>
                 <Tab>
-                    <TabHeader>Reutilizações ({reuseCount})</TabHeader>
+                    <TabHeader>Reutilizações e APIs ({reuseCount + dataserviceCount})</TabHeader>
                     <TabBodyWrapper>
+                        {dataserviceCount > 0 && (
+                            <div className="mb-40">
+                                <h3 className="font-medium text-neutral-900 text-base mb-16">
+                                    {dataserviceCount} {dataserviceCount === 1 ? "API" : "APIS"}
+                                </h3>
+                                <div className="grid grid-cols-2 agora-card-links-datasets-px0 gap-32">
+                                    {dataservices.map((ds) => (
+                                        <DataserviceCardLinks key={ds.id} dataservice={ds} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                         <div>
                             <h3 className="font-medium text-neutral-900 text-base mb-16">
                                 {reuseCount} {reuseCount === 1 ? "REUTILIZAÇÃO" : "REUTILIZAÇÕES"}

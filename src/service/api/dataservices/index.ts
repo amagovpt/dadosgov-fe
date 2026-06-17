@@ -63,6 +63,7 @@ export interface DataserviceListFilters {
   access_type?: string;
   organization_badge?: string;
   modified_since?: string;
+  dataset?: string;
 }
 
 export async function fetchDataservices(
@@ -79,6 +80,7 @@ export async function fetchDataservices(
     if (filters?.access_type) params.set("access_type", filters.access_type);
     if (filters?.organization_badge) params.set("organization_badge", filters.organization_badge);
     if (filters?.modified_since) params.set("modified_since", filters.modified_since);
+    if (filters?.dataset) params.set("dataset", filters.dataset);
     // Multi-value filters
     for (const key of ["tag", "organization"] as const) {
       const value = filters?.[key];
