@@ -65,6 +65,7 @@ export default function ApiRegistrationClient({
   const [datasetSearch, setDatasetSearch] = useState("");
   const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
   const [isLinkingDatasets, setIsLinkingDatasets] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   useEffect(() => {
     setDatasetLinkErrors({});
@@ -171,6 +172,25 @@ export default function ApiRegistrationClient({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Step 3: the API was created as a draft (private: true) in step 1. Publishing
+  // flips it public; saving keeps it as a draft. Both then return to the list.
+  const handlePublish = async () => {
+    if (!createdDataservice) return;
+    setIsPublishing(true);
+    setApiError(null);
+    try {
+      await updateDataservice(createdDataservice.id, { private: false });
+      window.location.href = "/pages/admin/me/dataservices";
+    } catch {
+      setApiError("Erro ao publicar a API. Tente novamente.");
+      setIsPublishing(false);
+    }
+  };
+
+  const handleSaveDraft = () => {
+    window.location.href = "/pages/admin/me/dataservices";
   };
 
   const clearError = (field: string) => {
@@ -682,12 +702,23 @@ export default function ApiRegistrationClient({
 
               <PublicationFeedbackButton />
 
+              {apiError && (
+                <div className="mt-16">
+                  <StatusCard variant="danger" showIcon description={apiError} />
+                </div>
+              )}
+
               <div className="admin-page__actions flex justify-end gap-[18px]">
-                <Button appearance="outline" variant="neutral">
+                <Button
+                  appearance="outline"
+                  variant="neutral"
+                  onClick={handleSaveDraft}
+                  disabled={isPublishing}
+                >
                   Salvar rascunho
                 </Button>
-                <Button variant="primary">
-                  Publicar API
+                <Button variant="primary" onClick={handlePublish} disabled={isPublishing}>
+                  {isPublishing ? "A publicar..." : "Publicar API"}
                 </Button>
               </div>
             </>
