@@ -52,11 +52,11 @@ export default async function Page({
 
     const sitemap = [{
         children: title,
-        href: slugify(title)
+        href: "#" + slugify(title),
     },
     ...sections.map((item) => ({
         children: item.heading,
-        href: slugify(item.heading),
+        href: "#" + slugify(item.heading),
     }))]
 
 
@@ -94,7 +94,7 @@ export default async function Page({
                 </div>
             </div>
             <div className="container grid grid-cols-12 gap-32 roadmap-page pb-32">
-                <div className="md:col-span-3 hidden md:block">
+                <div className="md:col-span-4 hidden md:block">
                     <SimpleSiteMap
                         anchor={sitemap.map(anchor => ({
                             children: anchor.children,
@@ -102,7 +102,7 @@ export default async function Page({
                         }))}
                     />
                 </div>
-                <div className="col-span-12 md:col-span-9 flex flex-col gap-64 pl-32  border-neutral-200 h-full">
+                <div className="col-span-12 md:col-span-8 flex flex-col gap-64 pl-32  border-neutral-200 h-full">
                     <div className='flex flex-col gap-16 max-w-[592px] px-32' id={slugify(title)}>
                         <ReactMarkdown
                             remarkPlugins={remarkPlugins}
@@ -128,29 +128,38 @@ export default async function Page({
                         <Typograph tag="h2" className="text-xl-bold text-primary-900">
                             {section.heading}
                         </Typograph>
-                        <div className='w-full h-full flex flex-col'>
-                            <ReactMarkdown
-                                remarkPlugins={remarkPlugins}
-                                rehypePlugins={rehypePlugins}
-                                components={{
-                                    a: ({ href, children }) => (
-                                        <Anchor href={href} appearance='link' className="!py-0 !min-h-[12px] !min-w-[12px]" >
-                                            {children}
-                                        </Anchor>
-                                    ),
-                                    ol: ({ children }) => <ol className="list-decimal pl-6 [&_li::marker]:font-bold">{children}</ol>,
-                                    ul: ({ children }) => <ul className="list-disc pl-6">{children}</ul>,
-                                    li: ({ children }) => <li className="ml-32">{children}</li>,
-                                }}
-                            >
-                                {section.body}
-                            </ReactMarkdown>
+                        <div className='flex flex-col gap-32'>
+                            <div className='w-full h-full flex flex-col'>
+                                <ReactMarkdown
+                                    remarkPlugins={remarkPlugins}
+                                    rehypePlugins={rehypePlugins}
+                                    components={{
+                                        a: ({ href, children }) => (
+                                            <Anchor href={href} appearance='link' className="!py-0 !min-h-[12px] !min-w-[12px]" >
+                                                {children}
+                                            </Anchor>
+                                        ),
+                                        ol: ({ children }) => <ol className="list-decimal pl-6 [&_li::marker]:font-bold">{children}</ol>,
+                                        ul: ({ children }) => <ul className="list-disc pl-6">{children}</ul>,
+                                        li: ({ children }) => <li className="ml-32">{children}</li>,
+                                    }}
+                                >
+                                    {section.body}
+                                </ReactMarkdown>
+                            </div>
+                            <div className='flex flex-col ml-32 border-l-2 border-primary-600 pl-16'>
+                                {section.datasets.map((dataset, index) => (
+                                    <Anchor className='!justify-start' href={"pages/" + dataset.href} key={index}>
+                                        {dataset.children}
+                                    </Anchor>
+                                ))}
+                            </div>
                         </div>
                     </div>))}
                 </div>
             </div>
 
-            <div className='w-full flex justify-center items-center bg-neutral-100 pt-64 pb-[172px]'>
+            <div className='w-full flex justify-center items-center bg-neutral-100 py-64'>
                 <div className='container w-full h-full flex flex-col gap-32'>
                     <div className='w-full flex justify-between items-center'>
                         <Typograph tag="h2" className='text-xl-bold'>
