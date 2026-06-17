@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Icon } from "@ama-pt/agora-design-system";
-import AuxiliarList, { type AuxiliarItem } from "@/components/admin/AuxiliarList";
+import type { AuxiliarItem } from "@/components/admin/AuxiliarList";
+import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 
 interface CommunityResourceAuxiliarySidebarProps {
   items: AuxiliarItem[];
@@ -11,15 +11,5 @@ interface CommunityResourceAuxiliarySidebarProps {
 export default function CommunityResourceAuxiliarySidebar({
   items,
 }: CommunityResourceAuxiliarySidebarProps) {
-  return (
-    <aside className="admin-page__auxiliar">
-      <div className="admin-page__auxiliar-inner">
-        <div className="admin-page__auxiliar-header">
-          <Icon name="agora-line-question-mark" className="h-24 w-24" />
-          <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
-        </div>
-        <AuxiliarList items={items} />
-      </div>
-    </aside>
-  );
+  return <AdminAuxiliarySidebar items={items} />;
 }
