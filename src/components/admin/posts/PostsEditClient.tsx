@@ -1,29 +1,31 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Button,
-  InputText,
-  InputTextArea,
-  RadioButton,
   Icon,
   StatusCard,
-  Tabs,
   Tab,
-  TabHeader,
   TabBody,
-  Tag,
+  TabHeader,
+  Tabs,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import AdminLayout from "@/components/Layout/AdminLayout";
-import { fetchPost, updatePost, uploadPostImage, deletePost, unpublishPost, publishPost } from "@/service/api/posts";
-import type { Post, PostUpdatePayload } from "@/service/types/posts";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import dynamic from "next/dynamic";
+import AdminLayout from "@/components/Layout/AdminLayout";
+import {
+  deletePost,
+  fetchPost,
+  publishPost,
+  unpublishPost,
+  updatePost,
+  uploadPostImage,
+} from "@/service/api/posts";
+import type { Post, PostUpdatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
-import { ImageUploadField } from "@/components/admin/posts/ImageUploadField";
+import PostMetadataSection from "@/components/admin/posts/PostMetadataSection";
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), {
   ssr: false,
@@ -66,20 +68,18 @@ export default function PostsEditClient() {
 
   const [post, setPost] = useState<Post | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
   const [articleType, setArticleType] = useState("news");
   const [contentType, setContentType] = useState("markdown");
   const [articleTitle, setArticleTitle] = useState("");
   const [articleHeader, setArticleHeader] = useState("");
   const [articleContent, setArticleContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
   const [isSaving, setIsSaving] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
 
-  const { keywordSearch, setKeywordSearch, keywordOptions, selectedKeywordsRef, addCustomTag } =
+  const { setKeywordSearch, keywordOptions, selectedKeywordsRef, addCustomTag } =
     usePostKeywords(selectedTags);
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export default function PostsEditClient() {
       }
     }
 
-    loadData();
+    void loadData();
   }, [postId]);
 
   const handleSaveMetadata = async () => {
@@ -230,14 +230,16 @@ export default function PostsEditClient() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
     if (!files || !files.length) return;
+
     const file = files[0];
     if (file.size > 4194304) {
       setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
       return;
     }
+
     setImageError(null);
     setIsSaving(true);
     setApiError(null);
@@ -257,6 +259,27 @@ export default function PostsEditClient() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleKeywordsChange = (value: string) => {
+    const selected = value.split(",").filter(Boolean);
+    setSelectedTags(selected);
+
+    let addedNew = false;
+    selected.forEach((tag) => {
+      addedNew = true;
+      addCustomTag(tag);
+    });
+
+    if (addedNew) {
+      setKeywordSearch("");
+    }
+  };
+
+  const handleRemoveTag = (keyword: string) => {
+    const next = selectedTags.filter((value) => value.toLowerCase() !== keyword.toLowerCase());
+    setSelectedTags(next);
+    selectedKeywordsRef.current = next.join(",");
   };
 
   if (isLoading) {
@@ -296,7 +319,6 @@ export default function PostsEditClient() {
         </Button>
       }
     >
-
       {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
       {apiSuccess && <StatusCard variant="success" showIcon description={apiSuccess} />}
 
@@ -307,7 +329,6 @@ export default function PostsEditClient() {
           setApiSuccess(null);
         }}
       >
-        {/* Metadados Tab */}
         <Tab>
           <TabHeader>Metadados</TabHeader>
           <TabBody>
@@ -318,135 +339,32 @@ export default function PostsEditClient() {
                     Campos precedidos por uma estrela (*) são obrigatórios.
                   </p>
 
-                  <h2 className="admin-page__section-title mt-8">DESCRIÇÃO</h2>
-
-                  <div className="admin-page__fields-group">
-                    <InputText
-                      label="Título do artigo *"
-                      placeholder="Insira o título aqui"
-                      id="article-title"
-                      value={articleTitle}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setArticleTitle(e.target.value)
-                      }
-                    />
-
-                    <InputTextArea
-                      label="Cabeçalho *"
-                      placeholder="Insira aqui"
-                      id="article-header"
-                      rows={3}
-                      value={articleHeader}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                        setArticleHeader(e.target.value)
-                      }
-                    />
-
-                    <div className="flex flex-col gap-8">
-                      <span className="text-primary-900 text-base font-medium leading-7">
-                        Tipo de Item
-                      </span>
-                      <div className="flex flex-row gap-4">
-                        <RadioButton
-                          label="Notícias"
-                          id="article-type-news"
-                          name="article-type"
-                          checked={articleType === "news"}
-                          onChange={() => setArticleType("news")}
-                        />
-                        <RadioButton
-                          label="Page"
-                          id="article-type-page"
-                          name="article-type"
-                          checked={articleType === "page"}
-                          onChange={() => setArticleType("page")}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-8">
-                      <span className="text-primary-900 text-base font-medium leading-7">
-                        Tipo de conteúdo
-                      </span>
-                      <div className="flex flex-row gap-4">
-                        <RadioButton
-                          label="HTML"
-                          id="content-html"
-                          name="content-type"
-                          checked={contentType === "html"}
-                          onChange={() => setContentType("html")}
-                        />
-                        <RadioButton
-                          label="Markdown"
-                          id="content-markdown"
-                          name="content-type"
-                          checked={contentType === "markdown"}
-                          onChange={() => setContentType("markdown")}
-                        />
-                        <RadioButton
-                          label="Blocos"
-                          id="content-blocks"
-                          name="content-type"
-                          checked={contentType === "blocks"}
-                          onChange={() => setContentType("blocks")}
-                        />
-                      </div>
-                    </div>
-
-                    <IsolatedSelect
-                      label="Palavras-chave"
-                      placeholder="Pesquise ou insira palavras-chave..."
-                      id="article-keywords"
-                      type="checkbox"
-                      searchable
-                      searchInputPlaceholder="Escreva para pesquisar ou criar..."
-                      searchNoResultsText="Nenhum resultado encontrado"
-                      defaultValue={selectedTags.join(",")}
-                      onChangeRef={selectedKeywordsRef}
-                      onSearchCallback={setKeywordSearch}
-                      onChangeCallback={(value) => {
-                        const selected = value.split(",").filter(Boolean);
-                        setSelectedTags(selected);
-                        let addedNew = false;
-                        selected.forEach((v) => {
-                          addedNew = true;
-                          addCustomTag(v);
-                        });
-                        if (addedNew) {
-                          setKeywordSearch("");
-                        }
-                      }}
-                    >
-                      {keywordOptions}
-                    </IsolatedSelect>
-
-                    {selectedTags.length > 0 && (
-                      <div className="flex flex-wrap gap-8 -mt-8">
-                        {selectedTags.map((keyword) => (
-                          <Tag
-                            key={keyword}
-                            aria-label={`Remover ${keyword}`}
-                            onClick={() => {
-                              const next = selectedTags.filter(
-                                (v) => v.toLowerCase() !== keyword.toLowerCase(),
-                              );
-                              setSelectedTags(next);
-                              selectedKeywordsRef.current = next.join(",");
-                            }}
-                          >
-                            {keyword}
-                          </Tag>
-                        ))}
-                      </div>
-                    )}
-
-                    <ImageUploadField
-                      onChange={handleImageUpload}
-                      onSecurityError={() => setImageError(POISONED_FILE_WARNING)}
-                      error={imageError}
-                      previewSrc={post.image ?? undefined}
-                    />
-                  </div>
+                  <PostMetadataSection
+                    title={articleTitle}
+                    header={articleHeader}
+                    articleType={articleType}
+                    contentType={contentType}
+                    selectedTags={selectedTags}
+                    keywordOptions={keywordOptions}
+                    selectedKeywordsRef={selectedKeywordsRef}
+                    imageError={imageError}
+                    previewSrc={post.image ?? undefined}
+                    contentTypeOptions={["html", "markdown", "blocks"]}
+                    sectionTitle="DESCRIÇÃO"
+                    sectionTitleClassName="admin-page__section-title mt-8"
+                    headerPlaceholder="Insira aqui"
+                    articleTypeLabel="Tipo de Item"
+                    pageLabel="Page"
+                    onTitleChange={(event) => setArticleTitle(event.target.value)}
+                    onHeaderChange={(event) => setArticleHeader(event.target.value)}
+                    onArticleTypeChange={setArticleType}
+                    onContentTypeChange={setContentType}
+                    onKeywordSearchChange={setKeywordSearch}
+                    onKeywordsChange={handleKeywordsChange}
+                    onRemoveTag={handleRemoveTag}
+                    onImageChange={handleImageUpload}
+                    onImageSecurityError={() => setImageError(POISONED_FILE_WARNING)}
+                  />
 
                   <div className="admin-page__actions">
                     <Button
@@ -526,14 +444,11 @@ export default function PostsEditClient() {
                           trailingIcon="agora-line-arrow-right-circle"
                           trailingIconHover="agora-solid-arrow-right-circle"
                           onClick={() => {
-                            show(
-                              <DeletePostPopupContent onClose={hide} onConfirm={handleDelete} />,
-                              {
-                                title: "Tem a certeza que quer eliminar este artigo?",
-                                closeAriaLabel: "Fechar",
-                                dimensions: "m",
-                              }
-                            );
+                            show(<DeletePostPopupContent onClose={hide} onConfirm={handleDelete} />, {
+                              title: "Tem a certeza que quer eliminar este artigo?",
+                              closeAriaLabel: "Fechar",
+                              dimensions: "m",
+                            });
                           }}
                           disabled={isSaving}
                         >
@@ -548,7 +463,6 @@ export default function PostsEditClient() {
           </TabBody>
         </Tab>
 
-        {/* Conteúdo Tab */}
         <Tab>
           <TabHeader>Conteúdo</TabHeader>
           <TabBody>
