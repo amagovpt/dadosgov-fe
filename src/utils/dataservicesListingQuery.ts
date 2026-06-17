@@ -1,8 +1,10 @@
 import { DataserviceListFilters } from "@/service/api/dataservices";
 
+// Values are the sort KEYS accepted by the /api/1/dataservices/ endpoint
+// (generated from the model's sortable fields), not the underlying columns.
 export const DATASERVICE_SORT_OPTIONS: Record<string, string> = {
   relevancia: "",
-  recentes: "-created_at",
+  recentes: "-created",
 };
 
 export const DATASERVICE_SORT_LABELS: Record<string, string> = {
@@ -11,7 +13,7 @@ export const DATASERVICE_SORT_LABELS: Record<string, string> = {
 };
 
 const DATASERVICE_SORT_REVERSE_MAP: Record<string, string> = {
-  "-created_at": "recentes",
+  "-created": "recentes",
 };
 
 export function parseDataservicesFilters(params: URLSearchParams): DataserviceListFilters {
