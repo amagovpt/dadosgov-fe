@@ -9,8 +9,10 @@ import {
   RadioButton,
   Icon,
   StatusCard,
+  usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import DataservicesEditDeletePopup from "@/components/admin/dataservices/DataservicesEditDeletePopup";
 import {
   fetchDataservice,
   updateDataservice,
@@ -26,6 +28,7 @@ const ACCESS_TYPES = [
 
 export default function DataservicesEditClient() {
   const router = useRouter();
+  const { show, hide } = usePopupContext();
   const searchParams = useSearchParams();
   const idOrSlug = searchParams.get("id") || searchParams.get("slug") || "";
 
@@ -123,15 +126,9 @@ export default function DataservicesEditClient() {
     }
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
     if (!dataservice) return;
-    if (
-      !window.confirm(
-        "Tem a certeza que deseja eliminar esta API? Esta ação é irreversível."
-      )
-    ) {
-      return;
-    }
+    hide();
     setIsSaving(true);
     try {
       await deleteDataservice(dataservice.id);
@@ -140,6 +137,15 @@ export default function DataservicesEditClient() {
       console.error("Error deleting dataservice:", error);
       setIsSaving(false);
     }
+  };
+
+  const handleOpenDeletePopup = () => {
+    if (!dataservice) return;
+    show(<DataservicesEditDeletePopup onClose={hide} onConfirm={confirmDelete} />, {
+      title: "Elimine a API",
+      closeAriaLabel: "Fechar",
+      dimensions: "m",
+    });
   };
 
   return (
@@ -290,7 +296,7 @@ export default function DataservicesEditClient() {
                     hasIcon
                     trailingIcon="agora-line-arrow-right-circle"
                     trailingIconHover="agora-solid-arrow-right-circle"
-                    onClick={handleDelete}
+                    onClick={handleOpenDeletePopup}
                     disabled={isSaving}
                   >
                     Eliminar a API

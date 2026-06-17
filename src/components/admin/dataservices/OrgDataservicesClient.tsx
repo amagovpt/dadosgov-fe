@@ -62,8 +62,10 @@ export default function OrgDataservicesClient() {
       if (sortField === "title") {
         return collator.compare(a.title ?? "", b.title ?? "") * dir;
       }
-      const av = sortField === "created_at" ? a.created_at : a.last_modified;
-      const bv = sortField === "created_at" ? b.created_at : b.last_modified;
+      const av =
+        sortField === "created_at" ? a.created_at : a.metadata_modified_at || a.last_modified;
+      const bv =
+        sortField === "created_at" ? b.created_at : b.metadata_modified_at || b.last_modified;
       const at = av ? Date.parse(av) : 0;
       const bt = bv ? Date.parse(bv) : 0;
       return (at - bt) * dir;
@@ -159,7 +161,7 @@ export default function OrgDataservicesClient() {
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
                 <TableCell headerLabel="Modificado em">
-                  {formatDateToDMY(api.last_modified)}
+                  {formatDateToDMY(api.metadata_modified_at || api.last_modified)}
                   <br />
                   <span className="text-sm text-neutral-500">
                     sobre <span className="text-success-600">●</span>{" "}

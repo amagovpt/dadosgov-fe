@@ -172,7 +172,7 @@ export default function SystemDataservicesClient() {
                 </TableCell>
                 <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
                 <TableCell headerLabel="Modificado em">
-                  {formatDateToDMY(api.last_modified)}
+                  {formatDateToDMY(api.metadata_modified_at || api.last_modified)}
                   {api.owner && (
                     <>
                       <br />

@@ -24,6 +24,9 @@ export interface Dataservice {
   owner: UserRef | null;
   created_at: string;
   last_modified: string;
+  // The list endpoint serialises the modification timestamp as
+  // metadata_modified_at; last_modified may be absent there.
+  metadata_modified_at?: string | null;
   archived_at: string | null;
   deleted_at: string | null;
   metrics: Metric;
