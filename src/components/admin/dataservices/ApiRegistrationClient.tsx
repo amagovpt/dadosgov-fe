@@ -15,7 +15,6 @@ import {
   DropdownOption,
   CardGeneral,
 } from "@ama-pt/agora-design-system";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { createDataservice } from "@/service/api/dataservices";
 import type { Dataservice } from "@/service/types/dataservice";
 import AuxiliarList from "@/components/admin/AuxiliarList";
@@ -252,28 +251,29 @@ export default function ApiRegistrationClient({
                 </p>
                 <h2 className="admin-page__section-title">Produtor</h2>
 
-                <IsolatedSelect
+                <InputSelect
                   label="Verifique a identidade que deseja usar na publicação."
                   placeholder="Para pesquisar..."
                   id="producer-identity"
-                  defaultValue="user"
-                  onChangeRef={producerRef}
+                  onChange={(options) => {
+                    producerRef.current = (options[0]?.value as string) || "user";
+                  }}
                 >
                   <DropdownSection name="identity">
-                    <DropdownOption value="user">
-                      {user
-                        ? `${user.first_name} ${user.last_name}`
-                        : "Eu próprio"}
-                    </DropdownOption>
-                    <>
-                      {(user?.organizations || []).map((org) => (
+                    {[
+                      <DropdownOption key="user" value="user">
+                        {user
+                          ? `${user.first_name} ${user.last_name}`
+                          : "Eu próprio"}
+                      </DropdownOption>,
+                      ...(user?.organizations || []).map((org) => (
                         <DropdownOption key={org.id} value={org.id}>
                           {org.name}
                         </DropdownOption>
-                      ))}
-                    </>
+                      )),
+                    ]}
                   </DropdownSection>
-                </IsolatedSelect>
+                </InputSelect>
 
                 <div className="admin-page__org-card">
                   <p className="admin-page__org-card-title">
