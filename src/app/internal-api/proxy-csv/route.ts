@@ -34,6 +34,9 @@ export async function GET(request: NextRequest) {
     allowedContentTypePrefixes: ALLOWED_CONTENT_TYPE_PREFIXES,
     maxBytes: MAX_BYTES,
     accept: "text/csv, text/plain, */*",
+    // dados.gov.pt storage serves files with `nosniff` and no content-type;
+    // the body is still size-capped and treated as text.
+    allowMissingContentType: true,
     requesterIp,
     logLabel: "proxy-csv",
   });
