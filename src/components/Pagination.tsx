@@ -9,6 +9,10 @@ interface PaginationProps {
   totalItems: number;
   pageSize: number;
   baseUrl?: string; // kept for API compatibility, not used
+  // When provided, navigation is handled in-memory via this callback instead
+  // of pushing a `?page=` URL change (used for paginating embedded content
+  // such as the resource preview, where the route must not change).
+  onPageChange?: (page: number) => void;
 }
 
 function buildPageUrl(page: number): string {
@@ -45,15 +49,19 @@ function getPageRange(current: number, total: number): (number | '...')[] {
   return range;
 }
 
-export const Pagination = ({ currentPage, totalItems, pageSize }: PaginationProps) => {
+export const Pagination = ({ currentPage, totalItems, pageSize, onPageChange }: PaginationProps) => {
   const router = useRouter();
   const totalPages = Math.ceil(totalItems / pageSize);
 
   const navigate = useCallback(
     (page: number) => {
+      if (onPageChange) {
+        onPageChange(page);
+        return;
+      }
       router.push(buildPageUrl(page));
     },
-    [router]
+    [router, onPageChange]
   );
 
   if (totalPages <= 1) return null;
