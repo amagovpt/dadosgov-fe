@@ -113,7 +113,6 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
   const lastUpdate =
     formatLongDate(dataservice.metadata_modified_at) ||
     formatLongDate(dataservice.last_modified);
-  const createdAt = formatLongDate(dataservice.created_at);
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-64">
@@ -282,40 +281,9 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
         </div>
       </div>
 
-      {/* Tabs: Informações + Discussões */}
+      {/* Tabs: Informações (inc. informações técnicas) + Discussões */}
       <section className="w-full">
         <DataserviceTabs dataservice={dataservice} />
-      </section>
-
-      {/* Technical information */}
-      <section className="container">
-        <h2 className="mb-24 text-base font-medium uppercase text-neutral-900">
-          Informações técnicas
-        </h2>
-        <div className="grid gap-32 md:grid-cols-2 xl:grid-cols-3">
-          {lastUpdate && (
-            <div>
-              <h3 className="text-sm mb-8 font-bold tracking-wider text-neutral-900">
-                Última atualização
-              </h3>
-              <p className="font-medium text-neutral-900">{lastUpdate}</p>
-            </div>
-          )}
-          {createdAt && (
-            <div>
-              <h3 className="text-sm mb-8 font-bold tracking-wider text-neutral-900">
-                Data de criação
-              </h3>
-              <p className="font-medium text-neutral-900">{createdAt}</p>
-            </div>
-          )}
-          <div>
-            <h3 className="text-sm mb-8 font-bold tracking-wider text-neutral-900">
-              Identificador
-            </h3>
-            <p className="break-all font-medium text-neutral-900">{dataservice.id}</p>
-          </div>
-        </div>
       </section>
     </main>
   );
