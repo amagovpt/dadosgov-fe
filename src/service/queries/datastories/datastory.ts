@@ -74,6 +74,10 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                   }
                 }
               }
+              breadcrumbs {
+                label
+                url
+              }
             }
           }
           sections {
@@ -231,8 +235,6 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
   }
 
   const datastory = data.queryDataStoriesContents[0]?.data;
-
-  console.log("datastory", datastory);
 
   if (!datastory) {
     return notFound();
