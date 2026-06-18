@@ -57,6 +57,10 @@ export default function HarvesterImplementationSection({
   onToggleEnabled,
   onToggleAutoArchive,
 }: HarvesterImplementationSectionProps) {
+  const supportsCkanFilters = selectedType === "ckan" || selectedType === "ckanpt";
+  const supportsRemoteUrlPrefix =
+    selectedType === "csw-dcat" || selectedType === "csw-iso-19139";
+
   return (
     <>
       <h2 className="admin-page__section-title">Implementação</h2>
@@ -86,7 +90,7 @@ export default function HarvesterImplementationSection({
           </DropdownSection>
         </IsolatedSelect>
 
-        {(selectedType === "ckan" || selectedType === "ckanpt") && (
+        {supportsCkanFilters && (
           <div>
             <p className="text-base font-medium leading-7 text-primary-900">Filtros</p>
 
@@ -163,55 +167,10 @@ export default function HarvesterImplementationSection({
         )}
 
         {selectedType === "csw-dcat" && (
-          <>
-            <Switch label="GeoDCAT-AP" checked={isGeoDcat} onChange={onToggleGeoDcat} />
-
-            {!showRemoteUrlPrefix ? (
-              <div className="flex justify-start">
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  leadingIcon="agora-line-plus-circle"
-                  leadingIconHover="agora-solid-plus-circle"
-                  onClick={onShowRemoteUrlPrefix}
-                >
-                  Configurar prefixo de URL remoto
-                </Button>
-              </div>
-            ) : (
-              <div>
-                <p className="text-base font-medium leading-7 text-primary-900">
-                  Prefixo de URL remoto
-                </p>
-                <div className="mt-8 flex items-center gap-8">
-                  <div className="flex-1">
-                    <InputText
-                      label=""
-                      hideLabel
-                      placeholder=""
-                      id="remote-url-prefix"
-                      value={remoteUrlPrefix}
-                      onChange={onRemoteUrlPrefixChange}
-                    />
-                  </div>
-                  <Button
-                    appearance="outline"
-                    variant="neutral"
-                    hasIcon
-                    leadingIcon="agora-line-trash"
-                    leadingIconHover="agora-solid-trash"
-                    onClick={onClearRemoteUrlPrefix}
-                  >
-                    EXCLUIR
-                  </Button>
-                </div>
-              </div>
-            )}
-          </>
+          <Switch label="GeoDCAT-AP" checked={isGeoDcat} onChange={onToggleGeoDcat} />
         )}
 
-        {selectedType === "csw-iso-19139" && (
+        {supportsRemoteUrlPrefix && (
           <>
             {!showRemoteUrlPrefix ? (
               <div className="flex justify-start">
