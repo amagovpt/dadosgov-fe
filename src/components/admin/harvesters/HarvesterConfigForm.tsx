@@ -13,7 +13,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import IsolatedInput from "@/components/admin/IsolatedInput";
-import { HarvesterPreviewPanel } from "@/components/admin/harvesters/HarvesterPreviewPanel";
+import HarvesterPreviewResult from "@/components/admin/harvesters/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
 
 const FILTER_KEY_LABELS: Record<string, string> = {
@@ -449,11 +449,15 @@ export function HarvesterConfigForm({
             </Button>
           </div>
 
-          <HarvesterPreviewPanel
-            isPreviewing={isPreviewing}
-            previewJob={previewJob}
-            previewError={previewError}
-          />
+          {isPreviewing || previewJob || previewError ? (
+            <HarvesterPreviewResult
+              isPreviewing={isPreviewing}
+              previewJob={previewJob}
+              previewError={previewError}
+              title="Resultado da pré-visualização"
+              className="mt-24 flex flex-col gap-12"
+            />
+          ) : null}
         </form>
 
         {/* Danger zone */}
