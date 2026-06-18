@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import {
   Button,
   Icon,
-  StatusCard,
   Tab,
   TabBody,
   TabHeader,
@@ -24,6 +23,7 @@ import {
 } from "@/service/api/posts";
 import type { Post, PostUpdatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import PostsEditDangerZone from "@/components/admin/posts/PostsEditDangerZone";
 import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
 import PostMetadataSection from "@/components/admin/posts/PostMetadataSection";
 import PostsEditStatusAlerts from "@/components/admin/posts/PostsEditStatusAlerts";
@@ -380,84 +380,19 @@ export default function PostsEditClient() {
                   </div>
                 </form>
 
-                <div className="dataset-edit-danger-actions">
-                  {post.published ? (
-                    <StatusCard
-                      variant="warning"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Retirar o artigo</strong>
-                          <br />
-                          Por favor, note que o item não será mais visível.
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={handleUnpublish}
-                            disabled={isSaving}
-                          >
-                            {isSaving ? "A retirar..." : "Retirar"}
-                          </Button>
-                        </>
-                      }
-                    />
-                  ) : (
-                    <StatusCard
-                      variant="informative"
-                      showIcon
-                      description={
-                        <>
-                          <strong>Artigo despublicado</strong>
-                          <br />
-                          Este artigo não está visível para o público.
-                          <br />
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            trailingIcon="agora-line-arrow-right-circle"
-                            trailingIconHover="agora-solid-arrow-right-circle"
-                            onClick={handleRepublish}
-                            disabled={isSaving}
-                          >
-                            {isSaving ? "A publicar..." : "Publicar novamente"}
-                          </Button>
-                        </>
-                      }
-                    />
-                  )}
-                  <StatusCard
-                    variant="danger"
-                    showIcon
-                    description={
-                      <>
-                        <strong>Atenção, esta ação não pode ser corrigida.</strong>
-                        <br />
-                        <Button
-                          appearance="link"
-                          variant="primary"
-                          hasIcon
-                          trailingIcon="agora-line-arrow-right-circle"
-                          trailingIconHover="agora-solid-arrow-right-circle"
-                          onClick={() => {
-                            show(<DeletePostPopupContent onClose={hide} onConfirm={handleDelete} />, {
-                              title: "Tem a certeza que quer eliminar este artigo?",
-                              closeAriaLabel: "Fechar",
-                              dimensions: "m",
-                            });
-                          }}
-                          disabled={isSaving}
-                        >
-                          Eliminar o artigo
-                        </Button>
-                      </>
-                    }
-                  />
-                </div>
+                <PostsEditDangerZone
+                  isPublished={!!post.published}
+                  isSaving={isSaving}
+                  onUnpublish={handleUnpublish}
+                  onRepublish={handleRepublish}
+                  onOpenDeletePopup={() => {
+                    show(<DeletePostPopupContent onClose={hide} onConfirm={handleDelete} />, {
+                      title: "Tem a certeza que quer eliminar este artigo?",
+                      closeAriaLabel: "Fechar",
+                      dimensions: "m",
+                    });
+                  }}
+                />
               </div>
             </div>
           </TabBody>
