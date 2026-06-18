@@ -2,15 +2,14 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@ama-pt/agora-design-system";
 import { createPost, publishPost, uploadPostImage } from "@/service/api/posts";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import PostsNewContentStep from "@/components/admin/posts/PostsNewContentStep";
+import PostsNewMetadataStep from "@/components/admin/posts/PostsNewMetadataStep";
 import type { PostCreatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
-import PostMetadataSection from "@/components/admin/posts/PostMetadataSection";
-import PostContentSection from "@/components/admin/posts/PostContentSection";
 
 export default function PostsNewClient() {
   const searchParams = useSearchParams();
@@ -155,111 +154,62 @@ export default function PostsNewClient() {
       <div className="admin-page__body">
         <div className="admin-page__form-area">
           {currentStep === 1 && (
-            <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
-              <p className="pt-32 text-base leading-7 text-neutral-900">
-                Os campos marcados com um asterisco ( * ) são obrigatórios.
-              </p>
-
-              <PostMetadataSection
-                title={articleTitle}
-                header={articleHeader}
-                articleType={articleType}
-                contentType={contentType}
-                selectedTags={selectedTags}
-                keywordOptions={keywordOptions}
-                selectedKeywordsRef={selectedKeywordsRef}
-                imageError={imageError}
-                previewSrc={imageFile ? URL.createObjectURL(imageFile) : undefined}
-                hasTitleError={!!formErrors.articleTitle}
-                hasHeaderError={!!formErrors.articleHeader}
-                onTitleChange={(event) => {
-                  setArticleTitle(event.target.value);
-                  if (event.target.value.trim()) {
-                    clearError("articleTitle");
-                  }
-                }}
-                onHeaderChange={(event) => {
-                  setArticleHeader(event.target.value);
-                  if (event.target.value.trim()) {
-                    clearError("articleHeader");
-                  }
-                }}
-                onArticleTypeChange={setArticleType}
-                onContentTypeChange={setContentType}
-                onKeywordSearchChange={setKeywordSearch}
-                onKeywordsChange={handleKeywordsChange}
-                onRemoveTag={handleRemoveTag}
-                onImageChange={handleImageChange}
-                onImageSecurityError={() => setImageError(POISONED_FILE_WARNING)}
-              />
-
-              <div className="admin-page__actions">
-                <Button
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={handleStep1Next}
-                >
-                  Seguinte
-                </Button>
-              </div>
-            </form>
+            <PostsNewMetadataStep
+              articleTitle={articleTitle}
+              articleHeader={articleHeader}
+              articleType={articleType}
+              contentType={contentType}
+              selectedTags={selectedTags}
+              keywordOptions={keywordOptions}
+              selectedKeywordsRef={selectedKeywordsRef}
+              imageError={imageError}
+              previewSrc={imageFile ? URL.createObjectURL(imageFile) : undefined}
+              hasTitleError={!!formErrors.articleTitle}
+              hasHeaderError={!!formErrors.articleHeader}
+              onTitleChange={(event) => {
+                setArticleTitle(event.target.value);
+                if (event.target.value.trim()) {
+                  clearError("articleTitle");
+                }
+              }}
+              onHeaderChange={(event) => {
+                setArticleHeader(event.target.value);
+                if (event.target.value.trim()) {
+                  clearError("articleHeader");
+                }
+              }}
+              onArticleTypeChange={setArticleType}
+              onContentTypeChange={setContentType}
+              onKeywordSearchChange={setKeywordSearch}
+              onKeywordsChange={handleKeywordsChange}
+              onRemoveTag={handleRemoveTag}
+              onImageChange={handleImageChange}
+              onImageSecurityError={() => setImageError(POISONED_FILE_WARNING)}
+              onNext={handleStep1Next}
+            />
           )}
 
           {currentStep === 2 && (
-            <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
-              <PostContentSection
-                content={articleContent}
-                hasError={!!formErrors.articleContent}
-                onChange={(event) => {
-                  setArticleContent(event.target.value);
-                  if (event.target.value.trim()) {
-                    clearError("articleContent");
-                  }
-                }}
-              />
-
-              {saveError && <p className="mb-16 text-sm text-danger-600">{saveError}</p>}
-
-              <div className="admin-page__actions">
-                <Button
-                  appearance="outline"
-                  variant="primary"
-                  hasIcon
-                  leadingIcon="agora-line-arrow-left-circle"
-                  leadingIconHover="agora-solid-arrow-left-circle"
-                  onClick={() => router.push("/pages/admin/system/posts/new?step=1")}
-                >
-                  Anterior
-                </Button>
-                <Button
-                  appearance="outline"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-check-circle"
-                  trailingIconHover="agora-solid-check-circle"
-                  onClick={() => {
-                    void handleSave(false);
-                  }}
-                  disabled={isSaving}
-                >
-                  {pendingAction === "draft" ? "A guardar..." : "Guardar como rascunho"}
-                </Button>
-                <Button
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-check-circle"
-                  trailingIconHover="agora-solid-check-circle"
-                  onClick={() => {
-                    void handleSave(true);
-                  }}
-                  disabled={isSaving}
-                >
-                  {pendingAction === "publish" ? "A publicar..." : "Publicar artigo"}
-                </Button>
-              </div>
-            </form>
+            <PostsNewContentStep
+              articleContent={articleContent}
+              hasContentError={!!formErrors.articleContent}
+              saveError={saveError}
+              isSaving={isSaving}
+              pendingAction={pendingAction}
+              onContentChange={(event) => {
+                setArticleContent(event.target.value);
+                if (event.target.value.trim()) {
+                  clearError("articleContent");
+                }
+              }}
+              onPrevious={() => router.push("/pages/admin/system/posts/new?step=1")}
+              onSaveDraft={() => {
+                void handleSave(false);
+              }}
+              onPublish={() => {
+                void handleSave(true);
+              }}
+            />
           )}
         </div>
       </div>
