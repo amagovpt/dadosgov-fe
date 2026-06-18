@@ -294,44 +294,57 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
   const format = resource.format?.toLowerCase() || "";
   const isTabular = TABULAR_FORMATS.includes(format);
   const isSpreadsheet = SPREADSHEET_FORMATS.includes(format);
+  // Remote resources are hosted elsewhere; the backend resolver often cannot
+  // stream them (SSRF guard, unreachable host), so the preview proxy fails.
+  const isRemote = resource.filetype === "remote";
 
   useEffect(() => {
     if (!isTabular) return;
 
+    // A failed preview is an expected outcome (external files the backend
+    // can't fetch, missing/oversized resources), not a programming error — so
+    // we surface a friendly message instead of throwing/logging, which would
+    // otherwise trigger the dev console-error overlay.
+    const unavailableMessage = isRemote
+      ? "Pré-visualização não disponível para ficheiros externos."
+      : "Não foi possível carregar os dados para pré-visualização.";
+
     async function fetchData() {
       setIsLoading(true);
+      setError(null);
       // Reset to the first page when a new resource's data loads, so we never
-      // land on a page that no longer exists. createPaginationProps handles the
-      // reset on page-size change.
+      // land on a page that no longer exists.
       setPage(1);
       try {
         // The browser sends only the resource id; the proxy resolves and
         // streams the bytes through the backend catalogue resolver.
         const rid = encodeURIComponent(resource.id);
+        const endpoint = isSpreadsheet ? "proxy-spreadsheet" : "proxy-csv";
+        const res = await fetch(`/internal-api/${endpoint}?rid=${rid}`);
+        if (!res.ok) {
+          setError(unavailableMessage);
+          return;
+        }
         if (isSpreadsheet) {
-          const res = await fetch(`/internal-api/proxy-spreadsheet?rid=${rid}`);
-          if (!res.ok) throw new Error("Erro ao carregar o ficheiro");
           const json: SpreadsheetPreview = await res.json();
           const parsed = buildTabularData(json.headers, json.rows, json.totalRows);
           parsed.lastModified = res.headers.get("last-modified") ?? json.lastModified;
           setTabularData(parsed);
         } else {
-          const res = await fetch(`/internal-api/proxy-csv?rid=${rid}`);
-          if (!res.ok) throw new Error("Erro ao carregar o ficheiro");
           const text = await res.text();
           const parsed = parseCsv(text);
           parsed.lastModified = res.headers.get("last-modified");
           setTabularData(parsed);
         }
-      } catch (err) {
-        console.error("Preview error:", err);
-        setError("Não foi possível carregar os dados.");
+      } catch {
+        // Network/parse failure — keep it quiet, just show the message.
+        setError(unavailableMessage);
       } finally {
         setIsLoading(false);
       }
     }
     fetchData();
-  }, [resource.id, isTabular, isSpreadsheet]);
+  }, [resource.id, isTabular, isSpreadsheet, isRemote]);
 
   // Cast Tabs to accept conditional children (the library type is overly strict)
   const FlexTabs = Tabs as React.FC<Omit<React.ComponentProps<typeof Tabs>, "children"> & { children: React.ReactNode }>;
@@ -341,7 +354,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
       <div className="w-[2px] bg-primary-600 shrink-0" />
       <div className="flex-1 min-w-0">
         <FlexTabs>
-          {isTabular && !isLoading && !error && tabularData && (
+          {isTabular && (
           <Tab>
             <TabHeader>Pré-visualização</TabHeader>
             <TabBody>
@@ -380,7 +393,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                         <TableHeader>
                           <TableRow>
                             {tabularData.headers.map((header, i) => (
-                              <TableHeaderCell key={i} sortType="string">
+                              <TableHeaderCell key={i}>
                                 {header}
                               </TableHeaderCell>
                             ))}
@@ -427,7 +440,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
             </TabBody>
           </Tab>
           )}
-          {isTabular && !isLoading && !error && tabularData && (
+          {isTabular && (
           <Tab>
             <TabHeader>Estrutura de dados</TabHeader>
             <TabBody>
