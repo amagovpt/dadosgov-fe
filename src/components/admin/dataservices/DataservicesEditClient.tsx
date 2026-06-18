@@ -9,6 +9,10 @@ import {
   RadioButton,
   Icon,
   StatusCard,
+  InputSelect,
+  DropdownSection,
+  DropdownOption,
+  Tag,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
@@ -18,7 +22,12 @@ import {
   updateDataservice,
   deleteDataservice,
 } from "@/service/api/dataservices";
+import { fetchDatasets, fetchMyDatasets } from "@/service/api/datasets";
+import { fetchOrgDatasets } from "@/service/api/organizations";
+import { searchDatasets } from "@/service/api/search";
+import { useAuth } from "@/context/AuthContext";
 import type { Dataservice } from "@/service/types/dataservice";
+import type { Dataset } from "@/service/types/dataset";
 
 const ACCESS_TYPES = [
   { value: "open", label: "Download gratuito" },
@@ -28,6 +37,7 @@ const ACCESS_TYPES = [
 
 export default function DataservicesEditClient() {
   const router = useRouter();
+  const { user } = useAuth();
   const { show, hide } = usePopupContext();
   const searchParams = useSearchParams();
   const idOrSlug = searchParams.get("id") || searchParams.get("slug") || "";
@@ -36,6 +46,12 @@ export default function DataservicesEditClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  // Associated datasets management.
+  const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
+  const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([]);
+  const [datasetSearch, setDatasetSearch] = useState("");
+  const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
 
   const [title, setTitle] = useState("");
   const [acronym, setAcronym] = useState("");
@@ -69,6 +85,9 @@ export default function DataservicesEditClient() {
         setRateLimiting(d.rate_limiting || "");
         setAvailability(d.availability != null ? String(d.availability) : "");
         setAccessType(d.access_type || "open");
+        // Load the datasets currently associated with this API.
+        const linked = await fetchDatasets(1, 100, { dataservice: d.id });
+        setSelectedDatasets(linked.data);
       } catch (error) {
         console.error("Error loading dataservice:", error);
       } finally {
@@ -77,6 +96,42 @@ export default function DataservicesEditClient() {
     }
     load();
   }, [idOrSlug]);
+
+  // Preload the dataset pool (user's own + their organizations' datasets).
+  useEffect(() => {
+    const dedupe = (items: Dataset[]) =>
+      Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const personal = fetchMyDatasets(1, 100);
+    const orgs = (user?.organizations || []).map((org) => fetchOrgDatasets(org.id, 1, 100));
+    Promise.all([personal, ...orgs])
+      .then((results) => setMyDatasets(dedupe(results.flatMap((r) => r.data || []))))
+      .catch(() => {});
+  }, [user?.organizations]);
+
+  // Search datasets across the whole portal when the user types (debounced).
+  useEffect(() => {
+    const q = datasetSearch.trim();
+    if (q.length < 2) return;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchDatasets(q, 1, 20);
+        setDatasetSearchResults(res.data || []);
+      } catch {
+        setDatasetSearchResults([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [datasetSearch]);
+
+  const availableDatasets = (() => {
+    const combined: Dataset[] = [...selectedDatasets, ...datasetSearchResults, ...myDatasets];
+    const seen = new Set<string>();
+    return combined.filter((d) => {
+      if (seen.has(d.id) || d.archived || d.deleted) return false;
+      seen.add(d.id);
+      return true;
+    });
+  })();
 
   const handleSave = async () => {
     if (!dataservice) return;
@@ -95,6 +150,7 @@ export default function DataservicesEditClient() {
         rate_limiting: rateLimiting.trim() || undefined,
         availability: availability.trim() ? parseFloat(availability) : undefined,
         access_type: accessType,
+        datasets: selectedDatasets.map((d) => d.id),
       });
       router.push(`/pages/dataservices/${dataservice.slug}`);
     } catch (error: unknown) {
@@ -241,6 +297,53 @@ export default function DataservicesEditClient() {
               </RadioButton>
             ))}
           </fieldset>
+
+          <div className="flex flex-col gap-8">
+            <span className="text-m-semibold">Conjuntos de dados associados</span>
+            <InputSelect
+              label="Pesquisar um conjunto de dados"
+              hideLabel
+              placeholder="Selecione conjuntos de dados..."
+              id="edit-dataservice-datasets"
+              type="checkbox"
+              searchable
+              searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
+              searchNoResultsText="Nenhum resultado encontrado"
+              onSearchInputChange={setDatasetSearch}
+              onChange={(options) => {
+                const ids = options.map((o) => String(o.value));
+                setSelectedDatasets(availableDatasets.filter((d) => ids.includes(d.id)));
+              }}
+            >
+              <DropdownSection name="datasets">
+                {availableDatasets.map((dataset) => (
+                  <DropdownOption
+                    key={dataset.id}
+                    value={dataset.id}
+                    selected={selectedDatasets.some((s) => s.id === dataset.id)}
+                  >
+                    {dataset.title}
+                  </DropdownOption>
+                ))}
+              </DropdownSection>
+            </InputSelect>
+            {selectedDatasets.length > 0 && (
+              <div className="mt-8 flex flex-wrap gap-8">
+                {selectedDatasets.map((dataset) => (
+                  <Tag
+                    key={dataset.id}
+                    aria-label={`Remover ${dataset.title}`}
+                    onClick={() =>
+                      setSelectedDatasets((prev) => prev.filter((d) => d.id !== dataset.id))
+                    }
+                  >
+                    {dataset.title}
+                  </Tag>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="admin-page__actions flex justify-end gap-16">
             <Button appearance="outline" variant="neutral" onClick={() => router.back()}>
               Cancelar
