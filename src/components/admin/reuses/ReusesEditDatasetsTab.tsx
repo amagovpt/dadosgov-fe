@@ -3,16 +3,14 @@ import {
   Button,
   DropdownOption,
   DropdownSection,
-  Icon,
   InputSelect,
   InputText,
   InputTextArea,
-  StatusCard,
   Tag,
 } from "@ama-pt/agora-design-system";
-import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
+import ReusesEditAssociatedDatasetsSection from "@/components/admin/reuses/ReusesEditAssociatedDatasetsSection";
 import ReusesEditDatasetsActions from "@/components/admin/reuses/ReusesEditDatasetsActions";
-import { formatDateToTimeAgo } from "@/utils/formatDate";
+import ReusesEditDatasetsNotices from "@/components/admin/reuses/ReusesEditDatasetsNotices";
 import type { Dataset } from "@/service/types/dataset";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 
@@ -59,11 +57,7 @@ export default function ReusesEditDatasetsTab({
   onSave,
 }: ReusesEditDatasetsTabProps) {
   const availableDatasets = (() => {
-    const combined: Dataset[] = [
-      ...selectedDatasets,
-      ...datasetSearchResults,
-      ...myDatasets,
-    ];
+    const combined: Dataset[] = [...selectedDatasets, ...datasetSearchResults, ...myDatasets];
     const associatedIds = new Set(associatedDatasets.map((dataset) => dataset.id));
     const seen = new Set<string>();
     return combined.filter((dataset) => {
@@ -78,67 +72,16 @@ export default function ReusesEditDatasetsTab({
 
   return (
     <div className="mt-24 flex flex-col gap-24">
-      {associatedDatasets.length > 0 && (
-          <div className="mb-24">
-            <div className="flex justify-end mb-16">
-              <Button
-                appearance="outline"
-                variant="danger"
-                hasIcon
-                leadingIcon="agora-line-trash"
-                leadingIconHover="agora-solid-trash"
-                disabled={isSubmitting}
-                onClick={onRemoveAllAssociatedDatasets}
-              >
-                Eliminar todos
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-16">
-              {associatedDatasets.map((dataset) => (
-                <div key={dataset.id} className="relative group/card">
-                  <CardMetrics
-                    link={`/pages/datasets/${dataset.slug}`}
-                    title={dataset.title}
-                    description={dataset.description || ""}
-                    last_modified={formatDateToTimeAgo(dataset.last_modified)}
-                    organization={dataset.organization ? {
-                      name: dataset.organization.name,
-                      logo: dataset.organization.logo ?? undefined,
-                    } : undefined}
-                    quality={dataset.quality}
-                    metrics={dataset.metrics}
-                  />
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={() => onRemoveAssociatedDataset(dataset.id)}
-                    className="rounded group absolute right-8 top-8 z-10 p-4"
-                    title="Eliminar"
-                  >
-                    <Icon
-                      name="agora-line-trash"
-                      className="block h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:hidden"
-                    />
-                    <Icon
-                      name="agora-solid-trash"
-                      className="hidden h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:block"
-                    />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      <ReusesEditAssociatedDatasetsSection
+        associatedDatasets={associatedDatasets}
+        isSubmitting={isSubmitting}
+        onRemoveAssociatedDataset={onRemoveAssociatedDataset}
+        onRemoveAllAssociatedDatasets={onRemoveAllAssociatedDatasets}
+      />
 
-        <div className="admin-page__form-area">
-        <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
-          <div className="mb-24">
-            <StatusCard
-              variant="warning"
-              showIcon
-              description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
-            />
-          </div>
+      <div className="admin-page__form-area">
+        <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
+          <ReusesEditDatasetsNotices />
 
           <InputSelect
             label="Pesquisar um conjunto de dados"
@@ -168,7 +111,7 @@ export default function ReusesEditDatasetsTab({
           </InputSelect>
 
           {selectedDatasets.length > 0 && (
-            <div className="flex flex-wrap gap-8 mt-16">
+            <div className="mt-16 flex flex-wrap gap-8">
               {selectedDatasets.map((dataset) => (
                 <Tag
                   key={dataset.id}
@@ -192,8 +135,8 @@ export default function ReusesEditDatasetsTab({
                 placeholder="Insira o URL aqui"
                 id={`edit-dataset-url-${index}`}
                 value={link.url}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onDatasetLinkChange(index, e.target.value)
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  onDatasetLinkChange(index, event.target.value)
                 }
                 hasError={!!datasetLinkErrors[index]}
                 hasFeedback={!!datasetLinkErrors[index]}
@@ -206,8 +149,8 @@ export default function ReusesEditDatasetsTab({
                 id={`edit-dataset-title-${index}`}
                 value={link.title ?? ""}
                 required={false}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onDatasetTitleChange(index, e.target.value)
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  onDatasetTitleChange(index, event.target.value)
                 }
               />
               <InputTextArea
@@ -216,12 +159,12 @@ export default function ReusesEditDatasetsTab({
                 id={`edit-dataset-description-${index}`}
                 value={link.description ?? ""}
                 required={false}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  onDatasetDescriptionChange(index, e.target.value)
+                onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  onDatasetDescriptionChange(index, event.target.value)
                 }
               />
               {link.url.trim() && (
-                <div className="flex justify-end mt-8">
+                <div className="mt-8 flex justify-end">
                   <Button
                     appearance="solid"
                     variant="danger"
@@ -246,7 +189,7 @@ export default function ReusesEditDatasetsTab({
             onSave={onSave}
           />
         </form>
-        </div>
+      </div>
     </div>
   );
 }
