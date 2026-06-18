@@ -3,11 +3,10 @@ import {
   Button,
   DropdownOption,
   DropdownSection,
-  Icon,
   InputSelect,
-  InputText,
 } from "@ama-pt/agora-design-system";
 import type { Reuse } from "@/service/types/reuse";
+import AdminExternalUrlFields from "@/components/admin/forms/AdminExternalUrlFields";
 import AppIcon from "@/components/Primitives/AppIcon";
 
 type ApiLink = { url: string };
@@ -77,50 +76,18 @@ export default function ReusesEditApiTab({
             <span className="admin-page__divider-or-text">ou</span>
           </div>
 
-          {apiLinks.map((link, index) => (
-            <div key={`api-${index}`}>
-              <InputText
-                label="Link para a API"
-                placeholder="https://..."
-                id={`edit-api-url-${index}`}
-                value={link.url}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onApiLinkChange(index, e.target.value)
-                }
-                hasError={!!apiLinkErrors[index]}
-                hasFeedback={!!apiLinkErrors[index]}
-                feedbackState="danger"
-                errorFeedbackText={apiLinkErrors[index]}
-              />
-              {link.url.trim() && (
-                <div className="flex justify-end mt-24">
-                  <Button
-                    appearance="solid"
-                    variant="danger"
-                    hasIcon
-                    leadingIcon="agora-line-trash"
-                    leadingIconHover="agora-solid-trash"
-                    onClick={() => onRemoveApiLink(index)}
-                  >
-                    Eliminar
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))}
-
-          <div className="flex justify-end">
-            <Button
-              appearance="outline"
-              variant="primary"
-              hasIcon
-              leadingIcon="agora-line-plus-circle"
-              leadingIconHover="agora-solid-plus-circle"
-              onClick={onAddApiLink}
-            >
-              Adicionar
-            </Button>
-          </div>
+          <AdminExternalUrlFields
+            entries={apiLinks}
+            errors={apiLinkErrors}
+            idPrefix="edit-api-url"
+            label="Link para a API"
+            placeholder="https://..."
+            removeButtonMarginClassName="mt-24"
+            onEntryChange={onApiLinkChange}
+            onRemoveEntry={onRemoveApiLink}
+            addLabel="Adicionar"
+            onAddEntry={onAddApiLink}
+          />
 
           <div className="admin-page__actions flex justify-end gap-[18px]">
             <Button

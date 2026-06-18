@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Button, DropdownOption, DropdownSection, InputSelect, InputText } from "@ama-pt/agora-design-system";
+import { DropdownOption, DropdownSection, InputSelect } from "@ama-pt/agora-design-system";
+import AdminExternalUrlFields from "@/components/admin/forms/AdminExternalUrlFields";
 
 interface DataserviceDatasetLink {
   url: string;
@@ -34,52 +35,19 @@ export default function DataserviceDatasetLinksSection({
         </DropdownSection>
       </InputSelect>
 
-      {datasetLinks.map((link, index) => (
-        <div key={index} className="mt-16">
-          <div>
-            <InputText
-              label="Link para o conjunto de dados"
-              placeholder="Insira o URL aqui"
-              id={`dataset-url-${index}`}
-              value={link.url}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                onDatasetUrlChange(index, event.target.value)
-              }
-              hasError={!!datasetLinkErrors[index]}
-              hasFeedback={!!datasetLinkErrors[index]}
-              feedbackState="danger"
-              errorFeedbackText={datasetLinkErrors[index]}
-            />
-            {link.url.trim() && (
-              <div className="mt-8 flex justify-end">
-                <Button
-                  appearance="link"
-                  variant="danger"
-                  hasIcon
-                  leadingIcon="agora-line-trash"
-                  leadingIconHover="agora-solid-trash"
-                  onClick={() => onRemoveDatasetLink(index)}
-                >
-                  Eliminar
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-
-      <div className="flex justify-end">
-        <Button
-          appearance="outline"
-          variant="primary"
-          hasIcon
-          leadingIcon="agora-line-plus-circle"
-          leadingIconHover="agora-solid-plus-circle"
-          onClick={onAddDatasetLink}
-        >
-          Adicionar
-        </Button>
-      </div>
+      <AdminExternalUrlFields
+        entries={datasetLinks}
+        errors={datasetLinkErrors}
+        idPrefix="dataset-url"
+        label="Link para o conjunto de dados"
+        placeholder="Insira o URL aqui"
+        itemClassName="mt-16"
+        removeButtonAppearance="link"
+        onEntryChange={onDatasetUrlChange}
+        onRemoveEntry={onRemoveDatasetLink}
+        addLabel="Adicionar"
+        onAddEntry={onAddDatasetLink}
+      />
     </>
   );
 }
