@@ -101,6 +101,20 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
     ? ACCESS_TYPE_LABELS[dataservice.access_type] ?? dataservice.access_type
     : null;
 
+  // The list endpoint exposes the modification timestamp as metadata_modified_at;
+  // last_modified can be absent (which rendered "Invalid Date").
+  const formatLongDate = (value?: string | null) => {
+    if (!value) return null;
+    const d = new Date(value);
+    return isNaN(d.getTime())
+      ? null
+      : d.toLocaleDateString("pt-PT", { day: "numeric", month: "long", year: "numeric" });
+  };
+  const lastUpdate =
+    formatLongDate(dataservice.metadata_modified_at) ||
+    formatLongDate(dataservice.last_modified);
+  const createdAt = formatLongDate(dataservice.created_at);
+
   return (
     <main className="flex w-full flex-col items-center justify-center gap-64">
       {/* Breadcrumb */}
@@ -210,14 +224,11 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                     "Sem autor"
                   )}
                 </div>
-                <div className="text-sm mb-16 text-neutral-900">
-                  <span className="text-m-semibold">Última atualização:</span>{" "}
-                  {new Date(dataservice.last_modified).toLocaleDateString("pt-PT", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </div>
+                {lastUpdate && (
+                  <div className="text-sm mb-16 text-neutral-900">
+                    <span className="text-m-semibold">Última atualização:</span> {lastUpdate}
+                  </div>
+                )}
                 {accessTypeLabel && (
                   <div className="text-sm text-neutral-900">
                     <span className="text-m-semibold">Método de acesso:</span> {accessTypeLabel}
@@ -274,6 +285,37 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
       {/* Tabs: Informações + Discussões */}
       <section className="w-full">
         <DataserviceTabs dataservice={dataservice} />
+      </section>
+
+      {/* Technical information */}
+      <section className="container">
+        <h2 className="mb-24 text-base font-medium uppercase text-neutral-900">
+          Informações técnicas
+        </h2>
+        <div className="grid gap-32 md:grid-cols-2 xl:grid-cols-3">
+          {lastUpdate && (
+            <div>
+              <h3 className="text-sm mb-8 font-bold tracking-wider text-neutral-900">
+                Última atualização
+              </h3>
+              <p className="font-medium text-neutral-900">{lastUpdate}</p>
+            </div>
+          )}
+          {createdAt && (
+            <div>
+              <h3 className="text-sm mb-8 font-bold tracking-wider text-neutral-900">
+                Data de criação
+              </h3>
+              <p className="font-medium text-neutral-900">{createdAt}</p>
+            </div>
+          )}
+          <div>
+            <h3 className="text-sm mb-8 font-bold tracking-wider text-neutral-900">
+              Identificador
+            </h3>
+            <p className="break-all font-medium text-neutral-900">{dataservice.id}</p>
+          </div>
+        </div>
       </section>
     </main>
   );

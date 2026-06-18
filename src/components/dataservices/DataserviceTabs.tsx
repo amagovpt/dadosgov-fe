@@ -1,26 +1,35 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Tabs, Tab, TabHeader, Icon, CardNoResults } from "@ama-pt/agora-design-system";
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
-import TextLink from "@/components/Primitives/TextLink";
+import CardMetrics, { CardMetricsProps } from "@/components/Primitives/Cards/CardMetrics";
 import { Dataservice } from "@/service/types/dataservice";
-import type { DatasetRef } from "@/service/types/dataset";
+import { Dataset } from "@/service/types/dataset";
+import { fetchDatasets } from "@/service/api/datasets";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 
 interface DataserviceTabsProps {
   dataservice: Dataservice;
 }
 
 export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
-  // The detail endpoint serialises `datasets` as a reference object
-  // ({ href, rel, total, type }), not an array, so read the count from `total`.
-  const relatedDatasets = dataservice.datasets as unknown as
-    | { total?: number; href?: string }
-    | DatasetRef[]
-    | null;
-  const relatedTotal = Array.isArray(relatedDatasets)
-    ? relatedDatasets.length
-    : (relatedDatasets?.total ?? 0);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [datasetCount, setDatasetCount] = useState(0);
+
+  useEffect(() => {
+    async function loadDatasets() {
+      try {
+        const response = await fetchDatasets(1, 50, { dataservice: dataservice.id });
+        setDatasets(response.data);
+        setDatasetCount(response.total);
+      } catch (error) {
+        console.error("Error loading related datasets:", error);
+      }
+    }
+    loadDatasets();
+  }, [dataservice.id]);
 
   return (
     <div className="w-full">
@@ -30,12 +39,12 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
           <TabBodyWrapper>
             <div className="flex flex-col gap-16">
               <h3 className="text-base font-medium text-neutral-900">
-                {relatedTotal}{" "}
-                {relatedTotal === 1
+                {datasetCount}{" "}
+                {datasetCount === 1
                   ? "CONJUNTO DE DADOS RELACIONADO"
                   : "CONJUNTOS DE DADOS RELACIONADOS"}
               </h3>
-              {relatedTotal === 0 ? (
+              {datasetCount === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
@@ -48,18 +57,17 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
                   description="Esta API ainda não tem conjuntos de dados associados."
                   hasAnchor={false}
                 />
-              ) : Array.isArray(relatedDatasets) ? (
-                <ul className="flex flex-col gap-8">
-                  {relatedDatasets.map((d) => (
-                    <li key={d.id}>
-                      <TextLink href={d.page}>{d.title}</TextLink>
-                    </li>
-                  ))}
-                </ul>
               ) : (
-                <p className="text-base text-neutral-900">
-                  Esta API tem {relatedTotal} conjuntos de dados associados.
-                </p>
+                <div className="grid gap-32 md:grid-cols-2 xl:grid-cols-3">
+                  {datasets.map((dataset, index) => {
+                    const cardProps = {
+                      ...dataset,
+                      last_modified: formatDateToTimeAgo(dataset.last_modified),
+                      link: `/pages/datasets/${dataset.slug}`,
+                    } as CardMetricsProps;
+                    return <CardMetrics key={`dataset-${index}`} {...cardProps} />;
+                  })}
+                </div>
               )}
             </div>
           </TabBodyWrapper>

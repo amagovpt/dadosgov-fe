@@ -148,11 +148,17 @@ export default function DataservicesClient() {
                 <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
                 <TableCell headerLabel="Modificado em">
                   {formatDateToDMY(api.metadata_modified_at || api.last_modified)}
-                  <br />
-                  <span className="text-sm text-neutral-500">
-                    sobre <span className="text-success-600">●</span>{" "}
-                    {api.owner ? `${api.owner.first_name} ${api.owner.last_name}` : "—"}
-                  </span>
+                  {(api.owner || api.organization) && (
+                    <>
+                      <br />
+                      <span className="text-sm text-neutral-500">
+                        por{" "}
+                        {api.owner
+                          ? `${api.owner.first_name} ${api.owner.last_name}`
+                          : api.organization?.name}
+                      </span>
+                    </>
+                  )}
                 </TableCell>
                 <TableCell headerLabel="Ações">
                   <TableActionsCell
