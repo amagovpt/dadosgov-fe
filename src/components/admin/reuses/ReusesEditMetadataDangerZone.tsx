@@ -18,15 +18,15 @@ export default function ReusesEditMetadataDangerZone({
 }: ReusesEditMetadataDangerZoneProps) {
   return (
     <AdminDangerActions
-      warningDescription={
+      primaryHeading={
         archived
           ? "Esta reutilização está arquivada. Pode desarquivar para voltar a indexá-la no portal."
           : "Uma reutilização arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto."
       }
-      warningActionLabel={archived ? "Desarquivar a reutilização" : "Arquivar a reutilização"}
-      onWarningAction={() => (archived ? onUnarchiveReuse() : onArchiveReuse())}
+      primaryActionLabel={archived ? "Desarquivar a reutilização" : "Arquivar a reutilização"}
+      onPrimaryAction={() => (archived ? onUnarchiveReuse() : onArchiveReuse())}
       dangerActionLabel="Eliminar a reutilização"
-      onDangerAction={onOpenDeletePopup}
+      onDangerAction={() => onOpenDeletePopup()}
       disabled={isSubmitting}
     />
   );

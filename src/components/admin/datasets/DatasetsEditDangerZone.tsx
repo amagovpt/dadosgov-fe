@@ -16,13 +16,13 @@ export default function DatasetsEditDangerZone({
 }: DatasetsEditDangerZoneProps) {
   return (
     <AdminDangerActions
-      warningDescription="Um conjunto de dados arquivado deixa de estar indexado no portal, mas permanece acessível através de um link direto."
-      warningActionLabel={
+      primaryHeading="Um conjunto de dados arquivado deixa de estar indexado no portal, mas permanece acessível através de um link direto."
+      primaryActionLabel={
         datasetArchived
           ? "Desarquivar o conjunto de dados"
           : "Arquivar o conjunto de dados"
       }
-      onWarningAction={onToggleArchive}
+      onPrimaryAction={onToggleArchive}
       dangerActionLabel="Eliminar o conjunto de dados"
       onDangerAction={onOpenDeletePopup}
       disabled={isSubmitting}

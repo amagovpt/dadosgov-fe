@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, StatusCard } from "@ama-pt/agora-design-system";
+import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
 
 interface PostsEditDangerZoneProps {
   isPublished: boolean;
@@ -18,78 +18,29 @@ export default function PostsEditDangerZone({
   onRepublish,
   onOpenDeletePopup,
 }: PostsEditDangerZoneProps) {
+  const primaryActionLabel = isSaving
+    ? isPublished
+      ? "A retirar..."
+      : "A publicar..."
+    : isPublished
+      ? "Retirar"
+      : "Publicar novamente";
+
   return (
-    <div className="dataset-edit-danger-actions">
-      {isPublished ? (
-        <StatusCard
-          variant="warning"
-          showIcon
-          description={
-            <>
-              <strong>Retirar o artigo</strong>
-              <br />
-              Por favor, note que o item não será mais visível.
-              <br />
-              <Button
-                appearance="link"
-                variant="primary"
-                hasIcon
-                trailingIcon="agora-line-arrow-right-circle"
-                trailingIconHover="agora-solid-arrow-right-circle"
-                onClick={onUnpublish}
-                disabled={isSaving}
-              >
-                {isSaving ? "A retirar..." : "Retirar"}
-              </Button>
-            </>
-          }
-        />
-      ) : (
-        <StatusCard
-          variant="informative"
-          showIcon
-          description={
-            <>
-              <strong>Artigo despublicado</strong>
-              <br />
-              Este artigo não está visível para o público.
-              <br />
-              <Button
-                appearance="link"
-                variant="primary"
-                hasIcon
-                trailingIcon="agora-line-arrow-right-circle"
-                trailingIconHover="agora-solid-arrow-right-circle"
-                onClick={onRepublish}
-                disabled={isSaving}
-              >
-                {isSaving ? "A publicar..." : "Publicar novamente"}
-              </Button>
-            </>
-          }
-        />
-      )}
-      <StatusCard
-        variant="danger"
-        showIcon
-        description={
-          <>
-            <strong>Atenção, esta ação não pode ser corrigida.</strong>
-            <br />
-            <Button
-              appearance="link"
-              variant="primary"
-              hasIcon
-              trailingIcon="agora-line-arrow-right-circle"
-              trailingIconHover="agora-solid-arrow-right-circle"
-              onClick={onOpenDeletePopup}
-              disabled={isSaving}
-            >
-              Eliminar o artigo
-            </Button>
-          </>
-        }
-      />
-    </div>
+    <AdminDangerActions
+      primaryVariant={isPublished ? "warning" : "informative"}
+      primaryHeading={isPublished ? "Retirar o artigo" : "Artigo despublicado"}
+      primaryDescription={
+        isPublished
+          ? "Por favor, note que o item não será mais visível."
+          : "Este artigo não está visível para o público."
+      }
+      primaryActionLabel={primaryActionLabel}
+      onPrimaryAction={() => (isPublished ? onUnpublish() : onRepublish())}
+      dangerHeading="Atenção, esta ação não pode ser corrigida."
+      dangerActionLabel="Eliminar o artigo"
+      onDangerAction={() => onOpenDeletePopup()}
+      disabled={isSaving}
+    />
   );
 }
