@@ -12,8 +12,11 @@ interface ImageUploadFieldProps {
   previewSrc?: string;
   previewAlt?: string;
   previewPlacement?: "before" | "after";
+  previewLabel?: string;
+  previewLabelClassName?: string;
   previewWrapperClassName?: string;
   previewImageClassName?: string;
+  uploaderWrapperClassName?: string;
   files?: File[];
   dragAndDropLabel?: string;
   inputLabel?: string;
@@ -28,14 +31,18 @@ export default function ImageUploadField({
   previewSrc,
   previewAlt = "Imagem de capa",
   previewPlacement = "after",
+  previewLabel,
+  previewLabelClassName = "mb-2 text-sm text-neutral-600",
   previewWrapperClassName = "mt-4 flex justify-center",
   previewImageClassName = "max-w-[200px] max-h-[150px] object-contain border border-neutral-200 rounded",
+  uploaderWrapperClassName = "mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit",
   files,
   dragAndDropLabel = "Arraste e largue o ficheiro aqui",
   inputLabel = "Selecione ou arraste o ficheiro",
 }: ImageUploadFieldProps) {
   const preview = previewSrc ? (
     <div className={previewWrapperClassName}>
+      {previewLabel ? <p className={previewLabelClassName}>{previewLabel}</p> : null}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={previewSrc} alt={previewAlt} className={previewImageClassName} />
     </div>
@@ -48,7 +55,7 @@ export default function ImageUploadField({
         {required ? " *" : ""}
       </span>
       {previewPlacement === "before" ? preview : null}
-      <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
+      <div className={uploaderWrapperClassName}>
         <DragAndDropUploader
           label="Ficheiros"
           dragAndDropLabel={dragAndDropLabel}

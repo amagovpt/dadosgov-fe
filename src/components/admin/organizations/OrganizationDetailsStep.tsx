@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button, InputText, InputTextArea, StatusCard } from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 
 interface OrganizationDetailsStepProps {
   orgName: string;
@@ -110,38 +110,19 @@ export default function OrganizationDetailsStep({
 
         <h2 className="admin-page__section-title">Logotipo</h2>
 
-        <div className="admin-page__fields-group [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-          <DragAndDropUploader
+        <div className="admin-page__fields-group">
+          <ImageUploadField
             label="Ficheiro"
-            dragAndDropLabel="Arraste e largue o ficheiro aqui"
-            inputLabel="Selecione ou arraste o ficheiro"
-            selectedFilesLabel="ficheiro selecionado"
-            removeFileButtonLabel="Remover ficheiro"
-            replaceFileButtonLabel="Substituir ficheiro"
-            extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-            accept=".jpg,.jpeg,.png"
-            maxSize={4194304}
-            maxCount={1}
-            maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-            forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-            hasError={!!orgLogoError}
-            hasFeedback={!!orgLogoError}
-            feedbackState="danger"
-            feedbackText={orgLogoError ?? undefined}
             onChange={onLogoChange}
             onSecurityError={onLogoSecurityError}
+            error={orgLogoError}
+            previewSrc={orgLogoPreview || undefined}
+            previewAlt="Pré-visualização do logotipo"
+            previewLabel="Pré-visualização:"
+            previewWrapperClassName="mt-12"
+            previewImageClassName="max-h-[120px] max-w-[240px] rounded-8 border border-neutral-200 object-contain p-8"
+            uploaderWrapperClassName="[&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center"
           />
-
-          {orgLogoPreview && (
-            <div className="mt-12">
-              <p className="mb-8 text-sm text-neutral-600">Pré-visualização:</p>
-              <img
-                src={orgLogoPreview}
-                alt="Pré-visualização do logotipo"
-                className="max-h-[120px] max-w-[240px] rounded-8 border border-neutral-200 object-contain p-8"
-              />
-            </div>
-          )}
         </div>
 
         <div className="admin-page__actions">
