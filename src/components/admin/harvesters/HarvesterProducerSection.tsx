@@ -1,8 +1,12 @@
 "use client";
 
 import React from "react";
-import { DropdownOption, DropdownSection } from "@ama-pt/agora-design-system";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
+import {
+  DropdownOption,
+  type DropdownSectionProps,
+  DropdownSection,
+} from "@ama-pt/agora-design-system";
+import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
 
 interface HarvesterProducerSectionProps {
   organizations: Array<{ id: string; name: string }>;
@@ -17,30 +21,33 @@ export default function HarvesterProducerSection({
   hasProducerError,
   onProducerChange,
 }: HarvesterProducerSectionProps) {
-  const options = organizations.map((organization) => (
-    <DropdownOption key={organization.id} value={organization.id}>
-      {organization.name}
-    </DropdownOption>
-  ));
+  const producerOptions: React.ReactElement<DropdownSectionProps> = (
+    <DropdownSection name="identity">
+      {organizations.map((organization) => (
+        <DropdownOption key={organization.id} value={organization.id}>
+          {organization.name}
+        </DropdownOption>
+      ))}
+    </DropdownSection>
+  );
 
   return (
     <>
       <h2 className="admin-page__section-title">Produtor</h2>
 
       <div className="admin-page__fields-group">
-        <IsolatedSelect
-          key={`producer-${organizations.length}`}
+        <AdminSelectAdapter
           label="Confirme a identidade que pretende utilizar na publicação. *"
           placeholder="Selecione o produtor..."
           id="harvester-producer"
-          onChangeRef={selectedProducerRef}
-          onChangeCallback={onProducerChange}
+          valueRef={selectedProducerRef}
+          onValueChange={onProducerChange}
           hasError={hasProducerError}
-          errorFeedbackText="Selecione uma organização"
+          errorMessage="Selecione uma organização"
           required
         >
-          <DropdownSection name="identity">{options}</DropdownSection>
-        </IsolatedSelect>
+          {producerOptions}
+        </AdminSelectAdapter>
       </div>
     </>
   );
