@@ -4,20 +4,18 @@ import {
   DropdownOption,
   type DropdownSectionProps,
   DropdownSection,
-  Icon,
   StatusCard,
   Switch,
   Tag,
 } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
-import AuxiliarList from "@/components/admin/AuxiliarList";
+import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import IsolatedTextArea from "@/components/admin/IsolatedTextArea";
 import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
 import { localizeReuseType, localizeReuseTopic } from "@/lib/reuse-labels";
 import type { Reuse, ReuseTopic, ReuseType } from "@/service/types/reuse";
-import AppIcon from "@/components/Primitives/AppIcon";
 
 type ReusesEditMetadataTabProps = {
   reuse: Reuse;
@@ -360,21 +358,15 @@ export default function ReusesEditMetadataTab({
             </form>
           </div>
 
-          <aside className="admin-page__auxiliar">
-            <div className="admin-page__auxiliar-inner">
-              <div className="admin-page__auxiliar-header">
-                <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
-                <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
-              </div>
-              <AuxiliarList
-                items={getReuseAuxiliarItems({
-                  title: !!formErrors.title,
-                  link: !!formErrors.url,
-                  description: !!formErrors.description,
-                })}
-              />
-            </div>
-          </aside>
+          <AdminAuxiliarySidebar
+            items={getReuseAuxiliarItems({
+              title: !!formErrors.title,
+              link: !!formErrors.url,
+              type: !!formErrors.type,
+              topic: !!formErrors.topic,
+              description: !!formErrors.description,
+            })}
+          />
     </div>
   );
 }

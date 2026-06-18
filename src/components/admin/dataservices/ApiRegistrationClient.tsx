@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, CardGeneral, StatusCard } from "@ama-pt/agora-design-system";
 import { createDataservice } from "@/service/api/dataservices";
 import type { Dataservice } from "@/service/types/dataservice";
@@ -43,10 +43,6 @@ export default function ApiRegistrationClient({
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
 
-  useEffect(() => {
-    setDatasetLinkErrors({});
-  }, [currentStep]);
-
   async function handleStep1Next() {
     const errors: Record<string, boolean> = {};
     if (!apiName.trim()) errors.apiName = true;
@@ -78,7 +74,7 @@ export default function ApiRegistrationClient({
       });
 
       setCreatedDataservice(dataservice);
-      onNextStep();
+      handleStepChange(onNextStep);
     } catch (error: unknown) {
       const normalizedError = error as { data?: Record<string, unknown> };
       if (normalizedError.data && typeof normalizedError.data === "object") {
@@ -142,6 +138,11 @@ export default function ApiRegistrationClient({
       });
       return nextErrors;
     });
+  }
+
+  function handleStepChange(callback: () => void) {
+    setDatasetLinkErrors({});
+    callback();
   }
 
   const auxiliaryItems = getDataserviceAuxiliaryItems({
@@ -258,7 +259,11 @@ export default function ApiRegistrationClient({
               />
 
               <div className="admin-page__actions">
-                <Button appearance="outline" variant="neutral" onClick={onPreviousStep}>
+                <Button
+                  appearance="outline"
+                  variant="neutral"
+                  onClick={() => handleStepChange(onPreviousStep)}
+                >
                   Anterior
                 </Button>
                 <Button
@@ -266,7 +271,7 @@ export default function ApiRegistrationClient({
                   hasIcon
                   trailingIcon="agora-line-arrow-right-circle"
                   trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={onNextStep}
+                  onClick={() => handleStepChange(onNextStep)}
                 >
                   Seguinte
                 </Button>
