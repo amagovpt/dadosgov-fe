@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, type ReactElement } from "react";
+import React, { useState, useEffect, useMemo, type ReactElement } from "react";
 import {
   Accordion,
   AccordionGroup,
@@ -19,6 +19,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { CommunityResource } from "@/service/types/community-resource";
 import { Resource } from "@/service/types/dataset";
+import { Pagination } from "@/components/Pagination";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE || "https://dados.gov.pt/api/1";
 
@@ -145,7 +146,7 @@ const CopyField: React.FC<{ label: string; value: string; mono?: boolean }> = ({
 // proxy and returned as JSON.
 const TABULAR_FORMATS = ["csv", "tsv", "xls", "xlsx", "ods"];
 const SPREADSHEET_FORMATS = ["xls", "xlsx", "ods"];
-const MAX_PREVIEW_ROWS = 5;
+const DEFAULT_PAGE_SIZE = 20;
 const MAX_SAMPLE_ROWS = 100;
 
 interface ColumnInfo {
@@ -204,7 +205,9 @@ const buildTabularData = (
   dataRows: string[][],
   totalRows: number
 ): TabularData => {
-  const rows = dataRows.slice(0, MAX_PREVIEW_ROWS);
+  // Keep every loaded row so the preview can paginate client-side. The proxies
+  // already cap how much is fetched (CSV: 1 MiB, spreadsheet: MAX_SAMPLE_ROWS).
+  const rows = dataRows;
   const sampleRows = dataRows.slice(0, MAX_SAMPLE_ROWS);
   const columns: ColumnInfo[] = headers.map((header, i) => ({
     name: header,
@@ -280,6 +283,13 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
   const [tabularData, setTabularData] = useState<TabularData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+
+  const visibleRows = useMemo(() => {
+    if (!tabularData) return [];
+    const start = (page - 1) * DEFAULT_PAGE_SIZE;
+    return tabularData.rows.slice(start, start + DEFAULT_PAGE_SIZE);
+  }, [tabularData, page]);
 
   const format = resource.format?.toLowerCase() || "";
   const isTabular = TABULAR_FORMATS.includes(format);
@@ -290,6 +300,10 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
 
     async function fetchData() {
       setIsLoading(true);
+      // Reset to the first page when a new resource's data loads, so we never
+      // land on a page that no longer exists. createPaginationProps handles the
+      // reset on page-size change.
+      setPage(1);
       try {
         // The browser sends only the resource id; the proxy resolves and
         // streams the bytes through the backend catalogue resolver.
@@ -340,7 +354,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                   </p>
                 ) : (
                   <div className="space-y-16">
-                    <div className="bg-primary-100 rounded-8 p-24 flex items-center gap-16" style={{ marginBottom: "24px" }}>
+                    <div className="hidden bg-primary-100 rounded-8 p-24 flex items-center gap-16" style={{ marginBottom: "24px" }}>
                       <div className="flex-1">
                         <p className="font-bold text-neutral-900 text-sm">
                           Explore os dados em detalhes.
@@ -373,7 +387,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {tabularData.rows.map((row, i) => (
+                          {visibleRows.map((row, i) => (
                             <TableRow key={i}>
                               {row.map((cell, j) => (
                                 <TableCell
@@ -388,6 +402,12 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                         </TableBody>
                       </Table>
                     </div>
+                    <Pagination
+                      currentPage={page}
+                      totalItems={tabularData.rows.length}
+                      pageSize={DEFAULT_PAGE_SIZE}
+                      onPageChange={setPage}
+                    />
                     <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
                       Última atualização da pré-visualização:{" "}
                       {tabularData.lastModified
@@ -398,6 +418,8 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                           })
                         : formatDate(resource.last_modified || resource.created_at)}{" "}
                       — {tabularData.totalCols} colunas — {tabularData.totalRows} linhas
+                      {tabularData.rows.length < tabularData.totalRows &&
+                        ` (pré-visualização limitada a ${tabularData.rows.length} linhas)`}
                     </p>
                   </div>
                 )}
