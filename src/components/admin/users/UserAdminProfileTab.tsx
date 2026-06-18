@@ -8,6 +8,7 @@ import {
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import UserAdminProfileDangerZone from "@/components/admin/users/UserAdminProfileDangerZone";
 
 type UserAdminProfileTabProps = {
   isAdmin: boolean;
@@ -201,53 +202,12 @@ export default function UserAdminProfileTab({
       </div>
 
       {isAdmin && (
-        <div className="dataset-edit-danger-actions">
-          <StatusCard
-            variant="warning"
-            showIcon
-            description={
-              <>
-                <strong>
-                  {userActive
-                    ? "Uma conta desativada impede o utilizador de iniciar sessão no portal, mas os seus dados permanecem acessíveis."
-                    : "Esta conta está desativada. O utilizador não consegue iniciar sessão no portal."}
-                </strong>
-                <br />
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={onToggleActive}
-                >
-                  {userActive ? "Desativar conta" : "Ativar conta"}
-                </Button>
-              </>
-            }
-          />
-          <StatusCard
-            variant="danger"
-            showIcon
-            description={
-              <>
-                <strong>Atenção esta ação é irreversível.</strong>
-                <br />
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={onOpenDeletePopup}
-                  disabled={isDeleting}
-                >
-                  Eliminar o perfil
-                </Button>
-              </>
-            }
-          />
-        </div>
+        <UserAdminProfileDangerZone
+          userActive={userActive}
+          isDeleting={isDeleting}
+          onToggleActive={onToggleActive}
+          onOpenDeletePopup={onOpenDeletePopup}
+        />
       )}
     </div>
   );

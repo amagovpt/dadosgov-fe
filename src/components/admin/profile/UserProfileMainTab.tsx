@@ -3,6 +3,7 @@
 import React from "react";
 import { Button, InputText, InputTextArea, StatusCard } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import UserProfileAvatarDangerZone from "@/components/admin/profile/UserProfileAvatarDangerZone";
 import type { ApiToken } from "@/service/types/identity";
 
 interface UserProfileMainTabProps {
@@ -393,29 +394,10 @@ export default function UserProfileMainTab({
       </div>
 
       {hasAvatar && (
-        <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
-          <StatusCard
-            variant="danger"
-            showIcon
-            description={
-              <>
-                <strong>Atenção esta ação é irreversível.</strong>
-                <br />
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={onDeleteAvatar}
-                  disabled={isDeletingAvatar}
-                >
-                  {isDeletingAvatar ? "A eliminar..." : "Eliminar foto de perfil"}
-                </Button>
-              </>
-            }
-          />
-        </div>
+        <UserProfileAvatarDangerZone
+          isDeletingAvatar={isDeletingAvatar}
+          onDeleteAvatar={onDeleteAvatar}
+        />
       )}
     </div>
   );
