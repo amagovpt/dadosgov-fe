@@ -149,7 +149,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
     <AdminLayout
       breadcrumbItems={[
         { label: "Administração", url: "/pages/admin" },
-        { label: "Reapers", url: "/pages/admin/system/harvesters" },
+        { label: "Harvesters", url: "/pages/admin/system/harvesters" },
         { label: source?.name || "Harvester", url: `/pages/admin/harvesters/${slug}` },
         { label: job.id.toUpperCase() },
       ]}
