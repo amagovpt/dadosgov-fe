@@ -1,9 +1,10 @@
 import React from "react";
-import { Button, type DropdownSectionProps, StatusCard, Switch } from "@ama-pt/agora-design-system";
+import { Button, type DropdownSectionProps, Switch } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/datasetsAuxiliarItems";
 import type { SpatialZone } from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
+import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
 import DatasetsEditDescriptionSection from "@/components/admin/datasets/DatasetsEditDescriptionSection";
 import DatasetsEditAccessTimeSection from "@/components/admin/datasets/DatasetsEditAccessTimeSection";
 import DatasetsEditSpaceSection from "@/components/admin/datasets/DatasetsEditSpaceSection";
@@ -116,30 +117,19 @@ export default function DatasetsEditMetadataTab({
     <div className="admin-page__body">
       <div className="admin-page__form-area">
         {dataset.private && (
-          <div className="dataset-edit-visibility-banner">
-            <StatusCard
-              variant="informative"
-              showIcon
-              description={
-                <>
-                  <strong>Modifique a visibilidade do conjunto de dados.</strong>
-                  <br />
-                  Este conjunto de dados encontra-se atualmente em <strong>modo privado</strong>.
-                  Apenas os membros da organização o podem visualizar e editar.
-                </>
-              }
-            />
-            <div>
-              <Button
-                variant="primary"
-                appearance="outline"
-                onClick={onPublishDataset}
-                disabled={isSubmitting}
-              >
-                Publicar o conjunto de dados
-              </Button>
-            </div>
-          </div>
+          <AdminVisibilityBanner
+            description={
+              <>
+                <strong>Modifique a visibilidade do conjunto de dados.</strong>
+                <br />
+                Este conjunto de dados encontra-se atualmente em <strong>modo privado</strong>.
+                Apenas os membros da organização o podem visualizar e editar.
+              </>
+            }
+            actionLabel="Publicar o conjunto de dados"
+            disabled={isSubmitting}
+            onAction={onPublishDataset}
+          />
         )}
 
         <form className="admin-page__form" noValidate onSubmit={(e) => e.preventDefault()}>

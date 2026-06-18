@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, StatusCard, type DropdownSectionProps } from "@ama-pt/agora-design-system";
+import { Button, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
+import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
 import ReusesEditMetadataDangerZone from "@/components/admin/reuses/ReusesEditMetadataDangerZone";
 import ReusesEditMetadataDetailsSection from "@/components/admin/reuses/ReusesEditMetadataDetailsSection";
 import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
@@ -85,30 +86,19 @@ export default function ReusesEditMetadataTab({
     <div className="admin-page__body">
       <div className="admin-page__form-area">
         {reuse.private && (
-          <div className="dataset-edit-visibility-banner">
-            <StatusCard
-              variant="informative"
-              showIcon
-              description={
-                <>
-                  <strong>Modifique a visibilidade da reutilização.</strong>
-                  <br />
-                  Esta reutilização encontra-se atualmente em <strong>modo rascunho</strong>.
-                  Apenas o produtor e os membros da organização a podem visualizar e editar.
-                </>
-              }
-            />
-            <div>
-              <Button
-                variant="primary"
-                appearance="outline"
-                onClick={onPublishReuse}
-                disabled={isSubmitting}
-              >
-                Publicar reutilização
-              </Button>
-            </div>
-          </div>
+          <AdminVisibilityBanner
+            description={
+              <>
+                <strong>Modifique a visibilidade da reutilização.</strong>
+                <br />
+                Esta reutilização encontra-se atualmente em <strong>modo rascunho</strong>.
+                Apenas o produtor e os membros da organização a podem visualizar e editar.
+              </>
+            }
+            actionLabel="Publicar reutilização"
+            disabled={isSubmitting}
+            onAction={onPublishReuse}
+          />
         )}
 
         <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
