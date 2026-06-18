@@ -28,6 +28,28 @@ interface HarvesterDetailClientProps {
   slug: string;
 }
 
+function CopyUrlButton({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      title={copied ? "Copiado!" : "Copiar URL"}
+      className="flex items-center text-neutral-500 hover:text-primary-600 transition-colors"
+    >
+      <Icon name={copied ? "agora-solid-copy" : "agora-line-copy"} className="w-16 h-16" />
+    </button>
+  );
+}
+
 const VALIDATION_LABELS: Record<string, { label: string; variant: "warning" | "success" | "danger" }> = {
   pending: { label: "VALIDAÇÃO PENDENTE", variant: "warning" },
   accepted: { label: "VALIDADO", variant: "success" },
@@ -374,6 +396,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
             <strong>URL:</strong>{" "}
             <code className="text-xs" title={source.url}>{source.url.length > 100 ? `${source.url.slice(0, 100)}...` : source.url}</code>
           </span>
+          <CopyUrlButton url={source.url} />
         </div>
         <div className="flex items-center gap-8">
           <Icon name="agora-line-calendar" className="w-16 h-16" />

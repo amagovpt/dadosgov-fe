@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Icon,
   InputSelect,
@@ -56,6 +56,182 @@ const ITEM_STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "in
   skipped: "warning",
   archived: "informative",
 };
+
+function extractDatasetId(errors: HarvestItem["errors"]): string | null {
+  for (const err of errors ?? []) {
+    const match = err.message?.match(/Dataset:([a-f0-9]{24})/i);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+interface ItemsTableProps {
+  items: HarvestItem[];
+  filteredTotal: number;
+  currentPage: number;
+  pageSize: number;
+  setCurrentPage: (page: number) => void;
+  setPageSize: (size: number) => void;
+}
+
+function ItemsTable({
+  items,
+  filteredTotal,
+  currentPage,
+  pageSize,
+  setCurrentPage,
+  setPageSize,
+}: ItemsTableProps) {
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (key: string) => {
+    setExpandedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  return (
+    <Table
+      paginationProps={createPaginationProps(
+        pageSize,
+        filteredTotal,
+        currentPage,
+        setCurrentPage,
+        setPageSize,
+        { currentPageIsZeroBased: true }
+      )}
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell>ID</TableHeaderCell>
+          <TableHeaderCell>Status</TableHeaderCell>
+          <TableHeaderCell>Link dados.gov.pt</TableHeaderCell>
+          <TableHeaderCell>Link fonte</TableHeaderCell>
+          <TableHeaderCell>
+            <Icon name="agora-line-alert-triangle" className="h-16 w-16" />
+          </TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {items.map((item: HarvestItem, index: number) => {
+          const hasErrors = (item.errors?.length ?? 0) > 0;
+          const rowKey = `${item.remote_id}-${index}`;
+          const expanded = expandedItems.has(rowKey);
+
+          return (
+            <React.Fragment key={rowKey}>
+              <TableRow>
+                <TableCell headerLabel="ID">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-sans text-[10px] text-neutral-400">ID Remoto:</span>
+                      <span className="font-mono text-xs text-neutral-800 break-all">{item.remote_id}</span>
+                    </div>
+                    {(() => {
+                      const internalId = item.dataset?.id ?? extractDatasetId(item.errors);
+                      return internalId ? (
+                        <span className="font-mono text-[10px] text-neutral-500">
+                          <span className="font-sans text-neutral-400 mr-4">ID dados.gov:</span>
+                          {internalId}
+                        </span>
+                      ) : null;
+                    })()}
+                  </div>
+                </TableCell>
+                <TableCell headerLabel="Status">
+                  <StatusDot variant={ITEM_STATUS_VARIANT[item.status] || "informative"}>
+                    {ITEM_STATUS_LABELS[item.status] || item.status}
+                  </StatusDot>
+                </TableCell>
+                <TableCell headerLabel="Link dados.gov.pt">
+                  {item.dataset ? (
+                    <TextLink
+                      href={`/pages/datasets/${item.dataset.id}`}
+                      className="flex items-center gap-4"
+                    >
+                      <Icon name="agora-line-globe" className="h-[14px] w-[14px]" />
+                      {item.dataset.title}
+                    </TextLink>
+                  ) : (
+                    "—"
+                  )}
+                </TableCell>
+                <TableCell headerLabel="Link fonte">
+                  {item.remote_url ? (
+                    <TextLink href={item.remote_url}>
+                      {item.remote_url.length > 60
+                        ? `${item.remote_url.slice(0, 60)}...`
+                        : item.remote_url}
+                    </TextLink>
+                  ) : (
+                    "—"
+                  )}
+                </TableCell>
+                <TableCell headerLabel="Avisos">
+                  {hasErrors ? (
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(rowKey)}
+                      title={expanded ? "Fechar logs" : "Ver logs de erro"}
+                      className="flex items-center gap-4 text-red-600 hover:text-red-800 transition-colors"
+                    >
+                      <span className="text-xs font-semibold">{item.errors.length}</span>
+                      <Icon
+                        name={expanded ? "agora-solid-chevron-up" : "agora-line-chevron-down"}
+                        className="h-14 w-14"
+                      />
+                    </button>
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
+              </TableRow>
+
+              {hasErrors && expanded && (
+                <TableRow>
+                  <TableCell headerLabel="Logs" colSpan={5} className="bg-neutral-50 px-24 py-16">
+                    {(() => {
+                      const internalId = item.dataset?.id ?? extractDatasetId(item.errors);
+                      return (
+                        <div className="mb-12 flex flex-wrap gap-16 rounded border border-neutral-200 bg-white px-12 py-8 text-[11px] font-mono">
+                          <span>
+                            <span className="text-neutral-400 font-sans">ID Remoto: </span>
+                            <span className="text-neutral-700">{item.remote_id}</span>
+                          </span>
+                          {internalId && (
+                            <span>
+                              <span className="text-neutral-400 font-sans">ID dados.gov: </span>
+                              <span className="text-neutral-700">{internalId}</span>
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    <ul className="flex flex-col gap-6">
+                      {item.errors.map((err, j) => (
+                        <li key={j} className="rounded border border-red-200 bg-red-50 px-12 py-8">
+                          <p className="text-xs font-semibold text-red-800">{err.message}</p>
+                          {err.details && (
+                            <p className="mt-4 text-[11px] text-red-600 font-mono opacity-80">
+                              {err.details}
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </TableCell>
+                </TableRow>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
+}
 
 export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetailClientProps) {
   const [job, setJob] = useState<HarvestJob | null>(null);
@@ -269,67 +445,14 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
       </div>
 
       {paginatedItems.length > 0 ? (
-        <Table
-          paginationProps={createPaginationProps(
-            pageSize,
-            filteredItems.length,
-            currentPage,
-            setCurrentPage,
-            setPageSize,
-            { currentPageIsZeroBased: true }
-          )}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell>ID</TableHeaderCell>
-              <TableHeaderCell>Status</TableHeaderCell>
-              <TableHeaderCell>Link dados.gov.pt</TableHeaderCell>
-              <TableHeaderCell>Link fonte</TableHeaderCell>
-              <TableHeaderCell>
-                <Icon name="agora-line-alert-triangle" className="h-16 w-16" />
-              </TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedItems.map((item: HarvestItem, index: number) => (
-              <TableRow key={`${item.remote_id}-${index}`}>
-                <TableCell headerLabel="ID">{item.remote_id}</TableCell>
-                <TableCell headerLabel="Status">
-                  <StatusDot variant={ITEM_STATUS_VARIANT[item.status] || "informative"}>
-                    {ITEM_STATUS_LABELS[item.status] || item.status}
-                  </StatusDot>
-                </TableCell>
-                <TableCell headerLabel="Link dados.gov.pt">
-                  {item.dataset ? (
-                    <TextLink
-                      href={`/pages/datasets/${item.dataset.id}`}
-                      className="flex items-center gap-4"
-                    >
-                      <Icon name="agora-line-globe" className="h-[14px] w-[14px]" />
-                      {item.dataset.title}
-                    </TextLink>
-                  ) : (
-                    "—"
-                  )}
-                </TableCell>
-                <TableCell headerLabel="Link fonte">
-                  {item.remote_url ? (
-                    <TextLink href={item.remote_url}>
-                      {item.remote_url.length > 60
-                        ? `${item.remote_url.slice(0, 60)}...`
-                        : item.remote_url}
-                    </TextLink>
-                  ) : (
-                    "—"
-                  )}
-                </TableCell>
-                <TableCell headerLabel="Avisos">
-                  {item.errors?.length > 0 ? item.errors.length : "-"}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <ItemsTable
+          items={paginatedItems}
+          filteredTotal={filteredItems.length}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          setCurrentPage={setCurrentPage}
+          setPageSize={setPageSize}
+        />
       ) : (
         <CardNoResults
           position="center"
