@@ -1,9 +1,8 @@
 import React from "react";
-import { Button, type DropdownSectionProps } from "@ama-pt/agora-design-system";
+import { Button, StatusCard, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import ReusesEditMetadataDangerZone from "@/components/admin/reuses/ReusesEditMetadataDangerZone";
 import ReusesEditMetadataDetailsSection from "@/components/admin/reuses/ReusesEditMetadataDetailsSection";
-import ReusesEditMetadataPublishBanner from "@/components/admin/reuses/ReusesEditMetadataPublishBanner";
 import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarItems";
 import type { Reuse, ReuseTopic, ReuseType } from "@/service/types/reuse";
 
@@ -86,10 +85,30 @@ export default function ReusesEditMetadataTab({
     <div className="admin-page__body">
       <div className="admin-page__form-area">
         {reuse.private && (
-          <ReusesEditMetadataPublishBanner
-            isSubmitting={isSubmitting}
-            onPublishReuse={onPublishReuse}
-          />
+          <div className="dataset-edit-visibility-banner">
+            <StatusCard
+              variant="informative"
+              showIcon
+              description={
+                <>
+                  <strong>Modifique a visibilidade da reutilização.</strong>
+                  <br />
+                  Esta reutilização encontra-se atualmente em <strong>modo rascunho</strong>.
+                  Apenas o produtor e os membros da organização a podem visualizar e editar.
+                </>
+              }
+            />
+            <div>
+              <Button
+                variant="primary"
+                appearance="outline"
+                onClick={onPublishReuse}
+                disabled={isSubmitting}
+              >
+                Publicar reutilização
+              </Button>
+            </div>
+          </div>
         )}
 
         <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>

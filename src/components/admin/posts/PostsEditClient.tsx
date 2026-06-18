@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   Button,
   Icon,
+  StatusCard,
   Tab,
   TabBody,
   TabHeader,
@@ -23,7 +24,6 @@ import {
 import type { Post, PostUpdatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
-import PostsEditStatusAlerts from "@/components/admin/posts/PostsEditStatusAlerts";
 import PostsEditMetadataTab from "@/components/admin/posts/PostsEditMetadataTab";
 import PostsEditContentTab from "@/components/admin/posts/PostsEditContentTab";
 
@@ -314,7 +314,8 @@ export default function PostsEditClient() {
         </Button>
       }
     >
-      <PostsEditStatusAlerts apiError={apiError} apiSuccess={apiSuccess} />
+      {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
+      {apiSuccess && <StatusCard variant="success" showIcon description={apiSuccess} />}
 
       <Tabs
         className="mt-8"

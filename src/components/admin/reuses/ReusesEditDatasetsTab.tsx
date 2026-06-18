@@ -6,11 +6,11 @@ import {
   InputSelect,
   InputText,
   InputTextArea,
+  StatusCard,
   Tag,
 } from "@ama-pt/agora-design-system";
 import ReusesEditAssociatedDatasetsSection from "@/components/admin/reuses/ReusesEditAssociatedDatasetsSection";
 import ReusesEditDatasetsActions from "@/components/admin/reuses/ReusesEditDatasetsActions";
-import ReusesEditDatasetsNotices from "@/components/admin/reuses/ReusesEditDatasetsNotices";
 import type { Dataset } from "@/service/types/dataset";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 
@@ -81,7 +81,13 @@ export default function ReusesEditDatasetsTab({
 
       <div className="admin-page__form-area">
         <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
-          <ReusesEditDatasetsNotices />
+          <div className="mb-24">
+            <StatusCard
+              variant="warning"
+              showIcon
+              description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
+            />
+          </div>
 
           <InputSelect
             label="Pesquisar um conjunto de dados"
