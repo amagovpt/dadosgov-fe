@@ -11,7 +11,6 @@ import {
   Tabs,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import dynamic from "next/dynamic";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import {
   deletePost,
@@ -23,15 +22,10 @@ import {
 } from "@/service/api/posts";
 import type { Post, PostUpdatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import PostsEditDangerZone from "@/components/admin/posts/PostsEditDangerZone";
 import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
-import PostMetadataSection from "@/components/admin/posts/PostMetadataSection";
 import PostsEditStatusAlerts from "@/components/admin/posts/PostsEditStatusAlerts";
-
-const RichTextEditor = dynamic(() => import("./RichTextEditor"), {
-  ssr: false,
-  loading: () => <p>A carregar editor...</p>,
-});
+import PostsEditMetadataTab from "@/components/admin/posts/PostsEditMetadataTab";
+import PostsEditContentTab from "@/components/admin/posts/PostsEditContentTab";
 
 function DeletePostPopupContent({
   onClose,
@@ -332,105 +326,49 @@ export default function PostsEditClient() {
         <Tab>
           <TabHeader>Metadados</TabHeader>
           <TabBody>
-            <div className="admin-page__body">
-              <div className="admin-page__form-area">
-                <form className="admin-page__form mt-24">
-                  <p className="text-neutral-900 text-base leading-7">
-                    Campos precedidos por uma estrela (*) são obrigatórios.
-                  </p>
-
-                  <PostMetadataSection
-                    title={articleTitle}
-                    header={articleHeader}
-                    articleType={articleType}
-                    contentType={contentType}
-                    selectedTags={selectedTags}
-                    keywordOptions={keywordOptions}
-                    selectedKeywordsRef={selectedKeywordsRef}
-                    imageError={imageError}
-                    previewSrc={post.image ?? undefined}
-                    contentTypeOptions={["html", "markdown", "blocks"]}
-                    sectionTitle="DESCRIÇÃO"
-                    sectionTitleClassName="admin-page__section-title mt-8"
-                    headerPlaceholder="Insira aqui"
-                    articleTypeLabel="Tipo de Item"
-                    pageLabel="Page"
-                    onTitleChange={(event) => setArticleTitle(event.target.value)}
-                    onHeaderChange={(event) => setArticleHeader(event.target.value)}
-                    onArticleTypeChange={setArticleType}
-                    onContentTypeChange={setContentType}
-                    onKeywordSearchChange={setKeywordSearch}
-                    onKeywordsChange={handleKeywordsChange}
-                    onRemoveTag={handleRemoveTag}
-                    onImageChange={handleImageUpload}
-                    onImageSecurityError={() => setImageError(POISONED_FILE_WARNING)}
-                  />
-
-                  <div className="admin-page__actions">
-                    <Button
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-check-circle"
-                      trailingIconHover="agora-solid-check-circle"
-                      onClick={handleSaveMetadata}
-                      disabled={isSaving}
-                    >
-                      {isSaving ? "A guardar..." : "Guardar"}
-                    </Button>
-                  </div>
-                </form>
-
-                <PostsEditDangerZone
-                  isPublished={!!post.published}
-                  isSaving={isSaving}
-                  onUnpublish={handleUnpublish}
-                  onRepublish={handleRepublish}
-                  onOpenDeletePopup={() => {
-                    show(<DeletePostPopupContent onClose={hide} onConfirm={handleDelete} />, {
-                      title: "Tem a certeza que quer eliminar este artigo?",
-                      closeAriaLabel: "Fechar",
-                      dimensions: "m",
-                    });
-                  }}
-                />
-              </div>
-            </div>
+            <PostsEditMetadataTab
+              post={post}
+              articleTitle={articleTitle}
+              articleHeader={articleHeader}
+              articleType={articleType}
+              contentType={contentType}
+              selectedTags={selectedTags}
+              keywordOptions={keywordOptions}
+              selectedKeywordsRef={selectedKeywordsRef}
+              imageError={imageError}
+              isSaving={isSaving}
+              onTitleChange={(event) => setArticleTitle(event.target.value)}
+              onHeaderChange={(event) => setArticleHeader(event.target.value)}
+              onArticleTypeChange={setArticleType}
+              onContentTypeChange={setContentType}
+              onKeywordSearchChange={setKeywordSearch}
+              onKeywordsChange={handleKeywordsChange}
+              onRemoveTag={handleRemoveTag}
+              onImageChange={handleImageUpload}
+              onImageSecurityError={() => setImageError(POISONED_FILE_WARNING)}
+              onSaveMetadata={handleSaveMetadata}
+              onUnpublish={handleUnpublish}
+              onRepublish={handleRepublish}
+              onOpenDeletePopup={() => {
+                show(<DeletePostPopupContent onClose={hide} onConfirm={handleDelete} />, {
+                  title: "Tem a certeza que quer eliminar este artigo?",
+                  closeAriaLabel: "Fechar",
+                  dimensions: "m",
+                });
+              }}
+            />
           </TabBody>
         </Tab>
 
         <Tab>
           <TabHeader>Conteúdo</TabHeader>
           <TabBody>
-            <div className="admin-page__body">
-              <div className="admin-page__form-area">
-                <form className="admin-page__form mt-24">
-                  <div className="admin-page__fields-group">
-                    <div className="flex flex-col gap-8">
-                      <span className="text-primary-900 text-base font-medium leading-7">
-                        Conteúdo *
-                      </span>
-                      <RichTextEditor
-                        content={articleContent}
-                        onChange={(html) => setArticleContent(html)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-page__actions">
-                    <Button
-                      variant="primary"
-                      hasIcon
-                      trailingIcon="agora-line-check-circle"
-                      trailingIconHover="agora-solid-check-circle"
-                      onClick={handleSaveContent}
-                      disabled={isSaving}
-                    >
-                      {isSaving ? "A guardar..." : "Guardar"}
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </div>
+            <PostsEditContentTab
+              articleContent={articleContent}
+              isSaving={isSaving}
+              onContentChange={setArticleContent}
+              onSaveContent={handleSaveContent}
+            />
           </TabBody>
         </Tab>
       </Tabs>
