@@ -11,8 +11,7 @@ import {
   StatusCard,
   Switch,
 } from "@ama-pt/agora-design-system";
-import AppIcon from "@/components/Primitives/AppIcon";
-import AuxiliarList from "@/components/admin/AuxiliarList";
+import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import { HarvesterPreviewPanel } from "@/components/admin/harvesters/HarvesterPreviewPanel";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
@@ -487,15 +486,7 @@ export function HarvesterConfigForm({
       </div>
 
       {/* Auxiliar sidebar */}
-      <aside className="admin-page__auxiliar">
-        <div className="admin-page__auxiliar-inner">
-          <div className="admin-page__auxiliar-header">
-            <AppIcon name="agora-line-question-mark" className="h-24 w-24" />
-            <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
-          </div>
-          <AuxiliarList items={auxiliarItems} />
-        </div>
-      </aside>
+      <AdminAuxiliarySidebar items={auxiliarItems} />
     </div>
   );
 }

@@ -42,6 +42,7 @@ import { POISONED_FILE_WARNING, translateUploadError } from "@/lib/security/tran
 import TextLink from "@/components/Primitives/TextLink";
 
 import { translateActivityLabel } from "@/utils/activityLabels";
+import DatasetsEditStatusAlerts from "./DatasetsEditStatusAlerts";
 
 export default function DatasetsEditClient() {
   const searchParams = useSearchParams();
@@ -817,16 +818,7 @@ export default function DatasetsEditClient() {
       }
     >
 
-      {apiError && (
-        <div className="my-24">
-          <StatusCard variant="danger" showIcon description={apiError} />
-        </div>
-      )}
-      {apiSuccess && (
-        <div className="my-24">
-          <StatusCard variant="success" showIcon description={apiSuccess} />
-        </div>
-      )}
+      <DatasetsEditStatusAlerts apiError={apiError} apiSuccess={apiSuccess} />
 
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">

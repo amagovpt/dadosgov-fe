@@ -26,6 +26,7 @@ import type { Post, PostUpdatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
 import PostMetadataSection from "@/components/admin/posts/PostMetadataSection";
+import PostsEditStatusAlerts from "@/components/admin/posts/PostsEditStatusAlerts";
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), {
   ssr: false,
@@ -319,8 +320,7 @@ export default function PostsEditClient() {
         </Button>
       }
     >
-      {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
-      {apiSuccess && <StatusCard variant="success" showIcon description={apiSuccess} />}
+      <PostsEditStatusAlerts apiError={apiError} apiSuccess={apiSuccess} />
 
       <Tabs
         className="mt-8"
