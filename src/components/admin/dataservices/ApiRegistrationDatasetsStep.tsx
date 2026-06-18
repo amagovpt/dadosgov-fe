@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Button, StatusCard } from "@ama-pt/agora-design-system";
+import { StatusCard } from "@ama-pt/agora-design-system";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import DataserviceDatasetLinksSection from "@/components/admin/dataservices/DataserviceDatasetLinksSection";
 
 interface ApiRegistrationDatasetsStepProps {
@@ -40,20 +41,21 @@ export default function ApiRegistrationDatasetsStep({
           onAddDatasetLink={onAddDatasetLink}
         />
 
-        <div className="admin-page__actions">
-          <Button appearance="outline" variant="neutral" onClick={onPreviousStep}>
-            Anterior
-          </Button>
-          <Button
-            variant="primary"
-            hasIcon
-            trailingIcon="agora-line-arrow-right-circle"
-            trailingIconHover="agora-solid-arrow-right-circle"
-            onClick={onNextStep}
-          >
-            Seguinte
-          </Button>
-        </div>
+        <AdminStepActions
+          previousAction={{
+            label: "Anterior",
+            appearance: "outline",
+            variant: "neutral",
+            onClick: onPreviousStep,
+          }}
+          primaryAction={{
+            label: "Seguinte",
+            onClick: onNextStep,
+            hasIcon: true,
+            trailingIcon: "agora-line-arrow-right-circle",
+            trailingIconHover: "agora-solid-arrow-right-circle",
+          }}
+        />
       </form>
     </>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@ama-pt/agora-design-system";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import PostContentSection from "@/components/admin/posts/PostContentSection";
 
 interface PostsNewContentStepProps {
@@ -37,39 +37,35 @@ export default function PostsNewContentStep({
 
       {saveError && <p className="mb-16 text-sm text-danger-600">{saveError}</p>}
 
-      <div className="admin-page__actions">
-        <Button
-          appearance="outline"
-          variant="primary"
-          hasIcon
-          leadingIcon="agora-line-arrow-left-circle"
-          leadingIconHover="agora-solid-arrow-left-circle"
-          onClick={onPrevious}
-        >
-          Anterior
-        </Button>
-        <Button
-          appearance="outline"
-          variant="primary"
-          hasIcon
-          trailingIcon="agora-line-check-circle"
-          trailingIconHover="agora-solid-check-circle"
-          onClick={onSaveDraft}
-          disabled={isSaving}
-        >
-          {pendingAction === "draft" ? "A guardar..." : "Guardar como rascunho"}
-        </Button>
-        <Button
-          variant="primary"
-          hasIcon
-          trailingIcon="agora-line-check-circle"
-          trailingIconHover="agora-solid-check-circle"
-          onClick={onPublish}
-          disabled={isSaving}
-        >
-          {pendingAction === "publish" ? "A publicar..." : "Publicar artigo"}
-        </Button>
-      </div>
+      <AdminStepActions
+        previousAction={{
+          label: "Anterior",
+          appearance: "outline",
+          variant: "primary",
+          hasIcon: true,
+          leadingIcon: "agora-line-arrow-left-circle",
+          leadingIconHover: "agora-solid-arrow-left-circle",
+          onClick: onPrevious,
+        }}
+        secondaryAction={{
+          label: pendingAction === "draft" ? "A guardar..." : "Guardar como rascunho",
+          appearance: "outline",
+          variant: "primary",
+          hasIcon: true,
+          trailingIcon: "agora-line-check-circle",
+          trailingIconHover: "agora-solid-check-circle",
+          onClick: onSaveDraft,
+          disabled: isSaving,
+        }}
+        primaryAction={{
+          label: pendingAction === "publish" ? "A publicar..." : "Publicar artigo",
+          hasIcon: true,
+          trailingIcon: "agora-line-check-circle",
+          trailingIconHover: "agora-solid-check-circle",
+          onClick: onPublish,
+          disabled: isSaving,
+        }}
+      />
     </form>
   );
 }

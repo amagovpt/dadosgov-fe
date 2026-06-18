@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Button, StatusCard } from "@ama-pt/agora-design-system";
+import { StatusCard } from "@ama-pt/agora-design-system";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 
 interface OrganizationSuccessStepProps {
   onPrevious: () => void;
@@ -26,20 +27,21 @@ export default function OrganizationSuccessStep({
         }
       />
 
-      <div className="admin-page__actions">
-        <Button appearance="outline" variant="neutral" onClick={onPrevious}>
-          Anterior
-        </Button>
-        <Button
-          variant="primary"
-          hasIcon
-          trailingIcon="agora-line-check-circle"
-          trailingIconHover="agora-solid-check-circle"
-          onClick={onFinish}
-        >
-          Guardar
-        </Button>
-      </div>
+      <AdminStepActions
+        previousAction={{
+          label: "Anterior",
+          appearance: "outline",
+          variant: "neutral",
+          onClick: onPrevious,
+        }}
+        primaryAction={{
+          label: "Guardar",
+          hasIcon: true,
+          trailingIcon: "agora-line-check-circle",
+          trailingIconHover: "agora-solid-check-circle",
+          onClick: onFinish,
+        }}
+      />
     </div>
   );
 }

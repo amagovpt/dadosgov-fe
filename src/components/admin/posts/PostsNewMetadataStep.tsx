@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Button } from "@ama-pt/agora-design-system";
 import type { JSX } from "react";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import PostMetadataSection from "@/components/admin/posts/PostMetadataSection";
 
 interface PostsNewMetadataStepProps {
@@ -81,17 +81,15 @@ export default function PostsNewMetadataStep({
         onImageSecurityError={onImageSecurityError}
       />
 
-      <div className="admin-page__actions">
-        <Button
-          variant="primary"
-          hasIcon
-          trailingIcon="agora-line-arrow-right-circle"
-          trailingIconHover="agora-solid-arrow-right-circle"
-          onClick={onNext}
-        >
-          Seguinte
-        </Button>
-      </div>
+      <AdminStepActions
+        primaryAction={{
+          label: "Seguinte",
+          onClick: onNext,
+          hasIcon: true,
+          trailingIcon: "agora-line-arrow-right-circle",
+          trailingIconHover: "agora-solid-arrow-right-circle",
+        }}
+      />
     </form>
   );
 }

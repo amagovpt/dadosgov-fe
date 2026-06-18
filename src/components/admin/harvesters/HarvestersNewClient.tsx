@@ -2,9 +2,10 @@
 
 import React, { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, StatusCard } from "@ama-pt/agora-design-system";
+import { StatusCard } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import { createHarvester, previewHarvestSource } from "@/service/api/harvesters";
 import type { HarvestPreviewJob, HarvestSourceCreatePayload } from "@/service/types/harvester";
 import HarvesterProducerSection from "@/components/admin/harvesters/HarvesterProducerSection";
@@ -272,17 +273,17 @@ export default function HarvestersNewClient() {
                   onToggleAutoArchive={() => setIsAutoArchive((value) => !value)}
                 />
 
-                <div className="admin-page__actions">
-                  <Button
-                    variant="primary"
-                    hasIcon
-                    trailingIcon="agora-line-arrow-right-circle"
-                    trailingIconHover="agora-solid-arrow-right-circle"
-                    onClick={handleStep1Next}
-                  >
-                    Seguinte
-                  </Button>
-                </div>
+                <AdminStepActions
+                  primaryAction={{
+                    label: "Seguinte",
+                    hasIcon: true,
+                    trailingIcon: "agora-line-arrow-right-circle",
+                    trailingIconHover: "agora-solid-arrow-right-circle",
+                    onClick: () => {
+                      void handleStep1Next();
+                    },
+                  }}
+                />
               </form>
             </>
           )}

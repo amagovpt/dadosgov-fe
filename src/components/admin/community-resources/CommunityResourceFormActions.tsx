@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@ama-pt/agora-design-system";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 
 interface CommunityResourceFormActionsProps {
   previousLabel: string;
@@ -29,27 +29,25 @@ export default function CommunityResourceFormActions({
   className = "admin-page__actions flex gap-[18px]",
 }: CommunityResourceFormActionsProps) {
   return (
-    <div className={className}>
-      <Button
-        variant="primary"
-        appearance="outline"
-        hasIcon
-        leadingIcon={previousIcon}
-        leadingIconHover={previousIconHover}
-        onClick={onPrevious}
-      >
-        {previousLabel}
-      </Button>
-      <Button
-        type="submit"
-        variant="primary"
-        hasIcon
-        trailingIcon={submitIcon}
-        trailingIconHover={submitIconHover}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? loadingSubmitLabel : submitLabel}
-      </Button>
-    </div>
+    <AdminStepActions
+      className={className}
+      previousAction={{
+        label: previousLabel,
+        appearance: "outline",
+        variant: "primary",
+        hasIcon: true,
+        leadingIcon: previousIcon,
+        leadingIconHover: previousIconHover,
+        onClick: onPrevious,
+      }}
+      primaryAction={{
+        label: isSubmitting ? loadingSubmitLabel : submitLabel,
+        type: "submit",
+        hasIcon: true,
+        trailingIcon: submitIcon,
+        trailingIconHover: submitIconHover,
+        disabled: isSubmitting,
+      }}
+    />
   );
 }

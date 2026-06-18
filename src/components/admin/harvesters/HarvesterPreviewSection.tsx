@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@ama-pt/agora-design-system";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import HarvesterPreviewResult from "@/components/admin/harvesters/HarvesterPreviewResult";
 import type { HarvestPreviewJob } from "@/service/types/harvester";
 
@@ -32,28 +32,25 @@ export default function HarvesterPreviewSection({
         showPendingCount
       />
 
-      <div className="admin-page__actions">
-        <Button
-          appearance="outline"
-          variant="neutral"
-          hasIcon
-          leadingIcon="agora-line-arrow-left-circle"
-          leadingIconHover="agora-solid-arrow-left-circle"
-          onClick={onPrevious}
-        >
-          Anterior
-        </Button>
-        <Button
-          variant="primary"
-          hasIcon
-          trailingIcon="agora-line-arrow-right-circle"
-          trailingIconHover="agora-solid-arrow-right-circle"
-          onClick={onCreate}
-          disabled={isCreating}
-        >
-          {isCreating ? "A criar..." : "Seguinte"}
-        </Button>
-      </div>
+      <AdminStepActions
+        previousAction={{
+          label: "Anterior",
+          appearance: "outline",
+          variant: "neutral",
+          hasIcon: true,
+          leadingIcon: "agora-line-arrow-left-circle",
+          leadingIconHover: "agora-solid-arrow-left-circle",
+          onClick: onPrevious,
+        }}
+        primaryAction={{
+          label: isCreating ? "A criar..." : "Seguinte",
+          hasIcon: true,
+          trailingIcon: "agora-line-arrow-right-circle",
+          trailingIconHover: "agora-solid-arrow-right-circle",
+          onClick: onCreate,
+          disabled: isCreating,
+        }}
+      />
     </div>
   );
 }

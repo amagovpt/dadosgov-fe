@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, StatusCard } from "@ama-pt/agora-design-system";
+import { StatusCard } from "@ama-pt/agora-design-system";
 import { createDataservice } from "@/service/api/dataservices";
 import type { Dataservice } from "@/service/types/dataservice";
 import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import ApiRegistrationDatasetsStep from "@/components/admin/dataservices/ApiRegistrationDatasetsStep";
 import ApiRegistrationPublishStep from "@/components/admin/dataservices/ApiRegistrationPublishStep";
 import DataserviceProducerSection from "@/components/admin/dataservices/DataserviceProducerSection";
@@ -223,20 +224,18 @@ export default function ApiRegistrationClient({
                 onBusinessDocUrlChange={(event) => setBusinessDocUrl(event.target.value)}
               />
 
-              <div className="admin-page__actions">
-                <Button
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={() => {
+              <AdminStepActions
+                primaryAction={{
+                  label: isSubmitting ? "A criar..." : "Seguinte",
+                  hasIcon: true,
+                  trailingIcon: "agora-line-arrow-right-circle",
+                  trailingIconHover: "agora-solid-arrow-right-circle",
+                  onClick: () => {
                     void handleStep1Next();
-                  }}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "A criar..." : "Seguinte"}
-                </Button>
-              </div>
+                  },
+                  disabled: isSubmitting,
+                }}
+              />
             </form>
           </>
         )}
