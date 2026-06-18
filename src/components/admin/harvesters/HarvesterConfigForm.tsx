@@ -11,6 +11,7 @@ import {
   Switch,
 } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
+import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
 import HarvesterDescriptionSection from "@/components/admin/harvesters/HarvesterDescriptionSection";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/HarvesterPreviewResult";
@@ -436,33 +437,14 @@ export function HarvesterConfigForm({
           ) : null}
         </form>
 
-        {/* Danger zone */}
-        <div className="dataset-edit-danger-actions">
-          <StatusCard
-            variant="danger"
-            showIcon
-            description={
-              <>
-                <strong>Atenção esta ação é irreversível.</strong>
-                <br />
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                >
-                  Eliminar o harvester
-                </Button>
-              </>
-            }
-          />
-        </div>
+        <AdminDangerActions
+          dangerActionLabel="Eliminar o harvester"
+          onDangerAction={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDelete();
+          }}
+        />
       </div>
 
       {/* Auxiliar sidebar */}
