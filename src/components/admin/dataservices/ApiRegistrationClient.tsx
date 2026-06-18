@@ -54,8 +54,6 @@ export default function ApiRegistrationClient({
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdDataservice, setCreatedDataservice] = useState<Dataservice | null>(null);
-  const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
-  const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
   // Producer identity: "user" (publish in my own name) or an organization id.
   // The Agora InputSelect reports the selected value into this ref's `.current`.
   const producerRef = useRef("user");
@@ -66,10 +64,6 @@ export default function ApiRegistrationClient({
   const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
   const [isLinkingDatasets, setIsLinkingDatasets] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-
-  useEffect(() => {
-    setDatasetLinkErrors({});
-  }, [currentStep]);
 
   // Preload the dataset pool with the user's own datasets and every dataset
   // from each organization they belong to. The search bar still queries the
@@ -201,45 +195,6 @@ export default function ApiRegistrationClient({
         return next;
       });
     }
-  };
-
-  const handleDatasetUrlChange = (index: number, value: string) => {
-    const updated = [...datasetLinks];
-    updated[index] = { url: value };
-    setDatasetLinks(updated);
-
-    if (value.trim() && datasetLinkErrors[index]) {
-      setDatasetLinkErrors((prev) => {
-        const next = { ...prev };
-        delete next[index];
-        return next;
-      });
-    }
-  };
-
-  const addDatasetLink = () => {
-    const lastIndex = datasetLinks.length - 1;
-    if (!datasetLinks[lastIndex].url.trim()) {
-      setDatasetLinkErrors((prev) => ({
-        ...prev,
-        [lastIndex]: "Campo obrigatório",
-      }));
-      return;
-    }
-    setDatasetLinks((prev) => [...prev, { url: "" }]);
-  };
-
-  const removeDatasetLink = (index: number) => {
-    setDatasetLinks((prev) => prev.filter((_, i) => i !== index));
-    setDatasetLinkErrors((prev) => {
-      const next: Record<number, string> = {};
-      Object.entries(prev).forEach(([key, value]) => {
-        const k = Number(key);
-        if (k < index) next[k] = value;
-        else if (k > index) next[k - 1] = value;
-      });
-      return next;
-    });
   };
 
   const auxiliarItemsStep1 = [
@@ -488,8 +443,8 @@ export default function ApiRegistrationClient({
                         label="Abrir com conta"
                         id="access-account"
                         name="access-type"
-                        checked={accessType === "account"}
-                        onChange={() => setAccessType("account")}
+                        checked={accessType === "open_with_account"}
+                        onChange={() => setAccessType("open_with_account")}
                       />
                       <RadioButton
                         label="Restrito"
@@ -593,56 +548,6 @@ export default function ApiRegistrationClient({
                   </div>
                 )}
 
-                <div className="admin-page__divider-or">
-                  <span className="admin-page__divider-or-text">ou</span>
-                </div>
-
-                {datasetLinks.map((link, index) => (
-                  <div key={index} className="mt-16">
-                    <div>
-                      <InputText
-                        label="Link para o conjunto de dados"
-                        placeholder="Insira o URL aqui"
-                        id={`dataset-url-${index}`}
-                        value={link.url}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleDatasetUrlChange(index, e.target.value)
-                        }
-                        hasError={!!datasetLinkErrors[index]}
-                        hasFeedback={!!datasetLinkErrors[index]}
-                        feedbackState="danger"
-                        errorFeedbackText={datasetLinkErrors[index]}
-                      />
-                      {link.url.trim() && (
-                        <div className="flex justify-end mt-8">
-                          <Button
-                            appearance="link"
-                            variant="danger"
-                            hasIcon
-                            leadingIcon="agora-line-trash"
-                            leadingIconHover="agora-solid-trash"
-                            onClick={() => removeDatasetLink(index)}
-                          >
-                            Eliminar
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                <div className="flex justify-end">
-                  <Button
-                    appearance="outline"
-                    variant="primary"
-                    hasIcon
-                    leadingIcon="agora-line-plus-circle"
-                    leadingIconHover="agora-solid-plus-circle"
-                    onClick={addDatasetLink}
-                  >
-                    Adicionar
-                  </Button>
-                </div>
 
                 <div className="admin-page__actions">
                   <Button
