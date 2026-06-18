@@ -9,6 +9,10 @@ interface HarvesterDescriptionSectionProps {
   harvesterUrl: string;
   hasHarvesterNameError: boolean;
   hasHarvesterUrlError: boolean;
+  namePlaceholder?: string;
+  descriptionLabel?: string;
+  descriptionPlaceholder?: string;
+  urlPlaceholder?: string;
   onHarvesterNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onHarvesterDescriptionChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onHarvesterUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -20,6 +24,10 @@ export default function HarvesterDescriptionSection({
   harvesterUrl,
   hasHarvesterNameError,
   hasHarvesterUrlError,
+  namePlaceholder = "Insira o nome aqui",
+  descriptionLabel = "Descrição",
+  descriptionPlaceholder = "Insira a descrição aqui",
+  urlPlaceholder = "Insira o url aqui",
   onHarvesterNameChange,
   onHarvesterDescriptionChange,
   onHarvesterUrlChange,
@@ -31,7 +39,7 @@ export default function HarvesterDescriptionSection({
       <div className="admin-page__fields-group">
         <InputText
           label="Nome *"
-          placeholder="Insira o nome aqui"
+          placeholder={namePlaceholder}
           id="harvester-name"
           value={harvesterName}
           onChange={onHarvesterNameChange}
@@ -43,8 +51,8 @@ export default function HarvesterDescriptionSection({
         />
 
         <InputTextArea
-          label="Descrição"
-          placeholder="Insira a descrição aqui"
+          label={descriptionLabel}
+          placeholder={descriptionPlaceholder}
           id="harvester-description"
           rows={6}
           value={harvesterDescription}
@@ -53,7 +61,7 @@ export default function HarvesterDescriptionSection({
 
         <InputText
           label="URL *"
-          placeholder="Insira o url aqui"
+          placeholder={urlPlaceholder}
           id="harvester-url"
           value={harvesterUrl}
           onChange={onHarvesterUrlChange}

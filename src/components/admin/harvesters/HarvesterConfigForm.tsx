@@ -7,11 +7,11 @@ import {
   DropdownSection,
   InputSelect,
   InputText,
-  InputTextArea,
   StatusCard,
   Switch,
 } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
+import HarvesterDescriptionSection from "@/components/admin/harvesters/HarvesterDescriptionSection";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
@@ -130,12 +130,12 @@ export function HarvesterConfigForm({
         ))}
       </DropdownSection>
     ),
-    [backends, selectedBackend]
+    [backends, selectedBackend],
   );
 
   const activeFilterKeys = useMemo(
     () => new Set(activeBackendFilters.map((f) => f.key)),
-    [activeBackendFilters]
+    [activeBackendFilters],
   );
 
   // Filters stored on the harvester whose key is not declared by the selected
@@ -147,7 +147,7 @@ export function HarvesterConfigForm({
       filters
         .map((f, index) => ({ ...f, index }))
         .filter((f) => f.type && !activeFilterKeys.has(f.type)),
-    [filters, activeFilterKeys]
+    [filters, activeFilterKeys],
   );
 
   const auxiliarItems = [
@@ -191,50 +191,26 @@ export function HarvesterConfigForm({
             obrigatórios.
           </p>
 
-          <h2 className="admin-page__section-title">Descrição</h2>
-
-          <div className="admin-page__fields-group">
-            <InputText
-              label="Nome *"
-              placeholder=""
-              id="harvester-name"
-              value={harvesterName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setHarvesterName(e.target.value);
-                if (e.target.value.trim()) clearError("harvesterName");
-              }}
-              hasError={!!formErrors.harvesterName}
-              hasFeedback={!!formErrors.harvesterName}
-              feedbackState="danger"
-              errorFeedbackText="Campo obrigatório"
-            />
-
-            <InputTextArea
-              label="Descrição *"
-              placeholder=""
-              id="harvester-description"
-              rows={6}
-              value={harvesterDescription}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setHarvesterDescription(e.target.value)
-              }
-            />
-
-            <InputText
-              label="URL *"
-              placeholder=""
-              id="harvester-url"
-              value={harvesterUrl}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setHarvesterUrl(e.target.value);
-                if (e.target.value.trim()) clearError("harvesterUrl");
-              }}
-              hasError={!!formErrors.harvesterUrl}
-              hasFeedback={!!formErrors.harvesterUrl}
-              feedbackState="danger"
-              errorFeedbackText="Campo obrigatório"
-            />
-          </div>
+          <HarvesterDescriptionSection
+            harvesterName={harvesterName}
+            harvesterDescription={harvesterDescription}
+            harvesterUrl={harvesterUrl}
+            hasHarvesterNameError={!!formErrors.harvesterName}
+            hasHarvesterUrlError={!!formErrors.harvesterUrl}
+            namePlaceholder=""
+            descriptionLabel="Descrição *"
+            descriptionPlaceholder=""
+            urlPlaceholder=""
+            onHarvesterNameChange={(e) => {
+              setHarvesterName(e.target.value);
+              if (e.target.value.trim()) clearError("harvesterName");
+            }}
+            onHarvesterDescriptionChange={(e) => setHarvesterDescription(e.target.value)}
+            onHarvesterUrlChange={(e) => {
+              setHarvesterUrl(e.target.value);
+              if (e.target.value.trim()) clearError("harvesterUrl");
+            }}
+          />
 
           <h2 className="admin-page__section-title">Implementação</h2>
 
