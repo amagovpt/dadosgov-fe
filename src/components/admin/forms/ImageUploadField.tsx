@@ -6,6 +6,7 @@ import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/Dra
 interface ImageUploadFieldProps {
   label?: string;
   required?: boolean;
+  uploaderLabel?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSecurityError: () => void;
   error?: string | null;
@@ -20,11 +21,17 @@ interface ImageUploadFieldProps {
   files?: File[];
   dragAndDropLabel?: string;
   inputLabel?: string;
+  accept?: string;
+  maxSize?: number;
+  extensionsInstructions?: string;
+  maxSizeExceededErrorLabel?: string;
+  forbiddenExtensionErrorLabel?: string;
 }
 
 export default function ImageUploadField({
   label = "Imagem de capa",
   required = false,
+  uploaderLabel = "Ficheiros",
   onChange,
   onSecurityError,
   error = null,
@@ -39,6 +46,11 @@ export default function ImageUploadField({
   files,
   dragAndDropLabel = "Arraste e largue o ficheiro aqui",
   inputLabel = "Selecione ou arraste o ficheiro",
+  accept = ".jpg,.jpeg,.png",
+  maxSize = 4194304,
+  extensionsInstructions = "Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG.",
+  maxSizeExceededErrorLabel = "O ficheiro excede o tamanho máximo de 4 MB.",
+  forbiddenExtensionErrorLabel = "Formato de ficheiro não permitido.",
 }: ImageUploadFieldProps) {
   const preview = previewSrc ? (
     <div className={previewWrapperClassName}>
@@ -57,18 +69,18 @@ export default function ImageUploadField({
       {previewPlacement === "before" ? preview : null}
       <div className={uploaderWrapperClassName}>
         <DragAndDropUploader
-          label="Ficheiros"
+          label={uploaderLabel}
           dragAndDropLabel={dragAndDropLabel}
           inputLabel={inputLabel}
           selectedFilesLabel="ficheiro selecionado"
           removeFileButtonLabel="Remover ficheiro"
           replaceFileButtonLabel="Substituir ficheiro"
-          extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-          accept=".jpg,.jpeg,.png"
-          maxSize={4194304}
+          extensionsInstructions={extensionsInstructions}
+          accept={accept}
+          maxSize={maxSize}
           maxCount={1}
-          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+          maxSizeExceededErrorLabel={maxSizeExceededErrorLabel}
+          forbiddenExtensionErrorLabel={forbiddenExtensionErrorLabel}
           files={files}
           hasError={!!error}
           hasFeedback={!!error}

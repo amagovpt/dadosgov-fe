@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button, InputText, InputTextArea, StatusCard } from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import UserProfileAvatarDangerZone from "@/components/admin/profile/UserProfileAvatarDangerZone";
 import type { ApiToken } from "@/service/types/identity";
 
@@ -150,32 +150,13 @@ export default function UserProfileMainTab({
           onChange={onWebsiteChange}
         />
 
-        <div>
-          <span className="text-base font-medium leading-7 text-primary-900">Foto de perfil</span>
-          <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-            <DragAndDropUploader
-              key={avatarUploaderKey}
-              label="Ficheiros"
-              dragAndDropLabel="Arraste e largue o ficheiro aqui"
-              inputLabel="Selecione ou arraste o ficheiro"
-              selectedFilesLabel="ficheiro selecionado"
-              removeFileButtonLabel="Remover ficheiro"
-              replaceFileButtonLabel="Substituir ficheiro"
-              extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-              accept=".jpg,.jpeg,.png"
-              maxSize={4194304}
-              maxCount={1}
-              maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-              forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-              hasError={!!avatarError}
-              hasFeedback={!!avatarError}
-              feedbackState="danger"
-              feedbackText={avatarError ?? undefined}
-              onChange={onAvatarChange}
-              onSecurityError={onAvatarSecurityError}
-            />
-          </div>
-        </div>
+        <ImageUploadField
+          key={avatarUploaderKey}
+          label="Foto de perfil"
+          onChange={onAvatarChange}
+          onSecurityError={onAvatarSecurityError}
+          error={avatarError}
+        />
 
         <div className="flex flex-col gap-16">
           <div>

@@ -10,7 +10,7 @@ import {
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import type { OrgBadges } from "@/service/types/identity";
 
 interface OrganizationProfileFormSectionProps {
@@ -148,29 +148,16 @@ export default function OrganizationProfileFormSection({
 
         {canEdit && (
           <div>
-            <span className="text-base font-medium leading-7 text-primary-900">Logotipo</span>
-            <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-              <DragAndDropUploader
-                label="Ficheiro"
-                dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                inputLabel="Selecione ou arraste o ficheiro"
-                selectedFilesLabel="ficheiro selecionado"
-                removeFileButtonLabel="Remover ficheiro"
-                replaceFileButtonLabel="Substituir ficheiro"
-                extensionsInstructions="Tamanho máximo: 500 KB. Formatos aceites: JPG, JPEG, PNG."
-                accept=".jpg,.jpeg,.png"
-                maxSize={512000}
-                maxCount={1}
-                maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 500 KB."
-                forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                hasError={!!logoError}
-                hasFeedback={!!logoError}
-                feedbackState="danger"
-                feedbackText={logoError ?? undefined}
-                onChange={onLogoUpload}
-                onSecurityError={onLogoSecurityError}
-              />
-            </div>
+            <ImageUploadField
+              label="Logotipo"
+              uploaderLabel="Ficheiro"
+              onChange={onLogoUpload}
+              onSecurityError={onLogoSecurityError}
+              error={logoError}
+              maxSize={512000}
+              extensionsInstructions="Tamanho máximo: 500 KB. Formatos aceites: JPG, JPEG, PNG."
+              maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 500 KB."
+            />
           </div>
         )}
 
