@@ -138,9 +138,6 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
         </Button>
       </div>
 
-      {user && isMember && (
-        <StatusCard variant="informative" showIcon description="Já pertence a esta organização." />
-      )}
       {requestSuccess && (
         <StatusCard
           variant="success"
