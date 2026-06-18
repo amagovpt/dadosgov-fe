@@ -35,9 +35,9 @@ import FileOrLinkSection from "@/components/admin/community-resources/FileOrLink
 import ResourceDescriptionSection from "@/components/admin/community-resources/ResourceDescriptionSection";
 import SchemaSection from "@/components/admin/community-resources/SchemaSection";
 import DatasetSelectionSection from "@/components/admin/community-resources/DatasetSelectionSection";
-import CommunityResourceFormActions from "@/components/admin/community-resources/CommunityResourceFormActions";
 import FormStatusMessages from "@/components/admin/community-resources/FormStatusMessages";
 import CommunityResourceAuxiliarySidebar from "@/components/admin/community-resources/CommunityResourceAuxiliarySidebar";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -355,17 +355,25 @@ export default function CommunityResourceFormClient({
                   onRemoveSelectedDataset={handleRemoveSelectedDataset}
                 />
 
-                <CommunityResourceFormActions
-                  previousLabel="Anterior"
-                  onPrevious={onPreviousStep}
-                  submitLabel="Seguinte"
-                  loadingSubmitLabel="A criar..."
-                  isSubmitting={isSubmitting}
-                  previousIcon="agora-line-arrow-left-circle"
-                  previousIconHover="agora-solid-arrow-left-circle"
-                  submitIcon="agora-line-arrow-right-circle"
-                  submitIconHover="agora-solid-arrow-right-circle"
+                <AdminStepActions
                   className="admin-page__actions flex justify-between gap-[18px]"
+                  previousAction={{
+                    label: "Anterior",
+                    appearance: "outline",
+                    variant: "primary",
+                    hasIcon: true,
+                    leadingIcon: "agora-line-arrow-left-circle",
+                    leadingIconHover: "agora-solid-arrow-left-circle",
+                    onClick: onPreviousStep,
+                  }}
+                  primaryAction={{
+                    label: isSubmitting ? "A criar..." : "Seguinte",
+                    type: "submit",
+                    hasIcon: true,
+                    trailingIcon: "agora-line-arrow-right-circle",
+                    trailingIconHover: "agora-solid-arrow-right-circle",
+                    disabled: isSubmitting,
+                  }}
                 />
               </form>
             </>

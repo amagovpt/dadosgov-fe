@@ -35,9 +35,9 @@ import ChecksumSection from "@/components/admin/community-resources/ChecksumSect
 import EditDescriptionSection from "@/components/admin/community-resources/EditDescriptionSection";
 import EditSchemaSection from "@/components/admin/community-resources/EditSchemaSection";
 import DangerZoneSection from "@/components/admin/community-resources/DangerZoneSection";
-import CommunityResourceFormActions from "@/components/admin/community-resources/CommunityResourceFormActions";
 import FormStatusMessages from "@/components/admin/community-resources/FormStatusMessages";
 import CommunityResourceAuxiliarySidebar from "@/components/admin/community-resources/CommunityResourceAuxiliarySidebar";
+import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 
 type CommunityResourceEditField =
   | "url"
@@ -451,16 +451,24 @@ export default function CommunityResourceEditClient() {
               onSchemaUrlChange={handleSchemaUrlChange}
             />
 
-            <CommunityResourceFormActions
-              previousLabel="Anterior"
-              onPrevious={() => router.push("/pages/admin/system/community-resources")}
-              submitLabel="Guardar"
-              loadingSubmitLabel="A guardar..."
-              isSubmitting={isSubmitting}
-              previousIcon="agora-line-arrow-left-circle"
-              previousIconHover="agora-solid-arrow-left-circle"
-              submitIcon="agora-line-check-circle"
-              submitIconHover="agora-solid-check-circle"
+            <AdminStepActions
+              previousAction={{
+                label: "Anterior",
+                appearance: "outline",
+                variant: "primary",
+                hasIcon: true,
+                leadingIcon: "agora-line-arrow-left-circle",
+                leadingIconHover: "agora-solid-arrow-left-circle",
+                onClick: () => router.push("/pages/admin/system/community-resources"),
+              }}
+              primaryAction={{
+                label: isSubmitting ? "A guardar..." : "Guardar",
+                type: "submit",
+                hasIcon: true,
+                trailingIcon: "agora-line-check-circle",
+                trailingIconHover: "agora-solid-check-circle",
+                disabled: isSubmitting,
+              }}
             />
 
             <DangerZoneSection isSubmitting={isSubmitting} onDelete={handleDelete} />
