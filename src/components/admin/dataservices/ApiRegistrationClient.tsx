@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, CardGeneral, StatusCard } from "@ama-pt/agora-design-system";
+import { Button, StatusCard } from "@ama-pt/agora-design-system";
 import { createDataservice } from "@/service/api/dataservices";
 import type { Dataservice } from "@/service/types/dataservice";
-import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
+import ApiRegistrationDatasetsStep from "@/components/admin/dataservices/ApiRegistrationDatasetsStep";
+import ApiRegistrationPublishStep from "@/components/admin/dataservices/ApiRegistrationPublishStep";
 import DataserviceProducerSection from "@/components/admin/dataservices/DataserviceProducerSection";
 import DataserviceDescriptionSection from "@/components/admin/dataservices/DataserviceDescriptionSection";
 import DataserviceAccessSection from "@/components/admin/dataservices/DataserviceAccessSection";
-import DataserviceDatasetLinksSection from "@/components/admin/dataservices/DataserviceDatasetLinksSection";
 import { getDataserviceAuxiliaryItems } from "@/components/admin/dataservices/dataserviceAuxiliaryContent";
 
 interface ApiRegistrationClientProps {
@@ -242,81 +242,23 @@ export default function ApiRegistrationClient({
         )}
 
         {currentStep === 2 && (
-          <>
-            <StatusCard
-              variant="informative"
-              showIcon
-              description="É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização."
-            />
-
-            <form className="admin-page__form">
-              <DataserviceDatasetLinksSection
-                datasetLinks={datasetLinks}
-                datasetLinkErrors={datasetLinkErrors}
-                onDatasetUrlChange={handleDatasetUrlChange}
-                onRemoveDatasetLink={removeDatasetLink}
-                onAddDatasetLink={addDatasetLink}
-              />
-
-              <div className="admin-page__actions">
-                <Button
-                  appearance="outline"
-                  variant="neutral"
-                  onClick={() => handleStepChange(onPreviousStep)}
-                >
-                  Anterior
-                </Button>
-                <Button
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={() => handleStepChange(onNextStep)}
-                >
-                  Seguinte
-                </Button>
-              </div>
-            </form>
-          </>
+          <ApiRegistrationDatasetsStep
+            datasetLinks={datasetLinks}
+            datasetLinkErrors={datasetLinkErrors}
+            onDatasetUrlChange={handleDatasetUrlChange}
+            onRemoveDatasetLink={removeDatasetLink}
+            onAddDatasetLink={addDatasetLink}
+            onPreviousStep={() => handleStepChange(onPreviousStep)}
+            onNextStep={() => handleStepChange(onNextStep)}
+          />
         )}
 
         {currentStep === 3 && (
-          <>
-            <StatusCard
-              variant="success"
-              showIcon
-              description={
-                <>
-                  <strong>A sua API foi criada!</strong>
-                  <br />
-                  Agora pode publicar ou guardar como rascunho.
-                </>
-              }
-            />
-
-            <CardGeneral
-              variant="white-outline"
-              isCardHorizontal
-              isBlockedLink
-              iconDefault="agora-line-layers-menu"
-              iconHover="agora-solid-layers-menu"
-              titleText={createdDataservice?.title || apiName || "Sem título"}
-              descriptionText={createdDataservice?.description || apiDescription || "Sem descrição"}
-              anchor={{
-                href: createdDataservice ? `/pages/dataservices/${createdDataservice.id}` : "#",
-                children: "",
-              }}
-            />
-
-            <PublicationFeedbackButton />
-
-            <div className="admin-page__actions flex justify-end gap-[18px]">
-              <Button appearance="outline" variant="neutral">
-                Salvar rascunho
-              </Button>
-              <Button variant="primary">Publicar API</Button>
-            </div>
-          </>
+          <ApiRegistrationPublishStep
+            createdDataservice={createdDataservice}
+            apiName={apiName}
+            apiDescription={apiDescription}
+          />
         )}
       </div>
 
