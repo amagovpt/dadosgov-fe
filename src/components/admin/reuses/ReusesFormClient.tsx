@@ -13,8 +13,7 @@ import {
   updateReuse,
   uploadReuseImage,
 } from "@/service/api/reuses";
-import { searchDatasets, suggestTags } from "@/service/api/search";
-import type { TagSuggestion } from "@/service/types/catalog";
+import { searchDatasets } from "@/service/api/search";
 import type { Dataset } from "@/service/types/dataset";
 import type { Reuse, ReuseTopic, ReuseType } from "@/service/types/reuse";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
@@ -29,6 +28,7 @@ import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarI
 import ReusesFormDetailsStep from "@/components/admin/reuses/ReusesFormDetailsStep";
 import ReusesFormDatasetsStep from "@/components/admin/reuses/ReusesFormDatasetsStep";
 import ReusesFormPublishStep from "@/components/admin/reuses/ReusesFormPublishStep";
+import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 
 interface ReusesFormClientProps {
   currentStep: number;
@@ -60,9 +60,6 @@ export default function ReusesFormClient({
   // Dynamic options from backend
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
   const [reuseTopics, setReuseTopics] = useState<ReuseTopic[]>([]);
-  const [tags, setTags] = useState<TagSuggestion[]>([]);
-  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
-  const [keywordSearch, setKeywordSearch] = useState("");
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
   // Persist selected values across step navigation (uncontrolled IsolatedSelect
   // remounts when the step 1 JSX unmounts/remounts; state survives because the
@@ -85,26 +82,7 @@ export default function ReusesFormClient({
   useEffect(() => {
     fetchReuseTypes().then(setReuseTypes);
     fetchReuseTopics().then(setReuseTopics);
-    suggestTags("", 50).then(setTags);
   }, []);
-
-  useEffect(() => {
-    const query = keywordSearch.trim();
-    if (query.length < 2) {
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      try {
-        const response = await suggestTags(query, 20);
-        setTagSearch(response);
-      } catch {
-        setTagSearch([]);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [keywordSearch]);
 
   useEffect(() => {
     const dedupe = (items: Dataset[]) =>
@@ -167,83 +145,29 @@ export default function ReusesFormClient({
     return () => clearTimeout(timer);
   }, [datasetSearch]);
 
-  const keywordsChildren = useMemo(() => {
-    const trimmed = keywordSearch.trim();
-    const trimmedLower = trimmed.toLowerCase();
-    const visibleTagSearch = trimmed.length >= 2 ? tagSearch : [];
-    // Selected tags stay visible regardless of query so the InputSelect keeps
-    // tracking them across searches; otherwise typing a new query would drop
-    // them from the children and the next onChange would lose those selections.
-    const selectedSet = new Set(
+  const selectedKeywords = useMemo(
+    () =>
       selectedKeywordsValue
         .split(",")
-        .map((value) => value.trim().toLowerCase())
+        .map((value) => value.trim())
         .filter(Boolean),
-    );
-    const seen = new Set<string>();
-    const uniqueTags = [...tags, ...visibleTagSearch].filter((tag) => {
-      const key = tag.text.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      if (selectedSet.has(key)) return true;
-      if (trimmedLower && !key.includes(trimmedLower)) return false;
-      return true;
-    });
-    const showCreate =
-      trimmed.length > 0 &&
-      ![...tags, ...visibleTagSearch].some((tag) => tag.text.toLowerCase() === trimmedLower) &&
-      !selectedSet.has(trimmedLower);
-
-    const options = [
-      ...(showCreate
-        ? [
-            <DropdownOption key={`__create__${trimmedLower}`} value={trimmed} selected={false}>
-              Criar &quot;{trimmed}&quot;
-            </DropdownOption>,
-          ]
-        : []),
-      ...uniqueTags.map((tag) => (
-        <DropdownOption
-          key={tag.text.toLowerCase()}
-          value={tag.text}
-          selected={selectedSet.has(tag.text.toLowerCase())}
-        >
-          {tag.text}
-        </DropdownOption>
-      )),
-    ];
-
-    return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [keywordSearch, selectedKeywordsValue, tagSearch, tags]);
+    [selectedKeywordsValue],
+  );
+  const {
+    keywordOptions: keywordsChildren,
+    setKeywordSearch,
+    registerSelectedKeywordValue,
+  } = useKeywordSelect({
+    selectedKeywords,
+    includeSelectedOutsideSuggestions: false,
+  });
 
   const handleKeywordChange = useCallback(
     (value: string) => {
       setSelectedKeywordsValue(value);
-      const selected = value.split(",").filter(Boolean);
-      let addedNew = false;
-
-      selected.forEach((entry) => {
-        const lower = entry.toLowerCase();
-        const existsInTags = tags.some((tag) => tag.text.toLowerCase() === lower);
-        const existsInSearch = tagSearch.some((tag) => tag.text.toLowerCase() === lower);
-        if (!existsInTags && !existsInSearch) {
-          addedNew = true;
-          setTags((previous) => {
-            if (previous.some((tag) => tag.text.toLowerCase() === lower)) {
-              return previous;
-            }
-            return [...previous, { text: entry }];
-          });
-        }
-      });
-
-      if (addedNew) {
-        // Clear the search input after creating a new tag so the "Criar X" option
-        // disappears and the new tag shows as checked in the list.
-        setKeywordSearch("");
-      }
+      registerSelectedKeywordValue(value);
     },
-    [tagSearch, tags],
+    [registerSelectedKeywordValue],
   );
 
   const isValidUrl = (value: string): boolean => {

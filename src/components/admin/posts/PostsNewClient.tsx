@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createPost, publishPost, uploadPostImage } from "@/service/api/posts";
 import AdminLayout from "@/components/Layout/AdminLayout";
@@ -9,7 +9,7 @@ import PostsNewContentStep from "@/components/admin/posts/PostsNewContentStep";
 import PostsNewMetadataStep from "@/components/admin/posts/PostsNewMetadataStep";
 import type { PostCreatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
+import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 
 export default function PostsNewClient() {
   const searchParams = useSearchParams();
@@ -28,9 +28,10 @@ export default function PostsNewClient() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const isSaving = pendingAction !== null;
-
-  const { setKeywordSearch, keywordOptions, selectedKeywordsRef, addCustomTag } =
-    usePostKeywords(selectedTags);
+  const selectedKeywordsRef = useRef("");
+  const { setKeywordSearch, keywordOptions, registerSelectedKeywordValue } = useKeywordSelect({
+    selectedKeywords: selectedTags,
+  });
 
   function clearError(field: string) {
     if (formErrors[field]) {
@@ -60,7 +61,7 @@ export default function PostsNewClient() {
     let addedNew = false;
     selected.forEach((tag) => {
       addedNew = true;
-      addCustomTag(tag);
+      registerSelectedKeywordValue(tag);
     });
 
     if (addedNew) {

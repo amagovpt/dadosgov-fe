@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Button,
@@ -23,7 +23,7 @@ import {
 } from "@/service/api/posts";
 import type { Post, PostUpdatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import { usePostKeywords } from "@/components/admin/posts/usePostKeywords";
+import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 import PostsEditMetadataTab from "@/components/admin/posts/PostsEditMetadataTab";
 import PostsEditContentTab from "@/components/admin/posts/PostsEditContentTab";
 
@@ -73,9 +73,10 @@ export default function PostsEditClient() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
-
-  const { setKeywordSearch, keywordOptions, selectedKeywordsRef, addCustomTag } =
-    usePostKeywords(selectedTags);
+  const selectedKeywordsRef = useRef("");
+  const { setKeywordSearch, keywordOptions, registerSelectedKeywordValue } = useKeywordSelect({
+    selectedKeywords: selectedTags,
+  });
 
   useEffect(() => {
     async function loadData() {
@@ -263,7 +264,7 @@ export default function PostsEditClient() {
     let addedNew = false;
     selected.forEach((tag) => {
       addedNew = true;
-      addCustomTag(tag);
+      registerSelectedKeywordValue(tag);
     });
 
     if (addedNew) {

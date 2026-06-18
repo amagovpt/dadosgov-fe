@@ -4,8 +4,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Button,
-  DropdownOption,
-  DropdownSection,
   Icon,
   StatusCard,
   Pill,
@@ -24,10 +22,10 @@ import { fetchDataset, fetchMyDatasets } from "@/service/api/datasets";
 import { fetchDiscussions } from "@/service/api/discussions-topics";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { fetchReuse, updateReuse, deleteReuse, fetchReuseTypes, fetchReuseTopics, linkDatasetToReuse, unlinkDatasetFromReuse, linkDataserviceToReuse } from "@/service/api/reuses";
-import { searchDatasets, suggestTags } from "@/service/api/search";
+import { searchDatasets } from "@/service/api/search";
 import { requestTransfer } from "@/service/api/transfers";
 import { useAuth } from "@/context/AuthContext";
-import { Activity, TagSuggestion } from "@/service/types/catalog";
+import { Activity } from "@/service/types/catalog";
 import { Dataset } from "@/service/types/dataset";
 import { Discussion } from "@/service/types/discussion";
 import { Reuse, ReuseType, ReuseTopic } from "@/service/types/reuse";
@@ -40,6 +38,7 @@ import ReusesEditDiscussionsTab from "@/components/admin/reuses/ReusesEditDiscus
 import ReusesEditActivitiesTab from "@/components/admin/reuses/ReusesEditActivitiesTab";
 import ReusesEditDeletePopup from "@/components/admin/reuses/ReusesEditDeletePopup";
 import TextLink from "@/components/Primitives/TextLink";
+import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 
 import { translateActivityLabel } from "@/utils/activityLabels";
 
@@ -78,9 +77,6 @@ export default function ReusesEditClient() {
   // Keywords state (IsolatedSelect pattern)
   const selectedKeywordsRef = useRef("");
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
-  const [keywordSearch, setKeywordSearch] = useState("");
-  const [tagSuggestions, setTagSuggestions] = useState<TagSuggestion[]>([]);
-  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
 
   // Discussions tab state
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
@@ -182,28 +178,6 @@ export default function ReusesEditClient() {
     return () => clearTimeout(timer);
   }, [datasetSearch]);
 
-  // Initial pool of tag suggestions for the keywords dropdown.
-  useEffect(() => {
-    suggestTags("", 50)
-      .then(setTagSuggestions)
-      .catch(() => setTagSuggestions([]));
-  }, []);
-
-  // Debounced tag search while user types in the keywords dropdown.
-  useEffect(() => {
-    const q = keywordSearch.trim();
-    if (q.length < 2) return;
-    const timer = setTimeout(async () => {
-      try {
-        const res = await suggestTags(q, 20);
-        setTagSearch(res);
-      } catch {
-        setTagSearch([]);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [keywordSearch]);
-
   const selectedKeywords = useMemo(
     () =>
       selectedKeywordsValue
@@ -213,54 +187,9 @@ export default function ReusesEditClient() {
     [selectedKeywordsValue]
   );
 
-  const keywordOptions = useMemo(() => {
-    const trimmed = keywordSearch.trim();
-    const trimmedLower = trimmed.toLowerCase();
-    // Selected tags stay visible regardless of query so the InputSelect keeps
-    // tracking them across searches; otherwise typing a new query would drop
-    // them from the children and the next onChange would lose those selections.
-    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
-    const seen = new Set<string>();
-    const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
-      const key = t.text.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      if (selectedLowerSet.has(key)) return true;
-      if (trimmedLower && !key.includes(trimmedLower)) return false;
-      return true;
-    });
-    const selectedNotInSuggestions = selectedKeywords.filter(
-      (keyword) => !seen.has(keyword.toLowerCase())
-    );
-    const showCreate =
-      trimmed.length > 0 &&
-      ![...tagSuggestions, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
-      !selectedLowerSet.has(trimmedLower);
-    const options = [
-      ...(showCreate
-        ? [
-            <DropdownOption key={`__create__${trimmedLower}`} value={trimmed} selected={false}>
-              Criar &quot;{trimmed}&quot;
-            </DropdownOption>,
-          ]
-        : []),
-      ...selectedNotInSuggestions.map((keyword) => (
-        <DropdownOption key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
-          {keyword}
-        </DropdownOption>
-      )),
-      ...uniqueTags.map((tag) => (
-        <DropdownOption
-          key={tag.text.toLowerCase()}
-          value={tag.text}
-          selected={selectedLowerSet.has(tag.text.toLowerCase())}
-        >
-          {tag.text}
-        </DropdownOption>
-      )),
-    ];
-    return <DropdownSection name="keywords">{options}</DropdownSection>;
-  }, [tagSuggestions, tagSearch, selectedKeywords, keywordSearch]);
+  const { keywordOptions, setKeywordSearch, registerSelectedKeywordValue } = useKeywordSelect({
+    selectedKeywords,
+  });
 
   useEffect(() => {
     if (!reuse || !reuse.datasets || reuse.datasets.length === 0) return;
@@ -323,9 +252,6 @@ export default function ReusesEditClient() {
 
   const handleKeywordSearchChange = (value: string) => {
     setKeywordSearch(value);
-    if (value.trim().length < 2) {
-      setTagSearch([]);
-    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -373,25 +299,7 @@ export default function ReusesEditClient() {
 
   const handleKeywordsChange = (value: string) => {
     setSelectedKeywordsValue(value);
-    const selected = value.split(",").filter(Boolean);
-    let addedNew = false;
-    selected.forEach((keyword) => {
-      const lower = keyword.toLowerCase();
-      const existsInSuggestions = tagSuggestions.some((tag) => tag.text.toLowerCase() === lower);
-      const existsInSearch = tagSearch.some((tag) => tag.text.toLowerCase() === lower);
-      if (!existsInSuggestions && !existsInSearch) {
-        addedNew = true;
-        setTagSuggestions((prev) => {
-          if (prev.some((tag) => tag.text.toLowerCase() === lower)) {
-            return prev;
-          }
-          return [...prev, { text: keyword }];
-        });
-      }
-    });
-    if (addedNew) {
-      setKeywordSearch("");
-    }
+    registerSelectedKeywordValue(value);
   };
 
   const handleRemoveKeyword = (keyword: string) => {

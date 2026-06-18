@@ -22,10 +22,10 @@ import { pt } from "date-fns/locale";
 import { fetchActivity } from "@/service/api/activity";
 import { fetchDataset, updateDataset, deleteDataset, uploadResource, createResource, fetchLicenses, fetchFrequencies, fetchResourceTypes, fetchGranularities, fetchSpatialZonesByIds } from "@/service/api/datasets";
 import { fetchDiscussions } from "@/service/api/discussions-topics";
-import { suggestSpatialZones, suggestTags } from "@/service/api/search";
+import { suggestSpatialZones } from "@/service/api/search";
 import { requestTransfer } from "@/service/api/transfers";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
-import { License, Frequency, Granularity, SpatialZone, TagSuggestion, Activity, ResourceType } from "@/service/types/catalog";
+import { License, Frequency, Granularity, SpatialZone, Activity, ResourceType } from "@/service/types/catalog";
 import { Dataset, Resource } from "@/service/types/dataset";
 import { Discussion } from "@/service/types/discussion";
 import DeleteResourcePopup from "@/components/admin/datasets/DeleteResourcePopup";
@@ -42,6 +42,7 @@ import { POISONED_FILE_WARNING, translateUploadError } from "@/lib/security/tran
 import TextLink from "@/components/Primitives/TextLink";
 
 import { translateActivityLabel } from "@/utils/activityLabels";
+import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 
 export default function DatasetsEditClient() {
   const searchParams = useSearchParams();
@@ -84,9 +85,6 @@ export default function DatasetsEditClient() {
   const [licenses, setLicenses] = useState<License[]>([]);
   const [frequencies, setFrequencies] = useState<Frequency[]>([]);
   const [granularities, setGranularities] = useState<Granularity[]>([]);
-  const [tagSuggestions, setTagSuggestions] = useState<TagSuggestion[]>([]);
-  const [tagSearch, setTagSearch] = useState<TagSuggestion[]>([]);
-  const [keywordSearch, setKeywordSearch] = useState("");
   const [spatialZones, setSpatialZones] = useState<SpatialZone[]>([]);
   const [spatialZoneSearch, setSpatialZoneSearch] = useState<SpatialZone[]>([]);
   const spatialZoneSearchRef = useRef<SpatialZone[]>([]);
@@ -164,7 +162,6 @@ export default function DatasetsEditClient() {
         setGranularities(granularitiesData);
         setResourceTypes(resTypes);
 
-        suggestTags("", 50).then(setTagSuggestions);
         suggestSpatialZones("", 20).then((results) => {
           spatialZoneSearchRef.current = results;
           setSpatialZoneSearch(results);
@@ -249,55 +246,9 @@ export default function DatasetsEditClient() {
     () => (loadedKeywords ? loadedKeywords.split(",").filter(Boolean) : []),
     [loadedKeywords]
   );
-
-  const keywordOptions = useMemo(() => {
-    const trimmed = keywordSearch.trim();
-    const trimmedLower = trimmed.toLowerCase();
-    // Selected tags stay visible regardless of query so the InputSelect keeps
-    // tracking them across searches; otherwise typing a new query would drop
-    // them from the children and the next onChange would lose those selections.
-    const selectedLowerSet = new Set(selectedKeywords.map((k) => k.toLowerCase()));
-    const seen = new Set<string>();
-    const uniqueTags = [...tagSuggestions, ...tagSearch].filter((t) => {
-      const key = t.text.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      if (selectedLowerSet.has(key)) return true;
-      if (trimmedLower && !key.includes(trimmedLower)) return false;
-      return true;
-    });
-    const selectedNotInSuggestions = selectedKeywords.filter(
-      (keyword) => !seen.has(keyword.toLowerCase())
-    );
-    const showCreate =
-      trimmed.length > 0 &&
-      ![...tagSuggestions, ...tagSearch].some((t) => t.text.toLowerCase() === trimmedLower) &&
-      !selectedLowerSet.has(trimmedLower);
-    const options = [
-      ...(showCreate
-        ? [
-            <Dropdown.Option key={`__create__${trimmedLower}`} value={trimmed} selected={false}>
-              Criar &quot;{trimmed}&quot;
-            </Dropdown.Option>,
-          ]
-        : []),
-      ...selectedNotInSuggestions.map((keyword) => (
-        <Dropdown.Option key={`selected-${keyword.toLowerCase()}`} value={keyword} selected>
-          {keyword}
-        </Dropdown.Option>
-      )),
-      ...uniqueTags.map((tag) => (
-        <Dropdown.Option
-          key={tag.text.toLowerCase()}
-          value={tag.text}
-          selected={selectedLowerSet.has(tag.text.toLowerCase())}
-        >
-          {tag.text}
-        </Dropdown.Option>
-      )),
-    ];
-    return <Dropdown.Section name="keywords">{options}</Dropdown.Section>;
-  }, [tagSuggestions, tagSearch, selectedKeywords, keywordSearch]);
+  const { keywordOptions, setKeywordSearch, registerSelectedKeywordValue } = useKeywordSelect({
+    selectedKeywords,
+  });
 
   const allSpatialZones = useMemo(() => {
     const seen = new Set<string>();
@@ -977,31 +928,10 @@ export default function DatasetsEditClient() {
                 }}
                 onKeywordSearch={(q) => {
                   setKeywordSearch(q);
-                  if (!q) {
-                    setTagSearch([]);
-                    return;
-                  }
-                  suggestTags(q, 20).then(setTagSearch);
                 }}
                 onKeywordsChange={(value) => {
                   setLoadedKeywords(value);
-                  const selected = value.split(",").filter(Boolean);
-                  let addedNew = false;
-                  selected.forEach((v) => {
-                    const lower = v.toLowerCase();
-                    const existsInSuggestions = tagSuggestions.some(
-                      (t) => t.text.toLowerCase() === lower
-                    );
-                    const existsInSearch = tagSearch.some((t) => t.text.toLowerCase() === lower);
-                    if (!existsInSuggestions && !existsInSearch) {
-                      addedNew = true;
-                      setTagSuggestions((prev) => {
-                        if (prev.some((t) => t.text.toLowerCase() === lower)) return prev;
-                        return [...prev, { text: v }];
-                      });
-                    }
-                  });
-                  if (addedNew) setKeywordSearch("");
+                  registerSelectedKeywordValue(value);
                 }}
                 onRemoveKeyword={(keyword) => {
                   const next = selectedKeywords
