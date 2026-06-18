@@ -1,25 +1,17 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Button,
-  DropdownOption,
-  DropdownSection,
-  InputText,
-  Icon,
-  StatusCard,
-  Switch,
-} from "@ama-pt/agora-design-system";
+import { Button, StatusCard } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
-import IsolatedSelect from "@/components/admin/IsolatedSelect";
-import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { createHarvester, previewHarvestSource } from "@/service/api/harvesters";
 import type { HarvestPreviewJob, HarvestSourceCreatePayload } from "@/service/types/harvester";
 import HarvesterProducerSection from "@/components/admin/harvesters/HarvesterProducerSection";
 import HarvesterDescriptionSection from "@/components/admin/harvesters/HarvesterDescriptionSection";
+import HarvesterImplementationSection from "@/components/admin/harvesters/HarvesterImplementationSection";
 import HarvesterPreviewSection from "@/components/admin/harvesters/HarvesterPreviewSection";
+import HarvesterPublishStep from "@/components/admin/harvesters/HarvesterPublishStep";
 import { getHarvesterAuxiliaryItems } from "@/components/admin/harvesters/harvesterAuxiliaryContent";
 import { AdminStepper } from "../AdminStepper";
 import AdminLayout from "@/components/Layout/AdminLayout";
@@ -54,44 +46,6 @@ export default function HarvestersNewClient() {
 
   const selectedProducerRef = useRef("");
   const selectedTypeRef = useRef("");
-
-  const typeOptions = useMemo(
-    () => (
-      <DropdownSection name="types">
-        <DropdownOption value="dcat">DCAT</DropdownOption>
-        <DropdownOption value="csw-dcat">CSW-DCAT</DropdownOption>
-        <DropdownOption value="csw-iso-19139">CSW-ISO-19139</DropdownOption>
-        <DropdownOption value="ckan">CKAN</DropdownOption>
-        <DropdownOption value="ckanpt">CKAN PT</DropdownOption>
-        <DropdownOption value="dkan">DKAN</DropdownOption>
-        <DropdownOption value="cswudata">CSW</DropdownOption>
-        <DropdownOption value="odspt">OpenDataSoft PT</DropdownOption>
-        <DropdownOption value="maaf">MAAF</DropdownOption>
-        <DropdownOption value="ogc">OGC</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
-  );
-
-  const filterModeOptions = useMemo(
-    () => (
-      <DropdownSection name="mode">
-        <DropdownOption value="include">Incluir</DropdownOption>
-        <DropdownOption value="exclude">Excluir</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
-  );
-
-  const filterTypeSelectOptions = useMemo(
-    () => (
-      <DropdownSection name="type">
-        <DropdownOption value="organization">Organização</DropdownOption>
-        <DropdownOption value="tag">Marcação</DropdownOption>
-      </DropdownSection>
-    ),
-    [],
-  );
 
   function addFilter() {
     setFilters((previousFilters) => [
@@ -288,223 +242,35 @@ export default function HarvestersNewClient() {
                   }}
                 />
 
-                <h2 className="admin-page__section-title">Implementação</h2>
-
-                <div className="admin-page__fields-group">
-                  <IsolatedSelect
-                    label="Tipo"
-                    placeholder="Selecione um tipo..."
-                    id="harvester-type"
-                    searchable
-                    searchInputPlaceholder="Escreva para pesquisar..."
-                    searchNoResultsText="Nenhum resultado encontrado"
-                    onChangeRef={selectedTypeRef}
-                    onChangeCallback={(value) => {
-                      setSelectedType(value);
-                      setShowRemoteUrlPrefix(false);
-                      setRemoteUrlPrefix("");
-                      setIsGeoDcat(false);
-                      setFilters([]);
-                    }}
-                  >
-                    {typeOptions}
-                  </IsolatedSelect>
-
-                  {(selectedType === "ckan" || selectedType === "ckanpt") && (
-                    <div>
-                      <p className="text-base font-medium leading-7 text-primary-900">Filtros</p>
-
-                      {filters.map((filter, index) => (
-                        <div
-                          key={index}
-                          className={`mb-8 mt-8 pb-16 ${index < filters.length - 1 ? "border-b border-neutral-200" : ""}`}
-                        >
-                          <div className="flex items-center gap-8">
-                            <IsolatedSelect
-                              label=""
-                              hideLabel
-                              placeholder="Incluir"
-                              id={`filter-mode-${index}`}
-                              onChangeCallback={(value) => updateFilter(index, "mode", value)}
-                            >
-                              {filterModeOptions}
-                            </IsolatedSelect>
-                            <IsolatedSelect
-                              label=""
-                              hideLabel
-                              placeholder="Organização"
-                              id={`filter-type-${index}`}
-                              onChangeCallback={(value) => updateFilter(index, "type", value)}
-                            >
-                              {filterTypeSelectOptions}
-                            </IsolatedSelect>
-                          </div>
-                          <div className="mt-8 flex items-center gap-8">
-                            <div className="flex-1">
-                              <InputText
-                                label=""
-                                hideLabel
-                                placeholder=""
-                                id={`filter-value-${index}`}
-                                value={filter.value}
-                                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                  updateFilter(index, "value", event.target.value)
-                                }
-                              />
-                            </div>
-                            <Button
-                              variant="danger"
-                              hasIcon
-                              iconOnly
-                              leadingIcon="agora-line-trash"
-                              leadingIconHover="agora-solid-trash"
-                              onClick={() => removeFilter(index)}
-                              aria-label="Excluir filtro"
-                            >
-                              {" "}
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-
-                      <Button
-                        appearance="link"
-                        variant="primary"
-                        hasIcon
-                        leadingIcon="agora-line-plus-circle"
-                        leadingIconHover="agora-solid-plus-circle"
-                        onClick={addFilter}
-                      >
-                        Adicionar um filtro
-                      </Button>
-                    </div>
-                  )}
-
-                  {selectedType === "csw-dcat" && (
-                    <>
-                      <Switch
-                        label="GeoDCAT-AP"
-                        checked={isGeoDcat}
-                        onChange={() => setIsGeoDcat((value) => !value)}
-                      />
-
-                      {!showRemoteUrlPrefix ? (
-                        <div className="flex justify-start">
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            leadingIcon="agora-line-plus-circle"
-                            leadingIconHover="agora-solid-plus-circle"
-                            onClick={() => setShowRemoteUrlPrefix(true)}
-                          >
-                            Configurar prefixo de URL remoto
-                          </Button>
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="text-base font-medium leading-7 text-primary-900">
-                            Prefixo de URL remoto
-                          </p>
-                          <div className="mt-8 flex items-center gap-8">
-                            <div className="flex-1">
-                              <InputText
-                                label=""
-                                hideLabel
-                                placeholder=""
-                                id="remote-url-prefix"
-                                value={remoteUrlPrefix}
-                                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                  setRemoteUrlPrefix(event.target.value)
-                                }
-                              />
-                            </div>
-                            <Button
-                              appearance="outline"
-                              variant="neutral"
-                              hasIcon
-                              leadingIcon="agora-line-trash"
-                              leadingIconHover="agora-solid-trash"
-                              onClick={() => {
-                                setShowRemoteUrlPrefix(false);
-                                setRemoteUrlPrefix("");
-                              }}
-                            >
-                              EXCLUIR
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {selectedType === "csw-iso-19139" && (
-                    <>
-                      {!showRemoteUrlPrefix ? (
-                        <div className="flex justify-start">
-                          <Button
-                            appearance="link"
-                            variant="primary"
-                            hasIcon
-                            leadingIcon="agora-line-plus-circle"
-                            leadingIconHover="agora-solid-plus-circle"
-                            onClick={() => setShowRemoteUrlPrefix(true)}
-                          >
-                            Configurar prefixo de URL remoto
-                          </Button>
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="text-base font-medium leading-7 text-primary-900">
-                            Prefixo de URL remoto
-                          </p>
-                          <div className="mt-8 flex items-center gap-8">
-                            <div className="flex-1">
-                              <InputText
-                                label=""
-                                hideLabel
-                                placeholder=""
-                                id="remote-url-prefix"
-                                value={remoteUrlPrefix}
-                                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                  setRemoteUrlPrefix(event.target.value)
-                                }
-                              />
-                            </div>
-                            <Button
-                              appearance="outline"
-                              variant="neutral"
-                              hasIcon
-                              leadingIcon="agora-line-trash"
-                              leadingIconHover="agora-solid-trash"
-                              onClick={() => {
-                                setShowRemoteUrlPrefix(false);
-                                setRemoteUrlPrefix("");
-                              }}
-                            >
-                              EXCLUIR
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {selectedType && (
-                    <div className="flex gap-48">
-                      <Switch
-                        label="Ativado"
-                        checked={isEnabled}
-                        onChange={() => setIsEnabled((value) => !value)}
-                      />
-                      <Switch
-                        label="Arquivo automático"
-                        checked={isAutoArchive}
-                        onChange={() => setIsAutoArchive((value) => !value)}
-                      />
-                    </div>
-                  )}
-                </div>
+                <HarvesterImplementationSection
+                  selectedTypeRef={selectedTypeRef}
+                  selectedType={selectedType}
+                  filters={filters}
+                  isGeoDcat={isGeoDcat}
+                  showRemoteUrlPrefix={showRemoteUrlPrefix}
+                  remoteUrlPrefix={remoteUrlPrefix}
+                  isEnabled={isEnabled}
+                  isAutoArchive={isAutoArchive}
+                  onTypeChange={(value) => {
+                    setSelectedType(value);
+                    setShowRemoteUrlPrefix(false);
+                    setRemoteUrlPrefix("");
+                    setIsGeoDcat(false);
+                    setFilters([]);
+                  }}
+                  onAddFilter={addFilter}
+                  onRemoveFilter={removeFilter}
+                  onUpdateFilter={updateFilter}
+                  onToggleGeoDcat={() => setIsGeoDcat((value) => !value)}
+                  onShowRemoteUrlPrefix={() => setShowRemoteUrlPrefix(true)}
+                  onRemoteUrlPrefixChange={(event) => setRemoteUrlPrefix(event.target.value)}
+                  onClearRemoteUrlPrefix={() => {
+                    setShowRemoteUrlPrefix(false);
+                    setRemoteUrlPrefix("");
+                  }}
+                  onToggleEnabled={() => setIsEnabled((value) => !value)}
+                  onToggleAutoArchive={() => setIsAutoArchive((value) => !value)}
+                />
 
                 <div className="admin-page__actions">
                   <Button
@@ -535,69 +301,17 @@ export default function HarvestersNewClient() {
           )}
 
           {currentStep === 3 && (
-            <div className="admin-page__form">
-              {createError && (
-                <StatusCard
-                  variant="danger"
-                  showIcon
-                  description={
-                    <>
-                      <strong>Erro ao criar o harvester</strong>
-                      <br />
-                      {createError}
-                    </>
-                  }
-                />
-              )}
-
-              {!createError && (
-                <StatusCard
-                  variant="warning"
-                  showIcon
-                  description={
-                    <>
-                      <strong>
-                        O seu harvester foi criado e está a aguardar validação pela equipa de
-                        administração.
-                      </strong>
-                      <br />
-                      Informe-nos através do formulário de contacto abaixo se deseja que validemos o
-                      seu harvester. Será notificado da aprovação (ou rejeição).
-                    </>
-                  }
-                />
-              )}
-
-              <div className="mt-16 flex justify-start">
-                <PublicationFeedbackButton />
-              </div>
-
-              <div className="admin-page__actions">
-                <Button
-                  appearance="outline"
-                  variant="neutral"
-                  onClick={() =>
-                    router.push(
-                      createdHarvesterId
-                        ? `/pages/admin/harvesters/${createdHarvesterId}`
-                        : "/pages/admin/system/harvesters",
-                    )
-                  }
-                >
-                  Ver na administração
-                </Button>
-                <Button
-                  appearance="outline"
-                  variant="neutral"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/pages/support")}
-                >
-                  Solicitar validação do harvester
-                </Button>
-              </div>
-            </div>
+            <HarvesterPublishStep
+              createError={createError}
+              onViewInAdmin={() =>
+                router.push(
+                  createdHarvesterId
+                    ? `/pages/admin/harvesters/${createdHarvesterId}`
+                    : "/pages/admin/system/harvesters",
+                )
+              }
+              onRequestValidation={() => router.push("/pages/support")}
+            />
           )}
         </div>
 
