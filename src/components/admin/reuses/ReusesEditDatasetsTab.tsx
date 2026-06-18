@@ -11,6 +11,7 @@ import {
   Tag,
 } from "@ama-pt/agora-design-system";
 import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
+import ReusesEditDatasetsActions from "@/components/admin/reuses/ReusesEditDatasetsActions";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import type { Dataset } from "@/service/types/dataset";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
@@ -236,35 +237,14 @@ export default function ReusesEditDatasetsTab({
             </div>
           ))}
 
-          <div className="flex justify-end">
-            <Button
-              appearance="outline"
-              variant="primary"
-              hasIcon
-              leadingIcon="agora-line-plus-circle"
-              leadingIconHover="agora-solid-plus-circle"
-              onClick={onAddDatasetLink}
-            >
-              Adicionar
-            </Button>
-          </div>
-
-          <div className="admin-page__actions flex justify-end gap-[18px]">
-            <Button
-              variant="primary"
-              hasIcon
-              trailingIcon="agora-line-check-circle"
-              trailingIconHover="agora-solid-check-circle"
-              onClick={onSave}
-              disabled={
-                isSubmitting ||
-                (selectedDatasets.length === 0 &&
-                  !datasetLinks.some((link) => link.url.trim()))
-              }
-            >
-              {isSubmitting ? "A guardar..." : "Guardar"}
-            </Button>
-          </div>
+          <ReusesEditDatasetsActions
+            isSubmitting={isSubmitting}
+            canSave={
+              selectedDatasets.length > 0 || datasetLinks.some((link) => link.url.trim())
+            }
+            onAddDatasetLink={onAddDatasetLink}
+            onSave={onSave}
+          />
         </form>
         </div>
     </div>
