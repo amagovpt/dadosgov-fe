@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import DatastoryDetailsPage from "@/components/Shared/Datastories/DatastoryDetailsPage";
-import { BreadcrumbItem } from "@/service/types/shared/breadcrumbItem";
 import { getDatastory, getDatastoryMetadata } from "@/service/queries/datastories/datastory";
 
 export async function generateMetadata({
@@ -29,18 +28,5 @@ export default async function DataStoryDetailPage({
 
   const datastory = await getDatastory(datastorySlug, "pt");
 
-  let breadcrumbItems: BreadcrumbItem[] = [];
-  if (datastory && datastory.hero) {
-    breadcrumbItems = [
-      { label: "Início", url: "/" },
-      /** TODO: remove /pages from the href after refactoring the app routes */
-      { label: "Data Stories", url: "/pages/datastories" },
-      {
-        label: datastory.hero.title,
-        url: `/pages/datastories/${datastorySlug}`,
-      },
-    ];
-  }
-
-  return <DatastoryDetailsPage datastory={datastory} breadcrumbItems={breadcrumbItems} />;
+  return <DatastoryDetailsPage datastory={datastory} />;
 }

@@ -58,7 +58,7 @@ export function RelatedDatastories({ title, description, datastories }: RelatedD
         </InfoBlock.Header>
         <InfoBlock.Content className="flex flex-col gap-32">
           <div className="grid grid-cols-12 gap-32">
-            {datastories.map((datastory, index) => {
+            {datastories?.map((datastory, index) => {
               return (
                 <div
                   className="col-span-12 h-full md:col-span-6 lg:col-span-4"

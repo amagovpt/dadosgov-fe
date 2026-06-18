@@ -1,4 +1,6 @@
-﻿type Anchor = {
+﻿import { BreadcrumbItem } from "../shared";
+
+type Anchor = {
   children: string;
   href: string;
   icon: string;
@@ -29,6 +31,7 @@ export type DatastoryHero = {
   title: string;
   description: string;
   index: Index;
+  breadcrumbs: BreadcrumbItem[];
 };
 
 // ----------------------------------------------------------------------------------------------
