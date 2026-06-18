@@ -2,8 +2,7 @@
 
 import React from "react";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
-import { InputText, InputTextArea } from "@ama-pt/agora-design-system";
-import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
+import ResourceDescriptionFields from "@/components/admin/community-resources/ResourceDescriptionFields";
 
 interface ResourceDescriptionSectionProps {
   title: string;
@@ -35,37 +34,16 @@ export default function ResourceDescriptionSection({
       <h2 className="admin-page__section-title">Descrição</h2>
 
       <div className="admin-page__fields-group">
-        <InputText
-          label="Título *"
-          placeholder="Insira o título aqui"
-          id="resource-title"
-          value={title}
-          onChange={onTitleChange}
-          hasError={hasTitleError}
-          hasFeedback={hasTitleError}
-          feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
-        />
-
-        <AdminSelectAdapter
-          label="Tipo *"
-          placeholder="Ficheiros principais"
-          id="resource-type"
-          valueRef={selectedTypeRef}
-          hasError={hasTypeError}
-          errorMessage="Campo obrigatório"
-          onValueChange={onTypeChange}
-        >
-          {typeOptions}
-        </AdminSelectAdapter>
-
-        <InputTextArea
-          label="Descrição"
-          placeholder="Insira a descrição aqui"
-          id="resource-description"
-          rows={6}
-          value={description}
-          onChange={onDescriptionChange}
+        <ResourceDescriptionFields
+          title={title}
+          description={description}
+          typeOptions={typeOptions}
+          selectedTypeRef={selectedTypeRef}
+          hasTitleError={hasTitleError}
+          hasTypeError={hasTypeError}
+          onTitleChange={onTitleChange}
+          onDescriptionChange={onDescriptionChange}
+          onTypeChange={() => onTypeChange()}
         />
       </div>
     </>

@@ -2,8 +2,9 @@
 
 import React from "react";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
-import { InputText, InputTextArea } from "@ama-pt/agora-design-system";
+import { InputText } from "@ama-pt/agora-design-system";
 import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
+import ResourceDescriptionFields from "@/components/admin/community-resources/ResourceDescriptionFields";
 
 interface EditDescriptionSectionProps {
   resourceId: string;
@@ -59,40 +60,20 @@ export default function EditDescriptionSection({
       <h2 className="admin-page__section-title">Descrição</h2>
 
       <div className="admin-page__fields-group">
-        <InputText
-          label="Título *"
-          placeholder="Insira o título aqui"
-          id="resource-title"
-          value={title}
-          onChange={onTitleChange}
-          hasError={hasTitleError}
-          hasFeedback={hasTitleError}
-          feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
-        />
-
-        <AdminSelectAdapter
-          key={`type-${resourceId}-${resourceTypesCount}`}
-          label="Tipo *"
-          placeholder="Ficheiros principais"
-          id="resource-type"
-          initialValue={selectedType}
-          valueRef={selectedTypeRef}
-          onValueChange={onTypeChange}
-          hasError={hasTypeError}
-          errorMessage="Campo obrigatório"
-          renderErrorBelow
-        >
-          {typeOptions}
-        </AdminSelectAdapter>
-
-        <InputTextArea
-          label="Descrição"
-          placeholder="Insira a descrição aqui"
-          id="resource-description"
-          rows={10}
-          value={description}
-          onChange={onDescriptionChange}
+        <ResourceDescriptionFields
+          title={title}
+          description={description}
+          typeOptions={typeOptions}
+          selectedTypeRef={selectedTypeRef}
+          hasTitleError={hasTitleError}
+          hasTypeError={hasTypeError}
+          typeSelectKey={`type-${resourceId}-${resourceTypesCount}`}
+          typeInitialValue={selectedType}
+          renderTypeErrorBelow
+          descriptionRows={10}
+          onTitleChange={onTitleChange}
+          onDescriptionChange={onDescriptionChange}
+          onTypeChange={onTypeChange}
         />
 
         <AdminSelectAdapter
