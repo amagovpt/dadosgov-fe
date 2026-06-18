@@ -1,14 +1,12 @@
 import React from "react";
 import {
-  Button,
   DropdownOption,
   DropdownSection,
   InputSelect,
-  InputText,
-  InputTextArea,
   StatusCard,
   Tag,
 } from "@ama-pt/agora-design-system";
+import ReuseExternalDatasetFields from "@/components/admin/reuses/ReuseExternalDatasetFields";
 import ReusesEditAssociatedDatasetsSection from "@/components/admin/reuses/ReusesEditAssociatedDatasetsSection";
 import ReusesEditDatasetsActions from "@/components/admin/reuses/ReusesEditDatasetsActions";
 import type { Dataset } from "@/service/types/dataset";
@@ -134,57 +132,15 @@ export default function ReusesEditDatasetsTab({
             <span className="admin-page__divider-or-text">ou</span>
           </div>
 
-          {datasetLinks.map((link, index) => (
-            <div key={`dataset-${index}`} className="flex flex-col gap-16">
-              <InputText
-                label="Link para o conjunto de dados"
-                placeholder="Insira o URL aqui"
-                id={`edit-dataset-url-${index}`}
-                value={link.url}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  onDatasetLinkChange(index, event.target.value)
-                }
-                hasError={!!datasetLinkErrors[index]}
-                hasFeedback={!!datasetLinkErrors[index]}
-                feedbackState="danger"
-                errorFeedbackText={datasetLinkErrors[index]}
-              />
-              <InputText
-                label="Título (opcional)"
-                placeholder="Nome do conjunto de dados externo"
-                id={`edit-dataset-title-${index}`}
-                value={link.title ?? ""}
-                required={false}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  onDatasetTitleChange(index, event.target.value)
-                }
-              />
-              <InputTextArea
-                label="Descrição (opcional)"
-                placeholder="Pequena descrição do conjunto de dados"
-                id={`edit-dataset-description-${index}`}
-                value={link.description ?? ""}
-                required={false}
-                onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  onDatasetDescriptionChange(index, event.target.value)
-                }
-              />
-              {link.url.trim() && (
-                <div className="mt-8 flex justify-end">
-                  <Button
-                    appearance="solid"
-                    variant="danger"
-                    hasIcon
-                    leadingIcon="agora-line-trash"
-                    leadingIconHover="agora-solid-trash"
-                    onClick={() => onRemoveDatasetLink(index)}
-                  >
-                    Eliminar
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))}
+          <ReuseExternalDatasetFields
+            datasetLinks={datasetLinks}
+            datasetLinkErrors={datasetLinkErrors}
+            idPrefix="edit"
+            onDatasetUrlChange={onDatasetLinkChange}
+            onDatasetTitleChange={onDatasetTitleChange}
+            onDatasetDescriptionChange={onDatasetDescriptionChange}
+            onRemoveDatasetLink={onRemoveDatasetLink}
+          />
 
           <ReusesEditDatasetsActions
             isSubmitting={isSubmitting}

@@ -1,15 +1,14 @@
 "use client";
 
-import type { ChangeEvent, ReactElement } from "react";
+import type { ReactElement } from "react";
 import {
   Button,
   type DropdownSectionProps,
   InputSelect,
-  InputText,
-  InputTextArea,
   StatusCard,
   Tag,
 } from "@ama-pt/agora-design-system";
+import ReuseExternalDatasetFields from "@/components/admin/reuses/ReuseExternalDatasetFields";
 import type { Dataset } from "@/service/types/dataset";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 
@@ -128,57 +127,16 @@ export default function ReusesFormDatasetsStep({
           <span className="admin-page__divider-or-text">ou</span>
         </div>
 
-        {datasetLinks.map((link, index) => (
-          <div key={`dataset-${index}`} className="mt-16 flex flex-col gap-16">
-            <InputText
-              label="Link para o conjunto de dados"
-              placeholder="Insira o URL aqui"
-              id={`reuse-dataset-url-${index}`}
-              value={link.url}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                onDatasetUrlChange(index, event.target.value)
-              }
-              hasError={!!datasetLinkErrors[index]}
-              hasFeedback={!!datasetLinkErrors[index]}
-              feedbackState="danger"
-              errorFeedbackText={datasetLinkErrors[index]}
-            />
-            <InputText
-              label="Título (opcional)"
-              placeholder="Nome do conjunto de dados externo"
-              id={`reuse-dataset-title-${index}`}
-              value={link.title ?? ""}
-              required={false}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                onDatasetTitleChange(index, event.target.value)
-              }
-            />
-            <InputTextArea
-              label="Descrição (opcional)"
-              placeholder="Pequena descrição do conjunto de dados"
-              id={`reuse-dataset-description-${index}`}
-              value={link.description ?? ""}
-              required={false}
-              onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
-                onDatasetDescriptionChange(index, event.target.value)
-              }
-            />
-            {link.url.trim() && (
-              <div className="mt-8 flex justify-end">
-                <Button
-                  appearance="solid"
-                  variant="danger"
-                  hasIcon
-                  leadingIcon="agora-line-trash"
-                  leadingIconHover="agora-solid-trash"
-                  onClick={() => onDatasetLinkRemove(index)}
-                >
-                  Eliminar
-                </Button>
-              </div>
-            )}
-          </div>
-        ))}
+        <ReuseExternalDatasetFields
+          datasetLinks={datasetLinks}
+          datasetLinkErrors={datasetLinkErrors}
+          idPrefix="reuse"
+          itemClassName="mt-16 flex flex-col gap-16"
+          onDatasetUrlChange={onDatasetUrlChange}
+          onDatasetTitleChange={onDatasetTitleChange}
+          onDatasetDescriptionChange={onDatasetDescriptionChange}
+          onRemoveDatasetLink={onDatasetLinkRemove}
+        />
 
         <div className="flex justify-end">
           <Button
