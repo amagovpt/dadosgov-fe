@@ -9,7 +9,7 @@ import {
   StatusCard,
   Tag,
 } from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import AppIcon from "@/components/Primitives/AppIcon";
 
@@ -260,30 +260,14 @@ export default function ReusesFormDetailsStep({
             </div>
           )}
 
-          <div>
-            <span className="text-base font-medium leading-7 text-primary-900">Imagem de capa</span>
-            <div className="mt-2 [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-              <DragAndDropUploader
-                dragAndDropLabel="Arraste e largue a imagem aqui"
-                inputLabel="Selecionar ficheiro"
-                selectedFilesLabel="ficheiro selecionado"
-                separatorLabel="ou"
-                removeFileButtonLabel="Remover ficheiro"
-                replaceFileButtonLabel="Substituir ficheiro"
-                extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-                accept=".jpg,.jpeg,.png"
-                maxSize={4194304}
-                maxCount={1}
-                maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-                forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                files={reuseCoverImageFile ? [reuseCoverImageFile] : undefined}
-                onChange={onReuseCoverImageChange}
-                onSecurityError={onReuseCoverImageSecurityError}
-                hasError={false}
-                hasFeedback={false}
-              />
-            </div>
-          </div>
+          <ImageUploadField
+            label="Imagem de capa"
+            files={reuseCoverImageFile ? [reuseCoverImageFile] : undefined}
+            onChange={onReuseCoverImageChange}
+            onSecurityError={onReuseCoverImageSecurityError}
+            dragAndDropLabel="Arraste e largue a imagem aqui"
+            inputLabel="Selecionar ficheiro"
+          />
         </div>
 
         <div className="admin-page__actions flex justify-between gap-[18px]">

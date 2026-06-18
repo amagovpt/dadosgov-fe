@@ -2,7 +2,7 @@
 
 import React from "react";
 import { InputText, InputTextArea, RadioButton } from "@ama-pt/agora-design-system";
-import { ImageUploadField } from "@/components/admin/posts/ImageUploadField";
+import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import PostKeywordsField from "@/components/admin/posts/PostKeywordsField";
 
 interface PostMetadataSectionProps {
@@ -165,6 +165,7 @@ export default function PostMetadataSection({
           onSecurityError={onImageSecurityError}
           error={imageError}
           previewSrc={previewSrc}
+          previewAlt="Cobertura do artigo"
         />
       </div>
     </>

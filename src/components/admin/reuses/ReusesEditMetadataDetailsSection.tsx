@@ -6,7 +6,7 @@ import {
   Switch,
   Tag,
 } from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import IsolatedTextArea from "@/components/admin/IsolatedTextArea";
@@ -200,41 +200,18 @@ export default function ReusesEditMetadataDetailsSection({
           </div>
         )}
 
-        <div>
-          <span className="text-primary-900 text-base font-medium leading-7">Imagem de capa *</span>
-          {(reuse.image_thumbnail || reuse.image) && (
-            <div className="mt-2 mb-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={reuse.image_thumbnail || reuse.image || ""}
-                alt="Imagem de capa atual"
-                className="rounded border border-neutral-200 max-h-[180px] object-cover"
-              />
-            </div>
-          )}
-          <div className="mt-2 [&_.instructions]:items-center [&_.instructions]:text-center [&_.drag-and-drop-area_.agora-btn]:w-fit">
-            <DragAndDropUploader
-              label="Ficheiros"
-              dragAndDropLabel="Arraste e largue o ficheiro aqui"
-              inputLabel="Selecione ou arraste o ficheiro"
-              selectedFilesLabel="ficheiro selecionado"
-              removeFileButtonLabel="Remover ficheiro"
-              replaceFileButtonLabel="Substituir ficheiro"
-              extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-              accept=".jpg,.jpeg,.png"
-              maxSize={4194304}
-              maxCount={1}
-              maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-              forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-              hasError={!!imageError}
-              hasFeedback={!!imageError}
-              feedbackState="danger"
-              feedbackText={imageError ?? undefined}
-              onChange={onImageUpload}
-              onSecurityError={onImageSecurityError}
-            />
-          </div>
-        </div>
+        <ImageUploadField
+          label="Imagem de capa"
+          required
+          onChange={onImageUpload}
+          onSecurityError={onImageSecurityError}
+          error={imageError}
+          previewSrc={reuse.image_thumbnail || reuse.image || undefined}
+          previewAlt="Imagem de capa atual"
+          previewPlacement="before"
+          previewWrapperClassName="mt-2 mb-2"
+          previewImageClassName="rounded border border-neutral-200 max-h-[180px] object-cover"
+        />
       </div>
     </>
   );
