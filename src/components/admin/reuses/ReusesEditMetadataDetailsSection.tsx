@@ -4,9 +4,9 @@ import {
   type DropdownSectionProps,
   DropdownSection,
   Switch,
-  Tag,
 } from "@ama-pt/agora-design-system";
 import ImageUploadField from "@/components/admin/forms/ImageUploadField";
+import KeywordSelectField from "@/components/admin/forms/KeywordSelectField";
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import IsolatedTextArea from "@/components/admin/IsolatedTextArea";
@@ -168,37 +168,17 @@ export default function ReusesEditMetadataDetailsSection({
           feedbackText="Campo obrigatório"
           errorFeedbackText="Campo obrigatório"
         />
-        <IsolatedSelect
-          label="Palavras-chave"
-          placeholder="Pesquise ou insira palavras-chave..."
+        <KeywordSelectField
           id="edit-keywords"
-          type="checkbox"
-          searchable
-          searchInputPlaceholder="Escreva para pesquisar ou criar..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          selectedKeywords={selectedKeywords}
+          keywordOptions={keywordOptions}
+          selectedKeywordsRef={selectedKeywordsRef}
           defaultValue={selectedKeywordsValue}
-          onChangeRef={selectedKeywordsRef}
-          onSearchCallback={onKeywordSearchChange}
-          onChangeCallback={onKeywordsChange}
-        >
-          {keywordOptions}
-        </IsolatedSelect>
-
-        {selectedKeywords.length > 0 && (
-          <div className="flex flex-wrap gap-8 -mt-8">
-            {[...selectedKeywords]
-              .sort((left, right) => left.localeCompare(right))
-              .map((keyword) => (
-                <Tag
-                  key={keyword}
-                  aria-label={`Remover ${keyword}`}
-                  onClick={() => onRemoveKeyword(keyword)}
-                >
-                  {keyword}
-                </Tag>
-              ))}
-          </div>
-        )}
+          onSearchChange={onKeywordSearchChange}
+          onChange={onKeywordsChange}
+          onRemoveKeyword={onRemoveKeyword}
+          sortSelectedKeywords
+        />
 
         <ImageUploadField
           label="Imagem de capa"

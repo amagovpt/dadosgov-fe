@@ -7,9 +7,9 @@ import {
   InputText,
   InputTextArea,
   StatusCard,
-  Tag,
 } from "@ama-pt/agora-design-system";
 import ImageUploadField from "@/components/admin/forms/ImageUploadField";
+import KeywordSelectField from "@/components/admin/forms/KeywordSelectField";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import AppIcon from "@/components/Primitives/AppIcon";
 
@@ -225,40 +225,20 @@ export default function ReusesFormDetailsStep({
             feedbackState="danger"
             errorFeedbackText="Campo obrigatório"
           />
-          <IsolatedSelect
-            label="Palavras-chave"
-            placeholder="Pesquise ou insira palavras-chave..."
+          <KeywordSelectField
             id="reuse-keywords"
-            type="checkbox"
-            searchable
-            searchInputPlaceholder="Escreva para pesquisar ou criar..."
-            searchNoResultsText="Nenhum resultado encontrado"
-            onChangeRef={selectedKeywordsRef}
+            selectedKeywords={selectedKeywordsValue
+              .split(",")
+              .map((value) => value.trim())
+              .filter(Boolean)}
+            keywordOptions={keywordsChildren}
+            selectedKeywordsRef={selectedKeywordsRef}
             defaultValue={selectedKeywordsValue}
-            onSearchCallback={onKeywordSearch}
-            onChangeCallback={onKeywordChange}
-          >
-            {keywordsChildren}
-          </IsolatedSelect>
-
-          {selectedKeywordsValue.trim() && (
-            <div className="-mt-8 flex flex-wrap gap-8">
-              {selectedKeywordsValue
-                .split(",")
-                .map((value) => value.trim())
-                .filter(Boolean)
-                .sort((left, right) => left.localeCompare(right))
-                .map((keyword) => (
-                  <Tag
-                    key={keyword}
-                    aria-label={`Remover ${keyword}`}
-                    onClick={() => onKeywordRemove(keyword)}
-                  >
-                    {keyword}
-                  </Tag>
-                ))}
-            </div>
-          )}
+            onSearchChange={onKeywordSearch}
+            onChange={onKeywordChange}
+            onRemoveKeyword={onKeywordRemove}
+            sortSelectedKeywords
+          />
 
           <ImageUploadField
             label="Imagem de capa"

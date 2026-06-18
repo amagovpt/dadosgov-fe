@@ -3,7 +3,7 @@
 import React from "react";
 import { InputText, InputTextArea, RadioButton } from "@ama-pt/agora-design-system";
 import ImageUploadField from "@/components/admin/forms/ImageUploadField";
-import PostKeywordsField from "@/components/admin/posts/PostKeywordsField";
+import KeywordSelectField from "@/components/admin/forms/KeywordSelectField";
 
 interface PostMetadataSectionProps {
   title: string;
@@ -151,13 +151,16 @@ export default function PostMetadataSection({
           </div>
         </div>
 
-        <PostKeywordsField
-          selectedTags={selectedTags}
+        <KeywordSelectField
+          id="article-keywords"
+          selectedKeywords={selectedTags}
           keywordOptions={keywordOptions}
           selectedKeywordsRef={selectedKeywordsRef}
+          defaultValue={selectedTags.join(",")}
           onSearchChange={onKeywordSearchChange}
           onChange={onKeywordsChange}
-          onRemoveTag={onRemoveTag}
+          onRemoveKeyword={onRemoveTag}
+          hideSectionNames
         />
 
         <ImageUploadField
