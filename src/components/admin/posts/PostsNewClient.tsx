@@ -9,6 +9,7 @@ import PostsNewContentStep from "@/components/admin/posts/PostsNewContentStep";
 import PostsNewMetadataStep from "@/components/admin/posts/PostsNewMetadataStep";
 import type { PostCreatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 
 export default function PostsNewClient() {
@@ -22,26 +23,16 @@ export default function PostsNewClient() {
   const [articleHeader, setArticleHeader] = useState("");
   const [articleContent, setArticleContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [pendingAction, setPendingAction] = useState<"draft" | "publish" | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const isSaving = pendingAction !== null;
   const selectedKeywordsRef = useRef("");
+  const { hasError, setErrors, clearError, resetErrors, scrollToFirstError } = useFormErrors();
   const { setKeywordSearch, keywordOptions, registerSelectedKeywordValue } = useKeywordSelect({
     selectedKeywords: selectedTags,
   });
-
-  function clearError(field: string) {
-    if (formErrors[field]) {
-      setFormErrors((previousErrors) => {
-        const nextErrors = { ...previousErrors };
-        delete nextErrors[field];
-        return nextErrors;
-      });
-    }
-  }
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -81,22 +72,18 @@ export default function PostsNewClient() {
     if (!articleHeader.trim()) errors.articleHeader = true;
 
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+      setErrors(errors);
       return;
     }
 
-    setFormErrors({});
+    resetErrors();
     router.push("/pages/admin/system/posts/new?step=2");
   }
 
   async function handleSave(publish: boolean) {
     if (!articleContent.trim()) {
-      setFormErrors({ articleContent: true });
-      requestAnimationFrame(() => {
-        document
-          .querySelector('[aria-invalid="true"]')
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
+      setErrors({ articleContent: true });
+      scrollToFirstError();
       return;
     }
 
@@ -165,8 +152,8 @@ export default function PostsNewClient() {
               selectedKeywordsRef={selectedKeywordsRef}
               imageError={imageError}
               previewSrc={imageFile ? URL.createObjectURL(imageFile) : undefined}
-              hasTitleError={!!formErrors.articleTitle}
-              hasHeaderError={!!formErrors.articleHeader}
+              hasTitleError={hasError("articleTitle")}
+              hasHeaderError={hasError("articleHeader")}
               onTitleChange={(event) => {
                 setArticleTitle(event.target.value);
                 if (event.target.value.trim()) {
@@ -193,7 +180,7 @@ export default function PostsNewClient() {
           {currentStep === 2 && (
             <PostsNewContentStep
               articleContent={articleContent}
-              hasContentError={!!formErrors.articleContent}
+              hasContentError={hasError("articleContent")}
               saveError={saveError}
               isSaving={isSaving}
               pendingAction={pendingAction}

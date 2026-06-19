@@ -28,6 +28,7 @@ import { getReuseAuxiliarItems } from "@/components/admin/reuses/reusesAuxiliarI
 import ReusesFormDetailsStep from "@/components/admin/reuses/ReusesFormDetailsStep";
 import ReusesFormDatasetsStep from "@/components/admin/reuses/ReusesFormDatasetsStep";
 import ReusesFormPublishStep from "@/components/admin/reuses/ReusesFormPublishStep";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 
 interface ReusesFormClientProps {
@@ -52,10 +53,10 @@ export default function ReusesFormClient({
   const [reuseLinkInvalid, setReuseLinkInvalid] = useState(false);
   const [reuseDescription, setReuseDescription] = useState("");
   const [reuseCoverImageFile, setReuseCoverImageFile] = useState<File | null>(null);
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdReuse, setCreatedReuse] = useState<Reuse | null>(null);
+  const { errors: formErrors, hasError, setErrors, clearError, resetErrors } = useFormErrors();
 
   // Dynamic options from backend
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
@@ -195,11 +196,11 @@ export default function ReusesFormClient({
     if (!reuseDescription.trim()) errors.reuseDescription = true;
 
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+      setErrors(errors);
       return;
     }
 
-    setFormErrors({});
+    resetErrors();
     setApiError(null);
     setIsSubmitting(true);
 
@@ -324,22 +325,12 @@ export default function ReusesFormClient({
     });
   };
 
-  const clearError = (field: string) => {
-    if (formErrors[field]) {
-      setFormErrors((previous) => {
-        const next = { ...previous };
-        delete next[field];
-        return next;
-      });
-    }
-  };
-
   const auxiliarItems = getReuseAuxiliarItems({
-    title: !!formErrors.reuseName,
-    link: !!formErrors.reuseLink,
-    type: !!formErrors.reuseType,
-    topic: !!formErrors.reuseTopic,
-    description: !!formErrors.reuseDescription || !!formErrors.reuseDescriptionLength,
+    title: hasError("reuseName"),
+    link: hasError("reuseLink"),
+    type: hasError("reuseType"),
+    topic: hasError("reuseTopic"),
+    description: hasError("reuseDescription") || hasError("reuseDescriptionLength"),
   });
 
   const producerOptions = useMemo(() => {
