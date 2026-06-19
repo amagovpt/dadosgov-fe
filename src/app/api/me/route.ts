@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendFetch, forwardedHeaders } from "../backend-fetch";
+import { backendFetch, forwardedHeaders } from "../../backend-fetch";
 
 /**
  * Proxies `GET /me` to the backend `/api/1/me/` endpoint.
