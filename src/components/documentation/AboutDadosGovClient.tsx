@@ -6,12 +6,13 @@ export default function AboutDadosGovClient({ initialContent }: { initialContent
   return (
     <GitHubArticlePage
       slug="pages/faqs/about_dadosgov"
-      title="Sobre o dados.gov.pt"
+      title="O que é dados.gov.pt"
       initialContent={initialContent}
       breadcrumbItems={[
         { label: "Home", url: "/" },
         { label: "Recursos", url: "#" },
-        { label: "Sobre o dados.gov.pt", url: "/pages/faqs/about_dadosgov" },
+        { label: "Como usar o portal", url: "#" },
+        { label: "O que é dados.gov.pt", url: "/pages/faqs/about_dadosgov" },
       ]}
     />
   );
