@@ -16,6 +16,7 @@ import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
 import { translateUploadError } from "@/lib/security/translateUploadError";
 import { getZoneName } from "@/utils/spatialLabels";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { DatasetWizardStep2 } from "./DatasetWizardStep2";
 import { DatasetWizardStep3 } from "./DatasetWizardStep3";
 import { DatasetWizardStep4 } from "./DatasetWizardStep4";
@@ -56,7 +57,7 @@ export default function DatasetsAdminClient({
   const spatialGranularityRef = useRef("");
   const [temporalStart, setTemporalStart] = useState("");
   const [temporalEnd, setTemporalEnd] = useState("");
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
+  const { errors: formErrors, setErrors, clearError, resetErrors } = useFormErrors();
   const [selectedProducer, setSelectedProducer] = useState("");
   const [orgContactPoints, setOrgContactPoints] = useState<ContactPoint[]>([]);
   const [selectedContactPointIds, setSelectedContactPointIds] = useState<string[]>([]);
@@ -413,18 +414,8 @@ export default function DatasetsAdminClient({
     }
   }, [datasetId, createdDataset]);
 
-  const clearError = (field: string) => {
-    if (formErrors[field]) {
-      setFormErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  };
-
   const clearTemporalCoverageErrors = () => {
-    setFormErrors((prev) => {
+    setErrors((prev) => {
       const next = { ...prev };
       delete next.temporalCoverage;
       delete next.temporalCoverageInvalidFormat;
@@ -438,13 +429,13 @@ export default function DatasetsAdminClient({
     setDraftContacts([{ id: 0, name: "", email: "", link: "", saved: false, errors: {} }]);
     setSelectedProducer(value);
     if (value) {
-      setFormErrors((prev) => {
+      setErrors((prev) => {
         const next = { ...prev };
         delete next.datasetProducer;
         return next;
       });
     }
-  }, []);
+  }, [setErrors]);
 
   const handleSpatialZonesSearchQuery = useCallback((q: string) => {
     if (!q) return;
@@ -650,10 +641,10 @@ export default function DatasetsAdminClient({
       e?.preventDefault();
     }
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+      setErrors(errors);
       return;
     }
-    setFormErrors({});
+    resetErrors();
     setApiError(null);
     setIsSubmitting(true);
 
