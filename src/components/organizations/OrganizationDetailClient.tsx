@@ -16,6 +16,7 @@ import {
 import { Organization } from "@/service/types/identity";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
+import { OrganizationBadges } from "@/components/organizations/OrganizationBadges";
 import { useAuth } from "@/context/AuthContext";
 import { followEntity, unfollowEntity, isFollowing } from "@/service/api/followers";
 import { requestMembership } from "@/service/api/organizations";
@@ -26,7 +27,7 @@ interface OrganizationDetailClientProps {
 }
 
 export default function OrganizationDetailClient({ organization }: OrganizationDetailClientProps) {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -37,6 +38,8 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   const [requestError, setRequestError] = useState<string | null>(null);
 
   const isMember = user?.organizations?.some((org) => org.id === organization.id) ?? false;
+  // A super admin or a member of the organization can edit it.
+  const canEdit = isAdmin || isMember;
 
   useEffect(() => {
     let cancelled = false;
@@ -136,6 +139,18 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
         >
           {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         </Button>
+        {canEdit && (
+          <Button
+            variant="primary"
+            hasIcon={true}
+            leadingIcon="agora-line-edit"
+            leadingIconHover="agora-solid-edit"
+            className="flex-shrink-0"
+            onClick={() => router.push(`/pages/admin/org/${organization.id}/profile`)}
+          >
+            Editar
+          </Button>
+        )}
       </div>
 
       {requestSuccess && (
@@ -191,6 +206,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 {organization.name}
               </h1>
             </div>
+            <OrganizationBadges badges={organization.badges} className="mb-24" />
           </div>
 
           {/* Description Section */}

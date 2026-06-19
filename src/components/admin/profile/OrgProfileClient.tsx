@@ -180,7 +180,8 @@ export default function OrgProfileClient() {
         acronym: acronym || null,
         description,
         url: url || null,
-        badges: selectedBadgeKinds.map((kind) => ({ kind })),
+        // Only super admins may set badges (business rule).
+        ...(isAdmin ? { badges: selectedBadgeKinds.map((kind) => ({ kind })) } : {}),
       });
       setOrg(updated);
       setSelectedBadgeKinds(badgeKindsFromOrg(updated.badges));
@@ -397,7 +398,9 @@ export default function OrgProfileClient() {
                 disabled={!canEdit}
               />
 
-              {Object.keys(availableBadges).length > 0 && (
+              {/* Business rule: only super administrators may view/define the
+                  organization badges (emblemas) — not regular org members. */}
+              {isAdmin && Object.keys(availableBadges).length > 0 && (
                 <AccordionGroup>
                   <Accordion headingTitle="Emblemas" headingLevel="h3">
                     <div className="flex flex-col gap-8 p-16">
