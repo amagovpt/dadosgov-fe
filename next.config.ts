@@ -7,6 +7,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
 const urlAPI = new URL(API_URL);
 
+// Max request body the `/api/*` rewrite proxy streams to the backend. See the
+// `experimental` block below. Cast to the config's own SizeLimit type since
+// the env value is a plain string.
+const PROXY_CLIENT_MAX_BODY_SIZE = (process.env.PROXY_CLIENT_MAX_BODY_SIZE ||
+  "100mb") as NonNullable<NextConfig["experimental"]>["proxyClientMaxBodySize"];
+
 // Read udata version from backend pyproject.toml at build time
 let udataVersion = "unknown";
 try {
@@ -33,6 +39,16 @@ const nextConfig: NextConfig = {
   compress: true,
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
+  experimental: {
+    // Max request body Next.js will stream through the `/api/*` rewrite proxy
+    // to the backend. Defaults to 10MB, which truncates larger resource
+    // uploads (the body arrives incomplete at Flask → 400 / ECONNRESET). The
+    // backend itself sets no MAX_CONTENT_LENGTH, so this is the only app-level
+    // cap. Tune via PROXY_CLIENT_MAX_BODY_SIZE (e.g. "250mb"). NOTE: in
+    // production the fronting nginx `client_max_body_size` (default 1MB) must
+    // be raised to match, or it will reject large uploads first.
+    proxyClientMaxBodySize: PROXY_CLIENT_MAX_BODY_SIZE,
+  },
   async headers() {
     // Content-Security-Policy is emitted per-request from `src/proxy.ts`
     // (TICKET-56b) so it can carry a fresh nonce on each response. The
