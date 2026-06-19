@@ -42,6 +42,7 @@ import { POISONED_FILE_WARNING, translateUploadError } from "@/lib/security/tran
 import TextLink from "@/components/Primitives/TextLink";
 
 import { translateActivityLabel } from "@/utils/activityLabels";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 
 export default function DatasetsEditClient() {
@@ -79,7 +80,8 @@ export default function DatasetsEditClient() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
+  const { errors: formErrors, setErrors, clearError, resetErrors, scrollToFirstError } =
+    useFormErrors();
 
   // Dropdown data
   const [licenses, setLicenses] = useState<License[]>([]);
@@ -326,15 +328,6 @@ export default function DatasetsEditClient() {
     return <Dropdown.Section name="spatial-granularity">{options}</Dropdown.Section>;
   }, [granularities, loadedSpatialGranularity]);
 
-  const clearError = useCallback((field: string) => {
-    setFormErrors((prev) => {
-      if (!prev[field]) return prev;
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
-  }, []);
-
   const handleTitleChange = useCallback(
     (value: string) => {
       setTitle(value);
@@ -356,15 +349,11 @@ export default function DatasetsEditClient() {
       if (endDate <= startDate) errors.temporalEnd = true;
     }
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      requestAnimationFrame(() => {
-        document
-          .querySelector('[aria-invalid="true"]')
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
+      setErrors(errors);
+      scrollToFirstError();
       return;
     }
-    setFormErrors({});
+    resetErrors();
     setApiError(null);
     setApiSuccess(null);
     setIsSubmitting(true);
