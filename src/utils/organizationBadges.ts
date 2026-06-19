@@ -1,26 +1,17 @@
-// Organization badges (etiquetas) assigned in the backoffice. Shared metadata
+// Organization badges (etiquetas) assigned in the backoffice. Shared PT labels
 // used both by the organization filters and by the frontoffice badge display
-// so labels stay consistent. Kinds match the backend
+// so they stay consistent. Kinds match the backend
 // (udata/core/organization/constants.py).
 
-import type { Pill } from "@ama-pt/agora-design-system";
-
-type PillVariant = NonNullable<React.ComponentProps<typeof Pill>["variant"]>;
-
-export interface OrganizationBadgeMeta {
-  label: string;
-  variant: PillVariant;
-}
-
-export const ORGANIZATION_BADGE_META: Record<string, OrganizationBadgeMeta> = {
-  "public-service": { label: "Serviço público", variant: "primary" },
-  certified: { label: "Certificado", variant: "success" },
-  association: { label: "Associação", variant: "neutral" },
-  company: { label: "Empresa", variant: "neutral" },
-  "local-authority": { label: "Autoridade local", variant: "neutral" },
+export const ORGANIZATION_BADGE_LABELS: Record<string, string> = {
+  "public-service": "Serviço público",
+  certified: "Certificado",
+  association: "Associação",
+  company: "Empresa",
+  "local-authority": "Autoridade local",
 };
 
 /** Human-readable PT label for a badge kind (falls back to the raw kind). */
 export function organizationBadgeLabel(kind: string): string {
-  return ORGANIZATION_BADGE_META[kind]?.label ?? kind;
+  return ORGANIZATION_BADGE_LABELS[kind] ?? kind;
 }

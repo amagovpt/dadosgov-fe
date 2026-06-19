@@ -2,7 +2,7 @@
 
 import { Pill } from "@ama-pt/agora-design-system";
 import type { Badge } from "@/service/types/identity";
-import { ORGANIZATION_BADGE_META, organizationBadgeLabel } from "@/utils/organizationBadges";
+import { organizationBadgeLabel } from "@/utils/organizationBadges";
 
 interface OrganizationBadgesProps {
   badges?: Badge[];
@@ -18,14 +18,11 @@ export function OrganizationBadges({ badges, className }: OrganizationBadgesProp
 
   return (
     <div className={`flex flex-wrap items-center gap-8 ${className ?? ""}`}>
-      {badges.map((badge) => {
-        const meta = ORGANIZATION_BADGE_META[badge.kind];
-        return (
-          <Pill key={badge.kind} appearance="solid" variant={meta?.variant ?? "neutral"}>
-            {organizationBadgeLabel(badge.kind)}
-          </Pill>
-        );
-      })}
+      {badges.map((badge) => (
+        <Pill key={badge.kind} appearance="outline" variant="neutral">
+          {organizationBadgeLabel(badge.kind)}
+        </Pill>
+      ))}
     </div>
   );
 }
