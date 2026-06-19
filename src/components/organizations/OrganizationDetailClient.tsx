@@ -16,6 +16,7 @@ import {
 import { Organization } from "@/service/types/identity";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
+import { OrganizationBadges } from "@/components/organizations/OrganizationBadges";
 import { useAuth } from "@/context/AuthContext";
 import { followEntity, unfollowEntity, isFollowing } from "@/service/api/followers";
 import { requestMembership } from "@/service/api/organizations";
@@ -191,6 +192,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 {organization.name}
               </h1>
             </div>
+            <OrganizationBadges badges={organization.badges} className="mb-24" />
           </div>
 
           {/* Description Section */}
