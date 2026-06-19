@@ -4,7 +4,7 @@ import { CardGeneral, ProgressBar } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import Icon from "../../Primitives/Icon";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 export type CardMetricsProps = {
     link: string;
@@ -36,6 +36,8 @@ export type CardMetricsProps = {
         followers?: number;
     };
     hideProgressBar?: boolean;
+    /** Optional content (e.g. organization badges) shown under the title. */
+    titleBadges?: ReactNode;
 };
 
 const PLACEHOLDER = "/images/placeholders/organization.png";
@@ -54,6 +56,7 @@ export default function CardMetrics({
     quality,
     metrics,
     hideProgressBar = false,
+    titleBadges,
 }: CardMetricsProps) {
     const qualityScore = quality?.score != null ? Math.round(quality.score * 100) : 0;
     const sourceImg = organization?.logo || owner?.avatar_thumbnail || PLACEHOLDER;
@@ -105,6 +108,7 @@ export default function CardMetrics({
                 }
                 descriptionText={
                     <div className="flex flex-col grow">
+                        {titleBadges && <div className="mb-12">{titleBadges}</div>}
                         <span className="text-m-regular text-neutral-800 line-clamp-3 mb-16">{formatHtmlParagraphs(description)}</span>
                         <div
                             className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}

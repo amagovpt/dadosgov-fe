@@ -14,6 +14,7 @@ import { pt } from "date-fns/locale";
 
 import HeroGeneral from "@/components/HeroGeneral";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
+import { OrganizationBadges } from "@/components/organizations/OrganizationBadges";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useOrganizationsListing } from "@/hooks/useOrganizationsListing";
 import { ORGANIZATION_SORT_LABELS } from "@/utils/organizationsListingQuery";
@@ -167,6 +168,7 @@ export default function OrganizationsClient({
                         reuses: org.metrics.reuses,
                         followers: org.metrics.followers,
                       },
+                      titleBadges: <OrganizationBadges badges={org.badges} />,
                     };
                     return (
                       <CardMetrics key={`org-${org.slug}`} {...cardProps} hideProgressBar />
