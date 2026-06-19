@@ -38,6 +38,7 @@ import ReusesEditDiscussionsTab from "@/components/admin/reuses/ReusesEditDiscus
 import ReusesEditActivitiesTab from "@/components/admin/reuses/ReusesEditActivitiesTab";
 import ReusesEditDeletePopup from "@/components/admin/reuses/ReusesEditDeletePopup";
 import TextLink from "@/components/Primitives/TextLink";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 
 import { translateActivityLabel } from "@/utils/activityLabels";
@@ -68,7 +69,8 @@ export default function ReusesEditClient() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
+  const { errors: formErrors, setErrors, clearError, resetErrors, scrollToFirstError } =
+    useFormErrors();
 
   // Dropdown data
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
@@ -232,16 +234,6 @@ export default function ReusesEditClient() {
   const discussionsCount = discussionsLoaded
     ? discussions.length
     : (reuse?.metrics?.discussions ?? 0);
-
-  const clearError = (field: string) => {
-    if (formErrors[field]) {
-      setFormErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  };
 
   const handleDatasetSearchChange = (value: string) => {
     setDatasetSearch(value);
@@ -573,16 +565,12 @@ export default function ReusesEditClient() {
     if (!url.trim()) errors.url = true;
     if (!description.trim()) errors.description = true;
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      requestAnimationFrame(() => {
-        document
-          .querySelector('[aria-invalid="true"]')
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
+      setErrors(errors);
+      scrollToFirstError();
       return;
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setFormErrors({});
+    resetErrors();
     setApiError(null);
     setApiSuccess(null);
     setIsSubmitting(true);
