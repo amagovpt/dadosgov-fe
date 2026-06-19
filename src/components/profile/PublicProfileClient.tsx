@@ -25,10 +25,12 @@ import { fetchMyDatasets, fetchDatasets } from "@/service/api/datasets";
 import { fetchUserFollowers, fetchMyFollowing } from "@/service/api/followers";
 import { fetchMyReuses, fetchReuses } from "@/service/api/reuses";
 import { fetchUserProfile } from "@/service/api/users";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
 import AppIcon from "../Primitives/AppIcon";
+import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
 export default function PublicProfileClient() {
@@ -297,112 +299,30 @@ export default function PublicProfileClient() {
             {displayUser.organizations.length === 1 ? "Organização" : "Organizações"}
           </h2>
 
-          <div className="grid grid-cols-2 agora-card-links-datasets-px0 profile-org-cards gap-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
             {displayUser.organizations.map((org) => (
-              <div key={org.id} className="h-full">
-                <CardLinks
-                  onClick={() =>
-                    (window.location.href = `/pages/organizations/${org.slug}`)
-                  }
-                  className="cursor-pointer text-neutral-900"
-                  variant="transparent"
-                  image={{
-                    src:
-                      org.logo || "/images/placeholders/organization.png",
-                    alt: org.name,
-                  }}
-                  category="Organização"
-                  title={
-                    <div className="underline text-xl-bold">{org.name}</div>
-                  }
-                  description={
-                    org.description ? (
-                      <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
-                        {org.description}
-                      </p>
-                    ) : undefined
-                  }
-                  date={
-                    org.last_modified ? (
-                      <span className="font-[300]">
-                        {`Atualizado há ${formatDistanceToNow(new Date(org.last_modified), { locale: pt })}`}
-                      </span>
-                    ) : undefined
-                  }
-                  links={[
-                    {
-                      href: "#",
-                      hasIcon: true,
-                      leadingIcon: "agora-line-eye",
-                      leadingIconHover: "agora-solid-eye",
-                      trailingIcon: "",
-                      trailingIconHover: "",
-                      trailingIconActive: "",
-                      children: org.metrics?.views
-                        ? org.metrics.views >= 1000000
-                          ? (org.metrics.views / 1000000)
-                            .toFixed(1)
-                            .replace(".", ",") + " M"
-                          : org.metrics.views >= 1000
-                            ? (org.metrics.views / 1000).toFixed(0) + " mil"
-                            : String(org.metrics.views)
-                        : "0",
-                      title: "Visualizações",
-                      onClick: (e: React.MouseEvent) => e.preventDefault(),
-                      className: "text-[#034AD8]",
-                    },
-                    {
-                      href: "#",
-                      hasIcon: true,
-                      leadingIcon: "agora-line-layers-menu",
-                      leadingIconHover: "agora-solid-layers-menu",
-                      trailingIcon: "",
-                      trailingIconHover: "",
-                      trailingIconActive: "",
-                      children: String(org.metrics?.datasets || 0),
-                      title: "Datasets",
-                      onClick: (e: React.MouseEvent) => e.preventDefault(),
-                      className: "text-[#034AD8]",
-                    },
-                    {
-                      href: "#",
-                      hasIcon: false,
-                      children: (
-                        <span className="flex items-center gap-8">
-                          <img
-                            src="/Icons/bar_chart_primary.svg"
-                            alt=""
-                            aria-hidden="true"
-                          />
-                          <span>{org.metrics?.reuses || 0}</span>
-                        </span>
-                      ),
-                      title: "Reutilizações",
-                      onClick: (e: React.MouseEvent) => e.preventDefault(),
-                      className: "text-[#034AD8]",
-                    },
-                    {
-                      href: "#",
-                      hasIcon: true,
-                      leadingIcon: "agora-line-star",
-                      leadingIconHover: "agora-solid-star",
-                      trailingIcon: "",
-                      trailingIconHover: "",
-                      trailingIconActive: "",
-                      children: String(org.metrics?.followers || 0),
-                      title: "Favoritos",
-                      onClick: (e: React.MouseEvent) => e.preventDefault(),
-                      className: "text-[#034AD8]",
-                    },
-                  ]}
-                  mainLink={
-                    <Link href={`/pages/organizations/${org.slug}`}>
-                      <span className="underline">{org.name}</span>
-                    </Link>
-                  }
-                  blockedLink={true}
-                />
-              </div>
+              <CardMetrics
+                key={`org-${org.slug}`}
+                title={org.name}
+                description={org.description ?? ""}
+                link={`/pages/organizations/${org.slug}`}
+                last_modified={
+                  org.last_modified
+                    ? formatDateToTimeAgo(org.last_modified)
+                    : undefined
+                }
+                organization={{
+                  name: org.name,
+                  logo: org.logo ?? undefined,
+                }}
+                metrics={{
+                  views: org.metrics?.views,
+                  resources_downloads: org.metrics?.resource_downloads,
+                  reuses: org.metrics?.reuses,
+                  followers: org.metrics?.followers,
+                }}
+                hideProgressBar
+              />
             ))}
           </div>
         </div>

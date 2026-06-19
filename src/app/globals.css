@@ -993,6 +993,14 @@ li.section-name:empty {
   background-color: var(--color-primary-100) !important;
 }
 
+/* Cards inside tabs sit on a primary-100 bleed background, so make them white
+   to stand out from the tab body. The !important is required only because the
+   base rule above already uses it. */
+.tab-panel .card-general-listing .card-general .content,
+.tab-panel .card-general-listing .card-general>.image {
+  background-color: var(--color-white) !important;
+}
+
 .card-general-listing .card-general>.image {
   height: 88px !important;
   background-color: var(--color-primary-100);

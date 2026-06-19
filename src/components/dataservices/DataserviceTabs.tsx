@@ -84,7 +84,7 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
               )}
 
               {/* Technical information */}
-              <div className="mt-32">
+              <div className="mt-32 rounded-4 bg-white p-32">
                 <h3 className="mb-24 text-base font-medium uppercase text-neutral-900">
                   Informações técnicas
                 </h3>
