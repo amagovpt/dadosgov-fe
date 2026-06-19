@@ -6,6 +6,7 @@ import { StatusCard } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { createHarvester, previewHarvestSource } from "@/service/api/harvesters";
 import type { HarvestPreviewJob, HarvestSourceCreatePayload } from "@/service/types/harvester";
 import HarvesterProducerSection from "@/components/admin/harvesters/HarvesterProducerSection";
@@ -27,7 +28,6 @@ export default function HarvestersNewClient() {
   const [harvesterName, setHarvesterName] = useState("");
   const [harvesterDescription, setHarvesterDescription] = useState("");
   const [harvesterUrl, setHarvesterUrl] = useState("");
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [isEnabled, setIsEnabled] = useState(true);
   const [isAutoArchive, setIsAutoArchive] = useState(true);
   const [filters, setFilters] = useState<{ mode: string; type: string; value: string }[]>([]);
@@ -47,6 +47,7 @@ export default function HarvestersNewClient() {
 
   const selectedProducerRef = useRef("");
   const selectedTypeRef = useRef("");
+  const { hasError, setErrors, clearError, resetErrors } = useFormErrors();
 
   function addFilter() {
     setFilters((previousFilters) => [
@@ -65,16 +66,6 @@ export default function HarvestersNewClient() {
         itemIndex === index ? { ...filter, [field]: value } : filter,
       ),
     );
-  }
-
-  function clearError(field: string) {
-    if (formErrors[field]) {
-      setFormErrors((previousErrors) => {
-        const nextErrors = { ...previousErrors };
-        delete nextErrors[field];
-        return nextErrors;
-      });
-    }
   }
 
   function buildPayload(): HarvestSourceCreatePayload {
@@ -136,11 +127,11 @@ export default function HarvestersNewClient() {
     if (!harvesterUrl.trim()) errors.harvesterUrl = true;
 
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+      setErrors(errors);
       return;
     }
 
-    setFormErrors({});
+    resetErrors();
     setIsPreviewing(true);
     setPreviewError(null);
     setPreviewJob(null);
@@ -168,8 +159,8 @@ export default function HarvestersNewClient() {
   };
 
   const auxiliaryItems = getHarvesterAuxiliaryItems({
-    hasHarvesterNameError: !!formErrors.harvesterName,
-    hasHarvesterUrlError: !!formErrors.harvesterUrl,
+    hasHarvesterNameError: hasError("harvesterName"),
+    hasHarvesterUrlError: hasError("harvesterUrl"),
   });
 
   return (
@@ -220,7 +211,7 @@ export default function HarvestersNewClient() {
                     name: organization.name,
                   }))}
                   selectedProducerRef={selectedProducerRef}
-                  hasProducerError={!!formErrors.harvesterProducer}
+                  hasProducerError={hasError("harvesterProducer")}
                   onProducerChange={() => clearError("harvesterProducer")}
                 />
 
@@ -228,8 +219,8 @@ export default function HarvestersNewClient() {
                   harvesterName={harvesterName}
                   harvesterDescription={harvesterDescription}
                   harvesterUrl={harvesterUrl}
-                  hasHarvesterNameError={!!formErrors.harvesterName}
-                  hasHarvesterUrlError={!!formErrors.harvesterUrl}
+                  hasHarvesterNameError={hasError("harvesterName")}
+                  hasHarvesterUrlError={hasError("harvesterUrl")}
                   onHarvesterNameChange={(event) => {
                     setHarvesterName(event.target.value);
                     if (event.target.value.trim()) clearError("harvesterName");

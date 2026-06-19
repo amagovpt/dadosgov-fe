@@ -7,6 +7,7 @@ import type { Dataservice } from "@/service/types/dataservice";
 import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import ApiRegistrationDatasetsStep from "@/components/admin/dataservices/ApiRegistrationDatasetsStep";
 import ApiRegistrationPublishStep from "@/components/admin/dataservices/ApiRegistrationPublishStep";
 import DataserviceProducerSection from "@/components/admin/dataservices/DataserviceProducerSection";
@@ -37,12 +38,12 @@ export default function ApiRegistrationClient({
   const [availability, setAvailability] = useState("");
   const [authRequestUrl, setAuthRequestUrl] = useState("");
   const [businessDocUrl, setBusinessDocUrl] = useState("");
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdDataservice, setCreatedDataservice] = useState<Dataservice | null>(null);
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
+  const { hasError, setErrors, clearError, resetErrors } = useFormErrors();
 
   async function handleStep1Next() {
     const errors: Record<string, boolean> = {};
@@ -50,11 +51,11 @@ export default function ApiRegistrationClient({
     if (!apiDescription.trim()) errors.apiDescription = true;
 
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+      setErrors(errors);
       return;
     }
 
-    setFormErrors({});
+    resetErrors();
     setApiError(null);
     setIsSubmitting(true);
 
@@ -88,16 +89,6 @@ export default function ApiRegistrationClient({
       }
     } finally {
       setIsSubmitting(false);
-    }
-  }
-
-  function clearError(field: string) {
-    if (formErrors[field]) {
-      setFormErrors((previousErrors) => {
-        const nextErrors = { ...previousErrors };
-        delete nextErrors[field];
-        return nextErrors;
-      });
     }
   }
 
@@ -147,8 +138,8 @@ export default function ApiRegistrationClient({
   }
 
   const auxiliaryItems = getDataserviceAuxiliaryItems({
-    hasApiNameError: !!formErrors.apiName,
-    hasApiDescriptionError: !!formErrors.apiDescription,
+    hasApiNameError: hasError("apiName"),
+    hasApiDescriptionError: hasError("apiDescription"),
   });
 
   return (
@@ -193,8 +184,8 @@ export default function ApiRegistrationClient({
                 technicalDocUrl={technicalDocUrl}
                 rateLimiting={rateLimiting}
                 availability={availability}
-                hasApiNameError={!!formErrors.apiName}
-                hasApiDescriptionError={!!formErrors.apiDescription}
+                hasApiNameError={hasError("apiName")}
+                hasApiDescriptionError={hasError("apiDescription")}
                 onApiNameChange={(event) => {
                   setApiName(event.target.value);
                   if (event.target.value.trim()) {

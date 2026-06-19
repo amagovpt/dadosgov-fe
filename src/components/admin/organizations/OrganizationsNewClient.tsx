@@ -8,6 +8,7 @@ import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import OrganizationSelectionStep from "@/components/admin/organizations/OrganizationSelectionStep";
 import OrganizationDetailsStep from "@/components/admin/organizations/OrganizationDetailsStep";
 import OrganizationSuccessStep from "@/components/admin/organizations/OrganizationSuccessStep";
@@ -26,10 +27,10 @@ export default function OrganizationsNewClient() {
   const [orgLogo, setOrgLogo] = useState<File | null>(null);
   const [orgLogoPreview, setOrgLogoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [orgLogoError, setOrgLogoError] = useState<string | null>(null);
   const [orgSuggestions, setOrgSuggestions] = useState<OrganizationSuggestion[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
+  const { hasError, setErrors, clearError, resetErrors } = useFormErrors();
 
   useEffect(() => {
     suggestOrganizations("", 20).then(setOrgSuggestions);
@@ -43,27 +44,17 @@ export default function OrganizationsNewClient() {
     return () => clearTimeout(timer);
   }, [orgSearchQuery]);
 
-  function clearError(field: string) {
-    if (formErrors[field]) {
-      setFormErrors((previousErrors) => {
-        const nextErrors = { ...previousErrors };
-        delete nextErrors[field];
-        return nextErrors;
-      });
-    }
-  }
-
   async function handleCreateOrg() {
     const errors: Record<string, boolean> = {};
     if (!orgName.trim()) errors.orgName = true;
     if (!orgDescription.trim()) errors.orgDescription = true;
 
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+      setErrors(errors);
       return;
     }
 
-    setFormErrors({});
+    resetErrors();
     setIsSubmitting(true);
 
     try {
@@ -120,8 +111,8 @@ export default function OrganizationsNewClient() {
   };
 
   const auxiliaryItems = getOrganizationAuxiliaryItems({
-    hasNameError: !!formErrors.orgName,
-    hasDescriptionError: !!formErrors.orgDescription,
+    hasNameError: hasError("orgName"),
+    hasDescriptionError: hasError("orgDescription"),
   });
 
   return (
@@ -164,8 +155,8 @@ export default function OrganizationsNewClient() {
               orgLogoError={orgLogoError}
               orgLogoPreview={orgLogoPreview}
               isSubmitting={isSubmitting}
-              hasNameError={!!formErrors.orgName}
-              hasDescriptionError={!!formErrors.orgDescription}
+              hasNameError={hasError("orgName")}
+              hasDescriptionError={hasError("orgDescription")}
               onNameChange={(event) => {
                 setOrgName(event.target.value);
                 if (event.target.value.trim()) {
