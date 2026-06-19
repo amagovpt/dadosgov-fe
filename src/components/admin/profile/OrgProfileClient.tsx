@@ -16,6 +16,7 @@ import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import AdminEmptyState from "../AdminEmptyState";
 import OrganizationProfileHeaderCard from "@/components/admin/profile/OrganizationProfileHeaderCard";
 import OrganizationProfileFormSection from "@/components/admin/profile/OrganizationProfileFormSection";
@@ -76,11 +77,10 @@ export default function OrgProfileClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
-  const [nameError, setNameError] = useState(false);
-  const [descriptionError, setDescriptionError] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null);
   const [logoError, setLogoError] = useState<string | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const { hasError, setError, clearError, resetErrors, scrollToFirstError } = useFormErrors();
 
   useEffect(() => {
     if (!orgId) {
@@ -141,21 +141,16 @@ export default function OrgProfileClient() {
 
     const hasNameError = !name.trim();
     const hasDescriptionError = !description.trim();
-    if (hasNameError) setNameError(true);
-    if (hasDescriptionError) setDescriptionError(true);
+    if (hasNameError) setError("name");
+    if (hasDescriptionError) setError("description");
 
     if (hasNameError || hasDescriptionError) {
-      requestAnimationFrame(() => {
-        document
-          .querySelector('[aria-invalid="true"]')
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
+      scrollToFirstError();
       return;
     }
 
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setNameError(false);
-    setDescriptionError(false);
+    resetErrors();
     setIsSaving(true);
     setSaveStatus(null);
 
@@ -255,18 +250,18 @@ export default function OrgProfileClient() {
             selectedBadgeKinds={selectedBadgeKinds}
             canEdit={canEdit}
             isSaving={isSaving}
-            nameError={nameError}
-            descriptionError={descriptionError}
+            nameError={hasError("name")}
+            descriptionError={hasError("description")}
             logoError={logoError}
             saveStatus={saveStatus}
             onNameChange={(event) => {
               setName(event.target.value);
-              if (event.target.value.trim()) setNameError(false);
+              if (event.target.value.trim()) clearError("name");
             }}
             onAcronymChange={(event) => setAcronym(event.target.value)}
             onDescriptionChange={(event) => {
               setDescription(event.target.value);
-              if (event.target.value.trim()) setDescriptionError(false);
+              if (event.target.value.trim()) clearError("description");
             }}
             onUrlChange={(event) => setUrl(event.target.value)}
             onBadgeToggle={handleBadgeToggle}

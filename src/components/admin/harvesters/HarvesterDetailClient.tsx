@@ -23,6 +23,7 @@ import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } fro
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { HarvesterJobsTable } from "@/components/admin/harvesters/HarvesterJobsTable";
 import { HarvesterConfigForm } from "@/components/admin/harvesters/HarvesterConfigForm";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 
 interface HarvesterDetailClientProps {
   slug: string;
@@ -89,7 +90,6 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   // which then owns the field state internally to avoid caret-jump on every
   // parent re-render.
   const [loadedSchedule, setLoadedSchedule] = useState("");
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -98,6 +98,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   const [selectedBackend, setSelectedBackend] = useState("");
+  const { errors: formErrors, setErrors, clearError, scrollToFirstError } = useFormErrors();
 
   useEffect(() => {
     async function load() {
@@ -152,16 +153,6 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     loadJobsPage();
   }, [jobsPage, jobsPageSize]);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  const clearError = (field: string) => {
-    if (formErrors[field]) {
-      setFormErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  };
-
   const activeBackendFilters = useMemo(
     () => backends.find((b) => b.id === selectedBackend)?.filters ?? [],
     [backends, selectedBackend],
@@ -187,10 +178,8 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     if (!harvesterName.trim()) errors.harvesterName = true;
     if (!harvesterUrl.trim()) errors.harvesterUrl = true;
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      requestAnimationFrame(() => {
-        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
+      setErrors(errors);
+      scrollToFirstError();
       return;
     }
 
