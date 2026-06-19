@@ -94,17 +94,17 @@ export function proxy(request: NextRequest) {
     response.headers.set("Content-Security-Policy", buildCsp(nonce));
   }
 
-  return NextResponse.rewrite(
-    response.headers.get("x-middleware-rewrite")
-      ? new URL(response.headers.get("x-middleware-rewrite")!, request.url)
-      : request.nextUrl,
-    {
+  const rewriteUrl = response.headers.get("x-middleware-rewrite");
+  if (rewriteUrl) {
+    return NextResponse.rewrite(new URL(rewriteUrl, request.url), {
       request: {
         headers: requestHeaders,
       },
       headers: response.headers,
-    }
-  );
+    });
+  }
+
+  return response;
 }
 
 export const config = {
