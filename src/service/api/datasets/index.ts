@@ -19,7 +19,13 @@ import type {
 } from "@/service/types/dataset";
 import type { Organization } from "@/service/types/identity";
 import type { APIResponse } from "@/service/types/shared";
-import { API_AUTH_URL, API_BASE_URL, authFetch, translateUploadErrorPayload } from "@/service/utils/API";
+import {
+  API_AUTH_URL,
+  API_BASE_URL,
+  authFetch,
+  chunkedUploadFetch,
+  translateUploadErrorPayload,
+} from "@/service/utils/API";
 
 
 /**
@@ -380,13 +386,7 @@ export async function createResource(
 
 
 export async function uploadResource(datasetId: string, file: File): Promise<Resource> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(`${API_AUTH_URL}/datasets/${datasetId}/upload/`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
-  });
+  const res = await chunkedUploadFetch(`${API_AUTH_URL}/datasets/${datasetId}/upload/`, file);
   const text = await res.text();
   if (!res.ok) {
     let data: Record<string, unknown> = {};
@@ -434,15 +434,9 @@ export async function replaceResourceFile(
   resourceId: string,
   file: File
 ): Promise<Resource> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(
+  const res = await chunkedUploadFetch(
     `${API_AUTH_URL}/datasets/${datasetId}/resources/${resourceId}/upload/`,
-    {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-    }
+    file
   );
   const text = await res.text();
   if (!res.ok) {
