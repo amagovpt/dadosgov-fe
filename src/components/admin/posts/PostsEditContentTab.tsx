@@ -11,6 +11,7 @@ const RichTextEditor = dynamic(() => import("./RichTextEditor"), {
 
 interface PostsEditContentTabProps {
   articleContent: string;
+  hasContentError?: boolean;
   isSaving: boolean;
   onContentChange: (html: string) => void;
   onSaveContent: () => void;
@@ -18,6 +19,7 @@ interface PostsEditContentTabProps {
 
 export default function PostsEditContentTab({
   articleContent,
+  hasContentError = false,
   isSaving,
   onContentChange,
   onSaveContent,
@@ -30,6 +32,7 @@ export default function PostsEditContentTab({
             <div className="flex flex-col gap-8">
               <span className="text-primary-900 text-base font-medium leading-7">Conteúdo *</span>
               <RichTextEditor content={articleContent} onChange={onContentChange} />
+              {hasContentError && <p className="text-sm text-danger-500">Campo obrigatório</p>}
             </div>
           </div>
 

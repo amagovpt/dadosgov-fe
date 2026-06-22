@@ -16,6 +16,8 @@ interface PostsEditMetadataTabProps {
   keywordOptions: React.JSX.Element;
   selectedKeywordsRef: React.RefObject<string>;
   imageError: string | null;
+  hasTitleError?: boolean;
+  hasHeaderError?: boolean;
   isSaving: boolean;
   onTitleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onHeaderChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -42,6 +44,8 @@ export default function PostsEditMetadataTab({
   keywordOptions,
   selectedKeywordsRef,
   imageError,
+  hasTitleError = false,
+  hasHeaderError = false,
   isSaving,
   onTitleChange,
   onHeaderChange,
@@ -75,6 +79,8 @@ export default function PostsEditMetadataTab({
             selectedKeywordsRef={selectedKeywordsRef}
             imageError={imageError}
             previewSrc={post.image ?? undefined}
+            hasTitleError={hasTitleError}
+            hasHeaderError={hasHeaderError}
             contentTypeOptions={["html", "markdown", "blocks"]}
             sectionTitle="DESCRIÇÃO"
             sectionTitleClassName="admin-page__section-title mt-8"

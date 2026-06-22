@@ -23,6 +23,7 @@ import {
 } from "@/service/api/posts";
 import type { Post, PostUpdatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 import PostsEditMetadataTab from "@/components/admin/posts/PostsEditMetadataTab";
 import PostsEditContentTab from "@/components/admin/posts/PostsEditContentTab";
@@ -74,6 +75,7 @@ export default function PostsEditClient() {
   const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const selectedKeywordsRef = useRef("");
+  const { hasError, setError, clearError, resetErrors, scrollToFirstError } = useFormErrors();
   const { setKeywordSearch, keywordOptions, registerSelectedKeywordValue } = useKeywordSelect({
     selectedKeywords: selectedTags,
   });
@@ -106,8 +108,13 @@ export default function PostsEditClient() {
 
   const handleSaveMetadata = async () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    if (!articleTitle.trim()) return;
+    if (!articleTitle.trim()) {
+      setError("articleTitle");
+      scrollToFirstError();
+      return;
+    }
 
+    resetErrors();
     setIsSaving(true);
     setApiError(null);
     setApiSuccess(null);
@@ -138,8 +145,13 @@ export default function PostsEditClient() {
 
   const handleSaveContent = async () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    if (!articleContent.trim()) return;
+    if (!articleContent.trim()) {
+      setError("articleContent");
+      scrollToFirstError();
+      return;
+    }
 
+    resetErrors();
     setIsSaving(true);
     setApiError(null);
     setApiSuccess(null);
@@ -338,8 +350,15 @@ export default function PostsEditClient() {
               keywordOptions={keywordOptions}
               selectedKeywordsRef={selectedKeywordsRef}
               imageError={imageError}
+              hasTitleError={hasError("articleTitle")}
+              hasHeaderError={false}
               isSaving={isSaving}
-              onTitleChange={(event) => setArticleTitle(event.target.value)}
+              onTitleChange={(event) => {
+                setArticleTitle(event.target.value);
+                if (event.target.value.trim()) {
+                  clearError("articleTitle");
+                }
+              }}
               onHeaderChange={(event) => setArticleHeader(event.target.value)}
               onArticleTypeChange={setArticleType}
               onContentTypeChange={setContentType}
@@ -367,8 +386,14 @@ export default function PostsEditClient() {
           <TabBody>
             <PostsEditContentTab
               articleContent={articleContent}
+              hasContentError={hasError("articleContent")}
               isSaving={isSaving}
-              onContentChange={setArticleContent}
+              onContentChange={(value) => {
+                setArticleContent(value);
+                if (value.trim()) {
+                  clearError("articleContent");
+                }
+              }}
               onSaveContent={handleSaveContent}
             />
           </TabBody>
