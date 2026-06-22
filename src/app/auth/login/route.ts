@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendFetch, forwardedHeaders } from "../backend-fetch";
+import { backendFetch, forwardedHeaders } from "../../backend-fetch";
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();

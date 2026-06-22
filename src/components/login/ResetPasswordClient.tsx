@@ -39,7 +39,7 @@ export function ResetPasswordClient({ token }: Props) {
     setError(null);
 
     try {
-      const res = await fetch(`/reset-password/${token}`, {
+      const res = await fetch(`/auth/reset-password/${token}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password, password_confirm: passwordConfirm }),

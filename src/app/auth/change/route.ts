@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendFetch, forwardedHeaders } from "../backend-fetch";
+import { backendFetch, forwardedHeaders } from "../../backend-fetch";
 
 // Merge Set-Cookie name=value pairs from a backend response over an existing
 // Cookie header, so the value the backend just updated (e.g. the session with a

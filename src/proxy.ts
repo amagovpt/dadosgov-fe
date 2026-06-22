@@ -67,10 +67,6 @@ function buildCsp(nonce: string): string {
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  const locale = request.cookies.get("NEXT_LOCALE")?.value ?? i18nConfig.defaultLocale; // fallback to pt
-  const hasLocale = /^\/[a-z]{2}(\/|$)/.test(pathname);
-  const pathnameWithoutLang = pathname.replace(/^\/[a-z]{2}/, "");
-
   const isBackendProxy = BACKEND_PROXY_PATHS.some((p) => pathname.startsWith(p));
 
   const skipCsp = NO_CSP_PATHS.some((p) => pathname.startsWith(p));
@@ -111,7 +107,7 @@ export const config = {
   matcher: [
     {
       source:
-        "/((?!_next/static|.*\\..*|_next/image|favicon.ico|favicon.png|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|eot)$).*)",
+        "/((?!api/|auth/|internal-api/|confirm/|reset/|confirm-change-email/|assets/|swaggerui/|s/|saml/|get-csrf|_next/static|.*\\..*|_next/image|favicon.ico|favicon.png|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|eot)$).*)",
     },
   ],
 };

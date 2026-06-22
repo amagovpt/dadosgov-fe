@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendFetch, forwardedHeaders } from "../backend-fetch";
+import { backendFetch, forwardedHeaders } from "../../backend-fetch";
 
 export async function GET(request: NextRequest) {
   let backendResponse: Response;

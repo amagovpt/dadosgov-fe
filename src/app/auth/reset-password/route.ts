@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendFetch } from "../backend-fetch";
+import { backendFetch } from "../../backend-fetch";
 
 export async function POST(request: NextRequest) {
   const { email, recaptcha_token } = await request.json();

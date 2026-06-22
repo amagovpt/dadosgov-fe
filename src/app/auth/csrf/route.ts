@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendFetch } from "../backend-fetch";
+import { backendFetch } from "../../backend-fetch";
 
 export async function GET(_request: NextRequest) {
     try {
