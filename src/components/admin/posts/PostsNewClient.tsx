@@ -7,10 +7,15 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import PostsNewContentStep from "@/components/admin/posts/PostsNewContentStep";
 import PostsNewMetadataStep from "@/components/admin/posts/PostsNewMetadataStep";
-import type { PostCreatePayload } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
+import {
+  buildPostCreatePayload,
+  type PostFormField,
+  validatePostContent,
+  validatePostMetadata,
+} from "@/components/admin/posts/postFormModel";
 
 export default function PostsNewClient() {
   const searchParams = useSearchParams();
@@ -29,7 +34,8 @@ export default function PostsNewClient() {
   const [imageError, setImageError] = useState<string | null>(null);
   const isSaving = pendingAction !== null;
   const selectedKeywordsRef = useRef("");
-  const { hasError, setErrors, clearError, resetErrors, focusFirstError } = useFormErrors();
+  const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
+    useFormErrors<PostFormField>();
   const { setKeywordSearch, keywordOptions, registerSelectedKeywordValue } = useKeywordSelect({
     selectedKeywords: selectedTags,
   });
@@ -67,9 +73,11 @@ export default function PostsNewClient() {
   }
 
   function handleStep1Next() {
-    const errors: Record<string, boolean> = {};
-    if (!articleTitle.trim()) errors.articleTitle = true;
-    if (!articleHeader.trim()) errors.articleHeader = true;
+    const errors = validatePostMetadata({
+      title: articleTitle,
+      header: articleHeader,
+      requireHeader: true,
+    });
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -81,8 +89,9 @@ export default function PostsNewClient() {
   }
 
   async function handleSave(publish: boolean) {
-    if (!articleContent.trim()) {
-      setErrors({ articleContent: true });
+    const errors = validatePostContent(articleContent);
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
       focusFirstError();
       return;
     }
@@ -92,13 +101,13 @@ export default function PostsNewClient() {
     setSaveError(null);
 
     try {
-      const payload: PostCreatePayload = {
-        name: articleTitle.trim(),
-        headline: articleHeader.trim(),
-        content: articleContent.trim(),
-        body_type: contentType,
+      const payload = buildPostCreatePayload({
+        title: articleTitle,
+        header: articleHeader,
+        content: articleContent,
+        contentType,
         tags: selectedTags,
-      };
+      });
 
       const result = await createPost(payload);
       if (result) {

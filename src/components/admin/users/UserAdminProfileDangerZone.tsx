@@ -30,6 +30,7 @@ export default function UserAdminProfileDangerZone({
             </strong>
             <br />
             <Button
+              type="button"
               appearance="link"
               variant="primary"
               hasIcon
@@ -50,6 +51,7 @@ export default function UserAdminProfileDangerZone({
             <strong>Atenção esta ação é irreversível.</strong>
             <br />
             <Button
+              type="button"
               appearance="link"
               variant="primary"
               hasIcon

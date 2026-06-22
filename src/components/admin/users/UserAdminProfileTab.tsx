@@ -58,8 +58,13 @@ export default function UserAdminProfileTab({
   onOpenDeletePopup,
 }: UserAdminProfileTabProps) {
   return (
-    <div
+    <form
       className="admin-page__form mt-24"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSave();
+      }}
       style={{
         maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))",
       }}
@@ -190,11 +195,11 @@ export default function UserAdminProfileTab({
 
       <div className="mt-16 flex justify-end">
         <Button
+          type="submit"
           variant="primary"
           hasIcon
           leadingIcon="agora-line-check-circle"
           leadingIconHover="agora-solid-check-circle"
-          onClick={onSave}
           disabled={isSaving}
         >
           {isSaving ? "A guardar..." : "Guardar"}
@@ -209,6 +214,6 @@ export default function UserAdminProfileTab({
           onOpenDeletePopup={onOpenDeletePopup}
         />
       )}
-    </div>
+    </form>
   );
 }

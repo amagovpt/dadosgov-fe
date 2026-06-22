@@ -44,6 +44,11 @@ import TextLink from "@/components/Primitives/TextLink";
 import { translateActivityLabel } from "@/utils/activityLabels";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
+import {
+  buildDatasetEditPayload,
+  type DatasetEditField,
+  validateDatasetEditMetadata,
+} from "@/components/admin/datasets/datasetEditFormModel";
 
 export default function DatasetsEditClient() {
   const searchParams = useSearchParams();
@@ -81,7 +86,7 @@ export default function DatasetsEditClient() {
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
-    useFormErrors();
+    useFormErrors<DatasetEditField>();
 
   // Dropdown data
   const [licenses, setLicenses] = useState<License[]>([]);
@@ -338,16 +343,12 @@ export default function DatasetsEditClient() {
 
   const handleSaveMetadata = async () => {
     if (!dataset) return;
-    const errors: Record<string, boolean> = {};
-    if (!title.trim()) errors.title = true;
-    if (!description.trim()) errors.description = true;
-    if (temporalStart && temporalEnd) {
-      const [startDd, startMm, startYyyy] = temporalStart.split("/");
-      const [endDd, endMm, endYyyy] = temporalEnd.split("/");
-      const startDate = new Date(`${startYyyy}-${startMm}-${startDd}`);
-      const endDate = new Date(`${endYyyy}-${endMm}-${endDd}`);
-      if (endDate <= startDate) errors.temporalEnd = true;
-    }
+    const errors = validateDatasetEditMetadata({
+      title,
+      description,
+      temporalStart,
+      temporalEnd,
+    });
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       focusFirstError();
@@ -359,8 +360,6 @@ export default function DatasetsEditClient() {
     setIsSubmitting(true);
 
     try {
-      const tagsValue = keywordsRef.current;
-      const tags = tagsValue ? tagsValue.split(",").filter(Boolean) : [];
       const granularity = spatialGranularityRef.current || undefined;
       const zonesValue = spatialCoverageRef.current;
       const zones = zonesValue
@@ -404,41 +403,25 @@ export default function DatasetsEditClient() {
         spatialGranularityRef.current = resolvedGranularity || "";
       }
 
-      const updated = await updateDataset(dataset.id, {
-        title: title.trim(),
-        description: description.trim(),
-        description_short: shortDescription.trim() || undefined,
-        acronym: acronym.trim() || undefined,
-        featured,
-        tags,
-        license: selectedLicenseRef.current || undefined,
-        frequency: selectedFrequencyRef.current || undefined,
-        temporal_coverage: temporalStart
-          ? {
-              start: (() => {
-                const [dd, mm, yyyy] = temporalStart.split("/");
-                return new Date(`${yyyy}-${mm}-${dd}T00:00:00.000Z`).toISOString();
-              })(),
-              ...(temporalEnd
-                ? {
-                    end: (() => {
-                      const [dd, mm, yyyy] = temporalEnd.split("/");
-                      return new Date(`${yyyy}-${mm}-${dd}T00:00:00.000Z`).toISOString();
-                    })(),
-                  }
-                : {}),
-            }
-          : undefined,
-        ...(resolvedGranularity || validZones
-          ? {
-              spatial: {
-                geom: dataset.spatial?.geom ?? null,
-                zones: validZones ?? dataset.spatial?.zones ?? [],
-                granularity: resolvedGranularity ?? null,
-              },
-            }
-          : {}),
-      });
+      const updated = await updateDataset(
+        dataset.id,
+        buildDatasetEditPayload({
+          title,
+          description,
+          shortDescription,
+          acronym,
+          featured,
+          keywords: keywordsRef.current,
+          license: selectedLicenseRef.current,
+          frequency: selectedFrequencyRef.current,
+          temporalStart,
+          temporalEnd,
+          spatialGeom: dataset.spatial?.geom,
+          spatialZones: validZones,
+          spatialGranularity: resolvedGranularity,
+          existingSpatialZones: dataset.spatial?.zones,
+        }),
+      );
       setDataset(updated);
       setApiSuccess("Conjunto de dados atualizado com sucesso.");
       setTimeout(() => setApiSuccess(null), 10000);

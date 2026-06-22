@@ -24,6 +24,12 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import { HarvesterJobsTable } from "@/components/admin/harvesters/HarvesterJobsTable";
 import { HarvesterConfigForm } from "@/components/admin/harvesters/HarvesterConfigForm";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
+import {
+  buildHarvesterPreviewPayload,
+  buildHarvesterUpdatePayload,
+  type HarvesterFormField,
+  validateHarvesterDetails,
+} from "@/components/admin/harvesters/harvesterFormModel";
 
 interface HarvesterDetailClientProps {
   slug: string;
@@ -98,7 +104,8 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   const [selectedBackend, setSelectedBackend] = useState("");
-  const { errors: formErrors, setErrors, clearError, focusFirstError } = useFormErrors();
+  const { errors: formErrors, setErrors, clearError, focusFirstError } =
+    useFormErrors<HarvesterFormField>();
 
   useEffect(() => {
     async function load() {
@@ -174,9 +181,10 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   };
 
   const handleSave = async () => {
-    const errors: Record<string, boolean> = {};
-    if (!harvesterName.trim()) errors.harvesterName = true;
-    if (!harvesterUrl.trim()) errors.harvesterUrl = true;
+    const errors = validateHarvesterDetails({
+      name: harvesterName,
+      url: harvesterUrl,
+    });
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       focusFirstError();
@@ -198,24 +206,21 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
       // Orphan filters (e.g. left over from a previous backend type) would be
       // rejected by the API with a 400 "Unknown filter key" error.
       const validKeys = new Set(activeBackendFilters.map((f) => f.key));
-      const filtersToSend = filters.filter(
-        (f) => f.value.trim() && f.type && validKeys.has(f.type)
-      );
-
       const [updated] = await Promise.all([
-        updateHarvester(source.id, {
-          name: harvesterName.trim(),
-          description: harvesterDescription.trim() || undefined,
-          url: harvesterUrl.trim(),
-          backend: selectedBackend || source.backend,
-          active: isEnabled,
-          autoarchive: isAutoArchive,
-          ...(filtersToSend.length > 0 && {
-            config: {
-              filters: filtersToSend.map((f) => ({ key: f.type, value: f.value, type: f.mode })),
-            },
+        updateHarvester(
+          source.id,
+          buildHarvesterUpdatePayload({
+            name: harvesterName,
+            description: harvesterDescription,
+            url: harvesterUrl,
+            backend: selectedBackend,
+            fallbackBackend: source.backend,
+            active: isEnabled,
+            autoarchive: isAutoArchive,
+            filters,
+            activeFilterKeys: [...validKeys],
           }),
-        }),
+        ),
         newSchedule && newSchedule !== oldSchedule
           ? scheduleHarvester(source.id, newSchedule)
           : !newSchedule && oldSchedule
@@ -243,21 +248,20 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     setPreviewJob(null);
     setPreviewError(null);
     try {
-      const job = await previewHarvestSource({
-        name: harvesterName.trim() || source.name,
-        url: harvesterUrl.trim() || source.url,
-        backend: selectedBackend || source.backend,
-        schedule: harvesterSchedule.trim() || undefined,
-        active: isEnabled,
-        autoarchive: isAutoArchive,
-        ...(filters.some((f) => f.value.trim() && f.type) && {
-          config: {
-            filters: filters
-              .filter((f) => f.value.trim() && f.type)
-              .map((f) => ({ key: f.type, value: f.value, type: f.mode })),
-          },
+      const job = await previewHarvestSource(
+        buildHarvesterPreviewPayload({
+          name: harvesterName,
+          fallbackName: source.name,
+          url: harvesterUrl,
+          fallbackUrl: source.url,
+          backend: selectedBackend,
+          fallbackBackend: source.backend,
+          schedule: harvesterSchedule,
+          active: isEnabled,
+          autoarchive: isAutoArchive,
+          filters,
         }),
-      });
+      );
       setPreviewJob(job);
     } catch (err: unknown) {
       const error = err as { data?: { message?: string }; message?: string };

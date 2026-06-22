@@ -16,6 +16,7 @@ import HarvesterDescriptionSection from "@/components/admin/harvesters/Harvester
 import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
+import type { HarvesterFormField } from "@/components/admin/harvesters/harvesterFormModel";
 
 const FILTER_KEY_LABELS: Record<string, string> = {
   Organization: "Organização",
@@ -65,7 +66,7 @@ interface HarvesterConfigFormProps {
   backends: HarvestBackend[];
   activeBackendFilters: { key: string; label: string }[];
   formErrors: Partial<Record<string, boolean | string>>;
-  clearError: (field: string) => void;
+  clearError: (field: HarvesterFormField) => void;
   addFilter: () => void;
   removeFilter: (index: number) => void;
   updateFilter: (index: number, field: string, value: string) => void;

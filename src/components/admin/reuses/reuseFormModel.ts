@@ -62,16 +62,7 @@ export function validateReuseDetails(
 }
 
 function normalizeKeywords(keywords: string | string[]): string[] {
-  const values = Array.isArray(keywords) ? keywords : keywords.split(",");
-  const seen = new Set<string>();
-
-  return values.flatMap((keyword) => {
-    const trimmed = keyword.trim();
-    const key = trimmed.toLocaleLowerCase();
-    if (!trimmed || seen.has(key)) return [];
-    seen.add(key);
-    return [trimmed];
-  });
+  return (Array.isArray(keywords) ? keywords : keywords.split(",")).filter(Boolean);
 }
 
 export function buildReuseCreatePayload(values: BuildReusePayloadValues): ReuseCreatePayload {
@@ -79,14 +70,14 @@ export function buildReuseCreatePayload(values: BuildReusePayloadValues): ReuseC
   if (!url) throw new Error("Cannot build a reuse payload with an invalid URL.");
 
   const tags = normalizeKeywords(values.keywords);
-  const producer = values.producer.trim();
-  const topic = values.topic.trim();
+  const producer = values.producer;
+  const topic = values.topic;
 
   return {
     title: values.name.trim(),
     description: values.description.trim(),
     url,
-    type: values.type.trim(),
+    type: values.type,
     private: true,
     ...(topic ? { topic } : {}),
     ...(tags.length > 0 ? { tags } : {}),

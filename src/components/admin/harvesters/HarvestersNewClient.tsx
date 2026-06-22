@@ -9,7 +9,7 @@ import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { normalizeApiError } from "@/service/utils/normalizeApiError";
 import { createHarvester, previewHarvestSource } from "@/service/api/harvesters";
-import type { HarvestPreviewJob, HarvestSourceCreatePayload } from "@/service/types/harvester";
+import type { HarvestPreviewJob } from "@/service/types/harvester";
 import HarvesterProducerSection from "@/components/admin/harvesters/HarvesterProducerSection";
 import HarvesterDescriptionSection from "@/components/admin/harvesters/HarvesterDescriptionSection";
 import HarvesterImplementationSection from "@/components/admin/harvesters/HarvesterImplementationSection";
@@ -18,6 +18,11 @@ import HarvesterPublishStep from "@/components/admin/harvesters/HarvesterPublish
 import { getHarvesterAuxiliaryItems } from "@/components/admin/harvesters/harvesterAuxiliaryContent";
 import { AdminStepper } from "../AdminStepper";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import {
+  buildHarvesterCreatePayload,
+  type HarvesterFormField,
+  validateHarvesterDetails,
+} from "@/components/admin/harvesters/harvesterFormModel";
 
 export default function HarvestersNewClient() {
   const { user } = useAuth();
@@ -48,7 +53,8 @@ export default function HarvestersNewClient() {
 
   const selectedProducerRef = useRef("");
   const selectedTypeRef = useRef("");
-  const { hasError, setErrors, clearError, resetErrors, focusFirstError } = useFormErrors();
+  const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
+    useFormErrors<HarvesterFormField>();
 
   function addFilter() {
     setFilters((previousFilters) => [
@@ -69,30 +75,17 @@ export default function HarvestersNewClient() {
     );
   }
 
-  function buildPayload(): HarvestSourceCreatePayload {
-    const producer = selectedProducerRef.current;
-    const backend = selectedTypeRef.current || "dcat";
-
-    return {
+  function buildPayload() {
+    return buildHarvesterCreatePayload({
       name: harvesterName,
+      description: harvesterDescription,
       url: harvesterUrl,
-      backend,
+      producer: selectedProducerRef.current,
+      backend: selectedTypeRef.current,
       active: isEnabled,
       autoarchive: isAutoArchive,
-      ...(harvesterDescription.trim() && {
-        description: harvesterDescription,
-      }),
-      ...(producer && producer !== "user" && { organization: producer }),
-      ...(filters.length > 0 && {
-        filters: filters
-          .filter((filter) => filter.value.trim())
-          .map((filter) => ({
-            key: filter.type,
-            value: filter.value,
-            type: filter.mode,
-          })),
-      }),
-    };
+      filters,
+    });
   }
 
   async function handleCreate() {
@@ -115,12 +108,12 @@ export default function HarvestersNewClient() {
   async function handleStep1Next(event?: React.MouseEvent) {
     event?.preventDefault();
 
-    const errors: Record<string, boolean> = {};
-    if (!selectedProducerRef.current || selectedProducerRef.current === "user") {
-      errors.harvesterProducer = true;
-    }
-    if (!harvesterName.trim()) errors.harvesterName = true;
-    if (!harvesterUrl.trim()) errors.harvesterUrl = true;
+    const errors = validateHarvesterDetails({
+      producer: selectedProducerRef.current,
+      name: harvesterName,
+      url: harvesterUrl,
+      requireOrganizationProducer: true,
+    });
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);

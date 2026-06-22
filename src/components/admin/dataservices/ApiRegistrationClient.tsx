@@ -44,12 +44,13 @@ export default function ApiRegistrationClient({
   const [createdDataservice, setCreatedDataservice] = useState<Dataservice | null>(null);
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
-  const { hasError, setErrors, clearError, resetErrors, focusFirstError } = useFormErrors();
+  const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
+    useFormErrors<"apiName" | "apiDescription">();
 
   async function handleStep1Next() {
-    const errors: Record<string, boolean> = {};
-    if (!apiName.trim()) errors.apiName = true;
-    if (!apiDescription.trim()) errors.apiDescription = true;
+    const errors: Partial<Record<"apiName" | "apiDescription", string>> = {};
+    if (!apiName.trim()) errors.apiName = "Indique o nome da API.";
+    if (!apiDescription.trim()) errors.apiDescription = "Descreva a API.";
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);

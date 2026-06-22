@@ -21,12 +21,19 @@ import {
   updatePost,
   uploadPostImage,
 } from "@/service/api/posts";
-import type { Post, PostUpdatePayload } from "@/service/types/posts";
+import type { Post } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 import PostsEditMetadataTab from "@/components/admin/posts/PostsEditMetadataTab";
 import PostsEditContentTab from "@/components/admin/posts/PostsEditContentTab";
+import {
+  buildPostContentUpdatePayload,
+  buildPostMetadataUpdatePayload,
+  type PostFormField,
+  validatePostContent,
+  validatePostMetadata,
+} from "@/components/admin/posts/postFormModel";
 
 function DeletePostPopupContent({
   onClose,
@@ -75,7 +82,8 @@ export default function PostsEditClient() {
   const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const selectedKeywordsRef = useRef("");
-  const { hasError, setError, clearError, resetErrors, focusFirstError } = useFormErrors();
+  const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
+    useFormErrors<PostFormField>();
   const { setKeywordSearch, keywordOptions, registerSelectedKeywordValue } = useKeywordSelect({
     selectedKeywords: selectedTags,
   });
@@ -108,8 +116,12 @@ export default function PostsEditClient() {
 
   const handleSaveMetadata = async () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    if (!articleTitle.trim()) {
-      setError("articleTitle");
+    const errors = validatePostMetadata({
+      title: articleTitle,
+      header: articleHeader,
+    });
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
       focusFirstError();
       return;
     }
@@ -120,13 +132,13 @@ export default function PostsEditClient() {
     setApiSuccess(null);
 
     try {
-      const payload: PostUpdatePayload = {
-        name: articleTitle.trim(),
-        headline: articleHeader.trim(),
-        body_type: contentType,
-        kind: articleType,
+      const payload = buildPostMetadataUpdatePayload({
+        title: articleTitle,
+        header: articleHeader,
+        contentType,
+        articleType,
         tags: selectedTags,
-      };
+      });
 
       const result = await updatePost(postId, payload);
       if (result) {
@@ -145,8 +157,9 @@ export default function PostsEditClient() {
 
   const handleSaveContent = async () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    if (!articleContent.trim()) {
-      setError("articleContent");
+    const errors = validatePostContent(articleContent);
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
       focusFirstError();
       return;
     }
@@ -157,9 +170,7 @@ export default function PostsEditClient() {
     setApiSuccess(null);
 
     try {
-      const payload: PostUpdatePayload = {
-        content: articleContent.trim(),
-      };
+      const payload = buildPostContentUpdatePayload(articleContent);
 
       const result = await updatePost(postId, payload);
       if (result) {
