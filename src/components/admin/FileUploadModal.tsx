@@ -20,6 +20,7 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { validateFileExtensions } from "@/lib/files/validateFileExtensions";
 import { ResourceType } from "@/service/types/catalog";
 import TextLink from "@/components/Primitives/TextLink";
 
@@ -119,7 +120,7 @@ function ResourceEditPendingPopupContent({
   // The set-state-in-effect lint rule warns about cascading renders, but
   // the alternative (waiting for a remount that never happens) is the bug
   // we are fixing — this prop-sync is the smaller of the two evils.
-  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- Intentional popup prop-to-state synchronization. */
   useEffect(() => {
     const t = initialMeta.title || name;
     setTitle(!isUrl && fileExt && t === name ? baseName : t);
@@ -131,6 +132,7 @@ function ResourceEditPendingPopupContent({
     setUrlError(null);
     resourceTypeRef.current = defaultType;
   }, [name, isUrl, initialMeta, file]);
+  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
   const isValidHttpsUrl = (value: string): boolean => {
     try {
@@ -675,6 +677,7 @@ export default function FileUploadModal({
   const [urlError, setUrlError] = useState<string | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Clear a stale URL error after another resource is selected.
     if (hasSelection) setUrlError(null);
   }, [hasSelection]);
   const [extensionErrors, setExtensionErrors] = useState<string[]>([]);
@@ -701,22 +704,6 @@ export default function FileUploadModal({
     setLocalUrl("");
     localUrlRef.current = "";
     setUrlError(null);
-  };
-
-  const getExtension = (filename: string) =>
-    filename.includes(".") ? filename.split(".").pop()!.toLowerCase() : "";
-
-  const validateFiles = (files: File[]): { valid: File[]; invalid: string[] } => {
-    if (!allowedExtensions || allowedExtensions.length === 0) return { valid: files, invalid: [] };
-    const allowed = allowedExtensions.map((e) => e.toLowerCase());
-    const valid: File[] = [];
-    const invalid: string[] = [];
-    for (const file of files) {
-      const ext = getExtension(file.name);
-      if (!ext || !allowed.includes(ext)) invalid.push(file.name);
-      else valid.push(file);
-    }
-    return { valid, invalid };
   };
 
   return (
@@ -793,7 +780,7 @@ export default function FileUploadModal({
           onChange={(e) => {
             const picked = Array.from((e.target as HTMLInputElement).files || []);
             if (picked.length === 0) return;
-            const { valid, invalid } = validateFiles(picked);
+            const { valid, invalid } = validateFileExtensions(picked, allowedExtensions);
             setExtensionErrors(invalid);
             setSecurityErrors([]);
             const existingNames = new Set(uploadedFiles.map((f) => f.name));
