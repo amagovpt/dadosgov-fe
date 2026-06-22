@@ -139,6 +139,7 @@ export default function HarvesterImplementationSection({
                     />
                   </div>
                   <Button
+                    type="button"
                     variant="danger"
                     hasIcon
                     iconOnly
@@ -154,6 +155,7 @@ export default function HarvesterImplementationSection({
             ))}
 
             <Button
+              type="button"
               appearance="link"
               variant="primary"
               hasIcon
@@ -175,6 +177,7 @@ export default function HarvesterImplementationSection({
             {!showRemoteUrlPrefix ? (
               <div className="flex justify-start">
                 <Button
+                  type="button"
                   appearance="link"
                   variant="primary"
                   hasIcon
@@ -202,6 +205,7 @@ export default function HarvesterImplementationSection({
                     />
                   </div>
                   <Button
+                    type="button"
                     appearance="outline"
                     variant="neutral"
                     hasIcon

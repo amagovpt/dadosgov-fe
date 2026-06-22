@@ -58,7 +58,14 @@ export default function ReusesEditApiTab({
           </div>
         )}
 
-        <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
+        <form
+          className="admin-page__form"
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            void onSave();
+          }}
+        >
           <InputSelect
             label="Pesquisar uma API"
             placeholder="Pesquise uma API..."
@@ -91,11 +98,11 @@ export default function ReusesEditApiTab({
 
           <div className="admin-page__actions flex justify-end gap-[18px]">
             <Button
+              type="submit"
               variant="primary"
               hasIcon
               trailingIcon="agora-line-check-circle"
               trailingIconHover="agora-solid-check-circle"
-              onClick={onSave}
               disabled={isSubmitting || !apiLinks.some((link) => link.url.trim())}
             >
               {isSubmitting ? "A guardar..." : "Guardar"}

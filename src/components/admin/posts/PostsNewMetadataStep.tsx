@@ -53,7 +53,14 @@ export default function PostsNewMetadataStep({
   onNext,
 }: PostsNewMetadataStepProps) {
   return (
-    <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
+    <form
+      className="admin-page__form"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        onNext();
+      }}
+    >
       <p className="pt-32 text-base leading-7 text-neutral-900">
         Os campos marcados com um asterisco ( * ) são obrigatórios.
       </p>
@@ -84,7 +91,7 @@ export default function PostsNewMetadataStep({
       <AdminStepActions
         primaryAction={{
           label: "Seguinte",
-          onClick: onNext,
+          type: "submit",
           hasIcon: true,
           trailingIcon: "agora-line-arrow-right-circle",
           trailingIconHover: "agora-solid-arrow-right-circle",

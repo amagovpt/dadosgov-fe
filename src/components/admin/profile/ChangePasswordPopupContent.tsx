@@ -54,7 +54,14 @@ export function ChangePasswordPopupContent() {
   };
 
   return (
-    <div className="flex flex-col gap-24">
+    <form
+      className="flex flex-col gap-24"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleSubmit();
+      }}
+    >
       {success ? (
         <StatusCard variant="success" showIcon description="Senha alterada com sucesso." />
       ) : (
@@ -101,13 +108,13 @@ export function ChangePasswordPopupContent() {
           />
 
           <div className="flex gap-16">
-            <Button appearance="outline" variant="neutral" onClick={() => hide()}>
+            <Button type="button" appearance="outline" variant="neutral" onClick={() => hide()}>
               Cancelar
             </Button>
             <Button
+              type="submit"
               appearance="solid"
               variant="primary"
-              onClick={handleSubmit}
               disabled={isSubmitting}
             >
               {isSubmitting ? "A alterar..." : "Altere a sua senha"}
@@ -115,6 +122,6 @@ export function ChangePasswordPopupContent() {
           </div>
         </>
       )}
-    </div>
+    </form>
   );
 }

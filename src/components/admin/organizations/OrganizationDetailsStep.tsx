@@ -58,7 +58,14 @@ export default function OrganizationDetailsStep({
         }
       />
 
-      <form className="admin-page__form">
+      <form
+        className="admin-page__form"
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit();
+        }}
+      >
         <p className="pt-32 text-base leading-7 text-neutral-900">
           Os campos marcados com um asterisco ( * ) são obrigatórios.
         </p>
@@ -126,10 +133,10 @@ export default function OrganizationDetailsStep({
         </div>
 
         <div className="admin-page__actions">
-          <Button appearance="outline" variant="neutral" onClick={onPrevious}>
+          <Button type="button" appearance="outline" variant="neutral" onClick={onPrevious}>
             Anterior
           </Button>
-          <Button variant="primary" onClick={onSubmit} disabled={isSubmitting}>
+          <Button type="submit" variant="primary" disabled={isSubmitting}>
             Criar a organização
           </Button>
         </div>

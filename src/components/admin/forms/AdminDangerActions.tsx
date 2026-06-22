@@ -46,6 +46,7 @@ function ActionCard({
           ) : null}
           <br />
           <Button
+            type="button"
             appearance="link"
             variant="primary"
             hasIcon

@@ -32,7 +32,13 @@ export default function ApiRegistrationDatasetsStep({
         description="É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização."
       />
 
-      <form className="admin-page__form">
+      <form
+        className="admin-page__form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onNextStep();
+        }}
+      >
         <DataserviceDatasetLinksSection
           datasetLinks={datasetLinks}
           datasetLinkErrors={datasetLinkErrors}
@@ -50,7 +56,7 @@ export default function ApiRegistrationDatasetsStep({
           }}
           primaryAction={{
             label: "Seguinte",
-            onClick: onNextStep,
+            type: "submit",
             hasIcon: true,
             trailingIcon: "agora-line-arrow-right-circle",
             trailingIconHover: "agora-solid-arrow-right-circle",

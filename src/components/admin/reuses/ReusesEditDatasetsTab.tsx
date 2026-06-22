@@ -78,7 +78,14 @@ export default function ReusesEditDatasetsTab({
       />
 
       <div className="admin-page__form-area">
-        <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
+        <form
+          className="admin-page__form"
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            void onSave();
+          }}
+        >
           <div className="mb-24">
             <StatusCard
               variant="warning"
@@ -148,7 +155,6 @@ export default function ReusesEditDatasetsTab({
               selectedDatasets.length > 0 || datasetLinks.some((link) => link.url.trim())
             }
             onAddDatasetLink={onAddDatasetLink}
-            onSave={onSave}
           />
         </form>
       </div>

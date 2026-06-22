@@ -25,7 +25,7 @@ type ReusesEditMetadataTabProps = {
     | React.ReactElement<DropdownSectionProps>
     | React.ReactElement<DropdownSectionProps>[];
   imageError: string | null;
-  formErrors: Record<string, boolean>;
+  formErrors: Partial<Record<string, boolean>>;
   reuseTypes: ReuseType[];
   reuseTopics: ReuseTopic[];
   onPublishReuse: () => void | Promise<void>;
@@ -101,7 +101,14 @@ export default function ReusesEditMetadataTab({
           />
         )}
 
-        <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
+        <form
+          className="admin-page__form"
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            void onSaveMetadata();
+          }}
+        >
           <p className="text-neutral-900 text-base leading-7">
             Os campos marcados com um asterisco ( * ) são obrigatórios.
           </p>
@@ -139,11 +146,11 @@ export default function ReusesEditMetadataTab({
 
           <div className="admin-page__actions flex justify-end mt-24">
             <Button
+              type="submit"
               variant="primary"
               hasIcon
               trailingIcon="agora-line-check-circle"
               trailingIconHover="agora-solid-check-circle"
-              onClick={onSaveMetadata}
               disabled={isSubmitting}
             >
               {isSubmitting ? "A guardar..." : "Guardar"}

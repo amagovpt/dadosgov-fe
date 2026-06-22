@@ -200,7 +200,14 @@ export default function HarvestersNewClient() {
                 }
               />
 
-              <form className="admin-page__form">
+              <form
+                className="admin-page__form"
+                noValidate
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void handleStep1Next();
+                }}
+              >
                 <p className="pt-32 text-base leading-7 text-neutral-900">
                   Os campos marcados com um asterisco ( * ) são obrigatórios.
                 </p>
@@ -267,12 +274,10 @@ export default function HarvestersNewClient() {
                 <AdminStepActions
                   primaryAction={{
                     label: "Seguinte",
+                    type: "submit",
                     hasIcon: true,
                     trailingIcon: "agora-line-arrow-right-circle",
                     trailingIconHover: "agora-solid-arrow-right-circle",
-                    onClick: () => {
-                      void handleStep1Next();
-                    },
                   }}
                 />
               </form>

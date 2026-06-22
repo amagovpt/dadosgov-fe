@@ -64,7 +64,14 @@ export default function PostsEditMetadataTab({
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
-        <form className="admin-page__form mt-24">
+        <form
+          className="admin-page__form mt-24"
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSaveMetadata();
+          }}
+        >
           <p className="text-neutral-900 text-base leading-7">
             Campos precedidos por uma estrela (*) são obrigatórios.
           </p>
@@ -100,11 +107,11 @@ export default function PostsEditMetadataTab({
 
           <div className="admin-page__actions">
             <Button
+              type="submit"
               variant="primary"
               hasIcon
               trailingIcon="agora-line-check-circle"
               trailingIconHover="agora-solid-check-circle"
-              onClick={onSaveMetadata}
               disabled={isSaving}
             >
               {isSaving ? "A guardar..." : "Guardar"}

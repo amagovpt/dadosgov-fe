@@ -28,7 +28,14 @@ export default function PostsNewContentStep({
   onPublish,
 }: PostsNewContentStepProps) {
   return (
-    <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
+    <form
+      className="admin-page__form"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        onPublish();
+      }}
+    >
       <PostContentSection
         content={articleContent}
         hasError={hasContentError}
@@ -59,10 +66,10 @@ export default function PostsNewContentStep({
         }}
         primaryAction={{
           label: pendingAction === "publish" ? "A publicar..." : "Publicar artigo",
+          type: "submit",
           hasIcon: true,
           trailingIcon: "agora-line-check-circle",
           trailingIconHover: "agora-solid-check-circle",
-          onClick: onPublish,
           disabled: isSaving,
         }}
       />

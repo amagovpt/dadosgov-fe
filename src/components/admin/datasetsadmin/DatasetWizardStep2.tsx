@@ -27,7 +27,7 @@ export interface DatasetWizardStep2Props {
   selectedProducerRef: React.MutableRefObject<string>;
   onProducerChange: (value: string) => void;
   producerOptions: DropdownSection;
-  formErrors: Record<string, boolean>;
+  formErrors: Partial<Record<string, boolean>>;
   datasetTitle: string;
   onDatasetTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   datasetAcronym: string;
@@ -188,7 +188,14 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
         </div>
       )}
 
-      <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
+      <form
+        className="admin-page__form"
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          onStep2Next();
+        }}
+      >
         <h2 className="admin-page__section-title">Descrição</h2>
 
         <div className="admin-page__fields-group">
@@ -362,6 +369,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                   </div>
                   <div style={{ paddingBottom: "24px" }}>
                     <Button
+                      type="button"
                       appearance="outline"
                       variant="primary"
                       hasIcon
@@ -377,6 +385,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
 
               <div style={{ marginTop: "-16px" }}>
                 <Button
+                  type="button"
                   appearance="outline"
                   variant="primary"
                   hasIcon
@@ -509,6 +518,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
 
         <div className="admin-page__actions flex justify-between gap-[18px]">
           <Button
+            type="button"
             variant="primary"
             appearance="outline"
             hasIcon
@@ -519,11 +529,11 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             Anterior
           </Button>
           <Button
+            type="submit"
             variant="primary"
             hasIcon
             trailingIcon="agora-line-arrow-right-circle"
             trailingIconHover="agora-solid-arrow-right-circle"
-            onClick={onStep2Next}
             disabled={isSubmitting}
           >
             {isSubmitting ? "A criar..." : "Seguinte"}

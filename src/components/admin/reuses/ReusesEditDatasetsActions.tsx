@@ -5,19 +5,18 @@ type ReusesEditDatasetsActionsProps = {
   isSubmitting: boolean;
   canSave: boolean;
   onAddDatasetLink: () => void;
-  onSave: () => void | Promise<void>;
 };
 
 export default function ReusesEditDatasetsActions({
   isSubmitting,
   canSave,
   onAddDatasetLink,
-  onSave,
 }: ReusesEditDatasetsActionsProps) {
   return (
     <>
       <div className="flex justify-end">
         <Button
+          type="button"
           appearance="outline"
           variant="primary"
           hasIcon
@@ -31,11 +30,11 @@ export default function ReusesEditDatasetsActions({
 
       <div className="admin-page__actions flex justify-end gap-[18px]">
         <Button
+          type="submit"
           variant="primary"
           hasIcon
           trailingIcon="agora-line-check-circle"
           trailingIconHover="agora-solid-check-circle"
-          onClick={onSave}
           disabled={!canSave || isSubmitting}
         >
           {isSubmitting ? "A guardar..." : "Guardar"}

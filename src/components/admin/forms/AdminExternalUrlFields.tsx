@@ -56,6 +56,7 @@ export default function AdminExternalUrlFields({
           {entry.url.trim() && (
             <div className={`${removeButtonMarginClassName} flex justify-end`}>
               <Button
+                type="button"
                 appearance={removeButtonAppearance}
                 variant="danger"
                 hasIcon
@@ -73,6 +74,7 @@ export default function AdminExternalUrlFields({
       {addLabel && onAddEntry ? (
         <div className="flex justify-end">
           <Button
+            type="button"
             appearance="outline"
             variant="primary"
             hasIcon

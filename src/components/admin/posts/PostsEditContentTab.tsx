@@ -27,7 +27,14 @@ export default function PostsEditContentTab({
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
-        <form className="admin-page__form mt-24">
+        <form
+          className="admin-page__form mt-24"
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSaveContent();
+          }}
+        >
           <div className="admin-page__fields-group">
             <div className="flex flex-col gap-8">
               <span className="text-primary-900 text-base font-medium leading-7">Conteúdo *</span>
@@ -38,11 +45,11 @@ export default function PostsEditContentTab({
 
           <div className="admin-page__actions">
             <Button
+              type="submit"
               variant="primary"
               hasIcon
               trailingIcon="agora-line-check-circle"
               trailingIconHover="agora-solid-check-circle"
-              onClick={onSaveContent}
               disabled={isSaving}
             >
               {isSaving ? "A guardar..." : "Guardar"}

@@ -79,7 +79,14 @@ export default function ReusesFormDatasetsStep({
         </div>
       )}
 
-      <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
+      <form
+        className="admin-page__form"
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          onNextStep();
+        }}
+      >
         <InputSelect
           key={`dataset-select-${producerId}`}
           label="Pesquisar um conjunto de dados"
@@ -140,6 +147,7 @@ export default function ReusesFormDatasetsStep({
 
         <div className="flex justify-end">
           <Button
+            type="button"
             appearance="outline"
             variant="primary"
             hasIcon
@@ -153,6 +161,7 @@ export default function ReusesFormDatasetsStep({
 
         <div className="admin-page__actions flex justify-between gap-[18px]">
           <Button
+            type="button"
             variant="primary"
             appearance="outline"
             hasIcon
@@ -163,12 +172,12 @@ export default function ReusesFormDatasetsStep({
             Anterior
           </Button>
           <Button
+            type="submit"
             variant="primary"
             hasIcon
             trailingIcon="agora-line-arrow-right-circle"
             trailingIconHover="agora-solid-arrow-right-circle"
             disabled={isSubmitting}
-            onClick={onNextStep}
           >
             {isSubmitting ? "A associar..." : "Seguinte"}
           </Button>

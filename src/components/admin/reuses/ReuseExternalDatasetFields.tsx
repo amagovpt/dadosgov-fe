@@ -65,6 +65,7 @@ export default function ReuseExternalDatasetFields({
           {link.url.trim() && (
             <div className="mt-8 flex justify-end">
               <Button
+                type="button"
                 appearance="solid"
                 variant="danger"
                 hasIcon

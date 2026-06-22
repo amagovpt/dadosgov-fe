@@ -64,7 +64,7 @@ interface HarvesterConfigFormProps {
   setSelectedBackend: (v: string) => void;
   backends: HarvestBackend[];
   activeBackendFilters: { key: string; label: string }[];
-  formErrors: Record<string, boolean>;
+  formErrors: Partial<Record<string, boolean>>;
   clearError: (field: string) => void;
   addFilter: () => void;
   removeFilter: (index: number) => void;
@@ -305,6 +305,7 @@ export function HarvesterConfigForm({
                             />
                           </div>
                           <Button
+                            type="button"
                             variant="danger"
                             hasIcon
                             iconOnly
@@ -322,6 +323,7 @@ export function HarvesterConfigForm({
 
                 {activeBackendFilters.length > 0 && (
                   <Button
+                    type="button"
                     appearance="link"
                     variant="primary"
                     hasIcon
@@ -351,6 +353,7 @@ export function HarvesterConfigForm({
                           {filter.mode === "exclude" ? " (excluir)" : " (incluir)"}
                         </span>
                         <Button
+                          type="button"
                           variant="danger"
                           hasIcon
                           iconOnly

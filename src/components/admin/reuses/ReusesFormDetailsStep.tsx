@@ -26,7 +26,7 @@ interface ReusesFormDetailsStepProps {
   reuseLink: string;
   reuseLinkInvalid: boolean;
   reuseDescription: string;
-  formErrors: Record<string, boolean>;
+  formErrors: Partial<Record<string, boolean>>;
   onReuseNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onReuseLinkChange: (event: ChangeEvent<HTMLInputElement>) => void;
   selectedReuseTypeRef: MutableRefObject<string>;
@@ -116,7 +116,14 @@ export default function ReusesFormDetailsStep({
         </div>
       )}
 
-      <form className="admin-page__form" onSubmit={(event) => event.preventDefault()}>
+      <form
+        className="admin-page__form"
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          onNextStep();
+        }}
+      >
         <p className="pt-32 text-base leading-7 text-neutral-900">
           Os campos marcados com um asterisco ( * ) são obrigatórios.
         </p>
@@ -252,6 +259,7 @@ export default function ReusesFormDetailsStep({
 
         <div className="admin-page__actions flex justify-between gap-[18px]">
           <Button
+            type="button"
             variant="primary"
             appearance="outline"
             hasIcon
@@ -262,11 +270,11 @@ export default function ReusesFormDetailsStep({
             Anterior
           </Button>
           <Button
+            type="submit"
             variant="primary"
             hasIcon
             trailingIcon="agora-line-arrow-right-circle"
             trailingIconHover="agora-solid-arrow-right-circle"
-            onClick={onNextStep}
             disabled={isSubmitting || reuseLinkInvalid}
           >
             {isSubmitting ? "A criar..." : "Seguinte"}
