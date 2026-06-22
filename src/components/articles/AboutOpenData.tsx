@@ -15,6 +15,7 @@ const AboutOpenData = ({ initialContent }: { initialContent?: string }) => {
       breadcrumbItems={[
         { label: "Home", url: "/" },
         { label: "Recursos", url: "#" },
+        { label: "Como usar o portal", url: "#" },
         { label: "Sobre dados abertos", url: "/pages/about-open-data" },
       ]}
     />
