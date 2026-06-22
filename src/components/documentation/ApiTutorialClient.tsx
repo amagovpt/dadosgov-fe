@@ -83,6 +83,8 @@ export default function ApiTutorialClient() {
             <Breadcrumb
               items={[
                 { label: "Home", url: "/" },
+                { label: "Recursos", url: "#" },
+                { label: "Desenvolvimento", url: "#" },
                 { label: "Referência API", url: "/pages/faqs/api-documentation" },
               ]}
             />

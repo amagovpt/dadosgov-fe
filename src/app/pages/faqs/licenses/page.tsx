@@ -28,7 +28,8 @@ export default async function page() {
         <Breadcrumb
           items={[
             { label: 'Home', url: '/' },
-            { label: 'FAQs', url: '/pages/faqs/' },
+            { label: 'Recursos', url: '#' },
+            { label: 'Como usar o portal', url: '#' },
             { label: title, url: '#' },
           ]}
         />

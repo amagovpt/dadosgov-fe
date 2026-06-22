@@ -17,8 +17,9 @@ export default async function page() {
                 <Breadcrumb
                     items={[
                         { label: 'Home', url: '/' },
-                        { label: 'FAQs', url: '/pages/faqs/' },
-                        { label: title, url: '#' },
+                        { label: 'Recursos', url: '#' },
+                        { label: 'Desenvolvimento', url: '#' },
+                        { label: 'Acesso via Sparql', url: '#' },
                     ]}
                 />
             </div>
