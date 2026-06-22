@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
+import { normalizeApiError } from "@/service/utils/normalizeApiError";
 import ApiRegistrationDatasetsStep from "@/components/admin/dataservices/ApiRegistrationDatasetsStep";
 import ApiRegistrationPublishStep from "@/components/admin/dataservices/ApiRegistrationPublishStep";
 import DataserviceProducerSection from "@/components/admin/dataservices/DataserviceProducerSection";
@@ -43,7 +44,7 @@ export default function ApiRegistrationClient({
   const [createdDataservice, setCreatedDataservice] = useState<Dataservice | null>(null);
   const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
-  const { hasError, setErrors, clearError, resetErrors } = useFormErrors();
+  const { hasError, setErrors, clearError, resetErrors, focusFirstError } = useFormErrors();
 
   async function handleStep1Next() {
     const errors: Record<string, boolean> = {};
@@ -52,6 +53,7 @@ export default function ApiRegistrationClient({
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
+      focusFirstError();
       return;
     }
 
@@ -78,15 +80,7 @@ export default function ApiRegistrationClient({
       setCreatedDataservice(dataservice);
       handleStepChange(onNextStep);
     } catch (error: unknown) {
-      const normalizedError = error as { data?: Record<string, unknown> };
-      if (normalizedError.data && typeof normalizedError.data === "object") {
-        const messages = Object.entries(normalizedError.data)
-          .map(([key, value]) => `${key}: ${value}`)
-          .join(", ");
-        setApiError(messages);
-      } else {
-        setApiError("Erro ao criar a API. Tente novamente.");
-      }
+      setApiError(normalizeApiError(error, "Erro ao criar a API. Tente novamente.").message);
     } finally {
       setIsSubmitting(false);
     }

@@ -14,6 +14,8 @@ interface OrganizationDetailsStepProps {
   isSubmitting: boolean;
   hasNameError: boolean;
   hasDescriptionError: boolean;
+  nameErrorMessage?: string;
+  descriptionErrorMessage?: string;
   onNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onAcronymChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onDescriptionChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -34,6 +36,8 @@ export default function OrganizationDetailsStep({
   isSubmitting,
   hasNameError,
   hasDescriptionError,
+  nameErrorMessage,
+  descriptionErrorMessage,
   onNameChange,
   onAcronymChange,
   onDescriptionChange,
@@ -82,7 +86,7 @@ export default function OrganizationDetailsStep({
             hasError={hasNameError}
             hasFeedback={hasNameError}
             feedbackState="danger"
-            errorFeedbackText="Campo obrigatório"
+            errorFeedbackText={nameErrorMessage}
           />
 
           <InputText
@@ -103,7 +107,7 @@ export default function OrganizationDetailsStep({
             hasError={hasDescriptionError}
             hasFeedback={hasDescriptionError}
             feedbackState="danger"
-            errorFeedbackText="Campo obrigatório"
+            errorFeedbackText={descriptionErrorMessage}
           />
 
           <InputText

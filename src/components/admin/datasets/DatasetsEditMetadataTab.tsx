@@ -14,7 +14,7 @@ type DatasetsEditMetadataTabProps = {
   dataset: Dataset;
   featured: boolean;
   isSubmitting: boolean;
-  formErrors: Partial<Record<string, boolean>>;
+  formErrors: Partial<Record<string, boolean | string>>;
   loadedTitle: string;
   loadedAcronym: string;
   description: string;

@@ -56,7 +56,14 @@ export default function ReusesFormClient({
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdReuse, setCreatedReuse] = useState<Reuse | null>(null);
-  const { errors: formErrors, hasError, setErrors, clearError, resetErrors } = useFormErrors();
+  const {
+    errors: formErrors,
+    hasError,
+    setErrors,
+    clearError,
+    resetErrors,
+    focusFirstError,
+  } = useFormErrors();
 
   // Dynamic options from backend
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
@@ -197,6 +204,7 @@ export default function ReusesFormClient({
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
+      focusFirstError();
       return;
     }
 

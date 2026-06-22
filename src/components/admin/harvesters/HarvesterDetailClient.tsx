@@ -98,7 +98,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   const [selectedBackend, setSelectedBackend] = useState("");
-  const { errors: formErrors, setErrors, clearError, scrollToFirstError } = useFormErrors();
+  const { errors: formErrors, setErrors, clearError, focusFirstError } = useFormErrors();
 
   useEffect(() => {
     async function load() {
@@ -179,7 +179,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     if (!harvesterUrl.trim()) errors.harvesterUrl = true;
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
-      scrollToFirstError();
+      focusFirstError();
       return;
     }
 

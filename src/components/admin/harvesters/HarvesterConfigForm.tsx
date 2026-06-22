@@ -64,7 +64,7 @@ interface HarvesterConfigFormProps {
   setSelectedBackend: (v: string) => void;
   backends: HarvestBackend[];
   activeBackendFilters: { key: string; label: string }[];
-  formErrors: Partial<Record<string, boolean>>;
+  formErrors: Partial<Record<string, boolean | string>>;
   clearError: (field: string) => void;
   addFilter: () => void;
   removeFilter: (index: number) => void;

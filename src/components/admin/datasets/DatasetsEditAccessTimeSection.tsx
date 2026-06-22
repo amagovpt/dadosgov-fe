@@ -3,7 +3,7 @@ import { InputDate, type DropdownSectionProps } from "@ama-pt/agora-design-syste
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 
 type DatasetsEditAccessTimeSectionProps = {
-  formErrors: Partial<Record<string, boolean>>;
+  formErrors: Partial<Record<string, boolean | string>>;
   loadedLicense: string;
   licenseOptions:
     | React.ReactElement<DropdownSectionProps>

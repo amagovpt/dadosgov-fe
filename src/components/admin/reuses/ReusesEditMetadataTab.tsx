@@ -25,7 +25,7 @@ type ReusesEditMetadataTabProps = {
     | React.ReactElement<DropdownSectionProps>
     | React.ReactElement<DropdownSectionProps>[];
   imageError: string | null;
-  formErrors: Partial<Record<string, boolean>>;
+  formErrors: Partial<Record<string, boolean | string>>;
   reuseTypes: ReuseType[];
   reuseTopics: ReuseTopic[];
   onPublishReuse: () => void | Promise<void>;

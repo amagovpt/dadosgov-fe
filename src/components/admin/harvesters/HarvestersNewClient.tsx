@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
+import { normalizeApiError } from "@/service/utils/normalizeApiError";
 import { createHarvester, previewHarvestSource } from "@/service/api/harvesters";
 import type { HarvestPreviewJob, HarvestSourceCreatePayload } from "@/service/types/harvester";
 import HarvesterProducerSection from "@/components/admin/harvesters/HarvesterProducerSection";
@@ -47,7 +48,7 @@ export default function HarvestersNewClient() {
 
   const selectedProducerRef = useRef("");
   const selectedTypeRef = useRef("");
-  const { hasError, setErrors, clearError, resetErrors } = useFormErrors();
+  const { hasError, setErrors, clearError, resetErrors, focusFirstError } = useFormErrors();
 
   function addFilter() {
     setFilters((previousFilters) => [
@@ -105,12 +106,7 @@ export default function HarvestersNewClient() {
       sessionStorage.setItem("createdHarvesterId", created.id);
       router.push(`/pages/admin/harvesters/new?step=3&id=${created.id}`);
     } catch (error: unknown) {
-      const normalizedError = error as { data?: { message?: string }; message?: string };
-      setCreateError(
-        normalizedError?.data?.message ||
-          normalizedError?.message ||
-          "Erro ao criar o harvester.",
-      );
+      setCreateError(normalizeApiError(error, "Erro ao criar o harvester.").message);
     } finally {
       setIsCreating(false);
     }
@@ -128,6 +124,7 @@ export default function HarvestersNewClient() {
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
+      focusFirstError();
       return;
     }
 
@@ -141,12 +138,7 @@ export default function HarvestersNewClient() {
       const job = await previewHarvestSource(buildPayload());
       setPreviewJob(job);
     } catch (error: unknown) {
-      const normalizedError = error as { data?: { message?: string }; message?: string };
-      setPreviewError(
-        normalizedError?.data?.message ||
-          normalizedError?.message ||
-          "Erro ao pré-visualizar o harvester.",
-      );
+      setPreviewError(normalizeApiError(error, "Erro ao pré-visualizar o harvester.").message);
     } finally {
       setIsPreviewing(false);
     }

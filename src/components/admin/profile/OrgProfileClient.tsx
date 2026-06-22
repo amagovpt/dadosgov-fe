@@ -80,7 +80,7 @@ export default function OrgProfileClient() {
   const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null);
   const [logoError, setLogoError] = useState<string | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const { hasError, setError, clearError, resetErrors, scrollToFirstError } = useFormErrors();
+  const { hasError, setError, clearError, resetErrors, focusFirstError } = useFormErrors();
 
   useEffect(() => {
     if (!orgId) {
@@ -145,7 +145,7 @@ export default function OrgProfileClient() {
     if (hasDescriptionError) setError("description");
 
     if (hasNameError || hasDescriptionError) {
-      scrollToFirstError();
+      focusFirstError();
       return;
     }
 

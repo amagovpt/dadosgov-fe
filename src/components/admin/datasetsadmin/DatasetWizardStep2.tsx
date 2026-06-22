@@ -27,7 +27,7 @@ export interface DatasetWizardStep2Props {
   selectedProducerRef: React.MutableRefObject<string>;
   onProducerChange: (value: string) => void;
   producerOptions: DropdownSection;
-  formErrors: Partial<Record<string, boolean>>;
+  formErrors: Partial<Record<string, boolean | string>>;
   datasetTitle: string;
   onDatasetTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   datasetAcronym: string;

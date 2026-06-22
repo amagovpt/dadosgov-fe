@@ -75,7 +75,7 @@ export default function PostsEditClient() {
   const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const selectedKeywordsRef = useRef("");
-  const { hasError, setError, clearError, resetErrors, scrollToFirstError } = useFormErrors();
+  const { hasError, setError, clearError, resetErrors, focusFirstError } = useFormErrors();
   const { setKeywordSearch, keywordOptions, registerSelectedKeywordValue } = useKeywordSelect({
     selectedKeywords: selectedTags,
   });
@@ -110,7 +110,7 @@ export default function PostsEditClient() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (!articleTitle.trim()) {
       setError("articleTitle");
-      scrollToFirstError();
+      focusFirstError();
       return;
     }
 
@@ -147,7 +147,7 @@ export default function PostsEditClient() {
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (!articleContent.trim()) {
       setError("articleContent");
-      scrollToFirstError();
+      focusFirstError();
       return;
     }
 

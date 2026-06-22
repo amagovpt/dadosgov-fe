@@ -57,7 +57,8 @@ export default function DatasetsAdminClient({
   const spatialGranularityRef = useRef("");
   const [temporalStart, setTemporalStart] = useState("");
   const [temporalEnd, setTemporalEnd] = useState("");
-  const { errors: formErrors, setErrors, clearError, resetErrors } = useFormErrors();
+  const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
+    useFormErrors();
   const [selectedProducer, setSelectedProducer] = useState("");
   const [orgContactPoints, setOrgContactPoints] = useState<ContactPoint[]>([]);
   const [selectedContactPointIds, setSelectedContactPointIds] = useState<string[]>([]);
@@ -642,6 +643,7 @@ export default function DatasetsAdminClient({
     }
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
+      focusFirstError();
       return;
     }
     resetErrors();

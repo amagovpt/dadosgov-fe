@@ -80,7 +80,7 @@ export default function DatasetsEditClient() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
-  const { errors: formErrors, setErrors, clearError, resetErrors, scrollToFirstError } =
+  const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors();
 
   // Dropdown data
@@ -350,7 +350,7 @@ export default function DatasetsEditClient() {
     }
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
-      scrollToFirstError();
+      focusFirstError();
       return;
     }
     resetErrors();

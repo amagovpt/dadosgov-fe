@@ -2,12 +2,34 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-export type FormErrors<TField extends string = string> = Partial<Record<TField, boolean>>;
+export type FormErrorValue = boolean | string;
+export type FormErrors<TField extends string = string> = Partial<Record<TField, FormErrorValue>>;
 
-interface ScrollToFirstErrorOptions {
+interface FirstErrorOptions {
   selector?: string;
   behavior?: ScrollBehavior;
   block?: ScrollLogicalPosition;
+}
+
+const FOCUSABLE_SELECTOR =
+  'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+export function revealFirstFormError({
+  selector = '[aria-invalid="true"]',
+  behavior = "smooth",
+  block = "center",
+}: FirstErrorOptions = {}): HTMLElement | null {
+  const invalidElement = document.querySelector<HTMLElement>(selector);
+  if (!invalidElement) return null;
+
+  const focusTarget = invalidElement.matches(FOCUSABLE_SELECTOR)
+    ? invalidElement
+    : invalidElement.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+
+  focusTarget?.focus({ preventScroll: true });
+  invalidElement.scrollIntoView?.({ behavior, block });
+
+  return focusTarget ?? invalidElement;
 }
 
 export function useFormErrors<TField extends string = string>(
@@ -24,7 +46,7 @@ export function useFormErrors<TField extends string = string>(
     });
   }, []);
 
-  const setError = useCallback((field: TField, value: boolean = true) => {
+  const setError = useCallback((field: TField, value: FormErrorValue = true) => {
     setErrors((prev) => {
       if (prev[field] === value) return prev;
       return { ...prev, [field]: value };
@@ -40,28 +62,34 @@ export function useFormErrors<TField extends string = string>(
     [errors],
   );
 
-  const scrollToFirstError = useCallback((options: ScrollToFirstErrorOptions = {}) => {
-    const {
-      selector = '[aria-invalid="true"]',
-      behavior = "smooth",
-      block = "center",
-    } = options;
+  const getErrorMessage = useCallback(
+    (field: TField, fallbackMessage: string = "Campo obrigatório") => {
+      const error = errors[field];
+      return typeof error === "string" ? error : error ? fallbackMessage : undefined;
+    },
+    [errors],
+  );
 
+  const focusFirstError = useCallback((options: FirstErrorOptions = {}) => {
     requestAnimationFrame(() => {
-      document.querySelector<HTMLElement>(selector)?.scrollIntoView({ behavior, block });
+      revealFirstFormError(options);
     });
   }, []);
 
-  const hasAnyError = useMemo(() => Object.keys(errors).length > 0, [errors]);
+  const scrollToFirstError = focusFirstError;
+
+  const hasAnyError = useMemo(() => Object.values(errors).some(Boolean), [errors]);
 
   return {
     errors,
     hasAnyError,
     hasError,
+    getErrorMessage,
     setErrors,
     setError,
     clearError,
     resetErrors,
+    focusFirstError,
     scrollToFirstError,
   };
 }

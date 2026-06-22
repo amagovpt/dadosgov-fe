@@ -30,7 +30,7 @@ type ReusesEditMetadataDetailsSectionProps = {
     | React.ReactElement<DropdownSectionProps>
     | React.ReactElement<DropdownSectionProps>[];
   imageError: string | null;
-  formErrors: Partial<Record<string, boolean>>;
+  formErrors: Partial<Record<string, boolean | string>>;
   reuseTypes: ReuseType[];
   reuseTopics: ReuseTopic[];
   onToggleFeatured: () => void;

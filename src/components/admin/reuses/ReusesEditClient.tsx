@@ -69,7 +69,7 @@ export default function ReusesEditClient() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
-  const { errors: formErrors, setErrors, clearError, resetErrors, scrollToFirstError } =
+  const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors();
 
   // Dropdown data
@@ -566,7 +566,7 @@ export default function ReusesEditClient() {
     if (!description.trim()) errors.description = true;
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
-      scrollToFirstError();
+      focusFirstError();
       return;
     }
     window.scrollTo({ top: 0, behavior: "smooth" });

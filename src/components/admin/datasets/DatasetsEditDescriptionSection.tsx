@@ -10,7 +10,7 @@ const RichTextEditor = dynamic(() => import("@/components/admin/posts/RichTextEd
 });
 
 type DatasetsEditDescriptionSectionProps = {
-  formErrors: Partial<Record<string, boolean>>;
+  formErrors: Partial<Record<string, boolean | string>>;
   loadedTitle: string;
   loadedAcronym: string;
   description: string;

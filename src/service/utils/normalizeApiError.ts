@@ -2,6 +2,38 @@ export interface NormalizedApiError {
   status?: number;
   message: string;
   data?: Record<string, unknown> | null;
+  fieldErrors?: Record<string, string>;
+}
+
+function stringifyErrorValue(value: unknown): string | null {
+  if (value == null) return null;
+  if (typeof value === "string") return value.trim() || null;
+  if (Array.isArray(value)) {
+    const parts = value.map(stringifyErrorValue).filter((part): part is string => Boolean(part));
+    return parts.length > 0 ? parts.join(", ") : null;
+  }
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+function extractFieldErrors(
+  data: Record<string, unknown> | null | undefined,
+): Record<string, string> | undefined {
+  if (!data) return undefined;
+
+  const nestedErrors =
+    data.errors && typeof data.errors === "object" && !Array.isArray(data.errors)
+      ? (data.errors as Record<string, unknown>)
+      : null;
+  const source = nestedErrors ?? data;
+
+  const entries = Object.entries(source).flatMap(([field, value]) => {
+    if (["message", "error", "detail"].includes(field)) return [];
+    const message = stringifyErrorValue(value);
+    return message ? [[field, message] as const] : [];
+  });
+
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
 }
 
 function extractMessageFromData(data: Record<string, unknown> | null | undefined): string | null {
@@ -13,11 +45,8 @@ function extractMessageFromData(data: Record<string, unknown> | null | undefined
 
   const parts = Object.entries(data)
     .flatMap(([key, value]) => {
-      if (value == null) return [];
-      if (typeof value === "string") return [`${key}: ${value}`];
-      if (Array.isArray(value)) return [`${key}: ${value.join(", ")}`];
-      if (typeof value === "object") return [`${key}: ${JSON.stringify(value)}`];
-      return [`${key}: ${String(value)}`];
+      const message = stringifyErrorValue(value);
+      return message ? [`${key}: ${message}`] : [];
     })
     .filter(Boolean);
 
@@ -39,15 +68,17 @@ export function normalizeApiError(
         : null;
 
     const messageFromData = extractMessageFromData(data);
+    const fieldErrors = extractFieldErrors(data);
     const message =
-      (typeof maybeMessage === "string" && maybeMessage.trim()) ||
       messageFromData ||
+      (typeof maybeMessage === "string" && maybeMessage.trim()) ||
       fallbackMessage;
 
     return {
       status: typeof maybeStatus === "number" ? maybeStatus : undefined,
       message,
       data,
+      fieldErrors,
     };
   }
 

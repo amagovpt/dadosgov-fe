@@ -26,7 +26,7 @@ interface ReusesFormDetailsStepProps {
   reuseLink: string;
   reuseLinkInvalid: boolean;
   reuseDescription: string;
-  formErrors: Partial<Record<string, boolean>>;
+  formErrors: Partial<Record<string, boolean | string>>;
   onReuseNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onReuseLinkChange: (event: ChangeEvent<HTMLInputElement>) => void;
   selectedReuseTypeRef: MutableRefObject<string>;

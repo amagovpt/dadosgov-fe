@@ -92,6 +92,7 @@ export default function CommunityResourceFormClient({
     clearError,
     setError,
     resetErrors,
+    focusFirstError,
   } = useFormErrors<CommunityResourceCreateField>();
 
   const { isSubmitting, run } = useAsyncSubmit({
@@ -207,6 +208,7 @@ export default function CommunityResourceFormClient({
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
+      focusFirstError();
       if (errors.dataset) {
         setApiError("Selecione um conjunto de dados antes de continuar.");
       }

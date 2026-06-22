@@ -88,7 +88,7 @@ export default function CommunityResourceEditClient() {
     setErrors,
     clearError,
     resetErrors,
-    scrollToFirstError,
+    focusFirstError,
   } = useFormErrors<CommunityResourceEditField>();
 
   const { isSubmitting, run } = useAsyncSubmit({
@@ -299,7 +299,7 @@ export default function CommunityResourceEditClient() {
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
-      scrollToFirstError();
+      focusFirstError();
       return;
     }
 

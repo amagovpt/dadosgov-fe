@@ -29,7 +29,7 @@ export default function PostsNewClient() {
   const [imageError, setImageError] = useState<string | null>(null);
   const isSaving = pendingAction !== null;
   const selectedKeywordsRef = useRef("");
-  const { hasError, setErrors, clearError, resetErrors, scrollToFirstError } = useFormErrors();
+  const { hasError, setErrors, clearError, resetErrors, focusFirstError } = useFormErrors();
   const { setKeywordSearch, keywordOptions, registerSelectedKeywordValue } = useKeywordSelect({
     selectedKeywords: selectedTags,
   });
@@ -83,7 +83,7 @@ export default function PostsNewClient() {
   async function handleSave(publish: boolean) {
     if (!articleContent.trim()) {
       setErrors({ articleContent: true });
-      scrollToFirstError();
+      focusFirstError();
       return;
     }
 
