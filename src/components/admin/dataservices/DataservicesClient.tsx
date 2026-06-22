@@ -68,9 +68,9 @@ export default function DataservicesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "API", url: "/pages/admin/dataservices" },
+        { label: "API", url: "/admin/dataservices" },
       ]}
       title="API"
       isLoading={isLoading}
@@ -92,7 +92,7 @@ export default function DataservicesClient() {
           }}
         />
       }
-      emptyState={<AdminEmptyState icon="agora-line-edit" createUrl="/pages/admin/dataservices/new" />}
+      emptyState={<AdminEmptyState icon="agora-line-edit" createUrl="/admin/dataservices/new" />}
     >
       <AdminListTable
         items={paginatedApis}

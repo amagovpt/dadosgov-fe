@@ -34,7 +34,7 @@ export default function SystemDatasetsClient() {
   const columns = useMemo(
     () =>
       createDatasetColumns({
-        editHref: (dataset) => `/pages/admin/datasets/${dataset.id}`,
+        editHref: (dataset) => `/admin/datasets/${dataset.id}`,
         showResourceCount: true,
         showQualityScore: true,
       }),
@@ -102,9 +102,9 @@ export default function SystemDatasetsClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Conjuntos de dados", url: "/pages/admin/system/datasets" },
+        { label: "Conjuntos de dados", url: "/admin/system/datasets" },
       ]}
       title="Conjuntos de dados"
       isLoading={isLoading}

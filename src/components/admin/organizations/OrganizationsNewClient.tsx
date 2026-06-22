@@ -83,7 +83,7 @@ export default function OrganizationsNewClient() {
       if (orgLogo) {
         await uploadOrgLogo(org.id, orgLogo);
       }
-      router.push(`/pages/organizations/${org.slug}`);
+      router.push(`/organizations/${org.slug}`);
     } catch (error) {
       const err = error as { status?: number; data?: unknown };
       console.error("Erro ao criar organização:", err.status, JSON.stringify(err.data));
@@ -154,11 +154,11 @@ export default function OrganizationsNewClient() {
 
   return (
     <AdminLayout breadcrumbItems={[
-      { label: "Administração", url: "/pages/admin" },
-      { label: "Organizações", url: "/pages/admin/system/organizations" },
+      { label: "Administração", url: "/admin" },
+      { label: "Organizações", url: "/admin/system/organizations" },
       {
         label: "Formulário de registo de uma organização",
-        url: "/pages/admin/organizations/new",
+        url: "/admin/organizations/new",
       },
     ]}
       title="Formulário de registo de uma organização"
@@ -207,7 +207,7 @@ export default function OrganizationsNewClient() {
                     if (selectedId) {
                       const org = orgSuggestions.find((o) => o.id === selectedId);
                       if (org) {
-                        router.push(`/pages/organizations/${org.slug}`);
+                        router.push(`/organizations/${org.slug}`);
                       }
                     }
                   }}
@@ -222,7 +222,7 @@ export default function OrganizationsNewClient() {
                 <div className="mt-16 flex justify-center">
                   <Button
                     variant="primary"
-                    onClick={() => router.push("/pages/admin/organizations/new?step=2")}
+                    onClick={() => router.push("/admin/organizations/new?step=2")}
                   >
                     Criar uma organização
                   </Button>
@@ -363,7 +363,7 @@ export default function OrganizationsNewClient() {
                   <Button
                     appearance="outline"
                     variant="neutral"
-                    onClick={() => router.push("/pages/admin/organizations/new?step=1")}
+                    onClick={() => router.push("/admin/organizations/new?step=1")}
                   >
                     Anterior
                   </Button>
@@ -394,7 +394,7 @@ export default function OrganizationsNewClient() {
                 <Button
                   appearance="outline"
                   variant="neutral"
-                  onClick={() => router.push("/pages/admin/organizations/new?step=2")}
+                  onClick={() => router.push("/admin/organizations/new?step=2")}
                 >
                   Anterior
                 </Button>
@@ -403,7 +403,7 @@ export default function OrganizationsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-check-circle"
                   trailingIconHover="agora-solid-check-circle"
-                  onClick={() => router.push("/pages/admin/system/organizations")}
+                  onClick={() => router.push("/admin/system/organizations")}
                 >
                   Guardar
                 </Button>

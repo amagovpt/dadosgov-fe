@@ -46,7 +46,7 @@ export default function ReusesEditActivitiesTab({
                 />
                 <div>
                   <p className="text-sm text-neutral-900">
-                    <TextLink href={`/pages/admin/users/${activity.actor?.id}`}>
+                    <TextLink href={`/admin/users/${activity.actor?.id}`}>
                       {activity.actor?.first_name} {activity.actor?.last_name}
                     </TextLink>{" "}
                     {translateActivityLabel(activity.label)}

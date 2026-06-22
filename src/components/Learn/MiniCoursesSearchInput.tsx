@@ -17,7 +17,7 @@ export default function MiniCoursesSearchInput(args: Omit<InputSearchProps, "onC
             const params = new URLSearchParams();
             if (value.trim()) params.set("q", value.trim());
             params.set("page", "1");
-            router.replace(`/pages/learn/mini-courses?${params.toString()}`, { scroll: false });
+            router.replace(`/learn/mini-courses?${params.toString()}`, { scroll: false });
         }, 300);
 
         return () => {

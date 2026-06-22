@@ -133,7 +133,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                     {datasets.map((dataset) => (
                       <div key={dataset.id} className="h-full">
                         <CardLinks
-                          onClick={() => router.push(`/pages/datasets/${dataset.slug}`)}
+                          onClick={() => router.push(`/datasets/${dataset.slug}`)}
                           className="cursor-pointer text-neutral-900"
                           variant="white"
                           image={{
@@ -179,7 +179,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             </span>
                           }
                           mainLink={
-                            <Link href={`/pages/datasets/${dataset.slug}`}>
+                            <Link href={`/datasets/${dataset.slug}`}>
                               <span className="underline">
                                 {sanitizeUserMarkdown(dataset.title)}
                               </span>

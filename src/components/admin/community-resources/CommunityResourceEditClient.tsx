@@ -207,7 +207,7 @@ export default function CommunityResourceEditClient() {
   const handleDelete = async () => {
     try {
       await deleteCommunityResource(resourceId);
-      router.push("/pages/admin/system/community-resources");
+      router.push("/admin/system/community-resources");
     } catch {
       setApiError("Erro ao eliminar recurso comunitário.");
     }
@@ -388,9 +388,9 @@ export default function CommunityResourceEditClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administracao", url: "/pages/admin" },
+        { label: "Administracao", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Recursos comunitários", url: "/pages/admin/system/community-resources" },
+        { label: "Recursos comunitários", url: "/admin/system/community-resources" },
         { label: "Editar" },
       ]}
       title="Metadados do arquivo"
@@ -640,7 +640,7 @@ export default function CommunityResourceEditClient() {
                 hasIcon
                 leadingIcon="agora-line-arrow-left-circle"
                 leadingIconHover="agora-solid-arrow-left-circle"
-                onClick={() => router.push("/pages/admin/system/community-resources")}
+                onClick={() => router.push("/admin/system/community-resources")}
               >
                 Anterior
               </Button>

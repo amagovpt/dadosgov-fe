@@ -219,7 +219,7 @@ export default function PostsEditClient() {
     try {
       const success = await deletePost(postId);
       if (success) {
-        router.push("/pages/admin/system/posts");
+        router.push("/admin/system/posts");
       } else {
         setApiError("Erro ao eliminar. Verifique a autenticação.");
       }
@@ -278,8 +278,8 @@ export default function PostsEditClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Bem-vindo", url: "/pages/admin" },
-        { label: "Artigos", url: "/pages/admin/system/posts" },
+        { label: "Bem-vindo", url: "/admin" },
+        { label: "Artigos", url: "/admin/system/posts" },
         { label: post.name },
       ]}
       title={post.name}
@@ -287,7 +287,7 @@ export default function PostsEditClient() {
         <Button
           variant="primary"
           appearance="outline"
-          onClick={() => window.open(`/pages/posts/${post.slug}`, "_blank")}
+          onClick={() => window.open(`/posts/${post.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="w-16 h-16" />

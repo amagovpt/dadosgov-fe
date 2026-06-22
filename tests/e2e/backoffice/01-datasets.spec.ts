@@ -14,7 +14,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-01: 'Os meus datasets' page lists the seeded dataset", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/");
+    await page.goto("/admin/me/datasets/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -33,7 +33,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-02: Publish dropdown exposes 'Um conjunto de dados' option", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/");
+    await page.goto("/admin/me/datasets/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -49,7 +49,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-03: Wizard step 1 renders the Formulário heading + step indicator", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/");
+    await page.goto("/admin/me/datasets/new/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -65,7 +65,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-04: Wizard step 2 exposes title input #api-name", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/?step=2");
+    await page.goto("/admin/me/datasets/new/?step=2");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -78,7 +78,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-05: Wizard step 3 exposes the FICHEIROS upload section", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/?step=3");
+    await page.goto("/admin/me/datasets/new/?step=3");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -89,7 +89,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-06: Wizard step 4 exposes draft/publish buttons", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/?step=4");
+    await page.goto("/admin/me/datasets/new/?step=4");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -103,7 +103,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   });
 
   test("DS-07: System datasets listing renders for admin", async ({ page }) => {
-    await page.goto("/pages/admin/system/datasets/");
+    await page.goto("/admin/system/datasets/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -116,7 +116,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-08: System datasets listing exposes search affordance", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/datasets/");
+    await page.goto("/admin/system/datasets/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -133,7 +133,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
     page,
   }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
@@ -152,7 +152,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
     page,
   }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
@@ -176,7 +176,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
     page,
   }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
@@ -203,7 +203,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
 
   test("DS-13: Ficheiros tab can be activated", async ({ page }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
@@ -222,7 +222,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
     page,
   }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
@@ -237,7 +237,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-15: Public dataset detail mirrors the seeded title", async ({
     page,
   }) => {
-    await page.goto(`/pages/datasets/${fixtures.dataset.slug}`);
+    await page.goto(`/datasets/${fixtures.dataset.slug}`);
     await page.waitForLoadState("networkidle");
 
     const title = page.locator("main h1").first();
@@ -286,7 +286,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-21: Wizard step 2 frequency dropdown shows placeholder, not pre-selected 'Desconhecida'", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/?step=2");
+    await page.goto("/admin/me/datasets/new/?step=2");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -301,7 +301,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
     page,
   }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
@@ -317,7 +317,7 @@ test.describe("Backoffice - Datasets CRUD", () => {
   test("DS-23: Wizard step 2 'Pontos de contacto *' section appears after selecting an org producer", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/?step=2");
+    await page.goto("/admin/me/datasets/new/?step=2");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

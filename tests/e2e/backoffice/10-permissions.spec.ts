@@ -14,7 +14,7 @@ test.describe("Backoffice - Permissions", () => {
     test("PM-01: Admin can reach the system datasets listing", async ({
       page,
     }) => {
-      await page.goto("/pages/admin/system/datasets");
+      await page.goto("/admin/system/datasets");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
@@ -27,7 +27,7 @@ test.describe("Backoffice - Permissions", () => {
     test("PM-02: Admin can reach the system users listing", async ({
       page,
     }) => {
-      await page.goto("/pages/admin/system/users");
+      await page.goto("/admin/system/users");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
@@ -36,7 +36,7 @@ test.describe("Backoffice - Permissions", () => {
     });
 
     test("PM-03: Admin can reach the editorial editor", async ({ page }) => {
-      await page.goto("/pages/admin/system/editorial");
+      await page.goto("/admin/system/editorial");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
@@ -53,21 +53,21 @@ test.describe("Backoffice - Permissions", () => {
     });
 
     test("PM-04: Editor reaches a backoffice URL", async ({ page }) => {
-      await page.goto("/pages/admin/");
+      await page.goto("/admin/");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2500);
 
       // The /admin/ index redirects to me/datasets (editor without org) or
       // org/datasets (editor with org membership). Some runs render the
       // /admin/ shell first and let the client redirect — accept any
-      // /pages/admin/ URL.
+      // /admin/ URL.
       expect(page.url()).toMatch(/\/pages\/admin/);
     });
 
     test("PM-05: Editor can see their personal datasets listing", async ({
       page,
     }) => {
-      await page.goto("/pages/admin/me/datasets");
+      await page.goto("/admin/me/datasets");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
@@ -85,7 +85,7 @@ test.describe("Backoffice - Permissions", () => {
       // Override storage state for this test only — anonymous context.
       const context = await browser.newContext({ storageState: undefined });
       const page = await context.newPage();
-      await page.goto("/pages/admin/system/datasets");
+      await page.goto("/admin/system/datasets");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 

@@ -67,9 +67,9 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
       sortType: "numeric",
       renderCell: (reuse) =>
         linkStyle === "textLink" ? (
-          <TextLink href={`/pages/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
+          <TextLink href={`/reuses/${reuse.slug}`}>{reuse.title}</TextLink>
         ) : (
-          <a href={`/pages/reuses/${reuse.slug}`} className="text-primary-600 underline">
+          <a href={`/reuses/${reuse.slug}`} className="text-primary-600 underline">
             {reuse.title}
           </a>
         ),
@@ -92,7 +92,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
               <br />
               <span className="text-sm text-neutral-500">
                 {reuse.owner ? (
-                  <TextLink href={`/pages/users/${reuse.owner.slug}`} className="text-xs">
+                  <TextLink href={`/users/${reuse.owner.slug}`} className="text-xs">
                     {reuse.owner.first_name} {reuse.owner.last_name}
                   </TextLink>
                 ) : (
@@ -116,7 +116,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
     },
     createTableActionsColumn<Reuse>({
       viewAction: (reuse) => ({
-        href: `/pages/reuses/${reuse.slug}`,
+        href: `/reuses/${reuse.slug}`,
       }),
       editAction: (reuse) => ({
         href: editHref(reuse),

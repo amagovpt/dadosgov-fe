@@ -89,7 +89,7 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
             <>
               {" "}
               <br />
-              <TextLink href={`/pages/datasets/${resource.dataset.id}`} className="text-sm">
+              <TextLink href={`/datasets/${resource.dataset.id}`} className="text-sm">
                 {resource.dataset.title}
               </TextLink>
             </>
@@ -146,7 +146,7 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
             <div>{formatDateToDMY(resource.last_modified)}</div>
             {resource.owner && (
               <a
-                href={`/pages/users/${resource.owner.slug}`}
+                href={`/users/${resource.owner.slug}`}
                 className="text-xs text-primary-600 underline"
               >
                 {resource.owner.first_name} {resource.owner.last_name}

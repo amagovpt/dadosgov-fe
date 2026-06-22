@@ -75,7 +75,7 @@ export default function CommunityResourcesClient() {
       createCommunityResourceColumns({
         includeFormat: true,
         showDatasetLink: true,
-        editHref: (resource) => `/pages/admin/me/community-resources/edit?id=${resource.id}`,
+        editHref: (resource) => `/admin/me/community-resources/edit?id=${resource.id}`,
       }),
     []
   );
@@ -83,9 +83,9 @@ export default function CommunityResourcesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
+        { label: "Recursos comunitários", url: "/admin/me/community-resources" },
       ]}
       title="Recursos comunitários"
       isLoading={isLoading}
@@ -106,7 +106,7 @@ export default function CommunityResourcesClient() {
         <AdminEmptyState
           icon="agora-line-user-group"
           description="Ainda não publicou um recurso comunitário."
-          createUrl="/pages/admin/community-resources/new"
+          createUrl="/admin/community-resources/new"
         />
       }
     >

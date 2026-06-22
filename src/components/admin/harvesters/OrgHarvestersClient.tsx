@@ -89,7 +89,7 @@ export default function OrgHarvestersClient() {
   const columns = useMemo(
     () =>
       createOrgHarvesterColumns({
-        editHref: (harvester) => `/pages/admin/org/harvesters/${harvester.id}`,
+        editHref: (harvester) => `/admin/org/harvesters/${harvester.id}`,
       }),
     []
   );
@@ -107,9 +107,9 @@ export default function OrgHarvestersClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: orgName || "Organização", url: "#" },
-        { label: "Harvesters", url: "/pages/admin/org/harvesters" },
+        { label: "Harvesters", url: "/admin/org/harvesters" },
       ]}
       title="Harvesters"
       isLoading={isLoading}

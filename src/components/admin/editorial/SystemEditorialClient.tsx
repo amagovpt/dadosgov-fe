@@ -172,8 +172,8 @@ export default function SystemEditorialClient() {
     return (
       <AdminLayout
         breadcrumbItems={[
-          { label: "Administração", url: "/pages/admin" },
-          { label: "Editorial", url: "/pages/admin/system/editorial" },
+          { label: "Administração", url: "/admin" },
+          { label: "Editorial", url: "/admin/system/editorial" },
         ]}
         title="Editorial"
         headerAction={
@@ -208,8 +208,8 @@ export default function SystemEditorialClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Editorial", url: "/pages/admin/system/editorial" },
+        { label: "Administração", url: "/admin" },
+        { label: "Editorial", url: "/admin/system/editorial" },
       ]}
       title="Editorial"
       headerAction={

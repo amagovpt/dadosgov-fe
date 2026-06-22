@@ -18,7 +18,7 @@ export type CardMetricsProps = {
     /**
      * Fallback author for user-published datasets that don't belong to an
      * organization (LEDG-1861). When `organization` is null/undefined we use
-     * this to attribute the card and link to /pages/users/<slug>.
+     * this to attribute the card and link to /users/<slug>.
      */
     owner?: {
         slug: string;

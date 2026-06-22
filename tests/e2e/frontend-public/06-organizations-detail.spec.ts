@@ -1,12 +1,12 @@
 import { test, expect, type Page } from "playwright/test";
 
-const ORGS_URL = "/pages/organizations";
+const ORGS_URL = "/organizations";
 
 async function gotoFirstOrgDetail(page: Page) {
   await page.goto(ORGS_URL);
   await page.waitForLoadState("networkidle");
 
-  const firstLink = page.locator("a[href^='/pages/organizations/']").first();
+  const firstLink = page.locator("a[href^='/organizations/']").first();
   await expect(firstLink).toBeVisible({ timeout: 15000 });
   const href = await firstLink.getAttribute("href");
   if (!href) throw new Error("No organization link found on listing");

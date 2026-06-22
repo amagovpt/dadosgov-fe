@@ -535,7 +535,7 @@ export default function DatasetsEditClient() {
     setIsSubmitting(true);
     try {
       await updateDataset(dataset.id, { archived: new Date().toISOString() });
-      router.push("/pages/admin/me/datasets?status=archived");
+      router.push("/admin/me/datasets?status=archived");
     } catch (error) {
       console.error("Error archiving dataset:", error);
       setApiError("Erro ao arquivar o conjunto de dados.");
@@ -580,7 +580,7 @@ export default function DatasetsEditClient() {
     try {
       await deleteDataset(dataset.id);
       hide();
-      router.push("/pages/admin/me/datasets");
+      router.push("/admin/me/datasets");
     } catch (error) {
       console.error("Error deleting dataset:", error);
       setApiError("Erro ao eliminar o conjunto de dados.");
@@ -746,7 +746,7 @@ export default function DatasetsEditClient() {
     return (
       <div className="admin-page">
         <StatusCard variant="danger" showIcon description="Conjunto de dados não encontrado." />
-        <Button variant="primary" onClick={() => router.push("/pages/admin/me/datasets")}>
+        <Button variant="primary" onClick={() => router.push("/admin/me/datasets")}>
           Voltar
         </Button>
       </div>
@@ -798,8 +798,8 @@ export default function DatasetsEditClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
+        { label: "Administração", url: "/admin" },
+        { label: "Conjuntos de dados", url: "/admin/me/datasets" },
         { label: dataset.title },
       ]}
       title={dataset.title}
@@ -807,7 +807,7 @@ export default function DatasetsEditClient() {
         <Button
           variant="primary"
           appearance="outline"
-          onClick={() => window.open(`/pages/datasets/${dataset.slug}`, "_blank")}
+          onClick={() => window.open(`/datasets/${dataset.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="h-16 w-16" />
@@ -865,7 +865,7 @@ export default function DatasetsEditClient() {
           {latestActivity ? (
             <>
               {" Atividade mais recente: "}
-              <TextLink href={`/pages/users/${latestActivity.actor.slug}`}>
+              <TextLink href={`/users/${latestActivity.actor.slug}`}>
                 {latestActivity.actor.first_name} {latestActivity.actor.last_name}
               </TextLink>
               {" — "}
@@ -882,7 +882,7 @@ export default function DatasetsEditClient() {
               {" Atividade mais recente: "}
               {dataset.owner && (
                 <>
-                  <TextLink href={`/pages/users/${dataset.owner.slug}`}>
+                  <TextLink href={`/users/${dataset.owner.slug}`}>
                     {dataset.owner.first_name} {dataset.owner.last_name}
                   </TextLink>
                 </>

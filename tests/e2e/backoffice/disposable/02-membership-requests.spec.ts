@@ -86,7 +86,7 @@ test.describe("Backoffice (disposable) - Membership requests", () => {
     await editorCtx.close();
 
     // Admin navigates to the members page.
-    await page.goto(`/pages/admin/org/${orgId}/members`);
+    await page.goto(`/admin/org/${orgId}/members`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -131,7 +131,7 @@ test.describe("Backoffice (disposable) - Membership requests", () => {
     await editorCtx.close();
 
     // Admin navigates to the members page.
-    await page.goto(`/pages/admin/org/${orgId}/members`);
+    await page.goto(`/admin/org/${orgId}/members`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -180,7 +180,7 @@ test.describe("Backoffice (disposable) - Membership requests", () => {
     });
     await editorCtx.close();
 
-    await page.goto(`/pages/admin/org/${orgId}/members`);
+    await page.goto(`/admin/org/${orgId}/members`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

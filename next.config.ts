@@ -186,8 +186,8 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/:locale([a-z]{2})/datasets", destination: "/pages/datasets", permanent: true },
-      { source: "/:locale([a-z]{2})/datasets/:path*", destination: "/pages/datasets/:path*", permanent: true },
+      { source: "/:locale([a-z]{2})/datasets", destination: "/datasets", permanent: true },
+      { source: "/:locale([a-z]{2})/datasets/:path*", destination: "/datasets/:path*", permanent: true },
     ];
   },
   // TODO: Install @sentry/nextjs and configure

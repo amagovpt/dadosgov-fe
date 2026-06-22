@@ -307,7 +307,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     try {
       await deleteHarvester(source.id);
       hide();
-      router.push("/pages/admin/system/harvesters");
+      router.push("/admin/system/harvesters");
     } catch (error) {
       console.error("Error deleting harvester:", error);
       hide();
@@ -377,7 +377,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
   return (
     <AdminLayout breadcrumbItems={[
-      { label: "Sistema", url: "/pages/admin/system/harvesters" },
+      { label: "Sistema", url: "/admin/system/harvesters" },
       { label: source.name, url: "#" },
     ]}
       title={source.name}

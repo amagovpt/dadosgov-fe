@@ -17,24 +17,24 @@ const linkColumns = [
   {
     title: "Dados abertos",
     links: [
-      { href: "/pages/roadmap", label: "Roadmap" },
-      { href: "/pages/datasets/catalogo-de-dados-dos-dados-gov-pt", label: "Catálogo de dados" },
+      { href: "/roadmap", label: "Roadmap" },
+      { href: "/datasets/catalogo-de-dados-dos-dados-gov-pt", label: "Catálogo de dados" },
       { href: "https://data.europa.eu/pt", label: "Portal de dados europeu" },
     ],
   },
   {
     title: "Portal",
     links: [
-      { href: "/pages/posts", label: "Notícias" },
-      { href: "/pages/faqs/about_dadosgov", label: "Sobre nós" },
-      { href: "/pages/support", label: "Ajuda e contactos" },
-      { href: "/pages/faqs/terms", label: "Termos de utilização" },
+      { href: "/posts", label: "Notícias" },
+      { href: "/faqs/about_dadosgov", label: "Sobre nós" },
+      { href: "/support", label: "Ajuda e contactos" },
+      { href: "/faqs/terms", label: "Termos de utilização" },
     ],
   },
   {
     title: "Desenvolvimento",
     links: [
-      { href: "/pages/docapi", label: "API dos dados.gov.pt" },
+      { href: "/docapi", label: "API dos dados.gov.pt" },
       {
         href: "https://github.com/amagovpt/udata-pt",
         label: `Mecanismo de código aberto : udata (${process.env.NEXT_PUBLIC_UDATA_VERSION && process.env.NEXT_PUBLIC_UDATA_VERSION !== "unknown" ? process.env.NEXT_PUBLIC_UDATA_VERSION : "10.4.3"})`,

@@ -103,7 +103,7 @@ export default function DatasetsClient({
         title="Conjuntos de dados"
         breadcrumbItems={[
           { label: "Home", url: "/" },
-          { label: "Conjuntos de dados", url: "/pages/datasets" },
+          { label: "Conjuntos de dados", url: "/datasets" },
         ]}
         subtitle={
           <p className="text-primary-100 max-w-[592px]">
@@ -203,7 +203,7 @@ export default function DatasetsClient({
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
-                      link: `/pages/datasets/${dataset.slug}`
+                      link: `/datasets/${dataset.slug}`
                     } as CardMetricsProps;
                     return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />
                   })

@@ -78,14 +78,14 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
 
   const handleNext = () => {
     if (isLastStep) {
-      router.push(`/pages/learn/mini-courses`);
+      router.push(`/learn/mini-courses`);
     } else {
-      router.push(`/pages/learn/mini-courses/${slug}/${step + 1}`);
+      router.push(`/learn/mini-courses/${slug}/${step + 1}`);
     }
   };
 
   const handlePrevious = () => {
-    router.push(`/pages/learn/mini-courses/${slug}/${step - 1}`);
+    router.push(`/learn/mini-courses/${slug}/${step - 1}`);
   };
 
 
@@ -97,8 +97,8 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
           items={[
             { label: 'Home', url: '/' },
             { label: "Recursos", url: "#" },
-            { label: 'Aprender', url: '/pages/learn/' },
-            { label: 'Minicursos', url: '/pages/learn/mini-courses/' },
+            { label: 'Aprender', url: '/learn/' },
+            { label: 'Minicursos', url: '/learn/mini-courses/' },
             { label: title, url: '#' },
           ]}
         />

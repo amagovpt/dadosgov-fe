@@ -23,9 +23,9 @@ export default function ReusesNewClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Reutilizações", url: "/pages/admin/me/reuses" },
+        { label: "Reutilizações", url: "/admin/me/reuses" },
       ]}
       title="Formulário de publicação de uma reutilização"
     >

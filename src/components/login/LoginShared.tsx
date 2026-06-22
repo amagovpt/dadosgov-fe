@@ -73,7 +73,7 @@ export function TermsSection({
       <p className="text-sm">
         Deve ler atentamente os{" "}
         <TextLink
-          href="/pages/faqs/terms"
+          href="/faqs/terms"
           className="hover:text-primary-800 active:decoration-dashed"
         >
           Termos e condições para o tratamento dos seus dados
@@ -106,7 +106,7 @@ export function SupportStatusCard() {
                 Se precisar de ajuda, fale connosco através do nosso formulário.
               </p>
               <a
-                href="/pages/support"
+                href="/support"
                 className="text-sm flex items-center gap-8 text-informative-600"
               >
                 Formulário de contacto

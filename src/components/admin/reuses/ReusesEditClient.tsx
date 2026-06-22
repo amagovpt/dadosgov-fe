@@ -716,7 +716,7 @@ export default function ReusesEditClient() {
     setIsSubmitting(true);
     try {
       await deleteReuse(reuse.id);
-      router.push("/pages/admin/me/reuses");
+      router.push("/admin/me/reuses");
     } catch (error) {
       console.error("Error deleting reuse:", error);
       setApiError("Erro ao eliminar a reutilização.");
@@ -791,7 +791,7 @@ export default function ReusesEditClient() {
     return (
       <div className="admin-page">
         <StatusCard variant="danger" showIcon description="Reutilização não encontrada." />
-        <Button variant="primary" onClick={() => router.push("/pages/admin/me/reuses")}>
+        <Button variant="primary" onClick={() => router.push("/admin/me/reuses")}>
           Voltar
         </Button>
       </div>
@@ -801,8 +801,8 @@ export default function ReusesEditClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Reutilizações", url: "/pages/admin/me/reuses" },
+        { label: "Administração", url: "/admin" },
+        { label: "Reutilizações", url: "/admin/me/reuses" },
         { label: reuse.title },
       ]}
       title={reuse.title}
@@ -811,7 +811,7 @@ export default function ReusesEditClient() {
           variant="primary"
           appearance="outline"
           disabled={!!(reuse.archived || reuse.deleted)}
-          onClick={() => window.open(`/pages/reuses/${reuse.slug}`, "_blank")}
+          onClick={() => window.open(`/reuses/${reuse.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="h-16 w-16" />
@@ -871,7 +871,7 @@ export default function ReusesEditClient() {
           {" Atividade mais recente: "}
           {reuse.owner && (
             <>
-              <TextLink href={`/pages/users/${reuse.owner.slug}`}>
+              <TextLink href={`/users/${reuse.owner.slug}`}>
                 {reuse.owner.first_name} {reuse.owner.last_name}
               </TextLink>
             </>

@@ -28,7 +28,7 @@ function sanitizeMarkdown(content: string): string {
     .replace(/\bdados gov\b/g, "dados.gov.pt")
     .replace(
       /Para pedidos de certificação, enviar e-mail para: dados@ama\.pt\./g,
-      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/pages/support)."
+      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/support)."
     )
     .replace(
       /### Utilização do e-mail dados\(arroba\)ama\.pt/g,
@@ -36,7 +36,7 @@ function sanitizeMarkdown(content: string): string {
     )
     .replace(
       /Este endereço de correio eletrónico permite contatar a equipa de projeto do dados\.gov, para questões relacionadas com o funcionamento geral da plataforma\. Não deverá ser utilizado para endereçar questões específicas sobre conjuntos de dados ou fornecedores\. Os participantes deverão ser contatados através do sistema de comentários relativo a cada conjunto de dados\./g,
-      "Para questões relacionadas com o funcionamento geral do portal dados.gov, deverá ser utilizada a página [Ajuda e Contactos](/pages/support). Esta via não deverá ser utilizada para endereçar questões específicas sobre conjuntos de dados ou fornecedores. Nesses casos, os participantes deverão ser contactados através do sistema de comentários associado a cada conjunto de dados."
+      "Para questões relacionadas com o funcionamento geral do portal dados.gov, deverá ser utilizada a página [Ajuda e Contactos](/support). Esta via não deverá ser utilizada para endereçar questões específicas sobre conjuntos de dados ou fornecedores. Nesses casos, os participantes deverão ser contactados através do sistema de comentários associado a cada conjunto de dados."
     );
 }
 
@@ -87,7 +87,7 @@ export function GitHubMarkdownPage({
                       ),
                       a: ({ href, children }) => {
                         const isExternal = href?.startsWith("http");
-                        const isPortalLink = href?.startsWith("/pages/");
+                        const isPortalLink = href?.startsWith("/");
                         const resolvedHref =
                           isPortalLink || isExternal
                             ? (href ?? "#")

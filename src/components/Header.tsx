@@ -125,7 +125,7 @@ export const Header = () => {
 
   const [selectedLanguage, setSelectedLanguage] = useState("pt");
   const [submenu, setSubmenu] = useState<string | null>(null);
-  const selectedArea = pathname === "/pages/login" ? "2" : "1";
+  const selectedArea = pathname === "/login" ? "2" : "1";
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
@@ -152,7 +152,7 @@ export const Header = () => {
   }, [ecosystemOpen, ecosystemPanelNode]);
 
   // Mark header when on auth pages so CSS can style the "Autenticar" button
-  const isAuthPage = pathname === "/pages/login" || pathname === "/pages/login";
+  const isAuthPage = pathname === "/login" || pathname === "/login";
 
   // Reset submenu when clicking anywhere outside the card grid (.links)
   const handleHeaderClickCapture = React.useCallback((e: React.MouseEvent) => {
@@ -327,7 +327,7 @@ export const Header = () => {
                 <Area
                   value="2"
                   label="Iniciar Sessão"
-                  onClick={() => router.push("/pages/login")}
+                  onClick={() => router.push("/login")}
                   active={selectedArea === "2"}
                 />
               </div>
@@ -376,8 +376,8 @@ export const Header = () => {
                 <Link
                   href={
                     user
-                      ? `/pages/users/${user.slug}`
-                      : `/pages/login${pathname && pathname !== "/pages/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`
+                      ? `/users/${user.slug}`
+                      : `/login${pathname && pathname !== "/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`
                   }
                 >
                   {user ? `${user.first_name} ${user.last_name}` : "Autenticar"}
@@ -396,15 +396,15 @@ export const Header = () => {
           >
             <NavigationLink appearance="link">
               <Link
-                href="/pages/datastories"
-                onClick={(e) => handleLinkClick(e, "/pages/datastories")}
+                href="/datastories"
+                onClick={(e) => handleLinkClick(e, "/datastories")}
               >
                 Data Stories
               </Link>
             </NavigationLink>
 
             <NavigationLink appearance="link">
-              <Link href="/pages/datasets" onClick={(e) => handleLinkClick(e, "/pages/datasets")}>
+              <Link href="/datasets" onClick={(e) => handleLinkClick(e, "/datasets")}>
                 Conjuntos de dados
               </Link>
             </NavigationLink>
@@ -412,8 +412,8 @@ export const Header = () => {
             {/* API (dataservices) oculta temporariamente — feature incompleta para PRD
             <NavigationLink appearance="link">
               <Link
-                href="/pages/dataservices"
-                onClick={(e) => handleLinkClick(e, "/pages/dataservices")}
+                href="/dataservices"
+                onClick={(e) => handleLinkClick(e, "/dataservices")}
               >
                 API
               </Link>
@@ -421,15 +421,15 @@ export const Header = () => {
             */}
 
             <NavigationLink appearance="link">
-              <Link href="/pages/reuses" onClick={(e) => handleLinkClick(e, "/pages/reuses")}>
+              <Link href="/reuses" onClick={(e) => handleLinkClick(e, "/reuses")}>
                 Reutilizações
               </Link>
             </NavigationLink>
 
             <NavigationLink appearance="link">
               <Link
-                href="/pages/organizations"
-                onClick={(e) => handleLinkClick(e, "/pages/organizations")}
+                href="/organizations"
+                onClick={(e) => handleLinkClick(e, "/organizations")}
               >
                 Organizações
               </Link>
@@ -490,7 +490,7 @@ export const Header = () => {
                     iconHover="agora-solid-info-mark"
                     title="O que é o dados.gov.pt"
                     description="Sobre o portal"
-                    href="/pages/faqs/about_dadosgov"
+                    href="/faqs/about_dadosgov"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -502,7 +502,7 @@ export const Header = () => {
                     iconHover="agora-solid-globe"
                     title="Sobre dados abertos"
                     description="Informação geral"
-                    href="/pages/about-open-data"
+                    href="/about-open-data"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -514,7 +514,7 @@ export const Header = () => {
                     iconHover="agora-solid-upload"
                     title="Como publicar dados"
                     description="Guia de publicação"
-                    href="/pages/faqs/publish"
+                    href="/faqs/publish"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -526,7 +526,7 @@ export const Header = () => {
                     iconHover="agora-solid-refresh-ccw"
                     title="Como reutilizar dados"
                     description="Guia de reutilização"
-                    href="/pages/faqs/reuse"
+                    href="/faqs/reuse"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -538,7 +538,7 @@ export const Header = () => {
                     iconHover="agora-solid-shield"
                     title="Licenças"
                     description="Licenças de dados abertos"
-                    href="/pages/faqs/licenses"
+                    href="/faqs/licenses"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -551,7 +551,7 @@ export const Header = () => {
                     iconHover="agora-solid-book-open"
                     title="Aprender"
                     description="Cursos e Minicursos"
-                    href="/pages/learn"
+                    href="/learn"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -610,7 +610,7 @@ export const Header = () => {
                     iconHover="agora-solid-document"
                     title="Acesso via SPARQL"
                     description="Consultar o catálogo via SPARQL"
-                    href="/pages/faqs/acesso-ao-catalogo-via-sparql"
+                    href="/faqs/acesso-ao-catalogo-via-sparql"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -622,7 +622,7 @@ export const Header = () => {
                     iconHover="agora-solid-book-open"
                     title="Tutorial API"
                     description="Guia de utilização da API"
-                    href="/pages/faqs/api-tutorial"
+                    href="/faqs/api-tutorial"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -634,7 +634,7 @@ export const Header = () => {
                     iconHover="/Icons/reduce_icon.svg"
                     title="Referência API"
                     description="Documentação técnica"
-                    href="/pages/faqs/api-documentation"
+                    href="/faqs/api-documentation"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -647,7 +647,7 @@ export const Header = () => {
                     iconHover="agora-solid-mega-phone"
                     title="Publicações"
                     description="Novidades e eventos"
-                    href="/pages/publications"
+                    href="/publications"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -662,7 +662,7 @@ export const Header = () => {
                   iconHover: "agora-solid-layers-menu",
                   title: "Novo Conjunto de Dados",
                   description: "Publicar dados",
-                  href: "/pages/admin/datasets/new",
+                  href: "/admin/datasets/new",
                 },
                 // Nova API (dataservices) oculta temporariamente — feature incompleta para PRD
                 // {
@@ -670,28 +670,28 @@ export const Header = () => {
                 //   iconHover: "/Icons/api-solid.svg",
                 //   title: "Nova API",
                 //   description: "Serviços de dados",
-                //   href: "/pages/admin/dataservices/new",
+                //   href: "/admin/dataservices/new",
                 // },
                 {
                   iconDefault: "agora-line-share",
                   iconHover: "agora-solid-share",
                   title: "Nova Reutilização",
                   description: "Casos de uso",
-                  href: "/pages/admin/reuses/new",
+                  href: "/admin/reuses/new",
                 },
                 {
                   iconDefault: "agora-line-buildings",
                   iconHover: "agora-solid-buildings",
                   title: "Nova Organização",
                   description: "Entidades",
-                  href: "/pages/admin/organizations/new?step=1",
+                  href: "/admin/organizations/new?step=1",
                 },
                 {
                   iconDefault: "/Icons/harvester.svg",
                   iconHover: "/Icons/harvester-solid.svg",
                   title: "Novo Harvester",
                   description: "Recolha automática",
-                  href: "/pages/admin/harvesters/new",
+                  href: "/admin/harvesters/new",
                 },
               ].map((card) => (
                 <NavigationLink key={card.title} appearance="link">
@@ -706,7 +706,7 @@ export const Header = () => {
         createPortal(
           <div className="panel-menu unauthenticated-panel-menu">
             <span className="agora-link-wrapper agora-link-wrapper-link-neutral full-width custom-header-link-wrapper panel-menu-link-wrapper inline-flex min-h-[44px] min-w-[44px] items-center justify-center py-8">
-              <Link className="link-with-icon" href="/pages/admin/me/datasets">
+              <Link className="link-with-icon" href="/admin/me/datasets">
                 <div className="icon-wrapper leading">
                   <Icon name="agora-line-hardware-settings" dimensions="s" />
                 </div>

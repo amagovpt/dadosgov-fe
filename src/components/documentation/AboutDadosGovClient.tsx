@@ -11,7 +11,7 @@ export default function AboutDadosGovClient({ initialContent }: { initialContent
       breadcrumbItems={[
         { label: "Home", url: "/" },
         { label: "Recursos", url: "#" },
-        { label: "Sobre o dados.gov.pt", url: "/pages/faqs/about_dadosgov" },
+        { label: "Sobre o dados.gov.pt", url: "/faqs/about_dadosgov" },
       ]}
     />
   );

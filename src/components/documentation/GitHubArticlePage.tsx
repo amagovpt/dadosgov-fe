@@ -34,7 +34,7 @@ const markdownComponents = {
   p: ({ children }: any) => <p className="mb-16 text-m-regular leading-7">{children}</p>,
   a: ({ href, children }: any) => {
     const linkOverrides: Record<string, { href: string; text?: string }> = {
-      "/docapi/": { href: "/pages/faqs/api-documentation" },
+      "/docapi/": { href: "/faqs/api-documentation" },
       "http://www.mejoratuescuela.org": {
         href: "https://www.redalyc.org/journal/5475/547567705004/",
       },
@@ -49,8 +49,8 @@ const markdownComponents = {
           href: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
           text: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
         },
-      "/pt/pages/faqs/about_opendata/": { href: "/pages/about-open-data" },
-      "/pages/faqs/licenses/": { href: "/" },
+      "/pt/faqs/about_opendata/": { href: "/about-open-data" },
+      "/faqs/licenses/": { href: "/" },
     };
     const normalizedHref = href?.trim().replace(/^\/pt/, "");
     const override = linkOverrides[href] ?? linkOverrides[normalizedHref];
@@ -104,15 +104,15 @@ function sanitizeMarkdown(content: string): string {
     .replace(/\bdados gov\b/g, "dados.gov.pt")
     .replace(
       /A certificação pode ser pedida através do e-mail dados@ama\.pt\./g,
-      "O pedido de certificação deve ser realizado através da página [Ajuda e Contactos](/pages/support)."
+      "O pedido de certificação deve ser realizado através da página [Ajuda e Contactos](/support)."
     )
     .replace(
       /A ARTE também poderá ajudar neste processo, incluindo colaborar na organização de workshops \/ eventos com vista a promover estas interações, contacte-nos em dados@ama\.pt\./g,
-      "A ARTE também poderá apoiar este processo, nomeadamente através da colaboração na organização de workshops e eventos que promovam estas interações. Para mais informações, consulte a página [Ajuda e Contactos](/pages/support)."
+      "A ARTE também poderá apoiar este processo, nomeadamente através da colaboração na organização de workshops e eventos que promovam estas interações. Para mais informações, consulte a página [Ajuda e Contactos](/support)."
     )
     .replace(
       /Para pedidos de certificação, enviar e-mail para: dados@ama\.pt\./g,
-      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/pages/support)."
+      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/support)."
     );
 }
 

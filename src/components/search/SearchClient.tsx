@@ -310,14 +310,14 @@ export default function SearchClient() {
       current.append(paramName, value);
     }
     current.set("page", "1");
-    router.push(`/pages/search?${current.toString()}`);
+    router.push(`/search?${current.toString()}`);
   };
 
   const handleClearAdvancedFilter = (paramName: string) => {
     const current = new URLSearchParams(searchParams.toString());
     current.delete(paramName);
     current.set("page", "1");
-    router.push(`/pages/search?${current.toString()}`);
+    router.push(`/search?${current.toString()}`);
   };
 
   const handleFilterSearchChange = (groupName: string, value: string) => {
@@ -380,7 +380,7 @@ export default function SearchClient() {
       const t = params.type || activeTab;
       const p = params.page || 1;
       const q = params.q ?? query;
-      return `/pages/search?q=${encodeURIComponent(q)}&type=${t}&page=${p}`;
+      return `/search?q=${encodeURIComponent(q)}&type=${t}&page=${p}`;
     },
     [query, activeTab]
   );
@@ -414,7 +414,7 @@ export default function SearchClient() {
           backgroundImageUrl="/Banner/hero-bg.png"
           breadcrumbItems={[
             { label: "Home", url: "/" },
-            { label: "Pesquisa", url: "/pages/search" },
+            { label: "Pesquisa", url: "/search" },
           ]}
         >
           <InputSearchBar
@@ -563,7 +563,7 @@ export default function SearchClient() {
                         datasets.map((dataset) => (
                           <Link
                             key={dataset.id}
-                            href={`/pages/datasets/${dataset.slug}`}
+                            href={`/datasets/${dataset.slug}`}
                             className="-mt-px hover:shadow-sm relative block border border-neutral-200 p-20 transition-all first:rounded-t-8 last:rounded-b-8 hover:z-10 hover:border-primary-600"
                           >
                             <h3 className="text-m-bold text-primary-700">{dataset.title}</h3>
@@ -614,7 +614,7 @@ export default function SearchClient() {
                         dataservices.map((ds) => (
                           <Link
                             key={ds.id}
-                            href={`/pages/dataservices/${ds.id}`}
+                            href={`/dataservices/${ds.id}`}
                             className="-mt-px hover:shadow-sm relative block border border-neutral-200 p-20 transition-all first:rounded-t-8 last:rounded-b-8 hover:z-10 hover:border-primary-600"
                           >
                             <h3 className="text-m-bold text-primary-700">{ds.title}</h3>
@@ -647,7 +647,7 @@ export default function SearchClient() {
                         organizations.map((org) => (
                           <Link
                             key={org.id}
-                            href={`/pages/organizations/${org.slug}`}
+                            href={`/organizations/${org.slug}`}
                             className="-mt-px hover:shadow-sm relative flex items-center gap-20 border border-neutral-200 p-20 transition-all first:rounded-t-8 last:rounded-b-8 hover:z-10 hover:border-primary-600"
                           >
                             {org.logo ? (
@@ -693,7 +693,7 @@ export default function SearchClient() {
                         reuses.map((reuse) => (
                           <Link
                             key={reuse.id}
-                            href={`/pages/reuses/${reuse.slug}`}
+                            href={`/reuses/${reuse.slug}`}
                             className="-mt-px hover:shadow-sm relative flex items-center gap-20 border border-neutral-200 p-20 transition-all first:rounded-t-8 last:rounded-b-8 hover:z-10 hover:border-primary-600"
                           >
                             {reuse.image_thumbnail || reuse.image ? (
@@ -743,7 +743,7 @@ export default function SearchClient() {
                         currentPage={currentPage}
                         totalItems={totalForActiveTab}
                         pageSize={PAGE_SIZE}
-                        baseUrl={`/pages/search?q=${encodeURIComponent(query)}&type=${activeTab}`}
+                        baseUrl={`/search?q=${encodeURIComponent(query)}&type=${activeTab}`}
                       />
                     </div>
                   )}

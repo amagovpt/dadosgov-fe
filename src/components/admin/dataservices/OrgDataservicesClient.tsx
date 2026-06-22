@@ -80,7 +80,7 @@ export default function OrgDataservicesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: orgName || "Organização", url: "#" },
         { label: "API" },
       ]}
@@ -109,7 +109,7 @@ export default function OrgDataservicesClient() {
           icon="agora-line-edit"
           title="Sem publicações"
           description="A organização ainda não publicou uma API."
-          createUrl="/pages/admin/dataservices/new"
+          createUrl="/admin/dataservices/new"
         />
       }
     >

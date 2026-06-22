@@ -26,7 +26,7 @@ export function TopicCard({ topic, variant, iconProps }: TopicCardProps) {
       descriptionText={topic?.description}
       anchor={{
         children: "",
-        href: "/pages/areas-tematicas/" + topic?.slug,
+        href: "/areas-tematicas/" + topic?.slug,
         hasIcon: true,
         trailingIcon: "agora-line-arrow-right-circle",
         trailingIconActive: "agora-line-arrow-right-circle",

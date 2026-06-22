@@ -134,7 +134,7 @@ export function createSystemHarvesterColumns({
       id: "name",
       header: "Nome",
       renderCell: (harvester) => (
-        <TextLink href={`/pages/admin/harvesters/${harvester.id}`}>{harvester.name}</TextLink>
+        <TextLink href={`/admin/harvesters/${harvester.id}`}>{harvester.name}</TextLink>
       ),
     },
     {
@@ -211,7 +211,7 @@ export function createSystemHarvesterColumns({
           )}
           <TableActionsCell
             editAction={{
-              href: `/pages/admin/harvesters/${harvester.id}?tab=config`,
+              href: `/admin/harvesters/${harvester.id}?tab=config`,
             }}
           />
         </div>

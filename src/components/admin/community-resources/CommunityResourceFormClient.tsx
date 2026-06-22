@@ -141,8 +141,8 @@ export default function CommunityResourceFormClient({
 
       setCreatedResource(resource);
       const url = dataset
-        ? `/pages/datasets/${dataset.slug}`
-        : "/pages/admin/me/community-resources";
+        ? `/datasets/${dataset.slug}`
+        : "/admin/me/community-resources";
       onPublicPageReady?.(url);
       onNextStep();
     } catch (err: unknown) {
@@ -327,7 +327,7 @@ export default function CommunityResourceFormClient({
                     Quando o conjunto de dados for produzido no contexto de atividade profissional,
                     é recomendável que seja publicado em nome da organização responsável.
                   </p>
-                  <a href="/pages/admin/organizations/new" className="admin-page__org-card-link">
+                  <a href="/admin/organizations/new" className="admin-page__org-card-link">
                     Crie ou integre uma organização em dados.gov.pt
                     <Icon name="agora-line-arrow-right-circle" className="h-24 w-24" />
                   </a>
@@ -529,7 +529,7 @@ export default function CommunityResourceFormClient({
                         </span>
                       }
                       mainLink={
-                        <Link href={`/pages/datasets/${dataset.slug}`}>
+                        <Link href={`/datasets/${dataset.slug}`}>
                           <span className="underline">{dataset.title}</span>
                         </Link>
                       }

@@ -551,7 +551,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: cachedOrgName || viewedOrg?.name || "Organização", url: "#" },
         { label: "Membros" },
       ]}
@@ -590,7 +590,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
                       ) : (
                         <Icon name="agora-line-user" className="h-32 w-32" />
                       )}
-                      <TextLink href={`/pages/users/${request.user.slug}`}>
+                      <TextLink href={`/users/${request.user.slug}`}>
                         {request.user.first_name} {request.user.last_name}
                       </TextLink>
                     </div>

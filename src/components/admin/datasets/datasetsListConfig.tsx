@@ -92,7 +92,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       sortField: "title" as DatasetColumnField<TVariant>,
       sortType: "date",
       renderCell: (dataset) => (
-        <TextLink href={`/pages/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
+        <TextLink href={`/datasets/${dataset.slug}`}>{dataset.title}</TextLink>
       ),
     },
     {
@@ -116,12 +116,12 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
         <div>
           <div>{formatDatasetDate(dataset.last_modified)}</div>
           {showOwner && dataset.owner && (
-            <TextLink href={`/pages/users/${dataset.owner.slug}`} className="text-xs">
+            <TextLink href={`/users/${dataset.owner.slug}`} className="text-xs">
               {dataset.owner.first_name} {dataset.owner.last_name}
             </TextLink>
           )}
           {!dataset.owner && showOrganizationFallback && dataset.organization && (
-            <TextLink href={`/pages/organizations/${dataset.organization.slug}`} className="text-xs">
+            <TextLink href={`/organizations/${dataset.organization.slug}`} className="text-xs">
               {dataset.organization.name}
             </TextLink>
           )}
@@ -170,7 +170,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
     headerLabel: "Ações",
     renderCell: (dataset) => (
       <TableActionsCell
-        viewAction={{ href: `/pages/datasets/${dataset.slug}` }}
+        viewAction={{ href: `/datasets/${dataset.slug}` }}
         editAction={{ href: editHref(dataset) }}
       />
     ),

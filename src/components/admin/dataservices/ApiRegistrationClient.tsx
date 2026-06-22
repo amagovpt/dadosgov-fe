@@ -274,7 +274,7 @@ export default function ApiRegistrationClient({
                     tratar de uma atividade profissional.
                   </p>
                   <a
-                    href="/pages/admin/organizations/new"
+                    href="/admin/organizations/new"
                     className="admin-page__org-card-link"
                   >
                     Crie ou integre uma organização em dados.gov.pt
@@ -559,7 +559,7 @@ export default function ApiRegistrationClient({
                 }
                 anchor={{
                   href: createdDataservice
-                    ? `/pages/dataservices/${createdDataservice.id}`
+                    ? `/dataservices/${createdDataservice.id}`
                     : "#",
                   children: "",
                 }}

@@ -79,7 +79,7 @@ test.describe("Stored XSS — public detail pages (VULN-2075 / VULN-2076)", () =
     const { xss_organization } = loadFixtures();
     await assertNoXssExecution(
       page,
-      `/pages/organizations/${xss_organization.slug}`,
+      `/organizations/${xss_organization.slug}`,
       "organization.description",
     );
   });
@@ -90,7 +90,7 @@ test.describe("Stored XSS — public detail pages (VULN-2075 / VULN-2076)", () =
     const { xss_dataset } = loadFixtures();
     await assertNoXssExecution(
       page,
-      `/pages/datasets/${xss_dataset.slug}`,
+      `/datasets/${xss_dataset.slug}`,
       "dataset.description",
     );
   });
@@ -101,7 +101,7 @@ test.describe("Stored XSS — public detail pages (VULN-2075 / VULN-2076)", () =
     const { xss_reuse } = loadFixtures();
     await assertNoXssExecution(
       page,
-      `/pages/reuses/${xss_reuse.slug}`,
+      `/reuses/${xss_reuse.slug}`,
       "reuse.description+title",
     );
   });
@@ -126,7 +126,7 @@ test.describe("Stored XSS — public detail pages (VULN-2075 / VULN-2076)", () =
     //     (never parsed as HTML), so matching them there is also a false
     //     positive. What matters is the DOM the browser actually renders.
     const { xss_organization } = loadFixtures();
-    await page.goto(`/pages/organizations/${xss_organization.slug}`);
+    await page.goto(`/organizations/${xss_organization.slug}`);
     await page.waitForLoadState("networkidle");
 
     const rawHtml = await page.content();

@@ -563,7 +563,7 @@ export default function ReusesFormClient({
                       recomendável que seja publicada em nome da organização responsável.
                     </p>
                     <a
-                      href="/pages/admin/organizations/new"
+                      href="/admin/organizations/new"
                       className="admin-page__org-card-link"
                     >
                       Crie ou integre uma organização em dados.gov.pt
@@ -1167,7 +1167,7 @@ export default function ReusesFormClient({
                   ]}
                   mainLink={
                     createdReuse ? (
-                      <Link href={`/pages/reuses/${createdReuse.slug}`}>
+                      <Link href={`/reuses/${createdReuse.slug}`}>
                         <span className="underline">{reuseName}</span>
                       </Link>
                     ) : (
@@ -1196,7 +1196,7 @@ export default function ReusesFormClient({
                     setApiError(null);
                     try {
                       await updateReuse(createdReuse.id, { private: false });
-                      window.location.href = "/pages/admin/me/reuses";
+                      window.location.href = "/admin/me/reuses";
                     } catch {
                       setApiError("Erro ao publicar. Tente novamente.");
                     } finally {

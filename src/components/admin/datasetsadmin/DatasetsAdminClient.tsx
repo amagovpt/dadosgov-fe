@@ -741,7 +741,7 @@ export default function DatasetsAdminClient({
       if (onDatasetCreated) {
         onDatasetCreated(dataset.id);
       } else {
-        router.push(`/pages/admin/datasets/new?step=${currentStep + 1}&datasetId=${dataset.id}`);
+        router.push(`/admin/datasets/new?step=${currentStep + 1}&datasetId=${dataset.id}`);
       }
     } catch (error: unknown) {
       const err = error as { status?: number; data?: Record<string, unknown> };
@@ -900,7 +900,7 @@ export default function DatasetsAdminClient({
       };
       await updateDataset(createdDataset.id, publishPayload);
       if (onComplete) onComplete();
-      else router.push("/pages/admin/me/datasets");
+      else router.push("/admin/me/datasets");
     } catch (error) {
       console.error("Error publishing dataset:", error);
       setApiError("Erro ao publicar o conjunto de dados. Tente novamente.");
@@ -912,7 +912,7 @@ export default function DatasetsAdminClient({
   const handleSaveDraft = async () => {
     if (!createdDataset) {
       if (onComplete) onComplete();
-      else router.push("/pages/admin/me/datasets");
+      else router.push("/admin/me/datasets");
       return;
     }
 
@@ -958,7 +958,7 @@ export default function DatasetsAdminClient({
 
       await updateDataset(createdDataset.id, draftPayload);
       if (onComplete) onComplete();
-      else router.push("/pages/admin/me/datasets");
+      else router.push("/admin/me/datasets");
     } catch (error) {
       console.error("Error saving draft dataset:", error);
       setApiError("Erro ao guardar o rascunho. Tente novamente.");

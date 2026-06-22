@@ -57,7 +57,7 @@ export default function OrganizationsClient({
         title="Organizações"
         breadcrumbItems={[
           { label: "Home", url: "/" },
-          { label: "Organizações", url: "/pages/organizations" },
+          { label: "Organizações", url: "/organizations" },
         ]}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
@@ -156,7 +156,7 @@ export default function OrganizationsClient({
                     const cardProps: CardMetricsProps = {
                       title: org.name,
                       description: org.description ?? "",
-                      link: `/pages/organizations/${org.slug}`,
+                      link: `/organizations/${org.slug}`,
                       last_modified: timeAgo,
                       organization: {
                         name: org.name,

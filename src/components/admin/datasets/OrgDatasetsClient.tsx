@@ -41,7 +41,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
   const columns = useMemo(
     () =>
       createDatasetColumns({
-        editHref: (dataset) => `/pages/admin/org/${orgId}/datasets/edit?slug=${dataset.slug}`,
+        editHref: (dataset) => `/admin/org/${orgId}/datasets/edit?slug=${dataset.slug}`,
         showOwner: true,
         showOrganizationFallback: true,
         sortVariant: "org",
@@ -111,7 +111,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: orgName || "Organização", url: "#" },
         { label: "Conjuntos de dados", url: "#" },
       ]}
@@ -155,7 +155,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
           icon="agora-line-edit"
           title="Sem publicações"
           description="A organização ainda não publicou conjuntos de dados."
-          createUrl="/pages/admin/datasets/new"
+          createUrl="/admin/datasets/new"
         />
       }
     >

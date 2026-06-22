@@ -11,7 +11,7 @@ import { test, expect } from "playwright/test";
 test.describe("Backoffice - Harvesters CRUD", () => {
 
   test("HV-01: System harvesters listing renders", async ({ page }) => {
-    await page.goto("/pages/admin/system/harvesters");
+    await page.goto("/admin/system/harvesters");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -20,7 +20,7 @@ test.describe("Backoffice - Harvesters CRUD", () => {
   });
 
   test("HV-02: Harvester creation wizard step 1 renders", async ({ page }) => {
-    await page.goto("/pages/admin/harvesters/new");
+    await page.goto("/admin/harvesters/new");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -36,7 +36,7 @@ test.describe("Backoffice - Harvesters CRUD", () => {
   });
 
   test("HV-03: System listing exposes search affordance", async ({ page }) => {
-    await page.goto("/pages/admin/system/harvesters");
+    await page.goto("/admin/system/harvesters");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -78,7 +78,7 @@ test.describe("Backoffice - Harvesters CRUD", () => {
   test("HV-09: Approve popup opens, renders comment textarea, cancels cleanly", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/harvesters");
+    await page.goto("/admin/system/harvesters");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -110,7 +110,7 @@ test.describe("Backoffice - Harvesters CRUD", () => {
   test("HV-10: Reject popup blocks submission until a comment is provided", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/harvesters");
+    await page.goto("/admin/system/harvesters");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -151,7 +151,7 @@ test.describe("Backoffice - Harvesters CRUD", () => {
     });
     const page = await context.newPage();
     try {
-      await page.goto("/pages/admin/system/harvesters");
+      await page.goto("/admin/system/harvesters");
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 

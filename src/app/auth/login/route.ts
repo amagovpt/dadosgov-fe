@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json(
             {
               message: "migration_required",
-              redirect: "/pages/login",
+              redirect: "/login",
             },
             { status: 403, headers: responseHeaders }
           );

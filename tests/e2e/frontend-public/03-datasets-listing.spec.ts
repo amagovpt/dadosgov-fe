@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "playwright/test";
 
-const DATASETS_URL = "/pages/datasets";
+const DATASETS_URL = "/datasets";
 const PLACEHOLDER_SRC = "/images/placeholders/organization.png";
 
 async function openFiltersPanel(page: Page) {
@@ -28,7 +28,7 @@ test.describe("Datasets Listing", () => {
     });
     await expect(heading).toBeVisible({ timeout: 10000 });
 
-    const cards = page.locator("a[href^='/pages/datasets/']").first();
+    const cards = page.locator("a[href^='/datasets/']").first();
     await expect(cards).toBeVisible({ timeout: 15000 });
 
     // Filters are collapsed by default; the toggle must be present.
@@ -37,7 +37,7 @@ test.describe("Datasets Listing", () => {
   });
 
   test("DL-02: Each card has meaningful textual content", async ({ page }) => {
-    const firstCard = page.locator("a[href^='/pages/datasets/']").first();
+    const firstCard = page.locator("a[href^='/datasets/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     const cardText = await firstCard.textContent();
@@ -45,7 +45,7 @@ test.describe("Datasets Listing", () => {
   });
 
   test("DL-03: Click card opens dataset detail", async ({ page }) => {
-    const firstCard = page.locator("a[href^='/pages/datasets/']").first();
+    const firstCard = page.locator("a[href^='/datasets/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     await firstCard.click();
@@ -122,7 +122,7 @@ test.describe("Datasets Listing", () => {
   });
 
   test("DL-11: Result list renders cards for the page", async ({ page }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     const count = await cards.count();
@@ -153,7 +153,7 @@ test.describe("Datasets Listing", () => {
       timeout: 10000,
     });
 
-    const results = page.locator("a[href^='/pages/datasets/']");
+    const results = page.locator("a[href^='/datasets/']");
     await expect(results.first()).toBeVisible({ timeout: 15000 });
     expect(await results.count()).toBeGreaterThan(0);
   });
@@ -270,7 +270,7 @@ test.describe("Datasets Listing", () => {
   test("DL-19: Every dataset card renders an img element with a non-empty src", async ({
     page,
   }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     const count = await cards.count();
@@ -289,13 +289,13 @@ test.describe("Datasets Listing", () => {
   test("DL-20: Org logos from the API reach the dataset card img src (no server-side stripping)", async ({
     page,
   }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     // Collect every card img src from the DOM
     const srcs: string[] = await page.evaluate(() =>
       Array.from(
-        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        document.querySelectorAll("a[href^='/datasets/'] img")
       ).map((img) => (img as HTMLImageElement).getAttribute("src") ?? "")
     );
 
@@ -438,13 +438,13 @@ test.describe("Datasets Listing", () => {
   test("DL-21: onError fallback replaces a failed org logo with the placeholder", async ({
     page,
   }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     // Find card indices whose img currently shows a real logo (not the placeholder).
     const indicesWithLogo: number[] = await page.evaluate((placeholder) => {
       const imgs = Array.from(
-        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        document.querySelectorAll("a[href^='/datasets/'] img")
       );
       return imgs
         .map((img, i) => ({ i, src: (img as HTMLImageElement).getAttribute("src") ?? "" }))
@@ -467,7 +467,7 @@ test.describe("Datasets Listing", () => {
     // triggers the setImgSrc(PLACEHOLDER) state update in CardMetrics.
     await page.evaluate((placeholder) => {
       const imgs = Array.from(
-        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        document.querySelectorAll("a[href^='/datasets/'] img")
       ) as HTMLImageElement[];
       imgs.forEach((img) => {
         const src = img.getAttribute("src") ?? "";
@@ -481,7 +481,7 @@ test.describe("Datasets Listing", () => {
     await page.waitForFunction(
       ({ indices, placeholder }: { indices: number[]; placeholder: string }) => {
         const imgs = Array.from(
-          document.querySelectorAll("a[href^='/pages/datasets/'] img")
+          document.querySelectorAll("a[href^='/datasets/'] img")
         ) as HTMLImageElement[];
         return indices.every((i) =>
           (imgs[i]?.getAttribute("src") ?? "").includes("organization.png")
@@ -493,7 +493,7 @@ test.describe("Datasets Listing", () => {
 
     // Verify the placeholder is now shown for each formerly-logo card.
     for (const idx of indicesWithLogo.slice(0, 3)) {
-      const img = page.locator("a[href^='/pages/datasets/'] img").nth(idx);
+      const img = page.locator("a[href^='/datasets/'] img").nth(idx);
       const src = await img.getAttribute("src");
       expect(src).toContain("organization.png");
     }

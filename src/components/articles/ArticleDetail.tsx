@@ -69,7 +69,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
       <div className="flex min-h-screen flex-col items-center justify-center gap-16">
         <h1 className="text-2xl-bold text-neutral-900">Artigo não encontrado</h1>
         <p className="text-neutral-600">O artigo que procura não existe ou foi removido.</p>
-        <TextLink href="/pages/posts" className="hover:text-primary-700">
+        <TextLink href="/posts" className="hover:text-primary-700">
           Voltar aos artigos
         </TextLink>
       </div>
@@ -86,7 +86,7 @@ export default function ArticleDetail({ rid }: ArticleDetailProps) {
           <Breadcrumb
             items={[
               { label: "Início", url: "/" },
-              { label: "Notícias", url: "/pages/posts" },
+              { label: "Notícias", url: "/posts" },
               { label: post.name, url: "#" },
             ]}
           />

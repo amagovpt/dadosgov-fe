@@ -62,7 +62,7 @@ export default function DataservicesClient({
       if (page > 1) params.set("page", String(page));
 
       const qs = params.toString();
-      return `/pages/dataservices${qs ? `?${qs}` : ""}`;
+      return `/dataservices${qs ? `?${qs}` : ""}`;
     },
     [initialFilters, currentPage]
   );
@@ -103,7 +103,7 @@ export default function DataservicesClient({
         title="APIs"
         breadcrumbItems={[
           { label: "Home", url: "/" },
-          { label: "APIs", url: "/pages/dataservices" },
+          { label: "APIs", url: "/dataservices" },
         ]}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
@@ -200,7 +200,7 @@ export default function DataservicesClient({
               {dataservices.length > 0 ? (
                 dataservices.map((ds) => {
                   const timeAgo = formatDateToTimeAgo(ds.last_modified);
-                  const dsUrl = `/pages/dataservices/preview?title=${encodeURIComponent(ds.title)}&description=${encodeURIComponent(ds.description || "")}`;
+                  const dsUrl = `/dataservices/preview?title=${encodeURIComponent(ds.title)}&description=${encodeURIComponent(ds.description || "")}`;
 
                   return (
                     <Link

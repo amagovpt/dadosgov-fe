@@ -83,9 +83,9 @@ export default function SystemUsersClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Utilizadores", url: "/pages/admin/system/users" },
+        { label: "Utilizadores", url: "/admin/system/users" },
       ]}
       title="Utilizadores"
       isLoading={isLoading}

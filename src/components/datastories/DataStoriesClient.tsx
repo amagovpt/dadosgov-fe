@@ -58,7 +58,7 @@ export default function DataStoriesClient({
         title="Data Stories"
         breadcrumbItems={[
           { label: "Home", url: "/" },
-          { label: "Data Stories", url: "/pages/datastories" },
+          { label: "Data Stories", url: "/datastories" },
         ]}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
@@ -132,7 +132,7 @@ export default function DataStoriesClient({
                   return (
                     <div key={story.slug} className="h-full">
                       <CardLinks
-                        onClick={() => router.push(`/pages/datastories/${story.slug}`)}
+                        onClick={() => router.push(`/datastories/${story.slug}`)}
                         className="!h-full [&_.card-links-container]:!h-full [&_.text-content]:!w-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse cursor-pointer text-neutral-900"
                         variant="transparent"
                         image={{
@@ -151,7 +151,7 @@ export default function DataStoriesClient({
                         }
                         date={<span className="font-[300]">Publicado há {timeAgo}</span>}
                         mainLink={
-                          <Link href={`/pages/datastories/${story.slug}`}>
+                          <Link href={`/datastories/${story.slug}`}>
                             <span className="underline">{story.title}</span>
                           </Link>
                         }
@@ -176,7 +176,7 @@ export default function DataStoriesClient({
                     position="center"
                     hasAnchor={true}
                     valueAnchor="Redefinir filtros"
-                    anchorHref="/pages/datastories"
+                    anchorHref="/datastories"
                     anchorTrailingIcon="agora-line-arrow-right-circle"
                     anchorTrailingIconHover="agora-solid-arrow-right-circle"
                   />

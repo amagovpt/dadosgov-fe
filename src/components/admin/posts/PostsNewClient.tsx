@@ -69,7 +69,7 @@ export default function PostsNewClient() {
       return;
     }
     setFormErrors({});
-    router.push("/pages/admin/system/posts/new?step=2");
+    router.push("/admin/system/posts/new?step=2");
   };
 
   const handleSave = async (publish: boolean) => {
@@ -101,7 +101,7 @@ export default function PostsNewClient() {
         if (publish) {
           await publishPost(result.id);
         }
-        router.push("/pages/admin/system/posts");
+        router.push("/admin/system/posts");
       } else {
         setSaveError("Erro ao guardar o artigo. Verifique a autenticação.");
       }
@@ -120,9 +120,9 @@ export default function PostsNewClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Bem-vindo", url: "/pages/admin" },
-        { label: "Artigos", url: "/pages/admin/system/posts" },
-        { label: "Formulário de publicação de um artigo", url: "/pages/admin/system/posts/new" },
+        { label: "Bem-vindo", url: "/admin" },
+        { label: "Artigos", url: "/admin/system/posts" },
+        { label: "Formulário de publicação de um artigo", url: "/admin/system/posts/new" },
       ]}
       title="Formulário de publicação de um artigo"
     >
@@ -321,7 +321,7 @@ export default function PostsNewClient() {
                   hasIcon
                   leadingIcon="agora-line-arrow-left-circle"
                   leadingIconHover="agora-solid-arrow-left-circle"
-                  onClick={() => router.push("/pages/admin/system/posts/new?step=1")}
+                  onClick={() => router.push("/admin/system/posts/new?step=1")}
                 >
                   Anterior
                 </Button>

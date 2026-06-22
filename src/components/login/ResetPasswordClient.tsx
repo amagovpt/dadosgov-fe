@@ -85,7 +85,7 @@ export function ResetPasswordClient({ token }: Props) {
                   <Button
                     variant="primary"
                     className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                    onClick={() => (window.location.href = "/pages/login")}
+                    onClick={() => (window.location.href = "/login")}
                   >
                     Iniciar sessão
                   </Button>

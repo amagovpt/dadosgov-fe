@@ -90,7 +90,7 @@ export default function UserProfileClient() {
       try {
         const data = await fetchUser(userId);
         if (!data) {
-          router.push("/pages/admin/system/users");
+          router.push("/admin/system/users");
           return;
         }
         setUser(data);
@@ -160,7 +160,7 @@ export default function UserProfileClient() {
     try {
       await deleteUser(userId);
       hide();
-      router.push("/pages/admin/system/users");
+      router.push("/admin/system/users");
     } catch (error) {
       console.error("Error deleting user:", error);
     } finally {
@@ -226,8 +226,8 @@ export default function UserProfileClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Utilizadores", url: "/pages/admin/system/users" },
+        { label: "Administração", url: "/admin" },
+        { label: "Utilizadores", url: "/admin/system/users" },
         { label: displayName || "..." },
       ]}
       title="Perfil"
@@ -268,7 +268,7 @@ export default function UserProfileClient() {
               hasIcon
               leadingIcon="agora-line-eye"
               leadingIconHover="agora-solid-eye"
-              onClick={() => router.push(`/pages/users/${user.slug}`)}
+              onClick={() => router.push(`/users/${user.slug}`)}
             >
               Ver perfil público
             </Button>
@@ -622,10 +622,10 @@ export default function UserProfileClient() {
                         .slice(0, 2)
                         .join("");
                       const classToPath: Record<string, string> = {
-                        Dataset: "/pages/datasets",
-                        Organization: "/pages/organizations",
-                        Reuse: "/pages/reuses",
-                        User: "/pages/users",
+                        Dataset: "/datasets",
+                        Organization: "/organizations",
+                        Reuse: "/reuses",
+                        User: "/users",
                       };
                       const basePath = classToPath[sub.following.class];
                       const href =

@@ -70,9 +70,9 @@ export default function StatisticsClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Estatísticas", url: "/pages/admin/me/statistics" },
+        { label: "Estatísticas", url: "/admin/me/statistics" },
       ]}
       title="Estatísticas"
       headerAction={null}
@@ -129,7 +129,7 @@ export default function StatisticsClient() {
                       <Button
                         variant="primary"
                         appearance="outline"
-                        onClick={() => (window.location.href = "/pages/admin/datasets/new")}
+                        onClick={() => (window.location.href = "/admin/datasets/new")}
                       >
                         Publique no portal
                       </Button>
@@ -171,7 +171,7 @@ export default function StatisticsClient() {
                         <Button
                           variant="primary"
                           appearance="outline"
-                          onClick={() => (window.location.href = "/pages/admin/reuses/new")}
+                          onClick={() => (window.location.href = "/admin/reuses/new")}
                         >
                           Publique no portal
                         </Button>

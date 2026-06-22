@@ -53,9 +53,9 @@ export default function DiscussionsClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: activeOrg?.name || "Organização", url: "#" },
-        { label: "Discussões", url: "/pages/admin/org/discussions" },
+        { label: "Discussões", url: "/admin/org/discussions" },
       ]}
       title="Discussões"
       isLoading={false}

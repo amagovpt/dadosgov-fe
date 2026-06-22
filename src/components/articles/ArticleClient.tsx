@@ -139,7 +139,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
         backgroundImageUrl="/Banner/hero-bg.png"
         breadcrumbItems={[
           { label: "Home", url: "/" },
-          { label: "Últimas novidades", url: "/pages/posts" },
+          { label: "Últimas novidades", url: "/posts" },
         ]}
       >
         <InputSearchBar
@@ -188,7 +188,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
                 return (
                   <Link
                     key={post.id}
-                    href={`/pages/posts/${post.slug}`}
+                    href={`/posts/${post.slug}`}
                     className="card-general-listing flex h-full flex-col overflow-hidden rounded-4"
                   >
                     <CardGeneral
@@ -229,7 +229,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
                       }
                       isBlockedLink={true}
                       anchor={{
-                        href: `/pages/posts/${post.slug}`,
+                        href: `/posts/${post.slug}`,
                       }}
                     />
                   </Link>
@@ -243,7 +243,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
             currentPage={currentPage}
             totalItems={total}
             pageSize={PAGE_SIZE}
-            baseUrl="/pages/posts"
+            baseUrl="/posts"
           />
         </div>
       </div>

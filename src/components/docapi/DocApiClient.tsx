@@ -8,7 +8,7 @@ export default function DocApiClient() {
       <Breadcrumb
         items={[
           { label: "Início", url: "/" },
-          { label: "API do portal", url: "/pages/docapi" },
+          { label: "API do portal", url: "/docapi" },
         ]}
       />
 

@@ -161,7 +161,7 @@ export default function HarvestersNewClient() {
     try {
       const created = await createHarvester(buildPayload());
       sessionStorage.setItem("createdHarvesterId", created.id);
-      router.push(`/pages/admin/harvesters/new?step=3&id=${created.id}`);
+      router.push(`/admin/harvesters/new?step=3&id=${created.id}`);
     } catch (err: unknown) {
       const error = err as { data?: { message?: string }; message?: string };
       setCreateError(error?.data?.message || error?.message || "Erro ao criar o harvester.");
@@ -186,7 +186,7 @@ export default function HarvestersNewClient() {
     setIsPreviewing(true);
     setPreviewError(null);
     setPreviewJob(null);
-    router.push("/pages/admin/harvesters/new?step=2");
+    router.push("/admin/harvesters/new?step=2");
 
     try {
       const payload = buildPayload();
@@ -220,7 +220,7 @@ export default function HarvestersNewClient() {
           <p className="auxiliar-list__content mt-8 !p-0">
             Selecione uma organização da qual seja administrador. Se a sua organização ainda não
             existir, terá de a criar primeiro através deste{" "}
-            <TextLink href="/pages/admin/organizations/new" className="auxiliar-list__content !p-0">
+            <TextLink href="/admin/organizations/new" className="auxiliar-list__content !p-0">
               link ↗
             </TextLink>
             .
@@ -254,11 +254,11 @@ export default function HarvestersNewClient() {
 
   return (
     <AdminLayout breadcrumbItems={[
-      { label: "Administração", url: "/pages/admin" },
-      { label: "Harvesters", url: "/pages/admin/system/harvesters" },
+      { label: "Administração", url: "/admin" },
+      { label: "Harvesters", url: "/admin/system/harvesters" },
       {
         label: "Formulário de publicação de um harvester",
-        url: "/pages/admin/harvesters/new",
+        url: "/admin/harvesters/new",
       },
     ]}
 
@@ -738,7 +738,7 @@ export default function HarvestersNewClient() {
                   hasIcon
                   leadingIcon="agora-line-arrow-left-circle"
                   leadingIconHover="agora-solid-arrow-left-circle"
-                  onClick={() => router.push("/pages/admin/harvesters/new?step=1")}
+                  onClick={() => router.push("/admin/harvesters/new?step=1")}
                 >
                   Anterior
                 </Button>
@@ -802,8 +802,8 @@ export default function HarvestersNewClient() {
                   onClick={() =>
                     router.push(
                       createdHarvesterId
-                        ? `/pages/admin/harvesters/${createdHarvesterId}`
-                        : "/pages/admin/system/harvesters"
+                        ? `/admin/harvesters/${createdHarvesterId}`
+                        : "/admin/system/harvesters"
                     )
                   }
                 >
@@ -815,7 +815,7 @@ export default function HarvestersNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/pages/support")}
+                  onClick={() => router.push("/support")}
                 >
                   Solicitar validação do harvester
                 </Button>

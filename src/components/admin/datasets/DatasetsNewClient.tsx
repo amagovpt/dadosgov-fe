@@ -23,7 +23,7 @@ export default function DatasetsNewClient() {
   const [sessionKey, setSessionKey] = useState(0);
 
   const buildStepUrl = (step: number, id?: string | null) => {
-    const base = `/pages/admin/datasets/new?step=${step}`;
+    const base = `/admin/datasets/new?step=${step}`;
     return id ? `${base}&datasetId=${id}` : base;
   };
 
@@ -37,9 +37,9 @@ export default function DatasetsNewClient() {
 
   return (
     <AdminLayout breadcrumbItems={[
-      { label: "Administração", url: "/pages/admin" },
+      { label: "Administração", url: "/admin" },
       { label: displayName || "...", url: "#" },
-      { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
+      { label: "Conjuntos de dados", url: "/admin/me/datasets" },
     ]}
       title="Formulário de publicação de um conjunto de dados"
     >
@@ -68,7 +68,7 @@ export default function DatasetsNewClient() {
                 onClick: () => {
                   setSessionKey((k) => k + 1);
                   setCreatedDatasetId(null);
-                  router.push("/pages/admin/datasets/new?step=2");
+                  router.push("/admin/datasets/new?step=2");
                 },
               }}
             />
@@ -91,7 +91,7 @@ export default function DatasetsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/pages/faqs/api-documentation")}
+                  onClick={() => router.push("/faqs/api-documentation")}
                 >
                   Consulte a documentação da API
                 </Button>
@@ -101,7 +101,7 @@ export default function DatasetsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/pages/support")}
+                  onClick={() => router.push("/support")}
                 >
                   Contacte-nos
                 </Button>
@@ -135,7 +135,7 @@ export default function DatasetsNewClient() {
             setCreatedDatasetId(id);
             router.push(buildStepUrl(currentStep + 1, id));
           }}
-          onComplete={() => router.push("/pages/admin/me/datasets")}
+          onComplete={() => router.push("/admin/me/datasets")}
         />
       )}
     </AdminLayout>

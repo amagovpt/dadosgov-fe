@@ -140,9 +140,9 @@ export default function SystemLogsClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Logs", url: "/pages/admin/system/logs" },
+        { label: "Logs", url: "/admin/system/logs" },
       ]}
       title="Logs"
       headerAction={

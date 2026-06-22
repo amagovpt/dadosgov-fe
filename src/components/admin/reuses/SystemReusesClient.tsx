@@ -36,7 +36,7 @@ export default function SystemReusesClient() {
     () =>
       createReuseColumns({
         sortableDatasets: false,
-        editHref: (reuse) => `/pages/admin/reuses/${reuse.id}`,
+        editHref: (reuse) => `/admin/reuses/${reuse.id}`,
       }),
     []
   );
@@ -86,9 +86,9 @@ export default function SystemReusesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Reutilizações", url: "/pages/admin/system/reuses" },
+        { label: "Reutilizações", url: "/admin/system/reuses" },
       ]}
       title="Reutilizações"
       isLoading={isLoading}

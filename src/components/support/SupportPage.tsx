@@ -319,7 +319,7 @@ const SupportPageContent = () => {
 
             <div className="mt-16 flex flex-col gap-16">
               <a
-                href="/pages/faqs/about_dadosgov/"
+                href="/faqs/about_dadosgov/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
@@ -329,7 +329,7 @@ const SupportPageContent = () => {
               </a>
 
               <a
-                href="/pages/faqs/about_opendata/"
+                href="/faqs/about_opendata/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
@@ -404,7 +404,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/faqs/publish",
+                                            "/faqs/publish",
                                             "_blank"
                                           )
                                         }
@@ -494,7 +494,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/faqs/reuse/",
+                                            "/faqs/reuse/",
                                             "_blank"
                                           )
                                         }
@@ -519,7 +519,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/faqs/terms",
+                                            "/faqs/terms",
                                             "_blank"
                                           )
                                         }
@@ -559,7 +559,7 @@ const SupportPageContent = () => {
                                           minWidth: "auto",
                                         }}
                                         onClick={() =>
-                                          window.open("/pages/faqs/api-documentation", "_blank")
+                                          window.open("/faqs/api-documentation", "_blank")
                                         }
                                       >
                                         Endpoint de API do portal
@@ -591,7 +591,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/api-tutorial/",
+                                            "/api-tutorial/",
                                             "_blank"
                                           )
                                         }
@@ -637,7 +637,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/support#ajuda",
+                                            "/support#ajuda",
                                             "_blank"
                                           )
                                         }
@@ -667,7 +667,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/support",
+                                            "/support",
                                             "_blank"
                                           )
                                         }
@@ -693,7 +693,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/support",
+                                            "/support",
                                             "_blank"
                                           )
                                         }
@@ -741,7 +741,7 @@ const SupportPageContent = () => {
                                           minWidth: "auto",
                                         }}
                                         onClick={() =>
-                                          window.open("/pages/support", "_blank")
+                                          window.open("/support", "_blank")
                                         }
                                       >
                                         formulário e orientação disponíveis na página de contato
@@ -759,7 +759,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation",
+                                            "/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation",
                                             "_blank"
                                           )
                                         }
@@ -785,7 +785,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation",
+                                            "/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation",
                                             "_blank"
                                           )
                                         }
@@ -831,7 +831,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/organizations/instituto-nacional-de-estatistica/",
+                                            "/organizations/instituto-nacional-de-estatistica/",
                                             "_blank"
                                           )
                                         }
@@ -855,7 +855,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/organizations/direcao-geral-do-territorio/",
+                                            "/organizations/direcao-geral-do-territorio/",
                                             "_blank"
                                           )
                                         }
@@ -924,7 +924,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/pages/organizations/ebupi-estrutura-de-missao-para-a-expansao-do-sistema-de-informacao-cadastral-simplificado/#/presentation",
+                                            "/organizations/ebupi-estrutura-de-missao-para-a-expansao-do-sistema-de-informacao-cadastral-simplificado/#/presentation",
                                             "_blank"
                                           )
                                         }
