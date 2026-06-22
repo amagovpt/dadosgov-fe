@@ -21,6 +21,12 @@ import { DatasetWizardStep2 } from "./DatasetWizardStep2";
 import { DatasetWizardStep3 } from "./DatasetWizardStep3";
 import { DatasetWizardStep4 } from "./DatasetWizardStep4";
 import type { DatasetWizardDraftContact } from "./datasetWizardTypes";
+import {
+  buildDatasetCreatePayload,
+  type DatasetFormField,
+  toDatasetIsoDate,
+  validateDatasetDetails,
+} from "./datasetFormModel";
 
 interface DatasetsAdminClientProps {
   currentStep: number;
@@ -58,7 +64,7 @@ export default function DatasetsAdminClient({
   const [temporalStart, setTemporalStart] = useState("");
   const [temporalEnd, setTemporalEnd] = useState("");
   const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
-    useFormErrors();
+    useFormErrors<DatasetFormField>();
   const [selectedProducer, setSelectedProducer] = useState("");
   const [orgContactPoints, setOrgContactPoints] = useState<ContactPoint[]>([]);
   const [selectedContactPointIds, setSelectedContactPointIds] = useState<string[]>([]);
@@ -531,108 +537,27 @@ export default function DatasetsAdminClient({
     [selectedKeywords],
   );
 
-  const parseInputDateToTime = (value: string): number | null => {
-    const raw = (value || "").trim();
-    if (!raw) return null;
-
-    // Supports "dd/mm/yyyy" and "dd-mm-yyyy"
-    const ptMatch = raw.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
-    if (ptMatch) {
-      const day = Number(ptMatch[1]);
-      const month = Number(ptMatch[2]);
-      const year = Number(ptMatch[3]);
-      const d = new Date(year, month - 1, day);
-      if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {
-        return d.getTime();
-      }
-      return null;
-    }
-
-    // Supports ISO-like formats (e.g. yyyy-mm-dd)
-    const iso = new Date(raw);
-    const isoTime = iso.getTime();
-    return Number.isNaN(isoTime) ? null : isoTime;
-  };
-
-  const toIsoTemporalDate = (value: string): string | null => {
-    const raw = (value || "").trim();
-    if (!raw) return null;
-
-    // "dd/mm/yyyy" or "dd-mm-yyyy"
-    const ptMatch = raw.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
-    if (ptMatch) {
-      const dd = ptMatch[1];
-      const mm = ptMatch[2];
-      const yyyy = ptMatch[3];
-      return `${yyyy}-${mm}-${dd}T00:00:00.000Z`;
-    }
-
-    // "yyyy-mm-dd" or "yyyy-mm-ddTHH:mm:ss..."
-    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:T.*)?$/);
-    if (isoMatch) {
-      const yyyy = isoMatch[1];
-      const mm = isoMatch[2];
-      const dd = isoMatch[3];
-      return `${yyyy}-${mm}-${dd}T00:00:00.000Z`;
-    }
-
-    return null;
-  };
-
   const handleStep2Next = async (e?: React.MouseEvent<HTMLButtonElement>) => {
-    const errors: Record<string, boolean> = {};
-    if (!selectedProducerRef.current) errors.datasetProducer = true;
-    if (!datasetTitle.trim()) {
-      errors.datasetTitle = true;
-    } else if (datasetTitle.trim().length > 350) {
-      errors.datasetTitleTooLong = true;
-    }
-    if (!datasetDescription.trim()) errors.datasetDescription = true;
-    if (!selectedFrequencyRef.current) errors.datasetFrequency = true;
-    const startRaw = (temporalStart || "").trim();
-    const endRaw = (temporalEnd || "").trim();
-    const startTime = startRaw ? parseInputDateToTime(startRaw) : null;
-    const endTime = endRaw ? parseInputDateToTime(endRaw) : null;
+    const { errors, draftErrors } = validateDatasetDetails({
+      producer: selectedProducerRef.current,
+      title: datasetTitle,
+      description: datasetDescription,
+      frequency: selectedFrequencyRef.current,
+      temporalStart,
+      temporalEnd,
+      selectedProducer,
+      selectedContactPointIds,
+      draftContacts,
+    });
 
-    if ((startRaw && startTime === null) || (endRaw && endTime === null)) {
-      errors.temporalCoverageInvalidFormat = true;
-    }
-    if (
-      !errors.temporalCoverageInvalidFormat &&
-      startTime !== null &&
-      endTime !== null &&
-      startTime > endTime
-    ) {
-      errors.temporalCoverage = true;
-    }
-
-    // Validate contact point fields only when an org producer is selected
-    // (personal producers don't have the contact section shown in the UI).
-    if (selectedProducer && selectedProducer !== "user") {
-      const hasSavedContact = selectedContactPointIds.length > 0;
-      const draftErrorsMap: Record<number, Record<string, boolean>> = {};
-      let hasValidDraft = false;
-
-      draftContacts.forEach((draft) => {
-        const draftErrors: Record<string, boolean> = {};
-        if (!draft.name.trim()) draftErrors.name = true;
-        if (!draft.email.trim() && !draft.link.trim()) {
-          draftErrors.email = true;
-          draftErrors.link = true;
-        }
-        if (Object.keys(draftErrors).length === 0) {
-          hasValidDraft = true;
-        } else {
-          draftErrorsMap[draft.id] = draftErrors;
-        }
-      });
-
-      if (!hasSavedContact && !hasValidDraft) {
-        setDraftContacts((prev) =>
-          prev.map((d) => (draftErrorsMap[d.id] ? { ...d, errors: draftErrorsMap[d.id] } : d))
-        );
-        errors.contactDrafts = true;
-      }
+    // Contact rows remain controller state; the pure validator only reports
+    // which rows need feedback and does not alter any draft/scaffolding state.
+    if (errors.contactDrafts) {
+      setDraftContacts((previous) =>
+        previous.map((draft) =>
+          draftErrors[draft.id] ? { ...draft, errors: draftErrors[draft.id] } : draft,
+        ),
+      );
     }
 
     if (
@@ -651,37 +576,19 @@ export default function DatasetsAdminClient({
     setIsSubmitting(true);
 
     try {
-      const payload: Parameters<typeof createDataset>[0] = {
-        title: datasetTitle.trim(),
-        description: datasetDescription.trim(),
+      const payload = buildDatasetCreatePayload({
+        title: datasetTitle,
+        acronym: datasetAcronym,
+        description: datasetDescription,
+        shortDescription: datasetShortDescription,
+        producer: selectedProducerRef.current,
+        license: selectedLicenseRef.current,
         frequency: selectedFrequencyRef.current,
-        private: true,
-      };
-      if (datasetAcronym.trim()) payload.acronym = datasetAcronym.trim();
-      if (datasetShortDescription.trim()) {
-        payload.description_short = datasetShortDescription.trim();
-      } else {
-        const desc = datasetDescription.trim();
-        payload.description_short = desc.length > 197 ? desc.slice(0, 197) + "..." : desc;
-      }
-      if (selectedProducerRef.current && selectedProducerRef.current !== "user") {
-        payload.organization = selectedProducerRef.current;
-      }
-      if (selectedLicenseRef.current) payload.license = selectedLicenseRef.current;
-      if (selectedKeywordsRef.current) {
-        payload.tags = selectedKeywordsRef.current.split(",").filter(Boolean);
-      }
-      if (selectedContactPointIds.length > 0) {
-        payload.contact_points = selectedContactPointIds;
-      }
-      if (startRaw || endRaw) {
-        const startIso = toIsoTemporalDate(startRaw);
-        const endIso = toIsoTemporalDate(endRaw);
-        payload.temporal_coverage = {
-          ...(startIso ? { start: startIso } : {}),
-          ...(endIso ? { end: endIso } : {}),
-        } as Parameters<typeof createDataset>[0]["temporal_coverage"];
-      }
+        keywords: selectedKeywordsRef.current,
+        contactPointIds: selectedContactPointIds,
+        temporalStart,
+        temporalEnd,
+      });
       const spatialZoneIds = spatialCoverageRef.current
         .split(",")
         .map((id) => id.trim())
@@ -917,8 +824,8 @@ export default function DatasetsAdminClient({
         .map((tag) => tag.trim())
         .filter(Boolean);
       const tags = refTags.length > 0 ? refTags : createdDataset.tags || [];
-      const startIso = toIsoTemporalDate(temporalStart);
-      const endIso = toIsoTemporalDate(temporalEnd);
+      const startIso = toDatasetIsoDate(temporalStart);
+      const endIso = toDatasetIsoDate(temporalEnd);
       let temporalCoverage: DatasetUpdatePayload["temporal_coverage"] | undefined =
         createdDataset.temporal_coverage || undefined;
       if (startIso || endIso) {
