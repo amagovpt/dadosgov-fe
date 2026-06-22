@@ -108,8 +108,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Apply to every route except Next.js internals and static assets that
-  // don't render React or need CSP enforcement.
   matcher: [
     {
       source:
