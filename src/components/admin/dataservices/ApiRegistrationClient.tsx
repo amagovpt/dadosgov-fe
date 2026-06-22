@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   Button,
   InputText,
@@ -26,6 +27,8 @@ import AuxiliarList from "@/components/admin/AuxiliarList";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 import AppIcon from "@/components/Primitives/AppIcon";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { formatMetricValue } from "@/utils/formatNumber";
 
 interface ApiRegistrationClientProps {
   currentStep: number;
@@ -553,6 +556,9 @@ export default function ApiRegistrationClient({
                   <Button
                     appearance="outline"
                     variant="neutral"
+                    hasIcon
+                    leadingIcon="agora-line-arrow-left-circle"
+                    leadingIconHover="agora-solid-arrow-left-circle"
                     onClick={onPreviousStep}
                   >
                     Anterior
@@ -587,23 +593,96 @@ export default function ApiRegistrationClient({
                 }
               />
 
-              <CardGeneral
-                variant="white-outline"
-                isCardHorizontal
-                isBlockedLink
-                iconDefault="agora-line-layers-menu"
-                iconHover="agora-solid-layers-menu"
-                titleText={createdDataservice?.title || apiName || "Sem título"}
-                descriptionText={
-                  createdDataservice?.description || apiDescription || "Sem descrição"
-                }
-                anchor={{
-                  href: createdDataservice
-                    ? `/pages/dataservices/${createdDataservice.id}`
-                    : "#",
-                  children: "",
-                }}
-              />
+              <Link
+                href={createdDataservice ? `/pages/dataservices/${createdDataservice.id}` : "#"}
+                className="card-general-listing flex h-full flex-col overflow-hidden rounded-4"
+              >
+                <CardGeneral
+                  variant="neutral-100"
+                  image={{
+                    src:
+                      createdDataservice?.organization?.logo ||
+                      "/images/placeholders/organization.png",
+                    alt: createdDataservice?.organization?.name || "Organização",
+                    height: "56px",
+                    className: "bg-primary-100 !object-contain !h-[56px]",
+                  }}
+                  subtitleText={
+                    (
+                      <div className="flex flex-col">
+                        <span style={{ fontSize: "16px" }} className="text-neutral-900">
+                          {formatDateToTimeAgo(
+                            createdDataservice?.last_modified ||
+                              createdDataservice?.created_at ||
+                              ""
+                          )}
+                        </span>
+                        <span
+                          style={{ fontSize: "16px", fontWeight: 300 }}
+                          className="mt-4 text-neutral-900"
+                        >
+                          {createdDataservice?.organization?.name || "Sem Organização"}
+                        </span>
+                      </div>
+                    ) as unknown as string
+                  }
+                  titleText={createdDataservice?.title || apiName || "Sem título"}
+                  descriptionText={
+                    (
+                      <div className="flex grow flex-col">
+                        {(createdDataservice?.description || apiDescription) && (
+                          <p className="mb-16 line-clamp-3 text-m-regular text-neutral-800">
+                            {createdDataservice?.description || apiDescription}
+                          </p>
+                        )}
+                        <div className="mt-auto">
+                          <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
+                            <div className="flex items-center gap-8" title="Visualizações">
+                              <Icon
+                                name={
+                                  createdDataservice?.metrics?.views
+                                    ? "agora-solid-eye"
+                                    : "agora-line-eye"
+                                }
+                                dimensions="xs"
+                                className="fill-neutral-700"
+                                aria-hidden="true"
+                              />
+                              <span>{formatMetricValue(createdDataservice?.metrics?.views, 0)}</span>
+                            </div>
+                            <div className="flex items-center gap-8" title="Favoritos">
+                              <Icon
+                                name={
+                                  createdDataservice?.metrics?.followers
+                                    ? "agora-solid-star"
+                                    : "agora-line-star"
+                                }
+                                dimensions="xs"
+                                className="fill-neutral-700"
+                                aria-hidden="true"
+                              />
+                              <span>
+                                {formatMetricValue(createdDataservice?.metrics?.followers, 0)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-16 flex items-center gap-8 text-primary-600">
+                            <Icon
+                              name="agora-line-arrow-right-circle"
+                              className="h-32 w-32"
+                              aria-hidden="true"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ) as unknown as string
+                  }
+                  isBlockedLink={true}
+                  anchor={{
+                    href: createdDataservice ? `/pages/dataservices/${createdDataservice.id}` : "#",
+                  }}
+                />
+              </Link>
 
               <PublicationFeedbackButton />
 

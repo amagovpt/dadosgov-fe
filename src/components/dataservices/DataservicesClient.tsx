@@ -185,7 +185,7 @@ export default function DataservicesClient({
                                 <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
                                   <div className="flex items-center gap-8" title="Visualizações">
                                     <Icon
-                                      name={ds.metrics?.views ? "agora-solid-eye" : "agora-line-eye"}
+                                      name="agora-solid-eye"
                                       dimensions="xs"
                                       className="fill-neutral-700"
                                       aria-hidden="true"
@@ -194,9 +194,7 @@ export default function DataservicesClient({
                                   </div>
                                   <div className="flex items-center gap-8" title="Favoritos">
                                     <Icon
-                                      name={
-                                        ds.metrics?.followers ? "agora-solid-star" : "agora-line-star"
-                                      }
+                                      name="agora-solid-star"
                                       dimensions="xs"
                                       className="fill-neutral-700"
                                       aria-hidden="true"
