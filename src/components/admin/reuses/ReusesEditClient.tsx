@@ -40,6 +40,10 @@ import ReusesEditDeletePopup from "@/components/admin/reuses/ReusesEditDeletePop
 import TextLink from "@/components/Primitives/TextLink";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
+import {
+  buildRemoteDatasetEntries,
+  validateReuseDatasetSelection,
+} from "@/components/admin/reuses/reuseFormModel";
 
 import { translateActivityLabel } from "@/utils/activityLabels";
 
@@ -381,20 +385,7 @@ export default function ReusesEditClient() {
     // sticks). Compare against the snapshot taken at load time to know
     // whether anything was edited or removed — empty/whitespace fields
     // become `undefined` rather than persisted empty strings.
-    const seenUrls = new Set<string>();
-    const remoteEntries: RemoteDatasetEntry[] = [];
-    for (const link of datasetLinks) {
-      const url = link.url.trim();
-      if (!url || seenUrls.has(url)) continue;
-      seenUrls.add(url);
-      const title = link.title?.trim();
-      const description = link.description?.trim();
-      remoteEntries.push({
-        url,
-        title: title || undefined,
-        description: description || undefined,
-      });
-    }
+    const remoteEntries = buildRemoteDatasetEntries(datasetLinks);
     const hasLocal = selectedDatasets.length > 0;
     const hasRemote = remoteEntries.length > 0;
     const previousRemoteEntries = previousRemoteEntriesRef.current;
@@ -405,10 +396,12 @@ export default function ReusesEditClient() {
     const remoteListChanged =
       JSON.stringify(remoteEntries) !== JSON.stringify(previousRemoteEntries);
 
-    if (hasLocal && hasRemote) {
-      setApiError(
-        "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
-      );
+    const selectionError = validateReuseDatasetSelection(
+      selectedDatasets.length,
+      remoteEntries,
+    );
+    if (selectionError) {
+      setApiError(selectionError);
       return;
     }
     // Allow saving when the user removed every URL (previousHadRemote &&

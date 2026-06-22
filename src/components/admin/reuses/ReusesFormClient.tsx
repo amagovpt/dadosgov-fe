@@ -30,6 +30,14 @@ import ReusesFormDatasetsStep from "@/components/admin/reuses/ReusesFormDatasets
 import ReusesFormPublishStep from "@/components/admin/reuses/ReusesFormPublishStep";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
+import {
+  buildRemoteDatasetEntries,
+  buildReuseCreatePayload,
+  normalizeReuseUrl,
+  type ReuseFormField,
+  validateReuseDatasetSelection,
+  validateReuseDetails,
+} from "@/components/admin/reuses/reuseFormModel";
 
 interface ReusesFormClientProps {
   currentStep: number;
@@ -63,7 +71,7 @@ export default function ReusesFormClient({
     clearError,
     resetErrors,
     focusFirstError,
-  } = useFormErrors();
+  } = useFormErrors<ReuseFormField>();
 
   // Dynamic options from backend
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
@@ -178,29 +186,15 @@ export default function ReusesFormClient({
     [registerSelectedKeywordValue],
   );
 
-  const isValidUrl = (value: string): boolean => {
-    const trimmed = value.trim();
-    if (!trimmed) return false;
-    const normalized = trimmed.match(/^https?:\/\//) ? trimmed : `https://${trimmed}`;
-    try {
-      new URL(normalized);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   const handleStep1Next = async () => {
-    const errors: Record<string, boolean> = {};
-    if (!reuseName.trim()) errors.reuseName = true;
-    if (!reuseLink.trim()) errors.reuseLink = true;
-    if (reuseLink.trim() && !isValidUrl(reuseLink)) {
-      setReuseLinkInvalid(true);
-      return;
-    }
-    if (!selectedReuseTypeRef.current) errors.reuseType = true;
-    if (!selectedReuseTopicRef.current) errors.reuseTopic = true;
-    if (!reuseDescription.trim()) errors.reuseDescription = true;
+    const errors = validateReuseDetails({
+      name: reuseName,
+      url: reuseLink,
+      type: selectedReuseTypeRef.current,
+      topic: selectedReuseTopicRef.current,
+      description: reuseDescription,
+    });
+    setReuseLinkInvalid(Boolean(reuseLink.trim() && errors.reuseLink));
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -212,27 +206,16 @@ export default function ReusesFormClient({
     setApiError(null);
     setIsSubmitting(true);
 
-    const url = reuseLink.trim().match(/^https?:\/\//)
-      ? reuseLink.trim()
-      : `https://${reuseLink.trim()}`;
-
     try {
-      const selectedTags = selectedKeywordsValue
-        ? selectedKeywordsValue.split(",").filter(Boolean)
-        : [];
-
-      const payload = {
-        title: reuseName.trim(),
-        description: reuseDescription.trim(),
-        url,
+      const payload = buildReuseCreatePayload({
+        name: reuseName,
+        url: reuseLink,
         type: selectedReuseTypeRef.current,
-        topic: selectedReuseTopicRef.current || undefined,
-        private: true,
-        ...(selectedTags.length > 0 ? { tags: selectedTags } : {}),
-        ...(selectedProducerRef.current && selectedProducerRef.current !== "user"
-          ? { organization: selectedProducerRef.current }
-          : {}),
-      };
+        topic: selectedReuseTopicRef.current,
+        description: reuseDescription,
+        producer: selectedProducerRef.current,
+        keywords: selectedKeywordsValue,
+      });
 
       const reuse = createdReuse
         ? await updateReuse(createdReuse.id, payload)
@@ -437,7 +420,7 @@ export default function ReusesFormClient({
               setReuseLink(value);
               if (value.trim()) {
                 clearError("reuseLink");
-                setReuseLinkInvalid(!isValidUrl(value));
+                setReuseLinkInvalid(!normalizeReuseUrl(value));
               } else {
                 setReuseLinkInvalid(false);
               }
@@ -523,29 +506,17 @@ export default function ReusesFormClient({
               // LEDG-1748 PR 2: persist remote datasets as
               // { url, title?, description? } entries (deduped by URL,
               // first occurrence wins so user-typed metadata sticks).
-              const seenUrls = new Set<string>();
-              const remoteEntries: RemoteDatasetEntry[] = [];
-              for (const link of datasetLinks) {
-                const url = link.url.trim();
-                if (!url || seenUrls.has(url)) continue;
-                seenUrls.add(url);
-                const title = link.title?.trim();
-                const description = link.description?.trim();
-                remoteEntries.push({
-                  url,
-                  title: title || undefined,
-                  description: description || undefined,
-                });
-              }
+              const remoteEntries = buildRemoteDatasetEntries(datasetLinks);
 
-              const hasLocal = selectedDatasets.length > 0;
               const hasRemote = remoteEntries.length > 0;
 
               // Mutual exclusion: local datasets OR remote URLs, not both.
-              if (hasLocal && hasRemote) {
-                setApiError(
-                  "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização.",
-                );
+              const selectionError = validateReuseDatasetSelection(
+                selectedDatasets.length,
+                remoteEntries,
+              );
+              if (selectionError) {
+                setApiError(selectionError);
                 return;
               }
 
