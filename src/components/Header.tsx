@@ -639,20 +639,18 @@ export const Header = () => {
                   />
                 </div>
               </NavigationLink>
-              {/* hidden: publicações
               <NavigationLink appearance="link">
                 <div data-group="main">
                   <HeaderCard
-                    iconDefault="agora-line-mega-phone"
-                    iconHover="agora-solid-mega-phone"
+                    iconDefault="agora-line-document"
+                    iconHover="agora-solid-document"
                     title="Publicações"
                     description="Novidades e eventos"
-                    href="/pages/publications"
+                    href="https://10.55.37.38/pages/resources/publications"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
               </NavigationLink>
-              */}
             </NavigationRoot>
 
             <NavigationRoot label="Publicar">

@@ -276,10 +276,16 @@ const SupportPageContent = () => {
 
   // "Pedir um dataset" is informative only — no form is submitted.
   const DATASET_INFO = {
-    description:
-      "Para sugerir ou solicitar a publicação de um conjunto de dados que ainda não esteja disponível no dados.gov.pt, indicando, sempre que possível, a entidade responsável e a finalidade da reutilização.",
-    message:
-      "Para questões relacionadas com um conjunto de dados específico, tais como pedidos de atualização, esclarecimentos sobre conteúdo, formatos, periodicidade, qualidade dos dados ou disponibilização de informação adicional, utilize preferencialmente a área de discussão/comentários disponível na página do respetivo dataset. A resposta é da responsabilidade da entidade publicadora.",
+    message: (
+      <>
+        Para questões relacionadas com um conjunto de dados específico, como pedidos de atualização,
+        esclarecimentos sobre conteúdo, formatos, periodicidade, qualidade dos dados ou
+        disponibilização de informação adicional, utilize a área de discussão/comentários na página
+        do respetivo conjunto de dados.
+        <br />
+        A resposta é da responsabilidade da entidade publicadora.
+      </>
+    ),
   };
 
   return (
@@ -1235,7 +1241,6 @@ const SupportPageContent = () => {
 
           {selectedToggle === "dataset" && (
             <div className="mt-32 max-w-2xl">
-              <p className="mb-16 text-[16px] text-neutral-800">{DATASET_INFO.description}</p>
               <StatusCard variant="informative" showIcon description={DATASET_INFO.message} />
             </div>
           )}

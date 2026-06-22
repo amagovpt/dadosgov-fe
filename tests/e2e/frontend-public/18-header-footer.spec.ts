@@ -100,7 +100,12 @@ test.describe("Header and Footer", () => {
     await page.waitForTimeout(300);
 
     const mainCards = page.locator('[data-group="main"]');
-    for (const label of ["Como usar o portal", "Aprender", "Desenvolvimento"]) {
+    for (const label of [
+      "Como usar o portal",
+      "Aprender",
+      "Desenvolvimento",
+      "Publicações",
+    ]) {
       await expect(
         mainCards.filter({ hasText: label }).first()
       ).toBeVisible({ timeout: 10000 });
@@ -181,6 +186,25 @@ test.describe("Header and Footer", () => {
     await expect(
       page.getByText("Como usar o portal", { exact: true })
     ).toBeVisible({ timeout: 10000 });
+  });
+
+  test("NV-18: Recursos > Publicações links to the publications page", async ({
+    page,
+  }) => {
+    const header = page.locator("header").first();
+    await header.getByText(/^Recursos$/i).first().click();
+    await page.waitForTimeout(300);
+
+    const publicacoesCard = page
+      .locator('[data-group="main"]')
+      .filter({ hasText: "Publicações" })
+      .first();
+    await expect(publicacoesCard).toBeVisible({ timeout: 10000 });
+
+    const link = publicacoesCard.locator(
+      'a[href="https://10.55.37.38/pages/resources/publications"]'
+    );
+    await expect(link.first()).toHaveCount(1);
   });
 
   test("NV-16: Publicar dropdown opens and shows all creation links", async ({
