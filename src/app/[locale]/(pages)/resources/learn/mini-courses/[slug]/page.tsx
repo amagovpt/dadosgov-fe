@@ -28,9 +28,9 @@ export default async function Page({
                 <Breadcrumb
                     items={[
                         { label: 'Início', url: '/' },
-                        { label: "Recursos", url: "#" },
-                        { label: 'Aprender', url: '/learn/' },
-                        { label: 'Minicursos', url: '/learn/mini-courses/' },
+                        { label: "Recursos", url: "/recursos/" },
+                        { label: 'Aprender', url: '/recursos/aprender/' },
+                        { label: 'Minicursos', url: '/recursos/aprender/mini-courses/' },
                         { label: title, url: '#' },
                     ]}
                 />
@@ -51,7 +51,7 @@ export default async function Page({
                                 hasIcon={true}
                                 trailingIcon="agora-line-arrow-right-circle"
                                 trailingIconHover="agora-solid-arrow-right-circle"
-                                href={`/learn/mini-courses/${slug}/1`}
+                                href={`/recursos/aprender/mini-courses/${slug}/1`}
                                 className="px-24 h-48"
                             >
                                 Iniciar Curso

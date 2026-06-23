@@ -51,7 +51,7 @@ export default function MiniCoursesResult({ filteredCourses, currentPage, PAGE_S
                                 title={course.title}
                                 description={formatHtmlParagraphs(course.description)}
                                 mainLink={
-                                    <Link href={`/learn/mini-courses/${course.id}`} className="flex items-center h-full">
+                                    <Link href={`/recursos/aprender/mini-courses/${course.id}`} className="flex items-center h-full">
                                         <AppIcon name="agora-line-arrow-right-circle" className="w-24 h-24" />
                                     </Link>
                                 }
@@ -66,7 +66,7 @@ export default function MiniCoursesResult({ filteredCourses, currentPage, PAGE_S
                         currentPage={currentPage}
                         totalItems={filteredCourses.length}
                         pageSize={PAGE_SIZE}
-                        baseUrl="/learn/mini-courses"
+                        baseUrl="/recursos/aprender/mini-courses"
                     />
                 </div>
             </div>
