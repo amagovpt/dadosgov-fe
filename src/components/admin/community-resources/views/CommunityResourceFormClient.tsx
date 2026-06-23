@@ -12,6 +12,7 @@ import type { CommunityResource } from "@/service/types/community-resource";
 import type { Dataset } from "@/service/types/dataset";
 import { useAuth } from "@/context/AuthContext";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { MAX_UPLOAD_SIZE } from "@/lib/security/constants";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useAsyncSubmit } from "@/hooks/forms/useAsyncSubmit";
 import { normalizeApiError } from "@/service/utils/normalizeApiError";
@@ -98,12 +99,12 @@ export default function CommunityResourceFormClient({
   const { isSubmitting, run } = useAsyncSubmit({
     clearError: () => setApiError(null),
     onError: (error) => {
-      const normalized = normalizeApiError(error, "Erro ao criar recurso comunitário.");
+      const normalized = normalizeApiError(error, "Erro ao criar recurso comunitÃ¡rio.");
       if (normalized.status === 401) {
-        setApiError("Sessão expirada. Faça login novamente.");
+        setApiError("SessÃ£o expirada. FaÃ§a login novamente.");
         return;
       }
-      setApiError(normalized.message || "Erro ao criar recurso comunitário.");
+      setApiError(normalized.message || "Erro ao criar recurso comunitÃ¡rio.");
     },
   });
 
@@ -152,8 +153,8 @@ export default function CommunityResourceFormClient({
     const files = event.target.files;
     const selected = files && files.length > 0 ? files[0] : null;
 
-    if (selected && selected.size > 440401920) {
-      setFileError("O ficheiro excede o tamanho máximo de 420 MB.");
+    if (selected && selected.size > MAX_UPLOAD_SIZE) {
+      setFileError("O ficheiro excede o tamanho máximo de 800 MB.");
       setFile(null);
       return;
     }
@@ -241,7 +242,7 @@ export default function CommunityResourceFormClient({
       renderDropdownSection(
         "identity",
         buildProducerItems(
-          user ? `${user.first_name} ${user.last_name}` : "Eu próprio",
+          user ? `${user.first_name} ${user.last_name}` : "Eu prÃ³prio",
           (user?.organizations || []).map((organization) => ({
             id: organization.id,
             name: organization.name,
@@ -291,11 +292,11 @@ export default function CommunityResourceFormClient({
                 showIcon
                 description={
                   <>
-                    <strong>O que é um recurso comunitário?</strong>
+                    <strong>O que Ã© um recurso comunitÃ¡rio?</strong>
                     <br />
-                    Um recurso comunitário é um conteúdo adicionado por um usuário, como dados de
-                    referência cruzada, para enriquecer ou complementar um recurso comunitário
-                    público.
+                    Um recurso comunitÃ¡rio Ã© um conteÃºdo adicionado por um usuÃ¡rio, como dados de
+                    referÃªncia cruzada, para enriquecer ou complementar um recurso comunitÃ¡rio
+                    pÃºblico.
                   </>
                 }
               />
@@ -311,7 +312,7 @@ export default function CommunityResourceFormClient({
                 }}
               >
                 <p className="pt-32 text-base leading-7 text-neutral-900">
-                  Os campos marcados com um asterisco ( * ) são obrigatórios.
+                  Os campos marcados com um asterisco ( * ) sÃ£o obrigatÃ³rios.
                 </p>
 
                 <ProducerSection
@@ -388,9 +389,9 @@ export default function CommunityResourceFormClient({
                 showIcon
                 description={
                   <>
-                    <strong>O seu recurso comunitário foi criado!</strong>
+                    <strong>O seu recurso comunitÃ¡rio foi criado!</strong>
                     <br />
-                    Veja na página pública.
+                    Veja na pÃ¡gina pÃºblica.
                   </>
                 }
               />

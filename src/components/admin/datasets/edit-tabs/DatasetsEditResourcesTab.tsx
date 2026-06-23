@@ -12,7 +12,9 @@ import {
 } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import DragAndDropUploader, {
+  type SecurityRejection,
+} from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import StatusDot from "@/components/admin/StatusDot";
 import type { Dataset, Resource } from "@/service/types/dataset";
 import AppIcon from "@/components/Primitives/AppIcon";
@@ -23,7 +25,7 @@ type DatasetsEditResourcesTabProps = {
   fileUploadError: string | null;
   isSubmitting: boolean;
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void | Promise<void>;
-  onSecurityError: () => void;
+  onSecurityError: (rejections: SecurityRejection[]) => void;
   onResourceClick: (resource: Resource) => void;
   onResourceEdit: (resource: Resource) => void;
   onDeleteResource: (resource: Resource) => void;
