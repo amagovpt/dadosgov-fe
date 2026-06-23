@@ -1,0 +1,171 @@
+"use client";
+
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { Button } from "@ama-pt/agora-design-system";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
+import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
+import { fetchOrgDatasets } from "@/service/api/organizations";
+import { Dataset } from "@/service/types/dataset";
+import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
+import { useAuth } from "@/context/AuthContext";
+import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
+import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
+import { createDatasetColumns, OrgDatasetSortField } from "@/components/admin/datasets/config/datasetsListConfig";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
+
+const ORG_DATASET_SORT_MAP: Record<OrgDatasetSortField, string> = {
+  title: "title",
+  created: "created",
+  last_update: "last_update",
+};
+
+interface OrgDatasetsClientProps {
+  orgId: string;
+}
+
+export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
+  const { user } = useAuth();
+  const orgName = useViewedOrganizationName(orgId, user?.organizations);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortField, setSortField] = useState<OrgDatasetSortField | null>("created");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("descending");
+
+  const columns = useMemo(
+    () =>
+      createDatasetColumns({
+        editHref: (dataset) => `/pages/admin/org/${orgId}/datasets/edit?slug=${dataset.slug}`,
+        showOwner: true,
+        showOrganizationFallback: true,
+        sortVariant: "org",
+      }),
+    [orgId]
+  );
+
+  const loadDatasets = useCallback(
+    async (page: number, pageSize: number, q: string, status: string, sort?: string) => {
+      setIsLoading(true);
+      try {
+        const filters: {
+          q?: string;
+          sort?: string;
+          private?: boolean;
+          archived?: boolean;
+          deleted?: boolean;
+        } = {};
+
+        if (sort) filters.sort = sort;
+        if (q.trim()) filters.q = q.trim();
+        if (status === "public") {
+          filters.private = false;
+          filters.archived = false;
+          filters.deleted = false;
+        } else if (status === "draft") {
+          filters.private = true;
+          filters.archived = false;
+          filters.deleted = false;
+        } else if (status === "archived") {
+          filters.archived = true;
+          filters.deleted = false;
+        } else if (status === "deleted") {
+          filters.deleted = true;
+        }
+
+        const response = await fetchOrgDatasets(orgId, page, pageSize, filters);
+        setDatasets(response.data || []);
+        setTotal(response.total || 0);
+      } catch (error) {
+        console.error("Error loading org datasets:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [orgId]
+  );
+
+  useEffect(() => {
+    const sort = buildApiSortParam(sortField, sortOrder, ORG_DATASET_SORT_MAP);
+    void loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
+  }, [currentPage, itemsPerPage, searchQuery, statusFilter, sortField, sortOrder, loadDatasets]);
+
+  const handleSearch = useDebouncedSearch((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  });
+
+  const { handleSort, getSortOrder } = useSortControls(
+    sortField,
+    sortOrder,
+    setSortField,
+    setSortOrder,
+    setCurrentPage
+  );
+
+  return (
+    <AdminListPage
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: orgName || "Organização", url: "#" },
+        { label: "Conjuntos de dados", url: "#" },
+      ]}
+      title="Conjuntos de dados"
+      isLoading={isLoading}
+      count={total}
+      hasItems={datasets.length > 0}
+      currentPage={currentPage}
+      pageSize={itemsPerPage}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setItemsPerPage}
+      search={{
+        placeholder: "Pesquise o nome, código ou sigla da entidade",
+        ariaLabel: "Pesquisar conjuntos de dados",
+        onChange: handleSearch,
+      }}
+      filters={
+        <StatusFilterSelect
+          value={statusFilter}
+          onChange={(value) => {
+            setStatusFilter(value);
+            setCurrentPage(1);
+          }}
+        />
+      }
+      toolbarActions={
+        <a href={`/api/1/organizations/${orgId}/catalog`} download>
+          <Button
+            variant="primary"
+            appearance="outline"
+            hasIcon
+            leadingIcon="agora-line-download"
+            leadingIconHover="agora-solid-download"
+          >
+            Catálogo
+          </Button>
+        </a>
+      }
+      emptyState={
+        <AdminEmptyState
+          icon="agora-line-edit"
+          title="Sem publicações"
+          description="A organização ainda não publicou conjuntos de dados."
+          createUrl="/pages/admin/datasets/new"
+        />
+      }
+    >
+      <AdminListTable
+        items={datasets}
+        columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+        getRowKey={(dataset) => dataset.id}
+      />
+    </AdminListPage>
+  );
+}

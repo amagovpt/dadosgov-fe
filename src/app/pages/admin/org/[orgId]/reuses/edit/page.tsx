@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import ReusesEditClient from "@/components/admin/reuses/ReusesEditClient";
+import ReusesEditClient from "@/components/admin/reuses/views/ReusesEditClient";
 
 export const metadata: Metadata = {
-  title: "Editar reutilização - Organização - Admin - dados.gov.pt",
-  description: "Editar reutilização da organização no portal dados.gov.pt.",
+  title: "Editar reutilizaÃƒÂ§ÃƒÂ£o - OrganizaÃƒÂ§ÃƒÂ£o - Admin - dados.gov.pt",
+  description: "Editar reutilizaÃƒÂ§ÃƒÂ£o da organizaÃƒÂ§ÃƒÂ£o no portal dados.gov.pt.",
 };
 
 export default function OrgReusesEditPage() {

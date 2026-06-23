@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import OrgHarvestersClient from "@/components/admin/harvesters/OrgHarvestersClient";
+import OrgHarvestersClient from "@/components/admin/harvesters/views/OrgHarvestersClient";
 
 export const metadata: Metadata = {
-  title: "Harvesters - Organização - Admin - dados.gov.pt",
-  description: "Gestão de harvesters da organização no portal dados.gov.pt.",
+  title: "Harvesters - OrganizaÃƒÂ§ÃƒÂ£o - Admin - dados.gov.pt",
+  description: "GestÃƒÂ£o de harvesters da organizaÃƒÂ§ÃƒÂ£o no portal dados.gov.pt.",
 };
 
 export default function OrgHarvestersPage() {

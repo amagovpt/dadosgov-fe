@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import CommunityResourcesClient from "@/components/admin/community-resources/CommunityResourcesClient";
+import CommunityResourcesClient from "@/components/admin/community-resources/views/CommunityResourcesClient";
 
 export const metadata: Metadata = {
-  title: "Recursos comunitários - Admin - dados.gov.pt",
-  description: "Gestão de recursos comunitários no portal dados.gov.pt.",
+  title: "Recursos comunitÃƒÂ¡rios - Admin - dados.gov.pt",
+  description: "GestÃƒÂ£o de recursos comunitÃƒÂ¡rios no portal dados.gov.pt.",
 };
 
 export default function CommunityResourcesPage() {
