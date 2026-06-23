@@ -4,7 +4,21 @@ import { fetchHomepageData } from '@/service/api/system';
 import { getTematicAreas } from '@/service/queries/topics-areas/tematic-areas';
 import { getAssets } from '@/utils/getAssets';
 import { parseHtmlToParagraphs } from '@/utils/htmlToParagraphs';
+import { Metadata } from 'next';
 import Image from 'next/image';
+
+
+export async function generateMetadata({ }: {
+    params: Promise<{ locale: string; }>;
+}): Promise<Metadata> {
+
+    const { hero } = await getTematicAreas("pt");
+
+    return {
+        title: hero.title,
+        description: hero.description,
+    };
+}
 
 export default async function page() {
 
