@@ -30,6 +30,7 @@ import {
   POISONED_FILE_WARNING,
   translateUploadError,
 } from "@/lib/security/translateUploadError";
+import { MAX_UPLOAD_SIZE } from "@/lib/security/constants";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -345,10 +346,10 @@ export default function CommunityResourceFormClient({
                       selectedFilesLabel="ficheiro selecionado"
                       removeFileButtonLabel="Remover ficheiro"
                       replaceFileButtonLabel="Substituir ficheiro"
-                      extensionsInstructions="Tamanho máximo: 420 MB."
-                      maxSize={440401920}
+                      extensionsInstructions="Tamanho máximo: 800 MB."
+                      maxSize={MAX_UPLOAD_SIZE}
                       maxCount={1}
-                      maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 420 MB."
+                      maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 800 MB."
                       forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
                       hasError={!!fileError}
                       hasFeedback={!!fileError}
@@ -357,8 +358,8 @@ export default function CommunityResourceFormClient({
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         const files = e.target.files;
                         const selected = files && files.length > 0 ? files[0] : null;
-                        if (selected && selected.size > 440401920) {
-                          setFileError("O ficheiro excede o tamanho máximo de 420 MB.");
+                        if (selected && selected.size > MAX_UPLOAD_SIZE) {
+                          setFileError("O ficheiro excede o tamanho máximo de 800 MB.");
                           setFile(null);
                           return;
                         }

@@ -1065,7 +1065,10 @@ export default function DatasetsEditClient() {
                 fileUploadError={fileUploadError}
                 isSubmitting={isSubmitting}
                 onFileUpload={handleFileUpload}
-                onSecurityError={() => setFileUploadError(POISONED_FILE_WARNING)}
+                onSecurityError={(rejections) => {
+                  const tooLarge = rejections.find((r) => r.reason.includes("demasiado grande"));
+                  setFileUploadError(tooLarge ? tooLarge.reason : POISONED_FILE_WARNING);
+                }}
                 onResourceClick={handleResourceClick}
                 onResourceEdit={handleResourceEdit}
                 onDeleteResource={handleDeleteResource}
