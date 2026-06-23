@@ -3,7 +3,7 @@ import HarvestersNewClient from "@/components/admin/harvesters/views/HarvestersN
 
 export const metadata: Metadata = {
   title: "Criar harvester - Admin - dados.gov.pt",
-  description: "CriaÃƒÂ§ÃƒÂ£o de um novo harvester no portal dados.gov.pt.",
+  description: "Criação de um novo harvester no portal dados.gov.pt.",
 };
 
 export default function HarvestersNewPage() {

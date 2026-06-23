@@ -16,17 +16,17 @@ export default function ApiNewClient() {
   const stepTitles: Record<number, string> = {
     1: "Descreva a sua API",
     2: "Vincular conjuntos de dados",
-    3: "Finalizar a publicaÃƒÂ§ÃƒÂ£o",
+    3: "Finalizar a publicação",
   };
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "AdministraÃƒÂ§ÃƒÂ£o", url: "/pages/admin" },
+        { label: "Administração", url: "/pages/admin" },
         { label: displayName || "...", url: "#" },
         { label: "API", url: "/pages/admin/dataservices" },
       ]}
-      title="FormulÃƒÂ¡rio de inscriÃƒÂ§ÃƒÂ£o"
+      title="Formulário de inscrição"
     >
       <AdminStepper
         currentStep={currentStep}

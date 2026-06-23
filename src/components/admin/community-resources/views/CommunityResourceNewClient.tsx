@@ -19,17 +19,17 @@ export default function CommunityResourceNewClient() {
 
   const stepTitles: Record<number, string> = {
     1: "Descreva o recurso da sua comunidade.",
-    2: "Finalizar a publicaÃƒÂ§ÃƒÂ£o",
+    2: "Finalizar a publicação",
   };
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "AdministraÃƒÂ§ÃƒÂ£o", url: "/pages/admin" },
+        { label: "Administração", url: "/pages/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Recursos comunitÃƒÂ¡rios", url: "/pages/admin/me/community-resources" },
+        { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
       ]}
-      title="FormulÃƒÂ¡rio de inscriÃƒÂ§ÃƒÂ£o"
+      title="Formulário de inscrição"
     >
       {currentStep === 2 && publicPageUrl && (
         <div className="flex justify-end mb-16">
@@ -41,7 +41,7 @@ export default function CommunityResourceNewClient() {
             leadingIconHover="agora-solid-eye"
             onClick={() => router.push(publicPageUrl)}
           >
-            Veja a pÃƒÂ¡gina pÃƒÂºblica
+            Veja a página pública
           </Button>
         </div>
       )}

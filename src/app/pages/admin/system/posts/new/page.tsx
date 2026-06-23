@@ -3,7 +3,7 @@ import PostsNewClient from "@/components/admin/posts/views/PostsNewClient";
 
 export const metadata: Metadata = {
   title: "Criar artigo - Admin - dados.gov.pt",
-  description: "CriaÃƒÂ§ÃƒÂ£o de um novo artigo no portal dados.gov.pt.",
+  description: "Criação de um novo artigo no portal dados.gov.pt.",
 };
 
 export default function PostsNewPage() {

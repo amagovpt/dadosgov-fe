@@ -15,19 +15,19 @@ export default function ReusesNewClient() {
   const currentStep = Number(searchParams.get("step")) || 1;
 
   const stepTitles: Record<number, string> = {
-    1: "Descreva a sua reutilizaÃƒÂ§ÃƒÂ£o",
+    1: "Descreva a sua reutilização",
     2: "Associe os conjuntos de dados",
-    3: "Finalize a publicaÃƒÂ§ÃƒÂ£o da sua reutilizaÃƒÂ§ÃƒÂ£o",
+    3: "Finalize a publicação da sua reutilização",
   };
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "AdministraÃƒÂ§ÃƒÂ£o", url: "/pages/admin" },
+        { label: "Administração", url: "/pages/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "ReutilizaÃƒÂ§ÃƒÂµes", url: "/pages/admin/me/reuses" },
+        { label: "Reutilizações", url: "/pages/admin/me/reuses" },
       ]}
-      title="FormulÃƒÂ¡rio de publicaÃƒÂ§ÃƒÂ£o de uma reutilizaÃƒÂ§ÃƒÂ£o"
+      title="Formulário de publicação de uma reutilização"
     >
       <AdminStepper
         currentStep={currentStep}

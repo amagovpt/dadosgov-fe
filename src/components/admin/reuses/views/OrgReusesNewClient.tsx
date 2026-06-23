@@ -19,18 +19,18 @@ export default function OrgReusesNewClient() {
   const currentStep = Number(searchParams.get("step")) || 1;
 
   const stepTitles: Record<number, string> = {
-    1: "Descreva a sua reutilizaÃƒÂ§ÃƒÂ£o",
+    1: "Descreva a sua reutilização",
     2: "Conectar conjuntos de dados e APIs",
-    3: "Finalizar a publicaÃƒÂ§ÃƒÂ£o",
+    3: "Finalizar a publicação",
   };
 
   return (
     <AdminLayout breadcrumbItems={[
-      { label: "AdministraÃƒÂ§ÃƒÂ£o", url: "/pages/admin" },
-      { label: orgName || "OrganizaÃƒÂ§ÃƒÂ£o", url: "#" },
-      { label: "ReutilizaÃƒÂ§ÃƒÂµes", url: orgId ? `/pages/admin/org/${orgId}/reuses` : "#" }
+      { label: "Administração", url: "/pages/admin" },
+      { label: orgName || "Organização", url: "#" },
+      { label: "Reutilizações", url: orgId ? `/pages/admin/org/${orgId}/reuses` : "#" }
     ]}
-      title="FormulÃƒÂ¡rio de reutilizaÃƒÂ§ÃƒÂ£o"
+      title="Formulário de reutilização"
     >
 
       {/* Stepper */}
