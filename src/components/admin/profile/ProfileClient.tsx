@@ -1,57 +1,41 @@
 "use client";
 
-import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { fetchMyFollowing } from "@/service/api/followers";
 import {
-  deleteAvatar,
-  fetchApiTokens,
   fetchFullProfile,
-  generateApiKey,
-  requestEmailChange,
-  revokeApiToken,
   uploadAvatar,
+  deleteAvatar,
+  generateApiKey,
+  fetchApiTokens,
+  revokeApiToken,
+  requestEmailChange,
 } from "@/service/api/profile";
 import { fetchUserActivity, updateProfile } from "@/service/api/users";
-import type { Activity } from "@/service/types/catalog";
-import type { ApiToken, UserFollowing, UserPublic } from "@/service/types/identity";
-import { format, formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
+import { Activity } from "@/service/types/catalog";
+import { ApiToken, UserFollowing, UserPublic } from "@/service/types/identity";
 import {
   CardNoResults,
   Icon,
-  Tab,
-  TabBody,
-  TabHeader,
   Tabs,
-  usePopupContext,
+  Tab,
+  TabHeader,
+  TabBody,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import { ChangePasswordPopupContent } from "@/components/admin/profile/ChangePasswordPopupContent";
-import { DeleteAvatarPopupContent } from "@/components/admin/profile/DeleteAvatarPopupContent";
-import UserProfileHeaderCard from "@/components/admin/profile/UserProfileHeaderCard";
-import UserProfileMainTab from "@/components/admin/profile/UserProfileMainTab";
-import UserProfileSubscriptionsTab from "@/components/admin/profile/UserProfileSubscriptionsTab";
-import UserProfileActivityTab from "@/components/admin/profile/UserProfileActivityTab";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
-
-function toProxiedUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    const parsed = new URL(url);
-    return parsed.pathname + parsed.search;
-  } catch {
-    return url;
-  }
-}
+import { toProxiedUrl } from "./profileUtils";
+import { ProfileCard } from "./ProfileCard";
+import { ProfileFormTab } from "./ProfileFormTab";
+import { SubscriptionsTab } from "./SubscriptionsTab";
+import { ActivitiesTab } from "./ActivitiesTab";
 
 export default function ProfileClient() {
   const router = useRouter();
-  const { show } = usePopupContext();
   const { displayName } = useCurrentUser();
   const { user, samlLogin, refresh } = useAuth();
 
@@ -62,6 +46,7 @@ export default function ProfileClient() {
   const [lastName, setLastName] = useState("");
   const [about, setAbout] = useState("");
   const [website, setWebsite] = useState("");
+
   const [apiTokens, setApiTokens] = useState<ApiToken[]>([]);
   const [newToken, setNewToken] = useState<string | null>(null);
   const [newTokenName, setNewTokenName] = useState("");
@@ -71,8 +56,8 @@ export default function ProfileClient() {
     setMessage: setTokenCopied,
     setTemporaryMessage: showTokenCopied,
   } = useTemporaryMessage<boolean>(false, 3000);
-  const [email, setEmail] = useState("");
 
+  const [email, setEmail] = useState("");
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
@@ -261,7 +246,7 @@ export default function ProfileClient() {
     }
   };
 
-  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
@@ -314,20 +299,6 @@ export default function ProfileClient() {
     }
   };
 
-  const lastModified = profile?.since
-    ? format(new Date(profile.since), "d 'de' MMMM 'de' yyyy", { locale: pt })
-    : "";
-
-  function formatTokenCreatedAt(value: string) {
-    return format(new Date(value), "dd/MM/yyyy", { locale: pt });
-  }
-
-  function formatLastUsedAt(value: string | null) {
-    return value
-      ? ` · último uso ${formatDistanceToNow(new Date(value), { locale: pt, addSuffix: true })}`
-      : " · nunca utilizada";
-  }
-
   return (
     <AdminLayout
       breadcrumbItems={[
@@ -338,11 +309,10 @@ export default function ProfileClient() {
       title="Perfil"
       headerAction={null}
     >
-      <UserProfileHeaderCard
+      <ProfileCard
         profile={profile}
         avatarPreview={avatarPreview}
-        memberSinceLabel={lastModified}
-        onViewPublicProfile={() => router.push(`/pages/users/${user?.slug || ""}`)}
+        onViewPublic={() => router.push(`/pages/users/${user?.slug || ""}`)}
       />
 
       <div className="mt-32">
@@ -350,88 +320,60 @@ export default function ProfileClient() {
           <Tab active>
             <TabHeader>Perfil</TabHeader>
             <TabBody>
-              <UserProfileMainTab
+              <ProfileFormTab
+                profile={profile}
                 firstName={firstName}
                 lastName={lastName}
                 about={about}
                 website={website}
-                avatarError={avatarError}
-                avatarUploaderKey={avatarUploaderKey}
-                newTokenName={newTokenName}
-                isGeneratingKey={isGeneratingKey}
-                newToken={newToken}
-                tokenCopied={tokenCopied}
-                apiTokens={apiTokens}
-                revokingTokenId={revokingTokenId}
-                email={email}
-                isEditingEmail={isEditingEmail}
-                newEmail={newEmail}
-                pendingEmail={pendingEmail}
-                emailChangeSuccess={emailChangeSuccess}
-                isChangingEmail={isChangingEmail}
-                samlLogin={samlLogin}
                 isSaving={isSaving}
                 saveSuccess={saveSuccess}
                 saveError={saveError}
+                samlLogin={!!samlLogin}
+                onFirstNameChange={setFirstName}
+                onLastNameChange={setLastName}
+                onAboutChange={setAbout}
+                onWebsiteChange={setWebsite}
+                onSave={handleSave}
+                avatarError={avatarError}
+                avatarUploaderKey={avatarUploaderKey}
                 isDeletingAvatar={isDeletingAvatar}
-                hasAvatar={!!profile?.avatar_thumbnail}
-                onFirstNameChange={(event) => setFirstName(event.target.value)}
-                onLastNameChange={(event) => setLastName(event.target.value)}
-                onAboutChange={(event) => setAbout(event.target.value)}
-                onWebsiteChange={(event) => setWebsite(event.target.value)}
                 onAvatarChange={handleAvatarChange}
+                onDeleteAvatar={handleDeleteAvatar}
                 onAvatarSecurityError={() => setAvatarError(POISONED_FILE_WARNING)}
-                onNewTokenNameChange={(event) => setNewTokenName(event.target.value)}
-                onGenerateApiKey={() => {
-                  void handleGenerateApiKey();
-                }}
-                onCopyToken={() => {
-                  void handleCopyToken();
-                }}
-                onRevokeToken={(tokenId) => {
-                  void handleRevokeToken(tokenId);
-                }}
-                onStartEmailEdit={() => {
+                apiTokens={apiTokens}
+                newToken={newToken}
+                newTokenName={newTokenName}
+                tokenCopied={tokenCopied}
+                isGeneratingKey={isGeneratingKey}
+                revokingTokenId={revokingTokenId}
+                onTokenNameChange={setNewTokenName}
+                onGenerateApiKey={handleGenerateApiKey}
+                onCopyToken={handleCopyToken}
+                onRevokeToken={handleRevokeToken}
+                email={email}
+                pendingEmail={pendingEmail}
+                newEmail={newEmail}
+                isEditingEmail={isEditingEmail}
+                isChangingEmail={isChangingEmail}
+                emailChangeSuccess={emailChangeSuccess}
+                onStartEditEmail={() => {
                   setIsEditingEmail(true);
                   setNewEmail(emailChangeSuccess ? pendingEmail : "");
                 }}
-                onNewEmailChange={(event) => setNewEmail(event.target.value)}
-                onConfirmEmailChange={() => {
-                  void handleEmailChange();
-                }}
-                onCancelEmailEdit={() => {
+                onNewEmailChange={setNewEmail}
+                onConfirmEmailChange={handleEmailChange}
+                onCancelEmailChange={() => {
                   setIsEditingEmail(false);
                   setNewEmail("");
                 }}
-                onChangePassword={() =>
-                  show(<ChangePasswordPopupContent />, {
-                    title: "Altere a sua senha",
-                    closeAriaLabel: "Fechar",
-                    dimensions: "m",
-                  })
-                }
-                onSave={() => {
-                  void handleSave();
-                }}
-                onDeleteAvatar={() =>
-                  show(<DeleteAvatarPopupContent onConfirm={handleDeleteAvatar} />, {
-                    title: "Eliminar foto de perfil",
-                    closeAriaLabel: "Fechar",
-                    dimensions: "s",
-                  })
-                }
-                formatTokenCreatedAt={formatTokenCreatedAt}
-                formatLastUsedAt={formatLastUsedAt}
               />
             </TabBody>
           </Tab>
           <Tab>
             <TabHeader>Subscrições</TabHeader>
             <TabBody>
-              <UserProfileSubscriptionsTab
-                subscriptions={subscriptions}
-                isLoading={isLoadingSubscriptions}
-              />
+              <SubscriptionsTab subscriptions={subscriptions} isLoading={isLoadingSubscriptions} />
             </TabBody>
           </Tab>
           <Tab>
@@ -454,11 +396,11 @@ export default function ProfileClient() {
           <Tab>
             <TabHeader>Atividades</TabHeader>
             <TabBody>
-              <UserProfileActivityTab
+              <ActivitiesTab
                 activities={activities}
                 isLoading={isLoadingActivities}
-                activityTotal={activityTotal}
                 activityPage={activityPage}
+                activityTotal={activityTotal}
                 activityPageSize={activityPageSize}
                 onPageChange={setActivityPage}
                 onPageSizeChange={setActivityPageSize}

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Button, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
+import { Button, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import {
   deleteOrganization,
@@ -125,6 +125,14 @@ export default function OrgProfileClient() {
     [isAdmin, org, user],
   );
 
+  const canDelete = useMemo(
+    () =>
+      isAdmin ||
+      (org?.members?.some((member) => member.user.id === user?.id && member.role === "admin") ??
+        false),
+    [isAdmin, org, user],
+  );
+
   function handleBadgeToggle(kind: string, checked: boolean) {
     setSelectedBadgeKinds((previousKinds) =>
       checked
@@ -159,7 +167,7 @@ export default function OrgProfileClient() {
         acronym: acronym || null,
         description,
         url: url || null,
-        badges: selectedBadgeKinds.map((kind) => ({ kind })),
+        ...(isAdmin ? { badges: selectedBadgeKinds.map((kind) => ({ kind })) } : {}),
       });
       setOrg(updated);
       setSelectedBadgeKinds(badgeKindsFromOrg(updated.badges));
@@ -245,7 +253,7 @@ export default function OrgProfileClient() {
             acronym={acronym}
             description={description}
             url={url}
-            availableBadges={availableBadges}
+            availableBadges={isAdmin ? availableBadges : {}}
             selectedBadgeKinds={selectedBadgeKinds}
             canEdit={canEdit}
             isSaving={isSaving}
@@ -272,11 +280,7 @@ export default function OrgProfileClient() {
           />
 
           <OrganizationDangerZone
-            canDelete={
-              isAdmin ||
-              (org?.members?.some((member) => member.user.id === user?.id && member.role === "admin") ??
-                false)
-            }
+            canDelete={canDelete}
             isDeleting={isDeleting}
             deleteError={deleteError}
             onDeleteClick={(event) => {

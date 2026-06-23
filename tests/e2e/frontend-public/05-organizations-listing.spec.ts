@@ -3,6 +3,23 @@ import { test, expect, type Page } from "playwright/test";
 const ORGS_URL = "/pages/organizations";
 const PLACEHOLDER_SRC = "/images/placeholders/organization.png";
 
+// Acceptance fixture from the search ticket: the acronym "ARTE" must surface
+// "Agência para a Reforma Tecnológica do Estado". Its name does NOT contain the
+// substring "arte", so a hit can only come from the acronym field — and its
+// accented name lets us assert accent-insensitive matching from "agencia".
+const ARTE_ORG_SLUG = "agencia-para-a-reforma-tecnologica-do-estado";
+const ARTE_ORG_CARD = `a[href*='${ARTE_ORG_SLUG}']`;
+
+async function searchOrganizations(page: Page, query: string) {
+  const searchInput = page.locator("#organizations-search");
+  await expect(searchInput).toBeVisible({ timeout: 10000 });
+  await searchInput.fill(query);
+  await searchInput.press("Enter");
+  await page.waitForURL(new RegExp(`q=${encodeURIComponent(query)}`), {
+    timeout: 10000,
+  });
+}
+
 async function openFiltersPanel(page: Page) {
   const openBtn = page.getByRole("button", { name: /Abrir filtros/i });
   if ((await openBtn.count()) > 0 && (await openBtn.first().isVisible())) {
@@ -73,6 +90,28 @@ test.describe("Organizations Listing", () => {
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
+  });
+
+  test("OL-04c: Acronym search surfaces the matching org (ARTE → Agência…)", async ({
+    page,
+  }) => {
+    // "ARTE" appears nowhere in the org's name, so this only passes if the
+    // backend searches the acronym field.
+    await searchOrganizations(page, "ARTE");
+
+    const card = page.locator(ARTE_ORG_CARD);
+    await expect(card.first()).toBeVisible({ timeout: 15000 });
+  });
+
+  test("OL-04d: Search is accent-insensitive (agencia → Agência…)", async ({
+    page,
+  }) => {
+    // Typing without the accent ("agencia") must still find the accented name
+    // "Agência…" — the common-form-of-search requirement.
+    await searchOrganizations(page, "agencia");
+
+    const card = page.locator(ARTE_ORG_CARD);
+    await expect(card.first()).toBeVisible({ timeout: 15000 });
   });
 
   test("OL-05: Type filter section visible after opening filters", async ({

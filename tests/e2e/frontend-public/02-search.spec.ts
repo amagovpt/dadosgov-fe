@@ -1,4 +1,5 @@
 import { test, expect } from "playwright/test";
+import { loadFixtures } from "../../helpers/fixtures";
 
 const SEARCH_URL = "/pages/search";
 
@@ -170,5 +171,58 @@ test.describe("Search", () => {
 
     const searchInput = page.locator("#search-page-input");
     await expect(searchInput).toHaveValue("saude", { timeout: 10000 });
+  });
+
+  test("PQ-13: Dataset suggest API returns results for description-only query", async ({
+    request,
+  }) => {
+    // The fixture dataset title is "E2E Test Dataset" — "seed script" is NOT
+    // in the title but IS in its description "Dataset auto-created by the e2e
+    // seed script."  Before the fix, this query returned nothing; after the
+    // fix it must return the fixture.
+    const { dataset } = loadFixtures();
+
+    const response = await request.get(
+      `/api/1/datasets/suggest/?q=seed+script&size=25`
+    );
+    expect(response.ok()).toBeTruthy();
+
+    const data: { slug: string }[] = await response.json();
+    expect(Array.isArray(data)).toBeTruthy();
+    const slugs = data.map((d) => d.slug);
+    expect(slugs).toContain(dataset.slug);
+  });
+
+  test("PQ-14: Organization suggest API returns results for description-only query", async ({
+    request,
+  }) => {
+    // The fixture org name is "E2E Test Organization" — "seed script" is NOT
+    // in the name but IS in its description "Organisation auto-created by the
+    // e2e seed script."
+    const { organization } = loadFixtures();
+
+    const response = await request.get(
+      `/api/1/organizations/suggest/?q=seed+script&size=25`
+    );
+    expect(response.ok()).toBeTruthy();
+
+    const data: { slug: string }[] = await response.json();
+    expect(Array.isArray(data)).toBeTruthy();
+    const slugs = data.map((d) => d.slug);
+    expect(slugs).toContain(organization.slug);
+  });
+
+  test("PQ-15: Search page returns dataset results for description-only query", async ({
+    page,
+  }) => {
+    // "seed script" is in the fixture dataset description but not its title.
+    // The search page must surface at least one result (the fixture).
+    const { dataset } = loadFixtures();
+
+    await page.goto(`${SEARCH_URL}?q=seed+script&type=datasets`);
+    await page.waitForLoadState("networkidle");
+
+    const datasetLink = page.locator(`a[href*="/pages/datasets/${dataset.slug}"]`);
+    await expect(datasetLink).toBeVisible({ timeout: 15000 });
   });
 });

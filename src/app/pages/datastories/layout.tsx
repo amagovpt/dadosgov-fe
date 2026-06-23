@@ -1,14 +1,11 @@
+import { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
 
 export default function DataStoriesLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: ReactNode;
 }>) {
-    return (
-        <>
-            {children}
-        </>
-    );
+  return <>{children}</>;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, type ReactElement } from "react";
+import React, { useState, useEffect, useMemo, type ReactElement } from "react";
 import {
   Accordion,
   AccordionGroup,
@@ -19,6 +19,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { CommunityResource } from "@/service/types/community-resource";
 import { Resource } from "@/service/types/dataset";
+import { Pagination } from "@/components/Pagination";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE || "https://dados.gov.pt/api/1";
 
@@ -140,8 +141,13 @@ const CopyField: React.FC<{ label: string; value: string; mono?: boolean }> = ({
   );
 };
 
-const TABULAR_FORMATS = ["csv", "tsv", "xls", "xlsx", "ods", "parquet"];
-const MAX_PREVIEW_ROWS = 5;
+// Formats we can actually render a preview for. csv/tsv are parsed client-side
+// from the text proxy; xls/xlsx/ods are parsed server-side via the spreadsheet
+// proxy and returned as JSON.
+const TABULAR_FORMATS = ["csv", "tsv", "xls", "xlsx", "ods"];
+const SPREADSHEET_FORMATS = ["xls", "xlsx", "ods"];
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_SAMPLE_ROWS = 100;
 
 interface ColumnInfo {
   name: string;
@@ -192,6 +198,35 @@ const detectColumnType = (name: string, values: string[]): string => {
   return "string";
 };
 
+// Build the preview model from already-split rows. Shared by the CSV parser
+// and the server-side spreadsheet path so type detection stays consistent.
+const buildTabularData = (
+  headers: string[],
+  dataRows: string[][],
+  totalRows: number
+): TabularData => {
+  // Keep every loaded row so the preview can paginate client-side. The proxies
+  // already cap how much is fetched (CSV: 1 MiB, spreadsheet: MAX_SAMPLE_ROWS).
+  const rows = dataRows;
+  const sampleRows = dataRows.slice(0, MAX_SAMPLE_ROWS);
+  const columns: ColumnInfo[] = headers.map((header, i) => ({
+    name: header,
+    type: detectColumnType(
+      header,
+      sampleRows.map((row) => row[i] || "")
+    ),
+  }));
+
+  return {
+    headers,
+    columns,
+    rows,
+    totalRows,
+    totalCols: headers.length,
+    lastModified: null,
+  };
+};
+
 const parseCsv = (text: string, separator = ","): TabularData => {
   const lines = text.trim().split("\n");
   if (lines.length === 0)
@@ -232,55 +267,84 @@ const parseCsv = (text: string, separator = ","): TabularData => {
   const headers = parseLine(lines[0]);
   const dataLines = lines.slice(1).filter((l) => l.trim().length > 0);
   const allRows = dataLines.map(parseLine);
-  const rows = allRows.slice(0, MAX_PREVIEW_ROWS);
 
-  const sampleRows = allRows.slice(0, 100);
-  const columns: ColumnInfo[] = headers.map((header, i) => ({
-    name: header,
-    type: detectColumnType(
-      header,
-      sampleRows.map((row) => row[i] || "")
-    ),
-  }));
-
-  return {
-    headers,
-    columns,
-    rows,
-    totalRows: dataLines.length,
-    totalCols: headers.length,
-    lastModified: null,
-  };
+  return buildTabularData(headers, allRows, dataLines.length);
 };
+
+interface SpreadsheetPreview {
+  headers: string[];
+  rows: string[][];
+  totalRows: number;
+  totalCols: number;
+  lastModified: string | null;
+}
 
 const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource }) => {
   const [tabularData, setTabularData] = useState<TabularData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
-  const isTabular = TABULAR_FORMATS.includes(resource.format?.toLowerCase() || "");
+  const visibleRows = useMemo(() => {
+    if (!tabularData) return [];
+    const start = (page - 1) * DEFAULT_PAGE_SIZE;
+    return tabularData.rows.slice(start, start + DEFAULT_PAGE_SIZE);
+  }, [tabularData, page]);
+
+  const format = resource.format?.toLowerCase() || "";
+  const isTabular = TABULAR_FORMATS.includes(format);
+  const isSpreadsheet = SPREADSHEET_FORMATS.includes(format);
+  // Remote resources are hosted elsewhere; the backend resolver often cannot
+  // stream them (SSRF guard, unreachable host), so the preview proxy fails.
+  const isRemote = resource.filetype === "remote";
 
   useEffect(() => {
-    if (!isTabular || resource.format?.toLowerCase() !== "csv") return;
+    if (!isTabular) return;
+
+    // A failed preview is an expected outcome (external files the backend
+    // can't fetch, missing/oversized resources), not a programming error — so
+    // we surface a friendly message instead of throwing/logging, which would
+    // otherwise trigger the dev console-error overlay.
+    const unavailableMessage = isRemote
+      ? "Pré-visualização não disponível para ficheiros externos."
+      : "Não foi possível carregar os dados para pré-visualização.";
 
     async function fetchData() {
       setIsLoading(true);
+      setError(null);
+      // Reset to the first page when a new resource's data loads, so we never
+      // land on a page that no longer exists.
+      setPage(1);
       try {
-        const res = await fetch(`/internal-api/proxy-csv?url=${encodeURIComponent(resource.url)}`);
-        if (!res.ok) throw new Error("Erro ao carregar o ficheiro");
-        const text = await res.text();
-        const parsed = parseCsv(text);
-        parsed.lastModified = res.headers.get("last-modified");
-        setTabularData(parsed);
-      } catch (err) {
-        console.error("Preview error:", err);
-        setError("Não foi possível carregar os dados.");
+        // The browser sends only the resource id; the proxy resolves and
+        // streams the bytes through the backend catalogue resolver.
+        const rid = encodeURIComponent(resource.id);
+        const endpoint = isSpreadsheet ? "proxy-spreadsheet" : "proxy-csv";
+        const res = await fetch(`/internal-api/${endpoint}?rid=${rid}`);
+        if (!res.ok) {
+          setError(unavailableMessage);
+          return;
+        }
+        if (isSpreadsheet) {
+          const json: SpreadsheetPreview = await res.json();
+          const parsed = buildTabularData(json.headers, json.rows, json.totalRows);
+          parsed.lastModified = res.headers.get("last-modified") ?? json.lastModified;
+          setTabularData(parsed);
+        } else {
+          const text = await res.text();
+          const parsed = parseCsv(text);
+          parsed.lastModified = res.headers.get("last-modified");
+          setTabularData(parsed);
+        }
+      } catch {
+        // Network/parse failure — keep it quiet, just show the message.
+        setError(unavailableMessage);
       } finally {
         setIsLoading(false);
       }
     }
     fetchData();
-  }, [resource.url, resource.format, isTabular]);
+  }, [resource.id, isTabular, isSpreadsheet, isRemote]);
 
   // Cast Tabs to accept conditional children (the library type is overly strict)
   const FlexTabs = Tabs as React.FC<Omit<React.ComponentProps<typeof Tabs>, "children"> & { children: React.ReactNode }>;
@@ -290,7 +354,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
       <div className="w-[2px] bg-primary-600 shrink-0" />
       <div className="flex-1 min-w-0">
         <FlexTabs>
-          {isTabular && !isLoading && !error && tabularData && (
+          {isTabular && (
           <Tab>
             <TabHeader>Pré-visualização</TabHeader>
             <TabBody>
@@ -303,7 +367,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                   </p>
                 ) : (
                   <div className="space-y-16">
-                    <div className="bg-primary-100 rounded-8 p-24 flex items-center gap-16" style={{ marginBottom: "24px" }}>
+                    <div className="hidden bg-primary-100 rounded-8 p-24 flex items-center gap-16" style={{ marginBottom: "24px" }}>
                       <div className="flex-1">
                         <p className="font-bold text-neutral-900 text-sm">
                           Explore os dados em detalhes.
@@ -329,14 +393,14 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                         <TableHeader>
                           <TableRow>
                             {tabularData.headers.map((header, i) => (
-                              <TableHeaderCell key={i} sortType="string">
+                              <TableHeaderCell key={i}>
                                 {header}
                               </TableHeaderCell>
                             ))}
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {tabularData.rows.map((row, i) => (
+                          {visibleRows.map((row, i) => (
                             <TableRow key={i}>
                               {row.map((cell, j) => (
                                 <TableCell
@@ -351,6 +415,12 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                         </TableBody>
                       </Table>
                     </div>
+                    <Pagination
+                      currentPage={page}
+                      totalItems={tabularData.rows.length}
+                      pageSize={DEFAULT_PAGE_SIZE}
+                      onPageChange={setPage}
+                    />
                     <p className="text-neutral-900 text-sm" style={{ marginTop: "24px" }}>
                       Última atualização da pré-visualização:{" "}
                       {tabularData.lastModified
@@ -361,6 +431,8 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
                           })
                         : formatDate(resource.last_modified || resource.created_at)}{" "}
                       — {tabularData.totalCols} colunas — {tabularData.totalRows} linhas
+                      {tabularData.rows.length < tabularData.totalRows &&
+                        ` (pré-visualização limitada a ${tabularData.rows.length} linhas)`}
                     </p>
                   </div>
                 )}
@@ -368,7 +440,7 @@ const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ resource })
             </TabBody>
           </Tab>
           )}
-          {isTabular && !isLoading && !error && tabularData && (
+          {isTabular && (
           <Tab>
             <TabHeader>Estrutura de dados</TabHeader>
             <TabBody>

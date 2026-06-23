@@ -83,13 +83,15 @@ export default function ApiTutorialClient() {
             <Breadcrumb
               items={[
                 { label: "Home", url: "/" },
-                { label: "Documentação da API", url: "/pages/faqs/api-documentation" },
+                { label: "Recursos", url: "#" },
+                { label: "Desenvolvimento", url: "#" },
+                { label: "Referência API", url: "/pages/faqs/api-documentation" },
               ]}
             />
           </div>
 
           <h1 className="text-2xl-medium text-[#021C51] mb-32 leading-tight max-w-[800px]">
-            Documentação da API
+            Referência API
           </h1>
 
           <p className="text-m-regular leading-7 text-[#2b363c] mb-48 max-w-[800px]">

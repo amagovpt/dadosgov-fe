@@ -87,6 +87,55 @@ When fetching dynamic data in a client component (e.g., admin pages), use `useEf
 - `src/components/Header.tsx` / `Footer.tsx` - Layout components
 - `tailwind.config.ts` - Theme config with Agora design system
 
-## Git Commits
+## Branch & Commit Conventions
+
+All contributors must follow these conventions. References:
+[Conventional Branch](https://conventionalbranch.org/) and [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
 
 - **Never add `Co-Authored-By`** or any AI attribution to commit messages. Commits must appear as made solely by the developer working on the branch.
+
+### Branches — Conventional Branch
+
+Format: `<type>/<description>`
+
+- **Description** in `kebab-case`, lowercase, alphanumerics and hyphens only (no spaces, `_`, uppercase, or special chars).
+- Optionally include the issue/ticket number: `feature/issue-123-datasets-filters`.
+
+| Prefix     | Use                                                       |
+| ---------- | --------------------------------------------------------- |
+| `main`     | Main production branch (no prefix).                       |
+| `feature/` | New feature.                                              |
+| `bugfix/`  | Bug fix.                                                  |
+| `hotfix/`  | Urgent fix (typically against production).                |
+| `release/` | Release preparation.                                      |
+| `chore/`   | Tasks with no production-code impact (deps, config).      |
+
+Examples: `feature/datasets-server-component`, `bugfix/csrf-session-overwrite`, `chore/bump-design-system`, `hotfix/home-revalidate`.
+
+### Commits — Conventional Commits 1.0.0
+
+Format:
+
+```
+<type>[optional scope][!]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+- **type** (required): `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+- **scope** (optional): affected area, e.g. `feat(datasets):`, `fix(api):`.
+- **description**: imperative, lowercase, in English, no trailing period.
+- **`feat`** → _MINOR_ bump; **`fix`** → _PATCH_ bump.
+- **Breaking changes**: `!` after type/scope (e.g. `feat(api)!:`) and/or a `BREAKING CHANGE: <description>` footer.
+- Reference issues in the footer or description: `(fix #XXX)`.
+
+Examples:
+
+```
+feat(datasets): move datasets list fetch to async Server Component
+fix(auth): mint CSRF server-side on authenticated POSTs (fix #42)
+chore: bump @ama-pt/agora-design-system to 3.4.2
+refactor(home): pass aggregated data as props to HomeClient
+```

@@ -4,7 +4,13 @@ import type {
   CommunityResourceUpdatePayload,
 } from "@/service/types/community-resource";
 import type { APIResponse } from "@/service/types/shared";
-import { API_AUTH_URL, API_BASE_URL, authFetch, translateUploadErrorPayload } from "@/service/utils/API";
+import {
+  API_AUTH_URL,
+  API_BASE_URL,
+  authFetch,
+  chunkedUploadFetch,
+  translateUploadErrorPayload,
+} from "@/service/utils/API";
 
 
 // ── Community Resources CRUD (TICKET-31) ─────────────────────────────
@@ -169,13 +175,10 @@ export async function uploadCommunityResourceFile(
   id: string,
   file: File
 ): Promise<CommunityResource> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(`${API_AUTH_URL}/datasets/community_resources/${id}/upload/`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
-  });
+  const res = await chunkedUploadFetch(
+    `${API_AUTH_URL}/datasets/community_resources/${id}/upload/`,
+    file
+  );
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
     throw { status: res.status, data: translateUploadErrorPayload(error) };
