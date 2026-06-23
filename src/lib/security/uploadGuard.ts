@@ -1,4 +1,4 @@
-import { MAX_SVG_SIZE, MAX_XML_SIZE } from "./constants";
+import { MAX_SVG_SIZE, MAX_UPLOAD_SIZE, MAX_XML_SIZE } from "./constants";
 import { sanitizeSvg, SvgSanitizationError } from "./sanitizeSvg";
 import { sanitizeXml, XmlSanitizationError } from "./sanitizeXml";
 
@@ -50,10 +50,10 @@ function replaceFile(original: File, content: string, type: string): File {
 }
 
 export async function guardFile(file: File): Promise<GuardResult> {
-  if (file.size > MAX_XML_SIZE) {
+  if (file.size > MAX_UPLOAD_SIZE) {
     return {
       ok: false,
-      reason: `Ficheiro demasiado grande (máximo ${Math.floor(MAX_XML_SIZE / 1024 / 1024)}MB)`,
+      reason: `Ficheiro demasiado grande (máximo ${Math.floor(MAX_UPLOAD_SIZE / 1024 / 1024)}MB)`,
     };
   }
 
@@ -93,6 +93,12 @@ export async function guardFile(file: File): Promise<GuardResult> {
   }
 
   if (isXml) {
+    if (file.size > MAX_XML_SIZE) {
+      return {
+        ok: false,
+        reason: `XML demasiado grande (máximo ${Math.floor(MAX_XML_SIZE / 1024 / 1024)}MB)`,
+      };
+    }
     try {
       const content = await readAsText(file);
       const cleaned = sanitizeXml(content);
