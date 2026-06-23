@@ -59,7 +59,7 @@ export const tailwindSafelist = [
   "min-[768px]:!h-[710px]",
   // 1024px
   //  - iframe with background
-  "min-[1024px]:!h-[128px] ",
+  "min-[1024px]:!h-[128px]",
   //  - iframe size
   "min-[1024px]:!h-[610px]",
   "min-[1024px]:!h-[660px]",
