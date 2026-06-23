@@ -51,6 +51,8 @@ npm run test:e2e:backoffice # admin/backoffice
 - **REST API layer**: `src/service/api/<domain>/index.ts` - backend API calls grouped per domain; shared fetch helpers (`authFetch`, env-aware base URLs) in `src/service/utils/API.ts`; relay client IP with `serverForwardedHeaders()` (`src/service/utils/serverForwardedHeaders.ts`) in Server Components.
 - **GraphQL (Squidex)**: queries in `src/service/queries/<domain>/`, Apollo Client in `src/service/utils/apollo-client.ts`.
 - **Types**: `src/service/types/<domain>/` - TypeScript interfaces (barrel `index.ts` per domain).
+- **Utilities, helpers & hooks**: shared logic lives in `src/utils/` (generic helpers: `formatDate`, `formatNumber`, `slugify`, `filterUtils`, listing-query builders, label maps, …), `src/lib/` (`markdown/`, `security/`, `imageProbe`, reuse helpers, …), `src/service/utils/` (`API.ts`, `apollo-client.ts`, `serverForwardedHeaders.ts`), and reusable React hooks in `src/hooks/` (`useCurrentUser`, `useDatasetsListing`, `useListingUrlState`, …).
+  - **Reuse before creating — do NOT add a new util/helper/hook when a compatible one already exists.** Search `src/utils/`, `src/lib/`, `src/service/utils/`, and `src/hooks/` first and reuse or extend the existing implementation. Create a new one **only** when nothing compatible exists (same principle as the Design System component rule).
 - **Path alias**: `@/*` maps to `./src/*`
 
 ## Component Conventions
@@ -137,6 +139,9 @@ When fetching dynamic data in a client component (e.g., admin pages), use `useEf
 - `src/service/utils/API.ts` - shared fetch helpers & env-aware base URLs
 - `src/service/queries/` + `src/service/utils/apollo-client.ts` - Squidex (GraphQL) layer
 - `src/service/types/` - TypeScript type definitions (barrel `index.ts` per domain)
+- `src/utils/` - Generic helpers (formatting, slugify, filters, listing-query builders, label maps)
+- `src/lib/` - Standalone libs/helpers (markdown, security, image probing, reuse helpers)
+- `src/hooks/` - Reusable React hooks (current user, listing state, URL sync)
 - `src/components/Header.tsx` / `Footer.tsx` - Layout components
 - `src/components/Primitives/` & `src/components/Shared/` - Agora design-system wrappers
 - `tailwind.config.ts` - Theme config extending `AgoraTailwindConfig`
