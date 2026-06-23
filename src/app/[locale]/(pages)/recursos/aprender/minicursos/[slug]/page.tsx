@@ -30,7 +30,7 @@ export default async function Page({
                         { label: 'Início', url: '/' },
                         { label: "Recursos", url: "/recursos/" },
                         { label: 'Aprender', url: '/recursos/aprender/' },
-                        { label: 'Minicursos', url: '/recursos/aprender/mini-courses/' },
+                        { label: 'Minicursos', url: '/recursos/aprender/minicursos/' },
                         { label: title, url: '#' },
                     ]}
                 />
@@ -51,7 +51,7 @@ export default async function Page({
                                 hasIcon={true}
                                 trailingIcon="agora-line-arrow-right-circle"
                                 trailingIconHover="agora-solid-arrow-right-circle"
-                                href={`/recursos/aprender/mini-courses/${slug}/1`}
+                                href={`/recursos/aprender/minicursos/${slug}/1`}
                                 className="px-24 h-48"
                             >
                                 Iniciar Curso

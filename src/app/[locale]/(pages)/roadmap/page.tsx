@@ -37,7 +37,7 @@ export default async function page() {
                 title={hero.title}
                 description={parseHtmlToParagraphs(hero.description)}
                 breadcrumbItems={[
-                    { label: 'Home', url: '/' },
+                    { label: "Início", url: "/" },
                     { label: 'Roteiro para dados.gov.pt', url: '#' },
                 ]}
             />

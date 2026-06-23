@@ -27,9 +27,10 @@ export default function MiniCourseDetailClient({ slug }: Props) {
       <div className="container flex flex-col gap-64">
         <Breadcrumb
           items={[
-            { label: 'Home', url: '/' },
+            { label: "Início", url: "/" },
+            { label: 'Recursos', url: '/recursos/' },
             { label: 'Aprender', url: '/recursos/aprender/' },
-            { label: 'Minicursos', url: '/recursos/aprender/mini-courses/' },
+            { label: 'Minicursos', url: '/recursos/aprender/minicursos/' },
             { label: course.title, url: '#' },
           ]}
         />
@@ -51,7 +52,7 @@ export default function MiniCourseDetailClient({ slug }: Props) {
                 trailingIcon="agora-line-arrow-right-circle"
                 trailingIconHover="agora-solid-arrow-right-circle"
                 onClick={() =>
-                  router.push(`/recursos/aprender/mini-courses/${slug}/objectives`)
+                  router.push(`/recursos/aprender/minicursos/${slug}/objectives`)
                 }
                 className="px-24 h-48"
               >

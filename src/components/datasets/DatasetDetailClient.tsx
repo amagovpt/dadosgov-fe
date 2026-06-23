@@ -140,7 +140,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
       <div className="container flex items-center justify-between py-64">
         <Breadcrumb
           items={[
-            { label: "Home", url: "/" },
+            { label: "Início", url: "/" },
             { label: "Conjuntos de dados", url: "/datasets" },
             { label: dataset.title, url: `/datasets/${dataset.slug}` },
           ]}

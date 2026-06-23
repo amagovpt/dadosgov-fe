@@ -10,7 +10,7 @@ export default function ThemesPage() {
       <HeroGeneral
         title="Dados relacionados à cultura"
         breadcrumbItems={[
-          { label: 'Home', url: '/' },
+          { label: "Início", url: "/" },
           { label: 'Dados relacionados à cultura', url: '#' }
         ]}
       >

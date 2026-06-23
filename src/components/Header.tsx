@@ -490,7 +490,7 @@ export const Header = () => {
                     iconHover="agora-solid-info-mark"
                     title="O que é o dados.gov.pt"
                     description="Sobre o portal"
-                    href="/faqs/about_dadosgov"
+                    href="/recursos/como-usar-o-portal/o-que-e-dados-gov-pt"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -502,7 +502,7 @@ export const Header = () => {
                     iconHover="agora-solid-globe"
                     title="Sobre dados abertos"
                     description="Informação geral"
-                    href="/about-open-data"
+                    href="/recursos/como-usar-o-portal/sobre-dados-abertos"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -514,7 +514,7 @@ export const Header = () => {
                     iconHover="agora-solid-upload"
                     title="Como publicar dados"
                     description="Guia de publicação"
-                    href="/faqs/publish"
+                    href="/recursos/como-usar-o-portal/como-publicar-dados"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -526,7 +526,7 @@ export const Header = () => {
                     iconHover="agora-solid-refresh-ccw"
                     title="Como reutilizar dados"
                     description="Guia de reutilização"
-                    href="/faqs/reuse"
+                    href="/recursos/como-usar-o-portal/como-reutilizar-dados"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -538,7 +538,7 @@ export const Header = () => {
                     iconHover="agora-solid-shield"
                     title="Licenças"
                     description="Licenças de dados abertos"
-                    href="/faqs/licenses"
+                    href="/recursos/como-usar-o-portal/licencas"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -610,7 +610,7 @@ export const Header = () => {
                     iconHover="agora-solid-document"
                     title="Acesso via SPARQL"
                     description="Consultar o catálogo via SPARQL"
-                    href="/faqs/acesso-ao-catalogo-via-sparql"
+                    href="/recursos/desenvolvimento/acesso-via-sparql"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -622,7 +622,7 @@ export const Header = () => {
                     iconHover="agora-solid-book-open"
                     title="Tutorial API"
                     description="Guia de utilização da API"
-                    href="/faqs/api-tutorial"
+                    href="/recursos/desenvolvimento/tutorial-api"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
@@ -634,7 +634,7 @@ export const Header = () => {
                     iconHover="/Icons/reduce_icon.svg"
                     title="Referência API"
                     description="Documentação técnica"
-                    href="/faqs/api-documentation"
+                    href="/recursos/desenvolvimento/referencia-api"
                     onLinkClick={handleLinkClick}
                   />
                 </div>

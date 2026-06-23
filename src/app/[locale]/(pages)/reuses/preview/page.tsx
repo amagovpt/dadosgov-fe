@@ -17,7 +17,7 @@ function ReusePreviewContent() {
         <div className="flex justify-between items-center ">
           <Breadcrumb
             items={[
-              { label: "Home", url: "/" },
+              { label: "Início", url: "/" },
               { label: "Reutilizações", url: "/admin/me/reuses" },
               { label: title, url: "#" },
             ]}

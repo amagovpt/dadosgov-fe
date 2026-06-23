@@ -43,7 +43,7 @@ export default function MigrateAccountClient() {
   const [password, setPassword] = useState("");
 
   const breadcrumbItems = [
-    { label: "Home", url: "/" },
+    { label: "Início", url: "/" },
     { label: "Migrar conta", url: "#" },
   ];
 

@@ -103,7 +103,7 @@ export default function OrgDatasetsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/faqs/api-documentation")}
+                  onClick={() => router.push("/recursos/desenvolvimento/referencia-api")}
                 >
                   Consulte a documentação da API
                 </Button>
@@ -113,7 +113,7 @@ export default function OrgDatasetsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/faqs/reuse")}
+                  onClick={() => router.push("/recursos/como-usar-o-portal/como-reutilizar-dados")}
                 >
                   Saiba mais sobre o harvester.
                 </Button>

@@ -59,7 +59,7 @@ export default function ReusesClient({
       <HeroGeneral
         title="Reutilizações"
         breadcrumbItems={[
-          { label: "Home", url: "/" },
+          { label: "Início", url: "/" },
           { label: "Reutilizações", url: "/reuses" },
         ]}
         subtitle={

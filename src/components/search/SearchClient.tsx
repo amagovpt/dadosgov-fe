@@ -413,7 +413,7 @@ export default function SearchClient() {
           title={titleMap[activeTab]}
           backgroundImageUrl="/Banner/hero-bg.png"
           breadcrumbItems={[
-            { label: "Home", url: "/" },
+            { label: "Início", url: "/" },
             { label: "Pesquisa", url: "/search" },
           ]}
         >

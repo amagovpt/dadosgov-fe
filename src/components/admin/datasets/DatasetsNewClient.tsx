@@ -91,7 +91,7 @@ export default function DatasetsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/faqs/api-documentation")}
+                  onClick={() => router.push("/recursos/desenvolvimento/referencia-api")}
                 >
                   Consulte a documentação da API
                 </Button>

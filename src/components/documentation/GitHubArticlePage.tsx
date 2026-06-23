@@ -34,7 +34,7 @@ const markdownComponents = {
   p: ({ children }: any) => <p className="mb-16 text-m-regular leading-7">{children}</p>,
   a: ({ href, children }: any) => {
     const linkOverrides: Record<string, { href: string; text?: string }> = {
-      "/docapi/": { href: "/faqs/api-documentation" },
+      "/docapi/": { href: "/recursos/desenvolvimento/referencia-api" },
       "http://www.mejoratuescuela.org": {
         href: "https://www.redalyc.org/journal/5475/547567705004/",
       },
@@ -50,7 +50,7 @@ const markdownComponents = {
           text: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
         },
       "/pt/faqs/about_opendata/": { href: "/about-open-data" },
-      "/faqs/licenses/": { href: "/" },
+      "/recursos/como-usar-o-portal/licencas/": { href: "/" },
     };
     const normalizedHref = href?.trim().replace(/^\/pt/, "");
     const override = linkOverrides[href] ?? linkOverrides[normalizedHref];

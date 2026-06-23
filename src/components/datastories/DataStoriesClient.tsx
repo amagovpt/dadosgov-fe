@@ -57,7 +57,7 @@ export default function DataStoriesClient({
       <HeroGeneral
         title="Data Stories"
         breadcrumbItems={[
-          { label: "Home", url: "/" },
+          { label: "Início", url: "/" },
           { label: "Data Stories", url: "/datastories" },
         ]}
         subtitle={

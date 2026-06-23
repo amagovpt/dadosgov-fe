@@ -17,7 +17,7 @@ function DataservicePreviewContent() {
         <div className="flex justify-between items-center">
           <Breadcrumb
             items={[
-              { label: "Home", url: "/" },
+              { label: "Início", url: "/" },
               { label: "API", url: "/admin/dataservices" },
               { label: title, url: "#" },
             ]}

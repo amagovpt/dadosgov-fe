@@ -294,7 +294,7 @@ const SupportPageContent = () => {
           </>
         }
         breadcrumbItems={[
-          { label: "Home", url: "/" },
+          { label: "Início", url: "/" },
           { label: "Ajuda e contactos", url: "#" },
         ]}
         backgroundImageUrl="/Banner/hero-bg.png"
@@ -319,7 +319,7 @@ const SupportPageContent = () => {
 
             <div className="mt-16 flex flex-col gap-16">
               <a
-                href="/faqs/about_dadosgov/"
+                href="/recursos/como-usar-o-portal/o-que-e-dados-gov-pt"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex cursor-pointer items-center gap-8 text-white hover:underline"
@@ -494,7 +494,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/faqs/reuse/",
+                                            "/recursos/como-usar-o-portal/como-reutilizar-dados",
                                             "_blank"
                                           )
                                         }
@@ -559,7 +559,7 @@ const SupportPageContent = () => {
                                           minWidth: "auto",
                                         }}
                                         onClick={() =>
-                                          window.open("/faqs/api-documentation", "_blank")
+                                          window.open("/recursos/desenvolvimento/referencia-api", "_blank")
                                         }
                                       >
                                         Endpoint de API do portal

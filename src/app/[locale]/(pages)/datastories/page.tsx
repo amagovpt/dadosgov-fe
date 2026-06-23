@@ -5,13 +5,12 @@ import { Datastories } from "@/service/types/datastories/datastories";
 import { flattenData } from "@/utils/flattenObject";
 import { Metadata } from "next";
 
-
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Data Stories - dados.gov.pt",
   description:
-    "Explore narrativas baseadas em dados abertos para descobrir novos insights sobre Portugal.",
+    "Explore as nossas data stories, narrativas visuais e interativas sobre a realidade nacional, criadas a partir de dados abertos disponíveis neste portal.",
 };
 
 export default async function DataStoriesPage({

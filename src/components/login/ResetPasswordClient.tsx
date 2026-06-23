@@ -10,7 +10,7 @@ import {
 } from "@ama-pt/agora-design-system";
 
 const breadcrumbItems = [
-  { label: "Home", url: "/" },
+  { label: "Início", url: "/" },
   { label: "Redefinir palavra-passe", url: "#" },
 ];
 

@@ -138,7 +138,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
         title="Últimas novidades"
         backgroundImageUrl="/Banner/hero-bg.png"
         breadcrumbItems={[
-          { label: "Home", url: "/" },
+          { label: "Início", url: "/" },
           { label: "Últimas novidades", url: "/posts" },
         ]}
       >

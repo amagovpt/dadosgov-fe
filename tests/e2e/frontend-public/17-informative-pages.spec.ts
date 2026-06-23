@@ -1,7 +1,7 @@
 import { test, expect } from "playwright/test";
 
 const PAGES: { path: string; expectedHeading: RegExp }[] = [
-  { path: "/faqs/about_dadosgov", expectedHeading: /Sobre o dados\.gov\.pt/i },
+  { path: "/recursos/como-usar-o-portal/o-que-e-dados-gov-pt", expectedHeading: /Sobre o dados\.gov\.pt/i },
   { path: "/about-open-data", expectedHeading: /Sobre dados abertos/i },
   { path: "/faqs/terms", expectedHeading: /Termos e condições de utilização/i },
   { path: "/faqs/publish", expectedHeading: /Publicar Dados/i },

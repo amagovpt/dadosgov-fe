@@ -56,7 +56,7 @@ export default function OrganizationsClient({
       <HeroGeneral
         title="Organizações"
         breadcrumbItems={[
-          { label: "Home", url: "/" },
+          { label: "Início", url: "/" },
           { label: "Organizações", url: "/organizations" },
         ]}
         subtitle={

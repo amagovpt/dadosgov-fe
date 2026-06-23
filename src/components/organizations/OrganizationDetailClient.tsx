@@ -107,7 +107,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
       <div className="container flex items-center justify-between">
         <Breadcrumb
           items={[
-            { label: "Home", url: "/" },
+            { label: "Início", url: "/" },
             { label: "Organizações", url: "/organizations" },
             { label: organization.name, url: `/organizations/${organization.slug}` },
           ]}

@@ -13,7 +13,7 @@ export default function PublicationsPage() {
         title="Publicações"
         backgroundImageUrl="/Banner/hero-bg.png"
         breadcrumbItems={[
-          { label: "Home", url: "/" },
+          { label: "Início", url: "/" },
           { label: "Publicações", url: "/publications" },
         ]}
       />

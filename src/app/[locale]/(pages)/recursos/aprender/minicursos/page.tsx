@@ -56,10 +56,10 @@ export default async function Page({
           title: hero.title,
           description: hero.description,
           breadcrumbItems: [
-            { label: 'Home', url: '/' },
+            { label: "Início", url: "/" },
             { label: "Recursos", url: "/recursos/" },
             { label: 'Aprender', url: '/recursos/aprender/' },
-            { label: 'Minicursos', url: '/recursos/aprender/mini-courses/' }
+            { label: 'Minicursos', url: '/recursos/aprender/minicursos/' }
           ]
         }}
       />

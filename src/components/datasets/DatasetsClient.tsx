@@ -102,7 +102,7 @@ export default function DatasetsClient({
       <HeroGeneral
         title="Conjuntos de dados"
         breadcrumbItems={[
-          { label: "Home", url: "/" },
+          { label: "Início", url: "/" },
           { label: "Conjuntos de dados", url: "/datasets" },
         ]}
         subtitle={

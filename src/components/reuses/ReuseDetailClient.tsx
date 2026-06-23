@@ -166,7 +166,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               <Breadcrumb
                 darkMode={false}
                 items={[
-                  { label: "Home", url: "/" },
+                  { label: "Início", url: "/" },
                   { label: "Reutilizações", url: "/reuses" },
                   {
                     label: reuse.title,

@@ -76,40 +76,42 @@ export default function ApiTutorialClient() {
   }, []);
 
   return (
-    <div className="flex flex-col bg-white min-h-screen font-sans">
-      <main className="flex-grow pt-32 pb-64">
+    <div className="flex min-h-screen flex-col bg-white font-sans">
+      <main className="flex-grow pb-64 pt-32">
         <div className="container mx-auto px-4">
-          <div className="pt-32 mb-64">
+          <div className="mb-64 pt-32">
             <Breadcrumb
               items={[
-                { label: "Home", url: "/" },
-                { label: "Referência API", url: "/faqs/api-documentation" },
+                { label: "Início", url: "/" },
+                { label: "Recursos", url: "/recursos" },
+                { label: "Desenvolvimento", url: "/recursos/desenvolvimento" },
+                { label: "Referência API", url: "/recursos/desenvolvimento/referencia-api" },
               ]}
             />
           </div>
 
-          <h1 className="text-2xl-medium text-[#021C51] mb-32 leading-tight max-w-[800px]">
+          <h1 className="mb-32 max-w-[800px] text-2xl-medium leading-tight text-[#021C51]">
             Referência API
           </h1>
 
-          <p className="text-m-regular leading-7 text-[#2b363c] mb-48 max-w-[800px]">
+          <p className="mb-48 max-w-[800px] text-m-regular leading-7 text-[#2b363c]">
             Esta página descreve o comportamento da API RESTful aberta e gratuita do dados.gov.pt.
           </p>
         </div>
 
-        <div className="bg-[#F7F8FA] pt-64 pb-64">
+        <div className="bg-[#F7F8FA] pb-64 pt-64">
           <div className="container mx-auto px-4">
             <div className="max-w-[800px]">
               {/* Autenticação */}
               <section className="mb-48">
-                <h2 className="text-[20px] font-bold text-[#021C51] mb-16">Autenticação</h2>
-                <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
-                  Para poder executar operações de escrita, é necessário obter uma Chave de API
-                  nas definições do seu perfil.
+                <h2 className="mb-16 text-[20px] font-bold text-[#021C51]">Autenticação</h2>
+                <p className="mb-16 text-m-regular leading-7 text-[#2b363c]">
+                  Para poder executar operações de escrita, é necessário obter uma Chave de API nas
+                  definições do seu perfil.
                 </p>
                 <p className="text-m-regular leading-7 text-[#2b363c]">
                   Esta chave deve ser fornecida em cada chamada no cabeçalho HTTP{" "}
-                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
+                  <code className="rounded font-mono bg-[#e1e4ea] px-6 py-2 text-s-regular">
                     X-API-KEY
                   </code>
                   .
@@ -118,47 +120,47 @@ export default function ApiTutorialClient() {
 
               {/* Autorizações */}
               <section className="mb-48">
-                <h2 className="text-[20px] font-bold text-[#021C51] mb-16">Autorizações</h2>
-                <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
+                <h2 className="mb-16 text-[20px] font-bold text-[#021C51]">Autorizações</h2>
+                <p className="mb-16 text-m-regular leading-7 text-[#2b363c]">
                   As chamadas à API estão sujeitas às mesmas permissões que a interface web.
                 </p>
                 <p className="text-m-regular leading-7 text-[#2b363c]">
-                  Por exemplo, é necessário fazer parte de uma organização para modificar um dos seus
-                  conjuntos de dados.
+                  Por exemplo, é necessário fazer parte de uma organização para modificar um dos
+                  seus conjuntos de dados.
                 </p>
               </section>
 
               {/* Paginação */}
               <section className="mb-48">
-                <h2 className="text-[20px] font-bold text-[#021C51] mb-16">Paginação</h2>
-                <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
+                <h2 className="mb-16 text-[20px] font-bold text-[#021C51]">Paginação</h2>
+                <p className="mb-16 text-m-regular leading-7 text-[#2b363c]">
                   Alguns métodos são paginados e seguem sempre o mesmo padrão. A lista de objetos é
                   encapsulada num objeto{" "}
-                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
+                  <code className="rounded font-mono bg-[#e1e4ea] px-6 py-2 text-s-regular">
                     Page
                   </code>
                   .
                 </p>
-                <p className="text-m-regular leading-7 text-[#2b363c] mb-16">
+                <p className="mb-16 text-m-regular leading-7 text-[#2b363c]">
                   Não é necessário calcular as páginas anterior e seguinte, pois os URLs estão
                   disponíveis na resposta nos atributos{" "}
-                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
+                  <code className="rounded font-mono bg-[#e1e4ea] px-6 py-2 text-s-regular">
                     previous_page
                   </code>{" "}
                   e{" "}
-                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
+                  <code className="rounded font-mono bg-[#e1e4ea] px-6 py-2 text-s-regular">
                     next_page
                   </code>
                   . Estes serão definidos como{" "}
-                  <code className="bg-[#e1e4ea] rounded px-6 py-2 text-s-regular font-mono">
+                  <code className="rounded font-mono bg-[#e1e4ea] px-6 py-2 text-s-regular">
                     null
                   </code>{" "}
                   se não existir página anterior e/ou seguinte.
                 </p>
-                <p className="text-m-regular leading-7 text-[#2b363c] mb-8">
+                <p className="mb-8 text-m-regular leading-7 text-[#2b363c]">
                   <u>Exemplo</u>:
                 </p>
-                <pre className="bg-[#1e1e1e] text-[#d4d4d4] rounded-lg p-24 overflow-x-auto text-s-regular leading-[22px] font-mono">
+                <pre className="rounded-lg font-mono overflow-x-auto bg-[#1e1e1e] p-24 text-s-regular leading-[22px] text-[#d4d4d4]">
                   <code>
                     {JSON.stringify(
                       {
@@ -170,7 +172,7 @@ export default function ApiTutorialClient() {
                         previous_page: null,
                       },
                       null,
-                      2,
+                      2
                     )}
                   </code>
                 </pre>
@@ -178,8 +180,8 @@ export default function ApiTutorialClient() {
 
               {/* Referência */}
               <section>
-                <h2 className="text-[20px] font-bold text-[#021C51] mb-16">Referência</h2>
-                <p className="text-m-regular leading-7 text-[#2b363c] mb-24">
+                <h2 className="mb-16 text-[20px] font-bold text-[#021C51]">Referência</h2>
+                <p className="mb-24 text-m-regular leading-7 text-[#2b363c]">
                   Explore os endpoints disponíveis na documentação interativa abaixo.
                 </p>
               </section>
@@ -188,7 +190,7 @@ export default function ApiTutorialClient() {
             {/* Swagger UI */}
             <div
               ref={swaggerRef}
-              className="swagger-ui-container bg-white rounded-lg shadow-sm p-16"
+              className="swagger-ui-container rounded-lg shadow-sm bg-white p-16"
             />
           </div>
         </div>

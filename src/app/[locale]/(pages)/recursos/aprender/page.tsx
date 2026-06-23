@@ -45,7 +45,7 @@ export default async function page() {
           title: hero.title,
           description: hero.description,
           breadcrumbItems: [
-            { label: "Home", url: "/" },
+            { label: "Início", url: "/" },
             { label: "Recursos", url: "/recursos/" },
             { label: "Aprender", url: "/recursos/aprender/" },
           ],
@@ -84,7 +84,7 @@ export default async function page() {
                         },
                         isBlockedLink: true,
                         anchor: {
-                          href: `/recursos/aprender/mini-courses/${course.id}`,
+                          href: `/recursos/aprender/minicursos/${course.id}`,
                           children: "",
                         },
                       }}
