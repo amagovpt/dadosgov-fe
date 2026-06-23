@@ -99,12 +99,12 @@ export default function CommunityResourceFormClient({
   const { isSubmitting, run } = useAsyncSubmit({
     clearError: () => setApiError(null),
     onError: (error) => {
-      const normalized = normalizeApiError(error, "Erro ao criar recurso comunitÃ¡rio.");
+      const normalized = normalizeApiError(error, "Erro ao criar recurso comunitário.");
       if (normalized.status === 401) {
-        setApiError("SessÃ£o expirada. FaÃ§a login novamente.");
+        setApiError("Sessão expirada. Faça login novamente.");
         return;
       }
-      setApiError(normalized.message || "Erro ao criar recurso comunitÃ¡rio.");
+      setApiError(normalized.message || "Erro ao criar recurso comunitário.");
     },
   });
 
@@ -242,7 +242,7 @@ export default function CommunityResourceFormClient({
       renderDropdownSection(
         "identity",
         buildProducerItems(
-          user ? `${user.first_name} ${user.last_name}` : "Eu prÃ³prio",
+          user ? `${user.first_name} ${user.last_name}` : "Eu próprio",
           (user?.organizations || []).map((organization) => ({
             id: organization.id,
             name: organization.name,
@@ -292,11 +292,11 @@ export default function CommunityResourceFormClient({
                 showIcon
                 description={
                   <>
-                    <strong>O que Ã© um recurso comunitÃ¡rio?</strong>
+                    <strong>O que é um recurso comunitário?</strong>
                     <br />
-                    Um recurso comunitÃ¡rio Ã© um conteÃºdo adicionado por um usuÃ¡rio, como dados de
-                    referÃªncia cruzada, para enriquecer ou complementar um recurso comunitÃ¡rio
-                    pÃºblico.
+                    Um recurso comunitário é um conteúdo adicionado por um usuário, como dados de
+                    referência cruzada, para enriquecer ou complementar um recurso comunitário
+                    público.
                   </>
                 }
               />
@@ -312,7 +312,7 @@ export default function CommunityResourceFormClient({
                 }}
               >
                 <p className="pt-32 text-base leading-7 text-neutral-900">
-                  Os campos marcados com um asterisco ( * ) sÃ£o obrigatÃ³rios.
+                  Os campos marcados com um asterisco ( * ) são obrigatórios.
                 </p>
 
                 <ProducerSection
@@ -389,9 +389,9 @@ export default function CommunityResourceFormClient({
                 showIcon
                 description={
                   <>
-                    <strong>O seu recurso comunitÃ¡rio foi criado!</strong>
+                    <strong>O seu recurso comunitário foi criado!</strong>
                     <br />
-                    Veja na pÃ¡gina pÃºblica.
+                    Veja na página pública.
                   </>
                 }
               />
