@@ -59,7 +59,14 @@ export default function OrganizationProfileFormSection({
   onSave,
 }: OrganizationProfileFormSectionProps) {
   return (
-    <div className="admin-page__form">
+    <form
+      className="admin-page__form"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSave();
+      }}
+    >
       <h2 className="admin-page__section-title hidden">EDITAR ORGANIZAÇÃO</h2>
 
       <div className="admin-page__fields-group pt-32">
@@ -164,11 +171,11 @@ export default function OrganizationProfileFormSection({
         {canEdit && (
           <div className="mt-16 flex justify-end">
             <Button
+              type="submit"
               variant="primary"
               hasIcon
               trailingIcon="agora-line-check-circle"
               trailingIconHover="agora-solid-check-circle"
-              onClick={onSave}
               disabled={isSaving}
             >
               {isSaving ? "A guardar..." : "Guardar"}
@@ -176,6 +183,6 @@ export default function OrganizationProfileFormSection({
           </div>
         )}
       </div>
-    </div>
+    </form>
   );
 }

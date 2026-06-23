@@ -65,6 +65,7 @@ export default function DatasetsEditResourceEditPopup({
   };
 
   const handleSave = async () => {
+    if (isSaving || isCheckingUrl) return;
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (!title.trim()) return;
     const trimmedUrl = resourceUrl.trim();
@@ -128,7 +129,15 @@ export default function DatasetsEditResourceEditPopup({
   };
 
   return (
-    <div className="flex flex-col gap-16" style={{ minHeight: "60vh" }}>
+    <form
+      className="flex flex-col gap-16"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleSave();
+      }}
+      style={{ minHeight: "60vh" }}
+    >
       {error && <StatusCard variant="danger" description={error} />}
 
       <div className="flex-1 overflow-y-auto flex flex-col gap-16">
@@ -227,7 +236,7 @@ export default function DatasetsEditResourceEditPopup({
       </div>
 
       <div className="flex justify-between pt-8">
-        <Button appearance="outline" variant="primary" onClick={onCancel}>
+        <Button type="button" appearance="outline" variant="primary" onClick={onCancel}>
           Cancelar
         </Button>
         <div className="flex gap-8">
@@ -239,6 +248,7 @@ export default function DatasetsEditResourceEditPopup({
             disabled={isReplacing}
           />
           <Button
+            type="button"
             appearance="outline"
             variant="primary"
             onClick={() => replaceFileInputRef.current?.click()}
@@ -247,17 +257,17 @@ export default function DatasetsEditResourceEditPopup({
             {isReplacing ? "A substituir..." : "Substituir o ficheiro"}
           </Button>
           <Button
+            type="submit"
             variant="primary"
             hasIcon
             trailingIcon="agora-line-check-circle"
             trailingIconHover="agora-solid-check-circle"
-            onClick={handleSave}
             disabled={isSaving || isCheckingUrl || !title.trim()}
           >
             {isCheckingUrl ? "A verificar URL..." : isSaving ? "A guardar..." : "Guardar"}
           </Button>
         </div>
       </div>
-    </div>
+    </form>
   );
 }
