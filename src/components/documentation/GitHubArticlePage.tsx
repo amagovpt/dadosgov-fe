@@ -6,9 +6,6 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
-import { githubPagesConfig } from "@/config/site";
-
-
 interface BreadcrumbItem {
   label: string;
   url: string;
@@ -121,7 +118,6 @@ export function GitHubArticlePage({
   breadcrumbItems,
   initialContent = "",
 }: GitHubArticlePageProps) {
-  const editUrl = `${githubPagesConfig.repoBaseUrl}/${slug}.md`;
   const cleanContent = sanitizeMarkdown(initialContent);
 
   return (
@@ -155,19 +151,6 @@ export function GitHubArticlePage({
                   </p>
                 )}
 
-                <div className="max-w-[592px] pt-[32px]">
-                  <h1 className="text-[32px] font-medium text-[#021C51] mb-16 leading-tight max-w-[800px]">
-                    Ações
-                  </h1>
-                  <Link
-                    href={editUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-[#034AD8] underline hover:text-primary-700"
-                  >
-                    Propor uma mudança
-                  </Link>
-                </div>
               </div>
             </div>
           </div>
