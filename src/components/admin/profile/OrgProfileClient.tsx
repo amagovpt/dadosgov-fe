@@ -17,6 +17,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import AdminEmptyState from "../AdminEmptyState";
 import OrganizationProfileHeaderCard from "@/components/admin/profile/OrganizationProfileHeaderCard";
 import OrganizationProfileFormSection from "@/components/admin/profile/OrganizationProfileFormSection";
@@ -77,7 +78,11 @@ export default function OrgProfileClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null);
+  const {
+    message: saveStatus,
+    setMessage: setSaveStatus,
+    setTemporaryMessage: showSaveStatus,
+  } = useTemporaryMessage<"success" | "error" | null>(null, 5000);
   const [logoError, setLogoError] = useState<string | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const { hasError, setError, clearError, resetErrors, focusFirstError } = useFormErrors();
@@ -111,12 +116,6 @@ export default function OrgProfileClient() {
   useEffect(() => {
     fetchOrgBadges().then(setAvailableBadges);
   }, []);
-
-  useEffect(() => {
-    if (!saveStatus) return;
-    const timer = setTimeout(() => setSaveStatus(null), 5000);
-    return () => clearTimeout(timer);
-  }, [saveStatus]);
 
   const canEdit = useMemo(
     () =>
@@ -164,10 +163,10 @@ export default function OrgProfileClient() {
       });
       setOrg(updated);
       setSelectedBadgeKinds(badgeKindsFromOrg(updated.badges));
-      setSaveStatus("success");
+      showSaveStatus("success");
     } catch (error) {
       console.error("Error updating org profile:", error);
-      setSaveStatus("error");
+      showSaveStatus("error");
     } finally {
       setIsSaving(false);
     }

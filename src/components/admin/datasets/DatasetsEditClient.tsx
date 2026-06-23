@@ -44,6 +44,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { translateActivityLabel } from "@/utils/activityLabels";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import {
   buildDatasetEditPayload,
   type DatasetEditField,
@@ -83,7 +84,11 @@ export default function DatasetsEditClient() {
   const tabsRef = useRef<HTMLDivElement>(null);
   const [uploaderKey, setUploaderKey] = useState(0);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [apiSuccess, setApiSuccess] = useState<string | null>(null);
+  const {
+    message: apiSuccess,
+    setMessage: setApiSuccess,
+    setTemporaryMessage: showApiSuccess,
+  } = useTemporaryMessage<string | null>(null);
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors<DatasetEditField>();
@@ -423,8 +428,7 @@ export default function DatasetsEditClient() {
         }),
       );
       setDataset(updated);
-      setApiSuccess("Conjunto de dados atualizado com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Conjunto de dados atualizado com sucesso.");
       requestAnimationFrame(() => {
         // Keep feedback visible after save.
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -477,10 +481,10 @@ export default function DatasetsEditClient() {
       comment: comment || undefined,
     });
     hide();
-    setApiSuccess(
-      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`
+    showApiSuccess(
+      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
+      15000,
     );
-    setTimeout(() => setApiSuccess(null), 15000);
   };
 
   const handleUnarchiveDataset = async () => {
@@ -528,8 +532,7 @@ export default function DatasetsEditClient() {
       const updated = await fetchDataset(slug);
       setDataset(updated);
       setUploaderKey((k) => k + 1);
-      setApiSuccess("Ficheiro(s) carregado(s) com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Ficheiro(s) carregado(s) com sucesso.");
     } catch (error) {
       const err = error as { status?: number; data?: Record<string, unknown>; message?: string };
       console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
@@ -570,8 +573,7 @@ export default function DatasetsEditClient() {
           setDataset((prev) =>
             prev ? { ...prev, resources: prev.resources.filter((r) => r.id !== resource.id) } : prev
           );
-          setApiSuccess("Ficheiro eliminado com sucesso.");
-          setTimeout(() => setApiSuccess(null), 10000);
+          showApiSuccess("Ficheiro eliminado com sucesso.");
         }}
       />,
       {
@@ -596,8 +598,7 @@ export default function DatasetsEditClient() {
         resourceTypes={resourceTypes}
         onSaved={async () => {
           await refreshDataset();
-          setApiSuccess("Recurso atualizado com sucesso.");
-          setTimeout(() => setApiSuccess(null), 10000);
+          showApiSuccess("Recurso atualizado com sucesso.");
         }}
         onCancel={hide}
       />,
@@ -621,8 +622,7 @@ export default function DatasetsEditClient() {
             resourceTypes={resourceTypes}
             onSaved={async () => {
               await refreshDataset();
-              setApiSuccess("Recurso atualizado com sucesso.");
-              setTimeout(() => setApiSuccess(null), 10000);
+              showApiSuccess("Recurso atualizado com sucesso.");
             }}
             onCancel={hide}
           />,
@@ -885,8 +885,7 @@ export default function DatasetsEditClient() {
                       organization: dataset.organization?.id,
                     });
                     setDataset(updated);
-                    setApiSuccess("Conjunto de dados publicado com sucesso.");
-                    setTimeout(() => setApiSuccess(null), 10000);
+                    showApiSuccess("Conjunto de dados publicado com sucesso.");
                   } catch {
                     setApiError("Erro ao publicar o conjunto de dados.");
                   }

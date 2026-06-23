@@ -25,6 +25,7 @@ import type { Post } from "@/service/types/posts";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import PostsEditMetadataTab from "@/components/admin/posts/PostsEditMetadataTab";
 import PostsEditContentTab from "@/components/admin/posts/PostsEditContentTab";
 import {
@@ -80,7 +81,11 @@ export default function PostsEditClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
-  const [apiSuccess, setApiSuccess] = useState<string | null>(null);
+  const {
+    message: apiSuccess,
+    setMessage: setApiSuccess,
+    setTemporaryMessage: showApiSuccess,
+  } = useTemporaryMessage<string | null>(null);
   const selectedKeywordsRef = useRef("");
   const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors<PostFormField>();
@@ -143,8 +148,7 @@ export default function PostsEditClient() {
       const result = await updatePost(postId, payload);
       if (result) {
         setPost(result);
-        setApiSuccess("Metadados guardados com sucesso.");
-        setTimeout(() => setApiSuccess(null), 10000);
+        showApiSuccess("Metadados guardados com sucesso.");
       } else {
         setApiError("Erro ao guardar. Verifique a autenticação.");
       }
@@ -175,8 +179,7 @@ export default function PostsEditClient() {
       const result = await updatePost(postId, payload);
       if (result) {
         setPost(result);
-        setApiSuccess("Conteúdo guardado com sucesso.");
-        setTimeout(() => setApiSuccess(null), 10000);
+        showApiSuccess("Conteúdo guardado com sucesso.");
       } else {
         setApiError("Erro ao guardar. Verifique a autenticação.");
       }
@@ -196,8 +199,7 @@ export default function PostsEditClient() {
       const result = await unpublishPost(postId);
       if (result) {
         setPost(result);
-        setApiSuccess("Artigo despublicado com sucesso.");
-        setTimeout(() => setApiSuccess(null), 10000);
+        showApiSuccess("Artigo despublicado com sucesso.");
       } else {
         setApiError("Erro ao retirar. Verifique a autenticação.");
       }
@@ -217,8 +219,7 @@ export default function PostsEditClient() {
       const result = await publishPost(postId);
       if (result) {
         setPost(result);
-        setApiSuccess("Artigo publicado com sucesso.");
-        setTimeout(() => setApiSuccess(null), 10000);
+        showApiSuccess("Artigo publicado com sucesso.");
       } else {
         setApiError("Erro ao publicar. Verifique a autenticação.");
       }
@@ -268,8 +269,7 @@ export default function PostsEditClient() {
       const result = await uploadPostImage(postId, file);
       if (result) {
         setPost(result);
-        setApiSuccess("Imagem carregada com sucesso.");
-        setTimeout(() => setApiSuccess(null), 10000);
+        showApiSuccess("Imagem carregada com sucesso.");
       } else {
         setApiError("Erro ao carregar a imagem.");
       }

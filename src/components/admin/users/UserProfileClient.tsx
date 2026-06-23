@@ -31,6 +31,7 @@ import UserAdminHeaderCard from "@/components/admin/users/UserAdminHeaderCard";
 import UserAdminProfileTab from "@/components/admin/users/UserAdminProfileTab";
 import UserAdminActivitiesTab from "@/components/admin/users/UserAdminActivitiesTab";
 import UserAdminSubscriptionsTab from "@/components/admin/users/UserAdminSubscriptionsTab";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 
 function DeleteUserPopupContent({
   onClose,
@@ -78,7 +79,11 @@ export default function UserProfileClient() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const {
+    message: saveSuccess,
+    setMessage: setSaveSuccess,
+    setTemporaryMessage: showSaveSuccess,
+  } = useTemporaryMessage<boolean>(false);
   const [saveError, setSaveError] = useState("");
 
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -199,8 +204,7 @@ export default function UserProfileClient() {
       });
       if (updated) {
         setUser(updated);
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 10000);
+        showSaveSuccess(true);
       }
     } catch (error) {
       console.error("Error saving user:", error);

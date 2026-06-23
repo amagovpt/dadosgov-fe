@@ -13,6 +13,7 @@ import { fetchResourceTypes, fetchSchemas } from "@/service/api/datasets";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useAsyncSubmit } from "@/hooks/forms/useAsyncSubmit";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { normalizeApiError } from "@/service/utils/normalizeApiError";
 import type { ResourceType } from "@/service/types/catalog";
 import type { CommunityResource } from "@/service/types/community-resource";
@@ -63,7 +64,11 @@ export default function CommunityResourceEditClient() {
   const [schemas, setSchemas] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const {
+    message: successMessage,
+    setMessage: setSuccessMessage,
+    setTemporaryMessage: showSuccessMessage,
+  } = useTemporaryMessage<string | null>(null);
 
   const [resourceUrl, setResourceUrl] = useState("");
   const [title, setTitle] = useState("");
@@ -309,8 +314,7 @@ export default function CommunityResourceEditClient() {
       const updated = await updateCommunityResource(resourceId, buildUpdatePayload());
       applyResourceToForm(updated);
       setSaveCount((count) => count + 1);
-      setSuccessMessage("Recurso comunitário atualizado com sucesso.");
-      setTimeout(() => setSuccessMessage(null), 10000);
+      showSuccessMessage("Recurso comunitário atualizado com sucesso.");
     });
   };
 

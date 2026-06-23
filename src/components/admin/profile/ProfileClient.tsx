@@ -37,6 +37,7 @@ import UserProfileMainTab from "@/components/admin/profile/UserProfileMainTab";
 import UserProfileSubscriptionsTab from "@/components/admin/profile/UserProfileSubscriptionsTab";
 import UserProfileActivityTab from "@/components/admin/profile/UserProfileActivityTab";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 
 function toProxiedUrl(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -65,7 +66,11 @@ export default function ProfileClient() {
   const [newToken, setNewToken] = useState<string | null>(null);
   const [newTokenName, setNewTokenName] = useState("");
   const [revokingTokenId, setRevokingTokenId] = useState<string | null>(null);
-  const [tokenCopied, setTokenCopied] = useState(false);
+  const {
+    message: tokenCopied,
+    setMessage: setTokenCopied,
+    setTemporaryMessage: showTokenCopied,
+  } = useTemporaryMessage<boolean>(false, 3000);
   const [email, setEmail] = useState("");
 
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -76,7 +81,11 @@ export default function ProfileClient() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const {
+    message: saveSuccess,
+    setMessage: setSaveSuccess,
+    setTemporaryMessage: showSaveSuccess,
+  } = useTemporaryMessage<boolean>(false);
   const [saveError, setSaveError] = useState("");
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
@@ -169,9 +178,8 @@ export default function ProfileClient() {
         website,
       });
       setProfile(updated);
-      setSaveSuccess(true);
+      showSaveSuccess(true);
       await refresh();
-      setTimeout(() => setSaveSuccess(false), 10000);
     } catch (error) {
       console.error("Error saving profile:", error);
       setSaveError("Erro ao guardar o perfil. Tente novamente.");
@@ -214,8 +222,7 @@ export default function ProfileClient() {
     if (!newToken) return;
     try {
       await navigator.clipboard.writeText(newToken);
-      setTokenCopied(true);
-      setTimeout(() => setTokenCopied(false), 3000);
+      showTokenCopied(true);
     } catch (error) {
       console.error("Error copying token:", error);
     }

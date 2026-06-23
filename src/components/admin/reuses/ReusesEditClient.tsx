@@ -40,6 +40,7 @@ import ReusesEditDeletePopup from "@/components/admin/reuses/ReusesEditDeletePop
 import TextLink from "@/components/Primitives/TextLink";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import {
   buildRemoteDatasetEntries,
   validateReuseDatasetSelection,
@@ -72,7 +73,11 @@ export default function ReusesEditClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
-  const [apiSuccess, setApiSuccess] = useState<string | null>(null);
+  const {
+    message: apiSuccess,
+    setMessage: setApiSuccess,
+    setTemporaryMessage: showApiSuccess,
+  } = useTemporaryMessage<string | null>(null);
   const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors();
 
@@ -265,8 +270,7 @@ export default function ReusesEditClient() {
       await uploadReuseImage(reuse.id, file);
       const updated = await fetchReuse(reuse.id);
       setReuse(updated);
-      setApiSuccess("Imagem de capa atualizada com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Imagem de capa atualizada com sucesso.");
     } catch {
       setApiError("Erro ao carregar imagem de capa.");
     } finally {
@@ -284,8 +288,7 @@ export default function ReusesEditClient() {
         private: false,
       });
       setReuse(updated);
-      setApiSuccess("Reutilização publicada com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Reutilização publicada com sucesso.");
     } catch {
       setApiError("Erro ao publicar a reutilização.");
     } finally {
@@ -432,8 +435,7 @@ export default function ReusesEditClient() {
       previousRemoteEntriesRef.current = refreshedEntries;
       setDatasetLinks(refreshedEntries.length > 0 ? refreshedEntries : [{ url: "" }]);
       setSelectedDatasets([]);
-      setApiSuccess("Conjuntos de dados associados com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Conjuntos de dados associados com sucesso.");
     } catch (error: unknown) {
       const err = error as { data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
@@ -458,8 +460,7 @@ export default function ReusesEditClient() {
       const updated = await fetchReuse(reuseId);
       setReuse(updated);
       setAssociatedDatasets((prev) => prev.filter((d) => d.id !== datasetId));
-      setApiSuccess("Conjunto de dados removido com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Conjunto de dados removido com sucesso.");
     } catch {
       setApiError("Erro ao remover o conjunto de dados.");
     } finally {
@@ -478,8 +479,7 @@ export default function ReusesEditClient() {
       const updated = await fetchReuse(reuseId);
       setReuse(updated);
       setAssociatedDatasets([]);
-      setApiSuccess("Todos os conjuntos de dados foram removidos.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Todos os conjuntos de dados foram removidos.");
     } catch {
       setApiError("Erro ao remover os conjuntos de dados.");
     } finally {
@@ -542,8 +542,7 @@ export default function ReusesEditClient() {
       const updated = await fetchReuse(reuseId);
       setReuse(updated);
       setApiLinks([{ url: "" }]);
-      setApiSuccess("APIs associadas com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("APIs associadas com sucesso.");
     } catch {
       setApiError("Erro ao associar APIs.");
     } finally {
@@ -582,8 +581,7 @@ export default function ReusesEditClient() {
         tags: tagsValue,
       });
       setReuse(updated);
-      setApiSuccess("Reutilização atualizada com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Reutilização atualizada com sucesso.");
     } catch (error: unknown) {
       const err = error as { status?: number; data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
@@ -624,8 +622,7 @@ export default function ReusesEditClient() {
         archived: new Date().toISOString(),
       });
       setReuse(updated);
-      setApiSuccess("Reutilização arquivada com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Reutilização arquivada com sucesso.");
     } catch (error) {
       console.error("Error archiving reuse:", error);
       setApiError("Erro ao arquivar a reutilização.");
@@ -644,10 +641,10 @@ export default function ReusesEditClient() {
       comment: comment || undefined,
     });
     hide();
-    setApiSuccess(
-      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`
+    showApiSuccess(
+      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
+      15000,
     );
-    setTimeout(() => setApiSuccess(null), 15000);
   };
 
   const handleUnarchiveReuse = async () => {
@@ -658,8 +655,7 @@ export default function ReusesEditClient() {
     try {
       const updated = await updateReuse(reuse.id, { archived: null });
       setReuse(updated);
-      setApiSuccess("Reutilização desarquivada com sucesso.");
-      setTimeout(() => setApiSuccess(null), 10000);
+      showApiSuccess("Reutilização desarquivada com sucesso.");
     } catch (error) {
       console.error("Error unarchiving reuse:", error);
       setApiError("Erro ao desarquivar a reutilização.");

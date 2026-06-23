@@ -24,6 +24,7 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import { HarvesterJobsTable } from "@/components/admin/harvesters/HarvesterJobsTable";
 import { HarvesterConfigForm } from "@/components/admin/harvesters/HarvesterConfigForm";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import {
   buildHarvesterPreviewPayload,
   buildHarvesterUpdatePayload,
@@ -97,7 +98,11 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   // parent re-render.
   const [loadedSchedule, setLoadedSchedule] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const {
+    message: saveSuccess,
+    setMessage: setSaveSuccess,
+    setTemporaryMessage: showSaveSuccess,
+  } = useTemporaryMessage<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewJob, setPreviewJob] = useState<HarvestPreviewJob | null>(null);
@@ -228,8 +233,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
             : Promise.resolve(),
       ]);
       setSource(updated as HarvestSource);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 10000);
+      showSaveSuccess(true);
     } catch (err) {
       const e = err as { status?: number; data?: unknown };
       console.error("Error saving harvester:", e.status, e.data ?? err);
