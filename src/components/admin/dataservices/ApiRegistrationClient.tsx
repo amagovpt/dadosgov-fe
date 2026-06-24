@@ -7,14 +7,13 @@ import {
   InputText,
   InputTextArea,
   RadioButton,
-  Icon,
   StatusCard,
   Accordion,
   AccordionGroup,
   InputSelect,
   DropdownSection,
   DropdownOption,
-  CardGeneral,
+  CardLinks,
   Tag,
 } from "@ama-pt/agora-design-system";
 import { createDataservice, updateDataservice } from "@/service/api/dataservices";
@@ -28,7 +27,6 @@ import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackBut
 import { useAuth } from "@/context/AuthContext";
 import AppIcon from "@/components/Primitives/AppIcon";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
-import { formatMetricValue } from "@/utils/formatNumber";
 
 interface ApiRegistrationClientProps {
   currentStep: number;
@@ -593,96 +591,92 @@ export default function ApiRegistrationClient({
                 }
               />
 
-              <Link
-                href={createdDataservice ? `/pages/dataservices/${createdDataservice.id}` : "#"}
-                className="card-general-listing flex h-full flex-col overflow-hidden rounded-4"
-              >
-                <CardGeneral
-                  variant="neutral-100"
+              <div className="agora-card-links-admin-px0">
+                <CardLinks
+                  onClick={() => {}}
+                  className="cursor-pointer text-neutral-900"
+                  variant="transparent"
                   image={{
                     src:
                       createdDataservice?.organization?.logo ||
                       "/images/placeholders/organization.png",
-                    alt: createdDataservice?.organization?.name || "Organização",
-                    height: "56px",
-                    className: "bg-primary-100 !object-contain !h-[56px]",
+                    alt: createdDataservice?.title || apiName || "Sem título",
                   }}
-                  subtitleText={
-                    (
-                      <div className="flex flex-col">
-                        <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                          {formatDateToTimeAgo(
-                            createdDataservice?.last_modified ||
-                              createdDataservice?.created_at ||
-                              ""
-                          )}
-                        </span>
-                        <span
-                          style={{ fontSize: "16px", fontWeight: 300 }}
-                          className="mt-4 text-neutral-900"
-                        >
-                          {createdDataservice?.organization?.name || "Sem Organização"}
-                        </span>
-                      </div>
-                    ) as unknown as string
+                  category={createdDataservice?.organization?.name || "API"}
+                  title={
+                    <div className="underline text-xl-bold">
+                      {createdDataservice?.title || apiName || "Sem título"}
+                    </div>
                   }
-                  titleText={createdDataservice?.title || apiName || "Sem título"}
-                  descriptionText={
-                    (
-                      <div className="flex grow flex-col">
-                        {(createdDataservice?.description || apiDescription) && (
-                          <p className="mb-16 line-clamp-3 text-m-regular text-neutral-800">
-                            {createdDataservice?.description || apiDescription}
-                          </p>
-                        )}
-                        <div className="mt-auto">
-                          <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
-                            <div className="flex items-center gap-8" title="Visualizações">
-                              <Icon
-                                name={
-                                  createdDataservice?.metrics?.views
-                                    ? "agora-solid-eye"
-                                    : "agora-line-eye"
-                                }
-                                dimensions="xs"
-                                className="fill-neutral-700"
-                                aria-hidden="true"
-                              />
-                              <span>{formatMetricValue(createdDataservice?.metrics?.views, 0)}</span>
-                            </div>
-                            <div className="flex items-center gap-8" title="Favoritos">
-                              <Icon
-                                name={
-                                  createdDataservice?.metrics?.followers
-                                    ? "agora-solid-star"
-                                    : "agora-line-star"
-                                }
-                                dimensions="xs"
-                                className="fill-neutral-700"
-                                aria-hidden="true"
-                              />
-                              <span>
-                                {formatMetricValue(createdDataservice?.metrics?.followers, 0)}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="mt-16 flex items-center gap-8 text-primary-600">
-                            <Icon
-                              name="agora-line-arrow-right-circle"
-                              className="h-32 w-32"
-                              aria-hidden="true"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ) as unknown as string
+                  description={
+                    <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
+                      {createdDataservice?.description || apiDescription || ""}
+                    </p>
                   }
-                  isBlockedLink={true}
-                  anchor={{
-                    href: createdDataservice ? `/pages/dataservices/${createdDataservice.id}` : "#",
-                  }}
+                  date={
+                    <span className="font-[300]">
+                      {`Atualizado há ${formatDateToTimeAgo(
+                        createdDataservice?.last_modified ||
+                          createdDataservice?.created_at ||
+                          ""
+                      )}`}
+                    </span>
+                  }
+                  links={[
+                    {
+                      href: "#",
+                      hasIcon: true,
+                      leadingIcon: "agora-line-eye",
+                      leadingIconHover: "agora-solid-eye",
+                      trailingIcon: "",
+                      trailingIconHover: "",
+                      trailingIconActive: "",
+                      children: createdDataservice?.metrics?.views?.toLocaleString("pt-PT") || "0",
+                      title: "Visualizações",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                    {
+                      href: "#",
+                      hasIcon: true,
+                      leadingIcon: "agora-line-layers-menu",
+                      leadingIconHover: "agora-solid-layers-menu",
+                      trailingIcon: "",
+                      trailingIconHover: "",
+                      trailingIconActive: "",
+                      children: `${createdDataservice?.datasets?.length || 0} datasets`,
+                      title: "Datasets",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                    {
+                      href: "#",
+                      hasIcon: true,
+                      leadingIcon: "agora-line-star",
+                      leadingIconHover: "agora-solid-star",
+                      trailingIcon: "",
+                      trailingIconHover: "",
+                      trailingIconActive: "",
+                      children: createdDataservice?.metrics?.followers || 0,
+                      title: "Favoritos",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                  ]}
+                  mainLink={
+                    createdDataservice ? (
+                      <Link href={`/pages/dataservices/${createdDataservice.slug}`}>
+                        <span className="underline">
+                          {createdDataservice.title || apiName}
+                        </span>
+                      </Link>
+                    ) : (
+                      <span className="underline">{apiName || "Sem título"}</span>
+                    )
+                  }
+                  blockedLink={true}
                 />
-              </Link>
+              </div>
 
               <PublicationFeedbackButton />
 

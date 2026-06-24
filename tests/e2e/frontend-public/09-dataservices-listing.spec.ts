@@ -2,9 +2,11 @@ import { test, expect, type Page } from "playwright/test";
 
 const DATASERVICES_URL = "/pages/dataservices";
 
-// Card links point to the detail page (/pages/dataservices/<slug>); the bare
-// breadcrumb/nav link (/pages/dataservices) does not match the trailing slash.
-const CARD_SELECTOR = "a[href^='/pages/dataservices/']";
+// Dataservice cards use Agora's <CardLinks> with blockedLink=true (mirroring
+// the reuses listing), so the only real <a href="/pages/dataservices/{slug}">
+// is suppressed and navigation happens via onClick on a `.cursor-pointer` div.
+// Tests rely on this affordance rather than href matching.
+const CARD_SELECTOR = "div.cursor-pointer";
 
 async function openFiltersPanel(page: Page) {
   const openBtn = page.getByRole("button", { name: /Abrir filtros/i });

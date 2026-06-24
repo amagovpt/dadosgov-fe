@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Icon,
   CardNoResults,
   Button,
-  CardGeneral,
+  CardLinks,
   ToggleGroup,
   Toggle,
 } from "@ama-pt/agora-design-system";
@@ -19,7 +20,6 @@ import { Dataservice } from "@/service/types/dataservice";
 import { APIResponse } from "@/service/types/shared";
 import HeroGeneral from "@/components/HeroGeneral";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
-import { formatMetricValue } from "@/utils/formatNumber";
 import { useDataservicesListing } from "@/hooks/useDataservicesListing";
 import { DATASERVICE_SORT_LABELS } from "@/utils/dataservicesListingQuery";
 
@@ -32,6 +32,7 @@ export default function DataservicesClient({
   initialData,
   currentPage,
 }: DataservicesClientProps) {
+  const router = useRouter();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const {
     activePage,
@@ -133,90 +134,83 @@ export default function DataservicesClient({
             <div
               className={twJoin(
                 "grid gap-32",
-                filtersOpen
-                  ? "grid-cols-1 lg:grid-cols-2"
-                  : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+                filtersOpen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
               )}
             >
               {dataservices.length > 0 ? (
                 dataservices.map((ds) => {
-                  const timeAgo = formatDateToTimeAgo(ds.last_modified);
+                  const timeAgo = formatDateToTimeAgo(ds.last_modified || ds.created_at);
                   const dsUrl = `/pages/dataservices/${ds.slug}`;
 
                   return (
-                    <Link
-                      key={ds.id}
-                      href={dsUrl}
-                      className="card-general-listing flex h-full flex-col overflow-hidden rounded-4"
-                    >
-                      <CardGeneral
-                        variant="neutral-100"
+                    <div key={ds.id} className="h-full">
+                      <CardLinks
+                        onClick={() => router.push(dsUrl)}
+                        className="!h-full [&_.card-links-container]:!h-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse cursor-pointer text-neutral-900"
+                        variant="transparent"
                         image={{
                           src: ds.organization?.logo || "/images/placeholders/organization.png",
-                          alt: ds.organization?.name || "Organização",
-                          height: "56px",
-                          className: "bg-primary-100 !object-contain !h-[56px]",
+                          alt: ds.title,
                         }}
-                        subtitleText={
-                          (
-                            <div className="flex flex-col">
-                              <span style={{ fontSize: "16px" }} className="text-neutral-900">
-                                {timeAgo}
-                              </span>
-                              <span
-                                style={{ fontSize: "16px", fontWeight: 300 }}
-                                className="mt-4 text-neutral-900"
-                              >
-                                {ds.organization?.name || "Sem Organização"}
-                              </span>
-                            </div>
-                          ) as unknown as string
+                        category={ds.organization?.name || "API"}
+                        title={<div className="text-xl-bold underline">{ds.title}</div>}
+                        description={
+                          ds.description ? (
+                            <p className="text-sm mt-[8px] line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
+                              {ds.description}
+                            </p>
+                          ) : undefined
                         }
-                        titleText={ds.title}
-                        descriptionText={
-                          (
-                            <div className="flex grow flex-col">
-                              {ds.description && (
-                                <p className="mb-16 line-clamp-3 text-m-regular text-neutral-800">
-                                  {ds.description}
-                                </p>
-                              )}
-                              <div className="mt-auto">
-                                <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
-                                  <div className="flex items-center gap-8" title="Visualizações">
-                                    <Icon
-                                      name="agora-solid-eye"
-                                      dimensions="xs"
-                                      className="fill-neutral-700"
-                                      aria-hidden="true"
-                                    />
-                                    <span>{formatMetricValue(ds.metrics?.views, 0)}</span>
-                                  </div>
-                                  <div className="flex items-center gap-8" title="Favoritos">
-                                    <Icon
-                                      name="agora-solid-star"
-                                      dimensions="xs"
-                                      className="fill-neutral-700"
-                                      aria-hidden="true"
-                                    />
-                                    <span>{formatMetricValue(ds.metrics?.followers, 0)}</span>
-                                  </div>
-                                </div>
-                                <div className="mt-16 flex items-center gap-8 text-primary-600">
-                                  <Icon
-                                    name="agora-line-arrow-right-circle"
-                                    className="h-32 w-32"
-                                    aria-hidden="true"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ) as unknown as string
+                        date={<span className="font-[300]">Atualizado há {timeAgo}</span>}
+                        links={[
+                          {
+                            href: "#",
+                            hasIcon: true,
+                            leadingIcon: "agora-line-eye",
+                            leadingIconHover: "agora-solid-eye",
+                            trailingIcon: "",
+                            trailingIconHover: "",
+                            trailingIconActive: "",
+                            children: ds.metrics?.views?.toLocaleString("pt-PT") || "0",
+                            title: "Visualizações",
+                            onClick: (e: MouseEvent) => e.preventDefault(),
+                            className: "text-[#034AD8]",
+                          },
+                          {
+                            href: "#",
+                            hasIcon: true,
+                            leadingIcon: "agora-line-layers-menu",
+                            leadingIconHover: "agora-solid-layers-menu",
+                            trailingIcon: "",
+                            trailingIconHover: "",
+                            trailingIconActive: "",
+                            children: `${ds.datasets?.length || 0} datasets`,
+                            title: "Datasets",
+                            onClick: (e: MouseEvent) => e.preventDefault(),
+                            className: "text-[#034AD8]",
+                          },
+                          {
+                            href: "#",
+                            hasIcon: true,
+                            leadingIcon: "agora-line-star",
+                            leadingIconHover: "agora-solid-star",
+                            trailingIcon: "",
+                            trailingIconHover: "",
+                            trailingIconActive: "",
+                            children: ds.metrics?.followers || 0,
+                            title: "Favoritos",
+                            onClick: (e: MouseEvent) => e.preventDefault(),
+                            className: "text-[#034AD8]",
+                          },
+                        ]}
+                        mainLink={
+                          <Link href={dsUrl}>
+                            <span className="underline">{ds.title}</span>
+                          </Link>
                         }
-                        isBlockedLink={true}
-                        anchor={{ href: dsUrl }}
+                        blockedLink={true}
                       />
-                    </Link>
+                    </div>
                   );
                 })
               ) : (
