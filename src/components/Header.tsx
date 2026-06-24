@@ -639,7 +639,8 @@ export const Header = () => {
                   />
                 </div>
               </NavigationLink>
-              <NavigationLink appearance="link">
+              {/* Publicações oculto temporariamente */}
+              {/* <NavigationLink appearance="link">
                 <div data-group="main">
                   <HeaderCard
                     iconDefault="agora-line-document"
@@ -650,7 +651,7 @@ export const Header = () => {
                     onLinkClick={handleLinkClick}
                   />
                 </div>
-              </NavigationLink>
+              </NavigationLink> */}
             </NavigationRoot>
 
             <NavigationRoot label="Publicar">
