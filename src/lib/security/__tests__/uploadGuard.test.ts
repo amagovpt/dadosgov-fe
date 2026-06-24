@@ -66,6 +66,23 @@ describe("guardFile", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("accepts a large binary file below the global upload cap", async () => {
+    const file = makeFile("a,b,c\n1,2,3\n", "big.csv", "text/csv");
+    // 60MB — above the old 50MB XML cap but well below the 800MB upload cap.
+    Object.defineProperty(file, "size", { value: 60 * 1024 * 1024 });
+    const result = await guardFile(file);
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects a file above the global upload cap", async () => {
+    const file = makeFile("a,b,c\n1,2,3\n", "huge.csv", "text/csv");
+    // 801MB — above the 800MB upload cap.
+    Object.defineProperty(file, "size", { value: 801 * 1024 * 1024 });
+    const result = await guardFile(file);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.reason).toMatch(/demasiado grande/i);
+  });
+
   it("processes multiple files in guardFiles", async () => {
     const safe = makeFile(
       '<svg xmlns="http://www.w3.org/2000/svg"><circle r="10"/></svg>',
