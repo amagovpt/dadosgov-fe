@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Button,
@@ -20,35 +19,33 @@ import { Dropdown } from "@/components/Primitives/Dropdown";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { fetchActivity } from "@/service/api/activity";
-import { fetchDataset, updateDataset, deleteDataset, uploadResource, createResource, fetchLicenses, fetchFrequencies, fetchResourceTypes, fetchGranularities, fetchSpatialZonesByIds } from "@/service/api/datasets";
+import { fetchDataset, fetchLicenses, fetchFrequencies, fetchResourceTypes, fetchGranularities, fetchSpatialZonesByIds } from "@/service/api/datasets";
 import { fetchDiscussions } from "@/service/api/discussions-topics";
 import { suggestSpatialZones } from "@/service/api/search";
 import { requestTransfer } from "@/service/api/transfers";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import { License, Frequency, Granularity, SpatialZone, Activity, ResourceType } from "@/service/types/catalog";
-import { Dataset, Resource } from "@/service/types/dataset";
+import { Dataset } from "@/service/types/dataset";
 import { Discussion } from "@/service/types/discussion";
-import DeleteResourcePopup from "@/components/admin/datasets/resource-dialogs/DeleteResourcePopup";
 import DatasetsEditDeletePopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditDeletePopup";
-import DatasetsEditResourceDetailPopup from "@/components/admin/datasets/resource-dialogs/DatasetsEditResourceDetailPopup";
-import DatasetsEditResourceEditPopup from "@/components/admin/datasets/resource-dialogs/DatasetsEditResourceEditPopup";
 import DatasetsEditMetadataTab from "@/components/admin/datasets/edit-tabs/DatasetsEditMetadataTab";
 import DatasetsEditResourcesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditResourcesTab";
 import DatasetsEditDiscussionsTab from "@/components/admin/datasets/edit-tabs/DatasetsEditDiscussionsTab";
 import DatasetsEditActivitiesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditActivitiesTab";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
-import { POISONED_FILE_WARNING, translateUploadError } from "@/lib/security/translateUploadError";
+import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import TextLink from "@/components/Primitives/TextLink";
 
 import { translateActivityLabel } from "@/utils/activityLabels";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
+import { useDatasetLifecycleActions } from "@/components/admin/datasets/hooks/useDatasetLifecycleActions";
+import { useDatasetMetadataActions } from "@/components/admin/datasets/hooks/useDatasetMetadataActions";
+import { useDatasetResourceActions } from "@/components/admin/datasets/hooks/useDatasetResourceActions";
 import {
-  buildDatasetEditPayload,
   type DatasetEditField,
-  validateDatasetEditMetadata,
 } from "@/components/admin/datasets/form-state/datasetEditFormModel";
 
 export default function DatasetsEditClient() {
@@ -346,130 +343,48 @@ export default function DatasetsEditClient() {
     [clearError]
   );
 
-  const handleSaveMetadata = async () => {
-    if (!dataset) return;
-    const errors = validateDatasetEditMetadata({
-      title,
-      description,
-      temporalStart,
-      temporalEnd,
-    });
-    if (Object.keys(errors).length > 0) {
-      setErrors(errors);
-      focusFirstError();
-      return;
-    }
-    resetErrors();
-    setApiError(null);
-    setApiSuccess(null);
-    setIsSubmitting(true);
-
-    try {
-      const granularity = spatialGranularityRef.current || undefined;
-      const zonesValue = spatialCoverageRef.current;
-      const zones = zonesValue
-        ? zonesValue
-            .split(",")
-            .map((id) => id.trim())
-            .filter(Boolean)
-        : undefined;
-      let validZones = zones;
-      let zoneDetails: SpatialZone[] = [];
-      if (zones && zones.length > 0) {
-        zoneDetails = await fetchSpatialZonesByIds(zones);
-        const validZoneIds = new Set(zoneDetails.map((z) => z.id));
-        validZones = zones.filter((id) => validZoneIds.has(id));
-        if (validZones.length !== zones.length) {
-          const normalized = validZones.join(",");
-          spatialCoverageRef.current = normalized;
-          setSelectedSpatialZonesValue(normalized);
-        }
-      }
-      let resolvedGranularity = granularity;
-      if (validZones && validZones.length > 0) {
-        const selectedZoneSet = new Set(validZones);
-        const levels = Array.from(
-          new Set(
-            zoneDetails
-              .filter((z) => selectedZoneSet.has(z.id))
-              .map((z) => (typeof z.level === "string" ? z.level.trim() : ""))
-              .filter(Boolean)
-          )
-        );
-        if (levels.length === 1) {
-          resolvedGranularity = levels[0];
-        } else if (
-          levels.length > 1 &&
-          resolvedGranularity &&
-          !levels.includes(resolvedGranularity)
-        ) {
-          resolvedGranularity = levels[0];
-        }
-        spatialGranularityRef.current = resolvedGranularity || "";
-      }
-
-      const updated = await updateDataset(
-        dataset.id,
-        buildDatasetEditPayload({
-          title,
-          description,
-          shortDescription,
-          acronym,
-          featured,
-          keywords: keywordsRef.current,
-          license: selectedLicenseRef.current,
-          frequency: selectedFrequencyRef.current,
-          temporalStart,
-          temporalEnd,
-          spatialGeom: dataset.spatial?.geom,
-          spatialZones: validZones,
-          spatialGranularity: resolvedGranularity,
-          existingSpatialZones: dataset.spatial?.zones,
-        }),
-      );
-      setDataset(updated);
-      showApiSuccess("Conjunto de dados atualizado com sucesso.");
+  const { handleSaveMetadata } = useDatasetMetadataActions({
+    dataset,
+    title,
+    description,
+    shortDescription,
+    acronym,
+    featured,
+    temporalStart,
+    temporalEnd,
+    keywordsRef,
+    selectedLicenseRef,
+    selectedFrequencyRef,
+    spatialCoverageRef,
+    spatialGranularityRef,
+    setDataset,
+    setIsSubmitting,
+    setApiError,
+    setApiSuccess,
+    setErrors,
+    resetErrors,
+    focusFirstError,
+    setSelectedSpatialZonesValue,
+    showApiSuccess,
+    focusAfterSave: () => {
       requestAnimationFrame(() => {
-        // Keep feedback visible after save.
         window.scrollTo({ top: 0, behavior: "smooth" });
         tabsRef.current?.focus({ preventScroll: true });
       });
-    } catch (error: unknown) {
-      const err = error as { status?: number; data?: Record<string, unknown> };
-      if (err.data && typeof err.data === "object") {
-        const flattenValue = (val: unknown): string => {
-          if (Array.isArray(val)) return val.map(flattenValue).join("; ");
-          if (val && typeof val === "object")
-            return Object.values(val as Record<string, unknown>)
-              .map(flattenValue)
-              .join("; ");
-          return String(val);
-        };
-        const messages = Object.entries(err.data)
-          .map(([key, val]) => `${key}: ${flattenValue(val)}`)
-          .join(", ");
-        setApiError(messages);
-      } else {
-        setApiError("Erro ao atualizar o conjunto de dados.");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+  });
 
-  const handleArchiveDataset = async () => {
-    if (!dataset) return;
-    setIsSubmitting(true);
-    try {
-      await updateDataset(dataset.id, { archived: new Date().toISOString() });
-      router.push("/pages/admin/me/datasets?status=archived");
-    } catch (error) {
-      console.error("Error archiving dataset:", error);
-      setApiError("Erro ao arquivar o conjunto de dados.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { handleArchiveDataset, handleDeleteDataset, handlePublishDataset, handleUnarchiveDataset } =
+    useDatasetLifecycleActions({
+      dataset,
+      hide,
+      push: router.push,
+      keywordsRef,
+      setDataset,
+      setIsSubmitting,
+      setApiError,
+      showApiSuccess,
+    });
 
   const handleTransferDataset = async (recipient: RecipientSelection, comment: string) => {
     if (!dataset) throw new Error("Conjunto de dados não carregado.");
@@ -487,175 +402,22 @@ export default function DatasetsEditClient() {
     );
   };
 
-  const handleUnarchiveDataset = async () => {
-    if (!dataset) return;
-    setIsSubmitting(true);
-    try {
-      const updated = await updateDataset(dataset.id, { archived: null });
-      setDataset(updated);
-    } catch (error) {
-      console.error("Error unarchiving dataset:", error);
-      setApiError("Erro ao desarquivar o conjunto de dados.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const handleDeleteDataset = async () => {
-    if (!dataset) return;
-    setIsSubmitting(true);
-    try {
-      await deleteDataset(dataset.id);
-      hide();
-      router.push("/pages/admin/me/datasets");
-    } catch (error) {
-      console.error("Error deleting dataset:", error);
-      setApiError("Erro ao eliminar o conjunto de dados.");
-      hide();
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = (e.target as HTMLInputElement).files;
-    if (!files || files.length === 0 || !dataset) return;
-    if (isUploadingRef.current) return;
-    isUploadingRef.current = true;
-    setIsSubmitting(true);
-    setApiError(null);
-    setFileUploadError(null);
-    try {
-      for (const file of Array.from(files)) {
-        await uploadResource(dataset.id, file);
-      }
-      const updated = await fetchDataset(slug);
-      setDataset(updated);
-      setUploaderKey((k) => k + 1);
-      showApiSuccess("Ficheiro(s) carregado(s) com sucesso.");
-    } catch (error) {
-      const err = error as { status?: number; data?: Record<string, unknown>; message?: string };
-      console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
-      if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
-        const flattenValue = (val: unknown): string => {
-          if (Array.isArray(val)) return val.map(flattenValue).join("; ");
-          if (val && typeof val === "object")
-            return Object.values(val as Record<string, unknown>)
-              .map(flattenValue)
-              .join("; ");
-          return String(val);
-        };
-        const msg =
-          (err.data.message as string) ||
-          Object.entries(err.data)
-            .map(([k, v]) => `${k}: ${flattenValue(v)}`)
-            .join(", ");
-        setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(msg)}`);
-      } else if (err.message) {
-        setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(err.message)}`);
-      } else {
-        const statusHint = err.status ? ` (HTTP ${err.status})` : "";
-        setFileUploadError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
-      }
-    } finally {
-      isUploadingRef.current = false;
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteResource = (resource: Resource) => {
-    if (!dataset) return;
-    show(
-      <DeleteResourcePopup
-        datasetId={dataset.id}
-        resource={resource}
-        onDeleted={() => {
-          setDataset((prev) =>
-            prev ? { ...prev, resources: prev.resources.filter((r) => r.id !== resource.id) } : prev
-          );
-          showApiSuccess("Ficheiro eliminado com sucesso.");
-        }}
-      />,
-      {
-        title: "Eliminar ficheiro",
-        closeAriaLabel: "Fechar",
-        dimensions: "m",
-      }
-    );
-  };
-
-  const refreshDataset = async () => {
-    const updated = await fetchDataset(slug);
-    setDataset(updated);
-  };
-
-  const handleResourceEdit = (resource: Resource) => {
-    if (!dataset) return;
-    show(
-      <DatasetsEditResourceEditPopup
-        resource={resource}
-        datasetId={dataset.id}
-        resourceTypes={resourceTypes}
-        onSaved={async () => {
-          await refreshDataset();
-          showApiSuccess("Recurso atualizado com sucesso.");
-        }}
-        onCancel={hide}
-      />,
-      {
-        title: resource.title,
-        closeAriaLabel: "Fechar",
-        dimensions: "l",
-      }
-    );
-  };
-
-  const handleResourceClick = (resource: Resource) => {
-    if (!dataset) return;
-    const openEdit = () => {
-      hide();
-      setTimeout(() => {
-        show(
-          <DatasetsEditResourceEditPopup
-            resource={resource}
-            datasetId={dataset.id}
-            resourceTypes={resourceTypes}
-            onSaved={async () => {
-              await refreshDataset();
-              showApiSuccess("Recurso atualizado com sucesso.");
-            }}
-            onCancel={hide}
-          />,
-          {
-            title: resource.title,
-            closeAriaLabel: "Fechar",
-            dimensions: "l",
-          }
-        );
-      }, 100);
-    };
-
-    const openDelete = () => {
-      hide();
-      setTimeout(() => {
-        handleDeleteResource(resource);
-      }, 100);
-    };
-
-    show(
-      <DatasetsEditResourceDetailPopup
-        resource={resource}
-        onEdit={openEdit}
-        onDelete={openDelete}
-        onClose={hide}
-      />,
-      {
-        title: resource.title,
-        closeAriaLabel: "Fechar",
-        dimensions: "l",
-      }
-    );
-  };
+  const { handleDeleteResource, handleFileUpload, handleResourceClick, handleResourceEdit } =
+    useDatasetResourceActions({
+      dataset,
+      slug,
+      resourceTypes,
+      show,
+      hide,
+      setDataset,
+      setIsSubmitting,
+      setApiError,
+      setFileUploadError,
+      setUploaderKey,
+      showApiSuccess,
+      isUploadingRef,
+    });
 
   if (isLoading) {
     return (
@@ -862,34 +624,7 @@ export default function DatasetsEditClient() {
                 selectedFrequencyRef={selectedFrequencyRef}
                 spatialCoverageRef={spatialCoverageRef}
                 spatialGranularityRef={spatialGranularityRef}
-                onPublishDataset={async () => {
-                  try {
-                    const tagsValue = keywordsRef.current;
-                    const tags = tagsValue
-                      ? tagsValue
-                          .split(",")
-                          .map((tag) => tag.trim())
-                          .filter(Boolean)
-                      : dataset.tags || [];
-                    const updated = await updateDataset(dataset.id, {
-                      private: false,
-                      title: dataset.title,
-                      description: dataset.description,
-                      description_short: dataset.description_short || undefined,
-                      acronym: dataset.acronym || undefined,
-                      tags,
-                      license: dataset.license || undefined,
-                      frequency: dataset.frequency || undefined,
-                      temporal_coverage: dataset.temporal_coverage || undefined,
-                      spatial: dataset.spatial || undefined,
-                      organization: dataset.organization?.id,
-                    });
-                    setDataset(updated);
-                    showApiSuccess("Conjunto de dados publicado com sucesso.");
-                  } catch {
-                    setApiError("Erro ao publicar o conjunto de dados.");
-                  }
-                }}
+                onPublishDataset={handlePublishDataset}
                 onFeaturedChange={(checked) => setFeatured(checked)}
                 onTitleChange={handleTitleChange}
                 onAcronymChange={setAcronym}

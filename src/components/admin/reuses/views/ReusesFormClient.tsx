@@ -38,6 +38,12 @@ import {
   validateReuseDatasetSelection,
   validateReuseDetails,
 } from "@/components/admin/reuses/form-state/reuseFormModel";
+import {
+  addRemoteDatasetEntry,
+  clearIndexedErrorIfFilled,
+  removeRemoteDatasetEntry,
+  updateRemoteDatasetEntry,
+} from "@/components/admin/reuses/form-state/reuseAssociationHelpers";
 
 interface ReusesFormClientProps {
   currentStep: number;
@@ -270,50 +276,34 @@ export default function ReusesFormClient({
   };
 
   const handleDatasetUrlChange = (index: number, value: string) => {
-    const updated = [...datasetLinks];
-    updated[index] = { ...updated[index], url: value };
-    setDatasetLinks(updated);
-    if (value.trim() && datasetLinkErrors[index]) {
-      setDatasetLinkErrors((previous) => {
-        const next = { ...previous };
-        delete next[index];
-        return next;
-      });
-    }
+    setDatasetLinks((previous) => updateRemoteDatasetEntry(previous, index, { url: value }));
+    setDatasetLinkErrors((previous) => clearIndexedErrorIfFilled(previous, index, value));
   };
 
   const handleDatasetTitleChange = (index: number, value: string) => {
-    const updated = [...datasetLinks];
-    updated[index] = { ...updated[index], title: value };
-    setDatasetLinks(updated);
+    setDatasetLinks((previous) => updateRemoteDatasetEntry(previous, index, { title: value }));
   };
 
   const handleDatasetDescriptionChange = (index: number, value: string) => {
-    const updated = [...datasetLinks];
-    updated[index] = { ...updated[index], description: value };
-    setDatasetLinks(updated);
+    setDatasetLinks((previous) =>
+      updateRemoteDatasetEntry(previous, index, { description: value }),
+    );
   };
 
   const addDatasetLink = () => {
-    const lastIndex = datasetLinks.length - 1;
-    if (!datasetLinks[lastIndex].url.trim()) {
-      setDatasetLinkErrors((previous) => ({ ...previous, [lastIndex]: "Campo obrigatório" }));
-      return;
-    }
-    setDatasetLinks((previous) => [...previous, { url: "" }]);
+    const result = addRemoteDatasetEntry(
+      datasetLinks,
+      datasetLinkErrors,
+      "Campo obrigat\u00f3rio",
+    );
+    setDatasetLinks(result.entries);
+    setDatasetLinkErrors(result.errors);
   };
 
   const removeDatasetLink = (index: number) => {
-    setDatasetLinks((previous) => previous.filter((_, itemIndex) => itemIndex !== index));
-    setDatasetLinkErrors((previous) => {
-      const next: Record<number, string> = {};
-      Object.entries(previous).forEach(([key, value]) => {
-        const numericKey = Number(key);
-        if (numericKey < index) next[numericKey] = value;
-        else if (numericKey > index) next[numericKey - 1] = value;
-      });
-      return next;
-    });
+    const result = removeRemoteDatasetEntry(datasetLinks, datasetLinkErrors, index);
+    setDatasetLinks(result.entries);
+    setDatasetLinkErrors(result.errors);
   };
 
   const auxiliarItems = getReuseAuxiliarItems({

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Button,
@@ -13,24 +13,20 @@ import {
   TabBody,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
-import { fetchHarvester, fetchHarvestJobs, fetchHarvestBackends, updateHarvester, scheduleHarvester, unscheduleHarvester, previewHarvestSource, deleteHarvester, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
 import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,
 } from "@/components/admin/harvesters/form-ui/HarvesterValidationPopups";
 import { useAuth } from "@/context/AuthContext";
-import type { HarvestBackend, HarvestPreviewJob, HarvestSource, HarvestJob } from "@/service/types/harvester";
+import type { HarvestPreviewJob } from "@/service/types/harvester";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { HarvesterJobsTable } from "@/components/admin/harvesters/jobs/HarvesterJobsTable";
 import { HarvesterConfigForm } from "@/components/admin/harvesters/form-sections/HarvesterConfigForm";
+import { useHarvesterDetailActions } from "@/components/admin/harvesters/hooks/useHarvesterDetailActions";
+import { useHarvesterDetailData } from "@/components/admin/harvesters/hooks/useHarvesterDetailData";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
-import {
-  buildHarvesterPreviewPayload,
-  buildHarvesterUpdatePayload,
-  type HarvesterFormField,
-  validateHarvesterDetails,
-} from "@/components/admin/harvesters/form-state/harvesterFormModel";
+import { type HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 
 interface HarvesterDetailClientProps {
   slug: string;
@@ -97,15 +93,20 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isConfigTab = searchParams.get("tab") === "config";
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const { show, hide } = usePopupContext();
-  const [source, setSource] = useState<HarvestSource | null>(null);
-  const [jobs, setJobs] = useState<HarvestJob[]>([]);
-  const [jobsTotal, setJobsTotal] = useState(0);
-  const [jobsPage, setJobsPage] = useState(1);
-  const [jobsPageSize, setJobsPageSize] = useState(10);
-  const [backends, setBackends] = useState<HarvestBackend[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    backends,
+    isLoading,
+    jobs,
+    jobsPage,
+    jobsPageSize,
+    jobsTotal,
+    setJobsPage,
+    setJobsPageSize,
+    setSource,
+    source,
+  } = useHarvesterDetailData({ slug });
 
   // Config form state
   const [harvesterName, setHarvesterName] = useState("");
@@ -115,9 +116,6 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const [isAutoArchive, setIsAutoArchive] = useState(true);
   const [filters, setFilters] = useState<{ type: string; value: string; mode: string }[]>([]);
   const [harvesterSchedule, setHarvesterSchedule] = useState("");
-  // Seeded once from the API; passed as `defaultValue` to the IsolatedInput,
-  // which then owns the field state internally to avoid caret-jump on every
-  // parent re-render.
   const [loadedSchedule, setLoadedSchedule] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const {
@@ -135,199 +133,66 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
     useFormErrors<HarvesterFormField>();
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [data, backendsData] = await Promise.all([
-          fetchHarvester(slug),
-          fetchHarvestBackends(),
-        ]);
-        setBackends(backendsData);
-        setSource(data);
-        if (data) {
-          setHarvesterName(data.name);
-          setHarvesterDescription(data.description || "");
-          setHarvesterUrl(data.url);
-          setIsEnabled(data.active);
-          setIsAutoArchive(data.autoarchive);
-          setHarvesterSchedule(data.schedule || "");
-          setLoadedSchedule(data.schedule || "");
-          setSelectedBackend(data.backend);
-          const existingFilters = (data.config?.filters as { key?: string; value?: string; type?: string }[] | undefined) || [];
-          setFilters(existingFilters.map((f) => ({ type: f.key || "", value: String(f.value || ""), mode: f.type || "include" })));
-          const jobsRes = await fetchHarvestJobs(data.id, jobsPage, jobsPageSize);
-          setJobs(jobsRes.data || []);
-          setJobsTotal(jobsRes.total || 0);
-        }
-      } catch (error) {
-        console.error("Error loading harvester:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    load();
-  }, [jobsPage, jobsPageSize, slug]);
-
-  const jobsInitialLoadDone = useRef(false);
-
-  useEffect(() => {
-    if (!jobsInitialLoadDone.current) {
-      jobsInitialLoadDone.current = true;
-      return;
-    }
     if (!source) return;
-    async function loadJobsPage() {
-      try {
-        const jobsRes = await fetchHarvestJobs(source!.id, jobsPage, jobsPageSize);
-        setJobs(jobsRes.data || []);
-        setJobsTotal(jobsRes.total || 0);
-      } catch (error) {
-        console.error("Error loading jobs:", error);
-      }
-    }
-    loadJobsPage();
-  }, [jobsPage, jobsPageSize]);  // eslint-disable-line react-hooks/exhaustive-deps
+    const existingFilters =
+      (source.config?.filters as { key?: string; value?: string; type?: string }[] | undefined) || [];
 
-  const activeBackendFilters = useMemo(
-    () => backends.find((b) => b.id === selectedBackend)?.filters ?? [],
-    [backends, selectedBackend],
-  );
-
-  const addFilter = () => {
-    const firstKey = activeBackendFilters[0]?.key ?? "";
-    setFilters((prev) => [...prev, { type: firstKey, value: "", mode: "include" }]);
-  };
-
-  const removeFilter = (index: number) => {
-    setFilters((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const updateFilter = (index: number, field: string, value: string) => {
-    setFilters((prev) =>
-      prev.map((f, i) => (i === index ? { ...f, [field]: value } : f))
-    );
-  };
-
-  const handleSave = async () => {
-    const errors = validateHarvesterDetails({
-      name: harvesterName,
-      url: harvesterUrl,
+    const frameId = requestAnimationFrame(() => {
+      setHarvesterName(source.name);
+      setHarvesterDescription(source.description || "");
+      setHarvesterUrl(source.url);
+      setIsEnabled(source.active);
+      setIsAutoArchive(source.autoarchive);
+      setHarvesterSchedule(source.schedule || "");
+      setLoadedSchedule(source.schedule || "");
+      setSelectedBackend(source.backend);
+      setFilters(
+        existingFilters.map((filter) => ({
+          type: filter.key || "",
+          value: String(filter.value || ""),
+          mode: filter.type || "include",
+        })),
+      );
     });
-    if (Object.keys(errors).length > 0) {
-      setErrors(errors);
-      focusFirstError();
-      return;
-    }
 
-    if (!source) return;
+    return () => cancelAnimationFrame(frameId);
+  }, [source]);
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setIsSaving(true);
-    setSaveSuccess(false);
-    setSaveError(null);
-
-    try {
-      const newSchedule = harvesterSchedule.trim();
-      const oldSchedule = source.schedule || "";
-
-      // Only submit filters whose key is declared by the selected backend.
-      // Orphan filters (e.g. left over from a previous backend type) would be
-      // rejected by the API with a 400 "Unknown filter key" error.
-      const validKeys = new Set(activeBackendFilters.map((f) => f.key));
-      const [updated] = await Promise.all([
-        updateHarvester(
-          source.id,
-          buildHarvesterUpdatePayload({
-            name: harvesterName,
-            description: harvesterDescription,
-            url: harvesterUrl,
-            backend: selectedBackend,
-            fallbackBackend: source.backend,
-            active: isEnabled,
-            autoarchive: isAutoArchive,
-            filters,
-            activeFilterKeys: [...validKeys],
-          }),
-        ),
-        newSchedule && newSchedule !== oldSchedule
-          ? scheduleHarvester(source.id, newSchedule)
-          : !newSchedule && oldSchedule
-            ? unscheduleHarvester(source.id)
-            : Promise.resolve(),
-      ]);
-      setSource(updated as HarvestSource);
-      showSaveSuccess(true);
-    } catch (err) {
-      const e = err as { status?: number; data?: unknown };
-      console.error("Error saving harvester:", e.status, e.data ?? err);
-      const msg = typeof e.data === "object" && e.data !== null
-        ? JSON.stringify(e.data)
-        : "Tente novamente.";
-      setSaveError(`Erro ao guardar (${e.status ?? "?"}) — ${msg}`);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handlePreview = async () => {
-    if (!source) return;
-    setIsPreviewing(true);
-    setPreviewJob(null);
-    setPreviewError(null);
-    try {
-      const job = await previewHarvestSource(
-        buildHarvesterPreviewPayload({
-          name: harvesterName,
-          fallbackName: source.name,
-          url: harvesterUrl,
-          fallbackUrl: source.url,
-          backend: selectedBackend,
-          fallbackBackend: source.backend,
-          schedule: harvesterSchedule,
-          active: isEnabled,
-          autoarchive: isAutoArchive,
-          filters,
-        }),
-      );
-      setPreviewJob(job);
-    } catch (err: unknown) {
-      const error = err as { data?: { message?: string }; message?: string };
-      setPreviewError(
-        error?.data?.message || error?.message || "Erro ao pré-visualizar o harvester."
-      );
-    } finally {
-      setIsPreviewing(false);
-    }
-  };
-
-  const handleDeleteHarvester = async () => {
-    if (!source) return;
-    try {
-      await deleteHarvester(source.id);
-      hide();
-      router.push("/pages/admin/system/harvesters");
-    } catch (error) {
-      console.error("Error deleting harvester:", error);
-      hide();
-    }
-  };
-
-  const handleApproveSource = async (comment: string) => {
-    if (!source) return;
-    const updated = await validateHarvestSource(source.id, comment || undefined);
-    setSource((prev) =>
-      prev ? { ...prev, validation: updated.validation ?? prev.validation } : prev
-    );
-    hide();
-  };
-
-  const handleRejectSource = async (comment: string) => {
-    if (!source) return;
-    const updated = await rejectHarvestSource(source.id, comment);
-    setSource((prev) =>
-      prev ? { ...prev, validation: updated.validation ?? prev.validation } : prev
-    );
-    hide();
-  };
+  const {
+    activeBackendFilters,
+    addFilter,
+    handleApproveSource,
+    handleDeleteHarvester,
+    handlePreviewHarvester,
+    handleRejectSource,
+    handleSaveHarvester,
+    removeFilter,
+    updateFilter,
+  } = useHarvesterDetailActions({
+    source,
+    backends,
+    selectedBackend,
+    harvesterName,
+    harvesterDescription,
+    harvesterUrl,
+    isEnabled,
+    isAutoArchive,
+    filters,
+    harvesterSchedule,
+    setSource,
+    setFilters,
+    setIsSaving,
+    setSaveSuccess,
+    setSaveError,
+    showSaveSuccess,
+    setErrors,
+    focusFirstError,
+    setIsPreviewing,
+    setPreviewJob,
+    setPreviewError,
+    hide,
+    push: router.push,
+  });
 
   const openApproveSourcePopup = () => {
     if (!source) return;
@@ -521,11 +386,11 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
               isSaving={isSaving}
               saveSuccess={saveSuccess}
               saveError={saveError}
-              onSave={handleSave}
+              onSave={handleSaveHarvester}
               isPreviewing={isPreviewing}
               previewJob={previewJob}
               previewError={previewError}
-              onPreview={handlePreview}
+              onPreview={handlePreviewHarvester}
               onDelete={() => show(
                 <DeleteHarvesterPopupContent onClose={hide} onConfirm={handleDeleteHarvester} />,
                 { title: "Eliminar o harvester", closeAriaLabel: "Fechar", dimensions: "m" }

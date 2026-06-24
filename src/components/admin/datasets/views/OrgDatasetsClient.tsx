@@ -91,8 +91,19 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
   );
 
   useEffect(() => {
+    let isCancelled = false;
     const sort = buildApiSortParam(sortField, sortOrder, ORG_DATASET_SORT_MAP);
-    void loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
+
+    const loadCurrentDatasets = async () => {
+      if (isCancelled) return;
+      await loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
+    };
+
+    void loadCurrentDatasets();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [currentPage, itemsPerPage, searchQuery, statusFilter, sortField, sortOrder, loadDatasets]);
 
   const handleSearch = useDebouncedSearch((value: string) => {

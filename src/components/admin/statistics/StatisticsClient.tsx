@@ -118,7 +118,6 @@ export default function StatisticsClient() {
                 <CardNoResults
                   position="center"
                   icon={
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img src="/Icons/reduce.svg" alt="" className="h-40 w-40" />
                   }
                   title="Sem publicações"
@@ -160,7 +159,6 @@ export default function StatisticsClient() {
                   <CardNoResults
                     position="center"
                     icon={
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />
                     }
                     title="Sem publicações"

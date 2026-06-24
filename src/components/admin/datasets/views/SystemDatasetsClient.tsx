@@ -83,7 +83,18 @@ export default function SystemDatasetsClient() {
   }, [currentPage, pageSize, searchQuery, sortParam, statusFilter]);
 
   useEffect(() => {
-    loadDatasets();
+    let isCancelled = false;
+
+    const loadCurrentDatasets = async () => {
+      if (isCancelled) return;
+      await loadDatasets();
+    };
+
+    void loadCurrentDatasets();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [loadDatasets]);
 
   const handleSearch = useDebouncedSearch((value: string) => {

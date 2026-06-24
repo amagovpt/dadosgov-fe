@@ -55,7 +55,6 @@ export default function ImageUploadField({
   const preview = previewSrc ? (
     <div className={previewWrapperClassName}>
       {previewLabel ? <p className={previewLabelClassName}>{previewLabel}</p> : null}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={previewSrc} alt={previewAlt} className={previewImageClassName} />
     </div>
   ) : null;

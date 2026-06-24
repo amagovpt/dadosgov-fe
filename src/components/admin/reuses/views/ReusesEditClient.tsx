@@ -21,7 +21,7 @@ import { fetchActivity } from "@/service/api/activity";
 import { fetchDataset, fetchMyDatasets } from "@/service/api/datasets";
 import { fetchDiscussions } from "@/service/api/discussions-topics";
 import { fetchOrgDatasets } from "@/service/api/organizations";
-import { fetchReuse, updateReuse, deleteReuse, fetchReuseTypes, fetchReuseTopics, linkDatasetToReuse, unlinkDatasetFromReuse, linkDataserviceToReuse } from "@/service/api/reuses";
+import { fetchReuse, fetchReuseTypes, fetchReuseTopics, unlinkDatasetFromReuse } from "@/service/api/reuses";
 import { searchDatasets } from "@/service/api/search";
 import { requestTransfer } from "@/service/api/transfers";
 import { useAuth } from "@/context/AuthContext";
@@ -37,14 +37,23 @@ import ReusesEditApiTab from "@/components/admin/reuses/edit-tabs/ReusesEditApiT
 import ReusesEditDiscussionsTab from "@/components/admin/reuses/edit-tabs/ReusesEditDiscussionsTab";
 import ReusesEditActivitiesTab from "@/components/admin/reuses/edit-tabs/ReusesEditActivitiesTab";
 import ReusesEditDeletePopup from "@/components/admin/reuses/edit-dialogs/ReusesEditDeletePopup";
+import { useReuseAssociationActions } from "@/components/admin/reuses/hooks/useReuseAssociationActions";
+import { useReuseLifecycleActions } from "@/components/admin/reuses/hooks/useReuseLifecycleActions";
+import { useReuseMetadataActions } from "@/components/admin/reuses/hooks/useReuseMetadataActions";
 import TextLink from "@/components/Primitives/TextLink";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useKeywordSelect } from "@/hooks/forms/useKeywordSelect";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import {
-  buildRemoteDatasetEntries,
-  validateReuseDatasetSelection,
-} from "@/components/admin/reuses/form-state/reuseFormModel";
+  addRemoteDatasetEntry,
+  addUrlItem,
+  buildSelectedDatasetsFromIds,
+  clearIndexedErrorIfFilled,
+  removeRemoteDatasetEntry,
+  removeUrlItem,
+  updateRemoteDatasetEntry,
+  updateUrlItem,
+} from "@/components/admin/reuses/form-state/reuseAssociationHelpers";
 
 import { translateActivityLabel } from "@/utils/activityLabels";
 
@@ -255,44 +264,31 @@ export default function ReusesEditClient() {
     setKeywordSearch(value);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0 || !reuse) return;
-    const file = files[0];
-    if (file.size > 4194304) {
-      setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
-      return;
-    }
-    setImageError(null);
-    setIsSubmitting(true);
-    try {
-      const { uploadReuseImage } = await import("@/service/api/reuses");
-      await uploadReuseImage(reuse.id, file);
-      const updated = await fetchReuse(reuse.id);
-      setReuse(updated);
-      showApiSuccess("Imagem de capa atualizada com sucesso.");
-    } catch {
-      setApiError("Erro ao carregar imagem de capa.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    handleArchiveReuse,
+    handleImageUpload: handleImageUploadBase,
+    handleOpenDeletePopup,
+    handlePublishReuse,
+    handleUnarchiveReuse,
+  } = useReuseLifecycleActions({
+    reuse,
+    hide,
+    push: router.push,
+    setReuse,
+    setIsSubmitting,
+    setApiError,
+    setApiSuccess,
+    showApiSuccess,
+  });
 
-  const handlePublishReuse = async () => {
-    if (!reuse) return;
-    setApiError(null);
-    setApiSuccess(null);
-    setIsSubmitting(true);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      const updated = await updateReuse(reuse.id, {
-        private: false,
-      });
-      setReuse(updated);
-      showApiSuccess("Reutilização publicada com sucesso.");
-    } catch {
-      setApiError("Erro ao publicar a reutilização.");
-    } finally {
-      setIsSubmitting(false);
+      setImageError(null);
+      await handleImageUploadBase(e);
+    } catch (error) {
+      if (error instanceof Error && error.message === "MAX_FILE_SIZE") {
+        setImageError("O ficheiro excede o tamanho m\u00e1ximo de 4 MB.");
+      }
     }
   };
 
@@ -309,27 +305,16 @@ export default function ReusesEditClient() {
     selectedKeywordsRef.current = next;
   };
 
-  const handleOpenDeletePopup = () => {
-    if (!reuse) return;
-    show(<ReusesEditDeletePopup onClose={hide} onConfirm={handleDeleteReuse} />, {
-      title: "Elimine a reutilização",
-      closeAriaLabel: "Fechar",
-      dimensions: "m",
-    });
+  const openDeletePopup = () => {
+    handleOpenDeletePopup(
+      (onConfirm) => <ReusesEditDeletePopup onClose={hide} onConfirm={onConfirm} />,
+      show,
+    );
   };
 
   const handleDatasetSelectChange = (selectedIds: string[]) => {
-    const selectedIdsSet = new Set(selectedIds);
     const pool: Dataset[] = [...selectedDatasets, ...datasetSearchResults, ...myDatasets];
-    const seen = new Set<string>();
-    const next: Dataset[] = [];
-    for (const dataset of pool) {
-      if (selectedIdsSet.has(dataset.id) && !seen.has(dataset.id)) {
-        seen.add(dataset.id);
-        next.push(dataset);
-      }
-    }
-    setSelectedDatasets(next);
+    setSelectedDatasets(buildSelectedDatasetsFromIds(selectedIds, pool));
   };
 
   const handleRemoveSelectedDataset = (datasetId: string) => {
@@ -337,118 +322,36 @@ export default function ReusesEditClient() {
   };
 
   const handleDatasetLinkChange = (index: number, value: string) => {
-    const nextLinks = [...datasetLinks];
-    nextLinks[index] = { ...nextLinks[index], url: value };
-    setDatasetLinks(nextLinks);
-    if (value.trim()) {
-      setDatasetLinkErrors((prev) => {
-        const nextErrors = { ...prev };
-        delete nextErrors[index];
-        return nextErrors;
-      });
-    }
+    setDatasetLinks((previous) => updateRemoteDatasetEntry(previous, index, { url: value }));
+    setDatasetLinkErrors((previous) => clearIndexedErrorIfFilled(previous, index, value));
   };
 
   // LEDG-1748 PR 2: per-URL metadata fields kept on the same row so the
   // user can describe each external dataset alongside its URL.
   const handleDatasetTitleChange = (index: number, value: string) => {
-    const nextLinks = [...datasetLinks];
-    nextLinks[index] = { ...nextLinks[index], title: value };
-    setDatasetLinks(nextLinks);
+    setDatasetLinks((previous) => updateRemoteDatasetEntry(previous, index, { title: value }));
   };
 
   const handleDatasetDescriptionChange = (index: number, value: string) => {
-    const nextLinks = [...datasetLinks];
-    nextLinks[index] = { ...nextLinks[index], description: value };
-    setDatasetLinks(nextLinks);
+    setDatasetLinks((previous) =>
+      updateRemoteDatasetEntry(previous, index, { description: value }),
+    );
   };
 
   const handleRemoveDatasetLink = (index: number) => {
-    const nextLinks = datasetLinks.filter((_, currentIndex) => currentIndex !== index);
-    setDatasetLinks(nextLinks.length > 0 ? nextLinks : [{ url: "" }]);
+    const result = removeRemoteDatasetEntry(datasetLinks, datasetLinkErrors, index);
+    setDatasetLinks(result.entries);
+    setDatasetLinkErrors(result.errors);
   };
 
   const handleAddDatasetLink = () => {
-    const lastIndex = datasetLinks.length - 1;
-    if (!datasetLinks[lastIndex].url.trim()) {
-      setDatasetLinkErrors((prev) => ({
-        ...prev,
-        [lastIndex]: "Campo obrigatório",
-      }));
-      return;
-    }
-    setDatasetLinks([...datasetLinks, { url: "" }]);
-  };
-
-  const handleSaveDatasetAssociations = async () => {
-    if (!reuse) return;
-    // LEDG-1748 PR 2: build the entries list with the new
-    // { url, title?, description? } shape. Dedupe by URL (first occurrence
-    // wins so the title / description the user typed is the one that
-    // sticks). Compare against the snapshot taken at load time to know
-    // whether anything was edited or removed — empty/whitespace fields
-    // become `undefined` rather than persisted empty strings.
-    const remoteEntries = buildRemoteDatasetEntries(datasetLinks);
-    const hasLocal = selectedDatasets.length > 0;
-    const hasRemote = remoteEntries.length > 0;
-    const previousRemoteEntries = previousRemoteEntriesRef.current;
-    const previousHadRemote = previousRemoteEntries.length > 0;
-    // JSON-equality is good enough here: the entries are small flat objects
-    // with no field-order ambiguity (we always emit url, title, description
-    // in the same order via the constructor above).
-    const remoteListChanged =
-      JSON.stringify(remoteEntries) !== JSON.stringify(previousRemoteEntries);
-
-    const selectionError = validateReuseDatasetSelection(
-      selectedDatasets.length,
-      remoteEntries,
+    const result = addRemoteDatasetEntry(
+      datasetLinks,
+      datasetLinkErrors,
+      "Campo obrigat\u00f3rio",
     );
-    if (selectionError) {
-      setApiError(selectionError);
-      return;
-    }
-    // Allow saving when the user removed every URL (previousHadRemote &&
-    // !hasRemote). Only short-circuit when there's nothing local to add and
-    // the remote list is unchanged.
-    if (!hasLocal && !remoteListChanged) return;
-
-    setDatasetLinkErrors({});
-    setIsSubmitting(true);
-    setApiError(null);
-    try {
-      for (const dataset of selectedDatasets) {
-        await linkDatasetToReuse(reuse.id, dataset.id);
-      }
-      // Overwrite remote_datasets with the current list — no more silent
-      // merge with previously-saved entries, so removals stick.
-      if (remoteListChanged || (previousHadRemote && !hasRemote)) {
-        await updateReuse(reuse.id, {
-          extras: {
-            ...(reuse.extras || {}),
-            remote_datasets: remoteEntries,
-          },
-        });
-      }
-      const updated = await fetchReuse(reuseId);
-      setReuse(updated);
-      const refreshedEntries = normalizeRemoteDatasets(updated.extras);
-      previousRemoteEntriesRef.current = refreshedEntries;
-      setDatasetLinks(refreshedEntries.length > 0 ? refreshedEntries : [{ url: "" }]);
-      setSelectedDatasets([]);
-      showApiSuccess("Conjuntos de dados associados com sucesso.");
-    } catch (error: unknown) {
-      const err = error as { data?: Record<string, unknown> };
-      if (err.data && typeof err.data === "object") {
-        const messages = Object.entries(err.data)
-          .map(([key, val]) => `${key}: ${val}`)
-          .join(", ");
-        setApiError(messages);
-      } else {
-        setApiError("Erro ao associar conjuntos de dados.");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    setDatasetLinks(result.entries);
+    setDatasetLinkErrors(result.errors);
   };
 
   const handleRemoveAssociatedDataset = async (datasetId: string) => {
@@ -488,148 +391,61 @@ export default function ReusesEditClient() {
   };
 
   const handleApiLinkChange = (index: number, value: string) => {
-    const nextLinks = [...apiLinks];
-    nextLinks[index] = { url: value };
-    setApiLinks(nextLinks);
-    if (value.trim()) {
-      setApiLinkErrors((prev) => {
-        const nextErrors = { ...prev };
-        delete nextErrors[index];
-        return nextErrors;
-      });
-    }
+    setApiLinks((previous) => updateUrlItem(previous, index, { url: value }));
+    setApiLinkErrors((previous) => clearIndexedErrorIfFilled(previous, index, value));
   };
 
   const handleRemoveApiLink = (index: number) => {
-    const nextLinks = apiLinks.filter((_, currentIndex) => currentIndex !== index);
-    setApiLinks(nextLinks.length > 0 ? nextLinks : [{ url: "" }]);
+    setApiLinks((previous) => removeUrlItem(previous, index, () => ({ url: "" })));
   };
 
   const handleAddApiLink = () => {
-    const lastIndex = apiLinks.length - 1;
-    if (!apiLinks[lastIndex].url.trim()) {
-      setApiLinkErrors((prev) => ({
-        ...prev,
-        [lastIndex]: "Campo obrigatório",
-      }));
-      return;
-    }
-    setApiLinks([...apiLinks, { url: "" }]);
+    const result = addUrlItem(
+      apiLinks,
+      apiLinkErrors,
+      "Campo obrigat\u00f3rio",
+      () => ({ url: "" }),
+    );
+    setApiLinks(result.items);
+    setApiLinkErrors(result.errors);
   };
 
-  const handleSaveApiAssociations = async () => {
-    if (!reuse) return;
-    const errors: Record<number, string> = {};
-    apiLinks.forEach((link, index) => {
-      if (!link.url.trim() && apiLinks.length > 1) {
-        errors[index] = "Campo obrigatório";
-      }
+  const { handleSaveApiAssociations, handleSaveDatasetAssociations } =
+    useReuseAssociationActions({
+      reuse,
+      reuseId,
+      selectedDatasets,
+      datasetLinks,
+      apiLinks,
+      previousRemoteEntriesRef,
+      setReuse,
+      setDatasetLinks,
+      setDatasetLinkErrors,
+      setSelectedDatasets,
+      setApiLinks,
+      setApiLinkErrors,
+      setIsSubmitting,
+      setApiError,
+      showApiSuccess,
     });
-    if (Object.keys(errors).length > 0) {
-      setApiLinkErrors(errors);
-      return;
-    }
 
-    setApiLinkErrors({});
-    setIsSubmitting(true);
-    setApiError(null);
-    try {
-      for (const link of apiLinks) {
-        if (link.url.trim()) {
-          await linkDataserviceToReuse(reuse.id, link.url.trim());
-        }
-      }
-      const updated = await fetchReuse(reuseId);
-      setReuse(updated);
-      setApiLinks([{ url: "" }]);
-      showApiSuccess("APIs associadas com sucesso.");
-    } catch {
-      setApiError("Erro ao associar APIs.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSaveMetadata = async () => {
-    if (!reuse) return;
-    const errors: Record<string, boolean> = {};
-    if (!title.trim()) errors.title = true;
-    if (!url.trim()) errors.url = true;
-    if (!description.trim()) errors.description = true;
-    if (Object.keys(errors).length > 0) {
-      setErrors(errors);
-      focusFirstError();
-      return;
-    }
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    resetErrors();
-    setApiError(null);
-    setApiSuccess(null);
-    setIsSubmitting(true);
-
-    try {
-      const tagsValue = selectedKeywordsRef.current
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
-      const updated = await updateReuse(reuse.id, {
-        title: title.trim(),
-        url: url.trim(),
-        description: description.trim(),
-        type: selectedTypeRef.current || undefined,
-        topic: selectedTopicRef.current || undefined,
-        tags: tagsValue,
-      });
-      setReuse(updated);
-      showApiSuccess("Reutilização atualizada com sucesso.");
-    } catch (error: unknown) {
-      const err = error as { status?: number; data?: Record<string, unknown> };
-      if (err.data && typeof err.data === "object") {
-        const messages = Object.entries(err.data)
-          .map(([key, val]) => `${key}: ${val}`)
-          .join(", ");
-        setApiError(messages);
-      } else {
-        setApiError("Erro ao atualizar a reutilização.");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteReuse = async () => {
-    if (!reuse) return;
-    hide();
-    setIsSubmitting(true);
-    try {
-      await deleteReuse(reuse.id);
-      router.push("/pages/admin/me/reuses");
-    } catch (error) {
-      console.error("Error deleting reuse:", error);
-      setApiError("Erro ao eliminar a reutilização.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleArchiveReuse = async () => {
-    if (!reuse) return;
-    setApiError(null);
-    setApiSuccess(null);
-    setIsSubmitting(true);
-    try {
-      const updated = await updateReuse(reuse.id, {
-        archived: new Date().toISOString(),
-      });
-      setReuse(updated);
-      showApiSuccess("Reutilização arquivada com sucesso.");
-    } catch (error) {
-      console.error("Error archiving reuse:", error);
-      setApiError("Erro ao arquivar a reutilização.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { handleSaveMetadata } = useReuseMetadataActions({
+    reuse,
+    title,
+    url,
+    description,
+    selectedTypeRef,
+    selectedTopicRef,
+    selectedKeywordsRef,
+    setReuse,
+    setIsSubmitting,
+    setApiError,
+    setApiSuccess,
+    setErrors,
+    resetErrors,
+    focusFirstError,
+    showApiSuccess,
+  });
 
   const handleTransferReuse = async (recipient: RecipientSelection, comment: string) => {
     if (!reuse) throw new Error("Reutilização não carregada.");
@@ -645,23 +461,6 @@ export default function ReusesEditClient() {
       `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
       15000,
     );
-  };
-
-  const handleUnarchiveReuse = async () => {
-    if (!reuse) return;
-    setApiError(null);
-    setApiSuccess(null);
-    setIsSubmitting(true);
-    try {
-      const updated = await updateReuse(reuse.id, { archived: null });
-      setReuse(updated);
-      showApiSuccess("Reutilização desarquivada com sucesso.");
-    } catch (error) {
-      console.error("Error unarchiving reuse:", error);
-      setApiError("Erro ao desarquivar a reutilização.");
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   if (isLoading) {
@@ -824,7 +623,7 @@ export default function ReusesEditClient() {
               onSaveMetadata={handleSaveMetadata}
               onArchiveReuse={handleArchiveReuse}
               onUnarchiveReuse={handleUnarchiveReuse}
-              onOpenDeletePopup={handleOpenDeletePopup}
+              onOpenDeletePopup={openDeletePopup}
             />
           </TabBody>
         </Tab>

@@ -120,19 +120,21 @@ function ResourceEditPendingPopupContent({
   // The set-state-in-effect lint rule warns about cascading renders, but
   // the alternative (waiting for a remount that never happens) is the bug
   // we are fixing — this prop-sync is the smaller of the two evils.
-  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- Intentional popup prop-to-state synchronization. */
   useEffect(() => {
     const t = initialMeta.title || name;
-    setTitle(!isUrl && fileExt && t === name ? baseName : t);
-    setDescription(initialMeta.description || "");
-    setUrl(isUrl ? name : "");
-    setFilesize(initialMeta.filesize ?? (file ? String(file.size) : ""));
-    setFormat(initialMeta.format ?? (fileExt ? fileExt.slice(1).toLowerCase() : ""));
-    setMime(initialMeta.mime ?? (file?.type || ""));
-    setUrlError(null);
-    resourceTypeRef.current = defaultType;
-  }, [name, isUrl, initialMeta, file]);
-  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
+    const frameId = requestAnimationFrame(() => {
+      setTitle(!isUrl && fileExt && t === name ? baseName : t);
+      setDescription(initialMeta.description || "");
+      setUrl(isUrl ? name : "");
+      setFilesize(initialMeta.filesize ?? (file ? String(file.size) : ""));
+      setFormat(initialMeta.format ?? (fileExt ? fileExt.slice(1).toLowerCase() : ""));
+      setMime(initialMeta.mime ?? (file?.type || ""));
+      setUrlError(null);
+      resourceTypeRef.current = defaultType;
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [name, isUrl, initialMeta, file, fileExt, baseName, defaultType]);
 
   const isValidHttpsUrl = (value: string): boolean => {
     try {
@@ -677,8 +679,13 @@ export default function FileUploadModal({
   const [urlError, setUrlError] = useState<string | null>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Clear a stale URL error after another resource is selected.
-    if (hasSelection) setUrlError(null);
+    if (!hasSelection) return;
+
+    const frameId = requestAnimationFrame(() => {
+      setUrlError(null);
+    });
+
+    return () => cancelAnimationFrame(frameId);
   }, [hasSelection]);
   const [extensionErrors, setExtensionErrors] = useState<string[]>([]);
   const [securityErrors, setSecurityErrors] = useState<string[]>([]);

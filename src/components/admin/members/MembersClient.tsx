@@ -84,14 +84,22 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
 
   useEffect(() => {
     const query = searchQuery.trim();
+    let frameId: number | null = null;
+
     if (query.length < 2) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Keep the debounced search results in sync with the current short query.
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setSearchResults([]);
+        setIsSearching(false);
+      });
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
 
-    setIsSearching(true);
+    frameId = requestAnimationFrame(() => {
+      setIsSearching(true);
+    });
+
     const timer = setTimeout(async () => {
       try {
         const response = await suggestUsers(query, 50);
@@ -103,7 +111,10 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
       }
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      if (frameId !== null) cancelAnimationFrame(frameId);
+      clearTimeout(timer);
+    };
   }, [searchQuery]);
 
   const userDropdownChildren = useMemo(() => {
@@ -453,10 +464,20 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   }, [resolvedOrgId]);
 
   useEffect(() => {
-    if (resolvedOrgId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Load members whenever the active organization changes.
-      void loadMembers();
-    }
+    if (!resolvedOrgId) return;
+
+    let isCancelled = false;
+
+    const loadCurrentMembers = async () => {
+      if (isCancelled) return;
+      await loadMembers();
+    };
+
+    void loadCurrentMembers();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [resolvedOrgId, loadMembers]);
 
   const handleAcceptRequest = async (request: MembershipRequest) => {
@@ -690,4 +711,3 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     </AdminLayout>
   );
 }
-
