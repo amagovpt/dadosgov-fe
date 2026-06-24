@@ -55,7 +55,7 @@ export default function ReusesClient({
   const { data: reuses, total, page_size } = listData;
 
   return (
-    <main className="w-full flex flex-col items-center justify-center gap-32 bg-primary-50">
+    <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
         title="Reutilizações"
         breadcrumbItems={[
@@ -64,9 +64,8 @@ export default function ReusesClient({
         ]}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
-            {total === 0
-              ? "Não existem resultados disponíveis para a sua pesquisa"
-              : `Pesquise através de ${total.toLocaleString("pt-PT")} reutilizações em dados.gov.pt`}
+            Conheça estudos, visualizações e aplicações úteis para a sociedade, que reutilizam dados
+            públicos disponíveis neste portal.
           </p>
         }
       >
@@ -82,23 +81,23 @@ export default function ReusesClient({
         onSearch={handleSearch}
       />
       {/* Main Content */}
-      <div className="container flex flex-col gap-24 justify-center items-center py-32">
+      <div className="container flex flex-col items-center justify-center gap-24 py-32">
         {/* Results count + Sort toggles */}
-        <div className="w-full flex xl:flex-row flex-col gap-16">
-          <div className="w-full flex flex-row items-end gap-32 ">
+        <div className="flex w-full flex-col gap-16 xl:flex-row">
+          <div className="flex w-full flex-row items-end gap-32">
             <Button
               appearance="outline"
               variant="neutral"
               hasIcon
               {...(filtersOpen
                 ? {
-                  leadingIcon: "agora-line-chevron-left",
-                  leadingIconHover: "agora-solid-chevron-left",
-                }
+                    leadingIcon: "agora-line-chevron-left",
+                    leadingIconHover: "agora-solid-chevron-left",
+                  }
                 : {
-                  trailingIcon: "agora-line-chevron-right",
-                  trailingIconHover: "agora-solid-chevron-right",
-                })}
+                    trailingIcon: "agora-line-chevron-right",
+                    trailingIconHover: "agora-solid-chevron-right",
+                  })}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
               {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
@@ -107,7 +106,7 @@ export default function ReusesClient({
               {total.toLocaleString("pt-PT")} Resultados
             </span>
           </div>
-          <div className="w-full flex items-center xl:justify-end ">
+          <div className="flex w-full items-center xl:justify-end">
             <ToggleGroup
               multiple={false}
               value={sortDefault}
@@ -126,13 +125,11 @@ export default function ReusesClient({
             </ToggleGroup>
           </div>
         </div>
-        <div className="w-full divider-neutral-200 mb-24" />
-        <div
-          className={twJoin("grid gap-32 w-full", filtersOpen ? "grid-cols-12" : "")}
-        >
+        <div className="divider-neutral-200 mb-24 w-full" />
+        <div className={twJoin("grid w-full gap-32", filtersOpen ? "grid-cols-12" : "")}>
           {/* Sidebar */}
           {filtersOpen && (
-            <div className="col-span-4 ">
+            <div className="col-span-4">
               <ReusesFilters filterCounts={filterCounts} allOrganizations={allOrganizations} />
             </div>
           )}
@@ -141,7 +138,10 @@ export default function ReusesClient({
           <div className={filtersOpen ? "col-span-8" : "col-span-full"}>
             <div>
               <div
-                className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1" : "grid-cols-1  lg:grid-cols-2")}
+                className={twJoin(
+                  "grid gap-32",
+                  filtersOpen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+                )}
               >
                 {listData.error ? (
                   <ListingErrorBanner
@@ -155,7 +155,7 @@ export default function ReusesClient({
                       <div key={reuse.id} className="h-full">
                         <CardLinks
                           onClick={() => router.push(`/reuses/${reuse.slug}`)}
-                          className="!h-full [&_.card-links-container]:!h-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse cursor-pointer text-neutral-900"
+                          className="!h-full cursor-pointer text-neutral-900 [&_.card-links-container]:!h-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse"
                           variant="transparent"
                           image={{
                             src: reuse.image_thumbnail || reuse.image || "/laptop.png",
@@ -249,7 +249,7 @@ export default function ReusesClient({
           </div>
         </div>
         {/* Pagination */}
-        <div className="w-1/2 flex justify-center">
+        <div className="flex w-1/2 justify-center">
           <Pagination
             currentPage={activePage}
             totalItems={total}

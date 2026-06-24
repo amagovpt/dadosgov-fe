@@ -14,7 +14,7 @@ export default function PublicationsPage() {
         backgroundImageUrl="/Banner/hero-bg.png"
         breadcrumbItems={[
           { label: "Início", url: "/" },
-          { label: "Publicações", url: "/publications" },
+          { label: "Publicações", url: "/publicacoes" },
         ]}
       />
 

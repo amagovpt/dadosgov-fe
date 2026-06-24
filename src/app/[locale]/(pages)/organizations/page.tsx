@@ -11,7 +11,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
     title: 'Organizações - dados.gov.pt',
-    description: 'Explore as organizações que publicam dados abertos em Portugal.',
+    description: 'Conheça as organizações que partilham dados abertos connosco e explore os recursos que disponibilizam.',
 };
 
 export default async function OrganizationsPage({

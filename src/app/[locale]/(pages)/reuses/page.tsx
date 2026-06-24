@@ -11,7 +11,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
     title: 'Reutilizações - dados.gov.pt',
-    description: 'Descubra como os dados abertos estão a ser utilizados para criar valor em Portugal. Explore as reutilizações da comunidade.',
+    description: 'Conheça estudos, visualizações e aplicações úteis para a sociedade, que reutilizam dados públicos disponíveis neste portal.',
 };
 
 export default async function ReusesPage({

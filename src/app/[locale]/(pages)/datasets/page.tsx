@@ -1,6 +1,6 @@
 import { fetchDatasetsListing } from "@/service/api/datasets";
 import { DatasetFilters } from "@/service/types/dataset";
-import DatasetsClient from '@/components/datasets/DatasetsClient';
+import DatasetsClient from "@/components/datasets/DatasetsClient";
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 
 // The page is already dynamic (it reads searchParams); we intentionally do NOT
@@ -28,13 +28,13 @@ export default async function Page({
   if (resolved?.organization) filters.organization = resolved.organization;
   if (resolved?.badge) filters.badge = resolved.badge;
   if (resolved?.sort) filters.sort = String(resolved.sort);
-  if (resolved?.featured) filters.featured = resolved.featured === 'true';
+  if (resolved?.featured) filters.featured = resolved.featured === "true";
   if (resolved?.modified_since) filters.modified_since = String(resolved.modified_since);
 
   // Relevance sort: when no search query, fall back to default (most recent first)
   const apiFilters = { ...filters };
   if (!apiFilters.sort && !apiFilters.q) {
-    apiFilters.sort = '-created';
+    apiFilters.sort = "-created";
   }
 
   // LEDG-1836: one aggregated call replaces the prior Promise.all of 14 fetches

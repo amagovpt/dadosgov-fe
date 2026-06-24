@@ -647,7 +647,7 @@ export const Header = () => {
                     iconHover="agora-solid-mega-phone"
                     title="Publicações"
                     description="Novidades e eventos"
-                    href="/publications"
+                    href="/publicacoes"
                     onLinkClick={handleLinkClick}
                   />
                 </div>
