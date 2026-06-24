@@ -139,7 +139,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
         backgroundImageUrl="/Banner/hero-bg.png"
         breadcrumbItems={[
           { label: "Início", url: "/" },
-          { label: "Últimas novidades", url: "/posts" },
+          { label: "Notícias", url: "/noticias" },
         ]}
       >
         <InputSearchBar
@@ -243,7 +243,7 @@ export default function ArticleClient({ currentPage }: { currentPage: number }) 
             currentPage={currentPage}
             totalItems={total}
             pageSize={PAGE_SIZE}
-            baseUrl="/posts"
+            baseUrl="/noticias"
           />
         </div>
       </div>

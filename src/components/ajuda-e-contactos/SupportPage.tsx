@@ -519,7 +519,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/faqs/terms",
+                                            "/termos-de-utilizacao",
                                             "_blank"
                                           )
                                         }
@@ -637,7 +637,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/support#ajuda",
+                                            "/ajuda-e-contactos#ajuda",
                                             "_blank"
                                           )
                                         }
@@ -667,7 +667,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/support",
+                                            "/ajuda-e-contactos",
                                             "_blank"
                                           )
                                         }
@@ -693,7 +693,7 @@ const SupportPageContent = () => {
                                         }}
                                         onClick={() =>
                                           window.open(
-                                            "/support",
+                                            "/ajuda-e-contactos",
                                             "_blank"
                                           )
                                         }
@@ -741,7 +741,7 @@ const SupportPageContent = () => {
                                           minWidth: "auto",
                                         }}
                                         onClick={() =>
-                                          window.open("/support", "_blank")
+                                          window.open("/ajuda-e-contactos", "_blank")
                                         }
                                       >
                                         formulário e orientação disponíveis na página de contato

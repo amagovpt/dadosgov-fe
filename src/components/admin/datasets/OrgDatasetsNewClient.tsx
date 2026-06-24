@@ -123,7 +123,7 @@ export default function OrgDatasetsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/support")}
+                  onClick={() => router.push("/ajuda-e-contactos")}
                 >
                   Contacte-nos
                 </Button>

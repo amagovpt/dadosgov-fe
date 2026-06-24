@@ -25,16 +25,16 @@ const linkColumns = [
   {
     title: "Portal",
     links: [
-      { href: "/posts", label: "Notícias" },
-      { href: "/como-usar-o-portal/sobre", label: "Sobre nós" },
-      { href: "/support", label: "Ajuda e contactos" },
-      { href: "/faqs/terms", label: "Termos de utilização" },
+      { href: "/noticias", label: "Notícias" },
+      { href: "/recursos/como-usar-o-portal/o-que-e-dados-gov-pt", label: "O que é dados.gov.pt" },
+      { href: "/ajuda-e-contactos", label: "Ajuda e contactos" },
+      { href: "/termos-de-utilizacao", label: "Termos de utilização" },
     ],
   },
   {
     title: "Desenvolvimento",
     links: [
-      { href: "/docapi", label: "API dos dados.gov.pt" },
+      { href: "/recursos/desenvolvimento/referencia-api", label: "Referência API" },
       {
         href: "https://github.com/amagovpt/udata-pt",
         label: `Mecanismo de código aberto : udata (${process.env.NEXT_PUBLIC_UDATA_VERSION && process.env.NEXT_PUBLIC_UDATA_VERSION !== "unknown" ? process.env.NEXT_PUBLIC_UDATA_VERSION : "10.4.3"})`,

@@ -815,7 +815,7 @@ export default function HarvestersNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/support")}
+                  onClick={() => router.push("/ajuda-e-contactos")}
                 >
                   Solicitar validação do harvester
                 </Button>

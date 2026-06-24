@@ -10,7 +10,7 @@ export default function TermsClient({ initialContent }: { initialContent?: strin
       initialContent={initialContent}
       breadcrumbItems={[
         { label: "Início", url: "/" },
-        { label: "Termos de utilização", url: "/faqs/terms" },
+        { label: "Termos de utilização", url: "/termos-de-utilizacao" },
       ]}
     />
   );

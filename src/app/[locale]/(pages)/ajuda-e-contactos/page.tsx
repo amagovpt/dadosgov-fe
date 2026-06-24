@@ -1,4 +1,4 @@
-import SupportPage from '@/components/support/SupportPage';
+import SupportPage from '@/components/ajuda-e-contactos/SupportPage';
 
 export default function SupportPageWrapper() {
     return <SupportPage />;
