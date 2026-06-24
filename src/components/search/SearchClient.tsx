@@ -310,14 +310,14 @@ export default function SearchClient() {
       current.append(paramName, value);
     }
     current.set("page", "1");
-    router.push(`/search?${current.toString()}`);
+    router.push(`/pesquisa?${current.toString()}`);
   };
 
   const handleClearAdvancedFilter = (paramName: string) => {
     const current = new URLSearchParams(searchParams.toString());
     current.delete(paramName);
     current.set("page", "1");
-    router.push(`/search?${current.toString()}`);
+    router.push(`/pesquisa?${current.toString()}`);
   };
 
   const handleFilterSearchChange = (groupName: string, value: string) => {
@@ -380,7 +380,7 @@ export default function SearchClient() {
       const t = params.type || activeTab;
       const p = params.page || 1;
       const q = params.q ?? query;
-      return `/search?q=${encodeURIComponent(q)}&type=${t}&page=${p}`;
+      return `/pesquisa?q=${encodeURIComponent(q)}&type=${t}&page=${p}`;
     },
     [query, activeTab]
   );
@@ -414,7 +414,7 @@ export default function SearchClient() {
           backgroundImageUrl="/Banner/hero-bg.png"
           breadcrumbItems={[
             { label: "Início", url: "/" },
-            { label: "Pesquisa", url: "/search" },
+            { label: "Pesquisa", url: "/pesquisa" },
           ]}
         >
           <InputSearchBar
@@ -743,7 +743,7 @@ export default function SearchClient() {
                         currentPage={currentPage}
                         totalItems={totalForActiveTab}
                         pageSize={PAGE_SIZE}
-                        baseUrl={`/search?q=${encodeURIComponent(query)}&type=${activeTab}`}
+                        baseUrl={`/pesquisa?q=${encodeURIComponent(query)}&type=${activeTab}`}
                       />
                     </div>
                   )}
