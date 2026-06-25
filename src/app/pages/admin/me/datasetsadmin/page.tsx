@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DatasetsAdminClient from "@/components/admin/datasetsadmin/DatasetsAdminClient";
+import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
 
 export default function DatasetsAdminPage() {
   const [currentStep, setCurrentStep] = useState(0);

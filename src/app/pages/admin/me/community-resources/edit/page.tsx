@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CommunityResourceEditClient from "@/components/admin/community-resources/CommunityResourceEditClient";
+import CommunityResourceEditClient from "@/components/admin/community-resources/views/CommunityResourceEditClient";
 
 export const metadata: Metadata = {
   title: "Editar recurso comunitário - Admin - dados.gov.pt",

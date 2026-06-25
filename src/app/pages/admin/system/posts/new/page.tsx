@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import PostsNewClient from "@/components/admin/posts/PostsNewClient";
+import PostsNewClient from "@/components/admin/posts/views/PostsNewClient";
 
 export const metadata: Metadata = {
   title: "Criar artigo - Admin - dados.gov.pt",

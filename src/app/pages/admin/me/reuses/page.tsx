@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ReusesClient from "@/components/admin/reuses/ReusesClient";
+import ReusesClient from "@/components/admin/reuses/views/ReusesClient";
 
 export const metadata: Metadata = {
   title: "Reutilizações - Admin - dados.gov.pt",

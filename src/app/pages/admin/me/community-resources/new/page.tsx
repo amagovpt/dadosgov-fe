@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CommunityResourceNewClient from "@/components/admin/community-resources/CommunityResourceNewClient";
+import CommunityResourceNewClient from "@/components/admin/community-resources/views/CommunityResourceNewClient";
 
 export const metadata: Metadata = {
   title: "Novo recurso comunitário - Admin - dados.gov.pt",

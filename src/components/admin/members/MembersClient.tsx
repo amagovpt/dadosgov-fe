@@ -54,8 +54,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
   const pendingUserIdsRef = useRef<string[]>([]);
   const selectedUserIdRef = useRef("");
   const [selectedRole, setSelectedRole] = useState("editor");
-  const canSubmitRef = useRef(false);
-  const [, forceUpdate] = useState(0);
+  const [canSubmit, setCanSubmit] = useState(false);
   const [alreadyMember, setAlreadyMember] = useState(false);
   const [hasPendingInvite, setHasPendingInvite] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
@@ -85,13 +84,22 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
 
   useEffect(() => {
     const query = searchQuery.trim();
+    let frameId: number | null = null;
+
     if (query.length < 2) {
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setSearchResults([]);
+        setIsSearching(false);
+      });
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
 
-    setIsSearching(true);
+    frameId = requestAnimationFrame(() => {
+      setIsSearching(true);
+    });
+
     const timer = setTimeout(async () => {
       try {
         const response = await suggestUsers(query, 50);
@@ -103,7 +111,10 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
       }
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      if (frameId !== null) cancelAnimationFrame(frameId);
+      clearTimeout(timer);
+    };
   }, [searchQuery]);
 
   const userDropdownChildren = useMemo(() => {
@@ -121,7 +132,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
   }, [initialSuggestions, searchResults, searchQuery]);
 
   const handleAdd = async () => {
-    if (!canSubmitRef.current) return;
+    if (!canSubmit) return;
 
     setAddError(null);
     try {
@@ -138,10 +149,9 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
   const onUserChangeCallback = useCallback((userId: string) => {
     const isMember = userId ? memberIdsRef.current.includes(userId) : false;
     const isPending = userId ? pendingUserIdsRef.current.includes(userId) : false;
-    canSubmitRef.current = !!userId && !isMember && !isPending;
+    setCanSubmit(!!userId && !isMember && !isPending);
     setAlreadyMember(isMember);
     setHasPendingInvite(isPending);
-    forceUpdate((value) => value + 1);
   }, []);
 
   return (
@@ -206,7 +216,7 @@ function AddMemberPopupContent({ orgId, onMemberAdded, openKey }: AddMemberPopup
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
         </Button>
-        <Button variant="primary" onClick={handleAdd} disabled={!canSubmitRef.current}>
+        <Button variant="primary" onClick={handleAdd} disabled={!canSubmit}>
           Adicionar
         </Button>
       </div>
@@ -281,7 +291,14 @@ function EditRolePopupContent({ orgId, member, onRoleUpdated, openKey }: EditRol
   };
 
   return (
-    <div className="flex flex-col gap-24">
+    <form
+      className="flex flex-col gap-24"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleUpdate();
+      }}
+    >
       <p className="text-neutral-900">
         Alterar o papel de{" "}
         <strong>
@@ -312,20 +329,20 @@ function EditRolePopupContent({ orgId, member, onRoleUpdated, openKey }: EditRol
       </div>
 
       <div className="flex gap-16">
-        <Button appearance="outline" variant="primary" onClick={() => hide()}>
+        <Button type="button" appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
         </Button>
         <Button
+          type="submit"
           variant="primary"
           hasIcon
           trailingIcon="agora-line-check-circle"
           trailingIconHover="agora-solid-check-circle"
-          onClick={handleUpdate}
         >
           Guardar
         </Button>
       </div>
-    </div>
+    </form>
   );
 }
 
@@ -354,7 +371,14 @@ function RefuseMembershipPopupContent({ orgId, request, onRefused }: RefuseMembe
   };
 
   return (
-    <div className="flex flex-col gap-24">
+    <form
+      className="flex flex-col gap-24"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleRefuse();
+      }}
+    >
       <p className="text-neutral-900">
         Recusar o pedido de adesão de{" "}
         <strong>
@@ -373,14 +397,14 @@ function RefuseMembershipPopupContent({ orgId, request, onRefused }: RefuseMembe
       />
 
       <div className="flex gap-16">
-        <Button appearance="outline" variant="primary" onClick={() => hide()}>
+        <Button type="button" appearance="outline" variant="primary" onClick={() => hide()}>
           Cancelar
         </Button>
-        <Button variant="danger" onClick={handleRefuse} disabled={isSubmitting}>
+        <Button type="submit" variant="danger" disabled={isSubmitting}>
           {isSubmitting ? "A recusar..." : "Recusar"}
         </Button>
       </div>
-    </div>
+    </form>
   );
 }
 
@@ -399,7 +423,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const [viewedOrg, setViewedOrg] = useState<Organization | null>(null);
   const [members, setMembers] = useState<OrganizationMember[]>([]);
   const [pendingRequests, setPendingRequests] = useState<MembershipRequest[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(false);
   const [requestAction, setRequestAction] = useState<string | null>(null);
   const [requestError, setRequestError] = useState<string | null>(null);
   const {
@@ -440,12 +464,20 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   }, [resolvedOrgId]);
 
   useEffect(() => {
-    if (!resolvedOrgId) {
-      setIsLoading(false);
-      return;
-    }
+    if (!resolvedOrgId) return;
 
-    void loadMembers();
+    let isCancelled = false;
+
+    const loadCurrentMembers = async () => {
+      if (isCancelled) return;
+      await loadMembers();
+    };
+
+    void loadCurrentMembers();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [resolvedOrgId, loadMembers]);
 
   const handleAcceptRequest = async (request: MembershipRequest) => {
@@ -679,4 +711,3 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     </AdminLayout>
   );
 }
-
