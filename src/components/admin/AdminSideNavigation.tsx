@@ -137,18 +137,32 @@ export function AdminSideNavigation() {
 
   // Fetch org from URL if not already in user's org list
   useEffect(() => {
+    let frameId: number | null = null;
+
     if (!urlOrgId) {
-      setUrlOrg(null);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setUrlOrg(null);
+      });
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
     const alreadyLoaded = organizations.some((o) => o.id === urlOrgId || o.slug === urlOrgId);
     if (alreadyLoaded) {
-      setUrlOrg(null);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setUrlOrg(null);
+      });
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
     fetchOrganization(urlOrgId)
       .then((org) => setUrlOrg(org))
       .catch(() => setUrlOrg(null));
+
+    return () => {
+      if (frameId !== null) cancelAnimationFrame(frameId);
+    };
   }, [urlOrgId, organizations]);
 
   const orgChildren = (orgBase: string): NavChild[] => [

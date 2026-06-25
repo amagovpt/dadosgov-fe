@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import OrgProfileClient from "@/components/admin/profile/OrgProfileClient";
+import OrgProfileClient from "@/components/admin/profile/organization/OrgProfileClient";
 
 export const metadata: Metadata = {
   title: "Perfil - Organização - Admin - dados.gov.pt",

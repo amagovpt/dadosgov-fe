@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ApiNewClient from "@/components/admin/dataservices/ApiNewClient";
+import ApiNewClient from "@/components/admin/dataservices/views/ApiNewClient";
 
 export const metadata: Metadata = {
   title: "Descreva a sua API - Admin - dados.gov.pt",

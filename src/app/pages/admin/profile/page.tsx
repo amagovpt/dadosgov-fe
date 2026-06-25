@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ProfileClient from "@/components/admin/profile/ProfileClient";
+import ProfileClient from "@/components/admin/profile/user/ProfileClient";
 
 export const metadata: Metadata = {
   title: "Perfil - Admin - dados.gov.pt",

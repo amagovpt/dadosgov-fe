@@ -20,6 +20,7 @@ import {
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { validateFileExtensions } from "@/lib/files/validateFileExtensions";
 import { ResourceType } from "@/service/types/catalog";
 import TextLink from "@/components/Primitives/TextLink";
 
@@ -119,18 +120,21 @@ function ResourceEditPendingPopupContent({
   // The set-state-in-effect lint rule warns about cascading renders, but
   // the alternative (waiting for a remount that never happens) is the bug
   // we are fixing — this prop-sync is the smaller of the two evils.
-  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
   useEffect(() => {
     const t = initialMeta.title || name;
-    setTitle(!isUrl && fileExt && t === name ? baseName : t);
-    setDescription(initialMeta.description || "");
-    setUrl(isUrl ? name : "");
-    setFilesize(initialMeta.filesize ?? (file ? String(file.size) : ""));
-    setFormat(initialMeta.format ?? (fileExt ? fileExt.slice(1).toLowerCase() : ""));
-    setMime(initialMeta.mime ?? (file?.type || ""));
-    setUrlError(null);
-    resourceTypeRef.current = defaultType;
-  }, [name, isUrl, initialMeta, file]);
+    const frameId = requestAnimationFrame(() => {
+      setTitle(!isUrl && fileExt && t === name ? baseName : t);
+      setDescription(initialMeta.description || "");
+      setUrl(isUrl ? name : "");
+      setFilesize(initialMeta.filesize ?? (file ? String(file.size) : ""));
+      setFormat(initialMeta.format ?? (fileExt ? fileExt.slice(1).toLowerCase() : ""));
+      setMime(initialMeta.mime ?? (file?.type || ""));
+      setUrlError(null);
+      resourceTypeRef.current = defaultType;
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [name, isUrl, initialMeta, file, fileExt, baseName, defaultType]);
 
   const isValidHttpsUrl = (value: string): boolean => {
     try {
@@ -675,7 +679,13 @@ export default function FileUploadModal({
   const [urlError, setUrlError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (hasSelection) setUrlError(null);
+    if (!hasSelection) return;
+
+    const frameId = requestAnimationFrame(() => {
+      setUrlError(null);
+    });
+
+    return () => cancelAnimationFrame(frameId);
   }, [hasSelection]);
   const [extensionErrors, setExtensionErrors] = useState<string[]>([]);
   const [securityErrors, setSecurityErrors] = useState<string[]>([]);
@@ -701,22 +711,6 @@ export default function FileUploadModal({
     setLocalUrl("");
     localUrlRef.current = "";
     setUrlError(null);
-  };
-
-  const getExtension = (filename: string) =>
-    filename.includes(".") ? filename.split(".").pop()!.toLowerCase() : "";
-
-  const validateFiles = (files: File[]): { valid: File[]; invalid: string[] } => {
-    if (!allowedExtensions || allowedExtensions.length === 0) return { valid: files, invalid: [] };
-    const allowed = allowedExtensions.map((e) => e.toLowerCase());
-    const valid: File[] = [];
-    const invalid: string[] = [];
-    for (const file of files) {
-      const ext = getExtension(file.name);
-      if (!ext || !allowed.includes(ext)) invalid.push(file.name);
-      else valid.push(file);
-    }
-    return { valid, invalid };
   };
 
   return (
@@ -793,7 +787,7 @@ export default function FileUploadModal({
           onChange={(e) => {
             const picked = Array.from((e.target as HTMLInputElement).files || []);
             if (picked.length === 0) return;
-            const { valid, invalid } = validateFiles(picked);
+            const { valid, invalid } = validateFileExtensions(picked, allowedExtensions);
             setExtensionErrors(invalid);
             setSecurityErrors([]);
             const existingNames = new Set(uploadedFiles.map((f) => f.name));

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ReusesEditClient from "@/components/admin/reuses/ReusesEditClient";
+import ReusesEditClient from "@/components/admin/reuses/views/ReusesEditClient";
 
 export const metadata: Metadata = {
   title: "Editar reutilização - Organização - Admin - dados.gov.pt",

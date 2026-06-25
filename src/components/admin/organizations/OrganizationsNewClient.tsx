@@ -1,34 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import {
-  Breadcrumb,
-  Button,
-  DropdownSection,
-  DropdownOption,
-  InputText,
-  InputTextArea,
-  InputSelect,
-  Icon,
-  StatusCard,
-} from "@ama-pt/agora-design-system";
-import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
+import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { StatusCard } from "@ama-pt/agora-design-system";
 import { suggestOrganizations, createOrganization, uploadOrgLogo } from "@/service/api/organizations";
 import type { OrganizationSuggestion } from "@/service/types/identity";
-import PublishDropdown from "@/components/admin/PublishDropdown";
-import AuxiliarList from "@/components/admin/AuxiliarList";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
-import { AdminStepper } from "../AdminStepper";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { AdminStepper } from "@/components/admin/AdminStepper";
+import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
+import { useFormErrors } from "@/hooks/forms/useFormErrors";
+import { normalizeApiError } from "@/service/utils/normalizeApiError";
+import OrganizationSelectionStep from "@/components/admin/organizations/OrganizationSelectionStep";
+import OrganizationDetailsStep from "@/components/admin/organizations/OrganizationDetailsStep";
+import OrganizationSuccessStep from "@/components/admin/organizations/OrganizationSuccessStep";
+import { getOrganizationAuxiliaryItems } from "@/components/admin/organizations/organizationAuxiliaryContent";
 
 export default function OrganizationsNewClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
-  const totalSegments = 12;
-  const filledSegments = Math.round((currentStep / totalSteps) * totalSegments);
 
   const [orgName, setOrgName] = useState("");
   const [orgAcronym, setOrgAcronym] = useState("");
@@ -37,10 +29,18 @@ export default function OrganizationsNewClient() {
   const [orgLogo, setOrgLogo] = useState<File | null>(null);
   const [orgLogoPreview, setOrgLogoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [orgLogoError, setOrgLogoError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [orgSuggestions, setOrgSuggestions] = useState<OrganizationSuggestion[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
+  const {
+    hasError,
+    getErrorMessage,
+    setErrors,
+    clearError,
+    resetErrors,
+    focusFirstError,
+  } = useFormErrors<"orgName" | "orgDescription">();
 
   useEffect(() => {
     suggestOrganizations("", 20).then(setOrgSuggestions);
@@ -50,47 +50,66 @@ export default function OrganizationsNewClient() {
     const timer = setTimeout(() => {
       suggestOrganizations(orgSearchQuery, 20).then(setOrgSuggestions);
     }, 300);
+
     return () => clearTimeout(timer);
   }, [orgSearchQuery]);
 
-  const clearError = (field: string) => {
-    if (formErrors[field]) {
-      setFormErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  };
+  async function handleCreateOrg() {
+    const errors: Partial<Record<"orgName" | "orgDescription", string>> = {};
+    if (!orgName.trim()) errors.orgName = "Indique o nome da organização.";
+    if (!orgDescription.trim()) errors.orgDescription = "Descreva a organização.";
 
-  const handleCreateOrg = async () => {
-    const errors: Record<string, boolean> = {};
-    if (!orgName.trim()) errors.orgName = true;
-    if (!orgDescription.trim()) errors.orgDescription = true;
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
+      setErrors(errors);
+      focusFirstError();
       return;
     }
-    setFormErrors({});
+
+    resetErrors();
+    setApiError(null);
     setIsSubmitting(true);
+
     try {
-      const org = await createOrganization({
+      const organization = await createOrganization({
         name: orgName.trim(),
         acronym: orgAcronym.trim() || undefined,
         description: orgDescription.trim(),
         url: orgWebsite.trim() || undefined,
       });
+
       if (orgLogo) {
-        await uploadOrgLogo(org.id, orgLogo);
+        await uploadOrgLogo(organization.id, orgLogo);
       }
-      router.push(`/pages/organizations/${org.slug}`);
+
+      router.push(`/pages/organizations/${organization.slug}`);
     } catch (error) {
-      const err = error as { status?: number; data?: unknown };
-      console.error("Erro ao criar organização:", err.status, JSON.stringify(err.data));
+      setApiError(normalizeApiError(error, "Erro ao criar a organização.").message);
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
+
+  function handleOrganizationLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] || null;
+
+    if (file && file.size > 4194304) {
+      setOrgLogoError("O ficheiro excede o tamanho máximo de 4 MB.");
+      setOrgLogo(null);
+      setOrgLogoPreview(null);
+      return;
+    }
+
+    setOrgLogoError(null);
+    setOrgLogo(file);
+    setOrgLogoPreview(file ? URL.createObjectURL(file) : null);
+  }
+
+  function handleSelectSuggestedOrganization(organizationId: string) {
+    const organization = orgSuggestions.find((item) => item.id === organizationId);
+    if (organization) {
+      router.push(`/pages/organizations/${organization.slug}`);
+    }
+  }
 
   const stepTitles: Record<number, string> = {
     1: "Crie ou integre uma organização em dados.gov.pt",
@@ -98,73 +117,23 @@ export default function OrganizationsNewClient() {
     3: "Finalize sua organização",
   };
 
-  const auxiliarItems = [
-    {
-      title: "Dar um nome à sua organização",
-      content: "Nome público da sua organização.",
-      hasError: !!formErrors.orgName,
-    },
-    {
-      title: "Adicionar uma sigla",
-      content: "A sigla da sua organização, se houver.",
-    },
-    /* {
-      title: "Por que fornecer um número SIRET?",
-      content: (
-        <>
-          <p>
-            Um número SIRET nos permitirá atribuir um tipo à sua organização
-            (agências governamentais, autoridades locais, empresas, etc.) e
-            facilitará sua certificação. O número deve ter 14 dígitos.
-          </p>
-          <p className="mt-2">
-            Observe que todas as agências governamentais possuem um número SIRET.
-          </p>
-          <p className="mt-2">
-            Pode encontrar o seu número SIRET no{" "}
-            <TextLink href="#">
-              Diretório Comercial.
-            </TextLink>
-          </p>
-        </>
-      ),
-    }, */
-    {
-      title: "Descrever a organização",
-      content:
-        "Descreva de forma clara a atividade e missão da sua organização. Inclua também informações de contacto essenciais, como e‑mail, morada ou redes sociais. Estas informações ajudam os utilizadores a compreender o papel da sua organização e a contactá‑la facilmente, sempre que necessário.",
-      hasError: !!formErrors.orgDescription,
-    },
-    {
-      title: "Adicionar o site",
-      content: "Se a sua organização possui um site, inclua o endereço URL.",
-    },
-    {
-      title: "Escolher o logotipo",
-      content:
-        'Se a sua organização tiver um logótipo ou imagem de perfil, adicione-o. Para carregar o ficheiro, clique em "Selecione ou arraste o ficheiro" São aceites os seguintes formatos de imagem: JPG, JPEG e PNG.',
-    },
-  ];
-
-  const orgOptions = orgSuggestions.map((org) => (
-    <DropdownOption key={org.id} value={org.id}>
-      {org.name}
-    </DropdownOption>
-  ));
+  const auxiliaryItems = getOrganizationAuxiliaryItems({
+    hasNameError: hasError("orgName"),
+    hasDescriptionError: hasError("orgDescription"),
+  });
 
   return (
-    <AdminLayout breadcrumbItems={[
-      { label: "Administração", url: "/pages/admin" },
-      { label: "Organizações", url: "/pages/admin/system/organizations" },
-      {
-        label: "Formulário de registo de uma organização",
-        url: "/pages/admin/organizations/new",
-      },
-    ]}
+    <AdminLayout
+      breadcrumbItems={[
+        { label: "Administração", url: "/pages/admin" },
+        { label: "Organizações", url: "/pages/admin/system/organizations" },
+        {
+          label: "Formulário de registo de uma organização",
+          url: "/pages/admin/organizations/new",
+        },
+      ]}
       title="Formulário de registo de uma organização"
     >
-
-      {/* Step indicator */}
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
@@ -173,257 +142,65 @@ export default function OrganizationsNewClient() {
         stepTitle={stepTitles[currentStep] || ""}
       />
 
-      {/* Main content area */}
       <div className="admin-page__body">
         <div className="admin-page__form-area">
-          {/* Step 1: Ingressar ou criar */}
           {currentStep === 1 && (
-            <div className="admin-page__form">
-              <StatusCard
-                variant="informative"
-                showIcon
-                description={
-                  <>
-                    <strong>Inscreva-se numa organização</strong>
-                    <br />
-                    Uma organização é uma entidade na qual os utilizadores podem colaborar.
-                    Conjuntos de dados publicados dentro de uma organização podem ser editados pelos
-                    seus membros.
-                  </>
-                }
-              />
-
-              <div>
-                <InputSelect
-                  label="Organização"
-                  placeholder="Pesquisar uma organização em dados.gov.pt..."
-                  id="search-organization"
-                  searchable
-                  searchInputPlaceholder="Escreva para pesquisar..."
-                  searchNoResultsText="Nenhum resultado encontrado"
-                  onSearchInputChange={(value: string) => setOrgSearchQuery(value)}
-                  onChange={(options: { value?: string }[]) => {
-                    const selectedId = options?.[0]?.value;
-                    if (selectedId) {
-                      const org = orgSuggestions.find((o) => o.id === selectedId);
-                      if (org) {
-                        router.push(`/pages/organizations/${org.slug}`);
-                      }
-                    }
-                  }}
-                >
-                  <DropdownSection name="organizations">{orgOptions}</DropdownSection>
-                </InputSelect>
-
-                <div className="admin-page__divider-or">
-                  <span className="admin-page__divider-or-text">ou</span>
-                </div>
-
-                <div className="mt-16 flex justify-center">
-                  <Button
-                    variant="primary"
-                    onClick={() => router.push("/pages/admin/organizations/new?step=2")}
-                  >
-                    Criar uma organização
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <OrganizationSelectionStep
+              orgSuggestions={orgSuggestions}
+              onSearchChange={setOrgSearchQuery}
+              onSelectOrganization={handleSelectSuggestedOrganization}
+              onCreateOrganization={() => router.push("/pages/admin/organizations/new?step=2")}
+            />
           )}
 
-          {/* Step 2: Descreva a sua organização */}
           {currentStep === 2 && (
             <>
-              <StatusCard
-                variant="informative"
-                showIcon
-                description={
-                  <>
-                    <strong>O que é uma organização?</strong>
-                    <br />
-                    Uma organização é uma entidade na qual muitos utilizadores podem colaborar.
-                    Conjuntos de dados publicados sob a égide da organização podem ser editados
-                    pelos seus membros.
-                  </>
-                }
+              {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
+              <OrganizationDetailsStep
+                orgName={orgName}
+                orgAcronym={orgAcronym}
+                orgDescription={orgDescription}
+                orgWebsite={orgWebsite}
+                orgLogoError={orgLogoError}
+                orgLogoPreview={orgLogoPreview}
+                isSubmitting={isSubmitting}
+                hasNameError={hasError("orgName")}
+                hasDescriptionError={hasError("orgDescription")}
+                nameErrorMessage={getErrorMessage("orgName")}
+                descriptionErrorMessage={getErrorMessage("orgDescription")}
+                onNameChange={(event) => {
+                  setOrgName(event.target.value);
+                  if (event.target.value.trim()) {
+                    clearError("orgName");
+                  }
+                }}
+                onAcronymChange={(event) => setOrgAcronym(event.target.value)}
+                onDescriptionChange={(event) => {
+                  setOrgDescription(event.target.value);
+                  if (event.target.value.trim()) {
+                    clearError("orgDescription");
+                  }
+                }}
+                onWebsiteChange={(event) => setOrgWebsite(event.target.value)}
+                onLogoChange={handleOrganizationLogoChange}
+                onLogoSecurityError={() => setOrgLogoError(POISONED_FILE_WARNING)}
+                onPrevious={() => router.push("/pages/admin/organizations/new?step=1")}
+                onSubmit={() => {
+                  void handleCreateOrg();
+                }}
               />
-
-              <form className="admin-page__form">
-                <p className="pt-32 text-base leading-7 text-neutral-900">
-                  Os campos marcados com um asterisco ( * ) são obrigatórios.
-                </p>
-
-                <h2 className="admin-page__section-title">Descrição</h2>
-
-                <div className="admin-page__fields-group">
-                  <InputText
-                    label="Nome *"
-                    placeholder="Insira o nome aqui"
-                    id="org-name"
-                    value={orgName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setOrgName(e.target.value);
-                      if (e.target.value.trim()) clearError("orgName");
-                    }}
-                    hasError={!!formErrors.orgName}
-                    hasFeedback={!!formErrors.orgName}
-                    feedbackState="danger"
-                    errorFeedbackText="Campo obrigatório"
-                  />
-
-                  <InputText
-                    label="Sigla"
-                    placeholder="Insira a sigla aqui"
-                    id="org-acronym"
-                    value={orgAcronym}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setOrgAcronym(e.target.value)
-                    }
-                  />
-
-                  <InputTextArea
-                    label="Descrição *"
-                    placeholder="Insira a descrição aqui"
-                    id="org-description"
-                    rows={6}
-                    value={orgDescription}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                      setOrgDescription(e.target.value);
-                      if (e.target.value.trim()) clearError("orgDescription");
-                    }}
-                    hasError={!!formErrors.orgDescription}
-                    hasFeedback={!!formErrors.orgDescription}
-                    feedbackState="danger"
-                    errorFeedbackText="Campo obrigatório"
-                  />
-
-                  <InputText
-                    label="Website"
-                    placeholder="Insira o URL aqui"
-                    id="org-website"
-                    value={orgWebsite}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setOrgWebsite(e.target.value)
-                    }
-                  />
-                </div>
-
-                <h2 className="admin-page__section-title">Logotipo</h2>
-
-                <div className="admin-page__fields-group [&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
-                  <DragAndDropUploader
-                    label="Ficheiro"
-                    dragAndDropLabel="Arraste e largue o ficheiro aqui"
-                    inputLabel="Selecione ou arraste o ficheiro"
-                    selectedFilesLabel="ficheiro selecionado"
-                    removeFileButtonLabel="Remover ficheiro"
-                    replaceFileButtonLabel="Substituir ficheiro"
-                    extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
-                    accept=".jpg,.jpeg,.png"
-                    maxSize={4194304}
-                    maxCount={1}
-                    maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 4 MB."
-                    forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
-                    hasError={!!orgLogoError}
-                    hasFeedback={!!orgLogoError}
-                    feedbackState="danger"
-                    feedbackText={orgLogoError ?? undefined}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const file = e.target.files?.[0] || null;
-                      if (file && file.size > 4194304) {
-                        setOrgLogoError("O ficheiro excede o tamanho máximo de 4 MB.");
-                        setOrgLogo(null);
-                        setOrgLogoPreview(null);
-                        return;
-                      }
-                      setOrgLogoError(null);
-                      setOrgLogo(file);
-                      if (file) {
-                        const url = URL.createObjectURL(file);
-                        setOrgLogoPreview(url);
-                      } else {
-                        setOrgLogoPreview(null);
-                      }
-                    }}
-                    onSecurityError={() => setOrgLogoError(POISONED_FILE_WARNING)}
-                  />
-                  {orgLogoPreview && (
-                    <div className="mt-12">
-                      <p className="text-sm mb-8 text-neutral-600">Pré-visualização:</p>
-                      <img
-                        src={orgLogoPreview}
-                        alt="Pré-visualização do logotipo"
-                        className="max-h-[120px] max-w-[240px] rounded-8 border border-neutral-200 object-contain p-8"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="admin-page__actions">
-                  <Button
-                    appearance="outline"
-                    variant="neutral"
-                    onClick={() => router.push("/pages/admin/organizations/new?step=1")}
-                  >
-                    Anterior
-                  </Button>
-                  <Button variant="primary" onClick={handleCreateOrg} disabled={isSubmitting}>
-                    Criar a organização
-                  </Button>
-                </div>
-              </form>
             </>
           )}
 
-          {/* Step 3: Finalizar */}
           {currentStep === 3 && (
-            <div className="admin-page__form">
-              <StatusCard
-                variant="success"
-                showIcon
-                description={
-                  <>
-                    <strong>A sua organização foi criada!</strong>
-                    <br />
-                    Agora pode gerir a sua organização.
-                  </>
-                }
-              />
-
-              <div className="admin-page__actions">
-                <Button
-                  appearance="outline"
-                  variant="neutral"
-                  onClick={() => router.push("/pages/admin/organizations/new?step=2")}
-                >
-                  Anterior
-                </Button>
-                <Button
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-check-circle"
-                  trailingIconHover="agora-solid-check-circle"
-                  onClick={() => router.push("/pages/admin/system/organizations")}
-                >
-                  Guardar
-                </Button>
-              </div>
-            </div>
+            <OrganizationSuccessStep
+              onPrevious={() => router.push("/pages/admin/organizations/new?step=2")}
+              onFinish={() => router.push("/pages/admin/system/organizations")}
+            />
           )}
         </div>
 
-        {/* Right: Auxiliar sidebar (only for step 2) */}
-        {currentStep === 2 && (
-          <aside className="admin-page__auxiliar">
-            <div className="admin-page__auxiliar-inner">
-              <div className="admin-page__auxiliar-header">
-                <Icon name="agora-line-question-mark" className="h-24 w-24" />
-                <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
-              </div>
-              <AuxiliarList items={auxiliarItems} />
-            </div>
-          </aside>
-        )}
+        {currentStep === 2 && <AdminAuxiliarySidebar items={auxiliaryItems} />}
       </div>
     </AdminLayout>
   );

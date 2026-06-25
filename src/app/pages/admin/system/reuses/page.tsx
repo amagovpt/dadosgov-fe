@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import SystemReusesClient from "@/components/admin/reuses/SystemReusesClient";
+import SystemReusesClient from "@/components/admin/reuses/views/SystemReusesClient";
 
 export const metadata: Metadata = {
   title: "Reutilizações - Sistema - Admin - dados.gov.pt",

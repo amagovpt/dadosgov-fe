@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import DataservicesClient from "@/components/admin/dataservices/DataservicesClient";
+import DataservicesClient from "@/components/admin/dataservices/views/DataservicesClient";
 
 export const metadata: Metadata = {
   title: "API - Admin - dados.gov.pt",

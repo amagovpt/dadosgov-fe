@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import DatasetsClient from "@/components/admin/datasets/DatasetsClient";
+import DatasetsClient from "@/components/admin/datasets/views/DatasetsClient";
 
 export const metadata: Metadata = {
   title: "Conjunto de dados - Admin - dados.gov.pt",
