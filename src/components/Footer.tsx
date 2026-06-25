@@ -11,6 +11,7 @@ import {
   LinksSectionRelatedLinksCopyright,
   LinksSectionSocialLinks,
 } from "@ama-pt/agora-design-system";
+import Image from "next/image";
 import Link from "next/link";
 
 const linkColumns = [
@@ -85,24 +86,35 @@ const FooterBottom = () => {
         <FinancingSectionContainer aria-label="Parceiros do portal">
           <FooterDisclaimer>Portal aberto de dados públicos portugueses</FooterDisclaimer>
           <FooterGenericLogo>
-            <img
+            <Image
               src="/Logos/NextGenerationEU.svg"
               alt="NextGenerationEU"
-              style={{ height: "24px", width: "auto", opacity: 0.5 }}
+              height={26}
+              width={97}
+              style={{ opacity: 0.5 }}
+              className="object-fill"
+
             />
           </FooterGenericLogo>
           <FooterGenericLogo>
-            <img
+            <Image
               src="/Logos/republica-portuguesa.svg"
               alt="República Portuguesa"
-              style={{ height: "24px", width: "auto", opacity: 0.5 }}
+              height={26}
+              width={82}
+              style={{ opacity: 0.5 }}
+              className="object-fill"
+
             />
           </FooterGenericLogo>
           <FooterGenericLogo>
-            <img
+            <Image
               src="/Logos/Logotipo_ARTE__Horizontal_branco_pt.svg"
               alt="ARTE"
-              style={{ height: "26px", width: "auto", opacity: 0.5 }}
+              height={26}
+              width={131}
+              style={{ opacity: 0.5 }}
+              className="object-cover"
             />
           </FooterGenericLogo>
         </FinancingSectionContainer>
