@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import type { HeaderNavigationData } from '@/service/types/header';
 
 const Header = dynamic(
   () => import('@/components/Header').then((mod) => ({ default: mod.Header })),
@@ -12,4 +13,4 @@ const Header = dynamic(
   }
 );
 
-export const HeaderWrapper = () => <Header />;
+export const HeaderWrapper = ({ data }: { data: HeaderNavigationData }) => <Header data={data} />;

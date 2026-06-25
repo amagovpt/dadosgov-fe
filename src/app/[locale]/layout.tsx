@@ -11,6 +11,8 @@ import NewAccountNotice from "@/components/login/NewAccountNotice";
 import { ApolloWrapper } from "@/providers/ApolloProvider";
 import { headers } from "next/headers";
 import { Suspense } from "react";
+import { getHeaderNavigation } from "@/service/commom/header";
+import type { HeaderNavigationData } from "@/service/types/header";
 
 const notoSans = Noto_Sans({
   variable: "--font-noto-sans",
@@ -50,17 +52,26 @@ export async function generateMetadata({
       type: "website",
       images: [`${siteUrl}/og-images/metadados_dadosgov.jpg`],
     },
-    other:{
+    other: {
       "google-site-verification": "D63gacp78VxL2YWR2JTOYCE25ZpsdIazq4IR4ojc57k",
     }
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  let headerNavigation: HeaderNavigationData;
+  try {
+    headerNavigation = await getHeaderNavigation("pt");
+  } catch (error) {
+    console.error("Error fetching header navigation:", error);
+    headerNavigation = {} as HeaderNavigationData;
+  }
+
   return (
     <html lang="pt" data-scroll-behavior="smooth">
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
@@ -69,7 +80,7 @@ export default function RootLayout({
             <PopupProviderWrapper>
               <ScrollTop />
               <div className="flex min-h-screen w-full flex-col">
-                <HeaderWrapper />
+                <HeaderWrapper data={headerNavigation} />
                 <Suspense fallback={null}>
                   <NewAccountNotice />
                 </Suspense>
