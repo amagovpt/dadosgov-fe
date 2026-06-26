@@ -42,15 +42,13 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const [reuse, setReuse] = useState<Reuse | null>(null);
 
-  const canEdit = Boolean(
-    user &&
-    (isAdmin ||
-      (reuse?.owner && reuse.owner.id === user.id) ||
-      (reuse?.organization && user.organizations?.some((org) => org.id === reuse.organization?.id)))
-  );
+  // Authorization is decided by the backend (the single source of truth).
+  // fetchReuse carries the user's session, so reuse.permissions reflects what
+  // this user may do — no need to re-derive owner/org/role rules on the client.
+  const canEdit = reuse?.permissions?.edit ?? false;
 
   const [isLoadingReuse, setIsLoadingReuse] = useState(true);
   const [fullDatasets, setFullDatasets] = useState<Dataset[]>([]);

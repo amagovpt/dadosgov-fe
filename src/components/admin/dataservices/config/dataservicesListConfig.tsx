@@ -3,6 +3,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { can } from "@/utils/permissions";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
@@ -88,9 +89,8 @@ export function createDataserviceColumns({
       viewAction: (api) => ({
         href: `/pages/dataservices/${api.slug}`,
       }),
-      editAction: (api) => ({
-        href: `/pages/admin/dataservices/edit?slug=${api.slug}`,
-      }),
+      editAction: (api) =>
+        can(api, "edit") ? { href: `/pages/admin/dataservices/edit?slug=${api.slug}` } : undefined,
     }),
   ];
 }

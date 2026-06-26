@@ -36,6 +36,7 @@ import ChecksumSection from "@/components/admin/community-resources/form-section
 import EditDescriptionSection from "@/components/admin/community-resources/form-sections/EditDescriptionSection";
 import EditSchemaSection from "@/components/admin/community-resources/form-sections/EditSchemaSection";
 import DangerZoneSection from "@/components/admin/community-resources/form-sections/DangerZoneSection";
+import { can } from "@/utils/permissions";
 import FormStatusMessages from "@/components/admin/community-resources/form-ui/FormStatusMessages";
 import CommunityResourceAuxiliarySidebar from "@/components/admin/community-resources/form-ui/CommunityResourceAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
@@ -475,7 +476,11 @@ export default function CommunityResourceEditClient() {
               }}
             />
 
-            <DangerZoneSection isSubmitting={isSubmitting} onDelete={handleDelete} />
+            <DangerZoneSection
+              isSubmitting={isSubmitting}
+              canDelete={can(resource, "delete")}
+              onDelete={handleDelete}
+            />
           </form>
         </div>
 
