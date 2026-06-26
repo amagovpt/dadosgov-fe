@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans, Noto_Sans_Mono } from "next/font/google";
 import "./globals.css";
 import { HeaderWrapper } from "@/components/HeaderWrapper";
-import { Footer } from "@/components/Footer";
+import Footer from "@/components/Footer";
 import { PopupProviderWrapper } from "@/components/PopupProviderWrapper";
 import { AuthProvider } from "@/context/AuthContext";
 import { siteConfig } from "@/config/site";
@@ -10,9 +10,14 @@ import ScrollTop from "@/components/ScrollTop";
 import NewAccountNotice from "@/components/login/NewAccountNotice";
 import { ApolloWrapper } from "@/providers/ApolloProvider";
 import { headers } from "next/headers";
-import { Suspense } from "react";
+import { ReactNode, Suspense } from "react";
 import { getHeaderNavigation } from "@/service/commom/header";
 import type { HeaderNavigationData } from "@/service/types/header";
+import { Footer as FooterType } from "@/service/types/header/footer";
+import { getFooter } from "@/service/commom/footer";
+import { i18nConfig } from "@/config/i18nConfig";
+import initTranslations from "../i18n";
+import TranslationsProvider from "@/providers/TranslationProvider";
 
 const notoSans = Noto_Sans({
   variable: "--font-noto-sans",
@@ -24,6 +29,8 @@ const notoSansMono = Noto_Sans_Mono({
   subsets: ["latin"],
 });
 
+const namespaces = ["common", "footer"];
+
 export async function generateMetadata({
   params,
 }: {
@@ -33,36 +40,48 @@ export async function generateMetadata({
   const host = (await headers()).get("host") || "localhost:3000";
   const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
   const siteUrl = `${protocol}://${host}`;
+  const { t } = await initTranslations({
+    locale,
+    namespaces,
+  });
 
   return {
     title: {
-      default: siteConfig.title,
+      default: t("title"),
       template: `%s | ${siteConfig.title}`,
     },
-    description: siteConfig.description,
+    description: t("description"),
     icons: {
       icon: "/favicon.png",
     },
     openGraph: {
-      title: siteConfig.title,
-      description: siteConfig.description,
+      title: t("title"),
+      description: t("description"),
       url: siteConfig.url,
-      siteName: siteConfig.name,
-      locale: siteConfig.locale,
+      siteName: t("name"),
+      locale: locale,
       type: "website",
       images: [`${siteUrl}/og-images/metadados_dadosgov.jpg`],
     },
     other: {
       "google-site-verification": "D63gacp78VxL2YWR2JTOYCE25ZpsdIazq4IR4ojc57k",
-    }
+    },
   };
 }
 
 export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+  params,
+}: {
+  children: ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale: rawLocale } = await params;
+  const locale = i18nConfig.locales.includes(rawLocale) ? rawLocale : i18nConfig.defaultLocale;
+  const { resources, t } = await initTranslations({
+    locale,
+    namespaces,
+  });
 
   let headerNavigation: HeaderNavigationData;
   try {
@@ -72,22 +91,32 @@ export default async function RootLayout({
     headerNavigation = {} as HeaderNavigationData;
   }
 
+  let footerData: FooterType;
+  try {
+    footerData = await getFooter(locale);
+  } catch (error) {
+    console.error("Error fetching footer data:", error);
+    footerData = {} as FooterType;
+  }
+
   return (
-    <html lang="pt" data-scroll-behavior="smooth">
+    <html lang={locale} data-scroll-behavior="smooth">
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
         <AuthProvider>
           <ApolloWrapper>
-            <PopupProviderWrapper>
-              <ScrollTop />
-              <div className="flex min-h-screen w-full flex-col">
-                <HeaderWrapper data={headerNavigation} />
-                <Suspense fallback={null}>
-                  <NewAccountNotice />
-                </Suspense>
-                <div className="">{children}</div>
-                <Footer />
-              </div>
-            </PopupProviderWrapper>
+            <TranslationsProvider locale={locale} namespaces={namespaces} resources={resources}>
+              <PopupProviderWrapper>
+                <ScrollTop />
+                <div className="flex min-h-screen w-full flex-col">
+                  <HeaderWrapper data={headerNavigation} />
+                  <Suspense fallback={null}>
+                    <NewAccountNotice />
+                  </Suspense>
+                  <div className="">{children}</div>
+                  <Footer data={footerData} />
+                </div>
+              </PopupProviderWrapper>
+            </TranslationsProvider>
           </ApolloWrapper>
         </AuthProvider>
       </body>
