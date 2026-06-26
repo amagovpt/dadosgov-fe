@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
@@ -14,6 +14,7 @@ import {
 import { type OrgBadges, type Organization } from "@/service/types/identity";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+import { can } from "@/utils/permissions";
 import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
@@ -117,21 +118,12 @@ export default function OrgProfileClient() {
     fetchOrgBadges().then(setAvailableBadges);
   }, []);
 
-  const canEdit = useMemo(
-    () =>
-      isAdmin ||
-      (org?.members?.some((member) => member.user.id === user?.id && member.role === "admin") ??
-        false),
-    [isAdmin, org, user],
-  );
-
-  const canDelete = useMemo(
-    () =>
-      isAdmin ||
-      (org?.members?.some((member) => member.user.id === user?.id && member.role === "admin") ??
-        false),
-    [isAdmin, org, user],
-  );
+  // Authorization is decided by the backend (single source of truth):
+  // editing/deleting an organization requires EditOrganizationPermission
+  // (org admin or sysadmin) — editors cannot. `org` is fetched with the
+  // session, so org.permissions reflects this user.
+  const canEdit = can(org, "edit");
+  const canDelete = can(org, "delete");
 
   function handleBadgeToggle(kind: string, checked: boolean) {
     setSelectedBadgeKinds((previousKinds) =>

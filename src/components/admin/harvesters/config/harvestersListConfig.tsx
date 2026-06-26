@@ -9,6 +9,7 @@ import {
   sortItems,
 } from "@/utils/admin-lists/listHelpers";
 import type { HarvestSource } from "@/service/types/harvester";
+import { can } from "@/utils/permissions";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { getHarvesterStatus } from "@/utils/harvesterStatus";
 
@@ -53,7 +54,6 @@ interface OrgHarvesterColumnsOptions {
 }
 
 interface SystemHarvesterColumnsOptions {
-  isAdmin: boolean;
   onApprove: (harvester: HarvestSource) => void;
   onReject: (harvester: HarvestSource) => void;
 }
@@ -113,11 +113,12 @@ export function createOrgHarvesterColumns({
       id: "actions",
       header: "Ações",
       headerLabel: "Ações",
+      // Edit/run/delete require org-admin (HarvestSourceAdminPermission); an
+      // editor only gets preview, so show a read-only view link instead.
       renderCell: (harvester) => (
         <TableActionsCell
-          editAction={{
-            href: editHref(harvester),
-          }}
+          viewAction={can(harvester, "edit") ? undefined : { href: editHref(harvester) }}
+          editAction={can(harvester, "edit") ? { href: editHref(harvester) } : undefined}
         />
       ),
     },
@@ -125,7 +126,6 @@ export function createOrgHarvesterColumns({
 }
 
 export function createSystemHarvesterColumns({
-  isAdmin,
   onApprove,
   onReject,
 }: SystemHarvesterColumnsOptions): AdminListColumn<HarvestSource>[] {
@@ -177,7 +177,7 @@ export function createSystemHarvesterColumns({
       headerLabel: "Ações",
       renderCell: (harvester) => (
         <div className="flex items-center gap-[12px]">
-          {isAdmin && harvester.validation?.state === "pending" && (
+          {can(harvester, "validate") && harvester.validation?.state === "pending" && (
             <>
               <button
                 type="button"
@@ -210,9 +210,16 @@ export function createSystemHarvesterColumns({
             </>
           )}
           <TableActionsCell
-            editAction={{
-              href: `/pages/admin/harvesters/${harvester.id}?tab=config`,
-            }}
+            viewAction={
+              can(harvester, "edit")
+                ? undefined
+                : { href: `/pages/admin/harvesters/${harvester.id}` }
+            }
+            editAction={
+              can(harvester, "edit")
+                ? { href: `/pages/admin/harvesters/${harvester.id}?tab=config` }
+                : undefined
+            }
           />
         </div>
       ),

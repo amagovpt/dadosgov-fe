@@ -3,6 +3,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
+import { can } from "@/utils/permissions";
 import type { Reuse } from "@/service/types/reuse";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
@@ -118,9 +119,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
       viewAction: (reuse) => ({
         href: `/pages/reuses/${reuse.slug}`,
       }),
-      editAction: (reuse) => ({
-        href: editHref(reuse),
-      }),
+      editAction: (reuse) => (can(reuse, "edit") ? { href: editHref(reuse) } : undefined),
     }),
   ];
 }
