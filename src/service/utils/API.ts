@@ -29,9 +29,12 @@ export function authFetch(path: string, init?: RequestInit): Promise<Response> {
  * POST is blocked at the perimeter (payload/size signature) before it ever
  * reaches the application — the symptom is a WAF "Web Page Blocked" HTML page,
  * not an app-level error, so no backend change can recover it. Splitting the
- * file into ~2 MB parts keeps every request under the WAF limit, restoring the
- * chunked upload the legacy (fineuploader) frontend used. Files at or below the
- * chunk size are sent in a single request (already WAF-safe).
+ * file into ~1 MB parts keeps every request under the WAF limit, restoring the
+ * chunked upload the legacy (fineuploader) frontend used. The part size lives in
+ * `uiConfig.resourceFileUploadChunk`; it was lowered from 2 MB to 1 MB because
+ * 2 MB parts (plus multipart overhead) were still tripping the perimeter WAF on
+ * larger files. Files at or below the chunk size are sent in a single request
+ * (already WAF-safe).
  *
  * Protocol (udata `storages.api.handle_upload`): for each part POST
  * `file` + `uuid` + `filename` + `partindex` + `partbyteoffset` + `totalparts`
