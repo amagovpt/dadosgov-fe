@@ -4,7 +4,6 @@ import { OtherSection } from "@/service/types/datastories/datastory";
 import Section from "../../Section";
 import { InfoBlock } from "../../InfoBlock";
 import { CardAction } from "@ama-pt/agora-design-system";
-import { useRouter } from "next/navigation";
 
 export type OtherResourcesI = OtherSection;
 
@@ -13,10 +12,8 @@ type ResourceI = OtherResourcesI["resources"][number];
 // ----------------------------------------------------------------------------------------------------------------
 
 function Resource({ icon, title, subtitle, anchor }: ResourceI) {
-  const routerNav = useRouter();
-
   const handleClick = () => {
-    routerNav.push(anchor.href);
+    window.open(anchor.href, "_blank", "noopener,noreferrer");
   };
 
   return (
