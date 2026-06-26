@@ -414,7 +414,7 @@ interface MembersClientProps {
 
 export default function MembersClient({ orgId }: MembersClientProps = {}) {
   const { show } = usePopupContext();
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const { activeOrg } = useActiveOrganization();
   const resolvedOrgId = orgId ?? activeOrg?.id;
   const cachedOrgName = useOrganizationName(resolvedOrgId, user?.organizations);
@@ -552,13 +552,10 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     [editMemberOpenKey, loadMembers, resolvedOrgId, show]
   );
 
-  const isOrgAdmin = useMemo(
-    () =>
-      isAdmin ||
-      (viewedOrg?.members?.some((member) => member.user.id === user?.id && member.role === "admin") ??
-        false),
-    [isAdmin, viewedOrg, user]
-  );
+  // Whether the current user may manage members — decided by the backend.
+  // viewedOrg is fetched client-side with the session, so permissions.members
+  // reflects this user (sysadmin or org admin).
+  const isOrgAdmin = useMemo(() => viewedOrg?.permissions?.members ?? false, [viewedOrg]);
 
   const sortedMembers = useMemo(
     () => sortMembers(members, sortField, sortOrder),

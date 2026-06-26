@@ -56,6 +56,15 @@ export interface HarvestPreviewJob {
   source: string;
 }
 
+export interface HarvestSourcePermissions {
+  edit: boolean;
+  delete: boolean;
+  run: boolean;
+  preview: boolean;
+  validate: boolean;
+  schedule: boolean;
+}
+
 export interface HarvestSource {
   id: string;
   name: string;
@@ -74,6 +83,8 @@ export interface HarvestSource {
   last_modified: string;
   last_job: HarvestJob | null;
   datasets_count: number;
+  // Backend-computed authorization for the current user (single source of truth).
+  permissions?: HarvestSourcePermissions;
 }
 
 export interface HarvestSourceCreatePayload {

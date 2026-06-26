@@ -3,6 +3,7 @@ import { Button, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
 import ReusesEditMetadataDangerZone from "@/components/admin/reuses/edit-sections/ReusesEditMetadataDangerZone";
+import { can } from "@/utils/permissions";
 import ReusesEditMetadataDetailsSection from "@/components/admin/reuses/edit-sections/ReusesEditMetadataDetailsSection";
 import { getReuseAuxiliarItems } from "@/components/admin/reuses/config/reusesAuxiliarItems";
 import type { Reuse, ReuseTopic, ReuseType } from "@/service/types/reuse";
@@ -82,10 +83,13 @@ export default function ReusesEditMetadataTab({
   onUnarchiveReuse,
   onOpenDeletePopup,
 }: ReusesEditMetadataTabProps) {
+  // Authorization is decided by the backend (single source of truth).
+  const canEdit = can(reuse, "edit");
+  const canDelete = can(reuse, "delete");
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
-        {reuse.private && (
+        {reuse.private && canEdit && (
           <AdminVisibilityBanner
             description={
               <>
@@ -160,6 +164,8 @@ export default function ReusesEditMetadataTab({
           <ReusesEditMetadataDangerZone
             archived={!!reuse.archived}
             isSubmitting={isSubmitting}
+            canEdit={canEdit}
+            canDelete={canDelete}
             onArchiveReuse={onArchiveReuse}
             onUnarchiveReuse={onUnarchiveReuse}
             onOpenDeletePopup={onOpenDeletePopup}

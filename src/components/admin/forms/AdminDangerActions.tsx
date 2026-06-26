@@ -11,8 +11,8 @@ type AdminDangerActionsProps = {
   onPrimaryAction?: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
   dangerHeading?: React.ReactNode;
   dangerDescription?: React.ReactNode;
-  dangerActionLabel: React.ReactNode;
-  onDangerAction: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
+  dangerActionLabel?: React.ReactNode;
+  onDangerAction?: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
   disabled?: boolean;
 };
 
@@ -75,27 +75,39 @@ export default function AdminDangerActions({
   onDangerAction,
   disabled = false,
 }: AdminDangerActionsProps) {
+  const showPrimary = Boolean(primaryHeading && primaryActionLabel && onPrimaryAction);
+  const showDanger = Boolean(dangerActionLabel && onDangerAction);
+
+  // Each card is gated by the backend permission upstream (the caller only
+  // passes the action when allowed). When the user can do neither, render
+  // nothing instead of an empty danger zone.
+  if (!showPrimary && !showDanger) {
+    return null;
+  }
+
   return (
     <div className="dataset-edit-danger-actions">
-      {primaryHeading && primaryActionLabel && onPrimaryAction ? (
+      {showPrimary ? (
         <ActionCard
           variant={primaryVariant}
           heading={primaryHeading}
           description={primaryDescription}
           actionLabel={primaryActionLabel}
-          onAction={onPrimaryAction}
+          onAction={onPrimaryAction!}
           disabled={disabled}
         />
       ) : null}
 
-      <ActionCard
-        variant="danger"
-        heading={dangerHeading}
-        description={dangerDescription}
-        actionLabel={dangerActionLabel}
-        onAction={onDangerAction}
-        disabled={disabled}
-      />
+      {showDanger ? (
+        <ActionCard
+          variant="danger"
+          heading={dangerHeading}
+          description={dangerDescription}
+          actionLabel={dangerActionLabel}
+          onAction={onDangerAction!}
+          disabled={disabled}
+        />
+      ) : null}
     </div>
   );
 }

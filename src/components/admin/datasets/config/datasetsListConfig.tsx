@@ -2,6 +2,7 @@ import { ProgressBar } from "@ama-pt/agora-design-system";
 import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
 import TextLink from "@/components/Primitives/TextLink";
 import TableActionsCell from "@/components/admin/TableActionsCell";
+import { can } from "@/utils/permissions";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
 import type { Dataset } from "@/service/types/dataset";
@@ -171,7 +172,7 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
     renderCell: (dataset) => (
       <TableActionsCell
         viewAction={{ href: `/pages/datasets/${dataset.slug}` }}
-        editAction={{ href: editHref(dataset) }}
+        editAction={can(dataset, "edit") ? { href: editHref(dataset) } : undefined}
       />
     ),
   });

@@ -11,7 +11,6 @@ import {
   ApproveHarvesterPopupContent,
   RejectHarvesterPopupContent,
 } from "@/components/admin/harvesters/form-ui/HarvesterValidationPopups";
-import { useAuth } from "@/context/AuthContext";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   createSystemHarvesterColumns,
@@ -26,7 +25,6 @@ export default function SystemHarvestersClient() {
     variant: "success" | "danger";
     message: string;
   } | null>(null);
-  const { isAdmin } = useAuth();
   const { show, hide } = usePopupContext();
   const {
     currentPage,
@@ -167,11 +165,10 @@ export default function SystemHarvestersClient() {
   const columns = useMemo(
     () =>
       createSystemHarvesterColumns({
-        isAdmin,
         onApprove: openApprovePopup,
         onReject: openRejectPopup,
       }),
-    [isAdmin, openApprovePopup, openRejectPopup]
+    [openApprovePopup, openRejectPopup]
   );
 
   return (

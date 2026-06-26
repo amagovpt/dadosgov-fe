@@ -19,7 +19,7 @@ import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithRead
 import { OrganizationBadges } from "@/components/organizations/OrganizationBadges";
 import { useAuth } from "@/context/AuthContext";
 import { followEntity, unfollowEntity, isFollowing } from "@/service/api/followers";
-import { requestMembership } from "@/service/api/organizations";
+import { fetchOrganization, requestMembership } from "@/service/api/organizations";
 import { formatMetricValue } from "@/utils/formatNumber";
 
 interface OrganizationDetailClientProps {
@@ -27,7 +27,7 @@ interface OrganizationDetailClientProps {
 }
 
 export default function OrganizationDetailClient({ organization }: OrganizationDetailClientProps) {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -38,8 +38,26 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   const [requestError, setRequestError] = useState<string | null>(null);
 
   const isMember = user?.organizations?.some((org) => org.id === organization.id) ?? false;
-  // A super admin or a member of the organization can edit it.
-  const canEdit = isAdmin || isMember;
+
+  // Edit permission is decided by the backend (the single source of truth).
+  // The SSR org fetch is anonymous (no session), so re-fetch the org with the
+  // user's session to read its `permissions`. Anonymous users never edit.
+  const [canEditOrg, setCanEditOrg] = useState(false);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetchOrganization(organization.id)
+      .then((o) => {
+        if (!cancelled) setCanEditOrg(o?.permissions?.edit ?? false);
+      })
+      .catch(() => {
+        if (!cancelled) setCanEditOrg(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, organization.id]);
+  const canEdit = Boolean(user) && canEditOrg;
 
   useEffect(() => {
     let cancelled = false;

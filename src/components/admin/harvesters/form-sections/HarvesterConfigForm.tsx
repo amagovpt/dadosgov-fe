@@ -80,6 +80,11 @@ interface HarvesterConfigFormProps {
   previewError: string | null;
   onPreview: () => void;
   onDelete: () => void;
+  // Backend-computed authorization (single source of truth). Editing/deleting a
+  // harvest source needs org-admin (HarvestSourceAdminPermission); an editor may
+  // only preview. Default true for the create flow (no source yet).
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 export function HarvesterConfigForm({
@@ -114,6 +119,8 @@ export function HarvesterConfigForm({
   previewError,
   onPreview,
   onDelete,
+  canEdit = true,
+  canDelete = true,
 }: HarvesterConfigFormProps) {
   const [scheduleError, setScheduleError] = React.useState<string | null>(null);
 
@@ -418,16 +425,18 @@ export function HarvesterConfigForm({
             >
               {isPreviewing ? "A pré-visualizar..." : "Pré-visualizar"}
             </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              hasIcon
-              trailingIcon="agora-line-check-circle"
-              trailingIconHover="agora-solid-check-circle"
-              disabled={isSaving || !!scheduleError}
-            >
-              {isSaving ? "A guardar..." : "Guardar"}
-            </Button>
+            {canEdit && (
+              <Button
+                variant="primary"
+                type="submit"
+                hasIcon
+                trailingIcon="agora-line-check-circle"
+                trailingIconHover="agora-solid-check-circle"
+                disabled={isSaving || !!scheduleError}
+              >
+                {isSaving ? "A guardar..." : "Guardar"}
+              </Button>
+            )}
           </div>
 
           {isPreviewing || previewJob || previewError ? (
@@ -442,12 +451,16 @@ export function HarvesterConfigForm({
         </form>
 
         <AdminDangerActions
-          dangerActionLabel="Eliminar o harvester"
-          onDangerAction={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onDelete();
-          }}
+          dangerActionLabel={canDelete ? "Eliminar o harvester" : undefined}
+          onDangerAction={
+            canDelete
+              ? (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete();
+                }
+              : undefined
+          }
         />
       </div>
 

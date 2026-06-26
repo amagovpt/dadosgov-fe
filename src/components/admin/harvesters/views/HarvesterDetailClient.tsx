@@ -24,6 +24,7 @@ import { HarvesterJobsTable } from "@/components/admin/harvesters/jobs/Harvester
 import { HarvesterConfigForm } from "@/components/admin/harvesters/form-sections/HarvesterConfigForm";
 import { useHarvesterDetailActions } from "@/components/admin/harvesters/hooks/useHarvesterDetailActions";
 import { useHarvesterDetailData } from "@/components/admin/harvesters/hooks/useHarvesterDetailData";
+import { can } from "@/utils/permissions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { type HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
@@ -395,6 +396,8 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                 <DeleteHarvesterPopupContent onClose={hide} onConfirm={handleDeleteHarvester} />,
                 { title: "Eliminar o harvester", closeAriaLabel: "Fechar", dimensions: "m" }
               )}
+              canEdit={can(source, "edit")}
+              canDelete={can(source, "delete")}
             />
           </TabBody>
         </Tab>

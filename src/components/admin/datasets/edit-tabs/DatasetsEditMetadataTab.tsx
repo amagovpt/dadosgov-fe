@@ -9,6 +9,7 @@ import DatasetsEditDescriptionSection from "@/components/admin/datasets/edit-sec
 import DatasetsEditAccessTimeSection from "@/components/admin/datasets/edit-sections/DatasetsEditAccessTimeSection";
 import DatasetsEditSpaceSection from "@/components/admin/datasets/edit-sections/DatasetsEditSpaceSection";
 import DatasetsEditDangerZone from "@/components/admin/datasets/edit-sections/DatasetsEditDangerZone";
+import { can } from "@/utils/permissions";
 
 type DatasetsEditMetadataTabProps = {
   dataset: Dataset;
@@ -113,10 +114,13 @@ export default function DatasetsEditMetadataTab({
   onToggleArchive,
   onOpenDeletePopup,
 }: DatasetsEditMetadataTabProps) {
+  // Authorization is decided by the backend (single source of truth).
+  const canEdit = can(dataset, "edit");
+  const canDelete = can(dataset, "delete");
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
-        {dataset.private && (
+        {dataset.private && canEdit && (
           <AdminVisibilityBanner
             description={
               <>
@@ -218,6 +222,8 @@ export default function DatasetsEditMetadataTab({
           <DatasetsEditDangerZone
             datasetArchived={!!dataset.archived}
             isSubmitting={isSubmitting}
+            canEdit={canEdit}
+            canDelete={canDelete}
             onToggleArchive={onToggleArchive}
             onOpenDeletePopup={onOpenDeletePopup}
           />
