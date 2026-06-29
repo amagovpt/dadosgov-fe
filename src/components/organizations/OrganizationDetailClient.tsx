@@ -39,24 +39,13 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   const isMember = user?.organizations?.some((org) => org.id === organization.id) ?? false;
 
   useEffect(() => {
+    if (!user) { setIsFavorite(false); return; }
     let cancelled = false;
-    async function loadFavoriteState() {
-      if (!user) {
-        setIsFavorite(false);
-        return;
-      }
-      try {
-        const following = await isFollowing("organizations", organization.id, user.id);
-        if (!cancelled) setIsFavorite(following);
-      } catch (error) {
-        console.error("Error loading favorite state:", error);
-      }
-    }
-    loadFavoriteState();
-    return () => {
-      cancelled = true;
-    };
-  }, [user, organization.id]);
+    isFollowing("organizations", organization.id, user.id)
+      .then((following) => { if (!cancelled) setIsFavorite(following); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user?.id, organization.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
@@ -125,8 +114,8 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           </Button>
         )}
         <Button
-          variant="primary"
-          appearance={isFavorite ? "solid" : "outline"}
+          variant="neutral"
+          appearance="link"
           hasIcon={true}
           leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
           leadingIconHover="agora-solid-star"
@@ -137,10 +126,6 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         </Button>
       </div>
-
-      {user && isMember && (
-        <StatusCard variant="informative" showIcon description="Já pertence a esta organização." />
-      )}
       {requestSuccess && (
         <StatusCard
           variant="success"
@@ -261,6 +246,13 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                     year: "numeric",
                   })}
                 </div>
+                {user && isMember && (
+                  <StatusCard
+                    variant="informative"
+                    showIcon
+                    description="Já pertence a esta organização."
+                  />
+                )}
                 {/* <div className="pt-8">
                     <div className="text-neutral-900 text-sm font-medium">
                       <span className="text-m-semibold">Tipo:</span> Publicador Oficial

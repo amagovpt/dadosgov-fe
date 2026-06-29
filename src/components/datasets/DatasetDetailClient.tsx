@@ -75,22 +75,29 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
   const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function loadDataset() {
       try {
         const data = await fetchDataset(slug);
-        setDataset(data);
-        if (user && data) {
-          const following = await isFollowing("datasets", data.id, user.id);
-          setIsFavorite(following);
-        }
+        if (!cancelled) setDataset(data);
       } catch (error) {
         console.error("Error loading dataset:", error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
     loadDataset();
-  }, [slug, user]);
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!user || !dataset) return;
+    let cancelled = false;
+    isFollowing("datasets", dataset.id, user.id)
+      .then((following) => { if (!cancelled) setIsFavorite(following); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user?.id, dataset?.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
@@ -101,11 +108,11 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
     setIsTogglingFavorite(true);
     try {
       if (isFavorite) {
-        const success = await unfollowEntity("datasets", dataset.id);
-        if (success) setIsFavorite(false);
+        await unfollowEntity("datasets", dataset.id);
+        setIsFavorite(false);
       } else {
-        const result = await followEntity("datasets", dataset.id);
-        if (result) setIsFavorite(true);
+        await followEntity("datasets", dataset.id);
+        setIsFavorite(true);
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
@@ -152,8 +159,8 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
         {dataset.private && <Pill variant="warning">Rascunho</Pill>}
         {dataset.archived && <Pill variant="neutral">Arquivado</Pill>}
         <Button
-          variant="primary"
-          appearance={isFavorite ? "solid" : "outline"}
+          variant="neutral"
+          appearance="link"
           hasIcon={true}
           leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
           leadingIconHover="agora-solid-star"

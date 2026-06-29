@@ -36,22 +36,29 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
   const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function loadDataservice() {
       try {
         const data = await fetchDataservice(slug);
-        setDataservice(data);
-        if (user && data) {
-          const following = await isFollowing("dataservices", data.id, user.id);
-          setIsFavorite(following);
-        }
+        if (!cancelled) setDataservice(data);
       } catch (error) {
         console.error("Error loading dataservice:", error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
     loadDataservice();
-  }, [slug, user]);
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!user || !dataservice) return;
+    let cancelled = false;
+    isFollowing("dataservices", dataservice.id, user.id)
+      .then((following) => { if (!cancelled) setIsFavorite(following); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user?.id, dataservice?.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
@@ -62,11 +69,11 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
     setIsTogglingFavorite(true);
     try {
       if (isFavorite) {
-        const success = await unfollowEntity("dataservices", dataservice.id);
-        if (success) setIsFavorite(false);
+        await unfollowEntity("dataservices", dataservice.id);
+        setIsFavorite(false);
       } else {
-        const result = await followEntity("dataservices", dataservice.id);
-        if (result) setIsFavorite(true);
+        await followEntity("dataservices", dataservice.id);
+        setIsFavorite(true);
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
@@ -132,8 +139,8 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
         {dataservice.private && <Pill variant="warning">Rascunho</Pill>}
         {dataservice.archived_at && <Pill variant="neutral">Arquivado</Pill>}
         <Button
-          variant="primary"
-          appearance={isFavorite ? "solid" : "outline"}
+          variant="neutral"
+          appearance="link"
           hasIcon={true}
           leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
           leadingIconHover="agora-solid-star"
@@ -143,18 +150,21 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
         >
           {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         </Button>
-        {dataservice.base_api_url && (
-          <Button
-            variant="primary"
-            hasIcon={true}
-            trailingIcon="agora-line-external-link"
-            trailingIconHover="agora-solid-external-link"
-            className="flex-shrink-0"
-            onClick={() => window.open(dataservice.base_api_url as string, "_blank")}
-          >
-            Aceder à API
-          </Button>
-        )}
+        <Button
+          variant={canEdit ? "neutral" : "primary"}
+          appearance={canEdit ? "outline" : "solid"}
+          hasIcon={true}
+          trailingIcon="agora-line-external-link"
+          trailingIconHover="agora-solid-external-link"
+          className="flex-shrink-0"
+          onClick={
+            dataservice.base_api_url
+              ? () => window.open(dataservice.base_api_url as string, "_blank")
+              : undefined
+          }
+        >
+          Aceder à API
+        </Button>
         {canEdit && (
           <Link href={`/pages/admin/dataservices/edit?id=${dataservice.id}`}>
             <Button
