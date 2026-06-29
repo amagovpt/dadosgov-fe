@@ -210,6 +210,16 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     }
                   }
                 }
+                ... on SectionDatastorySummaryComponent {
+                  schemaName
+                  title
+                  description
+                  anchors {
+                    children
+                    href
+                    icon
+                  }
+                }
               }
             }
           }

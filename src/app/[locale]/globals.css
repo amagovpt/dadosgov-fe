@@ -67,6 +67,7 @@
      6.2 Login
      6.3 Page Detail & Links
      6.4 Mini-courses
+     6.5 Datastories
   7. ADMIN LAYOUT .............................................. [07]
      7.1 Admin Wrapper & Header
      7.2 Side Navigation
@@ -315,11 +316,17 @@ header[data-submenu="desenvolvimento"]
 }
 
 /* Usar dados submenu: hide main items, reveal submenu items */
-header[data-submenu="usar-dados"] .navigation-links-layout>.links>.link-wrapper:has([data-group="main"]) {
+header[data-submenu="usar-dados"]
+  .navigation-links-layout
+  > .links
+  > .link-wrapper:has([data-group="main"]) {
   display: none;
 }
 
-header[data-submenu="usar-dados"] .navigation-links-layout>.links>.link-wrapper:has([data-group="submenu-usar-dados"]) {
+header[data-submenu="usar-dados"]
+  .navigation-links-layout
+  > .links
+  > .link-wrapper:has([data-group="submenu-usar-dados"]) {
   display: block;
 }
 
@@ -1204,6 +1211,23 @@ li.section-name:empty {
 
 /* 6.4 Mini-courses */
 /* (card styles in 5.5) */
+
+/* 6.5 Datastories */
+
+.datastory-page .agora-card-links .bottom-container {
+  padding: 0 !important;
+}
+
+.datastory-page .agora-card-links .card-links-container {
+  padding: 0 !important;
+  border: none !important;
+}
+
+.datastory-page .agora-card-links a {
+  padding-left: 32px !important;
+  border-left: 1px solid white !important;
+  border-radius: 0 !important;
+}
 
 /* ==========================================================================
    [07] ADMIN LAYOUT

@@ -155,6 +155,15 @@ export type OtherSection = {
 };
 
 // ----------------------------------------------------------------------------------------------
+
+export type SummarySection = {
+  schemaName: "section-datastory-summary";
+  title: string;
+  description: string;
+  anchors: Anchor[];
+};
+
+// ----------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------
 
@@ -165,7 +174,8 @@ export type DatastorySection =
   | IframeSection
   | RelatedSection
   | SourceSection
-  | OtherSection;
+  | OtherSection
+  | SummarySection;
 
 export type DatastorySections = {
   isFirstSectionWhite: boolean;
