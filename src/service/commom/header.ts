@@ -109,8 +109,8 @@ export async function getHeaderNavigation(locale: string = "pt"): Promise<Header
   });
 
   if (!data || error) {
-    console.error("Error fetching datastory information:", error);
-    throw new Error("Failed to fetch datastory information");
+    console.error("Error fetching header information:", error);
+    throw new Error("Failed to fetch header information");
   }
 
   const headerData = data.findHeaderNavigationSingleton?.data;
