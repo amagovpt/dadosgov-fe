@@ -145,8 +145,8 @@ export default function CommunityResourceFormClient({
 
   function getPublicPageUrl() {
     return activeDataset
-      ? `/pages/datasets/${activeDataset.slug}`
-      : "/pages/admin/me/community-resources";
+      ? `/datasets/${activeDataset.slug}`
+      : "/admin/me/community-resources";
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {

@@ -100,7 +100,7 @@ export default function UserProfileClient() {
       try {
         const data = await fetchUser(userId);
         if (!data) {
-          router.push("/pages/admin/system/users");
+          router.push("/admin/system/users");
           return;
         }
         setUser(data);
@@ -170,7 +170,7 @@ export default function UserProfileClient() {
     try {
       await deleteUser(userId);
       hide();
-      router.push("/pages/admin/system/users");
+      router.push("/admin/system/users");
     } catch (error) {
       console.error("Error deleting user:", error);
     } finally {
@@ -225,8 +225,8 @@ export default function UserProfileClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Utilizadores", url: "/pages/admin/system/users" },
+        { label: "Administração", url: "/admin" },
+        { label: "Utilizadores", url: "/admin/system/users" },
         { label: displayName || "..." },
       ]}
       title="Perfil"
@@ -236,7 +236,7 @@ export default function UserProfileClient() {
         user={user}
         displayName={displayName}
         lastModified={lastModified}
-        onViewPublicProfile={() => router.push(`/pages/users/${user.slug}`)}
+        onViewPublicProfile={() => router.push(`/users/${user.slug}`)}
       />
 
       <div className="mt-32">

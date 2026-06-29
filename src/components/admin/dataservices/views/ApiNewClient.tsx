@@ -22,9 +22,9 @@ export default function ApiNewClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "API", url: "/pages/admin/dataservices" },
+        { label: "API", url: "/admin/dataservices" },
       ]}
       title="Formulário de inscrição"
     >
@@ -37,10 +37,10 @@ export default function ApiNewClient() {
       <ApiRegistrationClient
         currentStep={currentStep}
         onNextStep={() =>
-          router.push(`/pages/admin/dataservices/new?step=${currentStep + 1}`)
+          router.push(`/admin/dataservices/new?step=${currentStep + 1}`)
         }
         onPreviousStep={() =>
-          router.push(`/pages/admin/dataservices/new?step=${currentStep - 1}`)
+          router.push(`/admin/dataservices/new?step=${currentStep - 1}`)
         }
       />
     </AdminLayout>

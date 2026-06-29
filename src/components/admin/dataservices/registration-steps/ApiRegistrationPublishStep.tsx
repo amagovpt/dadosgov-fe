@@ -39,7 +39,7 @@ export default function ApiRegistrationPublishStep({
         titleText={createdDataservice?.title || apiName || "Sem título"}
         descriptionText={createdDataservice?.description || apiDescription || "Sem descrição"}
         anchor={{
-          href: createdDataservice ? `/pages/dataservices/${createdDataservice.id}` : "#",
+          href: createdDataservice ? `/dataservices/${createdDataservice.id}` : "#",
           children: "",
         }}
       />

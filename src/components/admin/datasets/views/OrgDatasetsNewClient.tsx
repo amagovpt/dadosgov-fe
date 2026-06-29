@@ -27,10 +27,10 @@ export default function OrgDatasetsNewClient() {
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
 
-  const orgBase = activeOrg ? `/pages/admin/org/${activeOrg.id}` : "/pages/admin/org";
+  const orgBase = activeOrg ? `/admin/org/${activeOrg.id}` : "/admin/org";
 
   const buildStepUrl = (step: number) => {
-    return `/pages/admin/org/datasets/new?step=${step}`;
+    return `/admin/org/datasets/new?step=${step}`;
   };
 
 
@@ -44,9 +44,9 @@ export default function OrgDatasetsNewClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: orgName || "Organização", url: "#" },
-        { label: "Conjuntos de dados", url: resolvedOrgId ? `/pages/admin/org/${resolvedOrgId}/datasets` : "#" },
+        { label: "Conjuntos de dados", url: resolvedOrgId ? `/admin/org/${resolvedOrgId}/datasets` : "#" },
       ]}
 
       title="Formulário de publicação de um conjunto de dados"
@@ -103,7 +103,7 @@ export default function OrgDatasetsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/pages/faqs/api-documentation")}
+                  onClick={() => router.push("/recursos/desenvolvimento/referencia-api")}
                 >
                   Consulte a documentação da API
                 </Button>
@@ -113,7 +113,7 @@ export default function OrgDatasetsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/pages/faqs/reuse")}
+                  onClick={() => router.push("/recursos/como-usar-o-portal/como-reutilizar-dados")}
                 >
                   Saiba mais sobre o harvester.
                 </Button>
@@ -123,7 +123,7 @@ export default function OrgDatasetsNewClient() {
                   hasIcon
                   trailingIcon="agora-line-external-link"
                   trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/pages/support")}
+                  onClick={() => router.push("/ajuda-e-contactos")}
                 >
                   Contacte-nos
                 </Button>

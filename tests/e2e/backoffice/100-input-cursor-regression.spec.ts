@@ -27,7 +27,7 @@ test.describe("Backoffice — IsolatedInput cursor regression", () => {
     page,
   }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
 
@@ -56,7 +56,7 @@ test.describe("Backoffice — IsolatedInput cursor regression", () => {
     page,
   }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
 
@@ -85,7 +85,7 @@ test.describe("Backoffice — IsolatedInput cursor regression", () => {
     page,
   }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
 
@@ -110,7 +110,7 @@ test.describe("Backoffice — IsolatedInput cursor regression", () => {
     page,
   }) => {
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
 

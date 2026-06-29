@@ -18,7 +18,7 @@ test.describe("Backoffice - Organization badges (super admin)", () => {
   test("OBA-01: Emblemas section is visible to a super admin in the org profile", async ({
     page,
   }) => {
-    await page.goto(`/pages/admin/org/${organization.id}/profile`);
+    await page.goto(`/admin/org/${organization.id}/profile`);
     await page.waitForLoadState("networkidle");
 
     await expect(
@@ -29,7 +29,7 @@ test.describe("Backoffice - Organization badges (super admin)", () => {
   test("OBA-02: Editar button is shown on the public org page for an admin", async ({
     page,
   }) => {
-    await page.goto(`/pages/organizations/${organization.slug}`);
+    await page.goto(`/organizations/${organization.slug}`);
     await page.waitForLoadState("networkidle");
 
     await expect(page.locator("main h1").first()).toBeVisible({ timeout: 15000 });
@@ -47,7 +47,7 @@ test.describe("Backoffice - Organization badges (member, not super admin)", () =
   test("OBA-03: Emblemas section is hidden for a non-super-admin member", async ({
     page,
   }) => {
-    await page.goto(`/pages/admin/org/${organization.id}/profile`);
+    await page.goto(`/admin/org/${organization.id}/profile`);
     await page.waitForLoadState("networkidle");
 
     // The profile page itself still loads (the description field is present)…

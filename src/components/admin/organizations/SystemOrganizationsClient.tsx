@@ -149,9 +149,9 @@ export default function SystemOrganizationsClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Organizações", url: "/pages/admin/system/organizations" },
+        { label: "Organizações", url: "/admin/system/organizations" },
       ]}
       title="Organizações"
       isLoading={isLoading}

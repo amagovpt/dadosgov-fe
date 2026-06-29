@@ -70,7 +70,7 @@ export default function SelectedDatasetCard({
           </span>
         }
         mainLink={
-          <Link href={`/pages/datasets/${dataset.slug}`}>
+          <Link href={`/datasets/${dataset.slug}`}>
             <span className="underline">{dataset.title}</span>
           </Link>
         }

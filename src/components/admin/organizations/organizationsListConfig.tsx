@@ -27,7 +27,7 @@ export function createOrganizationColumns({
       sortField: "name",
       sortType: "string",
       renderCell: (organization) => (
-        <TextLink href={`/pages/admin/org/${organization.id}/profile`}>
+        <TextLink href={`/admin/org/${organization.id}/profile`}>
           {organization.name}
         </TextLink>
       ),
@@ -56,10 +56,10 @@ export function createOrganizationColumns({
     },
     createTableActionsColumn<Organization>({
       viewAction: (organization) => ({
-        href: `/pages/organizations/${organization.slug}`,
+        href: `/organizations/${organization.slug}`,
       }),
       editAction: (organization) => ({
-        href: `/pages/admin/org/${organization.id}/profile`,
+        href: `/admin/org/${organization.id}/profile`,
       }),
       deleteAction: (organization) => ({
         ariaLabel: `Eliminar ${organization.name}`,

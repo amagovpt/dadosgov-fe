@@ -598,7 +598,7 @@ export interface DatasetsListingResponse {
 
 
 /**
- * Aggregated fetch for the /pages/datasets listing page.
+ * Aggregated fetch for the /datasets listing page.
  * Hits /api/1/site/datasets-listing/ which returns the paginated listing,
  * sidebar filter counts and metadata in one response (LEDG-1836).
  */

@@ -204,7 +204,7 @@ export function useHarvesterDetailActions({
     try {
       await deleteHarvester(source.id);
       hide();
-      push("/pages/admin/system/harvesters");
+      push("/admin/system/harvesters");
     } catch (error) {
       console.error("Error deleting harvester:", error);
       hide();

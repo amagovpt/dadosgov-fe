@@ -240,7 +240,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
 
   return (
     <AdminLayout breadcrumbItems={[
-      { label: "Sistema", url: "/pages/admin/system/harvesters" },
+      { label: "Sistema", url: "/admin/system/harvesters" },
       { label: source.name, url: "#" },
     ]}
       title={source.name}

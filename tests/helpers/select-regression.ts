@@ -38,7 +38,7 @@ const FIXTURE_REUSE_SLUG = "e2e-test-reuse";
 export const SELECT_REGRESSION_CASES: SelectRegressionCase[] = [
   // ── Reuses wizard (step 1) ────────────────────────────────────────────
   {
-    route: "/pages/admin/me/reuses/new/",
+    route: "/admin/me/reuses/new/",
     selectIds: [
       "agora-input-select-reuse-type-control",
       "agora-input-select-reuse-theme-control",
@@ -46,7 +46,7 @@ export const SELECT_REGRESSION_CASES: SelectRegressionCase[] = [
     api: ["**/api/1/reuses/types/", "**/api/1/reuses/topics/"],
   },
   {
-    route: "/pages/admin/reuses/new/",
+    route: "/admin/reuses/new/",
     selectIds: [
       "agora-input-select-reuse-type-control",
       "agora-input-select-reuse-theme-control",
@@ -59,7 +59,7 @@ export const SELECT_REGRESSION_CASES: SelectRegressionCase[] = [
   // backed by `/api/1/spatial/zones/suggest/?q=…`, so it is empty until the
   // user types. Asserting >0 options would be a false negative.
   {
-    route: "/pages/admin/me/datasets/new/?step=2",
+    route: "/admin/me/datasets/new/?step=2",
     selectIds: [
       "agora-input-select-dataset-license-control",
       "agora-input-select-dataset-frequency-control",
@@ -74,14 +74,14 @@ export const SELECT_REGRESSION_CASES: SelectRegressionCase[] = [
 
   // ── Harvesters wizard ─────────────────────────────────────────────────
   {
-    route: "/pages/admin/harvesters/new/",
+    route: "/admin/harvesters/new/",
     selectIds: ["agora-input-select-harvester-type-control"],
     api: ["**/api/1/harvest/backends/"],
   },
 
   // ── Dataset edit (seeded fixture) ─────────────────────────────────────
   {
-    route: `/pages/admin/me/datasets/edit?slug=${FIXTURE_DATASET_SLUG}`,
+    route: `/admin/me/datasets/edit?slug=${FIXTURE_DATASET_SLUG}`,
     selectIds: [
       "agora-input-select-edit-license-control",
       "agora-input-select-edit-frequency-control",
@@ -98,7 +98,7 @@ export const SELECT_REGRESSION_CASES: SelectRegressionCase[] = [
 
   // ── Reuse edit (seeded fixture) ───────────────────────────────────────
   {
-    route: `/pages/admin/me/reuses/edit?slug=${FIXTURE_REUSE_SLUG}`,
+    route: `/admin/me/reuses/edit?slug=${FIXTURE_REUSE_SLUG}`,
     selectIds: [
       "agora-input-select-edit-type-control",
       "agora-input-select-edit-topic-control",

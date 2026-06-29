@@ -174,9 +174,9 @@ export default function SystemHarvestersClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Harvesters", url: "/pages/admin/system/harvesters" },
+        { label: "Harvesters", url: "/admin/system/harvesters" },
       ]}
       title="Harvesters"
       isLoading={isLoading}

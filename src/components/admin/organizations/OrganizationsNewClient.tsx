@@ -81,7 +81,7 @@ export default function OrganizationsNewClient() {
         await uploadOrgLogo(organization.id, orgLogo);
       }
 
-      router.push(`/pages/organizations/${organization.slug}`);
+      router.push(`/organizations/${organization.slug}`);
     } catch (error) {
       setApiError(normalizeApiError(error, "Erro ao criar a organização.").message);
     } finally {
@@ -107,7 +107,7 @@ export default function OrganizationsNewClient() {
   function handleSelectSuggestedOrganization(organizationId: string) {
     const organization = orgSuggestions.find((item) => item.id === organizationId);
     if (organization) {
-      router.push(`/pages/organizations/${organization.slug}`);
+      router.push(`/organizations/${organization.slug}`);
     }
   }
 
@@ -125,11 +125,11 @@ export default function OrganizationsNewClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Organizações", url: "/pages/admin/system/organizations" },
+        { label: "Administração", url: "/admin" },
+        { label: "Organizações", url: "/admin/system/organizations" },
         {
           label: "Formulário de registo de uma organização",
-          url: "/pages/admin/organizations/new",
+          url: "/admin/organizations/new",
         },
       ]}
       title="Formulário de registo de uma organização"
@@ -149,7 +149,7 @@ export default function OrganizationsNewClient() {
               orgSuggestions={orgSuggestions}
               onSearchChange={setOrgSearchQuery}
               onSelectOrganization={handleSelectSuggestedOrganization}
-              onCreateOrganization={() => router.push("/pages/admin/organizations/new?step=2")}
+              onCreateOrganization={() => router.push("/admin/organizations/new?step=2")}
             />
           )}
 
@@ -184,7 +184,7 @@ export default function OrganizationsNewClient() {
                 onWebsiteChange={(event) => setOrgWebsite(event.target.value)}
                 onLogoChange={handleOrganizationLogoChange}
                 onLogoSecurityError={() => setOrgLogoError(POISONED_FILE_WARNING)}
-                onPrevious={() => router.push("/pages/admin/organizations/new?step=1")}
+                onPrevious={() => router.push("/admin/organizations/new?step=1")}
                 onSubmit={() => {
                   void handleCreateOrg();
                 }}
@@ -194,8 +194,8 @@ export default function OrganizationsNewClient() {
 
           {currentStep === 3 && (
             <OrganizationSuccessStep
-              onPrevious={() => router.push("/pages/admin/organizations/new?step=2")}
-              onFinish={() => router.push("/pages/admin/system/organizations")}
+              onPrevious={() => router.push("/admin/organizations/new?step=2")}
+              onFinish={() => router.push("/admin/system/organizations")}
             />
           )}
         </div>

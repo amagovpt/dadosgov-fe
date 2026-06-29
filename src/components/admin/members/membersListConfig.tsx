@@ -71,7 +71,7 @@ export function createMemberColumns({
             <Icon name="agora-line-user" className="h-32 w-32" />
           )}
           <div>
-            <TextLink href={`/pages/users/${member.user.slug}`}>
+            <TextLink href={`/users/${member.user.slug}`}>
               {member.user.first_name} {member.user.last_name}
             </TextLink>
           </div>

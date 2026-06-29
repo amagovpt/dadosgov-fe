@@ -302,9 +302,9 @@ export default function ProfileClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Perfil", url: "/pages/admin/me/profile" },
+        { label: "Perfil", url: "/admin/me/profile" },
       ]}
       title="Perfil"
       headerAction={null}
@@ -312,7 +312,7 @@ export default function ProfileClient() {
       <ProfileCard
         profile={profile}
         avatarPreview={avatarPreview}
-        onViewPublic={() => router.push(`/pages/users/${user?.slug || ""}`)}
+        onViewPublic={() => router.push(`/users/${user?.slug || ""}`)}
       />
 
       <div className="mt-32">

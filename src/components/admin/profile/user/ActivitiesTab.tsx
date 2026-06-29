@@ -80,7 +80,7 @@ export function ActivitiesTab({
                         alt={`${activity.actor?.first_name || ""} ${activity.actor?.last_name || ""}`}
                       />
                       <TextLink
-                        href={`/pages/admin/users/${activity.actor?.id}`}
+                        href={`/admin/users/${activity.actor?.id}`}
                         className="text-sm"
                       >
                         {activity.actor?.first_name} {activity.actor?.last_name}

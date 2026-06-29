@@ -97,7 +97,7 @@ export default function HarvestersNewClient() {
     try {
       const created = await createHarvester(buildPayload());
       sessionStorage.setItem("createdHarvesterId", created.id);
-      router.push(`/pages/admin/harvesters/new?step=3&id=${created.id}`);
+      router.push(`/admin/harvesters/new?step=3&id=${created.id}`);
     } catch (error: unknown) {
       setCreateError(normalizeApiError(error, "Erro ao criar o harvester.").message);
     } finally {
@@ -125,7 +125,7 @@ export default function HarvestersNewClient() {
     setIsPreviewing(true);
     setPreviewError(null);
     setPreviewJob(null);
-    router.push("/pages/admin/harvesters/new?step=2");
+    router.push("/admin/harvesters/new?step=2");
 
     try {
       const job = await previewHarvestSource(buildPayload());
@@ -151,11 +151,11 @@ export default function HarvestersNewClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Harvesters", url: "/pages/admin/system/harvesters" },
+        { label: "Administração", url: "/admin" },
+        { label: "Harvesters", url: "/admin/system/harvesters" },
         {
           label: "Formulário de publicação de um harvester",
-          url: "/pages/admin/harvesters/new",
+          url: "/admin/harvesters/new",
         },
       ]}
       title="Formulário de publicação de um harvester"
@@ -275,7 +275,7 @@ export default function HarvestersNewClient() {
               previewJob={previewJob}
               previewError={previewError}
               isCreating={isCreating}
-              onPrevious={() => router.push("/pages/admin/harvesters/new?step=1")}
+              onPrevious={() => router.push("/admin/harvesters/new?step=1")}
               onCreate={() => {
                 void handleCreate();
               }}
@@ -288,11 +288,11 @@ export default function HarvestersNewClient() {
               onViewInAdmin={() =>
                 router.push(
                   createdHarvesterId
-                    ? `/pages/admin/harvesters/${createdHarvesterId}`
-                    : "/pages/admin/system/harvesters",
+                    ? `/admin/harvesters/${createdHarvesterId}`
+                    : "/admin/system/harvesters",
                 )
               }
-              onRequestValidation={() => router.push("/pages/support")}
+              onRequestValidation={() => router.push("/ajuda-e-contactos")}
             />
           )}
         </div>

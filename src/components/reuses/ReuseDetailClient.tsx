@@ -83,7 +83,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
     if (!reuse || isTogglingFavorite) return;
@@ -164,11 +164,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               <Breadcrumb
                 darkMode={false}
                 items={[
-                  { label: "Home", url: "/" },
-                  { label: "Reutilizações", url: "/pages/reuses" },
+                  { label: "Início", url: "/" },
+                  { label: "Reutilizações", url: "/reuses" },
                   {
                     label: reuse.title,
-                    url: `/pages/reuses/${reuse.slug || reuse.id}`,
+                    url: `/reuses/${reuse.slug || reuse.id}`,
                   },
                 ]}
               />
@@ -197,7 +197,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   Veja reutilização
                 </Button>
                 {canEdit && (
-                  <Link href={`/pages/admin/me/reuses/edit?id=${reuse.id}`}>
+                  <Link href={`/admin/me/reuses/edit?id=${reuse.id}`}>
                     <Button
                       variant="primary"
                       hasIcon={true}
@@ -226,7 +226,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             <p className="admin-edit-info__activity">
               <Icon name="agora-line-user" className="admin-edit-info__clock-icon" />
               {" Criado por: "}
-              <TextLink href={`/pages/users/${reuse.owner.slug}`}>
+              <TextLink href={`/users/${reuse.owner.slug}`}>
                 {reuse.owner.first_name} {reuse.owner.last_name}
               </TextLink>
             </p>
@@ -264,7 +264,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     )}
                     {reuse.organization && (
                       <TextLink
-                        href={`/pages/organizations/${reuse.organization.slug}`}
+                        href={`/organizations/${reuse.organization.slug}`}
                         className="text-sm font-medium hover:text-primary-800"
                       >
                         {reuse.organization.name}
@@ -404,7 +404,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
-                      link: `/pages/datasets/${dataset.slug}`,
+                      link: `/datasets/${dataset.slug}`,
                     } as CardMetricsProps;
                     return <CardMetrics key={`dataset-${index}`} {...cardProps} />;
                   })}

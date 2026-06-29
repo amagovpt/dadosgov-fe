@@ -84,9 +84,9 @@ export default function SystemDataservicesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "API", url: "/pages/admin/system/dataservices" },
+        { label: "API", url: "/admin/system/dataservices" },
       ]}
       title="API"
       isLoading={isLoading}

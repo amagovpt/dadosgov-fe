@@ -162,7 +162,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: cachedOrgName || viewedOrg?.name || "Organização", url: "#" },
         { label: "Membros" },
       ]}

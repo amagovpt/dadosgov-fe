@@ -1,7 +1,7 @@
 export const RECAPTCHA_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
 export const BREADCRUMB_ITEMS = [
-  { label: "Home", url: "/" },
+  { label: "Início", url: "/" },
   { label: "Autenticação", url: "#" },
 ];
 

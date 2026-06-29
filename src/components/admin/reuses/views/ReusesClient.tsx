@@ -93,7 +93,7 @@ export default function ReusesClient() {
       createReuseColumns({
         showOwner: true,
         linkStyle: "textLink",
-        editHref: (reuse) => `/pages/admin/me/reuses/edit?id=${reuse.id}`,
+        editHref: (reuse) => `/admin/me/reuses/edit?id=${reuse.id}`,
       }),
     []
   );
@@ -101,9 +101,9 @@ export default function ReusesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Reutilizações", url: "/pages/admin/me/reuses" },
+        { label: "Reutilizações", url: "/admin/me/reuses" },
       ]}
       title="Reutilizações"
       isLoading={isLoading}
@@ -132,7 +132,7 @@ export default function ReusesClient() {
           icon="bar_chart"
           title="Sem reutilizações"
           description="Não publicou reutilizações"
-          createUrl="/pages/admin/reuses/new"
+          createUrl="/admin/reuses/new"
         />
       }
     >

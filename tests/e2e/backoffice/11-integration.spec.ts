@@ -13,12 +13,12 @@ test.describe("Backoffice - Integration smoke tests", () => {
   test("IT-01: Admin can navigate from /admin to system datasets", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/");
+    await page.goto("/admin/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
     const datasetsLink = page
-      .locator('a[href="/pages/admin/system/datasets"]')
+      .locator('a[href="/admin/system/datasets"]')
       .first();
     if ((await datasetsLink.count()) === 0) return;
 
@@ -26,16 +26,16 @@ test.describe("Backoffice - Integration smoke tests", () => {
     await page.waitForURL(/\/pages\/admin\/system\/datasets/, {
       timeout: 10000,
     });
-    expect(page.url()).toContain("/pages/admin/system/datasets");
+    expect(page.url()).toContain("/admin/system/datasets");
   });
 
   test("IT-02: Admin can reach the publish dropdown from any backoffice page", async ({
     page,
   }) => {
     const routes = [
-      "/pages/admin/me/datasets",
-      "/pages/admin/system/users",
-      "/pages/admin/system/posts",
+      "/admin/me/datasets",
+      "/admin/system/users",
+      "/admin/system/posts",
     ];
     for (const route of routes) {
       await page.goto(route);

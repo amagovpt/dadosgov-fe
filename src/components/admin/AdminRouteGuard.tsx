@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-const ADMIN_DEFAULT_ROUTE = "/pages/admin/me/datasets";
-const LOGIN_ROUTE = "/pages/login";
+const ADMIN_DEFAULT_ROUTE = "/admin/me/datasets";
+const LOGIN_ROUTE = "/login";
 
 export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading, isAdmin, hasOrganization } = useAuth();
@@ -20,14 +20,14 @@ export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (pathname?.startsWith("/pages/admin/system") && !isAdmin) {
+    if (pathname?.startsWith("/admin/system") && !isAdmin) {
       router.replace(ADMIN_DEFAULT_ROUTE);
       return;
     }
 
     if (
-      pathname?.startsWith("/pages/admin/org") &&
-      !pathname?.startsWith("/pages/admin/organizations/new") &&
+      pathname?.startsWith("/admin/org") &&
+      !pathname?.startsWith("/admin/organizations/new") &&
       !hasOrganization
     ) {
       router.replace(ADMIN_DEFAULT_ROUTE);
@@ -45,11 +45,11 @@ export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
 
   if (!user) return null;
 
-  if (pathname?.startsWith("/pages/admin/system") && !isAdmin) return null;
+  if (pathname?.startsWith("/admin/system") && !isAdmin) return null;
 
   if (
-    pathname?.startsWith("/pages/admin/org") &&
-    !pathname?.startsWith("/pages/admin/organizations/new") &&
+    pathname?.startsWith("/admin/org") &&
+    !pathname?.startsWith("/admin/organizations/new") &&
     !hasOrganization
   )
     return null;

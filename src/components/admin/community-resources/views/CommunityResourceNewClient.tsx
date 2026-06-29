@@ -25,9 +25,9 @@ export default function CommunityResourceNewClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Recursos comunitários", url: "/pages/admin/me/community-resources" },
+        { label: "Recursos comunitários", url: "/admin/me/community-resources" },
       ]}
       title="Formulário de inscrição"
     >
@@ -60,12 +60,12 @@ export default function CommunityResourceNewClient() {
         onPublicPageReady={(url) => setPublicPageUrl(url)}
         onNextStep={() =>
           router.push(
-            `/pages/admin/community-resources/new?dataset_id=${datasetId}&step=${currentStep + 1}`
+            `/admin/community-resources/new?dataset_id=${datasetId}&step=${currentStep + 1}`
           )
         }
         onPreviousStep={() =>
           router.push(
-            `/pages/admin/community-resources/new?dataset_id=${datasetId}&step=${currentStep - 1}`
+            `/admin/community-resources/new?dataset_id=${datasetId}&step=${currentStep - 1}`
           )
         }
       />

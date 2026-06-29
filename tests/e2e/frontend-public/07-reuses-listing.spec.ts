@@ -1,9 +1,9 @@
 import { test, expect, type Page } from "playwright/test";
 
-const REUSES_URL = "/pages/reuses";
+const REUSES_URL = "/reuses";
 
 // Reuse cards use Agora's <CardLinks> with blockedLink=true, so the only
-// real <a href="/pages/reuses/{slug}"> is suppressed and navigation happens
+// real <a href="/reuses/{slug}"> is suppressed and navigation happens
 // via onClick on a `.cursor-pointer` div. Tests rely on this affordance
 // rather than href matching.
 const CARD_SELECTOR = "div.cursor-pointer";

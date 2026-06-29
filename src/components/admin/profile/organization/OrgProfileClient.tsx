@@ -180,7 +180,7 @@ export default function OrgProfileClient() {
     try {
       await deleteOrganization(org.id);
       hide();
-      router.push("/pages/admin/me/profile");
+      router.push("/admin/me/profile");
     } catch (error) {
       console.error("Error deleting organization:", error);
       hide();
@@ -229,7 +229,7 @@ export default function OrgProfileClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: org?.name || cachedOrgName || "Organização", url: "#" },
         { label: "Perfil" },
       ]}

@@ -40,7 +40,7 @@ export default function ReusesEditAssociatedDatasetsSection({
         {associatedDatasets.map((dataset) => (
           <div key={dataset.id} className="relative group/card">
             <CardMetrics
-              link={`/pages/datasets/${dataset.slug}`}
+              link={`/datasets/${dataset.slug}`}
               title={dataset.title}
               description={dataset.description || ""}
               last_modified={formatDateToTimeAgo(dataset.last_modified)}

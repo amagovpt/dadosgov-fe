@@ -31,7 +31,7 @@ const markdownComponents = {
   p: ({ children }: any) => <p className="mb-16 text-m-regular leading-7">{children}</p>,
   a: ({ href, children }: any) => {
     const linkOverrides: Record<string, { href: string; text?: string }> = {
-      "/docapi/": { href: "/pages/faqs/api-documentation" },
+      "/docapi/": { href: "/recursos/desenvolvimento/referencia-api" },
       "http://www.mejoratuescuela.org": {
         href: "https://www.redalyc.org/journal/5475/547567705004/",
       },
@@ -46,7 +46,7 @@ const markdownComponents = {
           href: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
           text: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
         },
-      "/pt/pages/faqs/about_opendata/": { href: "/pages/about-open-data" },
+      "/pt/pages/faqs/about_opendata/": { href: "/recursos/como-usar-o-portal/sobre-dados-abertos" },
       "/pages/faqs/licenses/": { href: "/" },
     };
     const normalizedHref = href?.trim().replace(/^\/pt/, "");
@@ -66,7 +66,7 @@ const markdownComponents = {
     );
   },
   ul: ({ children }: any) => (
-    <ul className="mb-24 text-m-regular list-disc space-y-12 pl-48 leading-7">{children}</ul>
+    <ul className="mb-24 list-disc space-y-12 pl-48 text-m-regular leading-7">{children}</ul>
   ),
   ol: ({ children }: any) => (
     <ol className="mb-24 list-decimal space-y-12 pl-48 text-m-regular leading-7">{children}</ol>
@@ -87,7 +87,7 @@ const markdownComponents = {
     );
   },
   img: ({ src, alt }: any) => (
-    <img src={src} alt={alt ?? ""} className="max-w-full h-auto mb-[16px] rounded" />
+    <img src={src} alt={alt ?? ""} className="rounded mb-[16px] h-auto max-w-full" />
   ),
   strong: ({ children }: any) => <strong>{children}</strong>,
   em: ({ children }: any) => <em>{children}</em>,
@@ -101,15 +101,15 @@ function sanitizeMarkdown(content: string): string {
     .replace(/\bdados gov\b/g, "dados.gov.pt")
     .replace(
       /A certificação pode ser pedida através do e-mail dados@ama\.pt\./g,
-      "O pedido de certificação deve ser realizado através da página [Ajuda e Contactos](/pages/support)."
+      "O pedido de certificação deve ser realizado através da página [Ajuda e Contactos](/ajuda-e-contactos)."
     )
     .replace(
       /A ARTE também poderá ajudar neste processo, incluindo colaborar na organização de workshops \/ eventos com vista a promover estas interações, contacte-nos em dados@ama\.pt\./g,
-      "A ARTE também poderá apoiar este processo, nomeadamente através da colaboração na organização de workshops e eventos que promovam estas interações. Para mais informações, consulte a página [Ajuda e Contactos](/pages/support)."
+      "A ARTE também poderá apoiar este processo, nomeadamente através da colaboração na organização de workshops e eventos que promovam estas interações. Para mais informações, consulte a página [Ajuda e Contactos](/ajuda-e-contactos)."
     )
     .replace(
       /Para pedidos de certificação, enviar e-mail para: dados@ama\.pt\./g,
-      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/pages/support)."
+      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/ajuda-e-contactos)."
     );
 }
 
@@ -125,16 +125,16 @@ export function GitHubArticlePage({
       <main className="flex-grow pt-32">
         <div className="container mx-auto px-4">
           {/* Breadcrumbs */}
-          <div className="pt-[32px] mb-[64px]">
+          <div className="mb-[64px] pt-[32px]">
             <Breadcrumb items={breadcrumbItems} />
           </div>
         </div>
 
-        <div className="bg-[#F7F8FA] pt-[64px] pb-[38px] pl-[112px] pr-[112px]">
+        <div className="bg-[#F7F8FA] pb-[38px] pl-[112px] pr-[112px] pt-[64px]">
           <div className="container mx-auto px-4">
             {/* Main Content */}
             <div>
-              <div className="text-[#2b363c] flex flex-col gap-[32px]">
+              <div className="flex flex-col gap-[32px] text-[#2b363c]">
                 {cleanContent ? (
                   <div className="max-w-[592px]">
                     <ReactMarkdown
@@ -150,7 +150,6 @@ export function GitHubArticlePage({
                     Não foi possível carregar o conteúdo.
                   </p>
                 )}
-
               </div>
             </div>
           </div>
