@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import OrgCommunityResourcesClient from "@/components/admin/community-resources/OrgCommunityResourcesClient";
+import OrgCommunityResourcesClient from "@/components/admin/community-resources/views/OrgCommunityResourcesClient";
 
 export const metadata: Metadata = {
   title: "Recursos comunitários - Organização - Admin - dados.gov.pt",

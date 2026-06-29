@@ -12,7 +12,29 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import { TopicCard } from '@/components/tematic-areas/TopicCard'
 import { getTematicAreas } from '@/service/queries/topics-areas/tematic-areas'
+import { Metadata } from 'next'
 
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+    const { slug } = await params;
+
+    const dataTopic = await getDataTopics(slug, "pt")
+
+    if (!dataTopic) {
+        return {
+            title: "404 - Não foi encontrada",
+            description: "Área Temática não foi encontrada",
+        };
+    }
+
+    return {
+        title: dataTopic.title,
+        description: dataTopic.description,
+    };
+}
 
 export default async function Page({
     params,

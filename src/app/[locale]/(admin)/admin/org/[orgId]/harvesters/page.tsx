@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import OrgHarvestersClient from "@/components/admin/harvesters/OrgHarvestersClient";
+import OrgHarvestersClient from "@/components/admin/harvesters/views/OrgHarvestersClient";
 
 export const metadata: Metadata = {
   title: "Harvesters - Organização - Admin - dados.gov.pt",

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import DatasetsNewClient from "@/components/admin/datasets/DatasetsNewClient";
+import DatasetsNewClient from "@/components/admin/datasets/views/DatasetsNewClient";
 
 export const metadata: Metadata = {
   title: "Publique em dados.gov.pt - Admin - dados.gov.pt",

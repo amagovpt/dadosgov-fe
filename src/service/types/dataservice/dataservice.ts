@@ -2,6 +2,12 @@ import type { Organization, UserRef } from '@/service/types/identity';
 import type { Metric } from '@/service/types/shared';
 import type { DatasetRef } from '@/service/types/dataset';
 
+export interface DataservicePermissions {
+  edit: boolean;
+  delete: boolean;
+  read: boolean;
+}
+
 export interface Dataservice {
   id: string;
   title: string;
@@ -31,6 +37,8 @@ export interface Dataservice {
   private: boolean;
   featured: boolean;
   datasets: DatasetRef[];
+  // Backend-computed authorization for the current user (single source of truth).
+  permissions?: DataservicePermissions;
 }
 
 export interface DataserviceCreatePayload {

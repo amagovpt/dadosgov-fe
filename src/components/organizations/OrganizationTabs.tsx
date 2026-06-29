@@ -120,7 +120,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
         {/* Tab 2: Conjuntos de dados */}
         <Tab>
-          <TabHeader> Conjuntos de dados ({organization.metrics?.datasets || 0})</TabHeader>
+          <TabHeader>
+            {" "}
+            Conjuntos de dados ({datasetsResponse?.total ?? organization.metrics?.datasets ?? 0})
+          </TabHeader>
           <TabBodyWrapper>
             <div>
               <h3 className="mb-24 text-base font-medium text-neutral-900">
@@ -242,7 +245,6 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
             </div>
           </TabBodyWrapper>
         </Tab>
-
 
         {/* Tab 5: Discussões */}
         <Tab>

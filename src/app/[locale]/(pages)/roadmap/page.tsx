@@ -1,5 +1,4 @@
 import { Accordion } from '@/components/Shared/Accordion';
-import Anchor from '@/components/Shared/Anchor';
 import { Typograph } from '@/components/Shared/Generics/Typograph';
 import Hero from '@/components/Shared/Hero';
 import SimpleSiteMap from '@/components/Shared/SiteMap/SimpleSiteMap'
@@ -21,8 +20,7 @@ export default async function page() {
         followAlongAndJoinIn,
         history,
         historyOfDevelopment,
-        actions,
-        actionTitle } = await getRoadmapPage("pt");
+    } = await getRoadmapPage("pt");
 
     const tableHeaders = [
         "Funcionalidade",
@@ -140,27 +138,7 @@ export default async function page() {
                             ))}
                         </Accordion.Root>
                     </div>
-                    {actions && actions.length > 0 && (
-                        <div className="container flex flex-col gap-16 pb-32">
-                            <div className="text-primary-900 w-full flex flex-col gap-16">
-                                <h2 className="text-2xl-bold">{actionTitle}</h2>
-                            </div>
-                            <ul className="pl-6">
-
-                                {actions.map((action, index) => (<li key={index} className="ml-32">
-                                    <Anchor href={action.href || "#"} hasIcon={true} trailingIcon="agora-line-external-link" trailingIconHover="agora-solid-external-link">
-                                        {action.children}
-                                    </Anchor>
-                                </li>))}
-                            </ul>
-
-                        </div>
-                    )}
-
-
-
                 </div >
-
             </div >
         </main >
     )

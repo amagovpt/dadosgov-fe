@@ -22,3 +22,13 @@ export interface Sitemap {
   title: string;
   links: Anchor[];
 }
+
+export interface FileDocument {
+  id: string
+  url: string
+  fileName: string
+  slug: string
+  fileSize: number
+  fileType: string
+  metadataText: string
+}
