@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import PostsEditClient from "@/components/admin/posts/PostsEditClient";
+import PostsEditClient from "@/components/admin/posts/views/PostsEditClient";
 
 export default function PostEditPage() {
   return (

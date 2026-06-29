@@ -44,13 +44,23 @@ export default function RecipientSelect({
 
   useEffect(() => {
     const q = searchQuery.trim();
+    let frameId: number | null = null;
+
     if (q.length < MIN_QUERY_LENGTH) {
-      setUsers([]);
-      setOrgs([]);
-      setIsSearching(false);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setUsers([]);
+        setOrgs([]);
+        setIsSearching(false);
+      });
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
-    setIsSearching(true);
+
+    frameId = requestAnimationFrame(() => {
+      setIsSearching(true);
+    });
+
     const timer = setTimeout(async () => {
       try {
         const [u, o] = await Promise.all([
@@ -66,7 +76,11 @@ export default function RecipientSelect({
         setIsSearching(false);
       }
     }, DEBOUNCE_MS);
-    return () => clearTimeout(timer);
+
+    return () => {
+      if (frameId !== null) cancelAnimationFrame(frameId);
+      clearTimeout(timer);
+    };
   }, [searchQuery]);
 
   useEffect(() => {

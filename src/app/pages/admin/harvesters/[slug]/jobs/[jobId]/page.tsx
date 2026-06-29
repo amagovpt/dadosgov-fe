@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import HarvestJobDetailClient from "@/components/admin/harvesters/HarvestJobDetailClient";
+import HarvestJobDetailClient from "@/components/admin/harvesters/views/HarvestJobDetailClient";
 
 export const metadata: Metadata = {
   title: "Detalhe do trabalho - Admin - dados.gov.pt",

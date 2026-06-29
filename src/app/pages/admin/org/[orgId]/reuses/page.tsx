@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import OrgReusesClient from "@/components/admin/reuses/OrgReusesClient";
+import OrgReusesClient from "@/components/admin/reuses/views/OrgReusesClient";
 
 export const metadata: Metadata = {
   title: "Reutilizações - Organização - Admin - dados.gov.pt",

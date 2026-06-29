@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import HarvesterDetailClient from "@/components/admin/harvesters/HarvesterDetailClient";
+import HarvesterDetailClient from "@/components/admin/harvesters/views/HarvesterDetailClient";
 
 export const metadata: Metadata = {
   title: "Detalhe do harvester - Admin - dados.gov.pt",

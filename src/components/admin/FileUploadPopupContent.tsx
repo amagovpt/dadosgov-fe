@@ -5,6 +5,7 @@ import { Button, Icon, usePopupContext } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { fetchAllowedExtensions } from "@/service/api/datasets";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
+import { validateFileExtensions } from "@/lib/files/validateFileExtensions";
 
 interface FileUploadPopupContentProps {
   onConfirm: (files: File[]) => void;
@@ -24,26 +25,7 @@ export default function FileUploadPopupContent({
   useEffect(() => {
     if (allowedExtensions !== null) return;
     fetchAllowedExtensions().then((exts) => setAllowedExtensions(exts));
-  }, []);
-
-  const getExtension = (filename: string) =>
-    filename.includes(".") ? filename.split(".").pop()!.toLowerCase() : "";
-
-  const validateFiles = (files: File[]): { valid: File[]; invalid: string[] } => {
-    if (!allowedExtensions || allowedExtensions.length === 0) return { valid: files, invalid: [] };
-    const allowed = allowedExtensions.map((e) => e.toLowerCase());
-    const valid: File[] = [];
-    const invalid: string[] = [];
-    for (const file of files) {
-      const ext = getExtension(file.name);
-      if (!ext || !allowed.includes(ext)) {
-        invalid.push(file.name);
-      } else {
-        valid.push(file);
-      }
-    }
-    return { valid, invalid };
-  };
+  }, [allowedExtensions]);
 
   const handleConfirm = () => {
     if (extensionErrors.length > 0 && pendingFiles.length === 0) {
@@ -68,7 +50,7 @@ export default function FileUploadPopupContent({
             onChange={(e) => {
               const picked = Array.from((e.target as HTMLInputElement).files || []);
               if (picked.length === 0) return;
-              const { valid, invalid } = validateFiles(picked);
+              const { valid, invalid } = validateFileExtensions(picked, allowedExtensions);
               setExtensionErrors(invalid);
               setSecurityErrors([]);
               setPendingFiles((prev) => {

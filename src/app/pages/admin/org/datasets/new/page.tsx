@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import OrgDatasetsNewClient from "@/components/admin/datasets/OrgDatasetsNewClient";
+import OrgDatasetsNewClient from "@/components/admin/datasets/views/OrgDatasetsNewClient";
 
 export const metadata: Metadata = {
   title: "Publique em dados.gov.pt - Organização - Admin - dados.gov.pt",
