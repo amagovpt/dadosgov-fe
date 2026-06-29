@@ -41,13 +41,7 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
           />
         );
       case "section-datastory-bignumbers":
-        return (
-          <BigNumbers
-            key={`section-${index}`}
-            {...section}
-            className={getSectionClassname(index)}
-          />
-        );
+        return <BigNumbers key={`section-${index}`} {...section} />;
       case "section-datastory-iframe":
         return (
           <Iframe

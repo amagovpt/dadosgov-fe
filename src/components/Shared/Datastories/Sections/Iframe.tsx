@@ -9,7 +9,7 @@ export type IframeI = IframeSection & { className?: string };
 export default function Iframe({ id, title, description, iframe, className }: IframeI) {
   return (
     <Section
-      className={twMerge("flex flex-col items-center justify-center bg-primary-100", className)}
+      className={twMerge("flex flex-col gap-32 lg:gap-64 items-center justify-center bg-primary-100", className)}
     >
       <InfoBlock.Root className={"gap-64 pt-64"}>
         <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
