@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import {
   Button,
@@ -14,10 +14,11 @@ import {
   DropdownSection,
   DropdownOption,
   CardLinks,
-  Tag,
+  Icon,
+  Pill,
 } from "@ama-pt/agora-design-system";
 import { createDataservice, updateDataservice } from "@/service/api/dataservices";
-import { fetchMyDatasets } from "@/service/api/datasets";
+import { fetchMyDatasets, fetchDataset } from "@/service/api/datasets";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { searchDatasets } from "@/service/api/search";
 import type { Dataservice } from "@/service/types/dataservice";
@@ -26,7 +27,13 @@ import AuxiliarList from "@/components/admin/AuxiliarList";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 import AppIcon from "@/components/Primitives/AppIcon";
+import CardMetrics, { CardMetricsProps } from "@/components/Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
+import {
+  AUDIENCE_CONDITIONS,
+  AUDIENCE_ROLES,
+  RESTRICTION_REASONS,
+} from "@/utils/dataserviceLabels";
 
 interface ApiRegistrationClientProps {
   currentStep: number;
@@ -48,9 +55,15 @@ export default function ApiRegistrationClient({
   const [machineDocUrl, setMachineDocUrl] = useState("");
   const [technicalDocUrl, setTechnicalDocUrl] = useState("");
   const [rateLimiting, setRateLimiting] = useState("");
+  const [rateLimitingUrl, setRateLimitingUrl] = useState("");
   const [availability, setAvailability] = useState("");
   const [authRequestUrl, setAuthRequestUrl] = useState("");
   const [businessDocUrl, setBusinessDocUrl] = useState("");
+  // Restricted-access details (only sent when accessType === "restricted").
+  // Maps each audience role to its selected condition ("" = not set).
+  const [accessAudiences, setAccessAudiences] = useState<Record<string, string>>({});
+  const [reasonCategory, setReasonCategory] = useState("");
+  const [reasonText, setReasonText] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,13 +71,22 @@ export default function ApiRegistrationClient({
   // Producer identity: "user" (publish in my own name) or an organization id.
   // The Agora InputSelect reports the selected value into this ref's `.current`.
   const producerRef = useRef("user");
-  // Step 2: link internal datasets to the created API.
+  // Step 2: link internal datasets to the created API. The two input methods
+  // write to independent buckets so neither clobbers the other:
+  // `dropdownDatasets` is owned by the search multi-select (replace semantics),
+  // `linkDatasets` by the "add by URL" field. The persisted/displayed selection
+  // is their deduped union.
   const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
-  const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([]);
+  const [dropdownDatasets, setDropdownDatasets] = useState<Dataset[]>([]);
+  const [linkDatasets, setLinkDatasets] = useState<Dataset[]>([]);
   const [datasetSearch, setDatasetSearch] = useState("");
   const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
   const [isLinkingDatasets, setIsLinkingDatasets] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  // Step 2: add a portal dataset by pasting its public URL.
+  const [datasetLinkUrl, setDatasetLinkUrl] = useState("");
+  const [datasetLinkError, setDatasetLinkError] = useState<string | null>(null);
+  const [isResolvingLink, setIsResolvingLink] = useState(false);
 
   // Preload the dataset pool with the user's own datasets and every dataset
   // from each organization they belong to. The search bar still queries the
@@ -94,8 +116,20 @@ export default function ApiRegistrationClient({
     return () => clearTimeout(timer);
   }, [datasetSearch]);
 
+  // Deduped union of both buckets — the persisted/displayed selection.
+  const selectedDatasets = useMemo(() => {
+    const seen = new Set<string>();
+    return [...dropdownDatasets, ...linkDatasets].filter((d) => {
+      if (seen.has(d.id)) return false;
+      seen.add(d.id);
+      return true;
+    });
+  }, [dropdownDatasets, linkDatasets]);
+
+  // Options offered by the search multi-select. Excludes link-added datasets so
+  // the dropdown never reports (and thus can't drop) selections it doesn't own.
   const availableDatasets = (() => {
-    const combined: Dataset[] = [...selectedDatasets, ...datasetSearchResults, ...myDatasets];
+    const combined: Dataset[] = [...dropdownDatasets, ...datasetSearchResults, ...myDatasets];
     const seen = new Set<string>();
     return combined.filter((d) => {
       if (seen.has(d.id) || d.archived || d.deleted) return false;
@@ -103,6 +137,47 @@ export default function ApiRegistrationClient({
       return true;
     });
   })();
+
+  const removeDataset = (id: string) => {
+    setDropdownDatasets((prev) => prev.filter((d) => d.id !== id));
+    setLinkDatasets((prev) => prev.filter((d) => d.id !== id));
+  };
+
+  // Resolve a pasted dados.gov.pt dataset URL to a portal dataset and add it to
+  // the selection. The backend only accepts internal dataset references, so the
+  // last path segment (the slug) is used to fetch the matching dataset.
+  const handleAddDatasetLink = async () => {
+    const raw = datasetLinkUrl.trim();
+    if (!raw) return;
+    setDatasetLinkError(null);
+
+    let slug = "";
+    try {
+      const path = new URL(raw).pathname;
+      slug = path.split("/").filter(Boolean).pop() || "";
+    } catch {
+      slug = raw.split("/").filter(Boolean).pop() || "";
+    }
+    if (!slug) {
+      setDatasetLinkError("URL inválido. Cole o link de um conjunto de dados deste portal.");
+      return;
+    }
+
+    setIsResolvingLink(true);
+    try {
+      const dataset = await fetchDataset(slug);
+      if (selectedDatasets.some((d) => d.id === dataset.id)) {
+        setDatasetLinkError("Este conjunto de dados já foi adicionado.");
+        return;
+      }
+      setLinkDatasets((prev) => [...prev, dataset]);
+      setDatasetLinkUrl("");
+    } catch {
+      setDatasetLinkError("Conjunto de dados não encontrado neste portal.");
+    } finally {
+      setIsResolvingLink(false);
+    }
+  };
 
   const handleStep2Next = async () => {
     if (createdDataservice && selectedDatasets.length > 0) {
@@ -136,6 +211,14 @@ export default function ApiRegistrationClient({
       const producer = producerRef.current;
       const organization =
         producer && producer !== "user" ? producer : undefined;
+      const isRestricted = accessType === "restricted";
+      const audiences = isRestricted
+        ? AUDIENCE_ROLES.filter((r) => accessAudiences[r.role]).map((r) => ({
+            role: r.role,
+            condition: accessAudiences[r.role],
+          }))
+        : undefined;
+      const usesOtherReason = reasonCategory === "other";
       const dataservice = await createDataservice({
         title: apiName.trim(),
         organization,
@@ -147,8 +230,14 @@ export default function ApiRegistrationClient({
         business_documentation_url: businessDocUrl.trim() || undefined,
         authorization_request_url: authRequestUrl.trim() || undefined,
         rate_limiting: rateLimiting.trim() || undefined,
+        rate_limiting_url: rateLimitingUrl.trim() || undefined,
         availability: availability.trim() ? parseFloat(availability) : undefined,
         access_type: accessType,
+        access_audiences: audiences,
+        access_type_reason_category:
+          isRestricted && reasonCategory && !usesOtherReason ? reasonCategory : undefined,
+        access_type_reason:
+          isRestricted && usesOtherReason ? reasonText.trim() || undefined : undefined,
         private: true,
       });
 
@@ -170,14 +259,17 @@ export default function ApiRegistrationClient({
   };
 
   // Step 3: the API was created as a draft (private: true) in step 1. Publishing
-  // flips it public; saving keeps it as a draft. Both then return to the list.
+  // flips it public and redirects to the API's public page; saving keeps it as a
+  // draft and returns to the list.
   const handlePublish = async () => {
     if (!createdDataservice) return;
     setIsPublishing(true);
     setApiError(null);
     try {
       await updateDataservice(createdDataservice.id, { private: false });
-      window.location.href = "/pages/admin/me/dataservices";
+      window.location.href = createdDataservice.slug
+        ? `/pages/dataservices/${createdDataservice.slug}`
+        : "/pages/admin/me/dataservices";
     } catch {
       setApiError("Erro ao publicar a API. Tente novamente.");
       setIsPublishing(false);
@@ -406,15 +498,6 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputText
-                    label="Limite de chamadas"
-                    placeholder="Insira aqui"
-                    id="api-rate-limit"
-                    value={rateLimiting}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setRateLimiting(e.target.value)
-                    }
-                  />
-                  <InputText
                     label="Disponibilidade"
                     placeholder="99,9"
                     id="api-availability"
@@ -456,6 +539,65 @@ export default function ApiRegistrationClient({
                       />
                     </div>
                   </div>
+
+                  {accessType === "restricted" && (
+                    <>
+                      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                        {AUDIENCE_ROLES.map((role) => (
+                          <InputSelect
+                            key={role.role}
+                            label={role.label}
+                            placeholder="Selecione uma opção"
+                            id={`access-audience-${role.role}`}
+                            onChange={(options) =>
+                              setAccessAudiences((prev) => ({
+                                ...prev,
+                                [role.role]: (options[0]?.value as string) || "",
+                              }))
+                            }
+                          >
+                            <DropdownSection name={`audience-${role.role}`}>
+                              {AUDIENCE_CONDITIONS.map((condition) => (
+                                <DropdownOption key={condition.value} value={condition.value}>
+                                  {condition.label}
+                                </DropdownOption>
+                              ))}
+                            </DropdownSection>
+                          </InputSelect>
+                        ))}
+                      </div>
+
+                      <InputSelect
+                        label="Motivo da restrição"
+                        placeholder="Selecione uma opção"
+                        id="access-reason-category"
+                        onChange={(options) =>
+                          setReasonCategory((options[0]?.value as string) || "")
+                        }
+                      >
+                        <DropdownSection name="reason-category">
+                          {RESTRICTION_REASONS.map((reason) => (
+                            <DropdownOption key={reason.value} value={reason.value}>
+                              {reason.label}
+                            </DropdownOption>
+                          ))}
+                        </DropdownSection>
+                      </InputSelect>
+
+                      {reasonCategory === "other" && (
+                        <InputText
+                          label="Especifique o motivo da restrição"
+                          placeholder="Descreva o motivo"
+                          id="access-reason-text"
+                          value={reasonText}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setReasonText(e.target.value)
+                          }
+                        />
+                      )}
+                    </>
+                  )}
+
                   <InputText
                     label="Link para a ferramenta de autorização de acesso"
                     placeholder="Insira o URL aqui"
@@ -472,6 +614,29 @@ export default function ApiRegistrationClient({
                     value={businessDocUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setBusinessDocUrl(e.target.value)
+                    }
+                  />
+                </div>
+
+                <h2 className="admin-page__section-title">Termos de uso</h2>
+
+                <div className="admin-page__fields-group">
+                  <InputText
+                    label="Limite de chamadas"
+                    placeholder="Insira aqui"
+                    id="api-rate-limit"
+                    value={rateLimiting}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setRateLimiting(e.target.value)
+                    }
+                  />
+                  <InputText
+                    label="Link para a documentação sobre limites de chamadas"
+                    placeholder="https://..."
+                    id="api-rate-limit-url"
+                    value={rateLimitingUrl}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setRateLimitingUrl(e.target.value)
                     }
                   />
                 </div>
@@ -513,7 +678,7 @@ export default function ApiRegistrationClient({
                   onSearchInputChange={setDatasetSearch}
                   onChange={(options) => {
                     const selectedIds = options.map((o) => String(o.value));
-                    setSelectedDatasets(
+                    setDropdownDatasets(
                       availableDatasets.filter((d) => selectedIds.includes(d.id))
                     );
                   }}
@@ -523,7 +688,7 @@ export default function ApiRegistrationClient({
                       <DropdownOption
                         key={dataset.id}
                         value={dataset.id}
-                        selected={selectedDatasets.some((s) => s.id === dataset.id)}
+                        selected={dropdownDatasets.some((s) => s.id === dataset.id)}
                       >
                         {dataset.title}
                       </DropdownOption>
@@ -532,23 +697,81 @@ export default function ApiRegistrationClient({
                 </InputSelect>
 
                 {selectedDatasets.length > 0 && (
-                  <div className="mt-16 flex flex-wrap gap-8">
-                    {selectedDatasets.map((dataset) => (
-                      <Tag
-                        key={dataset.id}
-                        aria-label={`Remover ${dataset.title}`}
-                        onClick={() =>
-                          setSelectedDatasets((prev) =>
-                            prev.filter((d) => d.id !== dataset.id)
-                          )
-                        }
-                      >
-                        {dataset.title}
-                      </Tag>
-                    ))}
+                  <div className="mt-16 grid grid-cols-1 gap-32 sm:grid-cols-2">
+                    {selectedDatasets.map((dataset) => {
+                      const cardProps = {
+                        ...dataset,
+                        last_modified: formatDateToTimeAgo(dataset.last_modified),
+                        link: `/pages/datasets/${dataset.slug}`,
+                      } as CardMetricsProps;
+                      return (
+                        <div key={dataset.id} className="relative h-full">
+                          <CardMetrics {...cardProps} />
+                          <button
+                            type="button"
+                            title="Remover"
+                            aria-label={`Remover ${dataset.title}`}
+                            className="rounded group absolute right-8 top-8 z-10 p-4"
+                            onClick={(e: React.MouseEvent) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removeDataset(dataset.id);
+                            }}
+                          >
+                            <Icon
+                              name="agora-line-trash"
+                              className="block h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:hidden"
+                            />
+                            <Icon
+                              name="agora-solid-trash"
+                              className="hidden h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:block"
+                            />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
+                <div className="admin-page__divider-or">
+                  <span className="admin-page__divider-or-text">ou</span>
+                </div>
+
+                <div className="flex flex-col gap-8">
+                  <InputText
+                    label="Link para o conjunto de dados"
+                    placeholder="https://..."
+                    id="dataset-link-url"
+                    value={datasetLinkUrl}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setDatasetLinkUrl(e.target.value);
+                      if (datasetLinkError) setDatasetLinkError(null);
+                    }}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddDatasetLink();
+                      }
+                    }}
+                    hasError={!!datasetLinkError}
+                  />
+                  {datasetLinkError && (
+                    <span className="text-sm text-danger-600">{datasetLinkError}</span>
+                  )}
+                  <div className="flex justify-end">
+                    <Button
+                      appearance="outline"
+                      variant="primary"
+                      hasIcon
+                      leadingIcon="agora-line-plus-circle"
+                      leadingIconHover="agora-solid-plus-circle"
+                      onClick={handleAddDatasetLink}
+                      disabled={isResolvingLink || !datasetLinkUrl.trim()}
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
+                </div>
 
                 <div className="admin-page__actions">
                   <Button
@@ -592,6 +815,15 @@ export default function ApiRegistrationClient({
               />
 
               <div className="agora-card-links-admin-px0">
+                <div className="mb-8">
+                  {createdDataservice?.archived_at ? (
+                    <Pill variant="neutral">ARQUIVADO</Pill>
+                  ) : (
+                    (createdDataservice?.private ?? true) && (
+                      <Pill variant="warning">RASCUNHO</Pill>
+                    )
+                  )}
+                </div>
                 <CardLinks
                   onClick={() => {}}
                   className="cursor-pointer text-neutral-900"
