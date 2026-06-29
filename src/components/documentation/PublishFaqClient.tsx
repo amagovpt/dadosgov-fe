@@ -9,10 +9,10 @@ export default function PublishFaqClient({ initialContent }: { initialContent?: 
       title="Como publicar dados?"
       initialContent={initialContent}
       breadcrumbItems={[
-        { label: "Home", url: "/" },
-        { label: "Recursos", url: "#" },
-        { label: "Como usar o portal", url: "#" },
-        { label: "Como publicar dados", url: "/pages/faqs/publish" },
+        { label: "Início", url: "/" },
+        { label: "Recursos", url: "/recursos" },
+        { label: "Como usar o portal", url: "/recursos/como-usar-o-portal" },
+        { label: "Como publicar dados", url: "/recursos/como-usar-o-portal/como-publicar-dados" },
       ]}
     />
   );

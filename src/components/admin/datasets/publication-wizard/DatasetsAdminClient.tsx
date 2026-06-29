@@ -523,10 +523,10 @@ export default function DatasetsAdminClient({
     onNextStep,
     onComplete,
     navigateToStep: (nextStep, nextDatasetId) => {
-      router.push(`/pages/admin/datasets/new?step=${nextStep}&datasetId=${nextDatasetId}`);
+      router.push(`/admin/datasets/new?step=${nextStep}&datasetId=${nextDatasetId}`);
     },
     finishWizard: () => {
-      router.push("/pages/admin/me/datasets");
+      router.push("/admin/me/datasets");
     },
   });
 

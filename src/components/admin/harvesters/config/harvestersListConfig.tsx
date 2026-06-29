@@ -134,7 +134,7 @@ export function createSystemHarvesterColumns({
       id: "name",
       header: "Nome",
       renderCell: (harvester) => (
-        <TextLink href={`/pages/admin/harvesters/${harvester.id}`}>{harvester.name}</TextLink>
+        <TextLink href={`/admin/harvesters/${harvester.id}`}>{harvester.name}</TextLink>
       ),
     },
     {
@@ -213,11 +213,11 @@ export function createSystemHarvesterColumns({
             viewAction={
               can(harvester, "edit")
                 ? undefined
-                : { href: `/pages/admin/harvesters/${harvester.id}` }
+                : { href: `/admin/harvesters/${harvester.id}` }
             }
             editAction={
               can(harvester, "edit")
-                ? { href: `/pages/admin/harvesters/${harvester.id}?tab=config` }
+                ? { href: `/admin/harvesters/${harvester.id}?tab=config` }
                 : undefined
             }
           />

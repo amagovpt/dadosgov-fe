@@ -99,9 +99,9 @@ export default function SystemPostsClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Artigos", url: "/pages/admin/system/posts" },
+        { label: "Artigos", url: "/admin/system/posts" },
       ]}
       title="Artigos"
       isLoading={isLoading}
@@ -157,7 +157,7 @@ export default function SystemPostsClient() {
           hasIcon
           leadingIcon="agora-line-plus-circle"
           leadingIconHover="agora-solid-plus-circle"
-          onClick={() => router.push("/pages/admin/system/posts/new")}
+          onClick={() => router.push("/admin/system/posts/new")}
         >
           Criar um artigo
         </Button>

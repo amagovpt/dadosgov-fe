@@ -109,7 +109,7 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: orgName || "Organização", url: "#" },
         { label: "Discussões" },
       ]}

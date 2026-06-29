@@ -3,11 +3,11 @@ import { test, expect } from "playwright/test";
 const BASE_URL = "http://localhost:3000";
 
 /**
- * Account migration flow at /pages/migrate-account.
+ * Account migration flow at /migrate-account.
  *
  * The page is a multi-step wizard (search → confirm-account → choose-method →
  * verify-code | verify-password → success) gated by `fetchMigrationPending()`.
- * Without a pending migration the client redirects to /pages/login. These
+ * Without a pending migration the client redirects to /login. These
  * tests exercise the page surface that is reachable without a valid migration
  * cookie; deeper steps require backend-seeded migration state and stay skipped.
  */
@@ -15,11 +15,11 @@ test.describe("Migrate Account Page", () => {
   test("MA-01: Page loads and either redirects to login or shows search step", async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/pages/migrate-account`);
+    await page.goto(`${BASE_URL}/migrate-account`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    // No pending migration → redirect to /pages/login.
+    // No pending migration → redirect to /login.
     // With pending migration → search/confirm step rendered.
     const url = page.url();
     expect(url).toMatch(/\/pages\/(login|migrate-account)/);
@@ -28,11 +28,11 @@ test.describe("Migrate Account Page", () => {
   test("MA-02: Breadcrumb shows Home › Migrar conta when migration is pending", async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/pages/migrate-account`);
+    await page.goto(`${BASE_URL}/migrate-account`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    if (page.url().includes("/pages/migrate-account")) {
+    if (page.url().includes("/migrate-account")) {
       const breadcrumb = page.getByText("Migrar conta", { exact: false });
       await expect(breadcrumb.first()).toBeVisible({ timeout: 5000 });
     }
@@ -41,11 +41,11 @@ test.describe("Migrate Account Page", () => {
   test("MA-03: Search step exposes email + name inputs with stable IDs", async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/pages/migrate-account`);
+    await page.goto(`${BASE_URL}/migrate-account`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    if (!page.url().includes("/pages/migrate-account")) {
+    if (!page.url().includes("/migrate-account")) {
       test.skip(true, "No pending migration in this environment");
     }
 
@@ -67,11 +67,11 @@ test.describe("Migrate Account Page", () => {
   test("MA-04: Procurar conta button is disabled when search inputs are empty", async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/pages/migrate-account`);
+    await page.goto(`${BASE_URL}/migrate-account`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    if (!page.url().includes("/pages/migrate-account")) {
+    if (!page.url().includes("/migrate-account")) {
       test.skip(true, "No pending migration in this environment");
     }
 
@@ -85,11 +85,11 @@ test.describe("Migrate Account Page", () => {
   test("MA-05: \"Criar conta nova\" skip button is present in search step", async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/pages/migrate-account`);
+    await page.goto(`${BASE_URL}/migrate-account`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    if (!page.url().includes("/pages/migrate-account")) {
+    if (!page.url().includes("/migrate-account")) {
       test.skip(true, "No pending migration in this environment");
     }
 
@@ -102,11 +102,11 @@ test.describe("Migrate Account Page", () => {
   test("MA-06: ?no_email=true forces the search step to render", async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/pages/migrate-account?no_email=true`);
+    await page.goto(`${BASE_URL}/migrate-account?no_email=true`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    if (!page.url().includes("/pages/migrate-account")) {
+    if (!page.url().includes("/migrate-account")) {
       test.skip(true, "No pending migration in this environment");
     }
 

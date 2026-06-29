@@ -64,7 +64,7 @@ export function useDatasetLifecycleActions({
     setIsSubmitting(true);
     try {
       await updateDataset(dataset.id, { archived: new Date().toISOString() });
-      push("/pages/admin/me/datasets?status=archived");
+      push("/admin/me/datasets?status=archived");
     } catch (error) {
       console.error("Error archiving dataset:", error);
       setApiError("Erro ao arquivar o conjunto de dados.");
@@ -95,7 +95,7 @@ export function useDatasetLifecycleActions({
     try {
       await deleteDataset(dataset.id);
       hide();
-      push("/pages/admin/me/datasets");
+      push("/admin/me/datasets");
     } catch (error) {
       console.error("Error deleting dataset:", error);
       setApiError("Erro ao eliminar o conjunto de dados.");

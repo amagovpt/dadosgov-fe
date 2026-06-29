@@ -123,7 +123,7 @@ export default function ReusesFormPublishStep({
           ]}
           mainLink={
             createdReuse ? (
-              <Link href={`/pages/reuses/${createdReuse.slug}`}>
+              <Link href={`/reuses/${createdReuse.slug}`}>
                 <span className="underline">{reuseName}</span>
               </Link>
             ) : (

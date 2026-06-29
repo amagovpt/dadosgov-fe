@@ -81,7 +81,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
     if (isTogglingFavorite) return;
@@ -125,9 +125,9 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
       <div className="container flex items-center justify-between">
         <Breadcrumb
           items={[
-            { label: "Home", url: "/" },
-            { label: "Organizações", url: "/pages/organizations" },
-            { label: organization.name, url: `/pages/organizations/${organization.slug}` },
+            { label: "Início", url: "/" },
+            { label: "Organizações", url: "/organizations" },
+            { label: organization.name, url: `/organizations/${organization.slug}` },
           ]}
         />
       </div>
@@ -164,7 +164,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             leadingIcon="agora-line-edit"
             leadingIconHover="agora-solid-edit"
             className="flex-shrink-0"
-            onClick={() => router.push(`/pages/admin/org/${organization.id}/profile`)}
+            onClick={() => router.push(`/admin/org/${organization.id}/profile`)}
           >
             Editar
           </Button>

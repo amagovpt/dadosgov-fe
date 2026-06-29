@@ -9,7 +9,7 @@ export async function login(formData: FormData): Promise<{ message: string; redi
     params.append(key, typeof value === "string" ? value : value.name);
   }
 
-  const res = await fetch("/login", {
+  const res = await fetch("/auth/login", {
     method: "POST",
     body: params,
   });
@@ -26,7 +26,7 @@ export async function login(formData: FormData): Promise<{ message: string; redi
  * Perform logout
  */
 export async function logout(): Promise<void> {
-  const res = await fetch("/logout", { method: "GET" });
+  const res = await fetch("/auth/logout", { method: "GET" });
   if (!res.ok) throw new Error("Logout failed");
 }
 
@@ -36,7 +36,7 @@ export async function logout(): Promise<void> {
  */
 export async function fetchCurrentUser(): Promise<UserRef | null> {
   try {
-    const res = await fetch("/me", { cache: "no-store" });
+    const res = await fetch("/auth/me", { cache: "no-store" });
     if (!res.ok) return null;
     return await res.json();
   } catch {

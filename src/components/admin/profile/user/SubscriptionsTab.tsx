@@ -8,10 +8,10 @@ interface SubscriptionsTabProps {
 }
 
 const CLASS_TO_PATH: Record<string, string> = {
-  Dataset: "/pages/datasets",
-  Organization: "/pages/organizations",
-  Reuse: "/pages/reuses",
-  User: "/pages/users",
+  Dataset: "/datasets",
+  Organization: "/organizations",
+  Reuse: "/reuses",
+  User: "/users",
 };
 
 export function SubscriptionsTab({ subscriptions, isLoading }: SubscriptionsTabProps) {

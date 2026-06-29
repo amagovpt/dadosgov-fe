@@ -83,7 +83,7 @@ export default function ReusesEditTransferPopup({
           recomendável que seja publicada em nome da organização responsável.
         </p>
         <Link
-          href="/pages/admin/organizations"
+          href="/admin/organizations"
           className="inline-flex items-center text-primary-500 text-base hover:underline"
         >
           <span className="mr-[5px]">Crie ou integre uma organização em dados.gov.pt</span>

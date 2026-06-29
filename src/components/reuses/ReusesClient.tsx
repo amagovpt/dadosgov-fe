@@ -59,8 +59,8 @@ export default function ReusesClient({
       <HeroGeneral
         title="Reutilizações"
         breadcrumbItems={[
-          { label: "Home", url: "/" },
-          { label: "Reutilizações", url: "/pages/reuses" },
+          { label: "Início", url: "/" },
+          { label: "Reutilizações", url: "/reuses" },
         ]}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
@@ -154,7 +154,7 @@ export default function ReusesClient({
                     return (
                       <div key={reuse.id} className="h-full">
                         <CardLinks
-                          onClick={() => router.push(`/pages/reuses/${reuse.slug}`)}
+                          onClick={() => router.push(`/reuses/${reuse.slug}`)}
                           className="!h-full cursor-pointer text-neutral-900 [&_.card-links-container]:!h-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse"
                           variant="transparent"
                           image={{
@@ -213,7 +213,7 @@ export default function ReusesClient({
                             },
                           ]}
                           mainLink={
-                            <Link href={`/pages/reuses/${reuse.slug}`}>
+                            <Link href={`/reuses/${reuse.slug}`}>
                               <span className="underline">{reuse.title}</span>
                             </Link>
                           }
@@ -238,7 +238,7 @@ export default function ReusesClient({
                       position="center"
                       hasAnchor={true}
                       valueAnchor="Redefinir filtros"
-                      anchorHref="/pages/reuses"
+                      anchorHref="/reuses"
                       anchorTrailingIcon="agora-line-arrow-right-circle"
                       anchorTrailingIconHover="agora-solid-arrow-right-circle"
                     />

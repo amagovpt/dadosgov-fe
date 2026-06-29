@@ -13,7 +13,7 @@ test.describe("Backoffice - Data Services CRUD", () => {
     page,
   }) => {
     // Reachable via the publish menu and direct URL — admin should not see 404.
-    await page.goto("/pages/admin/me/dataservices");
+    await page.goto("/admin/me/dataservices");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

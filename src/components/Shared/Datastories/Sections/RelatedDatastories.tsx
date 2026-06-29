@@ -25,7 +25,7 @@ function DatastoryCard({ createdAt, title, description, slug }: DatastoryCardI) 
       descriptionText={formatHtmlParagraphs(description) as string[]}
       anchor={{
         target: "_blank",
-        href: `/pages/datastories/${slug}`,
+        href: `/datastories/${slug}`,
         children: "",
         hasIcon: true,
         iconOnly: true,

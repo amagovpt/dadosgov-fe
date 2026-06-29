@@ -79,7 +79,7 @@ export async function requestEmailChange(
     new_email: newEmail,
     new_email_confirm: newEmail,
   });
-  const res = await fetch("/change-email", {
+  const res = await fetch("/auth/change-email", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     credentials: "include",
@@ -103,7 +103,7 @@ export async function changePassword(
     new_password: newPassword,
     new_password_confirm: newPasswordConfirm,
   });
-  const res = await fetch("/change", {
+  const res = await fetch("/auth/change", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     credentials: "include",

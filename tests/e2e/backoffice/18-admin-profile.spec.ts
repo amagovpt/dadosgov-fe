@@ -1,7 +1,7 @@
 import { test, expect } from "playwright/test";
 import { loginAsAdmin } from "../../helpers/auth";
 
-const PROFILE_URL = "/pages/admin/profile";
+const PROFILE_URL = "/admin/profile";
 
 test.describe("Backoffice - Admin Profile", () => {
   test.beforeEach(async ({ page }) => {
@@ -89,7 +89,7 @@ test.describe("Backoffice - Admin Profile", () => {
     await btn.click();
     await page.waitForLoadState("networkidle");
 
-    expect(page.url()).toContain("/pages/users/");
+    expect(page.url()).toContain("/users/");
     const heading = page.getByRole("heading", { name: /^Perfil$/i, level: 1 });
     await expect(heading).toBeVisible({ timeout: 10000 });
   });

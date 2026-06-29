@@ -1,6 +1,6 @@
 import { test, expect } from "playwright/test";
 
-const THEMES_URL = "/pages/themes";
+const THEMES_URL = "/themes";
 
 test.describe("Themes Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -44,9 +44,9 @@ test.describe("Themes Page", () => {
     page,
   }) => {
     // Datasets are referenced lazily; check that the page content mentions
-    // /pages/datasets/ somewhere in its DOM (anchors or data attributes).
+    // /datasets/ somewhere in its DOM (anchors or data attributes).
     const html = await page.content();
-    expect(html).toContain("/pages/datasets");
+    expect(html).toContain("/datasets");
   });
 
   test("TM-06: Page renders an h2 section heading", async ({ page }) => {

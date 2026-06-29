@@ -61,7 +61,7 @@ export default function DatasetsEditInfoPanel({
         {latestActivity ? (
           <>
             {" Atividade mais recente: "}
-            <TextLink href={`/pages/users/${latestActivity.actor.slug}`}>
+            <TextLink href={`/users/${latestActivity.actor.slug}`}>
               {latestActivity.actor.first_name} {latestActivity.actor.last_name}
             </TextLink>
             {" — "}
@@ -77,7 +77,7 @@ export default function DatasetsEditInfoPanel({
           <>
             {" Atividade mais recente: "}
             {dataset.owner && (
-              <TextLink href={`/pages/users/${dataset.owner.slug}`}>
+              <TextLink href={`/users/${dataset.owner.slug}`}>
                 {dataset.owner.first_name} {dataset.owner.last_name}
               </TextLink>
             )}

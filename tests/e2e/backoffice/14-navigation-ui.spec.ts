@@ -14,7 +14,7 @@ test.describe("Backoffice - Navigation and UI", () => {
   }) => {
     // Use a concrete admin page rather than /admin/ — the index occasionally
     // redirects late and the sidebar isn't fully hydrated when /admin/ idles.
-    await page.goto("/pages/admin/me/datasets");
+    await page.goto("/admin/me/datasets");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
 
@@ -32,7 +32,7 @@ test.describe("Backoffice - Navigation and UI", () => {
   });
 
   test("UI-02: Admin sees the system navigation block", async ({ page }) => {
-    await page.goto("/pages/admin/system/users");
+    await page.goto("/admin/system/users");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
 
@@ -46,7 +46,7 @@ test.describe("Backoffice - Navigation and UI", () => {
   test("UI-03: Header logout link is present in the user dropdown", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/");
+    await page.goto("/admin/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -57,7 +57,7 @@ test.describe("Backoffice - Navigation and UI", () => {
   test("UI-04: Quick publish menu offers dataset, reuse, harvester, organisation", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/");
+    await page.goto("/admin/me/datasets/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -81,10 +81,10 @@ test.describe("Backoffice - Navigation and UI", () => {
     page,
   }) => {
     const systemPages = [
-      "/pages/admin/system/datasets/",
-      "/pages/admin/system/reuses/",
-      "/pages/admin/system/organizations/",
-      "/pages/admin/system/users/",
+      "/admin/system/datasets/",
+      "/admin/system/reuses/",
+      "/admin/system/organizations/",
+      "/admin/system/users/",
     ];
     for (const route of systemPages) {
       await page.goto(route);
@@ -102,7 +102,7 @@ test.describe("Backoffice - Navigation and UI", () => {
   test("UI-06: Personal statistics page renders with Estatísticas heading", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/statistics");
+    await page.goto("/admin/me/statistics");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -113,7 +113,7 @@ test.describe("Backoffice - Navigation and UI", () => {
   test("UI-07: Global statistics page renders for the admin user", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/statistics");
+    await page.goto("/admin/statistics");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

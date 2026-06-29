@@ -1,6 +1,6 @@
 import { test, expect } from "playwright/test";
 
-const DATASERVICES_URL = "/pages/dataservices";
+const DATASERVICES_URL = "/dataservices";
 
 test.describe("Dataservices Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -21,7 +21,7 @@ test.describe("Dataservices Page", () => {
   test("SD-02: Empty state or card list renders", async ({ page }) => {
     // Test backend currently has 0 dataservices, so the listing shows a
     // CardNoResults; with seeded data it should show cards. Either is valid.
-    const cards = page.locator("a[href*='/pages/dataservices/'], div.cursor-pointer");
+    const cards = page.locator("a[href*='/dataservices/'], div.cursor-pointer");
     const noResults = page.getByText(/Não existem resultados|Não encontrou o que procurava/i);
 
     const cardCount = await cards.count();
@@ -46,7 +46,7 @@ test.describe("Dataservices Page", () => {
     page,
   }) => {
     // With 0 dataservices in the test DB pagination is correctly absent.
-    const cards = page.locator("a[href*='/pages/dataservices/'], div.cursor-pointer");
+    const cards = page.locator("a[href*='/dataservices/'], div.cursor-pointer");
     const cardCount = await cards.count();
     if (cardCount === 0) {
       const pagination = page.locator('nav[aria-label="Paginação"]');

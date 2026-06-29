@@ -272,7 +272,7 @@ export default function PublicProfileClient() {
                 hasIcon={true}
                 leadingIcon="agora-line-edit"
                 leadingIconHover="agora-solid-edit"
-                onClick={() => router.push("/pages/admin/me/profile")}
+                onClick={() => router.push("/admin/me/profile")}
               >
                 Editar o meu perfil
               </Button>
@@ -302,7 +302,7 @@ export default function PublicProfileClient() {
               <div key={org.id} className="h-full">
                 <CardLinks
                   onClick={() =>
-                    (window.location.href = `/pages/organizations/${org.slug}`)
+                    (window.location.href = `/organizations/${org.slug}`)
                   }
                   className="cursor-pointer text-neutral-900"
                   variant="transparent"
@@ -396,7 +396,7 @@ export default function PublicProfileClient() {
                     },
                   ]}
                   mainLink={
-                    <Link href={`/pages/organizations/${org.slug}`}>
+                    <Link href={`/organizations/${org.slug}`}>
                       <span className="underline">{org.name}</span>
                     </Link>
                   }
@@ -595,7 +595,7 @@ export default function PublicProfileClient() {
                     {formatShortDate(dataset.last_modified || dataset.created_at)}
                   </TableCell>
                   <TableCell headerLabel="">
-                    <a href={`/pages/datasets/${dataset.slug}`}>
+                    <a href={`/datasets/${dataset.slug}`}>
                       <AppIcon name="agora-line-eye" />
                     </a>
                   </TableCell>
@@ -627,7 +627,7 @@ export default function PublicProfileClient() {
             {reuses.map((reuse) => (
               <div key={reuse.id} className="h-full">
                 <CardLinks
-                  onClick={() => (window.location.href = `/pages/reuses/${reuse.slug}`)}
+                  onClick={() => (window.location.href = `/reuses/${reuse.slug}`)}
                   className="cursor-pointer text-neutral-900"
                   variant="transparent"
                   image={{
@@ -677,7 +677,7 @@ export default function PublicProfileClient() {
                     },
                   ]}
                   mainLink={
-                    <Link href={`/pages/reuses/${reuse.slug}`}>
+                    <Link href={`/reuses/${reuse.slug}`}>
                       <span className="underline">{reuse.title}</span>
                     </Link>
                   }

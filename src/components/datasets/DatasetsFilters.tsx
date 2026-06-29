@@ -410,7 +410,7 @@ export const DatasetsFilters = ({
           appearance="outline"
           onClick={() => {
             paramsRef.current = "";
-            router.replace("/pages/datasets", { scroll: false });
+            router.replace("/datasets", { scroll: false });
           }}
         >
           Limpar filtros

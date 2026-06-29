@@ -50,7 +50,7 @@ export function createDataserviceColumns({
       headerLabel: "Título",
       sortField: "title",
       sortType: "numeric",
-      renderCell: (api) => <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>,
+      renderCell: (api) => <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>,
     },
     {
       id: "status",
@@ -87,10 +87,10 @@ export function createDataserviceColumns({
     },
     createTableActionsColumn<Dataservice>({
       viewAction: (api) => ({
-        href: `/pages/dataservices/${api.slug}`,
+        href: `/dataservices/${api.slug}`,
       }),
       editAction: (api) =>
-        can(api, "edit") ? { href: `/pages/admin/dataservices/edit?slug=${api.slug}` } : undefined,
+        can(api, "edit") ? { href: `/admin/dataservices/edit?slug=${api.slug}` } : undefined,
     }),
   ];
 }

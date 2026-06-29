@@ -231,7 +231,7 @@ export function HarvesterJobsTable({
               <TableRow>
                 <TableCell headerLabel="ID de tarefa">
                   <a
-                    href={`/pages/admin/harvesters/${slug}/jobs/${job.id}`}
+                    href={`/admin/harvesters/${slug}/jobs/${job.id}`}
                     className="text-primary-600 underline uppercase text-xs"
                   >
                     {job.id}

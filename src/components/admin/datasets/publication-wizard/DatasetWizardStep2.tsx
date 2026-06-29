@@ -182,7 +182,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             Quando o conjunto de dados for produzido no contexto de atividade profissional, é
             recomendável que seja publicado em nome da organização responsável.
           </p>
-          <Button variant="primary" onClick={() => router.push("/pages/admin/organizations/new")}>
+          <Button variant="primary" onClick={() => router.push("/admin/organizations/new")}>
             Crie ou integre uma organização em dados.gov.pt
           </Button>
         </div>

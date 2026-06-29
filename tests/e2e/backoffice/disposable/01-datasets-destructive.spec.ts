@@ -23,7 +23,7 @@ test.describe("Backoffice (disposable) - Datasets destructive CRUD", () => {
     const ctx = await browser.newContext({ storageState: undefined });
     const page = await ctx.newPage();
     await page.goto(
-      `/pages/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
+      `/admin/me/datasets/edit?slug=${fixtures.dataset.slug}`
     );
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);

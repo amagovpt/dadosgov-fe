@@ -226,7 +226,7 @@ export default function HomeClient({
                   const cardProps = {
                     ...dataset,
                     last_modified: timeAgo,
-                    link: `/pages/datasets/${dataset.slug}`,
+                    link: `/datasets/${dataset.slug}`,
                   } as CardMetricsProps;
                   return <CardMetrics key={`featured-dataset-${index}`} {...cardProps} />;
                 })
@@ -237,7 +237,7 @@ export default function HomeClient({
               )}
             </div>
             <div className="mt-32">
-              <Link href="/pages/datasets">
+              <Link href="/datasets">
                 <Button
                   variant="primary"
                   appearance="link"
@@ -282,14 +282,14 @@ export default function HomeClient({
                       }
                       title={story.title}
                       mainAnchor={{
-                        href: `/pages/datastories/${story.slug}`,
+                        href: `/datastories/${story.slug}`,
                       }}
                       blockedLink={true}
                     />
                   ))}
                 </div>
                 <div className="mt-32">
-                  <Link href="/pages/datastories">
+                  <Link href="/datastories">
                     <Button
                       variant="primary"
                       appearance="link"
@@ -334,7 +334,7 @@ export default function HomeClient({
                       blockedLink={false}
                     >
                       <div className="mt-auto pt-16">
-                        <Link href={`/pages/posts/${post.slug}`}>
+                        <Link href={`/posts/${post.slug}`}>
                           <Button
                             variant="primary"
                             appearance="link"
@@ -357,7 +357,7 @@ export default function HomeClient({
               )}
             </div>
             <div className="mt-32">
-              <Link href="/pages/posts">
+              <Link href="/posts">
                 <Button
                   variant="primary"
                   appearance="link"
@@ -391,7 +391,7 @@ export default function HomeClient({
                 )}
               </div>
             </div>
-            <Link href="/pages/organizations">
+            <Link href="/organizations">
               <Button
                 variant="primary"
                 appearance="link"

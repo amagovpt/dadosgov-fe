@@ -149,7 +149,7 @@ function ItemsTable({
                 <TableCell headerLabel="Link dados.gov.pt">
                   {item.dataset ? (
                     <TextLink
-                      href={`/pages/datasets/${item.dataset.id}`}
+                      href={`/datasets/${item.dataset.id}`}
                       className="flex items-center gap-4"
                     >
                       <Icon name="agora-line-globe" className="h-[14px] w-[14px]" />
@@ -324,9 +324,9 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Harvesters", url: "/pages/admin/system/harvesters" },
-        { label: source?.name || "Harvester", url: `/pages/admin/harvesters/${slug}` },
+        { label: "Administração", url: "/admin" },
+        { label: "Harvesters", url: "/admin/system/harvesters" },
+        { label: source?.name || "Harvester", url: `/admin/harvesters/${slug}` },
         { label: job.id.toUpperCase() },
       ]}
       title={job.id.toUpperCase()}

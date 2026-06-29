@@ -48,9 +48,9 @@ export default function SystemTopicsClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Temas", url: "/pages/admin/system/topics" },
+        { label: "Temas", url: "/admin/system/topics" },
       ]}
       title="Temas"
       isLoading={isLoading}

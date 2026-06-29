@@ -12,7 +12,7 @@ const BADGE_LABELS = ["Serviço público", "Certificado"];
 
 test.describe("Organization Badges (frontoffice visibility)", () => {
   test("OB-01: Detail page shows the organization's badges as pills", async ({ page }) => {
-    await page.goto(`/pages/organizations/${organization.slug}`);
+    await page.goto(`/organizations/${organization.slug}`);
     await page.waitForLoadState("networkidle");
 
     await expect(page.locator("main h1").first()).toBeVisible({ timeout: 15000 });
@@ -24,7 +24,7 @@ test.describe("Organization Badges (frontoffice visibility)", () => {
   });
 
   test("OB-02: Badges are rendered as neutral outline pills (not solid)", async ({ page }) => {
-    await page.goto(`/pages/organizations/${organization.slug}`);
+    await page.goto(`/organizations/${organization.slug}`);
     await page.waitForLoadState("networkidle");
 
     const pill = page
@@ -36,7 +36,7 @@ test.describe("Organization Badges (frontoffice visibility)", () => {
   });
 
   test("OB-03: Listing card shows the organization's badges", async ({ page }) => {
-    await page.goto("/pages/organizations");
+    await page.goto("/organizations");
     await page.waitForLoadState("networkidle");
 
     // Narrow the 500+ results down to the seeded org via search.

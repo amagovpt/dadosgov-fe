@@ -11,10 +11,10 @@ type UserAdminSubscriptionsTabProps = {
 };
 
 const classToPath: Record<string, string> = {
-  Dataset: "/pages/datasets",
-  Organization: "/pages/organizations",
-  Reuse: "/pages/reuses",
-  User: "/pages/users",
+  Dataset: "/datasets",
+  Organization: "/organizations",
+  Reuse: "/reuses",
+  User: "/users",
 };
 
 export default function UserAdminSubscriptionsTab({

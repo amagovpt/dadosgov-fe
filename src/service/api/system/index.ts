@@ -152,7 +152,7 @@ export async function fetchLatestReuses(pageSize: number = 3): Promise<APIRespon
 export async function fetchHomepageData(): Promise<HomepageData> {
   try {
     // Short ISR window so featured datasets/reuses changes set via
-    // /pages/admin/system/editorial surface on the homepage within ~10s.
+    // /admin/system/editorial surface on the homepage within ~10s.
     // The backend already caches /site/home/ for 300s and invalidates that
     // cache on PUT, so the extra upstream load from a shorter window is
     // bounded to one call per 10s (LEDG-1860).

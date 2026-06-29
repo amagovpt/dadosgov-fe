@@ -9,10 +9,10 @@ export default function AboutDadosGovClient({ initialContent }: { initialContent
       title="O que é dados.gov.pt"
       initialContent={initialContent}
       breadcrumbItems={[
-        { label: "Home", url: "/" },
-        { label: "Recursos", url: "#" },
-        { label: "Como usar o portal", url: "#" },
-        { label: "O que é dados.gov.pt", url: "/pages/faqs/about_dadosgov" },
+        { label: "Início", url: "/" },
+        { label: "Recursos", url: "/recursos" },
+        { label: "Como usar o portal", url: "/recursos/como-usar-o-portal" },
+        { label: "O que é dados.gov.pt", url: "/recursos/como-usar-o-portal/o-que-e-dados-gov-pt" },
       ]}
     />
   );
