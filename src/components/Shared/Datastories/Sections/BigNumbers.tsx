@@ -17,7 +17,7 @@ function BigNumber({ icon, number, numberLabel, title, subtitle }: BigNumberI) {
   return (
     <div className="flex flex-row gap-16">
       <div className="h-fit w-fit rounded-8 bg-primary-100 p-16">
-        <AppIcon name={icon} className="h-24 w-24 fill-primary-600" />
+        <AppIcon name={icon} className="h-24 w-24 !fill-primary-600" />
       </div>
       <div className="flex flex-col">
         <p>
@@ -41,9 +41,18 @@ function BigNumber({ icon, number, numberLabel, title, subtitle }: BigNumberI) {
 
 // ----------------------------------------------------------------------------------------------------------------
 
-export default function BigNumbers({ title, bignumbers, dataReference, className }: BigNumbersI) {
+export default function BigNumbers({
+  id,
+  title,
+  bignumbers,
+  dataReference,
+  className,
+}: BigNumbersI) {
   return (
-    <Section className={twMerge("flex w-full justify-center bg-primary-600 py-64", className)}>
+    <Section
+      id={id}
+      className={twMerge("flex w-full justify-center bg-primary-600 py-64", className)}
+    >
       <InfoBlock.Root className="flex-col gap-32">
         <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
           <InfoBlock.Title

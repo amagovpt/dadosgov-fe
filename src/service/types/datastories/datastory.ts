@@ -46,6 +46,7 @@ type Bignumbers = {
 
 export type BigNumbersSection = {
   schemaName: "section-datastory-bignumbers";
+  id: string;
   title: string;
   bignumbers: Bignumbers[];
   dataReference: DateReference;
@@ -68,6 +69,7 @@ type Timeline = {
 
 export type TimelineSection = {
   schemaName: "section-datastory-timeline";
+  id: string;
   title: string;
   description: string;
   cards: Card[];
@@ -88,6 +90,7 @@ type PublicAdminStructure = {
 
 export type PublicAdminStructureSection = {
   schemaName: "section-datastory-public-admin-structure";
+  id: string;
   title: string;
   parts: PublicAdminStructure;
 };
@@ -119,6 +122,7 @@ type RelatedDatastory = {
 
 export type RelatedSection = {
   schemaName: "section-datastory-related-datastory";
+  id: string;
   title: string;
   description: string;
   datastories: RelatedDatastory[];
@@ -150,6 +154,7 @@ type Resource = {
 
 export type OtherSection = {
   schemaName: "section-datastory-other-resources";
+  id: string;
   title: string;
   resources: Resource[];
 };
@@ -158,6 +163,7 @@ export type OtherSection = {
 
 export type SummarySection = {
   schemaName: "section-datastory-summary";
+  id: string;
   title: string;
   description: string;
   anchors: Anchor[];

@@ -86,6 +86,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
               sections {
                 ... on SectionDatastoryBignumbersComponent {
                   schemaName
+                  id
                   title
                   bignumbers {
                     icon
@@ -122,6 +123,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 }
                 ... on SectionDatastoryOtherResourcesComponent {
                   schemaName
+                  id
                   title
                   resources {
                     icon
@@ -135,12 +137,13 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 }
                 ... on SectionDatastoryRelatedDatastoryComponent {
                   schemaName
+                  id
                   title
                   description
                   datastories {
                     data {
                       metadata {
-                        pt {
+                        ${locale} {
                           createdAt
                           description
                           slug
@@ -152,6 +155,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 }
                 ... on SectionDatastoryTimelineComponent {
                   schemaName
+                  id
                   title
                   description
                   cards {
@@ -176,6 +180,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 }
                 ... on SectionDatastoryPublicAdminStructureComponent {
                   schemaName
+                  id
                   title
                   parts {
                     centralAdmin {
@@ -212,6 +217,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 }
                 ... on SectionDatastorySummaryComponent {
                   schemaName
+                  id
                   title
                   description
                   anchors {
