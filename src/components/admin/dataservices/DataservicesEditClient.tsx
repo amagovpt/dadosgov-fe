@@ -391,13 +391,21 @@ export default function DataservicesEditClient() {
     setIsSaving(true);
     setApiError(null);
     setApiSuccess(null);
+    const isArchiving = !dataservice.archived_at;
     try {
       const updated = await updateDataservice(dataservice.id, {
-        archived_at: dataservice.archived_at ? null : new Date().toISOString(),
+        archived_at: isArchiving ? new Date().toISOString() : null,
       });
       setDataservice(updated);
+      setApiSuccess(isArchiving ? "API arquivada com sucesso." : "API desarquivada com sucesso.");
+      setTimeout(() => setApiSuccess(null), 10000);
     } catch (error) {
       console.error("Error archiving dataservice:", error);
+      setApiError(
+        isArchiving
+          ? "Erro ao arquivar a API. Tente novamente."
+          : "Erro ao desarquivar a API. Tente novamente."
+      );
     } finally {
       setIsSaving(false);
     }

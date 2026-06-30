@@ -71,7 +71,11 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
                   hasAnchor={false}
                 />
               ) : (
-                <div className="grid gap-32 md:grid-cols-2 xl:grid-cols-3">
+                <div className="tab-body-bleed grid gap-32 md:grid-cols-2 xl:grid-cols-3">
+                  {/* `tab-body-bleed` activates the existing white-card + 2px
+                      neutral-700 outline rule (globals.css). It lives on the grid
+                      rather than TabBodyWrapper because agora's Tabs renders only
+                      the tab body's children, discarding the wrapper element. */}
                   {datasets.map((dataset, index) => {
                     const cardProps = {
                       ...dataset,
