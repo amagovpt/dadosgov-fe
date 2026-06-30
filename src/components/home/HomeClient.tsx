@@ -86,10 +86,10 @@ export default function HomeClient({
             title={
               <h1 className="text-white flex flex-col items-start leading-tight">
                 <span className="text-2xl-bold">
-                  Portal aberto
+                  Portal Nacional
                 </span>
                 <span className="text-2xl-regular">
-                  de dados públicos portugueses
+                  de Dados Abertos
                 </span>
               </h1>
             }
