@@ -21,9 +21,10 @@ export default function Summary({ title, description, anchors }: SummaryI) {
                 return {
                   children: anchor.children,
                   href: anchor.href,
-                  trailingIcon: anchor.icon,
-                  trailingIconActive: anchor.icon,
-                  trailingIconHover: anchor.icon,
+                  trailingIcon: anchor?.icon ?? "agora-line-external-link",
+                  trailingIconActive: anchor?.icon ?? "agora-line-external-link",
+                  trailingIconHover: anchor?.icon ?? "agora-line-external-link",
+                  target: "_blank",
                 };
               })}
             />
