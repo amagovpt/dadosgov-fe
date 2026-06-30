@@ -45,6 +45,16 @@ const DATASERVICE_TOGGLE_FILTERS = {
       { id: "public-service", label: "Serviço público" },
     ],
   },
+  acesso: {
+    title: "Tipo de acesso",
+    param: "access_type",
+    options: [
+      { id: "all", label: "Todos" },
+      { id: "open", label: "Aberto" },
+      { id: "open_with_account", label: "Aberto com conta" },
+      { id: "restricted", label: "Restrito" },
+    ],
+  },
 };
 
 type ToggleFilterKey = keyof typeof DATASERVICE_TOGGLE_FILTERS;
@@ -110,6 +120,7 @@ export const DataservicesFilters = () => {
     return {
       atualizacao: detectAtualizacaoFromParams(params),
       organizacao: params.get("organization_badge") || "all",
+      acesso: params.get("access_type") || "all",
     };
   }, [searchParams]);
 
