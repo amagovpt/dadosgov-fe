@@ -14,7 +14,7 @@ export default function InfoBlockRoot({
 }: IInfoBlockRootProps) {
   return (
     <div
-      className={twMerge("container h-full flex flex-col gap-32", className)}
+      className={twMerge("container h-full flex flex-col gap-64", className)}
       data-testid="info-block-root"
       id={id}
     >

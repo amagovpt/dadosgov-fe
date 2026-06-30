@@ -238,7 +238,7 @@ export const OrganizationsFilters = ({
           variant="primary"
           appearance="outline"
           onClick={() => {
-            router.replace("/pages/organizations", { scroll: false });
+            router.replace("/organizations", { scroll: false });
           }}
         >
           Limpar filtros

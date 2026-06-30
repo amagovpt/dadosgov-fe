@@ -101,7 +101,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
     if (!dataset || isTogglingFavorite) return;
@@ -147,9 +147,9 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
       <div className="container flex items-center justify-between py-64">
         <Breadcrumb
           items={[
-            { label: "Home", url: "/" },
-            { label: "Conjuntos de dados", url: "/pages/datasets" },
-            { label: dataset.title, url: `/pages/datasets/${dataset.slug}` },
+            { label: "Início", url: "/" },
+            { label: "Conjuntos de dados", url: "/datasets" },
+            { label: dataset.title, url: `/datasets/${dataset.slug}` },
           ]}
         />
       </div>
@@ -174,7 +174,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
           (user && dataset.owner?.id === user.id) ||
           (dataset.organization &&
             organizations.some((org) => org.id === dataset.organization?.id))) && (
-          <Link href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
+          <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
             <Button
               variant="primary"
               hasIcon={true}
@@ -235,7 +235,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                 <div className="mb-8 text-m-light text-neutral-900">
                   {dataset.organization ? (
                     <Link
-                      href={`/pages/organizations/${dataset.organization.slug}`}
+                      href={`/organizations/${dataset.organization.slug}`}
                       className="hover:underline"
                     >
                       {dataset.organization.name}
@@ -245,7 +245,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                        profile instead of the broken "Organização Desconhecida"
                        fallback. */
                     <Link
-                      href={`/pages/users/${dataset.owner.slug}`}
+                      href={`/users/${dataset.owner.slug}`}
                       className="hover:underline"
                     >
                       {ownerFullName}
@@ -267,7 +267,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     <TextLink
                       href={
                         dataset.license_url ||
-                        `/pages/licenses/${dataset.license}/`
+                        `/licenses/${dataset.license}/`
                       }
                     >
                       <span className="text-m-semibold">Licença:</span>{" "}

@@ -9,9 +9,9 @@ test.describe("Header and Footer", () => {
   test("NV-01: Header shows logo on public pages", async ({ page }) => {
     const pages = [
       "/",
-      "/pages/datasets",
-      "/pages/reuses",
-      "/pages/organizations",
+      "/datasets",
+      "/reuses",
+      "/organizations",
     ];
 
     for (const pagePath of pages) {
@@ -29,10 +29,10 @@ test.describe("Header and Footer", () => {
   test("NV-02: Header exposes primary navigation links", async ({ page }) => {
     const header = page.locator("header").first();
     const navLinks = [
-      { href: "/pages/datastories", label: "Data Stories" },
-      { href: "/pages/datasets", label: "Conjuntos de dados" },
-      { href: "/pages/reuses", label: "Reutilizações" },
-      { href: "/pages/organizations", label: "Organizações" },
+      { href: "/datastories", label: "Data Stories" },
+      { href: "/datasets", label: "Conjuntos de dados" },
+      { href: "/reuses", label: "Reutilizações" },
+      { href: "/organizations", label: "Organizações" },
     ];
 
     for (const { href } of navLinks) {
@@ -79,11 +79,11 @@ test.describe("Header and Footer", () => {
   test('NV-06: "Autenticar" button is visible and opens login', async ({
     page,
   }) => {
-    const authLink = page.locator('header a[href="/pages/login"]').first();
+    const authLink = page.locator('header a[href="/login"]').first();
     await expect(authLink).toBeVisible({ timeout: 10000 });
     await authLink.click();
     await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
-    expect(page.url()).toContain("/pages/login");
+    expect(page.url()).toContain("/login");
   });
 
   test.skip("NV-07: User menu with session (needs auth)", async () => {
@@ -100,7 +100,12 @@ test.describe("Header and Footer", () => {
     await page.waitForTimeout(300);
 
     const mainCards = page.locator('[data-group="main"]');
-    for (const label of ["Como usar o portal", "Aprender", "Desenvolvimento"]) {
+    for (const label of [
+      "Como usar o portal",
+      "Aprender",
+      "Desenvolvimento",
+      "Publicações",
+    ]) {
       await expect(
         mainCards.filter({ hasText: label }).first()
       ).toBeVisible({ timeout: 10000 });
@@ -181,6 +186,25 @@ test.describe("Header and Footer", () => {
     await expect(
       page.getByText("Como usar o portal", { exact: true })
     ).toBeVisible({ timeout: 10000 });
+  });
+
+  test("NV-18: Recursos > Publicações links to the publications page", async ({
+    page,
+  }) => {
+    const header = page.locator("header").first();
+    await header.getByText(/^Recursos$/i).first().click();
+    await page.waitForTimeout(300);
+
+    const publicacoesCard = page
+      .locator('[data-group="main"]')
+      .filter({ hasText: "Publicações" })
+      .first();
+    await expect(publicacoesCard).toBeVisible({ timeout: 10000 });
+
+    const link = publicacoesCard.locator(
+      'a[href="https://10.55.37.38/pages/resources/publications"]'
+    );
+    await expect(link.first()).toHaveCount(1);
   });
 
   test("NV-16: Publicar dropdown opens and shows all creation links", async ({

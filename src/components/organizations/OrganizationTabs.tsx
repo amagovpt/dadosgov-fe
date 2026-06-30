@@ -139,7 +139,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
         {/* Tab 2: Conjuntos de dados */}
         <Tab>
-          <TabHeader> Conjuntos de dados ({organization.metrics?.datasets || 0})</TabHeader>
+          <TabHeader>
+            {" "}
+            Conjuntos de dados ({datasetsResponse?.total ?? organization.metrics?.datasets ?? 0})
+          </TabHeader>
           <TabBodyWrapper>
             <div>
               <h3 className="mb-24 text-base font-medium text-neutral-900">
@@ -152,7 +155,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                     {datasets.map((dataset) => (
                       <div key={dataset.id} className="h-full">
                         <CardLinks
-                          onClick={() => router.push(`/pages/datasets/${dataset.slug}`)}
+                          onClick={() => router.push(`/datasets/${dataset.slug}`)}
                           className="cursor-pointer text-neutral-900"
                           variant="white"
                           image={{
@@ -198,7 +201,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             </span>
                           }
                           mainLink={
-                            <Link href={`/pages/datasets/${dataset.slug}`}>
+                            <Link href={`/datasets/${dataset.slug}`}>
                               <span className="underline">
                                 {sanitizeUserMarkdown(dataset.title)}
                               </span>
@@ -277,7 +280,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
           </TabBodyWrapper>
         </Tab>
 
-        {/* Tab 4: Discussões */}
+
+        {/* Tab 5: Discussões */}
         <Tab>
           <TabHeader>Discussões</TabHeader>
           <TabBodyWrapper>

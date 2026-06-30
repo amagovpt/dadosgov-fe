@@ -93,7 +93,7 @@ describe("notification-helpers", () => {
   describe("harvesterValidationLink", () => {
     it("builds admin link from source.slug", () => {
       expect(harvesterValidationLink(harvesterDetails)).toBe(
-        "/pages/admin/system/harvesters/test-source"
+        "/admin/system/harvesters/test-source"
       );
     });
 

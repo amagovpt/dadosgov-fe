@@ -1,0 +1,2266 @@
+@import url("@ama-pt/agora-design-system/artifacts/dist/tailwind.css");
+@import url("@ama-pt/agora-design-system/artifacts/dist/style.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Full icon state control for header cards */
+@layer utilities {
+  .header-card-wrapper svg.leading-icon-active,
+  .header-card-wrapper svg.trailing-icon-active {
+    display: none !important;
+  }
+
+  .header-card-wrapper svg.leading-icon-default,
+  .header-card-wrapper svg.trailing-icon-default {
+    display: block !important;
+  }
+
+  .header-card-wrapper svg.leading-icon-hover,
+  .header-card-wrapper svg.trailing-icon-hover {
+    display: none !important;
+  }
+
+  .header-card-wrapper:hover svg.leading-icon-default,
+  .header-card-wrapper:hover svg.trailing-icon-default {
+    display: none !important;
+  }
+
+  .header-card-wrapper:hover svg.leading-icon-hover,
+  .header-card-wrapper:hover svg.trailing-icon-hover {
+    display: block !important;
+  }
+
+  .header-card-wrapper .description {
+    display: none;
+  }
+}
+
+/*
+  =============================================================================
+  TABLE OF CONTENTS
+  =============================================================================
+  1. DESIGN TOKENS ............................................. [01]
+  2. BASE STYLES ............................................... [02]
+  3. HEADER & NAVIGATION ....................................... [03]
+     3.1 Main Header
+     3.2 Header Cards & Icons
+     3.3 Header Navigation Panels
+     3.4 Publish Dropdown
+  4. FOOTER .................................................... [04]
+  5. UI COMPONENTS ............................................. [05]
+     5.1 Newsletter Card
+     5.2 Icon Containers
+     5.3 Tabs Overrides
+     5.4 Cards (General)
+     5.5 Cards (Illustrative)
+     5.6 Cards (Article)
+     5.7 Cards (Links / Datasets)
+     5.8 Cards (No Results)
+     5.9 Pagination
+     5.10 Toggle (Organizations Filters)
+     5.11 Popup Dialog
+     5.12 Timeline
+  6. PAGES ..................................................... [06]
+     6.1 Homepage
+     6.2 Login
+     6.3 Page Detail & Links
+     6.4 Mini-courses
+  7. ADMIN LAYOUT .............................................. [07]
+     7.1 Admin Wrapper & Header
+     7.2 Side Navigation
+     7.3 Content Area
+     7.4 Admin Page
+     7.5 Admin Forms (Steps, Fields, Auxiliar)
+     7.6 Admin Tabs & Statistics
+     7.7 Profile Card
+     7.8 Responsive
+  8. UTILITIES ................................................. [08]
+  =============================================================================
+*/
+
+/* ==========================================================================
+   [01] DESIGN TOKENS
+   ========================================================================== */
+
+:root {
+  --color-brand-blue-dark: var(--color-primary-900);
+  --color-brand-blue-dark-rgb: 2, 28, 81;
+  --color-brand-blue-primary: #0c02cb;
+  --color-brand-blue-primary-rgb: 12, 2, 203;
+  --color-brand-blue-secondary: #050157;
+  --color-brand-blue-secondary-rgb: 5, 1, 87;
+  --color-accent-light: #f7f7ff;
+  --color-accent-light-rgb: 247, 247, 255;
+  --color-gray-medium: var(--color-neutral-700);
+  --size-32: 32px;
+  --size-64: 64px;
+}
+
+/* ==========================================================================
+   [02] BASE STYLES
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 167px;
+}
+
+div[id] {
+  scroll-margin-top: 167px;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.rounded-8 {
+  border-radius: 8px;
+}
+
+.admin-page .agora-accordion .accordion-body.accordion-body-block {
+  padding: 32px !important;
+}
+
+/* ==========================================================================
+   [03] HEADER & NAVIGATION
+   ========================================================================== */
+
+/* Breadcrumb — increase underline offset on links */
+.agora-breadcrumb-desktop ol li .agora-anchor-text-neutral {
+  text-underline-offset: 0.75rem !important;
+  text-decoration-thickness: 2px !important;
+}
+
+/* Hide languages selector (temporarily) */
+header.sticky .languages-panel-menu {
+  display: none !important;
+}
+
+/* 3.1 Main Header */
+@media (min-width: 1280px) {
+  .agora-header .navigation-links-layout .links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Center short nav labels (e.g. "API") within the 44px min click-target box,
+   so the leftover space is split symmetrically instead of all on the right. */
+.internal-navigation-list ul li .agora-link-wrapper > a {
+  justify-content: center;
+}
+
+.search-panel-menu .panel-menu-content-children {
+  overflow: visible !important;
+}
+
+.search-panel-menu ul[role="listbox"] {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.agora-header .icon-container {
+  border-width: 0;
+  border-radius: 0%;
+  padding: 0px;
+  display: flex;
+  align-items: baseline;
+}
+
+/* Target icons that should be white */
+.agora-header .icon-set svg.icon,
+.agora-languages svg.icon,
+.agora-unauthenticated svg.icon,
+.agora-header .agora-areas svg.icon {
+  fill: #ffffff;
+}
+
+/* 3.2 Header Cards & Icons */
+.agora-header .card-general-neutral-100 .icon-set {
+  border-width: 2px;
+  border-color: var(--color-primary-600);
+  background-color: var(--color-primary-600);
+  padding: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agora-header .card-general-neutral-100 .icon-set img {
+  width: 16px !important;
+  min-width: 16px;
+  height: 16px !important;
+  min-height: 16px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.agora-header .card-general-neutral-100 .icon-set svg.icon {
+  height: 16px;
+  min-height: 16px;
+  width: 16px;
+  min-width: 16px;
+}
+
+/* Arrow icon in card anchor stays blue */
+.agora-header .card-general-neutral-100 .anchor-container .trailing-icon svg.icon {
+  fill: var(--color-primary-600);
+}
+
+.agora-header .card-general-neutral-100 .icon-container,
+.agora-header .card-general-neutral-100 .content {
+  background: transparent;
+}
+
+.agora-header .card-general.card-general-blockedLink:active {
+  transform: unset;
+}
+
+.agora-header .card-general {
+  width: 100%;
+  padding: 12px 0 12px 32px;
+}
+
+.agora-header .card-general .title-text {
+  margin-bottom: -2px;
+  font-size: 16px;
+  line-height: 28px;
+}
+
+.agora-header .card-general .description {
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.agora-header .navigation-links-layout .card-general .p-16 {
+  padding: 0;
+  padding-left: 16px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.agora-header .navigation-links-layout .card-general {
+  align-items: center;
+}
+
+.agora-header .card-general .anchor {
+  margin-right: unset;
+}
+
+.agora-header .card-general .content {
+  flex: 1 1 0%;
+}
+
+.agora-header .card-general .anchor.anchor-blockedLink {
+  margin-right: 0;
+}
+
+/* Hide card-level hover visuals */
+.agora-header .card-general-neutral-100.card-general-hover:hover:not(:active),
+.agora-header .card-general-neutral-100:hover .content-hover {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.navigation-links-layout .agora-link-wrapper:has(.card-general) {
+  display: block;
+}
+
+.navigation-links-layout .agora-link-wrapper .card-general *:focus,
+.navigation-links-layout .agora-link-wrapper .card-general *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 3.3 Header Navigation Panels */
+.agora-header .navigation-links-layout > .title {
+  display: none;
+}
+
+header[data-submenu] .navigation-links-layout > .title {
+  display: block;
+}
+
+header[data-submenu] .navigation-links-layout {
+  position: relative;
+  padding-top: 80px;
+}
+
+/* Hide submenu items when not in a submenu */
+.agora-header .navigation-links-layout > .links > .link-wrapper:has([data-group^="submenu-"]) {
+  display: none;
+}
+
+/* Desenvolvimento submenu: hide main items, reveal submenu items */
+header[data-submenu="desenvolvimento"]
+  .navigation-links-layout
+  > .links
+  > .link-wrapper:has([data-group="main"]) {
+  display: none;
+}
+
+header[data-submenu="desenvolvimento"]
+  .navigation-links-layout
+  > .links
+  > .link-wrapper:has([data-group="submenu-desenvolvimento"]) {
+  display: block;
+}
+
+/* Usar dados submenu: hide main items, reveal submenu items */
+header[data-submenu="usar-dados"] .navigation-links-layout>.links>.link-wrapper:has([data-group="main"]) {
+  display: none;
+}
+
+header[data-submenu="usar-dados"] .navigation-links-layout>.links>.link-wrapper:has([data-group="submenu-usar-dados"]) {
+  display: block;
+}
+
+/* Position the Voltar button absolutely at the top of the submenu layout */
+header[data-submenu] .navigation-links-layout > .links > .link-wrapper:has([data-is-back]) {
+  grid-column: 1 / -1 !important;
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  max-width: 1216px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 1;
+}
+
+/* 3.4 Publish Dropdown */
+.publish-dropdown-hero .agora-btn.agora-btn-solid-primary,
+.bg-primary-900 .publish-dropdown-wrapper .agora-btn.agora-btn-solid-primary {
+  background-color: #fff !important;
+  color: var(--color-neutral-900) !important;
+  border-color: #fff !important;
+}
+
+.publish-dropdown-hero .agora-btn.agora-btn-solid-primary:hover,
+.bg-primary-900 .publish-dropdown-wrapper .agora-btn.agora-btn-solid-primary:hover {
+  background-color: var(--color-neutral-100) !important;
+  border-color: var(--color-neutral-100) !important;
+}
+
+.publish-dropdown-hero .agora-btn.agora-btn-solid-primary svg,
+.bg-primary-900 .publish-dropdown-wrapper .agora-btn.agora-btn-solid-primary svg {
+  fill: var(--color-neutral-900) !important;
+}
+
+.publish-dropdown-wrapper .agora-dropdown {
+  top: 100% !important;
+  margin-top: 8px;
+}
+
+/* Auth page button active state */
+header[data-auth-page][data-no-user] .unauthenticated-panel-menu > .panel-menu-link-wrapper {
+  position: relative;
+}
+
+header[data-auth-page][data-no-user] .unauthenticated-panel-menu > .panel-menu-link-wrapper::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background-color: var(--color-primary-600);
+}
+
+header[data-auth-page][data-no-user]
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .children-wrapper {
+  color: var(--color-primary-600);
+}
+
+header[data-auth-page][data-no-user]
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .line {
+  display: none;
+}
+
+header[data-auth-page][data-no-user]
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .solid {
+  display: block;
+}
+
+header[data-auth-page][data-no-user]
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  svg {
+  fill: var(--color-primary-600);
+}
+
+/* Ecosystem panel */
+li.ecosystem-panel-menu {
+  gap: 8px;
+}
+
+.ecosystem-panel-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+.ecosystem-custom-panel {
+  background-color: rgb(241, 243, 248);
+  box-shadow: 0px 16px 16px 0px #00000029;
+  border-top: 4px solid var(--Neutral-200, #e1e4ea);
+}
+
+li.ecosystem-panel-menu .panel-menu-link-wrapper {
+  position: relative;
+  align-self: stretch;
+}
+
+li.ecosystem-panel-menu .panel-menu-link-wrapper:has(a[aria-expanded="true"])::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  height: 4px;
+  width: 100%;
+  background-color: var(--color-primary-600);
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper::after {
+  display: none;
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .children-wrapper {
+  color: inherit;
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .solid {
+  display: none;
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  .line {
+  display: block;
+}
+
+header[data-auth-page][data-no-user]:has(li.ecosystem-panel-menu a[aria-expanded="true"])
+  .unauthenticated-panel-menu
+  > .panel-menu-link-wrapper
+  .icon-wrapper
+  svg {
+  fill: currentColor;
+}
+
+/* ==========================================================================
+   [04] FOOTER
+   ========================================================================== */
+
+footer img {
+  height: 30px;
+}
+
+.border-t.border-neutral-500.border-footer {
+  opacity: 0.5;
+}
+
+.grid.items-center.xs\:grid-cols-4.md\:grid-cols-8.xl\:grid-cols-12.gap-32.xs\:pt-32.md\:pt-64.xs\:pb-32.xl\:pb-64 {
+  display: none;
+}
+
+nav.flex.items-center.justify-center.w-full.h-\[126px\].border-b-2.border-white\/5.xl\:justify-center.xl\:border-r-2.xl\:h-full.xl\:w-\[40\%\] {
+  width: 384px;
+  flex-shrink: 0;
+}
+
+.flex.flex-col.mx-\[-64px\].xl\:flex-row.xl\:h-\[260px\] {
+  display: flex;
+  flex-direction: inherit;
+  padding-left: 112px;
+  padding-right: 112px;
+}
+
+ul.flex.items-center.justify-center.gap-8.xl\:gap-32 {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 0;
+  width: 100%;
+}
+
+.flex.flex-col.pt-32.xs\:mx-64.xl\:w-\[60\%\].xl\:items-end.xl\:justify-center {
+  margin-left: 0px;
+  flex: 1;
+  width: auto;
+  padding-top: 64px;
+  padding-bottom: 64px;
+  gap: 32px;
+}
+
+.container.mx-auto.px-4.py-12.xl\:py-64 {
+  max-width: 1440px;
+  padding: 64px;
+}
+
+/* ==========================================================================
+   [05] UI COMPONENTS
+   ========================================================================== */
+
+/* 5.1 Dropdown section-name — hide when empty (no label provided) */
+li.section-name:empty {
+  display: none;
+}
+
+/* 5.2 Newsletter Card */
+.agora-card-highlight-newsletter {
+  user-select: text !important;
+  overflow: visible !important;
+}
+
+.agora-card-highlight-newsletter .card-container,
+.agora-card-highlight-newsletter .card-container .input-container .email-bar {
+  overflow: visible;
+}
+
+.agora-card-highlight-newsletter .card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.agora-card-highlight-newsletter .card-container:before {
+  background: linear-gradient(
+    90deg,
+    var(--color-brand-blue-dark) 0%,
+    rgba(var(--color-brand-blue-dark-rgb), 0.64) 55%,
+    rgba(var(--color-brand-blue-dark-rgb), 0.08) 100%
+  );
+  pointer-events: none;
+}
+
+.agora-card-highlight-newsletter .card-container .input-container {
+  grid-template-columns: none;
+  position: relative;
+  z-index: 30;
+  overflow: visible;
+}
+
+.agora-card-highlight-newsletter.bg-white .card-container {
+  padding: 32px 64px;
+}
+
+.agora-card-highlight-newsletter.bg-white .card-container:before {
+  display: none;
+}
+
+/* 5.2 Icon Containers */
+.icon-container {
+  border-radius: 50%;
+  border-width: 2px;
+  padding: 16px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-white svg,
+.homepage .agora-btn-link-primary:hover:not(:disabled).icon-white svg {
+  fill: var(--color-white);
+}
+
+.stats-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border-width: 2px;
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+}
+
+.stats-icon-wrapper svg,
+.stats-icon-wrapper svg path,
+.stats-icon-wrapper [class*="agora-icon"] {
+  fill: currentColor;
+}
+
+.stats-icon-square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+}
+
+.stats-icon-square svg,
+.stats-icon-square svg path,
+.stats-icon-square [class*="agora-icon"] {
+  fill: currentColor;
+}
+
+/* 5.3 Tabs Overrides */
+.agora-tabs.desktop .tab-panel.current-neutral,
+.agora-tabs.desktop .tab-list.desktop .tab-list-item.active.current-neutral {
+  background-color: var(--color-primary-100);
+}
+
+.tab-panel-content {
+  position: relative;
+  padding: 4rem;
+}
+
+.tab-panel-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Disable tab background for nested tabs (e.g. inside accordions) */
+.tab-panel-content .tab-panel-content::before,
+.tab-panel-content .tab-panel-content::after {
+  display: none !important;
+}
+
+.tab-panel-content .tab-panel-content > * {
+  z-index: auto;
+}
+
+.tab-panel-content .agora-tabs.desktop .tab-panel.current-neutral,
+.tab-panel-content .agora-tabs.desktop .tab-list.desktop .tab-list-item.active.current-neutral {
+  background-color: transparent !important;
+}
+
+.tab-panel-content .tab-panel-content {
+  padding: 0;
+  position: static;
+}
+
+.tab-panel-content .agora-tabs .tab-panel {
+  background-color: transparent !important;
+}
+
+/* 5.4 Cards (General) */
+.card-general {
+  height: 100%;
+}
+
+.related-datastories .card-general .content {
+  height: 100%;
+}
+
+/* 5.5 Cards (Illustrative) - Mini-courses */
+.mini-courses-cards .agora-card-illustrative.horizontal {
+  align-items: center;
+}
+
+.mini-courses-cards .agora-card-illustrative .card-anchor {
+  display: flex;
+  align-items: center;
+}
+
+/* 5.6 Cards (Article) */
+.agora-card-article img.card-image.w-full {
+  border-radius: 4px;
+  width: 352px !important;
+  height: 208px;
+  object-fit: cover;
+  display: flex;
+  align-self: stretch;
+  background-color: white;
+}
+
+.card-article-3_2 .agora-card-article .container-body {
+  padding: 32px;
+  border-radius: 4px;
+}
+
+.card-article-3_2.organization_detail .agora-card-article .container-body {
+  padding: 0px;
+}
+
+.card-article-3_2 .agora-card-article .card-article-3_2-img {
+  border-radius: 8px;
+  min-width: 163px;
+  min-height: 60px;
+  padding: 16px;
+}
+
+.card-article-3_2 .agora-card-article .card-article-3_2-img img {
+  max-height: 48px;
+}
+
+/* 5.7 Cards (Links / Datasets) */
+.agora-card-links .top-container .content .image-content img {
+  max-height: 216px;
+  object-fit: contain;
+}
+
+.agora-card-links-datasets {
+  padding-bottom: 16px;
+}
+
+.agora-card-links-datasets .agora-card-links {
+  padding: 16px 64px;
+}
+
+.agora-card-links-datasets-px0 .agora-card-links {
+  padding: 12px 0px;
+}
+
+.agora-card-links-datasets-px0 .agora-card-links .bottom-container .links {
+  flex-wrap: nowrap;
+}
+
+.reuse .agora-card-links-datasets-px0 .agora-card-links,
+.reuse .agora-card-links-datasets-px0 .agora-card-links .card-links-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.reuse .agora-card-links-datasets-px0 .agora-card-links .card-links-container .top-container {
+  flex: 1;
+}
+
+.datastories .agora-card-links-datasets-px0 .agora-card-links,
+.datastories .agora-card-links-datasets-px0 .agora-card-links .card-links-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.datastories .agora-card-links-datasets-px0 .agora-card-links .card-links-container .top-container {
+  flex: 1;
+}
+
+.datastories
+  .agora-card-links-datasets-px0
+  .agora-card-links
+  .card-links-container
+  .bottom-container {
+  margin-top: auto;
+}
+
+.agora-card-links-datasets .agora-card-links .title h2 {
+  text-decoration: underline;
+}
+
+.agora-card-links .card-links-container {
+  border-bottom: 2px solid var(--color-neutral-200);
+  padding-bottom: 16px;
+}
+
+.divider-neutral-200 {
+  border-bottom: 2px solid var(--color-neutral-200);
+}
+
+.cardsnews {
+  align-items: stretch;
+}
+
+.cardsnews .agora-card-links {
+  height: 100%;
+}
+
+.cardsnews .agora-card-links .card-links-container {
+  height: 100%;
+}
+
+.cardsnews .agora-card-links .card-links-container .bottom-container {
+  margin-top: auto;
+}
+
+/* Profile organization cards — equal height alignment */
+.profile-org-cards {
+  align-items: stretch;
+}
+
+.profile-org-cards .agora-card-links {
+  height: 100%;
+}
+
+.profile-org-cards .agora-card-links .card-links-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-org-cards .agora-card-links .card-links-container .bottom-container {
+  margin-top: auto;
+}
+
+/* Override icon fill and link color for reuses, article and organization pages */
+.reuse .agora-card-links.transparent .topic-item .icon,
+.article .agora-card-links.transparent .topic-item .icon,
+.organization .agora-card-links.transparent .topic-item .icon,
+.reuse .agora-card-links .bottom-container .icon,
+.article .agora-card-links .bottom-container .icon,
+.organization .agora-card-links .bottom-container .icon,
+.reuse .agora-card-links .bottom-container svg,
+.article .agora-card-links .bottom-container svg,
+.organization .agora-card-links .bottom-container svg {
+  fill: #034ad8;
+}
+
+.reuse .agora-card-links .bottom-container .agora-anchor,
+.reuse .agora-card-links .bottom-container .agora-anchor:hover,
+.article .agora-card-links .bottom-container .agora-anchor,
+.article .agora-card-links .bottom-container .agora-anchor:hover,
+.organization .agora-card-links .bottom-container .agora-anchor,
+.organization .agora-card-links .bottom-container .agora-anchor:hover {
+  color: #034ad8;
+}
+
+/* Hide default trailing icon from links */
+.reuse .agora-card-links .bottom-container .agora-anchor .trailing-icon-default,
+.reuse .agora-card-links .bottom-container .agora-anchor .trailing-icon-hover,
+.reuse .agora-card-links .bottom-container .agora-anchor .trailing-icon-active,
+.article .agora-card-links .bottom-container .agora-anchor .trailing-icon-default,
+.article .agora-card-links .bottom-container .agora-anchor .trailing-icon-hover,
+.article .agora-card-links .bottom-container .agora-anchor .trailing-icon-active,
+.organization .agora-card-links .bottom-container .agora-anchor .trailing-icon-default,
+.organization .agora-card-links .bottom-container .agora-anchor .trailing-icon-hover,
+.organization .agora-card-links .bottom-container .agora-anchor .trailing-icon-active {
+  display: none;
+}
+
+/* Hide arrow icon from link-container */
+.reuse .agora-card-links .link-container .icon,
+.article .agora-card-links .link-container .icon,
+.organization .agora-card-links .link-container .icon {
+  display: none;
+}
+
+/* Dataset reuse card layout */
+.dataset-reuse-card-wrapper .card-general,
+.dataset-reuse-card-wrapper .card-general > div {
+  height: 100% !important;
+  display: flex !important;
+  overflow: hidden !important;
+}
+
+.dataset-reuse-card-wrapper [class*="agora-card-image-container"] {
+  width: 300px !important;
+  min-width: 300px !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.dataset-reuse-card-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+}
+
+.dataset-reuse-card-wrapper [class*="agora-card-content"] {
+  flex: 1 !important;
+}
+
+/* 5.8 Cards (No Results) */
+.agora-card-no-results .icon-container {
+  border-width: 0px;
+}
+
+.agora-card-no-results .description {
+  font-weight: 400;
+  margin-bottom: 32px;
+  max-width: 65ch;
+}
+
+/* CardNoResults inside tab panels should have white background */
+.tab-panel .agora-card-no-results,
+.tab-panel-content .agora-card-no-results {
+  background-color: white !important;
+  border-radius: 8px;
+  padding: 48px 32px;
+}
+
+/* CardLinks inside tab panels should have white background */
+.tab-panel-content .agora-card-links,
+.tab-panel .agora-card-links {
+  background-color: white !important;
+  padding: 16px 32px !important;
+}
+
+/* Quality progress bar warning color when score <= 45% */
+.quality-progress-warning .progress-bar::-webkit-progress-value {
+  background-color: #d4a017 !important;
+}
+
+.quality-progress-warning .progress-bar::-moz-progress-bar {
+  background-color: #d4a017 !important;
+}
+
+.quality-progress-warning .progress-progress .progress-bar::-webkit-progress-value {
+  background-color: #d4a017 !important;
+}
+
+.quality-progress-warning .progress-progress .progress-bar::-moz-progress-bar {
+  background-color: #d4a017 !important;
+}
+
+/* Quality progress bar success color when score > 50% */
+.quality-progress-success .progress-bar::-webkit-progress-value {
+  background-color: #22863a !important;
+}
+
+.quality-progress-success .progress-bar::-moz-progress-bar {
+  background-color: #22863a !important;
+}
+
+.quality-progress-success .progress-progress .progress-bar::-webkit-progress-value {
+  background-color: #22863a !important;
+}
+
+.quality-progress-success .progress-progress .progress-bar::-moz-progress-bar {
+  background-color: #22863a !important;
+}
+
+/* Force buttons row inside CardNoResults extra-description */
+.agora-card-no-results .extra-description > div {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 16px !important;
+}
+
+.agora-card-no-results .main-content {
+  background: white;
+  padding: 80px;
+  margin: 0 !important;
+}
+
+.pagination-filters {
+  position: relative;
+  z-index: 0;
+}
+
+.pagination-filters::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: var(--color-primary-50);
+  z-index: -1;
+}
+
+.sidebar-index {
+  padding: 32px 64px 32px 32px;
+}
+
+.agora-search-pagination {
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.agora-search-pagination .nav-arrows {
+  border-color: var(--color-primary-600);
+}
+
+:has(.agora-card-no-results) .pagination-filters:before {
+  display: none;
+}
+
+/* 5.10 Toggle (Organizations Filters) */
+.organizations-filters .agora-toggle {
+  width: 100%;
+}
+
+.organizations-filters .agora-toggle.agora-toggle-icon {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.organizations-filters .agora-toggle .agora-toggle-icon-container img {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------------------------------- */
+
+.icon-bar-chart-blue {
+  width: 24px;
+  height: 24px;
+  background-color: #034ad8;
+
+  mask: url("/Icons/bar_chart.svg") no-repeat center;
+  -webkit-mask: url("/Icons/bar_chart.svg") no-repeat center;
+
+  mask-size: contain;
+  -webkit-mask-size: contain;
+}
+
+/* ------------ 5.12 TIMELINE ------------- */
+
+.datastory-modal .agora-timeline-vertical .timeline-label {
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+.datastory-modal .agora-timeline-vertical .timeline-icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.datastory-modal .agora-timeline-vertical .timeline-icon svg {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+}
+
+/* ==========================================================================
+   [06] PAGES
+   ========================================================================== */
+
+/* 6.1 Homepage */
+.dataset-content-proper {
+  height: 112px;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+.card-general-listing .card-general {
+  border-width: 1px !important;
+}
+
+.card-general-listing .card-general .content {
+  background-color: var(--color-primary-100) !important;
+}
+
+/* Cards inside the detail-page tabs sit on a primary-100 bleed background
+   (added by TabBodyWrapper), so make them white to stand out from the tab body.
+   Scoped to .tab-body-bleed so other tabbed contexts without the bleed (e.g. the
+   admin editorial preview) keep the default blue listing card. The !important is
+   required only because the base rule above already uses it. */
+.tab-body-bleed .card-general-listing .card-general .content,
+.tab-body-bleed .card-general-listing .card-general>.image {
+  background-color: var(--color-white) !important;
+}
+
+/* The white card needs a visible outline against the primary-100 bleed.
+   Matches the design spec: 2px Neutral/700 (#64718B) border. */
+.tab-body-bleed .card-general-listing .card-general {
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: var(--color-neutral-700) !important;
+}
+
+.card-general-listing .card-general>.image {
+  height: 88px !important;
+  background-color: var(--color-primary-100);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 32px;
+  padding-left: 32px;
+  padding-bottom: 16px;
+}
+
+.card-general-listing .image-overlay {
+  display: none !important;
+  background-color: transparent !important;
+  opacity: 0 !important;
+}
+
+.card-general-listing .card-general > .image img {
+  height: 56px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+.card-general-listing .card-general .title-text {
+  min-height: 64px;
+}
+
+.card-general-listing > * {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.card-general-listing a {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.card-general-listing .container-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.card-general-listing .card-general {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.card-general-listing .content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-general-listing .content > div.p-32 {
+  padding-top: 0 !important;
+}
+
+.card-general-listing .content > div:first-child {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-general-listing .description {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.homepage .agora-card-article.indented .container-body {
+  background: transparent;
+  border: 2px solid var(--color-white);
+}
+
+.homepage .agora-card-article.indented .container-body * {
+  color: var(--color-white);
+}
+
+.homepage .anchor-container.has-siblings {
+  height: 0;
+  padding-bottom: 32px;
+}
+
+.latest-news-section .agora-card-article .anchor-container {
+  margin-top: auto;
+}
+
+.homepage .latest-news-section .container-body {
+  background: var(--color-primary-100);
+  padding: 32px;
+}
+
+.homepage .latest-news-section .agora-card-article.default {
+  gap: 0px;
+}
+
+/* 6.2 Login */
+.login-page .agora-tabs.desktop .tab-panel.current-neutral,
+.login-page .agora-tabs.desktop.vertically .tab-list.desktop .tab-list-item.active.current-neutral {
+  background-color: var(--color-secondary-50);
+}
+
+.login-page .agora-tabs.desktop.vertically .tab-panel-content:before {
+  display: none;
+}
+
+.login-page .agora-tabs.desktop .tab-panel-content::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 100%;
+  width: calc(38vw - 50%);
+  background: var(--color-secondary-50);
+}
+
+@media (min-width: 1280px) {
+  .login-page .agora-tabs.desktop .tab-panel .tab-panel-content {
+    max-width: 1280px;
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+}
+
+/* 6.3 Page Detail & Links */
+/* (styles above in cards section) */
+
+/* 6.4 Mini-courses */
+/* (card styles in 5.5) */
+
+/* ==========================================================================
+   [07] ADMIN LAYOUT
+   ========================================================================== */
+
+/* 7.1 Admin Wrapper & Header */
+body:has(.admin-wrapper) > div > header.sticky {
+  display: none;
+}
+
+.admin-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.admin-header {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.admin-header .agora-header {
+  background-color: var(--color-brand-blue-secondary);
+}
+
+.admin-header .agora-header .agora-general-bar {
+  justify-content: flex-end;
+  padding: 0 112px;
+}
+
+.admin-header .authenticated-panel-menu > .agora-btn {
+  background-color: var(--color-white);
+  color: var(--color-primary-500);
+  border-color: transparent;
+  margin: 8px 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-header .authenticated-panel-menu > .agora-btn .children-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-600);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Image avatar */
+.admin-header .authenticated-panel-menu > .agora-btn img.icon {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Icon avatar (fallback) */
+.admin-header .authenticated-panel-menu > .agora-btn svg.icon {
+  fill: var(--color-primary-500);
+}
+
+/* 7.2 Side Navigation */
+.admin-layout {
+  display: flex;
+  flex: 1;
+}
+
+.admin-side-nav {
+  background-color: var(--color-primary-900);
+  width: 280px;
+  min-height: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar-nav {
+  padding: 8px 0;
+}
+
+.admin-sidebar-nav .agora-sidebar {
+  background-color: transparent;
+}
+
+.admin-sidebar-nav.agora-sidebar
+  .agora-sidebar-item
+  .agora-btn-link-neutral.agora-sidebar-button-item {
+  padding: 16px !important;
+  border-left: 3px solid transparent !important;
+  overflow: hidden;
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+.admin-sidebar-nav.agora-sidebar
+  .agora-sidebar-item
+  .agora-btn-link-neutral.agora-sidebar-button-item
+  > *:not(.agora-icon):not([class*="icon"]) {
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-sidebar-nav__group-label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 16px;
+  min-width: 0;
+  overflow: hidden;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.admin-sidebar-nav__group-label-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-sidebar-nav__group-label--active {
+  font-weight: 700;
+}
+
+.admin-sidebar-nav .agora-sidebar-item > .agora-sidebar-button-item:hover,
+.admin-sidebar-nav .agora-sidebar-item > button:hover,
+.admin-sidebar-nav .agora-sidebar-item .agora-btn-link-neutral:hover,
+.admin-side-nav .agora-sidebar .agora-sidebar-item .agora-btn-link-neutral:hover {
+  border-left: 3px solid transparent !important;
+  background-color: #0338a2 !important;
+  text-decoration: none !important;
+}
+
+.admin-sidebar-nav__group-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.admin-side-nav
+  .agora-sidebar.darkMode
+  .agora-sidebar-item
+  .agora-sidebar-anchor-item
+  .data-children-wrapper {
+  gap: 8px;
+  font-weight: 400;
+  padding-left: 16px;
+}
+
+.admin-sidebar-nav__children {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar-nav__child-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  padding-left: 36px;
+  text-decoration: none;
+  color: var(--color-white);
+  font-size: 16px;
+  line-height: 24px;
+  transition: background-color 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.admin-sidebar-nav__child-item:hover {
+  background-color: #0338a2;
+  border-left: 3px solid var(--color-white);
+}
+
+.admin-sidebar-nav__child-item--active {
+  background-color: #0338a2;
+  border-left: 3px solid var(--color-white);
+  padding-left: 36px;
+  font-weight: 700;
+}
+
+.admin-sidebar-nav__child-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.admin-sidebar-nav__child-icon,
+.admin-sidebar-nav__child-icon svg,
+.admin-sidebar-nav__child-icon svg path {
+  fill: var(--color-white);
+  color: var(--color-white);
+}
+
+/* 7.3 Content Area */
+.admin-layout__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-page .admin-search-wrapper {
+  width: 100%;
+  max-width: 654px;
+}
+
+/* Admin page - empty state (no results) */
+.admin-page__body {
+  display: flex;
+  gap: 32px;
+}
+
+.admin-page__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-shrink: 0;
+  width: 340px;
+}
+
+.admin-page__count {
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--color-neutral-900);
+  text-transform: uppercase;
+}
+
+.admin-page__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-page__empty .agora-card-no-results__anchor {
+  background-color: var(--color-primary-900);
+  color: var(--color-white);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 28px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.admin-page__empty .agora-card-no-results__anchor:hover {
+  background-color: var(--color-primary-700);
+  text-decoration: none;
+}
+
+.admin-page__empty-icon {
+  width: 80px;
+  height: 80px;
+}
+
+.admin-page__empty-icon svg {
+  width: 80px;
+  height: 80px;
+  fill: var(--color-brand-blue-secondary);
+}
+
+.admin-new-page__cards {
+  display: flex;
+  gap: 32px;
+  margin-top: 32px;
+}
+
+.admin-new-page__cards > * {
+  flex: 1;
+}
+
+.admin-new-page__cards .card-action {
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.admin-new-page__cards .card-action:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-color: var(--color-primary-900);
+}
+
+.admin-page {
+  --admin-auxiliar-width: 360px;
+  --admin-auxiliar-gap: 70px;
+}
+
+.admin-page [class*="agora-pill"] .children-wrapper {
+  font-weight: 700 !important;
+}
+
+.admin-page td [class*="agora-pill"] .children-wrapper {
+  font-weight: 400 !important;
+}
+
+.admin-page__body {
+  display: flex;
+  gap: var(--admin-auxiliar-gap);
+}
+
+.admin-page__form-area {
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap));
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.admin-page__section-title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 32px;
+  color: var(--color-primary-900);
+}
+
+.admin-page__section-title--no-top {
+  margin-top: 0 !important;
+}
+
+.admin-page__fields-group {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.admin-page__org-card {
+  background-color: var(--color-neutral-100);
+  border-radius: 4px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-page__org-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--color-neutral-900);
+}
+
+.admin-page__org-card-description {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 28px;
+  color: var(--color-neutral-900);
+}
+
+.admin-page__org-card-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary-600);
+  font-size: 16px;
+  line-height: 28px;
+  text-decoration: none;
+}
+
+.admin-page__org-card-link:hover {
+  text-decoration: underline;
+}
+
+.admin-page__divider-or {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.admin-page__divider-or::before,
+.admin-page__divider-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-neutral-300);
+}
+
+.admin-page__divider-or-text {
+  font-size: 14px;
+  color: var(--color-neutral-700);
+  white-space: nowrap;
+}
+
+.admin-page__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+.admin-page__actions--between {
+  justify-content: space-between;
+}
+
+/* Info card (unused but kept for reference) */
+.admin-page__info-card {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background-color: var(--color-informative-50, #e5f6ff);
+  border-radius: 4px;
+}
+
+.admin-page__info-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--color-informative-600, #00598c);
+}
+
+.admin-page__info-icon svg {
+  fill: var(--color-informative-600, #00598c);
+}
+
+.admin-page__info-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--color-neutral-900);
+}
+
+.admin-page__info-description {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 28px;
+  color: var(--color-neutral-900);
+}
+
+/* Auxiliar sidebar */
+.admin-page__auxiliar {
+  flex: 0 0 var(--admin-auxiliar-width);
+  max-width: var(--admin-auxiliar-width);
+  min-width: 0;
+  margin-left: auto;
+}
+
+.admin-page__auxiliar-inner {
+  background-color: var(--color-neutral-100);
+  padding: 32px;
+  position: sticky;
+  top: 80px;
+}
+
+.admin-page__auxiliar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.admin-page__auxiliar-header svg {
+  fill: var(--color-primary-600);
+}
+
+.admin-page__auxiliar-title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 32px;
+  color: var(--color-primary-900);
+}
+
+/* Auxiliar list (replaces accordions) */
+.auxiliar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.auxiliar-list__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.auxiliar-list__content,
+.auxiliar-list__content * {
+  font-size: 14px !important;
+  line-height: 22px !important;
+  color: var(--color-neutral-900);
+}
+
+.auxiliar-list__content {
+  padding: 0 16px 16px 56px;
+}
+
+.auxiliar-list__icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.auxiliar-list__icon {
+  color: var(--color-primary-600);
+}
+
+.auxiliar-list__icon svg,
+.auxiliar-list__icon svg path {
+  fill: currentColor !important;
+}
+
+.auxiliar-list__text {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--color-neutral-900);
+}
+
+.auxiliar-list__chevron {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.auxiliar-list__chevron svg {
+  fill: var(--color-primary-600);
+}
+
+/* CardGeneral overrides in admin */
+.admin-page .card-general {
+  width: 100%;
+}
+
+.admin-page .card-general .icon-container {
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.admin-page .card-general .icon-set {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background-color: transparent;
+}
+
+/* Hide download icon in profile uploader */
+.admin-page .agora-drag-and-drop-file-uploader .download-icon,
+.admin-page .agora-drag-and-drop-file-uploader .separator-label {
+  display: none;
+}
+
+/* 7.6 Admin Tabs & Statistics */
+.admin-page .agora-tabs.desktop .tab-panel.current-neutral,
+.admin-page .agora-tabs.desktop .tab-list.desktop .tab-list-item.current-neutral {
+  background-color: transparent;
+}
+
+.admin-page .agora-tabs.desktop .tab-list.desktop .tab-list-item.active.current-neutral {
+  background-color: var(--color-primary-100);
+}
+
+.admin-page .agora-tabs.desktop .tab-list.desktop {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.admin-page .tab-panel-content,
+.admin-page .agora-tabs.desktop .tab-panel .tab-panel-content {
+  padding: 0;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  background-color: transparent;
+  outline: none;
+}
+
+.admin-page .tab-panel-content::before,
+.admin-page .tab-panel-content::after {
+  display: none;
+}
+
+.admin-page .agora-tabs .tab-panel {
+  background-color: transparent;
+}
+
+.statistics-grid {
+  display: flex;
+  gap: 0;
+}
+
+.statistics-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 32px;
+  border-right: 1px solid var(--color-neutral-200);
+}
+
+.statistics-item:first-child {
+  padding-left: 0;
+}
+
+.statistics-item:last-child {
+  border-right: none;
+}
+
+/* Admin edit info section */
+.admin-edit-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-edit-info__badges {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-edit-info__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--color-neutral-600);
+}
+
+.admin-edit-info__clock-icon,
+.admin-edit-info__clock-icon.icon {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  max-width: 14px !important;
+  margin-right: 8px;
+  flex-shrink: 0;
+  fill: #64718b !important;
+  color: #64718b !important;
+}
+
+.admin-edit-info__stat-icon,
+.admin-edit-info__stat-icon.icon {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  max-width: 14px !important;
+  flex-shrink: 0;
+  fill: #64718b !important;
+  color: #64718b !important;
+}
+
+/* Dataset edit visibility banner */
+.dataset-edit-visibility-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.admin-edit-info__btn-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-edit-info__btn-content .icon {
+  display: inline-flex !important;
+}
+
+.admin-edit-info__activity {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  font-size: 14px !important;
+  line-height: 24px;
+  color: var(--color-neutral-900);
+  white-space: nowrap;
+  margin: 24px 0;
+}
+
+.admin-edit-info__activity span,
+.admin-edit-info__activity a {
+  font-size: 14px !important;
+}
+
+/* Dataset edit danger actions */
+.dataset-edit-danger-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.dataset-edit-danger-actions button,
+.dataset-edit-danger-actions button span,
+.dataset-edit-danger-actions button a {
+  color: var(--color-neutral-900) !important;
+}
+
+.dataset-edit-danger-actions button .icon,
+.dataset-edit-danger-actions button svg,
+.dataset-edit-danger-actions button .icon svg path {
+  color: var(--color-neutral-900) !important;
+  fill: var(--color-neutral-900) !important;
+}
+
+.dataset-edit-danger-actions .status-card,
+.dataset-edit-danger-actions .status-card * {
+  text-align: left !important;
+}
+
+/* Profile form width */
+.admin-layout__content .admin-page .agora-tabs .admin-page__form {
+  max-width: 100%;
+}
+
+/* 7.7 Profile Card */
+.profile-card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 32px;
+  background-color: var(--color-neutral-100);
+  border-radius: 4px;
+  overflow: visible;
+  position: relative;
+}
+
+.profile-edit-dropdown {
+  min-width: 250px !important;
+  width: max-content !important;
+}
+
+.profile-edit-dropdown .agora-dropdown-section-options {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.profile-card__avatar-container {
+  flex-shrink: 0;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--color-primary-500);
+  outline: 3px solid var(--color-primary-500);
+}
+
+.profile-card__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Agora Avatar (initials/icon) inside the container */
+.profile-card__avatar-container .agora-avatar-container,
+.profile-card__avatar-container .agora-avatar {
+  width: 104px;
+  height: 104px;
+  min-width: 104px;
+  min-height: 104px;
+  border-radius: 50%;
+}
+
+.profile-card__avatar-container .avatar.avatar-initials {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.profile-card__avatar-container .avatar.avatar-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.profile-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  justify-content: center;
+}
+
+.profile-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-card__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: center;
+}
+
+/* 7.8 Responsive */
+@media (max-width: 1024px) {
+  .admin-new-page__cards {
+    flex-direction: column;
+  }
+
+  .admin-page {
+    padding: 32px 24px;
+  }
+
+  .admin-page__body {
+    flex-direction: column;
+  }
+
+  .admin-page__form-area {
+    flex: 1;
+    max-width: 100%;
+  }
+
+  .admin-side-nav {
+    width: 220px;
+  }
+
+  .admin-side-nav__label {
+    font-size: 11px;
+  }
+
+  .admin-sidebar-nav__child-item {
+    padding-left: 24px;
+    font-size: 13px;
+  }
+
+  .admin-sidebar-nav__child-item--active {
+    padding-left: 21px;
+  }
+
+  .admin-header__content {
+    padding: 0 24px;
+  }
+}
+
+/* ==========================================================================
+   [08] UTILITIES
+   ========================================================================== */
+
+.pl-0 {
+  padding-left: 0;
+}
+
+p.max-w-ch,
+.max-w-ch p,
+li.max-w-ch,
+.max-w-ch li,
+div.max-w-ch,
+.max-w-ch div {
+  max-width: 75ch;
+}
+
+@media (min-width: 768px) {
+  .agora-card-no-results .main-content {
+    margin: 80px;
+  }
+}
+
+/* ==========================================================================
+   [09] RICH TEXT EDITOR (TipTap)
+   ========================================================================== */
+
+.rte-wrapper {
+  border: 2px solid var(--color-neutral-700);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border-bottom: 2px solid var(--color-neutral-700);
+  background: var(--color-neutral-50, #f9fafb);
+}
+
+.rte-toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-neutral-700, #374151);
+  transition: background 0.15s;
+}
+
+.rte-toolbar__btn:hover {
+  background: var(--color-neutral-200, #e5e7eb);
+}
+
+.rte-toolbar__btn--active {
+  background: var(--color-primary-100, #dbeafe);
+  color: var(--color-primary-700, #1d4ed8);
+}
+
+.rte-toolbar__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.rte-toolbar__separator {
+  width: 1px;
+  height: 20px;
+  background: var(--color-neutral-300, #d1d5db);
+  margin: 0 4px;
+}
+
+.rte-content .tiptap {
+  min-height: 200px;
+  padding: 16px;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-neutral-900, #111827);
+}
+
+.rte-content .tiptap p {
+  margin: 0.5em 0;
+}
+
+.rte-content .tiptap h2 {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin: 1em 0 0.5em;
+}
+
+.rte-content .tiptap h3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em;
+}
+
+.rte-content .tiptap ul {
+  list-style: disc;
+  padding-left: 1.5em;
+}
+
+.rte-content .tiptap ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+}
+
+.rte-content .tiptap blockquote {
+  border-left: 3px solid var(--color-neutral-300, #d1d5db);
+  padding-left: 1em;
+  color: var(--color-neutral-600, #4b5563);
+  font-style: italic;
+}
+
+.rte-content .tiptap pre {
+  background: var(--color-neutral-100, #f3f4f6);
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.rte-content .tiptap a {
+  color: var(--color-primary-600, #2563eb);
+  text-decoration: underline;
+}
+
+.rte-content .tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.rte-content .tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.rte-content .tiptap th,
+.rte-content .tiptap td {
+  border: 1px solid var(--color-neutral-300, #d1d5db);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.rte-content .tiptap th {
+  background: var(--color-neutral-100, #f3f4f6);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   [10] MARKDOWN CONTENT OVERRIDES
+   ========================================================================== */
+
+.markdown-container ul {
+  list-style: disc !important;
+  padding-left: 2em !important;
+}
+
+.markdown-container a {
+  text-decoration: underline !important;
+}
+
+.markdown-container p {
+  margin-top: 10px !important;
+  margin-bottom: 1em !important;
+}
+
+.roadmap-block p:has(+ p strong) {
+  margin-bottom: 4px;
+}
+
+.roadmap-block p + p:not(:has(strong)) {
+  margin-bottom: 24px;
+}
+.roadmap-page div[id] {
+  scroll-margin-top: 180px;
+}

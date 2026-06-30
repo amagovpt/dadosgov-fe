@@ -48,6 +48,8 @@ export interface Dataservice {
   private: boolean;
   featured: boolean;
   datasets: DatasetRef[];
+  // Backend-computed authorization for the current user (single source of truth).
+  permissions?: DataservicePermissions;
 }
 
 export interface DataserviceCreatePayload {

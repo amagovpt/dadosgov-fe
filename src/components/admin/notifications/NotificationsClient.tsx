@@ -23,22 +23,34 @@ export default function NotificationsClient() {
   const [items, setItems] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetchNotifications(1, 50);
-      setItems(res.data ?? []);
-    } catch (error) {
-      console.error("Error loading notifications:", error);
-      setItems([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    load();
-  }, [load]);
+    let isCancelled = false;
+
+    const loadNotifications = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetchNotifications(1, 50);
+        if (!isCancelled) {
+          setItems(res.data ?? []);
+        }
+      } catch (error) {
+        console.error("Error loading notifications:", error);
+        if (!isCancelled) {
+          setItems([]);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadNotifications();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const handleMarkRead = useCallback(async (id: string) => {
     try {
@@ -52,8 +64,8 @@ export default function NotificationsClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Notificações", url: "/pages/admin/notificacoes" },
+        { label: "Administração", url: "/admin" },
+        { label: "Notificações", url: "/admin/notificacoes" },
       ]}
       title="Notificações"
       headerAction={null}

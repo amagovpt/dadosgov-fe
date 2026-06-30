@@ -6,8 +6,6 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { Breadcrumb } from "@ama-pt/agora-design-system";
-import { githubPagesConfig } from "@/config/site";
-
 interface BreadcrumbItem {
   label: string;
   url: string;
@@ -28,7 +26,7 @@ function sanitizeMarkdown(content: string): string {
     .replace(/\bdados gov\b/g, "dados.gov.pt")
     .replace(
       /Para pedidos de certificação, enviar e-mail para: dados@ama\.pt\./g,
-      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](/pages/support)."
+      "Para pedidos de certificação, consulte a página [Ajuda e Contactos](ajuda-e-contactos)."
     )
     .replace(
       /### Utilização do e-mail dados\(arroba\)ama\.pt/g,
@@ -36,7 +34,7 @@ function sanitizeMarkdown(content: string): string {
     )
     .replace(
       /Este endereço de correio eletrónico permite contatar a equipa de projeto do dados\.gov, para questões relacionadas com o funcionamento geral da plataforma\. Não deverá ser utilizado para endereçar questões específicas sobre conjuntos de dados ou fornecedores\. Os participantes deverão ser contatados através do sistema de comentários relativo a cada conjunto de dados\./g,
-      "Para questões relacionadas com o funcionamento geral do portal dados.gov, deverá ser utilizada a página [Ajuda e Contactos](/pages/support). Esta via não deverá ser utilizada para endereçar questões específicas sobre conjuntos de dados ou fornecedores. Nesses casos, os participantes deverão ser contactados através do sistema de comentários associado a cada conjunto de dados."
+      "Para questões relacionadas com o funcionamento geral do portal dados.gov, deverá ser utilizada a página [Ajuda e Contactos](ajuda-e-contactos). Esta via não deverá ser utilizada para endereçar questões específicas sobre conjuntos de dados ou fornecedores. Nesses casos, os participantes deverão ser contactados através do sistema de comentários associado a cada conjunto de dados."
     );
 }
 
@@ -46,7 +44,6 @@ export function GitHubMarkdownPage({
   breadcrumbItems,
   initialContent = "",
 }: GitHubMarkdownPageProps) {
-  const editUrl = `${githubPagesConfig.repoBaseUrl}/${slug}.md`;
   const cleanContent = sanitizeMarkdown(initialContent);
 
   return (
@@ -87,7 +84,7 @@ export function GitHubMarkdownPage({
                       ),
                       a: ({ href, children }) => {
                         const isExternal = href?.startsWith("http");
-                        const isPortalLink = href?.startsWith("/pages/");
+                        const isPortalLink = href?.startsWith("/");
                         const resolvedHref =
                           isPortalLink || isExternal
                             ? (href ?? "#")
@@ -148,19 +145,6 @@ export function GitHubMarkdownPage({
                     {cleanContent}
                   </ReactMarkdown>
 
-                  <div className="pt-32">
-                    <h2 className="text-32 font-medium text-[#021C51] mb-16 leading-tight">
-                      Ações
-                    </h2>
-                    <Link
-                      href={editUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#034AD8] underline font-medium hover:text-primary-700"
-                    >
-                      Propor uma mudança
-                    </Link>
-                  </div>
                 </div>
               ) : (
                 <p className="text-m-regular leading-7 text-[#2b363c]">

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { i18nRouter } from "next-i18n-router";
+import { i18nConfig } from "./config/i18nConfig";
 
 /**
  * Next.js proxy (formerly middleware) for dados.gov.pt.
@@ -49,8 +51,7 @@ function buildCsp(nonce: string): string {
   // 'unsafe-eval' is only added in development: React uses eval() for
   // callstack reconstruction and other dev-mode debugging features, but
   // never in production builds.
-  const scriptSrcExtras =
-    process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
+  const scriptSrcExtras = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
   return [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com${scriptSrcExtras}`,
@@ -67,6 +68,7 @@ export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const isBackendProxy = BACKEND_PROXY_PATHS.some((p) => pathname.startsWith(p));
+
   const skipCsp = NO_CSP_PATHS.some((p) => pathname.startsWith(p));
 
   const requestHeaders = new Headers(request.headers);
@@ -76,29 +78,36 @@ export function proxy(request: NextRequest) {
   }
 
   let nonce: string | undefined;
+
   if (!skipCsp) {
     nonce = generateNonce();
     requestHeaders.set("x-nonce", nonce);
   }
 
-  const response = NextResponse.next({
-    request: { headers: requestHeaders },
-  });
+  const response = i18nRouter(request, i18nConfig);
 
   if (nonce) {
     response.headers.set("Content-Security-Policy", buildCsp(nonce));
+  }
+
+  const rewriteUrl = response.headers.get("x-middleware-rewrite");
+  if (rewriteUrl) {
+    return NextResponse.rewrite(new URL(rewriteUrl, request.url), {
+      request: {
+        headers: requestHeaders,
+      },
+      headers: response.headers,
+    });
   }
 
   return response;
 }
 
 export const config = {
-  // Apply to every route except Next.js internals and static assets that
-  // don't render React or need CSP enforcement.
   matcher: [
     {
       source:
-        "/((?!_next/static|_next/image|favicon.ico|favicon.png|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|eot)$).*)",
+        "/((?!api/|auth/|internal-api/|confirm/|reset/|confirm-change-email/|assets/|swaggerui/|s/|saml/|get-csrf|_next/static|.*\\..*|_next/image|favicon.ico|favicon.png|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|eot)$).*)",
     },
   ],
 };

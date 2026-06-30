@@ -9,7 +9,7 @@ import path from "node:path";
  * exported slugs/IDs, e.g.:
  *
  *   const { dataset } = loadFixtures();
- *   await page.goto(`/pages/admin/me/datasets/edit?slug=${dataset.slug}`);
+ *   await page.goto(`/admin/me/datasets/edit?slug=${dataset.slug}`);
  */
 export interface E2eFixtures {
   admin: { id: string; email: string; slug: string };

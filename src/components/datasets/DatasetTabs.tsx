@@ -91,7 +91,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                     hasAnchor={false}
                                     extraDescription={
                                         <div className="mt-24">
-                                            <Link href="/pages/admin/reuses/new">
+                                            <Link href="/admin/reuses/new">
                                                 <Button
                                                     variant="primary"
                                                     appearance="outline"
@@ -136,7 +136,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                     Atualmente, não existem recursos comunitários disponíveis para este conjunto de dados.
                                 </p>
                                 <div className="flex justify-center mt-32">
-                                    <Link href={`/pages/admin/community-resources/new?dataset_id=${dataset.id}`}>
+                                    <Link href={`/admin/community-resources/new?dataset_id=${dataset.id}`}>
                                         <Button
                                             variant="primary"
                                             appearance="outline"
@@ -162,7 +162,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                     <h3 className="font-medium text-neutral-900 text-base">
                                         {communityCount} {communityCount === 1 ? "RECURSO COMUNITÁRIO" : "RECURSOS COMUNITÁRIOS"}
                                     </h3>
-                                    <Link href={`/pages/admin/community-resources/new?dataset_id=${dataset.id}`}>
+                                    <Link href={`/admin/community-resources/new?dataset_id=${dataset.id}`}>
                                         <Button
                                             variant="primary"
                                             appearance="outline"

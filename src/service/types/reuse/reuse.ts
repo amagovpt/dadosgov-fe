@@ -32,6 +32,12 @@ export interface ReuseTopic {
   label: string;
 }
 
+export interface ReusePermissions {
+  edit: boolean;
+  delete: boolean;
+  read: boolean;
+}
+
 export interface Reuse {
   id: string;
   title: string;
@@ -56,6 +62,9 @@ export interface Reuse {
   datasets: DatasetRef[];
   dataservices: Dataservice[];
   extras?: Record<string, unknown>;
+  // Backend-computed authorization for the current user (the single source of
+  // truth). Present when the reuse is fetched with the user's session.
+  permissions?: ReusePermissions;
 }
 
 export interface ReuseCreatePayload {

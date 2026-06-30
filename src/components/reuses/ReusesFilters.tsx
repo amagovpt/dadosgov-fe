@@ -239,7 +239,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
           appearance="outline"
           onClick={() => {
             paramsRef.current = "";
-            router.replace("/pages/reuses", { scroll: false });
+            router.replace("/reuses", { scroll: false });
           }}
         >
           Limpar filtros

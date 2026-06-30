@@ -3,8 +3,8 @@ import { test, expect } from "playwright/test";
 /**
  * User moderation pages — admin-only.
  *
- *   - /pages/admin/system/users         (listing with filters)
- *   - /pages/admin/users/[userId]/profile (single user view, role change, deactivate, delete)
+ *   - /admin/system/users         (listing with filters)
+ *   - /admin/users/[userId]/profile (single user view, role change, deactivate, delete)
  *
  * Auth via auth-setup storage state.
  */
@@ -13,7 +13,7 @@ test.describe("Backoffice - User Moderation", () => {
   test("UM-01: System users listing renders with the Utilizadores heading", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/users");
+    await page.goto("/admin/system/users");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -25,7 +25,7 @@ test.describe("Backoffice - User Moderation", () => {
   });
 
   test("UM-02: Search input filters the user list", async ({ page }) => {
-    await page.goto("/pages/admin/system/users");
+    await page.goto("/admin/system/users");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -38,12 +38,12 @@ test.describe("Backoffice - User Moderation", () => {
   test("UM-03: Clicking a user navigates to the profile page", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/users");
+    await page.goto("/admin/system/users");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
     const profileLink = page
-      .locator("a[href*='/pages/admin/users/']")
+      .locator("a[href*='/admin/users/']")
       .first();
     if ((await profileLink.count()) === 0) {
       test.skip(true, "No user profile links rendered");
@@ -57,12 +57,12 @@ test.describe("Backoffice - User Moderation", () => {
   test("UM-04: User profile page exposes role/deactivate/delete affordances", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/users");
+    await page.goto("/admin/system/users");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
     const profileLink = page
-      .locator("a[href*='/pages/admin/users/']")
+      .locator("a[href*='/admin/users/']")
       .first();
     if ((await profileLink.count()) === 0) {
       test.skip(true, "No user profile links rendered");
@@ -101,7 +101,7 @@ test.describe("Backoffice - User Moderation", () => {
   }) => {
     const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
-    await page.goto("/pages/admin/system/users");
+    await page.goto("/admin/system/users");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

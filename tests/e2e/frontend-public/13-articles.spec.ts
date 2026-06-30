@@ -1,7 +1,7 @@
 import { test, expect } from "playwright/test";
 
-// The route is /pages/posts (the "articles" naming is internal to the spec).
-const POSTS_URL = "/pages/posts";
+// The route is /posts (the "articles" naming is internal to the spec).
+const POSTS_URL = "/posts";
 
 test.describe("Articles (Posts) Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -21,12 +21,12 @@ test.describe("Articles (Posts) Page", () => {
     const searchInput = page.locator("#articles-search");
     await expect(searchInput).toBeVisible({ timeout: 10000 });
 
-    const cards = page.locator("a[href^='/pages/posts/']");
+    const cards = page.locator("a[href^='/posts/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
   });
 
   test("NT-02: Posts have href slugs", async ({ page }) => {
-    const firstCard = page.locator("a[href^='/pages/posts/']").first();
+    const firstCard = page.locator("a[href^='/posts/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     const href = await firstCard.getAttribute("href");
@@ -40,7 +40,7 @@ test.describe("Articles (Posts) Page", () => {
   });
 
   test("NT-04: Listing renders multiple posts", async ({ page }) => {
-    const cards = page.locator("a[href^='/pages/posts/']");
+    const cards = page.locator("a[href^='/posts/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
     const count = await cards.count();
     expect(count).toBeGreaterThan(1);
@@ -49,7 +49,7 @@ test.describe("Articles (Posts) Page", () => {
   test("NT-05: Click card opens article detail with title and breadcrumb", async ({
     page,
   }) => {
-    const firstLink = page.locator("a[href^='/pages/posts/']").first();
+    const firstLink = page.locator("a[href^='/posts/']").first();
     await expect(firstLink).toBeVisible({ timeout: 15000 });
     await firstLink.click();
     await page.waitForURL(/\/pages\/posts\/.+/, { timeout: 15000 });
@@ -65,7 +65,7 @@ test.describe("Articles (Posts) Page", () => {
   });
 
   test("NT-06: Article detail renders body content", async ({ page }) => {
-    const firstLink = page.locator("a[href^='/pages/posts/']").first();
+    const firstLink = page.locator("a[href^='/posts/']").first();
     await firstLink.click();
     await page.waitForURL(/\/pages\/posts\/.+/, { timeout: 15000 });
 

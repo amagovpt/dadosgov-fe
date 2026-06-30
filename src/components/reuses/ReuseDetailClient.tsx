@@ -42,15 +42,13 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const [reuse, setReuse] = useState<Reuse | null>(null);
 
-  const canEdit = Boolean(
-    user &&
-    (isAdmin ||
-      (reuse?.owner && reuse.owner.id === user.id) ||
-      (reuse?.organization && user.organizations?.some((org) => org.id === reuse.organization?.id)))
-  );
+  // Authorization is decided by the backend (the single source of truth).
+  // fetchReuse carries the user's session, so reuse.permissions reflects what
+  // this user may do — no need to re-derive owner/org/role rules on the client.
+  const canEdit = reuse?.permissions?.edit ?? false;
 
   const [isLoadingReuse, setIsLoadingReuse] = useState(true);
   const [fullDatasets, setFullDatasets] = useState<Dataset[]>([]);
@@ -92,7 +90,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
     if (!reuse || isTogglingFavorite) return;
@@ -173,11 +171,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               <Breadcrumb
                 darkMode={false}
                 items={[
-                  { label: "Home", url: "/" },
-                  { label: "Reutilizações", url: "/pages/reuses" },
+                  { label: "Início", url: "/" },
+                  { label: "Reutilizações", url: "/reuses" },
                   {
                     label: reuse.title,
-                    url: `/pages/reuses/${reuse.slug || reuse.id}`,
+                    url: `/reuses/${reuse.slug || reuse.id}`,
                   },
                 ]}
               />
@@ -205,7 +203,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   Veja reutilização
                 </Button>
                 {canEdit && (
-                  <Link href={`/pages/admin/me/reuses/edit?id=${reuse.id}`}>
+                  <Link href={`/admin/me/reuses/edit?id=${reuse.id}`}>
                     <Button
                       variant="primary"
                       hasIcon={true}
@@ -234,7 +232,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             <p className="admin-edit-info__activity">
               <Icon name="agora-line-user" className="admin-edit-info__clock-icon" />
               {" Criado por: "}
-              <TextLink href={`/pages/users/${reuse.owner.slug}`}>
+              <TextLink href={`/users/${reuse.owner.slug}`}>
                 {reuse.owner.first_name} {reuse.owner.last_name}
               </TextLink>
             </p>
@@ -272,7 +270,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     )}
                     {reuse.organization && (
                       <TextLink
-                        href={`/pages/organizations/${reuse.organization.slug}`}
+                        href={`/organizations/${reuse.organization.slug}`}
                         className="text-sm font-medium hover:text-primary-800"
                       >
                         {reuse.organization.name}
@@ -412,7 +410,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
-                      link: `/pages/datasets/${dataset.slug}`,
+                      link: `/datasets/${dataset.slug}`,
                     } as CardMetricsProps;
                     return <CardMetrics key={`dataset-${index}`} {...cardProps} />;
                   })}

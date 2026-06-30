@@ -21,7 +21,7 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
     {
       icon: "agora-line-layers-menu",
       label: "Um conjunto de dados",
-      href: "/pages/admin/datasets/new",
+      href: "/admin/datasets/new",
     },
     {
       icon: null as string | null,
@@ -30,21 +30,20 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
       href: "/pages/admin/dataservices/new",
     },
     {
-      icon: null as string | null,
-      customIcon: "/Icons/bar_chart.svg",
+      icon: "agora-line-share",
       label: "Uma reutilização",
-      href: "/pages/admin/reuses/new",
+      href: "/admin/reuses/new",
     },
     {
       icon: null as string | null,
       customIcon: "/Icons/harvester.svg",
       label: "Um harvester",
-      href: "/pages/admin/harvesters/new",
+      href: "/admin/harvesters/new",
     },
     {
       icon: "agora-line-buildings",
       label: "Uma organização",
-      href: "/pages/admin/organizations/new?step=1",
+      href: "/admin/organizations/new?step=1",
     },
   ];
 

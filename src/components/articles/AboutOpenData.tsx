@@ -13,9 +13,10 @@ const AboutOpenData = ({ initialContent }: { initialContent?: string }) => {
       slug="pages/faqs/about_opendata"
       initialContent={processedContent}
       breadcrumbItems={[
-        { label: "Home", url: "/" },
-        { label: "Recursos", url: "#" },
-        { label: "Sobre dados abertos", url: "/pages/about-open-data" },
+        { label: "Início", url: "/" },
+        { label: "Recursos", url: "/recursos" },
+        { label: "Como usar o portal", url: "/recursos/como-usar-o-portal" },
+        { label: "Sobre dados abertos", url: "/recursos/como-usar-o-portal/sobre-dados-abertos" },
       ]}
     />
   );

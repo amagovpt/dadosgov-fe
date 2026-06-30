@@ -33,6 +33,16 @@ const nextConfig: NextConfig = {
   compress: true,
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
+  // No `experimental.proxyClientMaxBodySize` override: resource uploads are
+  // chunked client-side (chunkedUploadFetch, parts of
+  // uiConfig.resourceFileUploadChunk = 2MB), so no request streamed through the
+  // `/api/*` rewrite proxy exceeds the chunk size — well under Next's 10MB
+  // default. In production nginx routes `/api/` straight to the backend, so the
+  // rewrite proxy is not even in the upload path there.
+  // CAVEAT: if uiConfig.resourceFileUploadChunk is ever raised above Next's
+  // 10MB proxy default, re-add `experimental.proxyClientMaxBodySize` here
+  // (>= the chunk size) AND raise the fronting nginx `client_max_body_size` to
+  // match wherever the rewrite proxy is in the path (e.g. local dev).
   async headers() {
     // Content-Security-Policy is emitted per-request from `src/proxy.ts`
     // (TICKET-56b) so it can carry a fresh nonce on each response. The
@@ -165,8 +175,6 @@ const nextConfig: NextConfig = {
           destination: `${BACKEND_URL}/swaggerui/:path*`,
         },
       ],
-      afterFiles: [],
-      fallback: [],
     };
   },
   // TODO: Install @sentry/nextjs and configure

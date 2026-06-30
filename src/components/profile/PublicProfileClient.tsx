@@ -274,7 +274,7 @@ export default function PublicProfileClient() {
                 hasIcon={true}
                 leadingIcon="agora-line-edit"
                 leadingIconHover="agora-solid-edit"
-                onClick={() => router.push("/pages/admin/me/profile")}
+                onClick={() => router.push("/admin/me/profile")}
               >
                 Editar o meu perfil
               </Button>
@@ -301,28 +301,110 @@ export default function PublicProfileClient() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
             {displayUser.organizations.map((org) => (
-              <CardMetrics
-                key={`org-${org.slug}`}
-                title={org.name}
-                description={org.description ?? ""}
-                link={`/pages/organizations/${org.slug}`}
-                last_modified={
-                  org.last_modified
-                    ? formatDateToTimeAgo(org.last_modified)
-                    : undefined
-                }
-                organization={{
-                  name: org.name,
-                  logo: org.logo ?? undefined,
-                }}
-                metrics={{
-                  views: org.metrics?.views,
-                  resources_downloads: org.metrics?.resource_downloads,
-                  reuses: org.metrics?.reuses,
-                  followers: org.metrics?.followers,
-                }}
-                hideProgressBar
-              />
+              <div key={org.id} className="h-full">
+                <CardLinks
+                  onClick={() =>
+                    (window.location.href = `/organizations/${org.slug}`)
+                  }
+                  className="cursor-pointer text-neutral-900"
+                  variant="transparent"
+                  image={{
+                    src:
+                      org.logo || "/images/placeholders/organization.png",
+                    alt: org.name,
+                  }}
+                  category="Organização"
+                  title={
+                    <div className="underline text-xl-bold">{org.name}</div>
+                  }
+                  description={
+                    org.description ? (
+                      <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
+                        {org.description}
+                      </p>
+                    ) : undefined
+                  }
+                  date={
+                    org.last_modified ? (
+                      <span className="font-[300]">
+                        {`Atualizado há ${formatDistanceToNow(new Date(org.last_modified), { locale: pt })}`}
+                      </span>
+                    ) : undefined
+                  }
+                  links={[
+                    {
+                      href: "#",
+                      hasIcon: true,
+                      leadingIcon: "agora-line-eye",
+                      leadingIconHover: "agora-solid-eye",
+                      trailingIcon: "",
+                      trailingIconHover: "",
+                      trailingIconActive: "",
+                      children: org.metrics?.views
+                        ? org.metrics.views >= 1000000
+                          ? (org.metrics.views / 1000000)
+                            .toFixed(1)
+                            .replace(".", ",") + " M"
+                          : org.metrics.views >= 1000
+                            ? (org.metrics.views / 1000).toFixed(0) + " mil"
+                            : String(org.metrics.views)
+                        : "0",
+                      title: "Visualizações",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                    {
+                      href: "#",
+                      hasIcon: true,
+                      leadingIcon: "agora-line-layers-menu",
+                      leadingIconHover: "agora-solid-layers-menu",
+                      trailingIcon: "",
+                      trailingIconHover: "",
+                      trailingIconActive: "",
+                      children: String(org.metrics?.datasets || 0),
+                      title: "Datasets",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                    {
+                      href: "#",
+                      hasIcon: false,
+                      children: (
+                        <span className="flex items-center gap-8">
+                          <img
+                            src="/Icons/bar_chart_primary.svg"
+                            alt=""
+                            aria-hidden="true"
+                          />
+                          <span>{org.metrics?.reuses || 0}</span>
+                        </span>
+                      ),
+                      title: "Reutilizações",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                    {
+                      href: "#",
+                      hasIcon: true,
+                      leadingIcon: "agora-line-star",
+                      leadingIconHover: "agora-solid-star",
+                      trailingIcon: "",
+                      trailingIconHover: "",
+                      trailingIconActive: "",
+                      children: String(org.metrics?.followers || 0),
+                      title: "Favoritos",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                  ]}
+                  mainLink={
+                    <Link href={`/organizations/${org.slug}`}>
+                      <span className="underline">{org.name}</span>
+                    </Link>
+                  }
+                  blockedLink={true}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -515,7 +597,7 @@ export default function PublicProfileClient() {
                     {formatShortDate(dataset.last_modified || dataset.created_at)}
                   </TableCell>
                   <TableCell headerLabel="">
-                    <a href={`/pages/datasets/${dataset.slug}`}>
+                    <a href={`/datasets/${dataset.slug}`}>
                       <AppIcon name="agora-line-eye" />
                     </a>
                   </TableCell>
@@ -547,7 +629,7 @@ export default function PublicProfileClient() {
             {reuses.map((reuse) => (
               <div key={reuse.id} className="h-full">
                 <CardLinks
-                  onClick={() => (window.location.href = `/pages/reuses/${reuse.slug}`)}
+                  onClick={() => (window.location.href = `/reuses/${reuse.slug}`)}
                   className="cursor-pointer text-neutral-900"
                   variant="transparent"
                   image={{
@@ -597,7 +679,7 @@ export default function PublicProfileClient() {
                     },
                   ]}
                   mainLink={
-                    <Link href={`/pages/reuses/${reuse.slug}`}>
+                    <Link href={`/reuses/${reuse.slug}`}>
                       <span className="underline">{reuse.title}</span>
                     </Link>
                   }

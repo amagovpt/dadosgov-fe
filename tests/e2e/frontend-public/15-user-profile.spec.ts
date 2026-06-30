@@ -1,6 +1,6 @@
 import { test, expect } from "playwright/test";
 
-const UNKNOWN_SLUG_URL = "/pages/users/this-user-cannot-exist-xyz123";
+const UNKNOWN_SLUG_URL = "/users/this-user-cannot-exist-xyz123";
 
 test.describe("User Profile Page - Public Shell (unauthenticated)", () => {
   test.beforeEach(async ({ page }) => {

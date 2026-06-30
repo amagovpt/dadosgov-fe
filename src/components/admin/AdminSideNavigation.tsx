@@ -32,7 +32,7 @@ const navGroups: NavGroup[] = [
     children: [
       {
         label: "Conjunto de dados",
-        href: "/pages/admin/me/datasets",
+        href: "/admin/me/datasets",
       },
       {
         label: "API",
@@ -40,19 +40,19 @@ const navGroups: NavGroup[] = [
       },
       {
         label: "Reutilizações",
-        href: "/pages/admin/me/reuses",
+        href: "/admin/me/reuses",
       },
       {
         label: "Recursos comunitários",
-        href: "/pages/admin/me/community-resources",
+        href: "/admin/me/community-resources",
       },
       {
         label: "Perfil",
-        href: "/pages/admin/me/profile",
+        href: "/admin/me/profile",
       },
       {
         label: "Estatísticas",
-        href: "/pages/admin/me/statistics",
+        href: "/admin/me/statistics",
       },
     ],
   },
@@ -69,7 +69,7 @@ const navGroups: NavGroup[] = [
     children: [
       {
         label: "Conjunto de dados",
-        href: "/pages/admin/system/datasets",
+        href: "/admin/system/datasets",
       },
       {
         label: "API",
@@ -77,40 +77,40 @@ const navGroups: NavGroup[] = [
       },
       {
         label: "Reutilizações",
-        href: "/pages/admin/system/reuses",
+        href: "/admin/system/reuses",
       },
       {
         label: "Organizações",
-        href: "/pages/admin/system/organizations",
+        href: "/admin/system/organizations",
       },
       {
         label: "Utilizadores",
-        href: "/pages/admin/system/users",
+        href: "/admin/system/users",
       },
       {
         label: "Harvesters",
-        href: "/pages/admin/system/harvesters",
+        href: "/admin/system/harvesters",
       },
       {
         label: "Recursos comunitários",
-        href: "/pages/admin/system/community-resources",
+        href: "/admin/system/community-resources",
       },
       // Temas oculto temporariamente
       // {
       //   label: "Temas",
-      //   href: "/pages/admin/system/topics",
+      //   href: "/admin/system/topics",
       // },
       {
         label: "Artigos",
-        href: "/pages/admin/system/posts",
+        href: "/admin/system/posts",
       },
       {
         label: "Editorial",
-        href: "/pages/admin/system/editorial",
+        href: "/admin/system/editorial",
       },
       {
         label: "Logs",
-        href: "/pages/admin/system/logs",
+        href: "/admin/system/logs",
       },
     ],
   },
@@ -127,7 +127,7 @@ export function AdminSideNavigation() {
   const { organizations } = useActiveOrganization();
   const [urlOrg, setUrlOrg] = useState<Organization | null>(null);
 
-  // Extract orgId from URL like /pages/admin/org/{orgId}/...
+  // Extract orgId from URL like /admin/org/{orgId}/...
   const urlOrgId = useMemo(() => {
     const match = pathname?.match(/^\/pages\/admin\/org\/([^/]+)/);
     return match ? match[1] : null;
@@ -135,18 +135,32 @@ export function AdminSideNavigation() {
 
   // Fetch org from URL if not already in user's org list
   useEffect(() => {
+    let frameId: number | null = null;
+
     if (!urlOrgId) {
-      setUrlOrg(null);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setUrlOrg(null);
+      });
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
     const alreadyLoaded = organizations.some((o) => o.id === urlOrgId || o.slug === urlOrgId);
     if (alreadyLoaded) {
-      setUrlOrg(null);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setUrlOrg(null);
+      });
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
     fetchOrganization(urlOrgId)
       .then((org) => setUrlOrg(org))
       .catch(() => setUrlOrg(null));
+
+    return () => {
+      if (frameId !== null) cancelAnimationFrame(frameId);
+    };
   }, [urlOrgId, organizations]);
 
   const orgChildren = (orgBase: string): NavChild[] => [
@@ -196,7 +210,7 @@ export function AdminSideNavigation() {
     const orgGroups: NavGroup[] = organizations.map((org) => ({
       key: "organization" as const,
       label: org.name,
-      children: orgChildren(`/pages/admin/org/${org.id}`),
+      children: orgChildren(`/admin/org/${org.id}`),
     }));
 
     // Inject the org from the URL if it's not already in the user's org list
@@ -204,7 +218,7 @@ export function AdminSideNavigation() {
       orgGroups.push({
         key: "organization" as const,
         label: urlOrg.name,
-        children: orgChildren(`/pages/admin/org/${urlOrg.id}`),
+        children: orgChildren(`/admin/org/${urlOrg.id}`),
       });
     }
 

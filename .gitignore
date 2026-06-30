@@ -56,3 +56,5 @@ playwright-report/
 # Bind-mounted log directory (Next.js stdout/stderr piped here by docker-compose)
 /logs/*
 !/logs/.gitkeep
+public/Icons/reduce_icon.svg:Zone.Identifier
+*.Identifier

@@ -3,10 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Tabs, Tab, TabHeader, TabBody } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
-import { fetchHomeFeaturedDatasets, updateHomeFeaturedDatasets, fetchHomeFeaturedReuses, updateHomeFeaturedReuses } from "@/service/api/system";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
+import {
+  fetchHomeFeaturedDatasets,
+  updateHomeFeaturedDatasets,
+  fetchHomeFeaturedReuses,
+  updateHomeFeaturedReuses,
+} from "@/service/api/system";
 import type { Dataset } from "@/service/types/dataset";
 import type { Reuse } from "@/service/types/reuse";
-import type { ContentBlock, FeaturedDatasetsData, FeaturedReusesData } from "./editorial-blocks";
+import type {
+  ContentBlock,
+  FeaturedDatasetsData,
+  FeaturedReusesData,
+} from "./editorial-blocks";
 import { EditorialBlockList } from "./EditorialBlockUI";
 
 export default function SystemEditorialClient() {
@@ -15,10 +25,13 @@ export default function SystemEditorialClient() {
   const [reuseBlocks, setReuseBlocks] = useState<ContentBlock[]>([]);
   const [, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<{
+  const {
+    message: saveMessage,
+    setTemporaryMessage: showSaveMessage,
+  } = useTemporaryMessage<{
     type: "success" | "error";
     text: string;
-  } | null>(null);
+  } | null>(null, 4000);
   const [datasetNameMap, setDatasetNameMap] = useState<Record<string, Dataset>>({});
   const [reuseNameMap, setReuseNameMap] = useState<Record<string, Reuse>>({});
   const initialDatasetsRef = useRef<Dataset[]>([]);
@@ -36,14 +49,14 @@ export default function SystemEditorialClient() {
         initialReusesRef.current = reuses;
 
         const dsMap: Record<string, Dataset> = {};
-        datasets.forEach((d) => {
-          dsMap[d.id] = d;
+        datasets.forEach((dataset) => {
+          dsMap[dataset.id] = dataset;
         });
         setDatasetNameMap(dsMap);
 
         const rMap: Record<string, Reuse> = {};
-        reuses.forEach((r) => {
-          rMap[r.id] = r;
+        reuses.forEach((reuse) => {
+          rMap[reuse.id] = reuse;
         });
         setReuseNameMap(rMap);
 
@@ -55,11 +68,12 @@ export default function SystemEditorialClient() {
               data: {
                 title: "",
                 legend: "",
-                datasetIds: datasets.map((d) => d.id),
+                datasetIds: datasets.map((dataset) => dataset.id),
               } as FeaturedDatasetsData,
             },
           ]);
         }
+
         if (reuses.length > 0) {
           setReuseBlocks([
             {
@@ -68,7 +82,7 @@ export default function SystemEditorialClient() {
               data: {
                 title: "",
                 legend: "",
-                reuseIds: reuses.map((r) => r.id),
+                reuseIds: reuses.map((reuse) => reuse.id),
               } as FeaturedReusesData,
             },
           ]);
@@ -79,35 +93,32 @@ export default function SystemEditorialClient() {
         setIsLoading(false);
       }
     }
-    loadFeatured();
-  }, []);
 
-  useEffect(() => {
-    if (saveMessage) {
-      const timer = setTimeout(() => setSaveMessage(null), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [saveMessage]);
+    void loadFeatured();
+  }, []);
 
   const handleSave = async () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setIsSaving(true);
+
     try {
       const datasetIds = datasetBlocks
-        .filter((b) => b.type === "featured-datasets")
-        .flatMap((b) => (b.data as FeaturedDatasetsData).datasetIds);
+        .filter((block) => block.type === "featured-datasets")
+        .flatMap((block) => (block.data as FeaturedDatasetsData).datasetIds);
       const reuseIds = reuseBlocks
-        .filter((b) => b.type === "featured-reuses")
-        .flatMap((b) => (b.data as FeaturedReusesData).reuseIds);
+        .filter((block) => block.type === "featured-reuses")
+        .flatMap((block) => (block.data as FeaturedReusesData).reuseIds);
+
       await Promise.all([
         updateHomeFeaturedDatasets(datasetIds),
         updateHomeFeaturedReuses(reuseIds),
       ]);
+
       setHasChanges(false);
-      setSaveMessage({ type: "success", text: "Alterações guardadas." });
+      showSaveMessage({ type: "success", text: "Alterações guardadas." });
     } catch (error) {
       console.error("Error saving:", error);
-      setSaveMessage({ type: "error", text: "Erro ao guardar alterações." });
+      showSaveMessage({ type: "error", text: "Erro ao guardar alterações." });
     } finally {
       setIsSaving(false);
     }
@@ -116,6 +127,7 @@ export default function SystemEditorialClient() {
   const handleCancel = () => {
     const datasets = initialDatasetsRef.current;
     const reuses = initialReusesRef.current;
+
     setDatasetBlocks(
       datasets.length > 0
         ? [
@@ -125,12 +137,13 @@ export default function SystemEditorialClient() {
               data: {
                 title: "",
                 legend: "",
-                datasetIds: datasets.map((d) => d.id),
+                datasetIds: datasets.map((dataset) => dataset.id),
               } as FeaturedDatasetsData,
             },
           ]
         : []
     );
+
     setReuseBlocks(
       reuses.length > 0
         ? [
@@ -140,12 +153,13 @@ export default function SystemEditorialClient() {
               data: {
                 title: "",
                 legend: "",
-                reuseIds: reuses.map((r) => r.id),
+                reuseIds: reuses.map((reuse) => reuse.id),
               } as FeaturedReusesData,
             },
           ]
         : []
     );
+
     setHasChanges(false);
   };
 
@@ -153,8 +167,8 @@ export default function SystemEditorialClient() {
     return (
       <AdminLayout
         breadcrumbItems={[
-          { label: "Administração", url: "/pages/admin" },
-          { label: "Editorial", url: "/pages/admin/system/editorial" },
+          { label: "Administração", url: "/admin" },
+          { label: "Editorial", url: "/admin/system/editorial" },
         ]}
         title="Editorial"
         headerAction={
@@ -189,8 +203,8 @@ export default function SystemEditorialClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Editorial", url: "/pages/admin/system/editorial" },
+        { label: "Administração", url: "/admin" },
+        { label: "Editorial", url: "/admin/system/editorial" },
       ]}
       title="Editorial"
       headerAction={
@@ -223,8 +237,8 @@ export default function SystemEditorialClient() {
         <div
           className={`text-sm mb-16 rounded-8 p-12 ${
             saveMessage.type === "success"
-              ? "bg-green-50 text-green-700 border-green-200 border"
-              : "bg-red-50 text-red-700 border-red-200 border"
+              ? "border border-green-200 bg-green-50 text-green-700"
+              : "border border-red-200 bg-red-50 text-red-700"
           }`}
         >
           {saveMessage.text}

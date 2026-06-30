@@ -16,9 +16,10 @@ import {
 import { Organization } from "@/service/types/identity";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
+import { OrganizationBadges } from "@/components/organizations/OrganizationBadges";
 import { useAuth } from "@/context/AuthContext";
 import { followEntity, unfollowEntity, isFollowing } from "@/service/api/followers";
-import { requestMembership } from "@/service/api/organizations";
+import { fetchOrganization, requestMembership } from "@/service/api/organizations";
 import { formatMetricValue } from "@/utils/formatNumber";
 
 interface OrganizationDetailClientProps {
@@ -38,18 +39,53 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
 
   const isMember = user?.organizations?.some((org) => org.id === organization.id) ?? false;
 
+  // Edit permission is decided by the backend (the single source of truth).
+  // The SSR org fetch is anonymous (no session), so re-fetch the org with the
+  // user's session to read its `permissions`. Anonymous users never edit.
+  const [canEditOrg, setCanEditOrg] = useState(false);
   useEffect(() => {
-    if (!user) { setIsFavorite(false); return; }
+    if (!user) return;
     let cancelled = false;
-    isFollowing("organizations", organization.id, user.id)
-      .then((following) => { if (!cancelled) setIsFavorite(following); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [user?.id, organization.id]);
+    fetchOrganization(organization.id)
+      .then((o) => {
+        if (!cancelled) setCanEditOrg(o?.permissions?.edit ?? false);
+      })
+      .catch(() => {
+        if (!cancelled) setCanEditOrg(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, organization.id]);
+  const canEdit = Boolean(user) && canEditOrg;
+
+  // Edit permission is decided by the backend (the single source of truth).
+  // The SSR org fetch is anonymous (no session), so re-fetch the org with the
+  // user's session to read its `permissions`. Anonymous users never edit.
+  const [canEditOrg, setCanEditOrg] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    async function loadFavoriteState() {
+      if (!user) {
+        setIsFavorite(false);
+        return;
+      }
+      try {
+        const following = await isFollowing("organizations", organization.id, user.id);
+        if (!cancelled) setIsFavorite(following);
+      } catch (error) {
+        console.error("Error loading favorite state:", error);
+      }
+    }
+    loadFavoriteState();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, organization.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
     if (isTogglingFavorite) return;
@@ -93,9 +129,9 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
       <div className="container flex items-center justify-between">
         <Breadcrumb
           items={[
-            { label: "Home", url: "/" },
-            { label: "Organizações", url: "/pages/organizations" },
-            { label: organization.name, url: `/pages/organizations/${organization.slug}` },
+            { label: "Início", url: "/" },
+            { label: "Organizações", url: "/organizations" },
+            { label: organization.name, url: `/organizations/${organization.slug}` },
           ]}
         />
       </div>
@@ -125,7 +161,20 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
         >
           {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         </Button>
+        {canEdit && (
+          <Button
+            variant="primary"
+            hasIcon={true}
+            leadingIcon="agora-line-edit"
+            leadingIconHover="agora-solid-edit"
+            className="flex-shrink-0"
+            onClick={() => router.push(`/admin/org/${organization.id}/profile`)}
+          >
+            Editar
+          </Button>
+        )}
       </div>
+
       {requestSuccess && (
         <StatusCard
           variant="success"
@@ -179,6 +228,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 {organization.name}
               </h1>
             </div>
+            <OrganizationBadges badges={organization.badges} className="mb-24" />
           </div>
 
           {/* Description Section */}

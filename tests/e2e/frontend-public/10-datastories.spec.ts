@@ -1,6 +1,6 @@
 import { test, expect } from "playwright/test";
 
-const DATASTORIES_URL = "/pages/datastories";
+const DATASTORIES_URL = "/datastories";
 
 test.describe("Datastories Page", () => {
   test.beforeEach(async ({ page }) => {

@@ -9,9 +9,13 @@ export default function ReuseFaqClient({ initialContent }: { initialContent?: st
       title="Como reutilizar dados?"
       initialContent={initialContent}
       breadcrumbItems={[
-        { label: "Home", url: "/" },
-        { label: "Recursos", url: "#" },
-        { label: "Como reutilizar dados", url: "/pages/faqs/reuse" },
+        { label: "Início", url: "/" },
+        { label: "Recursos", url: "/recursos" },
+        { label: "Como usar o portal", url: "/recursos/como-usar-o-portal" },
+        {
+          label: "Como reutilizar dados",
+          url: "/recursos/como-usar-o-portal/como-reutilizar-dados",
+        },
       ]}
     />
   );

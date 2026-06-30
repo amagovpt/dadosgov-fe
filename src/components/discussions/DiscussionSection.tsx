@@ -207,7 +207,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
             className="self-stretch"
             onClick={() => {
               if (!user) {
-                window.location.href = "/pages/login";
+                window.location.href = "/login";
               } else {
                 setShowNewDiscussion(!showNewDiscussion);
               }

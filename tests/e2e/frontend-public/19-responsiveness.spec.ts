@@ -11,23 +11,23 @@ test.describe("Responsiveness", () => {
     page,
   }) => {
     await page.setViewportSize(VIEWPORTS.desktop);
-    await page.goto("/pages/datasets");
+    await page.goto("/datasets");
     await page.waitForLoadState("networkidle");
 
     await expect(page.locator("header").first()).toBeVisible({ timeout: 10000 });
     await expect(
-      page.locator("a[href^='/pages/datasets/']").first()
+      page.locator("a[href^='/datasets/']").first()
     ).toBeVisible({ timeout: 15000 });
   });
 
   test("RA-02: Tablet viewport renders datasets listing", async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.tablet);
-    await page.goto("/pages/datasets");
+    await page.goto("/datasets");
     await page.waitForLoadState("networkidle");
 
     await expect(page.locator("header").first()).toBeVisible({ timeout: 10000 });
     await expect(
-      page.locator("a[href^='/pages/datasets/']").first()
+      page.locator("a[href^='/datasets/']").first()
     ).toBeVisible({ timeout: 15000 });
   });
 
@@ -79,10 +79,10 @@ test.describe("Responsiveness", () => {
     page,
   }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto("/pages/datasets");
+    await page.goto("/datasets");
     await page.waitForLoadState("networkidle");
 
-    const firstCard = page.locator("a[href^='/pages/datasets/']").first();
+    const firstCard = page.locator("a[href^='/datasets/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
     const box = await firstCard.boundingBox();
     expect(box?.width ?? 0).toBeGreaterThan(0);
@@ -91,7 +91,7 @@ test.describe("Responsiveness", () => {
 
   test("RA-07: Mobile filters toggle is reachable", async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto("/pages/datasets");
+    await page.goto("/datasets");
     await page.waitForLoadState("networkidle");
 
     const toggle = page.getByRole("button", { name: /Abrir filtros/i });
@@ -102,9 +102,9 @@ test.describe("Responsiveness", () => {
     page,
   }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto("/pages/datasets");
+    await page.goto("/datasets");
     await page.waitForLoadState("networkidle");
-    const link = page.locator("a[href^='/pages/datasets/']").first();
+    const link = page.locator("a[href^='/datasets/']").first();
     const href = await link.getAttribute("href");
     await page.goto(href!);
     await page.waitForLoadState("networkidle");

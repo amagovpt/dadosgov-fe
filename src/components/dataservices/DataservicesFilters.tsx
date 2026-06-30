@@ -266,7 +266,7 @@ export const DataservicesFilters = () => {
           appearance="outline"
           onClick={() => {
             paramsRef.current = "";
-            router.replace("/pages/dataservices", { scroll: false });
+            router.replace("/dataservices", { scroll: false });
           }}
         >
           Limpar filtros

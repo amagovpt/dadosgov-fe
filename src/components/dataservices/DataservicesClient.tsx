@@ -51,8 +51,8 @@ export default function DataservicesClient({
       <HeroGeneral
         title="APIs"
         breadcrumbItems={[
-          { label: "Home", url: "/" },
-          { label: "APIs", url: "/pages/dataservices" },
+          { label: "Início", url: "/" },
+          { label: "APIs", url: "/dataservices" },
         ]}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
