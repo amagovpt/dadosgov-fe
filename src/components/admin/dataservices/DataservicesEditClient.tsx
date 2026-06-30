@@ -13,6 +13,7 @@ import {
   DropdownSection,
   DropdownOption,
   Pill,
+  Tag,
   Tabs,
   Tab,
   TabHeader,
@@ -28,8 +29,6 @@ import DataservicesEditActivitiesTab from "@/components/admin/dataservices/Datas
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import AppIcon from "@/components/Primitives/AppIcon";
 import TextLink from "@/components/Primitives/TextLink";
-import CardMetrics, { CardMetricsProps } from "@/components/Primitives/Cards/CardMetrics";
-import { formatDateToTimeAgo } from "@/utils/formatDate";
 import {
   fetchDataservice,
   updateDataservice,
@@ -936,39 +935,16 @@ export default function DataservicesEditClient() {
                     </InputSelect>
 
                     {selectedDatasets.length > 0 && (
-                      <div className="mt-16 grid grid-cols-1 gap-32 sm:grid-cols-2">
-                        {selectedDatasets.map((dataset) => {
-                          const cardProps = {
-                            ...dataset,
-                            last_modified: formatDateToTimeAgo(dataset.last_modified),
-                            link: `/pages/datasets/${dataset.slug}`,
-                          } as CardMetricsProps;
-                          return (
-                            <div key={dataset.id} className="relative h-full">
-                              <CardMetrics {...cardProps} />
-                              <button
-                                type="button"
-                                title="Remover"
-                                aria-label={`Remover ${dataset.title}`}
-                                className="rounded group absolute right-8 top-8 z-10 p-4"
-                                onClick={(e: React.MouseEvent) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  removeDataset(dataset.id);
-                                }}
-                              >
-                                <Icon
-                                  name="agora-line-trash"
-                                  className="block h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:hidden"
-                                />
-                                <Icon
-                                  name="agora-solid-trash"
-                                  className="hidden h-[18px] w-[18px] !fill-[var(--color-danger-600)] group-hover:block"
-                                />
-                              </button>
-                            </div>
-                          );
-                        })}
+                      <div className="mt-16 flex flex-wrap gap-8">
+                        {selectedDatasets.map((dataset) => (
+                          <Tag
+                            key={dataset.id}
+                            aria-label={`Remover ${dataset.title}`}
+                            onClick={() => removeDataset(dataset.id)}
+                          >
+                            {dataset.title}
+                          </Tag>
+                        ))}
                       </div>
                     )}
 
