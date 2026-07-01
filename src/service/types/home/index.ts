@@ -1,5 +1,7 @@
 export type {
   Datastory,
+  HomeHero,
+  HomeDatastories,
   UsedDailyBy,
   Home,
 } from './home';
