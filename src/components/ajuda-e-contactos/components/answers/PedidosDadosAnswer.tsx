@@ -6,10 +6,6 @@ export function PedidosDadosAnswer() {
   return (
     <div className="space-y-16">
       <div>
-        <p className="font-bold">Sugerir conjunto de dados</p>
-        <p>Formulário de sugestão no portal</p>
-      </div>
-      <div>
         <p className="font-bold">Pedido formal de dados a uma entidade pública</p>
         <p>
           Pode dirigir pedidos à{" "}
@@ -18,9 +14,11 @@ export function PedidosDadosAnswer() {
           </FaqLink>
         </p>
         <p>
-          <FaqLink href="/ajuda-e-contactos">
-            formulário e orientação disponíveis na página de contato
-          </FaqLink>
+          <span className="inline-flex items-baseline whitespace-nowrap">
+            Consulte a página de perguntas frequentes da
+            <FaqLink href="/ajuda-e-contactos">CADA</FaqLink>
+            <span>&nbsp;para saber como proceder</span>
+          </span>
         </p>
         <p>
           <FaqLink href="/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation">
@@ -33,7 +31,7 @@ export function PedidosDadosAnswer() {
         <p>
           Consultar lista pública de pedidos no portal{" "}
           <FaqLink href="/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation">
-            Comissão de Acesso aos Documentos Administrativos
+            Comissão de Acesso a Documentos Administrativos no dados.gov.pt
           </FaqLink>
         </p>
       </div>
