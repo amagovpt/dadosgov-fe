@@ -16,7 +16,7 @@ export function PedidosDadosAnswer() {
         <p>
           <span className="inline-flex items-baseline whitespace-nowrap">
             Consulte a página de perguntas frequentes da
-            <FaqLink href="/ajuda-e-contactos">CADA</FaqLink>
+            <FaqLink href="https://www.cada.pt/perguntas-frequentes">CADA</FaqLink>
             <span>&nbsp;para saber como proceder</span>
           </span>
         </p>
