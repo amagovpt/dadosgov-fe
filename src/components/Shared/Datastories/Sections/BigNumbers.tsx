@@ -4,6 +4,7 @@ import { InfoBlock } from "../../InfoBlock";
 import Section from "../../Section";
 import AppIcon from "@/components/Primitives/AppIcon";
 import { twMerge } from "tailwind-merge";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 // ----------------------------------------------------------------------------------------------------------------
 
@@ -28,8 +29,8 @@ function BigNumber({ icon, number, numberLabel, title, subtitle }: BigNumberI) {
             {numberLabel}
           </Typograph>
         </p>
-        <Typograph tag="p" className="text-m-regular text-white">
-          {title}
+        <Typograph tag="div" className="text-m-regular text-white">
+          {formatHtmlParagraphs(title) as string[]}
         </Typograph>
         <Typograph tag="p" className="text-s-regular text-primary-100">
           {subtitle}
@@ -70,12 +71,15 @@ export default function BigNumbers({
                 </div>
               );
             })}
+            {dataReference?.title && dataReference?.date && (
+              <div className="col-span-12 self-center md:col-span-6 lg:col-span-4">
+                <Typograph tag="p" className="text-m-regular text-white">
+                  {dataReference.title}{" "}
+                  <span className="text-primary-100">{dataReference.date}</span>
+                </Typograph>
+              </div>
+            )}
           </div>
-          {dataReference?.title && dataReference?.date && (
-            <Typograph tag="p" className="text-m-regular text-white">
-              {dataReference.title} <span className="text-primary-100">{dataReference.date}</span>
-            </Typograph>
-          )}
         </InfoBlock.Content>
       </InfoBlock.Root>
     </Section>

@@ -1251,6 +1251,10 @@ li.section-name:empty {
   flex-direction: column !important;
 }
 
+.datastory-page .agora-anchor .children-wrapper {
+  text-wrap: initial !important;
+}
+
 /* ==========================================================================
    [07] ADMIN LAYOUT
    ========================================================================== */
