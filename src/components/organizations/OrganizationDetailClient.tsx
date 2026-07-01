@@ -59,10 +59,6 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   }, [user, organization.id]);
   const canEdit = Boolean(user) && canEditOrg;
 
-  // Edit permission is decided by the backend (the single source of truth).
-  // The SSR org fetch is anonymous (no session), so re-fetch the org with the
-  // user's session to read its `permissions`. Anonymous users never edit.
-  const [canEditOrg, setCanEditOrg] = useState(false);
   useEffect(() => {
     let cancelled = false;
     async function loadFavoriteState() {
@@ -150,8 +146,8 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           </Button>
         )}
         <Button
-          variant="neutral"
-          appearance="link"
+          variant="primary"
+          appearance={isFavorite ? "solid" : "outline"}
           hasIcon={true}
           leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
           leadingIconHover="agora-solid-star"
@@ -296,13 +292,6 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                     year: "numeric",
                   })}
                 </div>
-                {user && isMember && (
-                  <StatusCard
-                    variant="informative"
-                    showIcon
-                    description="Já pertence a esta organização."
-                  />
-                )}
                 {/* <div className="pt-8">
                     <div className="text-neutral-900 text-sm font-medium">
                       <span className="text-m-semibold">Tipo:</span> Publicador Oficial

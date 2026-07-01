@@ -25,7 +25,7 @@ import { fetchMyDatasets, fetchDatasets } from "@/service/api/datasets";
 import { fetchUserFollowers, fetchMyFollowing } from "@/service/api/followers";
 import { fetchMyReuses, fetchReuses } from "@/service/api/reuses";
 import { fetchUserProfile } from "@/service/api/users";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
 import AppIcon from "../Primitives/AppIcon";
