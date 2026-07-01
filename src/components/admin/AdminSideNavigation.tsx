@@ -129,7 +129,7 @@ export function AdminSideNavigation() {
 
   // Extract orgId from URL like /admin/org/{orgId}/...
   const urlOrgId = useMemo(() => {
-    const match = pathname?.match(/^\/pages\/admin\/org\/([^/]+)/);
+    const match = pathname?.match(/^\/admin\/org\/([^/]+)/);
     return match ? match[1] : null;
   }, [pathname]);
 
