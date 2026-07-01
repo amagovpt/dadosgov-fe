@@ -93,7 +93,7 @@ const FooterBottom = ({ description, logos, social, related, copyright }: Footer
   ];
 
   const linksSectionSocialContent = [
-    ...social?.map((s, index) => {
+    ...(social?.map((s, index) => {
       const iconName = s.icon.startsWith("agora-") ? s.icon : `/Logos/${s.icon}.svg`;
       return (
         <FooterLink
@@ -109,11 +109,11 @@ const FooterBottom = ({ description, logos, social, related, copyright }: Footer
           target="_blank"
         />
       );
-    }),
+    }) ?? []),
   ];
 
   const linksSectionRelatedContent = [
-    ...related?.map((r, index) => (
+    ...(related?.map((r, index) => (
       <FooterLink
         key={`footer-related-links-${index}`}
         appearance="link"
@@ -123,7 +123,7 @@ const FooterBottom = ({ description, logos, social, related, copyright }: Footer
       >
         {r.children}
       </FooterLink>
-    )),
+    )) ?? []),
     <LinksSectionRelatedLinksCopyright key={"footer-copyright"}>
       {copyright}
     </LinksSectionRelatedLinksCopyright>,

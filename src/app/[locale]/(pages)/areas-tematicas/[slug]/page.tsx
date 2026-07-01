@@ -171,7 +171,7 @@ export default async function Page({
                             </div>
                             <div className='flex flex-col ml-32 border-l-2 border-primary-600 pl-16'>
                                 {section.datasets.map((dataset, index) => (
-                                    <Anchor className='!justify-start' href={"pages/" + dataset.href} key={index}>
+                                    <Anchor className='!justify-start' href={dataset.href} key={index}>
                                         {dataset.children}
                                     </Anchor>
                                 ))}

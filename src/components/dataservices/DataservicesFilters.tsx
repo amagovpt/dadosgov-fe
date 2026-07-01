@@ -27,16 +27,6 @@ interface FilterOption {
 }
 
 const DATASERVICE_TOGGLE_FILTERS = {
-  metodo: {
-    title: "Métodos de acesso",
-    param: "access_type",
-    options: [
-      { id: "all", label: "Todos" },
-      { id: "free_download", label: "Download gratuito" },
-      { id: "open_conditions", label: "Aberto sob certas condições" },
-      { id: "auth_access", label: "Acesso mediante autorização" },
-    ],
-  },
   atualizacao: {
     title: "Data da atualização",
     param: "modified_since",
@@ -49,14 +39,20 @@ const DATASERVICE_TOGGLE_FILTERS = {
   },
   organizacao: {
     title: "Tipo de organização",
-    param: "producer_type",
+    param: "organization_badge",
     options: [
       { id: "all", label: "Todos" },
-      { id: "public_service", label: "Serviço público" },
-      { id: "local_authority", label: "Autoridade local" },
-      { id: "business", label: "Negócios" },
-      { id: "association", label: "Associação" },
-      { id: "user", label: "Utilizador" },
+      { id: "public-service", label: "Serviço público" },
+    ],
+  },
+  acesso: {
+    title: "Tipo de acesso",
+    param: "access_type",
+    options: [
+      { id: "all", label: "Todos" },
+      { id: "open", label: "Aberto" },
+      { id: "open_with_account", label: "Aberto com conta" },
+      { id: "restricted", label: "Restrito" },
     ],
   },
 };
@@ -122,9 +118,9 @@ export const DataservicesFilters = () => {
   const selectedToggleFilters = useMemo<Record<ToggleFilterKey, string>>(() => {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
     return {
-      metodo: params.get("access_type") || "all",
       atualizacao: detectAtualizacaoFromParams(params),
-      organizacao: params.get("producer_type") || "all",
+      organizacao: params.get("organization_badge") || "all",
+      acesso: params.get("access_type") || "all",
     };
   }, [searchParams]);
 

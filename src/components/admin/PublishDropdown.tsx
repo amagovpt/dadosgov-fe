@@ -23,13 +23,12 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
       label: "Um conjunto de dados",
       href: "/admin/datasets/new",
     },
-    // Uma API (dataservices) oculta temporariamente — feature incompleta para PRD
-    // {
-    //   icon: null as string | null,
-    //   customIcon: "/Icons/api.svg",
-    //   label: "Uma API",
-    //   href: "/admin/dataservices/new",
-    // },
+    {
+      icon: null as string | null,
+      customIcon: "/Icons/api.svg",
+      label: "Uma API",
+      href: "/admin/dataservices/new",
+    },
     {
       icon: "agora-line-share",
       label: "Uma reutilização",

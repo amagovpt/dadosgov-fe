@@ -1067,7 +1067,25 @@ li.section-name:empty {
   background-color: var(--color-primary-100) !important;
 }
 
-.card-general-listing .card-general > .image {
+/* Cards inside the detail-page tabs sit on a primary-100 bleed background
+   (added by TabBodyWrapper), so make them white to stand out from the tab body.
+   Scoped to .tab-body-bleed so other tabbed contexts without the bleed (e.g. the
+   admin editorial preview) keep the default blue listing card. The !important is
+   required only because the base rule above already uses it. */
+.tab-body-bleed .card-general-listing .card-general .content,
+.tab-body-bleed .card-general-listing .card-general>.image {
+  background-color: var(--color-white) !important;
+}
+
+/* The white card needs a visible outline against the primary-100 bleed.
+   Matches the design spec: 2px Neutral/700 (#64718B) border. */
+.tab-body-bleed .card-general-listing .card-general {
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: var(--color-neutral-700) !important;
+}
+
+.card-general-listing .card-general>.image {
   height: 88px !important;
   background-color: var(--color-primary-100);
   display: flex;

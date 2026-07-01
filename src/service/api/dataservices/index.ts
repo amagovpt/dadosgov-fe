@@ -4,7 +4,7 @@ import type {
   DataserviceUpdatePayload,
 } from "@/service/types/dataservice";
 import type { APIResponse } from "@/service/types/shared";
-import { API_AUTH_URL, API_BASE_URL } from "@/service/utils/API";
+import { API_AUTH_URL, API_BASE_URL, authFetch } from "@/service/utils/API";
 
 
 /**
@@ -15,18 +15,30 @@ export async function fetchMyDataservices(
   pageSize: number = 20
 ): Promise<APIResponse<Dataservice>> {
   try {
-    const res = await fetch(
-      `${API_AUTH_URL}/me/dataservices/?page=${page}&page_size=${pageSize}`,
-      { cache: "no-store", credentials: "include" }
-    );
+    const res = await authFetch("/me/dataservices/", { cache: "no-store" });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch my dataservices: ${res.statusText}`);
     }
 
-    return await res.json();
+    // The /me/dataservices endpoint returns a plain list; normalise it into the
+    // paginated APIResponse shape and keep only personal entries (owned by the
+    // user, not by an organization), mirroring fetchMyDatasets.
+    const raw: Dataservice[] = await res.json();
+    const personal = raw.filter((d) => !!d.owner && !d.organization);
+    const total = personal.length;
+    const start = (page - 1) * pageSize;
+    const data = personal.slice(start, start + pageSize);
+
+    return {
+      data,
+      page,
+      page_size: pageSize,
+      total,
+      next_page: start + pageSize < total ? String(page + 1) : null,
+      previous_page: page > 1 ? String(page - 1) : null,
+    };
   } catch (error) {
-    console.error("Error fetching discussions:", error);
     console.error("Error fetching my dataservices:", error);
     return {
       data: [],
@@ -43,10 +55,21 @@ export async function fetchMyDataservices(
 /**
  * Fetch all dataservices (paginated, with optional filters)
  */
+export interface DataserviceListFilters {
+  q?: string;
+  sort?: string;
+  tag?: string | string[];
+  organization?: string | string[];
+  access_type?: string;
+  organization_badge?: string;
+  modified_since?: string;
+  dataset?: string;
+}
+
 export async function fetchDataservices(
   page: number = 1,
   pageSize: number = 20,
-  filters?: { q?: string; sort?: string }
+  filters?: DataserviceListFilters
 ): Promise<APIResponse<Dataservice>> {
   try {
     const params = new URLSearchParams();
@@ -54,6 +77,18 @@ export async function fetchDataservices(
     params.set("page_size", String(pageSize));
     if (filters?.q) params.set("q", filters.q);
     if (filters?.sort) params.set("sort", filters.sort);
+    if (filters?.access_type) params.set("access_type", filters.access_type);
+    if (filters?.organization_badge) params.set("organization_badge", filters.organization_badge);
+    if (filters?.modified_since) params.set("modified_since", filters.modified_since);
+    if (filters?.dataset) params.set("dataset", filters.dataset);
+    // Multi-value filters
+    for (const key of ["tag", "organization"] as const) {
+      const value = filters?.[key];
+      if (!value) continue;
+      for (const item of Array.isArray(value) ? value : [value]) {
+        if (item) params.append(key, item);
+      }
+    }
 
     const res = await fetch(
       `${API_BASE_URL}/dataservices/?${params.toString()}`,
@@ -158,7 +193,7 @@ export async function updateDataservice(
   payload: DataserviceUpdatePayload
 ): Promise<Dataservice> {
   const res = await fetch(`${API_AUTH_URL}/dataservices/${id}/`, {
-    method: "PUT",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify(payload),
