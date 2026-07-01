@@ -46,8 +46,8 @@ const markdownComponents = {
           href: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
           text: "https://online-learning.iscte-iul.pt/login/required?show_warning=true",
         },
-      "/pt/pages/faqs/about_opendata/": { href: "/recursos/como-usar-o-portal/sobre-dados-abertos" },
-      "/pages/faqs/licenses/": { href: "/" },
+      "/pt/faqs/about_opendata/": { href: "/recursos/como-usar-o-portal/sobre-dados-abertos" },
+      "/faqs/licenses/": { href: "/" },
     };
     const normalizedHref = href?.trim().replace(/^\/pt/, "");
     const override = linkOverrides[href] ?? linkOverrides[normalizedHref];

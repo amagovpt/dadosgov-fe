@@ -136,6 +136,7 @@ export async function fetchDatasets(
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
       if (filters.owner) params.set("owner", filters.owner);
       if (filters.modified_since) params.set("modified_since", filters.modified_since);
+      if (filters.dataservice) params.set("dataservice", filters.dataservice);
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],
@@ -631,6 +632,7 @@ export async function fetchDatasetsListing(
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
       if (filters.owner) params.set("owner", filters.owner);
       if (filters.modified_since) params.set("modified_since", filters.modified_since);
+      if (filters.dataservice) params.set("dataservice", filters.dataservice);
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],
