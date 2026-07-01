@@ -80,7 +80,7 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
                     const cardProps = {
                       ...dataset,
                       last_modified: formatDateToTimeAgo(dataset.last_modified),
-                      link: `/pages/datasets/${dataset.slug}`,
+                      link: `/datasets/${dataset.slug}`,
                     } as CardMetricsProps;
                     return <CardMetrics key={`dataset-${index}`} {...cardProps} />;
                   })}

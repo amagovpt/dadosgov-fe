@@ -36,7 +36,7 @@ const navGroups: NavGroup[] = [
       },
       {
         label: "API",
-        href: "/pages/admin/me/dataservices",
+        href: "/admin/me/dataservices",
       },
       {
         label: "Reutilizações",
@@ -73,7 +73,7 @@ const navGroups: NavGroup[] = [
       },
       {
         label: "API",
-        href: "/pages/admin/system/dataservices",
+        href: "/admin/system/dataservices",
       },
       {
         label: "Reutilizações",

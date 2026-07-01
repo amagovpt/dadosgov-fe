@@ -63,7 +63,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
     if (!dataservice || isTogglingFavorite) return;
@@ -163,8 +163,8 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
         <Breadcrumb
           items={[
             { label: "Home", url: "/" },
-            { label: "APIs", url: "/pages/dataservices" },
-            { label: dataservice.title, url: `/pages/dataservices/${dataservice.slug}` },
+            { label: "APIs", url: "/dataservices" },
+            { label: dataservice.title, url: `/dataservices/${dataservice.slug}` },
           ]}
         />
       </div>
@@ -186,7 +186,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
           {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         </Button>
         {canEdit && (
-          <Link href={`/pages/admin/dataservices/edit?id=${dataservice.id}`}>
+          <Link href={`/admin/dataservices/edit?id=${dataservice.id}`}>
             <Button
               variant="primary"
               hasIcon={true}
@@ -241,13 +241,13 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                 <div className="text-m-light text-neutral-900">
                   {dataservice.organization ? (
                     <Link
-                      href={`/pages/organizations/${dataservice.organization.slug}`}
+                      href={`/organizations/${dataservice.organization.slug}`}
                       className="hover:underline"
                     >
                       {dataservice.organization.name}
                     </Link>
                   ) : dataservice.owner ? (
-                    <Link href={`/pages/users/${dataservice.owner.slug}`} className="hover:underline">
+                    <Link href={`/users/${dataservice.owner.slug}`} className="hover:underline">
                       {ownerFullName}
                     </Link>
                   ) : (

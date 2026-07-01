@@ -140,7 +140,7 @@ export default function DataservicesClient({
               {dataservices.length > 0 ? (
                 dataservices.map((ds) => {
                   const timeAgo = formatDateToTimeAgo(ds.last_modified || ds.created_at);
-                  const dsUrl = `/pages/dataservices/${ds.slug}`;
+                  const dsUrl = `/dataservices/${ds.slug}`;
 
                   return (
                     <div key={ds.id} className="h-full">

@@ -94,7 +94,7 @@ export default function OrgDataservicesClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: orgName || "Organização", url: "#" },
         { label: "API" },
       ]}
@@ -154,7 +154,7 @@ export default function OrgDataservicesClient() {
             {sortedApis.map((api, index) => (
               <TableRow key={index}>
                 <TableCell headerLabel="Título">
-                  <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
+                  <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   <ResourceStatusBadge item={api} />
@@ -177,10 +177,10 @@ export default function OrgDataservicesClient() {
                 <TableCell headerLabel="Ações">
                   <TableActionsCell
                     viewAction={{
-                      href: `/pages/dataservices/${api.slug}`,
+                      href: `/dataservices/${api.slug}`,
                     }}
                     editAction={{
-                      href: `/pages/admin/dataservices/edit?slug=${api.slug}`,
+                      href: `/admin/dataservices/edit?slug=${api.slug}`,
                     }}
                   />
                 </TableCell>
@@ -193,7 +193,7 @@ export default function OrgDataservicesClient() {
           icon="agora-line-edit"
           title="Sem publicações"
           description="A organização ainda não publicou uma API."
-          createUrl="/pages/admin/dataservices/new"
+          createUrl="/admin/dataservices/new"
         />
       )}
     </AdminLayout>

@@ -41,7 +41,7 @@ function hasTechnical(ds: DS): boolean {
 }
 
 async function gotoDetail(page: Page, slug: string) {
-  await page.goto(`/pages/dataservices/${slug}`);
+  await page.goto(`/dataservices/${slug}`);
   await page.waitForLoadState("networkidle");
   await expect(page.locator("main h1").first()).toBeVisible({ timeout: 15000 });
 }

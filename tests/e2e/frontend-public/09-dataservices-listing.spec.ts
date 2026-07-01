@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "playwright/test";
 
-const DATASERVICES_URL = "/pages/dataservices";
+const DATASERVICES_URL = "/dataservices";
 
 // Dataservice cards use Agora's <CardLinks> with blockedLink=true (mirroring
 // the reuses listing), so the only real <a href="/pages/dataservices/{slug}">

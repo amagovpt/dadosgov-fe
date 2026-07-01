@@ -268,8 +268,8 @@ export default function ApiRegistrationClient({
     try {
       await updateDataservice(createdDataservice.id, { private: false });
       window.location.href = createdDataservice.slug
-        ? `/pages/dataservices/${createdDataservice.slug}`
-        : "/pages/admin/me/dataservices";
+        ? `/dataservices/${createdDataservice.slug}`
+        : "/admin/me/dataservices";
     } catch {
       setApiError("Erro ao publicar a API. Tente novamente.");
       setIsPublishing(false);
@@ -277,7 +277,7 @@ export default function ApiRegistrationClient({
   };
 
   const handleSaveDraft = () => {
-    window.location.href = "/pages/admin/me/dataservices";
+    window.location.href = "/admin/me/dataservices";
   };
 
   const clearError = (field: string) => {
@@ -362,8 +362,8 @@ export default function ApiRegistrationClient({
                     Recomendamos que publique em nome de uma organização se se
                     tratar de uma atividade profissional.
                   </p>
-                  <a
-                    href="/pages/admin/organizations/new"
+                  <Link
+                    href="/admin/organizations/new"
                     className="admin-page__org-card-link"
                   >
                     Crie ou integre uma organização em dados.gov.pt
@@ -371,7 +371,7 @@ export default function ApiRegistrationClient({
                       name="agora-line-arrow-right-circle"
                       className="w-24 h-24"
                     />
-                  </a>
+                  </Link>
                 </div>
 
                 <h2 className="admin-page__section-title">Descrição</h2>
@@ -820,7 +820,7 @@ export default function ApiRegistrationClient({
                   ]}
                   mainLink={
                     createdDataservice ? (
-                      <Link href={`/pages/dataservices/${createdDataservice.slug}`}>
+                      <Link href={`/dataservices/${createdDataservice.slug}`}>
                         <span className="underline">
                           {createdDataservice.title || apiName}
                         </span>

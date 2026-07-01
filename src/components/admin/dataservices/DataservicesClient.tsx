@@ -82,9 +82,9 @@ export default function DataservicesClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "API", url: "/pages/admin/dataservices" },
+        { label: "API", url: "/admin/dataservices" },
       ]}
       title="API"
     >
@@ -140,7 +140,7 @@ export default function DataservicesClient() {
             {sortedApis.map((api, index) => (
               <TableRow key={index}>
                 <TableCell headerLabel="Título">
-                  <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
+                  <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   <ResourceStatusBadge item={api} />
@@ -150,7 +150,7 @@ export default function DataservicesClient() {
                   <div>
                     <div>{formatDateToDMY(api.metadata_modified_at || api.last_modified)}</div>
                     {api.owner && (
-                      <TextLink href={`/pages/users/${api.owner.slug}`} className="text-xs">
+                      <TextLink href={`/users/${api.owner.slug}`} className="text-xs">
                         {api.owner.first_name} {api.owner.last_name}
                       </TextLink>
                     )}
@@ -159,10 +159,10 @@ export default function DataservicesClient() {
                 <TableCell headerLabel="Ações">
                   <TableActionsCell
                     viewAction={{
-                      href: `/pages/dataservices/${api.slug}`,
+                      href: `/dataservices/${api.slug}`,
                     }}
                     editAction={{
-                      href: `/pages/admin/dataservices/edit?slug=${api.slug}`,
+                      href: `/admin/dataservices/edit?slug=${api.slug}`,
                     }}
                   />
                 </TableCell>
@@ -171,7 +171,7 @@ export default function DataservicesClient() {
           </TableBody>
         </Table>
       ) : (
-        <AdminEmptyState icon="agora-line-edit" createUrl="/pages/admin/dataservices/new" />
+        <AdminEmptyState icon="agora-line-edit" createUrl="/admin/dataservices/new" />
       )}
     </AdminLayout>
   );

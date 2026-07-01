@@ -417,7 +417,7 @@ export default function DataservicesEditClient() {
     setIsSaving(true);
     try {
       await deleteDataservice(dataservice.id);
-      router.push("/pages/admin/me/dataservices");
+      router.push("/admin/me/dataservices");
     } catch (error) {
       console.error("Error deleting dataservice:", error);
       setIsSaving(false);
@@ -452,8 +452,8 @@ export default function DataservicesEditClient() {
     <AdminLayout
       title={dataservice?.title || "Editar API"}
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "API", url: "/pages/admin/dataservices" },
+        { label: "Administração", url: "/admin" },
+        { label: "API", url: "/admin/dataservices" },
         { label: dataservice?.title || "Editar", url: "#" },
       ]}
       headerAction={
@@ -462,7 +462,7 @@ export default function DataservicesEditClient() {
           appearance="outline"
           disabled={!!(dataservice?.archived_at || dataservice?.deleted_at)}
           onClick={() =>
-            dataservice && window.open(`/pages/dataservices/${dataservice.slug}`, "_blank")
+            dataservice && window.open(`/dataservices/${dataservice.slug}`, "_blank")
           }
         >
           <span className="admin-edit-info__btn-content">
@@ -507,7 +507,7 @@ export default function DataservicesEditClient() {
               <Icon name="agora-line-clock" className="admin-edit-info__clock-icon" />
               {" Atividade mais recente: "}
               {dataservice.owner && (
-                <TextLink href={`/pages/users/${dataservice.owner.slug}`}>
+                <TextLink href={`/users/${dataservice.owner.slug}`}>
                   {dataservice.owner.first_name} {dataservice.owner.last_name}
                 </TextLink>
               )}

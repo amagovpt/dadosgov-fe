@@ -24,7 +24,7 @@ test.describe("Backoffice - Data Services CRUD", () => {
   test("API-02: Wizard step 1 exposes the required name + description fields", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/dataservices/new?step=1");
+    await page.goto("/admin/dataservices/new?step=1");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -43,7 +43,7 @@ test.describe("Backoffice - Data Services CRUD", () => {
     // the "add by URL" field must coexist so a dataset added one way is not
     // wiped by the other. Step 2 renders from the query param regardless of
     // step-1 state, so the affordances can be asserted non-destructively.
-    await page.goto("/pages/admin/dataservices/new?step=2");
+    await page.goto("/admin/dataservices/new?step=2");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

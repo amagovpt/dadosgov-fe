@@ -14,7 +14,7 @@ interface DataserviceCardLinksProps {
 
 export function DataserviceCardLinks({ dataservice }: DataserviceCardLinksProps) {
   const router = useRouter();
-  const href = `/pages/dataservices/${dataservice.slug}`;
+  const href = `/dataservices/${dataservice.slug}`;
 
   const links = [
     {

@@ -92,9 +92,9 @@ export default function SystemDataservicesClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "API", url: "/pages/admin/system/dataservices" },
+        { label: "API", url: "/admin/system/dataservices" },
       ]}
       title="API"
     >
@@ -165,7 +165,7 @@ export default function SystemDataservicesClient() {
             {filteredApis.map((api) => (
               <TableRow key={api.id}>
                 <TableCell headerLabel="Título">
-                  <TextLink href={`/pages/dataservices/${api.slug}`}>{api.title}</TextLink>
+                  <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
                 <TableCell headerLabel="Estado">
                   <ResourceStatusBadge item={api} />
@@ -188,10 +188,10 @@ export default function SystemDataservicesClient() {
                 <TableCell headerLabel="Ações">
                   <TableActionsCell
                     viewAction={{
-                      href: `/pages/dataservices/${api.slug}`,
+                      href: `/dataservices/${api.slug}`,
                     }}
                     editAction={{
-                      href: `/pages/admin/dataservices/edit?slug=${api.slug}`,
+                      href: `/admin/dataservices/edit?slug=${api.slug}`,
                     }}
                   />
                 </TableCell>
