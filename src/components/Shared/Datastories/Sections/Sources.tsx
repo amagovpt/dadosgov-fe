@@ -6,13 +6,15 @@ import { Anchor } from "@ama-pt/agora-design-system";
 import { twMerge } from "tailwind-merge";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { SourceSection } from "@/service/types/datastories/datastory";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
+import CardMetrics, { CardMetricsProps } from "@/components/Primitives/Cards/CardMetrics";
 
 export type SourcesI = SourceSection & {
   className?: string;
 };
 
 // eslint-disable-next-line max-len
-export default function Sources({ id, className, title, description, sources }: SourcesI) {
+export default function Sources({ id, className, title, datasets }: SourcesI) {
   return (
     <Section
       id={id}
@@ -42,20 +44,15 @@ export default function Sources({ id, className, title, description, sources }: 
         </InfoBlock.Header>
         <InfoBlock.Content>
           <div className="flex flex-col gap-16">
-            {sources.map((source, index) => (
-              <Anchor
-                href={source.href}
-                className="!justify-start !text-nowrap"
-                target="_blank"
-                key={index}
-                hasIcon
-                trailingIcon="agora-line-external-link"
-                trailingIconActive="agora-line-external-link"
-                trailingIconHover="agora-solid-external-link"
-              >
-                {source.children}
-              </Anchor>
-            ))}
+            {datasets?.map((dataset) => {
+              const timeAgo = formatDateToTimeAgo(dataset.last_modified);
+              const cardProps = {
+                ...dataset,
+                last_modified: timeAgo,
+                link: `/datasets/${dataset.slug}`,
+              } as CardMetricsProps;
+              return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />;
+            })}
           </div>
         </InfoBlock.Content>
       </InfoBlock.Root>

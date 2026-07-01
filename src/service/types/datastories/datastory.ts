@@ -1,4 +1,4 @@
-﻿import { BreadcrumbItem } from "../shared";
+﻿import { BreadcrumbItem, Image } from "../shared";
 
 type Anchor = {
   children: string;
@@ -130,17 +130,20 @@ export type RelatedSection = {
 
 // ----------------------------------------------------------------------------------------------
 
-type Source = {
-  children: string;
-  href: string;
+type Metadata = {
+  image?: Image[];
+  slug: string;
+  organizationName: string;
+  title: string;
+  description: string;
+  createdAt: string;
 };
 
 export type SourceSection = {
   schemaName: "datasource";
   id: string;
   title: string;
-  description: string;
-  sources: Source[];
+  datasets: Metadata[];
 };
 
 // ----------------------------------------------------------------------------------------------
