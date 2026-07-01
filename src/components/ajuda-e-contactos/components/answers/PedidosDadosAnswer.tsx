@@ -22,7 +22,7 @@ export function PedidosDadosAnswer() {
         </p>
         <p>
           <FaqLink href="/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation">
-            Comissão de Acesso a Documentos Administrativos
+            Comissão de Acesso a Documentos Administrativos no dados.gov.pt
           </FaqLink>
         </p>
       </div>
@@ -31,7 +31,7 @@ export function PedidosDadosAnswer() {
         <p>
           Consultar lista pública de pedidos no portal{" "}
           <FaqLink href="/organizations/comissao-de-acesso-aos-documentos-administrativos/#/presentation">
-            Comissão de Acesso a Documentos Administrativos no dados.gov.pt
+            Comissão de Acesso a Documentos Administrativos
           </FaqLink>
         </p>
       </div>
