@@ -64,22 +64,29 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
 
   useEffect(() => {
+    let cancelled = false;
     async function loadReuse() {
       try {
         const data = await fetchReuse(slug);
-        setReuse(data);
-        if (user && data) {
-          const following = await isFollowing("reuses", data.id, user.id);
-          setIsFavorite(following);
-        }
+        if (!cancelled) setReuse(data);
       } catch (error) {
         console.error("Error loading reuse:", error);
       } finally {
-        setIsLoadingReuse(false);
+        if (!cancelled) setIsLoadingReuse(false);
       }
     }
     loadReuse();
-  }, [slug, user]);
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!user || !reuse) return;
+    let cancelled = false;
+    isFollowing("reuses", reuse.id, user.id)
+      .then((following) => { if (!cancelled) setIsFavorite(following); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user?.id, reuse?.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
@@ -176,9 +183,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             <div className="flex justify-end">
               <div className="flex flex-wrap items-center gap-16">
                 <Button
-                  variant="primary"
-                  appearance={isFavorite ? "solid" : "outline"}
-                  darkMode={false}
+                  variant="neutral"
+                  appearance="link"
                   hasIcon={true}
                   leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
                   leadingIconHover="agora-solid-star"

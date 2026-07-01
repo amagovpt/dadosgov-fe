@@ -63,7 +63,7 @@ export function PendingRequestsTable({
                   ) : (
                     <Icon name="agora-line-user" className="h-32 w-32" />
                   )}
-                  <TextLink href={`/pages/users/${request.user.slug}`}>
+                  <TextLink href={`/users/${request.user.slug}`}>
                     {request.user.first_name} {request.user.last_name}
                   </TextLink>
                 </div>

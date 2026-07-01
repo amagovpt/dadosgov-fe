@@ -25,10 +25,12 @@ import { fetchMyDatasets, fetchDatasets } from "@/service/api/datasets";
 import { fetchUserFollowers, fetchMyFollowing } from "@/service/api/followers";
 import { fetchMyReuses, fetchReuses } from "@/service/api/reuses";
 import { fetchUserProfile } from "@/service/api/users";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
 import AppIcon from "../Primitives/AppIcon";
+import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
 export default function PublicProfileClient() {
@@ -297,7 +299,7 @@ export default function PublicProfileClient() {
             {displayUser.organizations.length === 1 ? "Organização" : "Organizações"}
           </h2>
 
-          <div className="grid grid-cols-2 agora-card-links-datasets-px0 profile-org-cards gap-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
             {displayUser.organizations.map((org) => (
               <div key={org.id} className="h-full">
                 <CardLinks

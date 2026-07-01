@@ -188,5 +188,7 @@ export interface DatasetFilters {
   archived?: boolean;
   deleted?: boolean;
   modified_since?: string;
+  // Filter datasets served by a given dataservice (API).
+  dataservice?: string;
 }
 

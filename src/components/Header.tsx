@@ -291,7 +291,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
         data-no-user={!user || undefined}
         onClickCapture={handleHeaderClickCapture}
       >
-        <AgoraHeader ref={headerRef} maxNavigationItems={6}>
+        <AgoraHeader ref={headerRef} maxNavigationItems={7}>
           <Brand>
             <Logo>
               <Link href="/" className="flex items-center">
@@ -355,7 +355,6 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                     hasVoiceActionButton={false}
                     label="O que procura no Portal?"
                     placeholder="Pesquisar conjunto de dados, organizações, temas..."
-                    excludeTypes={["dataservices"]}
                   />
                 </div>
               </CustomSearch>
