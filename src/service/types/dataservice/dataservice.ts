@@ -8,6 +8,14 @@ import type { DatasetRef } from '@/service/types/dataset';
  * (local_authority_and_administration | company_and_association | private)
  * and `condition` the AccessAudienceCondition (yes | no | under_condition).
  */
+
+export interface DataservicePermissions {
+  edit: boolean;
+  delete: boolean;
+  read: boolean;
+}
+
+
 export interface AccessAudience {
   role: string;
   condition: string;
