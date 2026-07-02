@@ -131,7 +131,7 @@ export type RelatedSection = {
 // ----------------------------------------------------------------------------------------------
 
 type Metadata = {
-  image?: Image[];
+  image?: string[];
   slug: string;
   organizationName: string;
   title: string;
@@ -140,7 +140,7 @@ type Metadata = {
 };
 
 export type SourceSection = {
-  schemaName: "datasource";
+  schemaName: "section-datastory-datasets";
   id: string;
   title: string;
   datasets: Metadata[];

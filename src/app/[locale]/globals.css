@@ -1255,6 +1255,17 @@ li.section-name:empty {
   text-wrap: initial !important;
 }
 
+/* TODO: remove this when we have a connection to the BE to get metadata */
+.datastory-page .datastory-datasets .card-general .quality-progress-warning span,
+.datastory-page .datastory-datasets .card-general .quality-progress-warning div {
+  display: none !important;
+}
+
+/* TODO: remove this when we have a connection to the BE to get metadata */
+.datastory-page .datastory-datasets .card-general .quality-progress-warning div:last-child {
+  display: block !important;
+}
+
 /* ==========================================================================
    [07] ADMIN LAYOUT
    ========================================================================== */

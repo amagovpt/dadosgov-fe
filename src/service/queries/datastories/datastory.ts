@@ -111,16 +111,6 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     source
                   }
                 }
-                ... on DatasourceComponent {
-                  schemaName
-                  id
-                  title
-                  description
-                  sources {
-                    children
-                    href
-                  }
-                }
                 ... on SectionDatastoryOtherResourcesComponent {
                   schemaName
                   id
@@ -224,6 +214,21 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     children
                     href
                     icon
+                  }
+                }
+                ... on SectionDatastoryDatasetsComponent {
+                  schemaName
+                  id
+                  title
+                  datasets {
+                    image {
+                      url
+                    }
+                    createdAt
+                    organizationName
+                    title
+                    description
+                    slug
                   }
                 }
               }

@@ -55,7 +55,7 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
         );
       case "section-datastory-related-datastory":
         return <RelatedDatastories key={`section-${index}`} {...section} />;
-      case "datasource":
+      case "section-datastory-datasets":
         return <Sources key={`section-${index}`} {...section} />;
       case "section-datastory-other-resources":
         return <OtherResources key={`section-${index}`} {...section} />;
