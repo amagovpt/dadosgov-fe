@@ -6,6 +6,7 @@ import OtherResources from "./Sections/OtherResources";
 import { RelatedDatastories } from "./Sections/RelatedDatastories";
 import Timeline from "./Sections/Timeline";
 import PublicAdminStructure from "./Sections/PublicAdminStructure";
+import Summary from "./Sections/Summary";
 
 type SectionBg = "white" | "primary";
 
@@ -41,13 +42,7 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
           />
         );
       case "section-datastory-bignumbers":
-        return (
-          <BigNumbers
-            key={`section-${index}`}
-            {...section}
-            className={getSectionClassname(index)}
-          />
-        );
+        return <BigNumbers key={`section-${index}`} {...section} />;
       case "section-datastory-iframe":
         return (
           <Iframe
@@ -60,10 +55,12 @@ export default function DatastorySections({ isFirstSectionWhite, sections }: Dat
         );
       case "section-datastory-related-datastory":
         return <RelatedDatastories key={`section-${index}`} {...section} />;
-      case "datasource":
+      case "section-datastory-datasets":
         return <Sources key={`section-${index}`} {...section} />;
       case "section-datastory-other-resources":
         return <OtherResources key={`section-${index}`} {...section} />;
+      case "section-datastory-summary":
+        return <Summary key={`section-${index}`} {...section} />;
       default:
         return null;
     }
