@@ -11,8 +11,9 @@ export default function Summary({ id, title, description, anchors }: SummaryI) {
     <Section id={id} className="flex w-full justify-center bg-white py-64">
       <InfoBlock.Root className="flex flex-col gap-32">
         <div className="grid grid-cols-12 gap-32">
-          <div className="col-span-12 lg:col-span-8 bg-primary-600 p-32 lg:p-64">
+          <div className="col-span-12 bg-primary-700 p-32 lg:col-span-8 lg:p-64">
             <CardLinks
+              variant="primary-700"
               title={title}
               description={formatHtmlParagraphs(description) as string[]}
               links={anchors.map((anchor) => {
@@ -25,7 +26,6 @@ export default function Summary({ id, title, description, anchors }: SummaryI) {
                   target: "_blank",
                 };
               })}
-              className="bg-primary-600 !text-white [&_*]:!text-white [&_a:hover]:underline [&_a:hover]:decoration-white [&_svg]:!fill-white"
             />
           </div>
         </div>
