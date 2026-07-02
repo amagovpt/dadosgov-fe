@@ -1,4 +1,4 @@
-﻿import { BreadcrumbItem } from "../shared";
+﻿import { BreadcrumbItem, Image } from "../shared";
 
 type Anchor = {
   children: string;
@@ -46,6 +46,7 @@ type Bignumbers = {
 
 export type BigNumbersSection = {
   schemaName: "section-datastory-bignumbers";
+  id: string;
   title: string;
   bignumbers: Bignumbers[];
   dataReference: DateReference;
@@ -68,6 +69,7 @@ type Timeline = {
 
 export type TimelineSection = {
   schemaName: "section-datastory-timeline";
+  id: string;
   title: string;
   description: string;
   cards: Card[];
@@ -88,6 +90,7 @@ type PublicAdminStructure = {
 
 export type PublicAdminStructureSection = {
   schemaName: "section-datastory-public-admin-structure";
+  id: string;
   title: string;
   parts: PublicAdminStructure;
 };
@@ -119,6 +122,7 @@ type RelatedDatastory = {
 
 export type RelatedSection = {
   schemaName: "section-datastory-related-datastory";
+  id: string;
   title: string;
   description: string;
   datastories: RelatedDatastory[];
@@ -126,17 +130,20 @@ export type RelatedSection = {
 
 // ----------------------------------------------------------------------------------------------
 
-type Source = {
-  children: string;
-  href: string;
+type Metadata = {
+  image?: string[];
+  slug: string;
+  organizationName: string;
+  title: string;
+  description: string;
+  createdAt: string;
 };
 
 export type SourceSection = {
-  schemaName: "datasource";
+  schemaName: "section-datastory-datasets";
   id: string;
   title: string;
-  description: string;
-  sources: Source[];
+  datasets: Metadata[];
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -150,8 +157,19 @@ type Resource = {
 
 export type OtherSection = {
   schemaName: "section-datastory-other-resources";
+  id: string;
   title: string;
   resources: Resource[];
+};
+
+// ----------------------------------------------------------------------------------------------
+
+export type SummarySection = {
+  schemaName: "section-datastory-summary";
+  id: string;
+  title: string;
+  description: string;
+  anchors: Anchor[];
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -165,7 +183,8 @@ export type DatastorySection =
   | IframeSection
   | RelatedSection
   | SourceSection
-  | OtherSection;
+  | OtherSection
+  | SummarySection;
 
 export type DatastorySections = {
   isFirstSectionWhite: boolean;

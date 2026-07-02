@@ -86,6 +86,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
               sections {
                 ... on SectionDatastoryBignumbersComponent {
                   schemaName
+                  id
                   title
                   bignumbers {
                     icon
@@ -110,18 +111,9 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                     source
                   }
                 }
-                ... on DatasourceComponent {
-                  schemaName
-                  id
-                  title
-                  description
-                  sources {
-                    children
-                    href
-                  }
-                }
                 ... on SectionDatastoryOtherResourcesComponent {
                   schemaName
+                  id
                   title
                   resources {
                     icon
@@ -135,12 +127,13 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 }
                 ... on SectionDatastoryRelatedDatastoryComponent {
                   schemaName
+                  id
                   title
                   description
                   datastories {
                     data {
                       metadata {
-                        pt {
+                        ${locale} {
                           createdAt
                           description
                           slug
@@ -152,6 +145,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 }
                 ... on SectionDatastoryTimelineComponent {
                   schemaName
+                  id
                   title
                   description
                   cards {
@@ -176,6 +170,7 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                 }
                 ... on SectionDatastoryPublicAdminStructureComponent {
                   schemaName
+                  id
                   title
                   parts {
                     centralAdmin {
@@ -208,6 +203,32 @@ export async function getDatastory(slug: string, locale: string = "pt"): Promise
                       subtitle
                       description
                     }
+                  }
+                }
+                ... on SectionDatastorySummaryComponent {
+                  schemaName
+                  id
+                  title
+                  description
+                  anchors {
+                    children
+                    href
+                    icon
+                  }
+                }
+                ... on SectionDatastoryDatasetsComponent {
+                  schemaName
+                  id
+                  title
+                  datasets {
+                    image {
+                      url
+                    }
+                    createdAt
+                    organizationName
+                    title
+                    description
+                    slug
                   }
                 }
               }

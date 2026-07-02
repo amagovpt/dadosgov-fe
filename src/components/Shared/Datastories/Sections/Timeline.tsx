@@ -89,6 +89,7 @@ function TimelineModal({ title, description, events }: TimelineModalI) {
 
 export default function Timeline({
   className,
+  id,
   title,
   description,
   cards,
@@ -108,6 +109,7 @@ export default function Timeline({
 
   return (
     <Section
+      id={id}
       className={twMerge(
         "flex flex-col items-center justify-center gap-32 bg-white py-64",
         className

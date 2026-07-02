@@ -39,9 +39,12 @@ function DatastoryCard({ createdAt, title, description, slug }: DatastoryCardI) 
 
 // ----------------------------------------------------------------------------------------------------------------
 
-export function RelatedDatastories({ title, description, datastories }: RelatedDatastoriesI) {
+export function RelatedDatastories({ id, title, description, datastories }: RelatedDatastoriesI) {
   return (
-    <Section className="related-datastories flex w-full justify-center bg-primary-900 py-64">
+    <Section
+      id={id}
+      className="related-datastories flex w-full justify-center bg-primary-900 py-64"
+    >
       <InfoBlock.Root className="flex-col gap-32 lg:gap-64">
         <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
           <InfoBlock.Title
