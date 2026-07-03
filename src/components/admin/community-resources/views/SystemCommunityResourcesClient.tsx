@@ -50,7 +50,7 @@ export default function SystemCommunityResourcesClient() {
         titleHeader: "Título do recurso",
         showDatasetLink: true,
         useSystemStatusDot: true,
-        editHref: (resource) => `/pages/admin/system/community-resources?resource_id=${resource.id}`,
+        editHref: (resource) => `/admin/system/community-resources?resource_id=${resource.id}`,
       }),
     []
   );
@@ -91,9 +91,9 @@ export default function SystemCommunityResourcesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Recursos comunitários", url: "/pages/admin/system/community-resources" },
+        { label: "Recursos comunitários", url: "/admin/system/community-resources" },
       ]}
       title="Recursos comunitários"
       isLoading={isLoading}

@@ -64,26 +64,33 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
 
 
   useEffect(() => {
+    let cancelled = false;
     async function loadReuse() {
       try {
         const data = await fetchReuse(slug);
-        setReuse(data);
-        if (user && data) {
-          const following = await isFollowing("reuses", data.id, user.id);
-          setIsFavorite(following);
-        }
+        if (!cancelled) setReuse(data);
       } catch (error) {
         console.error("Error loading reuse:", error);
       } finally {
-        setIsLoadingReuse(false);
+        if (!cancelled) setIsLoadingReuse(false);
       }
     }
     loadReuse();
-  }, [slug, user]);
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!user || !reuse) return;
+    let cancelled = false;
+    isFollowing("reuses", reuse.id, user.id)
+      .then((following) => { if (!cancelled) setIsFavorite(following); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user?.id, reuse?.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
     if (!reuse || isTogglingFavorite) return;
@@ -164,11 +171,11 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               <Breadcrumb
                 darkMode={false}
                 items={[
-                  { label: "Home", url: "/" },
-                  { label: "Reutilizações", url: "/pages/reuses" },
+                  { label: "Início", url: "/" },
+                  { label: "Reutilizações", url: "/reuses" },
                   {
                     label: reuse.title,
-                    url: `/pages/reuses/${reuse.slug || reuse.id}`,
+                    url: `/reuses/${reuse.slug || reuse.id}`,
                   },
                 ]}
               />
@@ -176,9 +183,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             <div className="flex justify-end">
               <div className="flex flex-wrap items-center gap-16">
                 <Button
-                  variant="primary"
-                  appearance={isFavorite ? "solid" : "outline"}
-                  darkMode={false}
+                  variant="neutral"
+                  appearance="link"
                   hasIcon={true}
                   leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
                   leadingIconHover="agora-solid-star"
@@ -197,7 +203,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   Veja reutilização
                 </Button>
                 {canEdit && (
-                  <Link href={`/pages/admin/me/reuses/edit?id=${reuse.id}`}>
+                  <Link href={`/admin/me/reuses/edit?id=${reuse.id}`}>
                     <Button
                       variant="primary"
                       hasIcon={true}
@@ -226,7 +232,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             <p className="admin-edit-info__activity">
               <Icon name="agora-line-user" className="admin-edit-info__clock-icon" />
               {" Criado por: "}
-              <TextLink href={`/pages/users/${reuse.owner.slug}`}>
+              <TextLink href={`/users/${reuse.owner.slug}`}>
                 {reuse.owner.first_name} {reuse.owner.last_name}
               </TextLink>
             </p>
@@ -264,7 +270,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     )}
                     {reuse.organization && (
                       <TextLink
-                        href={`/pages/organizations/${reuse.organization.slug}`}
+                        href={`/organizations/${reuse.organization.slug}`}
                         className="text-sm font-medium hover:text-primary-800"
                       >
                         {reuse.organization.name}
@@ -404,7 +410,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
-                      link: `/pages/datasets/${dataset.slug}`,
+                      link: `/datasets/${dataset.slug}`,
                     } as CardMetricsProps;
                     return <CardMetrics key={`dataset-${index}`} {...cardProps} />;
                   })}

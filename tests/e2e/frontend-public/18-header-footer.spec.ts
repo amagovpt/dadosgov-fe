@@ -9,9 +9,9 @@ test.describe("Header and Footer", () => {
   test("NV-01: Header shows logo on public pages", async ({ page }) => {
     const pages = [
       "/",
-      "/pages/datasets",
-      "/pages/reuses",
-      "/pages/organizations",
+      "/datasets",
+      "/reuses",
+      "/organizations",
     ];
 
     for (const pagePath of pages) {
@@ -29,10 +29,10 @@ test.describe("Header and Footer", () => {
   test("NV-02: Header exposes primary navigation links", async ({ page }) => {
     const header = page.locator("header").first();
     const navLinks = [
-      { href: "/pages/datastories", label: "Data Stories" },
-      { href: "/pages/datasets", label: "Conjuntos de dados" },
-      { href: "/pages/reuses", label: "Reutilizações" },
-      { href: "/pages/organizations", label: "Organizações" },
+      { href: "/datastories", label: "Data Stories" },
+      { href: "/datasets", label: "Conjuntos de dados" },
+      { href: "/reuses", label: "Reutilizações" },
+      { href: "/organizations", label: "Organizações" },
     ];
 
     for (const { href } of navLinks) {
@@ -79,11 +79,11 @@ test.describe("Header and Footer", () => {
   test('NV-06: "Autenticar" button is visible and opens login', async ({
     page,
   }) => {
-    const authLink = page.locator('header a[href="/pages/login"]').first();
+    const authLink = page.locator('header a[href="/login"]').first();
     await expect(authLink).toBeVisible({ timeout: 10000 });
     await authLink.click();
     await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
-    expect(page.url()).toContain("/pages/login");
+    expect(page.url()).toContain("/login");
   });
 
   test.skip("NV-07: User menu with session (needs auth)", async () => {

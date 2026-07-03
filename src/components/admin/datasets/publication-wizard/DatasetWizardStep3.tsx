@@ -2,7 +2,9 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
-import FileUploadModal, { PendingResourceMeta, PendingResourceTable } from "@/components/admin/FileUploadModal";
+import FileUploadModal from "@/components/admin/FileUploadModal/FileUploadModal";
+import { PendingResourceTable } from "@/components/admin/FileUploadModal/PendingResourceTable";
+import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import type { ResourceType } from "@/service/types/catalog";
 
 export interface DatasetWizardStep3Props {

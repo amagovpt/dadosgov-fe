@@ -12,7 +12,7 @@ const fixtures = loadFixtures();
 
 test.describe("Backoffice - Organizations", () => {
   test("OR-01: System organizations listing renders", async ({ page }) => {
-    await page.goto("/pages/admin/system/organizations");
+    await page.goto("/admin/system/organizations");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -23,7 +23,7 @@ test.describe("Backoffice - Organizations", () => {
   test("OR-02: System organizations listing exposes search affordance", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/organizations");
+    await page.goto("/admin/system/organizations");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -37,7 +37,7 @@ test.describe("Backoffice - Organizations", () => {
   test("OR-03: 'Criar nova organização' page is reachable from /admin/organizations/new", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/organizations/new");
+    await page.goto("/admin/organizations/new");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -50,7 +50,7 @@ test.describe("Backoffice - Organizations", () => {
   test("OR-04: Public org page mirrors the seeded organisation name", async ({
     page,
   }) => {
-    await page.goto(`/pages/organizations/${fixtures.organization.slug}`);
+    await page.goto(`/organizations/${fixtures.organization.slug}`);
     await page.waitForLoadState("networkidle");
 
     const heading = page.locator("main h1").first();
@@ -60,7 +60,7 @@ test.describe("Backoffice - Organizations", () => {
   });
 
   test("OR-05: Org datasets tab activates after click", async ({ page }) => {
-    await page.goto(`/pages/organizations/${fixtures.organization.slug}`);
+    await page.goto(`/organizations/${fixtures.organization.slug}`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(3000);
 
@@ -88,7 +88,7 @@ test.describe("Backoffice - Organizations", () => {
   }) => {
     const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
-    await page.goto("/pages/admin/system/organizations");
+    await page.goto("/admin/system/organizations");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -96,58 +96,58 @@ test.describe("Backoffice - Organizations", () => {
     await context.close();
   });
 
-  test("OR-09: Email link — welcome_new_member — /pages/admin/org/{id}/datasets loads correctly", async ({
+  test("OR-09: Email link — welcome_new_member — /admin/org/{id}/datasets loads correctly", async ({
     page,
   }) => {
     // Simulates clicking "Ver a organização" from the welcome_new_member email.
-    await page.goto(`/pages/admin/org/${fixtures.organization.id}/datasets`);
+    await page.goto(`/admin/org/${fixtures.organization.id}/datasets`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
     // Admin org datasets page must render without redirecting to login.
-    expect(page.url()).toContain(`/pages/admin/org/${fixtures.organization.id}/datasets`);
+    expect(page.url()).toContain(`/admin/org/${fixtures.organization.id}/datasets`);
     const heading = page.locator("main").first();
     await expect(heading).toBeAttached({ timeout: 10000 });
   });
 
-  test("OR-10: Email link — new_membership_request — /pages/admin/org/{id}/members loads correctly", async ({
+  test("OR-10: Email link — new_membership_request — /admin/org/{id}/members loads correctly", async ({
     page,
   }) => {
     // Simulates clicking "See the request" from the new_membership_request email.
-    await page.goto(`/pages/admin/org/${fixtures.organization.id}/members`);
+    await page.goto(`/admin/org/${fixtures.organization.id}/members`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    expect(page.url()).toContain(`/pages/admin/org/${fixtures.organization.id}/members`);
+    expect(page.url()).toContain(`/admin/org/${fixtures.organization.id}/members`);
     const heading = page.locator("main").first();
     await expect(heading).toBeAttached({ timeout: 10000 });
   });
 
-  test("OR-11: Email link — membership_invitation (existing user) — /pages/admin/me/profile loads correctly", async ({
+  test("OR-11: Email link — membership_invitation (existing user) — /admin/me/profile loads correctly", async ({
     page,
   }) => {
     // Simulates clicking "View and respond to invitation" from the membership_invitation email.
-    await page.goto("/pages/admin/me/profile");
+    await page.goto("/admin/me/profile");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    expect(page.url()).toContain("/pages/admin/me/profile");
+    expect(page.url()).toContain("/admin/me/profile");
     const heading = page.locator("main").first();
     await expect(heading).toBeAttached({ timeout: 10000 });
   });
 
-  test("OR-12: Email link — membership_invitation (new user) — /pages/register loads correctly", async ({
+  test("OR-12: Email link — membership_invitation (new user) — /register loads correctly", async ({
     browser,
   }) => {
     // Simulates clicking "View and respond to invitation" for a user without an account.
     // This is a public page so we use an unauthenticated context.
     const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
-    await page.goto("/pages/register");
+    await page.goto("/register");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    expect(page.url()).toContain("/pages/register");
+    expect(page.url()).toContain("/register");
     const heading = page.locator("main").first();
     await expect(heading).toBeAttached({ timeout: 10000 });
     await context.close();

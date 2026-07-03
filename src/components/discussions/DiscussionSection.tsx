@@ -24,7 +24,7 @@ import { pt } from "date-fns/locale";
 
 interface DiscussionSectionProps {
   entityId: string;
-  entityClass: "Reuse" | "Dataset" | "Organization";
+  entityClass: "Reuse" | "Dataset" | "Organization" | "Dataservice";
 }
 
 interface ReplyFormProps {
@@ -207,7 +207,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
             className="self-stretch"
             onClick={() => {
               if (!user) {
-                window.location.href = "/pages/login";
+                window.location.href = "/login";
               } else {
                 setShowNewDiscussion(!showNewDiscussion);
               }

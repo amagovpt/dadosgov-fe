@@ -80,7 +80,7 @@ export default function OrgReusesClient() {
     () =>
       createReuseColumns({
         linkStyle: "anchor",
-        editHref: (reuse) => `/pages/admin/org/reuses/edit?slug=${reuse.slug}`,
+        editHref: (reuse) => `/admin/org/reuses/edit?slug=${reuse.slug}`,
       }),
     []
   );
@@ -98,7 +98,7 @@ export default function OrgReusesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: orgName || "Organização", url: "#" },
         { label: "Reutilizações", url: "#" },
       ]}
@@ -127,7 +127,7 @@ export default function OrgReusesClient() {
           icon="agora-line-edit"
           title="Sem publicações"
           description="A organização ainda não publicou uma reutilização."
-          createUrl="/pages/admin/reuses/new"
+          createUrl="/admin/reuses/new"
         />
       }
     >

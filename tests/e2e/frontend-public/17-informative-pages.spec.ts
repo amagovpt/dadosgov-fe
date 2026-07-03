@@ -1,15 +1,15 @@
 import { test, expect } from "playwright/test";
 
 const PAGES: { path: string; expectedHeading: RegExp }[] = [
-  { path: "/pages/faqs/about_dadosgov", expectedHeading: /Sobre o dados\.gov\.pt/i },
-  { path: "/pages/about-open-data", expectedHeading: /Sobre dados abertos/i },
-  { path: "/pages/faqs/terms", expectedHeading: /Termos e condições de utilização/i },
-  { path: "/pages/faqs/publish", expectedHeading: /Publicar Dados/i },
-  { path: "/pages/faqs/reuse", expectedHeading: /Reutilizar Dados/i },
-  // /pages/docapi server-redirects to /pages/faqs/api-documentation
-  { path: "/pages/docapi", expectedHeading: /Documentação da API/i },
-  { path: "/pages/faqs/api-tutorial", expectedHeading: /Documentação da API/i },
-  { path: "/pages/support", expectedHeading: /Ajuda/i },
+  { path: "/recursos/como-usar-o-portal/o-que-e-dados-gov-pt", expectedHeading: /Sobre o dados\.gov\.pt/i },
+  { path: "/about-open-data", expectedHeading: /Sobre dados abertos/i },
+  { path: "/faqs/terms", expectedHeading: /Termos e condições de utilização/i },
+  { path: "/faqs/publish", expectedHeading: /Publicar Dados/i },
+  { path: "/faqs/reuse", expectedHeading: /Reutilizar Dados/i },
+  // /docapi server-redirects to /faqs/api-documentation
+  { path: "/docapi", expectedHeading: /Documentação da API/i },
+  { path: "/faqs/api-tutorial", expectedHeading: /Documentação da API/i },
+  { path: "/support", expectedHeading: /Ajuda/i },
 ];
 
 test.describe("Informative Pages", () => {
@@ -31,7 +31,7 @@ test.describe("Informative Pages", () => {
   }
 
   test("PI-Support: page exposes accordion sections", async ({ page }) => {
-    await page.goto("/pages/support");
+    await page.goto("/support");
     await page.waitForLoadState("networkidle");
 
     const accordions = page.locator('[class*="accordion"]');

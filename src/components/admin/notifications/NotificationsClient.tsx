@@ -64,8 +64,8 @@ export default function NotificationsClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Notificações", url: "/pages/admin/notificacoes" },
+        { label: "Administração", url: "/admin" },
+        { label: "Notificações", url: "/admin/notificacoes" },
       ]}
       title="Notificações"
       headerAction={null}

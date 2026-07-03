@@ -2,7 +2,6 @@
 
 import { Datastory as DatastoryType } from "@/service/types/datastories/datastory";
 import { Datastory } from ".";
-import { BreadcrumbItem } from "@/service/types/shared/breadcrumbItem";
 import { ModalProvider } from "@ama-pt/agora-design-system";
 
 export type DatastoryDetailsPageProps = {
@@ -14,7 +13,7 @@ export default function DatastoryDetailsPage({
 }: DatastoryDetailsPageProps) {
   return (
     <ModalProvider>
-      <main className="flex flex-col">
+      <main className="flex flex-col datastory-page">
         {/* hero section with index */}
         <Datastory.Hero {...datastory.hero} />
 

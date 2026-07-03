@@ -2,9 +2,9 @@ import { test, expect } from "playwright/test";
 
 /**
  * Statistics dashboards exist in three flavours:
- *   - /pages/admin/me/statistics       (personal)
- *   - /pages/admin/org/statistics      (active org — redirects when no org)
- *   - /pages/admin/statistics          (global, admin-only)
+ *   - /admin/me/statistics       (personal)
+ *   - /admin/org/statistics      (active org — redirects when no org)
+ *   - /admin/statistics          (global, admin-only)
  *
  * Auth via auth-setup storage state.
  */
@@ -13,7 +13,7 @@ test.describe("Backoffice - Statistics", () => {
   test("ST-01: Personal statistics page loads with Estatísticas heading", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/statistics");
+    await page.goto("/admin/me/statistics");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -24,7 +24,7 @@ test.describe("Backoffice - Statistics", () => {
   test("ST-02: Org statistics page resolves to a backoffice URL", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/org/statistics");
+    await page.goto("/admin/org/statistics");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2500);
 
@@ -34,7 +34,7 @@ test.describe("Backoffice - Statistics", () => {
   });
 
   test("ST-03: Global statistics page loads for admin", async ({ page }) => {
-    await page.goto("/pages/admin/statistics");
+    await page.goto("/admin/statistics");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -45,7 +45,7 @@ test.describe("Backoffice - Statistics", () => {
   test("ST-04: At least one numeric KPI is rendered on personal stats", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/statistics");
+    await page.goto("/admin/me/statistics");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2500);
 
@@ -59,7 +59,7 @@ test.describe("Backoffice - Statistics", () => {
   }) => {
     const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
-    await page.goto("/pages/admin/statistics");
+    await page.goto("/admin/statistics");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

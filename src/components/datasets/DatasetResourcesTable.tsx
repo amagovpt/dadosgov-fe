@@ -725,7 +725,7 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
     if (cr.organization) {
       return {
         name: cr.organization.name,
-        url: `/pages/organizations/${cr.organization.slug || cr.organization.id}`,
+        url: `/organizations/${cr.organization.slug || cr.organization.id}`,
         isOrg: true,
       };
     }
@@ -733,7 +733,7 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
       const fullName = `${cr.owner.first_name} ${cr.owner.last_name}`.trim();
       return {
         name: fullName || cr.owner.slug,
-        url: `/pages/users/${cr.owner.slug || cr.owner.id}`,
+        url: `/users/${cr.owner.slug || cr.owner.id}`,
         isOrg: false,
       };
     }

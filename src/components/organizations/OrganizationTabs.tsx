@@ -21,12 +21,15 @@ import { ReuseCardLinks } from "@/components/Shared/ReuseCardLinks";
 import { Dataset } from "@/service/types/dataset";
 import { Organization } from "@/service/types/identity";
 import { Reuse } from "@/service/types/reuse";
+import { Dataservice } from "@/service/types/dataservice";
 import { APIResponse } from "@/service/types/shared";
 import { fetchOrgDatasets, fetchOrgReuses } from "@/service/api/organizations";
+import { fetchOrgDataservices } from "@/service/api/dataservices";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
 import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
+import { DataserviceCardLinks } from "@/components/Shared/DataserviceCardLinks";
 
 interface OrganizationTabsProps {
   organization: Organization;
@@ -38,8 +41,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
   const [datasetsResponse, setDatasetsResponse] = useState<APIResponse<Dataset> | null>(null);
   const [datasetsPage, setDatasetsPage] = useState(1);
   const [reuses, setReuses] = useState<Reuse[]>([]);
+  const [dataservices, setDataservices] = useState<Dataservice[]>([]);
   const [isLoadingDatasets, setIsLoadingDatasets] = useState(true);
   const [isLoadingReuses, setIsLoadingReuses] = useState(true);
+  const [isLoadingDataservices, setIsLoadingDataservices] = useState(true);
 
   useEffect(() => {
     async function loadDatasets() {
@@ -70,6 +75,20 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
     }
     loadReuses();
   }, [organization.slug]);
+
+  useEffect(() => {
+    async function loadDataservices() {
+      try {
+        const response = await fetchOrgDataservices(organization.id, 1, 20);
+        setDataservices(response.data);
+      } catch (error) {
+        console.error("Error loading organization dataservices:", error);
+      } finally {
+        setIsLoadingDataservices(false);
+      }
+    }
+    loadDataservices();
+  }, [organization.id]);
 
   const datasets = datasetsResponse?.data || [];
 
@@ -136,7 +155,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                     {datasets.map((dataset) => (
                       <div key={dataset.id} className="h-full">
                         <CardLinks
-                          onClick={() => router.push(`/pages/datasets/${dataset.slug}`)}
+                          onClick={() => router.push(`/datasets/${dataset.slug}`)}
                           className="cursor-pointer text-neutral-900"
                           variant="white"
                           image={{
@@ -182,7 +201,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             </span>
                           }
                           mainLink={
-                            <Link href={`/pages/datasets/${dataset.slug}`}>
+                            <Link href={`/datasets/${dataset.slug}`}>
                               <span className="underline">
                                 {sanitizeUserMarkdown(dataset.title)}
                               </span>
@@ -216,11 +235,26 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
           </TabBodyWrapper>
         </Tab>
 
-        {/* Tab 3: Reutilizações */}
+        {/* Tab 3: Reutilizações e APIs */}
         <Tab>
-          <TabHeader>Reutilizações ({organization.metrics?.reuses || 0})</TabHeader>
+          <TabHeader>
+            Reutilizações e APIs (
+            {(organization.metrics?.reuses || 0) + (organization.metrics?.dataservices || 0)})
+          </TabHeader>
 
           <TabBodyWrapper>
+            {!isLoadingDataservices && dataservices.length > 0 && (
+              <div className="mb-40">
+                <h3 className="mb-16 text-base font-medium text-neutral-900">
+                  {dataservices.length} {dataservices.length === 1 ? "API" : "APIS"}
+                </h3>
+                <div className="agora-card-links-datasets-px0 grid grid-cols-1 gap-32 md:grid-cols-2">
+                  {dataservices.map((dataservice) => (
+                    <DataserviceCardLinks key={dataservice.id} dataservice={dataservice} />
+                  ))}
+                </div>
+              </div>
+            )}
             <div>
               <h3 className="mb-16 text-base font-medium text-neutral-900">
                 {reuses.length} {reuses.length === 1 ? "REUTILIZAÇÃO" : "REUTILIZAÇÕES"}
@@ -245,6 +279,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
             </div>
           </TabBodyWrapper>
         </Tab>
+
 
         {/* Tab 5: Discussões */}
         <Tab>

@@ -10,7 +10,7 @@ import {
 } from "@ama-pt/agora-design-system";
 
 const breadcrumbItems = [
-  { label: "Home", url: "/" },
+  { label: "Início", url: "/" },
   { label: "Redefinir palavra-passe", url: "#" },
 ];
 
@@ -39,7 +39,7 @@ export function ResetPasswordClient({ token }: Props) {
     setError(null);
 
     try {
-      const res = await fetch(`/reset-password/${token}`, {
+      const res = await fetch(`/auth/reset-password/${token}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password, password_confirm: passwordConfirm }),
@@ -85,7 +85,7 @@ export function ResetPasswordClient({ token }: Props) {
                   <Button
                     variant="primary"
                     className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                    onClick={() => (window.location.href = "/pages/login")}
+                    onClick={() => (window.location.href = "/login")}
                   >
                     Iniciar sessão
                   </Button>

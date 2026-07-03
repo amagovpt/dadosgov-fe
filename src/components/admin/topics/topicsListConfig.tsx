@@ -9,7 +9,7 @@ export function createTopicColumns(): AdminListColumn<Topic>[] {
     {
       id: "name",
       header: "Nome",
-      renderCell: (topic) => <TextLink href={`/pages/themes/${topic.slug}`}>{topic.name}</TextLink>,
+      renderCell: (topic) => <TextLink href={`/themes/${topic.slug}`}>{topic.name}</TextLink>,
     },
     {
       id: "created_at",
@@ -28,7 +28,7 @@ export function createTopicColumns(): AdminListColumn<Topic>[] {
     },
     createTableActionsColumn<Topic>({
       viewAction: (topic) => ({
-        href: `/pages/themes/${topic.slug}`,
+        href: `/themes/${topic.slug}`,
       }),
     }),
   ];

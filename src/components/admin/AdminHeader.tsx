@@ -118,14 +118,14 @@ export function AdminHeader() {
                 leadingIcon="agora-line-user"
                 leadingIconHover="agora-solid-user"
               >
-                <a href={`/pages/users/${user?.slug || ''}`}>O meu perfil</a>
+                <a href={`/users/${user?.slug || ''}`}>O meu perfil</a>
               </AuthenticatedBodyLink>
               <AuthenticatedBodyLink
                 hasIcon
                 leadingIcon="agora-line-mega-phone"
                 leadingIconHover="agora-solid-mega-phone"
               >
-                <a href="/pages/admin/notificacoes">Notificações</a>
+                <a href="/admin/notificacoes">Notificações</a>
               </AuthenticatedBodyLink>
               {/* "As minhas definições" continua oculto até a página existir. */}
             </AuthenticatedBody>

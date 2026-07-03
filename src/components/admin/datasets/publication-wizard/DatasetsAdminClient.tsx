@@ -10,7 +10,7 @@ import { License, Frequency, Granularity, SpatialZone, TagSuggestion, ResourceTy
 import { Dataset, ContactPoint } from "@/service/types/dataset";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
-import { PendingResourceMeta } from "@/components/admin/FileUploadModal";
+import { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import { useAuth } from "@/context/AuthContext";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
@@ -523,10 +523,10 @@ export default function DatasetsAdminClient({
     onNextStep,
     onComplete,
     navigateToStep: (nextStep, nextDatasetId) => {
-      router.push(`/pages/admin/datasets/new?step=${nextStep}&datasetId=${nextDatasetId}`);
+      router.push(`/admin/datasets/new?step=${nextStep}&datasetId=${nextDatasetId}`);
     },
     finishWizard: () => {
-      router.push("/pages/admin/me/datasets");
+      router.push("/admin/me/datasets");
     },
   });
 

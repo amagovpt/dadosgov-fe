@@ -578,7 +578,7 @@ export default function ReusesFormClient({
               setApiError(null);
               try {
                 await updateReuse(createdReuse.id, { private: false });
-                window.location.href = "/pages/admin/me/reuses";
+                window.location.href = "/admin/me/reuses";
               } catch {
                 setApiError("Erro ao publicar. Tente novamente.");
               } finally {

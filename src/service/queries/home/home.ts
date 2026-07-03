@@ -5,55 +5,64 @@ import { gql } from "@apollo/client";
 
 export async function getHome(locale: string = "pt"): Promise<Home> {
   const query = gql(/* GraphQL */ `
-        query GetHome {
+       query GetHome {
         findHomeSingleton {
-            data {
+          data {
+            hero{
+              ${locale}{
+                title
+                highlight
+                description
+              }
+            }
+            datastories {
+              ${locale}{
+                description
                 datastories {
-                    ${locale} {
-                        data {
-                            metadata {
-                                ${locale} {
-                                    title
-                                    slug
-                                    image {
-                                        fileName
-                                        url
-                                        id
-                                        slug
-                                    }
-                                    createdAt
-                                    }
-                                }
-                            }
-                        
-                    }
-                }
-                usedDailyBy {
-                    iv {
-                      data {
-                        alt {
-                          ${locale}
+                  data {
+                    metadata {
+                      ${locale}{
+                        title
+                        slug
+                        image {
+                          fileName
+                          url
+                          id
+                          slug
                         }
-                        anchor {
-                          iv {
-                            children
-                            href
-                          }
-                        }
-                        logo {
-                          iv {
-                            id
-                            url
-                            slug
-                            fileName
-                          }
-                        }
+                        createdAt
                       }
                     }
+                  }
                 }
+              }
             }
+            usedDailyBy {
+              iv {
+                data {
+                  alt {
+                    pt
+                  }
+                  anchor {
+                    iv {
+                      children
+                      href
+                    }
+                  }
+                  logo {
+                    iv {
+                      id
+                      url
+                      slug
+                      fileName
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
-    }
+      }
   `);
 
   const { data, error } = await apolloClient.query<{

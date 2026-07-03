@@ -497,7 +497,7 @@ export interface OrganizationsListingResponse {
 
 
 /**
- * Aggregated fetch for the /pages/organizations listing page (LEDG-1836).
+ * Aggregated fetch for the /organizations listing page (LEDG-1836).
  * Replaces 3 + N (one per badge) parallel calls with 1.
  */
 export async function fetchOrganizationsListing(

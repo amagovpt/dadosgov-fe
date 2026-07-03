@@ -70,7 +70,7 @@ export default function OrgCommunityResourcesClient() {
       createCommunityResourceColumns({
         titleCellStyle: "primary",
         showOwnerOnLastModified: true,
-        editHref: (resource) => `/pages/admin/community-resources/edit?resource_id=${resource.id}`,
+        editHref: (resource) => `/admin/community-resources/edit?resource_id=${resource.id}`,
       }),
     []
   );
@@ -87,7 +87,7 @@ export default function OrgCommunityResourcesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: orgName || "Organização", url: "#" },
         { label: "Recursos comunitários" },
       ]}

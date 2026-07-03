@@ -52,7 +52,7 @@ export function useReuseLifecycleActions({
     setIsSubmitting(true);
     try {
       await deleteReuse(reuse.id);
-      push("/pages/admin/me/reuses");
+      push("/admin/me/reuses");
     } catch (error) {
       console.error("Error deleting reuse:", error);
       setApiError("Erro ao eliminar a reutilização.");

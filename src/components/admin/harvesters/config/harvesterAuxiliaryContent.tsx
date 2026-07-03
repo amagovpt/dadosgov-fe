@@ -25,7 +25,7 @@ export function getHarvesterAuxiliaryItems({
           <p className="auxiliar-list__content mt-8 !p-0">
             Selecione uma organização da qual seja administrador. Se a sua organização ainda não
             existir, terá de a criar primeiro através deste{" "}
-            <TextLink href="/pages/admin/organizations/new" className="auxiliar-list__content !p-0">
+            <TextLink href="/admin/organizations/new" className="auxiliar-list__content !p-0">
               link ↗
             </TextLink>
             .

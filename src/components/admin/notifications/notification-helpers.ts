@@ -41,5 +41,5 @@ export function harvesterValidationLink(
   details: ValidateHarvesterNotificationDetails
 ): string | null {
   if (!details.source?.slug) return null;
-  return `/pages/admin/system/harvesters/${details.source.slug}`;
+  return `/admin/system/harvesters/${details.source.slug}`;
 }

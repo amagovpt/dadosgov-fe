@@ -1,7 +1,7 @@
 import { test, expect } from "playwright/test";
 import { loadFixtures } from "../../helpers/fixtures";
 
-const SEARCH_URL = "/pages/search";
+const SEARCH_URL = "/search";
 
 test.describe("Search", () => {
   test("PQ-01: Search page opens with text field and filters", async ({
@@ -28,7 +28,7 @@ test.describe("Search", () => {
 
     const results = page
       .locator(
-        "a[href*='/pages/datasets/'], a[href*='/pages/organizations/'], a[href*='/pages/reuses/']"
+        "a[href*='/datasets/'], a[href*='/organizations/'], a[href*='/reuses/']"
       )
       .first();
     await expect(results).toBeVisible({ timeout: 15000 });
@@ -222,7 +222,7 @@ test.describe("Search", () => {
     await page.goto(`${SEARCH_URL}?q=seed+script&type=datasets`);
     await page.waitForLoadState("networkidle");
 
-    const datasetLink = page.locator(`a[href*="/pages/datasets/${dataset.slug}"]`);
+    const datasetLink = page.locator(`a[href*="/datasets/${dataset.slug}"]`);
     await expect(datasetLink).toBeVisible({ timeout: 15000 });
   });
 });

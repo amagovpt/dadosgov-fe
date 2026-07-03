@@ -29,7 +29,7 @@ export function createUserColumns(): AdminListColumn<UserAdmin, UserSortField>[]
       sortType: "string",
       renderCell: (user) => (
         <div>
-          <TextLink href={`/pages/users/${user.slug}`}>
+          <TextLink href={`/users/${user.slug}`}>
             {user.first_name} {user.last_name}
           </TextLink>
           {user.email && (
@@ -76,10 +76,10 @@ export function createUserColumns(): AdminListColumn<UserAdmin, UserSortField>[]
     },
     createTableActionsColumn<UserAdmin>({
       viewAction: (user) => ({
-        href: `/pages/users/${user.slug}`,
+        href: `/users/${user.slug}`,
       }),
       editAction: (user) => ({
-        href: `/pages/admin/users/${user.id}/profile`,
+        href: `/admin/users/${user.id}/profile`,
       }),
     }),
   ];

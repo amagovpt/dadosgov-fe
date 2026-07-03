@@ -473,7 +473,7 @@ function FeaturedDatasetsEditor({
                     ) as unknown as string
                   }
                   isBlockedLink={true}
-                  anchor={{ href: dataset?.slug ? `/pages/datasets/${dataset.slug}` : "#" }}
+                  anchor={{ href: dataset?.slug ? `/datasets/${dataset.slug}` : "#" }}
                 />
               </div>
               <button
@@ -738,7 +738,7 @@ function FeaturedReusesEditor({
                     ) as unknown as string
                   }
                   isBlockedLink={true}
-                  anchor={{ href: reuse?.slug ? `/pages/reuses/${reuse.slug}` : "#" }}
+                  anchor={{ href: reuse?.slug ? `/reuses/${reuse.slug}` : "#" }}
                 />
               </div>
               <button

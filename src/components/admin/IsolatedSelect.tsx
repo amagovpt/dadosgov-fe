@@ -128,9 +128,15 @@ const IsolatedSelect = React.memo(function IsolatedSelect({
       }
       onChange={(options) => {
         const value = options.map((o) => o.value as string).join(",");
-        setInternalValue(value);
+        // Refs don't trigger re-renders, so they're safe to set synchronously.
         if (onChangeRef) onChangeRef.current = value;
-        onChangeCallback?.(value);
+        // InputSelect can fire onChange during its own render cycle (e.g. when an
+        // option is pre-selected). Defer the state updates so we never setState
+        // on this component or a parent while another component is rendering.
+        queueMicrotask(() => {
+          setInternalValue(value);
+          onChangeCallback?.(value);
+        });
       }}
       hasError={hasError}
       hasFeedback={hasError}

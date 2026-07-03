@@ -12,7 +12,7 @@ test.describe("Backoffice - User Account Management", () => {
   test("UA-01: Profile editor renders with Perfil heading", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/profile");
+    await page.goto("/admin/me/profile");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -23,7 +23,7 @@ test.describe("Backoffice - User Account Management", () => {
   test("UA-02: Profile editor exposes name, surname and bio labels", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/profile");
+    await page.goto("/admin/me/profile");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -41,7 +41,7 @@ test.describe("Backoffice - User Account Management", () => {
   test("UA-03: Profile editor exposes the API keys section", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/profile");
+    await page.goto("/admin/me/profile");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -54,7 +54,7 @@ test.describe("Backoffice - User Account Management", () => {
   test("UA-04: Profile editor exposes activities/subscriptions navigation", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/profile");
+    await page.goto("/admin/me/profile");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

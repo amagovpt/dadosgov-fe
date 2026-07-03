@@ -43,7 +43,7 @@ export default function MigrateAccountClient() {
   const [password, setPassword] = useState("");
 
   const breadcrumbItems = [
-    { label: "Home", url: "/" },
+    { label: "Início", url: "/" },
     { label: "Migrar conta", url: "#" },
   ];
 
@@ -53,7 +53,7 @@ export default function MigrateAccountClient() {
       try {
         const data = await fetchMigrationPending();
         if (!data.pending) {
-          router.push("/pages/login");
+          router.push("/login");
           return;
         }
         if (data.email) setMaskedEmail(data.email);
@@ -65,7 +65,7 @@ export default function MigrateAccountClient() {
         // already have an account or want to create a new one.
         setStep("choice");
       } catch {
-        router.push("/pages/login");
+        router.push("/login");
       }
     }
     check();

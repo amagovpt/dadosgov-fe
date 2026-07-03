@@ -312,7 +312,7 @@ export interface ReusesListingResponse {
 
 
 /**
- * Aggregated fetch for the /pages/reuses listing page (LEDG-1836).
+ * Aggregated fetch for the /reuses listing page (LEDG-1836).
  * Replaces 6 parallel calls with 1 to /api/1/site/reuses-listing/.
  */
 export async function fetchReusesListing(

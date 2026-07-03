@@ -104,8 +104,8 @@ export default function DatasetsClient({
       <HeroGeneral
         title="Conjuntos de dados"
         breadcrumbItems={[
-          { label: "Home", url: "/" },
-          { label: "Conjuntos de dados", url: "/pages/datasets" },
+          { label: "Início", url: "/" },
+          { label: "Conjuntos de dados", url: "/datasets" },
         ]}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
@@ -207,7 +207,7 @@ export default function DatasetsClient({
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
-                      link: `/pages/datasets/${dataset.slug}`,
+                      link: `/datasets/${dataset.slug}`,
                     } as CardMetricsProps;
                     return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />;
                   })

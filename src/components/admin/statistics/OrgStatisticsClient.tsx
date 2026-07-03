@@ -136,9 +136,9 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: org?.name || "Organização", url: "#" },
-        { label: "Estatísticas", url: "/pages/admin/org/statistics" },
+        { label: "Estatísticas", url: "/admin/org/statistics" },
       ]}
       title="Estatísticas"
     >
@@ -251,7 +251,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                       <Button
                         variant="primary"
                         appearance="outline"
-                        onClick={() => (window.location.href = "/pages/admin/datasets/new")}
+                        onClick={() => (window.location.href = "/admin/datasets/new")}
                       >
                         Publique no portal
                       </Button>
@@ -310,7 +310,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                       <Button
                         variant="primary"
                         appearance="outline"
-                        onClick={() => (window.location.href = "/pages/admin/dataservices/new")}
+                        onClick={() => (window.location.href = "/admin/dataservices/new")}
                       >
                         Publique no portal
                       </Button>
@@ -347,7 +347,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                         <TableCell headerLabel="Visualizações">{ds.metrics?.views ?? 0}</TableCell>
                         <TableCell headerLabel="Favoritos">{ds.metrics?.followers ?? 0}</TableCell>
                         <TableCell headerLabel="Estado">
-                          {ds.private ? "Privado" : ds.archived ? "Arquivado" : "Público"}
+                          {ds.private ? "Privado" : ds.archived_at ? "Arquivado" : "Público"}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -389,7 +389,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                       <Button
                         variant="primary"
                         appearance="outline"
-                        onClick={() => (window.location.href = "/pages/admin/reuses/new")}
+                        onClick={() => (window.location.href = "/admin/reuses/new")}
                       >
                         Publique no portal
                       </Button>

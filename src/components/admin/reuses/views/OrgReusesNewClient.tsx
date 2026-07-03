@@ -26,9 +26,9 @@ export default function OrgReusesNewClient() {
 
   return (
     <AdminLayout breadcrumbItems={[
-      { label: "Administração", url: "/pages/admin" },
+      { label: "Administração", url: "/admin" },
       { label: orgName || "Organização", url: "#" },
-      { label: "Reutilizações", url: orgId ? `/pages/admin/org/${orgId}/reuses` : "#" }
+      { label: "Reutilizações", url: orgId ? `/admin/org/${orgId}/reuses` : "#" }
     ]}
       title="Formulário de reutilização"
     >

@@ -13,7 +13,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
   test("RU-01: 'Os meus reuses' page renders with empty-state CTA", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/reuses/");
+    await page.goto("/admin/me/reuses/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -28,7 +28,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
   test("RU-02: Wizard step 1 exposes title input #reuse-title", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/reuses/new/");
+    await page.goto("/admin/me/reuses/new/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -41,7 +41,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
   test("RU-03: Wizard step 1 exposes URL input #reuse-link", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/reuses/new/");
+    await page.goto("/admin/me/reuses/new/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -55,7 +55,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
   // at `tests/helpers/select-regression.ts` (driven by `99-select-regression.spec.ts`).
 
   test("RU-04: System reuses listing renders for admin", async ({ page }) => {
-    await page.goto("/pages/admin/system/reuses");
+    await page.goto("/admin/system/reuses");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -66,7 +66,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
   test("RU-05: Publish dropdown exposes 'Uma reutilização' option", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/reuses/");
+    await page.goto("/admin/me/reuses/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -82,7 +82,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
   test("RU-06: Public reuse detail mirrors the seeded title", async ({
     page,
   }) => {
-    await page.goto(`/pages/reuses/${fixtures.reuse.slug}`);
+    await page.goto(`/reuses/${fixtures.reuse.slug}`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -96,7 +96,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
   test("RU-07: Seeded reuse links back to its associated dataset", async ({
     page,
   }) => {
-    await page.goto(`/pages/reuses/${fixtures.reuse.slug}`);
+    await page.goto(`/reuses/${fixtures.reuse.slug}`);
     await page.waitForLoadState("networkidle");
 
     // Detail page shows "N conjunto(s) de dados associados".
@@ -108,7 +108,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
     await expect(associatedHeading).toBeVisible({ timeout: 10000 });
 
     const datasetLink = page
-      .locator(`a[href$="/pages/datasets/${fixtures.dataset.slug}"]`)
+      .locator(`a[href$="/datasets/${fixtures.dataset.slug}"]`)
       .first();
     await expect(datasetLink).toBeVisible({ timeout: 10000 });
   });
@@ -136,7 +136,7 @@ test.describe("Backoffice - Reuses CRUD", () => {
   test("RU-13: Tag chips on the reuse form render in alphabetical order", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/reuses/new/");
+    await page.goto("/admin/me/reuses/new/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

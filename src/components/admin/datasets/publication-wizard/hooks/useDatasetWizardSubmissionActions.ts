@@ -14,7 +14,7 @@ import type { SpatialZone } from "@/service/types/catalog";
 import type { Dataset, DatasetUpdatePayload } from "@/service/types/dataset";
 import { translateUploadError } from "@/lib/security/translateUploadError";
 import type { FormErrors } from "@/hooks/forms/useFormErrors";
-import type { PendingResourceMeta } from "@/components/admin/FileUploadModal";
+import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import type { DatasetWizardDraftContact } from "@/components/admin/datasets/publication-wizard/datasetWizardTypes";
 import {
   buildDatasetCreatePayload,

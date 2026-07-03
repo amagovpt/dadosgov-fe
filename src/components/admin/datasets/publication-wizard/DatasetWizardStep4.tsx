@@ -29,8 +29,8 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
   };
   const timeAgo = formatDateToTimeAgo(createdDataset?.last_modified, "agora");
   const href = createdDataset
-    ? `/pages/datasets/${createdDataset.slug}`
-    : `/pages/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`;
+    ? `/datasets/${createdDataset.slug}`
+    : `/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`;
 
   return (
     <>

@@ -10,15 +10,17 @@ import { Reuse } from "@/service/types/reuse";
 import { SiteMetrics } from "@/service/types/shared";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { useAuth } from "@/context/AuthContext";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
-import { Datastory, UsedDailyBy } from "@/service/types/home";
+import { HomeDatastories, HomeHero, UsedDailyBy } from "@/service/types/home";
 import { getAssets } from "@/utils/getAssets";
 import HeroGeneral from "../HeroGeneral";
 import PublishDropdown from "../admin/PublishDropdown";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import Image from "next/image";
 import AppIcon from "../Primitives/AppIcon";
+import { useTranslation } from "react-i18next";
+import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
+import { highlightText } from "@/utils/highlightText";
 
 function formatStatNumber(value: number): { number: string; suffix: string } {
   if (value >= 1_000_000) {
@@ -40,15 +42,17 @@ function formatStatNumber(value: number): { number: string; suffix: string } {
 }
 
 interface HomeClientProps {
+  HomeHero:HomeHero;
   siteMetrics: SiteMetrics;
   latestDatasets: Dataset[];
-  datastories: Datastory[];
+  datastories: HomeDatastories;
   latestReuses: Reuse[];
   posts: Post[];
   usedDailyBy?: UsedDailyBy[];
 }
 
 export default function HomeClient({
+  HomeHero,
   siteMetrics,
   latestDatasets,
   datastories,
@@ -56,10 +60,9 @@ export default function HomeClient({
   posts,
   usedDailyBy
 }: HomeClientProps) {
-  const router = useRouter();
-  const { user } = useAuth();
   const [showPublishDropdown, setShowPublishDropdown] = useState(false);
   const publishDropdownWrapperRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation("home");
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -85,20 +88,17 @@ export default function HomeClient({
           <HeroGeneral
             title={
               <h1 className="text-white flex flex-col items-start leading-tight">
-                <span className="text-2xl-bold">
-                  Portal aberto
-                </span>
-                <span className="text-2xl-regular">
-                  de dados públicos portugueses
-                </span>
+                {highlightText(HomeHero.title, HomeHero.highlight, {
+                  highlightClassName: "text-2xl-bold",
+                  textClassName: "text-2xl-regular",
+                })}
               </h1>
             }
             subtitle={
               <span className="text-white text-m-regular">
-                <p className="">
-                  Aceda, explore e reutilize dados públicos de forma transparente e acessível.
-                  Milhares de conjuntos de dados ao seu dispor.
-                </p>
+                {parseHtmlToParagraphs(HomeHero.description).map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
               </span>
             }
           >
@@ -138,7 +138,7 @@ export default function HomeClient({
 
                       )}
                     </div>
-                    <span className="text-m-regular">Reutilizações</span>
+                    <span className="text-m-regular">{t("reuses")}</span>
                   </div>
                 </div>
                 {/* Utilizadores */}
@@ -161,7 +161,7 @@ export default function HomeClient({
                         </span>
                       )}
                     </div>
-                    <span className="text-m-regular">Utilizadores</span>
+                    <span className="text-m-regular">{t("users")}</span>
                   </div>
                 </div>
                 {/* Conjuntos de dados */}
@@ -184,7 +184,7 @@ export default function HomeClient({
                         </span>
                       )}
                     </div>
-                    <span className="text-m-regular">Conjuntos de dados</span>
+                    <span className="text-m-regular">{t("datasets")}</span>
                   </div>
                 </div>
                 {/* Organizações */}
@@ -207,7 +207,7 @@ export default function HomeClient({
                         </span>
                       )}
                     </div>
-                    <span className="text-m-regular">Organizações</span>
+                    <span className="text-m-regular">{t("organizations")}</span>
                   </div>
                 </div>
               </div>
@@ -218,7 +218,7 @@ export default function HomeClient({
         {/* Featured Datasets */}
         <section className="w-full flex flex-col items-center justify-center pt-64">
           <div className="container flex flex-col gap-32">
-            <h2 className="text-xl-bold text-primary-900">Conjuntos de dados</h2>
+            <h2 className="text-xl-bold text-primary-900">{t("datasets")}</h2>
             <div className="grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
               {latestDatasets.length > 0 ? (
                 latestDatasets.map((dataset, index) => {
@@ -226,18 +226,18 @@ export default function HomeClient({
                   const cardProps = {
                     ...dataset,
                     last_modified: timeAgo,
-                    link: `/pages/datasets/${dataset.slug}`,
+                    link: `/datasets/${dataset.slug}`,
                   } as CardMetricsProps;
                   return <CardMetrics key={`featured-dataset-${index}`} {...cardProps} />;
                 })
               ) : (
                 <div className="py-32 text-center text-neutral-500 xl:col-span-3">
-                  Nenhum conjunto de dados encontrado.
+                  {t("404Dataset")}
                 </div>
               )}
             </div>
             <div className="mt-32">
-              <Link href="/pages/datasets">
+              <Link href="/datasets">
                 <Button
                   variant="primary"
                   appearance="link"
@@ -246,7 +246,7 @@ export default function HomeClient({
                   trailingIconHover="agora-solid-arrow-right-circle"
                   className="p-0! h-auto"
                 >
-                  <span>Ver todos os conjuntos de dados</span>
+                  <span>{t("seeAllDatasets")}</span>
                 </Button>
               </Link>
             </div>
@@ -258,13 +258,12 @@ export default function HomeClient({
           <div className="container flex flex-col gap-32">
             <h2 className="text-xl-bold text-white">Data Stories</h2>
             <p className="mb-32 mt-16 max-w-3xl text-white">
-              Histórias contadas com dados abertos — análises e visualizações sobre temas de
-              interesse público.
+              {parseHtmlToParagraphs(datastories.description)}
             </p>
-            {datastories && datastories.length > 0 ? (
+            {datastories && datastories.datastories.length > 0 ? (
               <>
                 <div className="storytellings grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-                  {datastories.map((story) => (
+                  {datastories.datastories.map((story) => (
                     <CardArticle
                       key={story.slug}
                       variant="indented"
@@ -277,19 +276,19 @@ export default function HomeClient({
                       }}
                       subtitle={
                         story.createdAt
-                          ? `Publicado a ${format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt })}`
+                          ? t("publishedAt", { date: format(new Date(story.createdAt), "dd MMM yyyy", { locale: pt }) })
                           : ""
                       }
                       title={story.title}
                       mainAnchor={{
-                        href: `/pages/datastories/${story.slug}`,
+                        href: `/datastories/${story.slug}`,
                       }}
                       blockedLink={true}
                     />
                   ))}
                 </div>
                 <div className="mt-32">
-                  <Link href="/pages/datastories">
+                  <Link href="/datastories">
                     <Button
                       variant="primary"
                       appearance="link"
@@ -299,14 +298,14 @@ export default function HomeClient({
                       className="p-0! icon-white h-auto"
                       darkMode={false}
                     >
-                      <span className="text-white">Ver todas as Data Stories</span>
+                      <span className="text-white">{t("seeAllDataStories")}</span>
                     </Button>
                   </Link>
                 </div>
               </>
             ) : (
               <div className="py-32 text-center text-neutral-500 xl:col-span-3">
-                Nenhum Data Story encontrado.
+                {t("404Datastory")}
               </div>
             )}
           </div>
@@ -315,7 +314,7 @@ export default function HomeClient({
         {/* Latest News */}
         <section className="w-full flex flex-col items-center justify-center py-64">
           <div className="container flex flex-col gap-32">
-            <h2 className="text-xl-bold text-primary-900">Últimas novidades</h2>
+            <h2 className="text-xl-bold text-primary-900">{t("latestNews")}</h2>
             <div className="grid gap-32 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
               {posts.length > 0 ? (
                 posts.map((post) => (
@@ -327,14 +326,14 @@ export default function HomeClient({
                       }}
                       subtitle={
                         post.created_at
-                          ? `Publicado a ${format(new Date(post.created_at), "d MM yyyy", { locale: pt })}`
+                          ? t("publishedAt", { date: format(new Date(post.created_at), "d MM yyyy", { locale: pt }) })
                           : ""
                       }
                       title={post.name}
                       blockedLink={false}
                     >
                       <div className="mt-auto pt-16">
-                        <Link href={`/pages/posts/${post.slug}`}>
+                        <Link href={`/posts/${post.slug}`}>
                           <Button
                             variant="primary"
                             appearance="link"
@@ -343,7 +342,7 @@ export default function HomeClient({
                             trailingIconHover="agora-solid-arrow-right-circle"
                             className="p-0! h-auto"
                           >
-                            <span>Ler mais</span>
+                            <span>{t("readMore")}</span>
                           </Button>
                         </Link>
                       </div>
@@ -352,12 +351,12 @@ export default function HomeClient({
                 ))
               ) : (
                 <div className="py-32 text-center text-neutral-500 xl:col-span-3">
-                  Nenhuma novidade encontrada.
+                  {t("404News")}
                 </div>
               )}
             </div>
             <div className="mt-32">
-              <Link href="/pages/posts">
+              <Link href="/posts">
                 <Button
                   variant="primary"
                   appearance="link"
@@ -366,7 +365,7 @@ export default function HomeClient({
                   trailingIconHover="agora-solid-arrow-right-circle"
                   className="p-0! h-auto"
                 >
-                  <span>Ver todas as novidades</span>
+                  <span>{t("seeAllNews")}</span>
                 </Button>
               </Link>
             </div>
@@ -377,21 +376,21 @@ export default function HomeClient({
         <section className="w-full flex flex-col items-center justify-center pb-64">
           <div className="container flex flex-col gap-32 ">
             <div className="w-full flex flex-col gap-32">
-              <h2 className="text-xl-bold text-primary-900">Utilizado diariamente por:</h2>
+              <h2 className="text-xl-bold text-primary-900">{t("usedDiaryBy")}</h2>
               <div className="grid grid-cols-4 xl:grid-cols-10 gap-32 ">
                 {usedDailyBy && usedDailyBy.length > 0 ? (
                   usedDailyBy.map((entry, index) => (
                     <div key={index} className="col-span-2 flex items-center justify-center">
-                      <Image src={getAssets(entry.logo[0].id)} alt={entry.alt} width={160} height={75} className="object-contain" unoptimized />
+                      <Image src={getAssets(entry.logo[0].id)} alt={entry.alt} width={160} height={75} className="object-contain" />
                     </div>))
                 ) : (
                   <div className="py-32 text-center text-neutral-500 xl:col-span-12">
-                    Nenhuma organização encontrada.
+                    {t("404Organizations")}
                   </div>
                 )}
               </div>
             </div>
-            <Link href="/pages/organizations">
+            <Link href="/organizations">
               <Button
                 variant="primary"
                 appearance="link"
@@ -400,7 +399,7 @@ export default function HomeClient({
                 trailingIconHover="agora-solid-arrow-right-circle"
                 className="p-0! h-auto"
               >
-                <span>Ver todas as organizações</span>
+                <span>{t("seeAllOrganizations")}</span>
               </Button>
             </Link>
           </div>

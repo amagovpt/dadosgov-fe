@@ -79,7 +79,7 @@ export default function DatasetsClient() {
   const columns = useMemo(
     () =>
       createDatasetColumns({
-        editHref: (dataset) => `/pages/admin/me/datasets/edit?id=${dataset.id}`,
+        editHref: (dataset) => `/admin/me/datasets/edit?id=${dataset.id}`,
         showOwner: true,
         showResourceCount: true,
         showQualityScore: true,
@@ -98,9 +98,9 @@ export default function DatasetsClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Conjuntos de dados", url: "/pages/admin/me/datasets" },
+        { label: "Conjuntos de dados", url: "/admin/me/datasets" },
       ]}
       title="Conjuntos de Dados"
       isLoading={isLoading}
@@ -132,7 +132,7 @@ export default function DatasetsClient() {
           icon="agora-line-edit"
           title="Sem conjuntos de dados"
           description="Não publicou conjuntos de dados."
-          createUrl="/pages/admin/datasets/new"
+          createUrl="/admin/datasets/new"
         />
       }
     >

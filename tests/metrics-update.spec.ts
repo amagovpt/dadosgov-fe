@@ -156,7 +156,7 @@ test.describe("Pipeline direto: api-tabular → udata job → frontend", () => {
   });
 
   test("3. Frontend displays updated metrics", async ({ page }) => {
-    await page.goto(`${FRONTEND_URL}/pages/datasets/${DATASET_SLUG}`, {
+    await page.goto(`${FRONTEND_URL}/datasets/${DATASET_SLUG}`, {
       waitUntil: "networkidle",
     });
 
@@ -259,7 +259,7 @@ test.describe("Pipeline Airflow: MongoDB → DAG → PostgreSQL → MongoDB → 
   });
 
   test("5. Frontend displays Airflow-updated metrics", async ({ page }) => {
-    await page.goto(`${FRONTEND_URL}/pages/datasets/${DATASET_SLUG}`, {
+    await page.goto(`${FRONTEND_URL}/datasets/${DATASET_SLUG}`, {
       waitUntil: "networkidle",
     });
 
