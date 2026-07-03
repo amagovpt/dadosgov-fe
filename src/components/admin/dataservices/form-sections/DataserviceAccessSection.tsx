@@ -31,14 +31,14 @@ export default function DataserviceAccessSection({
           </span>
           <div className="flex flex-row gap-4">
             <RadioButton
-              label="Abrir"
+              label="Aberto"
               id="access-open"
               name="access-type"
               checked={accessType === "open"}
               onChange={() => onAccessTypeChange("open")}
             />
             <RadioButton
-              label="Abrir com conta"
+              label="Aberto com conta"
               id="access-account"
               name="access-type"
               checked={accessType === "account"}
@@ -61,7 +61,7 @@ export default function DataserviceAccessSection({
           onChange={onAuthRequestUrlChange}
         />
         <InputText
-          label="Link para a documentação comercial da API"
+          label="Link para a documentação funcional"
           placeholder="Insira o URL aqui"
           id="api-doc-commercial"
           value={businessDocUrl}
