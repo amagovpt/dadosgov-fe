@@ -1,12 +1,11 @@
 import apolloClient from "@/service/utils/apollo-client";
-import { HeaderNavigationData } from "@/service/types/header";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 import { Footer } from "../types/header/footer";
 
 export async function getFooter(locale: string = "pt"): Promise<Footer> {
   const query = gql(/* GraphQL */ `
-    query MyQuery {
+    query GetFooter {
         findFooterSingleton {
             data {
                 title {
