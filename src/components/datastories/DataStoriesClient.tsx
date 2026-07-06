@@ -97,10 +97,10 @@ export default function DataStoriesClient({
                   })}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
-              {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
+              {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total.toLocaleString("pt-PT")} Resultados
+              {total.toLocaleString("pt-PT")} {t("results")}
             </span>
           </div>
         </div>
@@ -149,7 +149,11 @@ export default function DataStoriesClient({
                             {formatHtmlParagraphs(story.description)}
                           </p>
                         }
-                        date={<span className="font-[300]">Publicado há {timeAgo}</span>}
+                        date={
+                          <span className="font-[300]">
+                            {t("publishedTimeAgo", { timeAgo: timeAgo })}
+                          </span>
+                        }
                         mainLink={
                           <Link href={`/datastories/${story.slug}`}>
                             <span className="underline">{story.title}</span>

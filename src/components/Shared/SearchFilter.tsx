@@ -20,7 +20,7 @@ export default function SearchFilter({
   value,
   onChange,
   onSearch,
-  examplesText = 'Exemplos: "educação", "saúde pública", "ambiente"',
+  examplesText,
 }: SearchFilterProps) {
   return (
     <div className="container">

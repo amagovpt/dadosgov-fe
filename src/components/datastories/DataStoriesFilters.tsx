@@ -4,11 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@ama-pt/agora-design-system";
 import { suggestTags } from "@/service/api/search";
 import { Datastories } from "@/service/types/datastories/datastories";
-import { DataStoriesFilterState, DataStoriesToggleState } from "@/service/types/datastories/filters";
 import {
-  AdvancedFilterGroup,
-  AdvancedFiltersSidebar,
-} from "@/components/filters/AdvancedFiltersSidebar";
+  DataStoriesFilterState,
+  DataStoriesToggleState,
+} from "@/service/types/datastories/filters";
+import { AdvancedFilterGroup } from "@/components/filters/AdvancedFiltersSidebar";
 import {
   ToggleFilterSection,
   ToggleFilterSections,
@@ -196,7 +196,7 @@ export function DataStoriesFilters({
         checkboxIdPrefix="datastory"
       />
       */}
-      <div className="mt-32 mb-64">
+      <div className="mb-64 mt-32">
         <Button
           variant="primary"
           appearance="outline"

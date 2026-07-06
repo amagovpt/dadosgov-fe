@@ -14,5 +14,12 @@
     "pagination": "Paginação",
     "previous": "Página anterior",
     "next": "Página seguinte"
-  }
+  },
+  "filters": {
+    "filters": "Filtros",
+    "hideFilters": "Ocultar filtros",
+    "openFilters": "Abrir filtros"
+  },
+  "results": "Resultados",
+  "publishedTimeAgo": "Publicado há {{timeAgo}}"
 }
