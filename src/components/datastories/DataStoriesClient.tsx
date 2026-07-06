@@ -170,18 +170,10 @@ export default function DataStoriesClient({
                       />
                     }
                     title={pageContent.noResults.title}
-                    subtitle={
-                      <span className="font-bold">
-                        {pageContent.noResults.subtitle}
-                      </span>
-                    }
+                    subtitle={<span className="font-bold">{pageContent.noResults.subtitle}</span>}
                     description={pageContent.noResults.description}
                     position="center"
                     hasAnchor={true}
-                    valueAnchor="Redefinir filtros"
-                    anchorHref="/datastories"
-                    anchorTrailingIcon="agora-line-arrow-right-circle"
-                    anchorTrailingIconHover="agora-solid-arrow-right-circle"
                   />
                 </div>
               )}

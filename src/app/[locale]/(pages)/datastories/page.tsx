@@ -14,8 +14,6 @@ export async function generateMetadata({
 
   const metadata = await getDataStoriesMetadata(locale);
 
-  console.log("metadata", metadata);
-
   return {
     title: metadata.title,
     description: stripHtmlTags(metadata.description),

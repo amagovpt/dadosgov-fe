@@ -9,5 +9,10 @@
   "publishedAt": "Publicado a {{date}}",
   "readMore": "Ler mais",
   "home": "Início",
-  "datastories": "Data Stories"
+  "datastories": "Data Stories",
+  "pagination": {
+    "pagination": "Paginação",
+    "previous": "Página anterior",
+    "next": "Página seguinte"
+  }
 }
