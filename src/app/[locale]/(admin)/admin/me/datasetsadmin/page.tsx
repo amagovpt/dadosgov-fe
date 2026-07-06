@@ -1,16 +1,11 @@
-"use client";
+import type { Metadata } from "next";
+import DatasetsAdminWizardClient from "./DatasetsAdminWizardClient";
 
-import { useState } from "react";
-import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
+export const metadata: Metadata = {
+  title: "Publicar conjunto de dados - Admin - dados.gov.pt",
+  description: "Publicação assistida de conjuntos de dados no portal dados.gov.pt.",
+};
 
 export default function DatasetsAdminPage() {
-  const [currentStep, setCurrentStep] = useState(0);
-
-  return (
-    <DatasetsAdminClient
-      currentStep={currentStep}
-      onNextStep={() => setCurrentStep((s) => s + 1)}
-      onPreviousStep={() => setCurrentStep((s) => Math.max(0, s - 1))}
-    />
-  );
+  return <DatasetsAdminWizardClient />;
 }
