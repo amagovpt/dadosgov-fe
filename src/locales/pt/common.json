@@ -3,9 +3,11 @@
   "title": "dados.gov.pt",
   "description": "Portal aberto de dados públicos portugueses: descarregue, partilhe e reutilize os dados abertos do Estado e das autarquias",
   "reuses": "Reutilizações",
-  "users":"Utilizadores",
-  "datasets":"Conjuntos de dados",
-  "organizations":"Organizações",
-  "publishedAt":"Publicado a {{date}}",
-  "readMore":"Ler mais"
+  "users": "Utilizadores",
+  "datasets": "Conjuntos de dados",
+  "organizations": "Organizações",
+  "publishedAt": "Publicado a {{date}}",
+  "readMore": "Ler mais",
+  "home": "Início",
+  "datastories": "Data Stories"
 }

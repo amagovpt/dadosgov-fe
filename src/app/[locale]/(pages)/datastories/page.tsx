@@ -1,23 +1,35 @@
 import DataStoriesClient from "@/components/datastories/DataStoriesClient";
-import { getDataStories } from "@/service/queries/datastories/datastories";
-import apolloClient from "@/service/utils/apollo-client";
-import { Datastories } from "@/service/types/datastories/datastories";
-import { flattenData } from "@/utils/flattenObject";
+import { getDataStories, getDataStoriesMetadata } from "@/service/queries/datastories/datastories";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Data Stories - dados.gov.pt",
-  description:
-    "Explore as nossas data stories, narrativas visuais e interativas sobre a realidade nacional, criadas a partir de dados abertos disponíveis neste portal.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  const metadata = await getDataStoriesMetadata(locale);
+
+  console.log("metadata", metadata);
+
+  return {
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
+  };
+}
 
 export default async function DataStoriesPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ page?: string; q?: string; sort?: string }>;
 }) {
+  const { locale } = await params;
   const resolvedSearchParams = await searchParams;
 
   const page = Number(resolvedSearchParams?.page) || 1;
@@ -26,22 +38,14 @@ export default async function DataStoriesPage({
     ...(resolvedSearchParams?.sort && { sort: resolvedSearchParams.sort }),
   };
 
-  const { data, error } = await apolloClient.query<{
-    queryDataStoriesContents: Datastories;
-  }>({
-    query: getDataStories("pt"),
-  });
-
-  if (error || !data) {
-    console.error("Error:", error);
-    throw new Error(error?.message ?? "Failed to fetch data");
-  }
-
-  const datastories = Object.values(
-    flattenData(data.queryDataStoriesContents as unknown as Record<string, unknown>)
-  ) as Datastories;
+  const { pageContent, datastories } = await getDataStories(locale);
 
   return (
-    <DataStoriesClient currentPage={page} initialFilters={filters} datastories={datastories} />
+    <DataStoriesClient
+      currentPage={page}
+      initialFilters={filters}
+      pageContent={pageContent}
+      datastories={datastories}
+    />
   );
 }
