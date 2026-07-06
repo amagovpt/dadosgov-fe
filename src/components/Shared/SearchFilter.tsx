@@ -5,7 +5,7 @@ import { InputSearch } from "@ama-pt/agora-design-system";
 
 interface SearchFilterProps {
   id: string;
-  label: string;
+  label?: string;
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
