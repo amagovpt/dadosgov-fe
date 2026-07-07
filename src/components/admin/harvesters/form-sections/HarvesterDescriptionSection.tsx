@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { InputText, InputTextArea } from "@ama-pt/agora-design-system";
 
 interface HarvesterDescriptionSectionProps {
@@ -24,35 +25,42 @@ export default function HarvesterDescriptionSection({
   harvesterUrl,
   hasHarvesterNameError,
   hasHarvesterUrlError,
-  namePlaceholder = "Insira o nome aqui",
-  descriptionLabel = "Descrição",
-  descriptionPlaceholder = "Insira a descrição aqui",
-  urlPlaceholder = "Insira o url aqui",
+  namePlaceholder,
+  descriptionLabel,
+  descriptionPlaceholder,
+  urlPlaceholder,
   onHarvesterNameChange,
   onHarvesterDescriptionChange,
   onHarvesterUrlChange,
 }: HarvesterDescriptionSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
+  const resolvedNamePlaceholder = namePlaceholder ?? t("admin-harvesters:fields.namePlaceholder");
+  const resolvedDescriptionLabel = descriptionLabel ?? t("admin-harvesters:fields.description");
+  const resolvedDescriptionPlaceholder =
+    descriptionPlaceholder ?? t("admin-harvesters:fields.descriptionPlaceholder");
+  const resolvedUrlPlaceholder = urlPlaceholder ?? t("admin-harvesters:fields.urlPlaceholder");
+
   return (
     <>
-      <h2 className="admin-page__section-title">Descrição</h2>
+      <h2 className="admin-page__section-title">{t("admin-harvesters:fields.description")}</h2>
 
       <div className="admin-page__fields-group">
         <InputText
-          label="Nome *"
-          placeholder={namePlaceholder}
+          label={t("admin-harvesters:fields.name")}
+          placeholder={resolvedNamePlaceholder}
           id="harvester-name"
           value={harvesterName}
           onChange={onHarvesterNameChange}
           hasError={hasHarvesterNameError}
           hasFeedback={hasHarvesterNameError}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("admin-common:forms.requiredField")}
           required
         />
 
         <InputTextArea
-          label={descriptionLabel}
-          placeholder={descriptionPlaceholder}
+          label={resolvedDescriptionLabel}
+          placeholder={resolvedDescriptionPlaceholder}
           id="harvester-description"
           rows={6}
           value={harvesterDescription}
@@ -61,14 +69,14 @@ export default function HarvesterDescriptionSection({
 
         <InputText
           label="URL *"
-          placeholder={urlPlaceholder}
+          placeholder={resolvedUrlPlaceholder}
           id="harvester-url"
           value={harvesterUrl}
           onChange={onHarvesterUrlChange}
           hasError={hasHarvesterUrlError}
           hasFeedback={hasHarvesterUrlError}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("admin-common:forms.requiredField")}
           required
         />
       </div>

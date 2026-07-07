@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Icon, Pill, StatusCard } from "@ama-pt/agora-design-system";
 import type { HarvestPreviewJob } from "@/service/types/harvester";
 
@@ -14,7 +15,7 @@ interface HarvesterPreviewResultProps {
   showPendingCount?: boolean;
 }
 
-function formatPreviewDate(date?: string | null, isPreviewing?: boolean) {
+function formatPreviewDate(date: string | null | undefined, isPreviewing: boolean | undefined, emptyDate: string) {
   if (date) {
     return new Date(date).toLocaleString("pt-PT", {
       day: "numeric",
@@ -25,7 +26,7 @@ function formatPreviewDate(date?: string | null, isPreviewing?: boolean) {
     });
   }
 
-  return isPreviewing ? "..." : "—";
+  return isPreviewing ? "..." : emptyDate;
 }
 
 function getStatusVariant(
@@ -34,14 +35,6 @@ function getStatusVariant(
   if (status === "done") return "success";
   if (status === "failed" || status === "done-errors") return "danger";
   return "neutral";
-}
-
-function getStatusLabel(status?: HarvestPreviewJob["status"], isPreviewing?: boolean) {
-  if (status === "done") return "Concluído";
-  if (status === "failed") return "Erro";
-  if (status === "done-errors") return "Concluído com erros";
-  if (status === "processing") return "Em processamento";
-  return isPreviewing ? "Em processamento" : "Pendente";
 }
 
 export default function HarvesterPreviewResult({
@@ -53,9 +46,17 @@ export default function HarvesterPreviewResult({
   showEmptyErrorText = false,
   showPendingCount = false,
 }: HarvesterPreviewResultProps) {
+  const { t } = useTranslation("admin-harvesters");
   const pendingCount =
     previewJob?.items.filter((item) => item.status === "pending" || item.status === "started")
       .length ?? 0;
+  const getStatusLabel = (status?: HarvestPreviewJob["status"], isPreviewing?: boolean) => {
+    if (status === "done") return t("preview.statusLabels.done");
+    if (status === "failed") return t("preview.statusLabels.failed");
+    if (status === "done-errors") return t("preview.statusLabels.doneErrors");
+    if (status === "processing") return t("preview.statusLabels.processing");
+    return isPreviewing ? t("preview.statusLabels.processing") : t("preview.statusLabels.pending");
+  };
 
   return (
     <div className={className}>
@@ -67,12 +68,14 @@ export default function HarvesterPreviewResult({
           showIcon
           description={
             title ? (
-              <strong>A pré-visualizar o harvester... Por favor aguarde.</strong>
+              <strong>
+                {t("preview.previewingStrong")} {t("preview.pleaseWait")}
+              </strong>
             ) : (
               <>
-                <strong>A pré-visualizar o harvester...</strong>
+                <strong>{t("preview.previewingStrong")}</strong>
                 <br />
-                Por favor aguarde enquanto o harvester é testado.
+                {t("preview.pleaseWaitTesting")}
               </>
             )
           }
@@ -85,7 +88,7 @@ export default function HarvesterPreviewResult({
           showIcon
           description={
             <>
-              <strong>Erro</strong> — {previewError}
+              <strong>{t("preview.error")}</strong> - {previewError}
             </>
           }
         />
@@ -94,20 +97,22 @@ export default function HarvesterPreviewResult({
       <div className="mb-24 flex flex-col gap-8">
         <p className="flex items-center gap-6 text-sm text-neutral-900">
           <Icon name="agora-line-calendar" className="h-16 w-16" />
-          Iniciado em: {formatPreviewDate(previewJob?.started, isPreviewing)}
+          {t("preview.startedAt")}:{" "}
+          {formatPreviewDate(previewJob?.started, isPreviewing, t("preview.emptyDate"))}
         </p>
         <p className="flex items-center gap-6 text-sm text-neutral-900">
           <Icon name="agora-line-calendar" className="h-16 w-16" />
-          Terminado em: {formatPreviewDate(previewJob?.ended, isPreviewing)}
+          {t("preview.endedAt")}:{" "}
+          {formatPreviewDate(previewJob?.ended, isPreviewing, t("preview.emptyDate"))}
         </p>
         <p className="flex items-center gap-6 text-sm text-neutral-900">
-          Estado:{" "}
+          {t("preview.status")}:{" "}
           <Pill variant={getStatusVariant(previewJob?.status)}>
             {getStatusLabel(previewJob?.status, isPreviewing)}
           </Pill>
         </p>
         <p className="flex items-center gap-12 text-sm text-neutral-900">
-          Elementos:
+          {t("preview.items")}:
           <span className="flex items-center gap-4">
             <Icon name="agora-line-check" className="h-16 w-16" />
             {previewJob?.items.filter((item) => item.status === "done").length ?? 0}
@@ -126,11 +131,11 @@ export default function HarvesterPreviewResult({
               {pendingCount}
             </span>
           ) : null}
-          ({previewJob?.items.length ?? 0} no total)
+          ({previewJob?.items.length ?? 0} {t("preview.total")})
         </p>
       </div>
 
-      {title ? <h2 className="admin-page__section-title">Erros</h2> : null}
+      {title ? <h2 className="admin-page__section-title">{t("preview.errors")}</h2> : null}
 
       {previewJob && previewJob.errors.length > 0 ? (
         previewJob.errors.map((error, index) => (
@@ -140,7 +145,7 @@ export default function HarvesterPreviewResult({
             showIcon
             description={
               <>
-                <strong>ERRO</strong> {error.message}
+                <strong>{t("preview.errorUpper")}</strong> {error.message}
               </>
             }
           />
@@ -151,17 +156,17 @@ export default function HarvesterPreviewResult({
           showIcon
           description={
             <>
-              <strong>ERRO</strong> {previewError}
+              <strong>{t("preview.errorUpper")}</strong> {previewError}
             </>
           }
         />
       ) : showEmptyErrorText && !isPreviewing ? (
-        <p className="text-sm text-neutral-700">Nenhum erro encontrado.</p>
+        <p className="text-sm text-neutral-700">{t("preview.noErrors")}</p>
       ) : null}
 
       {title ? (
         <p className="mt-24 text-sm font-semibold uppercase text-neutral-700">
-          {previewJob?.items.length ?? 0} itens
+          {t("preview.itemsCount", { count: previewJob?.items.length ?? 0 })}
         </p>
       ) : null}
     </div>

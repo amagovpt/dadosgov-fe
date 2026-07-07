@@ -1,0 +1,234 @@
+{
+  "title": "Harvesters",
+  "publicationFormTitle": "Formulário de publicação de um harvester",
+  "search": {
+    "placeholder": "Pesquise o nome do harvester",
+    "ariaLabel": "Pesquisar harvesters"
+  },
+  "empty": {
+    "noOrganizationsTitle": "Sem organizações",
+    "noOrganizationsDescription": "Não pertence a nenhuma organização.",
+    "title": "Sem harvesters",
+    "description": "Nenhum harvester encontrado.",
+    "orgDescription": "A organização ainda não tem harvesters.",
+    "notFound": "Harvester não encontrado."
+  },
+  "feedback": {
+    "approved": "Harvester \"{{name}}\" aprovado.",
+    "rejected": "Harvester \"{{name}}\" rejeitado."
+  },
+  "status": {
+    "pendingValidation": "Em espera de validação",
+    "accepted": "Validado",
+    "refused": "Recusado",
+    "pending": "Pendente",
+    "initializing": "A inicializar",
+    "initialized": "Inicializado",
+    "processing": "Em processamento",
+    "done": "Terminado",
+    "doneErrors": "Terminado com erros",
+    "failed": "Falhado",
+    "started": "Em execução",
+    "noCurrentJob": "Sem tarefa de momento",
+    "noExecution": "Sem execução"
+  },
+  "columns": {
+    "name": "Nome",
+    "status": "Estado",
+    "implementation": "Implementação",
+    "createdAt": "Criado em",
+    "lastJob": "Última execução",
+    "datasets": "Conjuntos de dados",
+    "api": "API",
+    "actions": "Ações",
+    "notYet": "Ainda não"
+  },
+  "actions": {
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "save": "Guardar",
+    "saving": "A guardar...",
+    "preview": "Pré-visualizar",
+    "previewing": "A pré-visualizar...",
+    "approveHarvester": "Aprovar harvester",
+    "rejectHarvester": "Rejeitar harvester",
+    "deleteHarvester": "Eliminar o harvester",
+    "approveHarvesterNamed": "Aprovar harvester {{name}}",
+    "rejectHarvesterNamed": "Rejeitar harvester {{name}}",
+    "approving": "A aprovar...",
+    "rejecting": "A rejeitar...",
+    "copyUrl": "Copiar URL",
+    "copied": "Copiado!"
+  },
+  "detail": {
+    "tabs": {
+      "jobs": "Trabalhos",
+      "configuration": "Configuração"
+    },
+    "fields": {
+      "implementation": "Implementação",
+      "url": "URL",
+      "schedule": "Planeamento",
+      "status": "Estado"
+    },
+    "notApplicable": "Não aplicável",
+    "deleteConfirm": "Esta ação é irreversível. Tem a certeza que quer eliminar este harvester?",
+    "pendingAdminTitle": "Este harvester aguarda validação da equipa de administração.",
+    "pendingAdminDescription": "Aprove para o agendar e iniciar a primeira execução, ou rejeite indicando o motivo. O proprietário será notificado.",
+    "pendingOwnerTitle": "O seu harvester foi criado e está a aguardar validação da equipa de administração do portal.",
+    "pendingOwnerDescription": "A equipa de administração foi notificada automaticamente. Será notificado da aprovação ou rejeição quando esta for decidida."
+  },
+  "filters": {
+    "options": {
+      "all": "Todos",
+      "pending": "Em espera de validação",
+      "accepted": "Validado",
+      "refused": "Recusado",
+      "done": "Terminado",
+      "failed": "Falhado"
+    },
+    "acceptedInfo": "O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução - a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
+  },
+  "validation": {
+    "popup": {
+      "approveTitle": "Aprovar harvester",
+      "rejectTitle": "Rejeitar harvester",
+      "closeAriaLabel": "Fechar",
+      "approveDescription": "Pretende aprovar o harvester \"{{name}}\"? O proprietário será notificado.",
+      "rejectDescription": "Pretende rejeitar o harvester \"{{name}}\"? O motivo abaixo será comunicado ao proprietário.",
+      "optionalComment": "Comentário (opcional)",
+      "rejectionReason": "Motivo da rejeição",
+      "approveError": "Falha ao aprovar o harvester.",
+      "rejectError": "Falha ao rejeitar o harvester.",
+      "rejectReasonRequired": "É obrigatório indicar o motivo da rejeição."
+    },
+    "labels": {
+      "pending": "VALIDAÇÃO PENDENTE",
+      "accepted": "VALIDADO",
+      "refused": "RECUSADO"
+    }
+  },
+  "form": {
+    "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
+    "whatIsHarvesterTitle": "O que é um harvester?",
+    "whatIsHarvesterDescription": "Um harvester é um mecanismo para recolher metadados a partir de um catálogo e armazená-los noutra plataforma, garantindo o acesso aos dados.",
+    "steps": {
+      "describe": "Descreva o seu harvester",
+      "preview": "Visualize o seu harvester",
+      "publish": "Finalize a publicação do seu harvester"
+    },
+    "next": "Seguinte",
+    "createError": "Erro ao criar o harvester.",
+    "previewError": "Erro ao pré-visualizar o harvester.",
+    "creating": "A criar...",
+    "previous": "Anterior",
+    "viewInAdmin": "Ver na administração",
+    "requestValidation": "Solicitar validação do harvester",
+    "createErrorTitle": "Erro ao criar o harvester",
+    "createdPendingTitle": "O seu harvester foi criado e está a aguardar validação pela equipa de administração.",
+    "createdPendingDescription": "Informe-nos através do formulário de contacto abaixo se deseja que validemos o seu harvester. Será notificado da aprovação (ou rejeição).",
+    "validationErrors": {
+      "producer": "Selecione uma organização produtora.",
+      "name": "Indique o nome do harvester.",
+      "url": "Indique o URL do harvester."
+    },
+    "saveErrorRetry": "Tente novamente.",
+    "saveError": "Erro ao guardar ({{status}}) - {{message}}"
+  },
+  "fields": {
+    "producer": "Produtor",
+    "producerLabel": "Confirme a identidade que pretende utilizar na publicação. *",
+    "producerPlaceholder": "Selecione o produtor...",
+    "producerError": "Selecione uma organização",
+    "description": "Descrição",
+    "name": "Nome *",
+    "namePlaceholder": "Insira o nome aqui",
+    "descriptionPlaceholder": "Insira a descrição aqui",
+    "urlPlaceholder": "Insira o url aqui"
+  },
+  "preview": {
+    "previewingStrong": "A pré-visualizar o harvester...",
+    "pleaseWait": "Por favor aguarde.",
+    "pleaseWaitTesting": "Por favor aguarde enquanto o harvester é testado.",
+    "error": "Erro",
+    "startedAt": "Iniciado em",
+    "endedAt": "Terminado em",
+    "status": "Estado",
+    "items": "Elementos",
+    "total": "no total",
+    "errors": "Erros",
+    "errorUpper": "ERRO",
+    "noErrors": "Nenhum erro encontrado.",
+    "itemsCount": "{{count}} itens",
+    "emptyDate": "—",
+    "statusLabels": {
+      "done": "Concluído",
+      "failed": "Erro",
+      "doneErrors": "Concluído com erros",
+      "processing": "Em processamento",
+      "pending": "Pendente"
+    }
+  },
+  "jobDetail": {
+    "notFound": "Trabalho não encontrado.",
+    "startedAt": "Começou em",
+    "endedAt": "Terminou em",
+    "status": "Status",
+    "items": "Elementos",
+    "itemsHeading": "{{count}} ITENS",
+    "total": "no total",
+    "searchLabel": "Pesquisar",
+    "searchPlaceholder": "Pesquisar por ID",
+    "searchAriaLabel": "Pesquisar itens",
+    "statusFilterPlaceholder": "Filtrar por status",
+    "emptyTitle": "Sem itens",
+    "emptyDescription": "Nenhum item encontrado com os filtros aplicados.",
+    "table": {
+      "taskId": "ID de tarefa",
+      "completedAt": "Concluído em",
+      "completed": "Concluídos",
+      "skipped": "Ignorados",
+      "archived": "Arquivados",
+      "failed": "Falhados",
+      "status": "Status",
+      "dadosGovLink": "Link dados.gov.pt",
+      "sourceLink": "Link fonte",
+      "warnings": "Avisos",
+      "logs": "Logs",
+      "remoteId": "ID Remoto",
+      "dadosGovId": "ID dados.gov",
+      "archivedAlt": "Arquivados",
+      "closeLogs": "Fechar logs",
+      "viewErrorLogs": "Ver logs de erro"
+    },
+    "jobs": {
+      "noLogs": "Sem logs disponíveis.",
+      "jobErrors": "Erros do trabalho",
+      "datasetErrors": "Erros por dataset",
+      "emptyTitle": "Sem trabalhos no momento",
+      "settings": "Aceda às configurações",
+      "viewLogs": "Ver logs",
+      "errorsCount_one": "{{count}} erro",
+      "errorsCount_other": "{{count}} erros"
+    },
+    "itemStatus": {
+      "all": "Todos",
+      "pending": "Pendente",
+      "started": "Iniciado",
+      "done": "Concluído",
+      "failed": "Falhado",
+      "skipped": "Ignorado",
+      "archived": "Arquivado"
+    },
+    "jobStatus": {
+      "pending": "Pendente",
+      "initializing": "A inicializar",
+      "initialized": "Inicializado",
+      "started": "Iniciado",
+      "processing": "Em processamento",
+      "done": "Concluído",
+      "doneErrors": "Falhado",
+      "failed": "Falhado"
+    }
+  }
+}

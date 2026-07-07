@@ -1,12 +1,17 @@
+"use client";
+
 import { StatusCard } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 export default function HarvestersAcceptedStatusInfoCard() {
+  const { t } = useTranslation("admin-harvesters");
+
   return (
     <div className="mb-24">
       <StatusCard
         variant="informative"
         showIcon
-        description="O estado 'Validado' refere-se ao processo de aprovacao do harvester e e independente da ultima execucao - a lista pode incluir harvesters com ultima execucao 'Terminado' ou 'Falhado'."
+        description={t("filters.acceptedInfo")}
       />
     </div>
   );

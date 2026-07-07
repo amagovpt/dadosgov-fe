@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Icon,
   InputSelect,
@@ -27,26 +28,6 @@ interface HarvestJobDetailClientProps {
   slug: string;
   jobId: string;
 }
-
-const JOB_STATUS_LABELS: Record<string, string> = {
-  pending: "Pendente",
-  initializing: "A inicializar",
-  initialized: "Inicializado",
-  started: "Iniciado",
-  processing: "Em processamento",
-  done: "Concluído",
-  "done-errors": "Falhado",
-  failed: "Falhado",
-};
-
-const ITEM_STATUS_LABELS: Record<string, string> = {
-  pending: "Pendente",
-  started: "Iniciado",
-  done: "Concluído",
-  failed: "Falhado",
-  skipped: "Ignorado",
-  archived: "Arquivado",
-};
 
 const ITEM_STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "informative"> = {
   pending: "informative",
@@ -82,7 +63,16 @@ function ItemsTable({
   setCurrentPage,
   setPageSize,
 }: ItemsTableProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const itemStatusLabels: Record<string, string> = {
+    pending: t("admin-harvesters:jobDetail.itemStatus.pending"),
+    started: t("admin-harvesters:jobDetail.itemStatus.started"),
+    done: t("admin-harvesters:jobDetail.itemStatus.done"),
+    failed: t("admin-harvesters:jobDetail.itemStatus.failed"),
+    skipped: t("admin-harvesters:jobDetail.itemStatus.skipped"),
+    archived: t("admin-harvesters:jobDetail.itemStatus.archived"),
+  };
 
   const toggleExpand = (key: string) => {
     setExpandedItems((prev) => {
@@ -101,15 +91,22 @@ function ItemsTable({
         currentPage,
         setCurrentPage,
         setPageSize,
-        { currentPageIsZeroBased: true }
+        {
+          currentPageIsZeroBased: true,
+          itemsPerPageLabel: t("admin-common:pagination.itemsPerPage"),
+          buttonDropdownAriaLabel: t("admin-common:pagination.selectItemsPerPage"),
+          dropdownListAriaLabel: t("admin-common:pagination.itemsPerPageOptions"),
+          prevButtonAriaLabel: t("admin-common:pagination.previous"),
+          nextButtonAriaLabel: t("admin-common:pagination.next"),
+        }
       )}
     >
       <TableHeader>
         <TableRow>
           <TableHeaderCell>ID</TableHeaderCell>
-          <TableHeaderCell>Status</TableHeaderCell>
-          <TableHeaderCell>Link dados.gov.pt</TableHeaderCell>
-          <TableHeaderCell>Link fonte</TableHeaderCell>
+          <TableHeaderCell>{t("admin-harvesters:jobDetail.table.status")}</TableHeaderCell>
+          <TableHeaderCell>{t("admin-harvesters:jobDetail.table.dadosGovLink")}</TableHeaderCell>
+          <TableHeaderCell>{t("admin-harvesters:jobDetail.table.sourceLink")}</TableHeaderCell>
           <TableHeaderCell>
             <Icon name="agora-line-alert-triangle" className="h-16 w-16" />
           </TableHeaderCell>
@@ -127,26 +124,30 @@ function ItemsTable({
                 <TableCell headerLabel="ID">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-1">
-                      <span className="font-sans text-[10px] text-neutral-400">ID Remoto:</span>
+                      <span className="font-sans text-[10px] text-neutral-400">
+                        {t("admin-harvesters:jobDetail.table.remoteId")}:
+                      </span>
                       <span className="font-mono text-xs text-neutral-800 break-all">{item.remote_id}</span>
                     </div>
                     {(() => {
                       const internalId = item.dataset?.id ?? extractDatasetId(item.errors);
                       return internalId ? (
                         <span className="font-mono text-[10px] text-neutral-500">
-                          <span className="font-sans text-neutral-400 mr-4">ID dados.gov:</span>
+                          <span className="font-sans text-neutral-400 mr-4">
+                            {t("admin-harvesters:jobDetail.table.dadosGovId")}:
+                          </span>
                           {internalId}
                         </span>
                       ) : null;
                     })()}
                   </div>
                 </TableCell>
-                <TableCell headerLabel="Status">
+                <TableCell headerLabel={t("admin-harvesters:jobDetail.table.status")}>
                   <StatusDot variant={ITEM_STATUS_VARIANT[item.status] || "informative"}>
-                    {ITEM_STATUS_LABELS[item.status] || item.status}
+                    {itemStatusLabels[item.status] || item.status}
                   </StatusDot>
                 </TableCell>
-                <TableCell headerLabel="Link dados.gov.pt">
+                <TableCell headerLabel={t("admin-harvesters:jobDetail.table.dadosGovLink")}>
                   {item.dataset ? (
                     <TextLink
                       href={`/datasets/${item.dataset.id}`}
@@ -159,7 +160,7 @@ function ItemsTable({
                     "—"
                   )}
                 </TableCell>
-                <TableCell headerLabel="Link fonte">
+                <TableCell headerLabel={t("admin-harvesters:jobDetail.table.sourceLink")}>
                   {item.remote_url ? (
                     <TextLink href={item.remote_url}>
                       {item.remote_url.length > 60
@@ -170,12 +171,16 @@ function ItemsTable({
                     "—"
                   )}
                 </TableCell>
-                <TableCell headerLabel="Avisos">
+                <TableCell headerLabel={t("admin-harvesters:jobDetail.table.warnings")}>
                   {hasErrors ? (
                     <button
                       type="button"
                       onClick={() => toggleExpand(rowKey)}
-                      title={expanded ? "Fechar logs" : "Ver logs de erro"}
+                      title={
+                        expanded
+                          ? t("admin-harvesters:jobDetail.table.closeLogs")
+                          : t("admin-harvesters:jobDetail.table.viewErrorLogs")
+                      }
                       className="flex items-center gap-4 text-red-600 hover:text-red-800 transition-colors"
                     >
                       <span className="text-xs font-semibold">{item.errors.length}</span>
@@ -192,18 +197,26 @@ function ItemsTable({
 
               {hasErrors && expanded && (
                 <TableRow>
-                  <TableCell headerLabel="Logs" colSpan={5} className="bg-neutral-50 px-24 py-16">
+                  <TableCell
+                    headerLabel={t("admin-harvesters:jobDetail.table.logs")}
+                    colSpan={5}
+                    className="bg-neutral-50 px-24 py-16"
+                  >
                     {(() => {
                       const internalId = item.dataset?.id ?? extractDatasetId(item.errors);
                       return (
                         <div className="mb-12 flex flex-wrap gap-16 rounded border border-neutral-200 bg-white px-12 py-8 text-[11px] font-mono">
                           <span>
-                            <span className="text-neutral-400 font-sans">ID Remoto: </span>
+                            <span className="text-neutral-400 font-sans">
+                              {t("admin-harvesters:jobDetail.table.remoteId")}:{" "}
+                            </span>
                             <span className="text-neutral-700">{item.remote_id}</span>
                           </span>
                           {internalId && (
                             <span>
-                              <span className="text-neutral-400 font-sans">ID dados.gov: </span>
+                              <span className="text-neutral-400 font-sans">
+                                {t("admin-harvesters:jobDetail.table.dadosGovId")}:{" "}
+                              </span>
                               <span className="text-neutral-700">{internalId}</span>
                             </span>
                           )}
@@ -234,6 +247,7 @@ function ItemsTable({
 }
 
 export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetailClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [job, setJob] = useState<HarvestJob | null>(null);
   const [source, setSource] = useState<HarvestSource | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -300,7 +314,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   if (isLoading) {
     return (
       <div className="admin-page">
-        <p className="text-neutral-700">A carregar...</p>
+        <p className="text-neutral-700">{t("admin-common:loading")}</p>
       </div>
     );
   }
@@ -308,12 +322,22 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   if (!job) {
     return (
       <div className="admin-page">
-        <StatusCard variant="danger" showIcon description="Trabalho não encontrado." />
+        <StatusCard variant="danger" showIcon description={t("admin-harvesters:jobDetail.notFound")} />
       </div>
     );
   }
 
-  const statusLabel = JOB_STATUS_LABELS[job.status] || job.status;
+  const jobStatusLabels: Record<string, string> = {
+    pending: t("admin-harvesters:jobDetail.jobStatus.pending"),
+    initializing: t("admin-harvesters:jobDetail.jobStatus.initializing"),
+    initialized: t("admin-harvesters:jobDetail.jobStatus.initialized"),
+    started: t("admin-harvesters:jobDetail.jobStatus.started"),
+    processing: t("admin-harvesters:jobDetail.jobStatus.processing"),
+    done: t("admin-harvesters:jobDetail.jobStatus.done"),
+    "done-errors": t("admin-harvesters:jobDetail.jobStatus.doneErrors"),
+    failed: t("admin-harvesters:jobDetail.jobStatus.failed"),
+  };
+  const statusLabel = jobStatusLabels[job.status] || job.status;
   const statusVariant =
     job.status === "done"
       ? "success"
@@ -324,8 +348,8 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Harvesters", url: "/admin/system/harvesters" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
         { label: source?.name || "Harvester", url: `/admin/harvesters/${slug}` },
         { label: job.id.toUpperCase() },
       ]}
@@ -338,7 +362,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
         <div className="flex items-center gap-8">
           <Icon name="agora-line-calendar" className="h-16 w-16" />
           <span>
-            <strong>Começou em:</strong>{" "}
+            <strong>{t("admin-harvesters:jobDetail.startedAt")}:</strong>{" "}
             {job.started
               ? new Date(job.started).toLocaleString("pt-PT", {
                   day: "numeric",
@@ -353,7 +377,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
         <div className="flex items-center gap-8">
           <Icon name="agora-line-calendar" className="h-16 w-16" />
           <span>
-            <strong>Terminou em:</strong>{" "}
+            <strong>{t("admin-harvesters:jobDetail.endedAt")}:</strong>{" "}
             {job.ended
               ? new Date(job.ended).toLocaleString("pt-PT", {
                   day: "numeric",
@@ -368,7 +392,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
         <div className="flex items-center gap-8">
           <Icon name="agora-line-info-mark" className="h-16 w-16" />
           <span>
-            <strong>Status:</strong>{" "}
+            <strong>{t("admin-harvesters:jobDetail.status")}:</strong>{" "}
             <span
               className={`font-bold ${
                 statusVariant === "success"
@@ -385,26 +409,32 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
         <div className="flex items-center gap-8">
           <Icon name="agora-line-info-mark" className="h-16 w-16" />
           <span>
-            <strong>Elementos:</strong>{" "}
+            <strong>{t("admin-harvesters:jobDetail.items")}:</strong>{" "}
             <Icon name="agora-line-check" className="inline h-[14px] w-[14px]" /> {doneCount}{" "}
             <Icon name="agora-line-eye-off" className="inline h-[14px] w-[14px]" /> {skippedCount}{" "}
-            <img src="/Icons/box.svg" alt="Arquivados" className="inline h-[14px] w-[14px]" />{" "}
+            <img
+              src="/Icons/box.svg"
+              alt={t("admin-harvesters:jobDetail.table.archivedAlt")}
+              className="inline h-[14px] w-[14px]"
+            />{" "}
             {archivedCount} <Icon name="agora-line-x" className="inline h-[14px] w-[14px]" />{" "}
-            {failedCount} ({items.length} no total)
+            {failedCount} ({items.length} {t("admin-harvesters:jobDetail.total")})
           </span>
         </div>
       </div>
 
       {/* Items table */}
       <div className="mb-16 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-neutral-900">{filteredItems.length} ITENS</h2>
+        <h2 className="text-lg font-bold text-neutral-900">
+          {t("admin-harvesters:jobDetail.itemsHeading", { count: filteredItems.length })}
+        </h2>
         <div className="flex items-end gap-16">
           <div className="admin-search-wrapper">
             <InputSearchBar
               hasVoiceActionButton={false}
-              label="Pesquisar"
-              placeholder="Pesquisar por ID"
-              aria-label="Pesquisar itens"
+              label={t("admin-harvesters:jobDetail.searchLabel")}
+              placeholder={t("admin-harvesters:jobDetail.searchPlaceholder")}
+              aria-label={t("admin-harvesters:jobDetail.searchAriaLabel")}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleSearch(e.target.value);
               }}
@@ -413,7 +443,7 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
           <InputSelect
             label=""
             hideLabel
-            placeholder="Filtrar por status"
+            placeholder={t("admin-harvesters:jobDetail.statusFilterPlaceholder")}
             id="filter-item-status"
             onChange={(options) => {
               setStatusFilter(options.length > 0 ? (options[0].value as string) : "");
@@ -422,22 +452,22 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
           >
             <DropdownSection name="status">
               <DropdownOption value="" selected={statusFilter === ""}>
-                Todos
+                {t("admin-harvesters:jobDetail.itemStatus.all")}
               </DropdownOption>
               <DropdownOption value="done" selected={statusFilter === "done"}>
-                Concluído
+                {t("admin-harvesters:jobDetail.itemStatus.done")}
               </DropdownOption>
               <DropdownOption value="failed" selected={statusFilter === "failed"}>
-                Falhado
+                {t("admin-harvesters:jobDetail.itemStatus.failed")}
               </DropdownOption>
               <DropdownOption value="skipped" selected={statusFilter === "skipped"}>
-                Ignorado
+                {t("admin-harvesters:jobDetail.itemStatus.skipped")}
               </DropdownOption>
               <DropdownOption value="archived" selected={statusFilter === "archived"}>
-                Arquivado
+                {t("admin-harvesters:jobDetail.itemStatus.archived")}
               </DropdownOption>
               <DropdownOption value="pending" selected={statusFilter === "pending"}>
-                Pendente
+                {t("admin-harvesters:jobDetail.itemStatus.pending")}
               </DropdownOption>
             </DropdownSection>
           </InputSelect>
@@ -457,8 +487,8 @@ export default function HarvestJobDetailClient({ slug, jobId }: HarvestJobDetail
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-search" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem itens"
-          description="Nenhum item encontrado com os filtros aplicados."
+          title={t("admin-harvesters:jobDetail.emptyTitle")}
+          description={t("admin-harvesters:jobDetail.emptyDescription")}
           hasAnchor={false}
         />
       )}

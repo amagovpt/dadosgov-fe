@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 
@@ -15,6 +16,8 @@ export default function HarvesterPublishStep({
   onViewInAdmin,
   onRequestValidation,
 }: HarvesterPublishStepProps) {
+  const { t } = useTranslation("admin-harvesters");
+
   return (
     <div className="admin-page__form">
       {createError && (
@@ -23,7 +26,7 @@ export default function HarvesterPublishStep({
           showIcon
           description={
             <>
-              <strong>Erro ao criar o harvester</strong>
+              <strong>{t("form.createErrorTitle")}</strong>
               <br />
               {createError}
             </>
@@ -38,12 +41,10 @@ export default function HarvesterPublishStep({
           description={
             <>
               <strong>
-                O seu harvester foi criado e está a aguardar validação pela equipa de
-                administração.
+                {t("form.createdPendingTitle")}
               </strong>
               <br />
-              Informe-nos através do formulário de contacto abaixo se deseja que validemos o seu
-              harvester. Será notificado da aprovação (ou rejeição).
+              {t("form.createdPendingDescription")}
             </>
           }
         />
@@ -55,7 +56,7 @@ export default function HarvesterPublishStep({
 
       <div className="admin-page__actions">
         <Button appearance="outline" variant="neutral" onClick={onViewInAdmin}>
-          Ver na administração
+          {t("form.viewInAdmin")}
         </Button>
         <Button
           appearance="outline"
@@ -65,7 +66,7 @@ export default function HarvesterPublishStep({
           trailingIconHover="agora-solid-external-link"
           onClick={onRequestValidation}
         >
-          Solicitar validação do harvester
+          {t("form.requestValidation")}
         </Button>
       </div>
     </div>

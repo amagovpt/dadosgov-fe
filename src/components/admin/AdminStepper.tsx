@@ -4,7 +4,7 @@ interface AdminStepperProps {
     currentStep: number;
     totalSteps: number;
     stepTitle: string;
-    labelWord?: "Passo" | "Etapa";
+    labelWord?: string;
     labelFormat?: "slash" | "de";
 }
 

@@ -5,9 +5,17 @@
   "search": {
     "label": "Pesquisar"
   },
+  "breadcrumbs": {
+    "administration": "Administração",
+    "system": "Sistema",
+    "organization": "Organização"
+  },
   "filters": {
     "all": "Todos",
     "statusPlaceholder": "Filtrar por estado"
+  },
+  "stepper": {
+    "step": "Passo"
   },
   "actions": {
     "delete": "Eliminar",

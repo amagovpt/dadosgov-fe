@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CardNoResults, Icon, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
@@ -18,6 +19,7 @@ import {
 } from "@/components/admin/harvesters/config/harvestersListConfig";
 
 export default function SystemHarvestersClient() {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,10 +58,10 @@ export default function SystemHarvestersClient() {
       hide();
       setFeedback({
         variant: "success",
-        message: `Harvester "${harvester.name}" aprovado.`,
+        message: t("admin-harvesters:feedback.approved", { name: harvester.name }),
       });
     },
-    [applyValidationUpdate, hide]
+    [applyValidationUpdate, hide, t]
   );
 
   const handleReject = useCallback(
@@ -69,10 +71,10 @@ export default function SystemHarvestersClient() {
       hide();
       setFeedback({
         variant: "success",
-        message: `Harvester "${harvester.name}" rejeitado.`,
+        message: t("admin-harvesters:feedback.rejected", { name: harvester.name }),
       });
     },
-    [applyValidationUpdate, hide]
+    [applyValidationUpdate, hide, t]
   );
 
   const openApprovePopup = useCallback(
@@ -84,13 +86,13 @@ export default function SystemHarvestersClient() {
           onConfirm={(comment) => handleApprove(harvester, comment)}
         />,
         {
-          title: "Aprovar harvester",
-          closeAriaLabel: "Fechar",
+          title: t("admin-harvesters:validation.popup.approveTitle"),
+          closeAriaLabel: t("admin-harvesters:validation.popup.closeAriaLabel"),
           dimensions: "m",
         }
       );
     },
-    [show, hide, handleApprove]
+    [show, hide, handleApprove, t]
   );
 
   const openRejectPopup = useCallback(
@@ -102,13 +104,13 @@ export default function SystemHarvestersClient() {
           onConfirm={(comment) => handleReject(harvester, comment)}
         />,
         {
-          title: "Rejeitar harvester",
-          closeAriaLabel: "Fechar",
+          title: t("admin-harvesters:validation.popup.rejectTitle"),
+          closeAriaLabel: t("admin-harvesters:validation.popup.closeAriaLabel"),
           dimensions: "m",
         }
       );
     },
-    [show, hide, handleReject]
+    [show, hide, handleReject, t]
   );
 
   const handlePageChange = useCallback(
@@ -167,18 +169,52 @@ export default function SystemHarvestersClient() {
       createSystemHarvesterColumns({
         onApprove: openApprovePopup,
         onReject: openRejectPopup,
+        labels: {
+          name: t("admin-harvesters:columns.name"),
+          status: t("admin-harvesters:columns.status"),
+          implementation: t("admin-harvesters:columns.implementation"),
+          createdAt: t("admin-harvesters:columns.createdAt"),
+          lastJob: t("admin-harvesters:columns.lastJob"),
+          datasets: t("admin-harvesters:columns.datasets"),
+          api: t("admin-harvesters:columns.api"),
+          actions: t("admin-harvesters:columns.actions"),
+          notYet: t("admin-harvesters:columns.notYet"),
+        },
+        statusLabels: {
+          pendingValidation: t("admin-harvesters:status.pendingValidation"),
+          accepted: t("admin-harvesters:status.accepted"),
+          refused: t("admin-harvesters:status.refused"),
+          pending: t("admin-harvesters:status.pending"),
+          initializing: t("admin-harvesters:status.initializing"),
+          initialized: t("admin-harvesters:status.initialized"),
+          processing: t("admin-harvesters:status.processing"),
+          done: t("admin-harvesters:status.done"),
+          doneErrors: t("admin-harvesters:status.doneErrors"),
+          failed: t("admin-harvesters:status.failed"),
+          started: t("admin-harvesters:status.started"),
+          noCurrentJob: t("admin-harvesters:status.noCurrentJob"),
+          noExecution: t("admin-harvesters:status.noExecution"),
+        },
+        actions: {
+          approveHarvester: t("admin-harvesters:actions.approveHarvester"),
+          rejectHarvester: t("admin-harvesters:actions.rejectHarvester"),
+          approveHarvesterNamed: (name) =>
+            t("admin-harvesters:actions.approveHarvesterNamed", { name }),
+          rejectHarvesterNamed: (name) =>
+            t("admin-harvesters:actions.rejectHarvesterNamed", { name }),
+        },
       }),
-    [openApprovePopup, openRejectPopup]
+    [openApprovePopup, openRejectPopup, t]
   );
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Harvesters", url: "/admin/system/harvesters" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
       ]}
-      title="Harvesters"
+      title={t("admin-harvesters:title")}
       isLoading={isLoading}
       count={totalItems}
       hasItems={filteredHarvesters.length > 0}
@@ -187,8 +223,8 @@ export default function SystemHarvestersClient() {
       setCurrentPage={handlePageChange}
       setPageSize={handlePageSizeChange}
       search={{
-        placeholder: "Pesquise o nome do harvester",
-        ariaLabel: "Pesquisar harvesters",
+        placeholder: t("admin-harvesters:search.placeholder"),
+        ariaLabel: t("admin-harvesters:search.ariaLabel"),
         onChange: handleSearch,
       }}
       filters={
@@ -196,12 +232,12 @@ export default function SystemHarvestersClient() {
           value={filters.statusFilter}
           onChange={(value) => updateFilter("statusFilter", value)}
           options={[
-            { value: "", label: "Todos" },
-            { value: "pending", label: "Em espera de validação" },
-            { value: "accepted", label: "Validado" },
-            { value: "refused", label: "Recusado" },
-            { value: "done", label: "Terminado" },
-            { value: "failed", label: "Falhado" },
+            { value: "", label: t("admin-harvesters:filters.options.all") },
+            { value: "pending", label: t("admin-harvesters:filters.options.pending") },
+            { value: "accepted", label: t("admin-harvesters:filters.options.accepted") },
+            { value: "refused", label: t("admin-harvesters:filters.options.refused") },
+            { value: "done", label: t("admin-harvesters:filters.options.done") },
+            { value: "failed", label: t("admin-harvesters:filters.options.failed") },
           ]}
         />
       }
@@ -216,8 +252,8 @@ export default function SystemHarvestersClient() {
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-download" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem harvesters"
-          description="Nenhum harvester encontrado."
+          title={t("admin-harvesters:empty.title")}
+          description={t("admin-harvesters:empty.description")}
           hasAnchor={false}
         />
       }
