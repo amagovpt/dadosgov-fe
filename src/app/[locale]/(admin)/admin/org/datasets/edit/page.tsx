@@ -1,25 +1,13 @@
-"use client";
+import type { Metadata } from "next";
+import AdminOrgRedirect from "@/components/admin/AdminOrgRedirect";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+export const metadata: Metadata = {
+  title: "Editar conjunto de dados da organização - Admin - dados.gov.pt",
+  description: "Edição de conjuntos de dados da organização no portal dados.gov.pt.",
+};
 
 export default function OrgDatasetsEditRedirect() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { activeOrg, isLoading } = useActiveOrganization();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (activeOrg) {
-      const params = searchParams.toString();
-      router.replace(
-        `/admin/org/${activeOrg.id}/datasets/edit${params ? `?${params}` : ""}`,
-      );
-    } else {
-      router.replace("/admin");
-    }
-  }, [activeOrg, isLoading, router, searchParams]);
-
-  return null;
+  return (
+    <AdminOrgRedirect targetPath="/admin/org/{orgId}/datasets/edit" preserveSearchParams />
+  );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import DatasetsAdminWizardClient from "./DatasetsAdminWizardClient";
+import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
 
 export const metadata: Metadata = {
   title: "Publicar conjunto de dados - Admin - dados.gov.pt",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function DatasetsAdminPage() {
-  return <DatasetsAdminWizardClient />;
+  return <DatasetsAdminClient />;
 }

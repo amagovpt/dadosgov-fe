@@ -1,21 +1,11 @@
-"use client";
+import type { Metadata } from "next";
+import AdminOrgRedirect from "@/components/admin/AdminOrgRedirect";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+export const metadata: Metadata = {
+  title: "Recursos da comunidade da organização - Admin - dados.gov.pt",
+  description: "Gestão de recursos da comunidade da organização no portal dados.gov.pt.",
+};
 
 export default function OrgCommunityResourcesRedirect() {
-  const router = useRouter();
-  const { activeOrg, isLoading } = useActiveOrganization();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (activeOrg) {
-      router.replace(`/admin/org/${activeOrg.id}/community-resources`);
-    } else {
-      router.replace("/admin");
-    }
-  }, [activeOrg, isLoading, router]);
-
-  return null;
+  return <AdminOrgRedirect targetPath="/admin/org/{orgId}/community-resources" />;
 }

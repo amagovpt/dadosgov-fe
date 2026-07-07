@@ -1,21 +1,11 @@
-"use client";
+import type { Metadata } from "next";
+import AdminOrgRedirect from "@/components/admin/AdminOrgRedirect";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useActiveOrganization } from "@/hooks/useActiveOrganization";
+export const metadata: Metadata = {
+  title: "Membros da organização - Admin - dados.gov.pt",
+  description: "Gestão de membros da organização no portal dados.gov.pt.",
+};
 
 export default function OrgMembersRedirect() {
-  const router = useRouter();
-  const { activeOrg, isLoading } = useActiveOrganization();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (activeOrg) {
-      router.replace(`/admin/org/${activeOrg.id}/members`);
-    } else {
-      router.replace("/admin");
-    }
-  }, [activeOrg, isLoading, router]);
-
-  return null;
+  return <AdminOrgRedirect targetPath="/admin/org/{orgId}/members" />;
 }

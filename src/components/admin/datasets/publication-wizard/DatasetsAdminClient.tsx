@@ -25,16 +25,16 @@ import { useDatasetWizardSubmissionActions } from "./hooks/useDatasetWizardSubmi
 import { type DatasetFormField } from "./datasetFormModel";
 
 interface DatasetsAdminClientProps {
-  currentStep: number;
+  currentStep?: number;
   datasetId?: string | null;
-  onNextStep: () => void;
-  onPreviousStep: () => void;
+  onNextStep?: () => void;
+  onPreviousStep?: () => void;
   onDatasetCreated?: (datasetId: string) => void;
   onComplete?: () => void;
 }
 
 export default function DatasetsAdminClient({
-  currentStep,
+  currentStep: controlledCurrentStep,
   datasetId,
   onNextStep,
   onPreviousStep,
@@ -43,6 +43,11 @@ export default function DatasetsAdminClient({
 }: DatasetsAdminClientProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const [internalCurrentStep, setInternalCurrentStep] = useState(0);
+  const currentStep = controlledCurrentStep ?? internalCurrentStep;
+  const handleNextStep = onNextStep ?? (() => setInternalCurrentStep((step) => step + 1));
+  const handlePreviousStep =
+    onPreviousStep ?? (() => setInternalCurrentStep((step) => Math.max(0, step - 1)));
 
   // Form state
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -520,7 +525,7 @@ export default function DatasetsAdminClient({
     resetErrors,
     focusFirstError,
     onDatasetCreated,
-    onNextStep,
+    onNextStep: handleNextStep,
     onComplete,
     navigateToStep: (nextStep, nextDatasetId) => {
       router.push(`/admin/datasets/new?step=${nextStep}&datasetId=${nextDatasetId}`);
@@ -652,7 +657,7 @@ export default function DatasetsAdminClient({
               spatialGranularityDefaultValue={spatialGranularityDefaultValue}
               spatialGranularityRef={spatialGranularityRef}
               granularityOptions={granularityOptions}
-              onPreviousStep={onPreviousStep}
+              onPreviousStep={handlePreviousStep}
               onStep2Next={handleStep2Next}
               isSubmitting={isSubmitting}
             />
@@ -670,7 +675,7 @@ export default function DatasetsAdminClient({
               resourceTypes={resourceTypes}
               resourceMetadata={resourceMetadata}
               onEditMeta={updateResourceMetadata}
-              onPreviousStep={onPreviousStep}
+              onPreviousStep={handlePreviousStep}
               onStep3Next={handleStep3Next}
               isSubmitting={isSubmitting}
             />
