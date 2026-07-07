@@ -28,7 +28,7 @@ import DataservicesEditActivitiesTab from "@/components/admin/dataservices/Datas
 import DataserviceDescriptionSection from "@/components/admin/dataservices/form-sections/DataserviceDescriptionSection";
 import DataserviceAccessSection from "@/components/admin/dataservices/form-sections/DataserviceAccessSection";
 import AuxiliarList from "@/components/admin/AuxiliarList";
-import { getDataserviceAuxiliarItems } from "@/components/admin/dataservices/dataservicesAuxiliarItems";
+import { getDataserviceAuxiliaryItems } from "@/components/admin/dataservices/config/dataserviceAuxiliaryContent";
 import AppIcon from "@/components/Primitives/AppIcon";
 import TextLink from "@/components/Primitives/TextLink";
 import {
@@ -439,9 +439,9 @@ export default function DataservicesEditClient() {
     });
   };
 
-  const auxiliarItems = getDataserviceAuxiliarItems({
-    name: !!formErrors.title,
-    description: !!formErrors.description,
+  const auxiliarItems = getDataserviceAuxiliaryItems({
+    hasApiNameError: !!formErrors.title,
+    hasApiDescriptionError: !!formErrors.description,
   });
 
   const lastActivityRaw =

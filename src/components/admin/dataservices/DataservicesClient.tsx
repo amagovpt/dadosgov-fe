@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   InputSearchBar,
   Table,
@@ -29,6 +30,7 @@ type DataserviceSortField = "title" | "created_at" | "last_modified";
 
 export default function DataservicesClient() {
   const { displayName } = useCurrentUser();
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
 
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,11 +84,11 @@ export default function DataservicesClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "API", url: "/admin/dataservices" },
+        { label: t("admin-dataservices:title"), url: "/admin/dataservices" },
       ]}
-      title="API"
+      title={t("admin-dataservices:title")}
     >
 
       <ResultsCount count={filteredApis.length} isLoading={isLoading} />
@@ -95,9 +97,9 @@ export default function DataservicesClient() {
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome da API"
-            aria-label="Pesquisar APIs"
+            label={t("admin-common:search.label")}
+            placeholder={t("admin-dataservices:search.placeholder")}
+            aria-label={t("admin-dataservices:search.ariaLabel")}
           />
         </div>
         <StatusFilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v)} />
@@ -116,37 +118,39 @@ export default function DataservicesClient() {
                 sortOrder={getSortOrder("title")}
                 onSortChange={handleSort("title")}
               >
-                Título da API
+                {t("admin-dataservices:columns.title")}
               </TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
+              <TableHeaderCell>{t("admin-dataservices:columns.status")}</TableHeaderCell>
               <TableHeaderCell
                 sortType="date"
                 sortOrder={getSortOrder("created_at")}
                 onSortChange={handleSort("created_at")}
               >
-                Criado em
+                {t("admin-dataservices:columns.createdAt")}
               </TableHeaderCell>
               <TableHeaderCell
                 sortType="date"
                 sortOrder={getSortOrder("last_modified")}
                 onSortChange={handleSort("last_modified")}
               >
-                Modificado em
+                {t("admin-dataservices:columns.modifiedAt")}
               </TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
+              <TableHeaderCell>{t("admin-dataservices:columns.actions")}</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedApis.map((api, index) => (
               <TableRow key={index}>
-                <TableCell headerLabel="Título">
+                <TableCell headerLabel={t("admin-dataservices:columns.titleShort")}>
                   <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
-                <TableCell headerLabel="Estado">
+                <TableCell headerLabel={t("admin-dataservices:columns.status")}>
                   <ResourceStatusBadge item={api} />
                 </TableCell>
-                <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
-                <TableCell headerLabel="Modificado em">
+                <TableCell headerLabel={t("admin-dataservices:columns.createdAt")}>
+                  {formatDateToDMY(api.created_at)}
+                </TableCell>
+                <TableCell headerLabel={t("admin-dataservices:columns.modifiedAt")}>
                   <div>
                     <div>{formatDateToDMY(api.metadata_modified_at || api.last_modified)}</div>
                     {api.owner && (
@@ -156,7 +160,7 @@ export default function DataservicesClient() {
                     )}
                   </div>
                 </TableCell>
-                <TableCell headerLabel="Ações">
+                <TableCell headerLabel={t("admin-dataservices:columns.actions")}>
                   <TableActionsCell
                     viewAction={{
                       href: `/dataservices/${api.slug}`,

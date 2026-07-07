@@ -17,7 +17,8 @@
     "createdAt": "Criado em",
     "modifiedAt": "Modificado em",
     "by": "por",
-    "about": "sobre"
+    "about": "sobre",
+    "actions": "Ações"
   },
   "form": {
     "registrationTitle": "Formulário de inscrição",
@@ -31,9 +32,15 @@
     "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
     "createError": "Erro ao criar a API. Tente novamente.",
     "creating": "A criar...",
+    "linking": "A vincular...",
+    "publishing": "A publicar...",
     "previous": "Anterior",
     "next": "Seguinte",
     "me": "Eu próprio",
+    "producerIdentityLabel": "Verifique a identidade que deseja usar na publicação.",
+    "producerIdentityPlaceholder": "Para pesquisar...",
+    "noOrganizationTitle": "Não pertence a nenhuma organização.",
+    "organizationLink": "Crie ou integre uma organização em dados.gov.pt",
     "validationErrors": {
       "name": "Indique o nome da API.",
       "description": "Descreva a API."
@@ -44,6 +51,11 @@
     "publishSuccessDescription": "Agora pode publicar ou guardar como rascunho.",
     "untitled": "Sem título",
     "noDescription": "Sem descrição",
+    "updatedAgo": "Atualizado há {{time}}",
+    "viewsLabel": "Visualizações",
+    "datasetsLabel": "Datasets",
+    "datasetsCount": "{{count}} datasets",
+    "favoritesLabel": "Favoritos",
     "saveDraft": "Salvar rascunho",
     "publishApi": "Publicar API"
   },

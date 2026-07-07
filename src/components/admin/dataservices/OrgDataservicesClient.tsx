@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   InputSearchBar,
   Table,
@@ -31,6 +32,7 @@ type SortOrder = "none" | "ascending" | "descending";
 type DataserviceSortField = "title" | "created_at" | "last_modified";
 
 export default function OrgDataservicesClient() {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const params = useParams();
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -94,11 +96,11 @@ export default function OrgDataservicesClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: orgName || "Organização", url: "#" },
-        { label: "API" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
+        { label: t("admin-dataservices:title") },
       ]}
-      title="API"
+      title={t("admin-dataservices:title")}
     >
 
       <ResultsCount count={filteredApis.length} isLoading={isLoading} />
@@ -107,16 +109,16 @@ export default function OrgDataservicesClient() {
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome da API"
-            aria-label="Pesquisar APIs"
+            label={t("admin-common:search.label")}
+            placeholder={t("admin-dataservices:search.placeholder")}
+            aria-label={t("admin-dataservices:search.ariaLabel")}
           />
         </div>
         <StatusFilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v)} />
       </div>
 
       {isLoading ? (
-        <p>A carregar...</p>
+        <p>{t("admin-common:loading")}</p>
       ) : filteredApis.length > 0 ? (
         <Table
           paginationProps={createPaginationProps(5, filteredApis.length, 0, undefined, undefined, {
@@ -130,43 +132,45 @@ export default function OrgDataservicesClient() {
                 sortOrder={getSortOrder("title")}
                 onSortChange={handleSort("title")}
               >
-                Título da API
+                {t("admin-dataservices:columns.title")}
               </TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
+              <TableHeaderCell>{t("admin-dataservices:columns.status")}</TableHeaderCell>
               <TableHeaderCell
                 sortType="date"
                 sortOrder={getSortOrder("created_at")}
                 onSortChange={handleSort("created_at")}
               >
-                Criado em
+                {t("admin-dataservices:columns.createdAt")}
               </TableHeaderCell>
               <TableHeaderCell
                 sortType="date"
                 sortOrder={getSortOrder("last_modified")}
                 onSortChange={handleSort("last_modified")}
               >
-                Modificado em
+                {t("admin-dataservices:columns.modifiedAt")}
               </TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
+              <TableHeaderCell>{t("admin-dataservices:columns.actions")}</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedApis.map((api, index) => (
               <TableRow key={index}>
-                <TableCell headerLabel="Título">
+                <TableCell headerLabel={t("admin-dataservices:columns.titleShort")}>
                   <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
-                <TableCell headerLabel="Estado">
+                <TableCell headerLabel={t("admin-dataservices:columns.status")}>
                   <ResourceStatusBadge item={api} />
                 </TableCell>
-                <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
-                <TableCell headerLabel="Modificado em">
+                <TableCell headerLabel={t("admin-dataservices:columns.createdAt")}>
+                  {formatDateToDMY(api.created_at)}
+                </TableCell>
+                <TableCell headerLabel={t("admin-dataservices:columns.modifiedAt")}>
                   {formatDateToDMY(api.metadata_modified_at || api.last_modified)}
                   {(api.owner || api.organization) && (
                     <>
                       <br />
                       <span className="text-sm text-neutral-500">
-                        por{" "}
+                        {t("admin-dataservices:columns.by")}{" "}
                         {api.owner
                           ? `${api.owner.first_name} ${api.owner.last_name}`
                           : api.organization?.name}
@@ -174,7 +178,7 @@ export default function OrgDataservicesClient() {
                     </>
                   )}
                 </TableCell>
-                <TableCell headerLabel="Ações">
+                <TableCell headerLabel={t("admin-dataservices:columns.actions")}>
                   <TableActionsCell
                     viewAction={{
                       href: `/dataservices/${api.slug}`,
@@ -191,8 +195,8 @@ export default function OrgDataservicesClient() {
       ) : (
         <AdminEmptyState
           icon="agora-line-edit"
-          title="Sem publicações"
-          description="A organização ainda não publicou uma API."
+          title={t("admin-dataservices:empty.publicationsTitle")}
+          description={t("admin-dataservices:empty.orgDescription")}
           createUrl="/admin/dataservices/new"
         />
       )}

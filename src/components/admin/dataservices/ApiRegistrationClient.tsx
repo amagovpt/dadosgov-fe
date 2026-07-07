@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   InputText,
   InputTextArea,
   RadioButton,
   StatusCard,
-  Accordion,
-  AccordionGroup,
   InputSelect,
   DropdownSection,
   DropdownOption,
@@ -47,6 +46,7 @@ export default function ApiRegistrationClient({
   onPreviousStep,
 }: ApiRegistrationClientProps) {
   const { user } = useAuth();
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const [accessType, setAccessType] = useState("open");
   const [apiName, setApiName] = useState("");
   const [apiAcronym, setApiAcronym] = useState("");
@@ -159,7 +159,7 @@ export default function ApiRegistrationClient({
       slug = raw.split("/").filter(Boolean).pop() || "";
     }
     if (!slug) {
-      setDatasetLinkError("URL inválido. Cole o link de um conjunto de dados deste portal.");
+      setDatasetLinkError(t("admin-dataservices:edit.invalidDatasetUrl"));
       return;
     }
 
@@ -167,13 +167,13 @@ export default function ApiRegistrationClient({
     try {
       const dataset = await fetchDataset(slug);
       if (selectedDatasets.some((d) => d.id === dataset.id)) {
-        setDatasetLinkError("Este conjunto de dados já foi adicionado.");
+        setDatasetLinkError(t("admin-dataservices:edit.datasetAlreadyAdded"));
         return;
       }
       setLinkDatasets((prev) => [...prev, dataset]);
       setDatasetLinkUrl("");
     } catch {
-      setDatasetLinkError("Conjunto de dados não encontrado neste portal.");
+      setDatasetLinkError(t("admin-dataservices:edit.datasetNotFound"));
     } finally {
       setIsResolvingLink(false);
     }
@@ -251,7 +251,7 @@ export default function ApiRegistrationClient({
           .join(", ");
         setApiError(messages);
       } else {
-        setApiError("Erro ao criar a API. Tente novamente.");
+        setApiError(t("admin-dataservices:form.createError"));
       }
     } finally {
       setIsSubmitting(false);
@@ -271,7 +271,7 @@ export default function ApiRegistrationClient({
         ? `/dataservices/${createdDataservice.slug}`
         : "/admin/me/dataservices";
     } catch {
-      setApiError("Erro ao publicar a API. Tente novamente.");
+      setApiError(t("admin-dataservices:edit.publishError"));
       setIsPublishing(false);
     }
   };
@@ -309,13 +309,9 @@ export default function ApiRegistrationClient({
                 showIcon
                 description={
                   <>
-                    <strong>O que é uma API?</strong>
+                    <strong>{t("admin-dataservices:form.whatIsApiTitle")}</strong>
                     <br />
-                    Uma API (Application Programming Interface) é uma
-                    ferramenta/solução informática que permite o acesso automático e
-                    estruturado aos dados entre sistemas, ou seja, funciona como uma
-                    ponte ou um tradutor que permite que dois aplicativos diferentes
-                    comuniquem entre si.
+                    {t("admin-dataservices:form.whatIsApiDescription")}
                   </>
                 }
               />
@@ -326,13 +322,15 @@ export default function ApiRegistrationClient({
 
               <form className="admin-page__form">
                 <p className="text-neutral-900 text-base leading-7 pt-32">
-                  Os campos marcados com um asterisco ( * ) são obrigatórios.
+                  {t("admin-dataservices:form.requiredFields")}
                 </p>
-                <h2 className="admin-page__section-title">Produtor</h2>
+                <h2 className="admin-page__section-title">
+                  {t("admin-dataservices:fields.producer")}
+                </h2>
 
                 <InputSelect
-                  label="Verifique a identidade que deseja usar na publicação."
-                  placeholder="Para pesquisar..."
+                  label={t("admin-dataservices:form.producerIdentityLabel")}
+                  placeholder={t("admin-dataservices:form.producerIdentityPlaceholder")}
                   id="producer-identity"
                   onChange={(options) => {
                     producerRef.current = (options[0]?.value as string) || "user";
@@ -343,7 +341,7 @@ export default function ApiRegistrationClient({
                       <DropdownOption key="user" value="user">
                         {user
                           ? `${user.first_name} ${user.last_name}`
-                          : "Eu próprio"}
+                          : t("admin-dataservices:form.me")}
                       </DropdownOption>,
                       ...(user?.organizations || []).map((org) => (
                         <DropdownOption key={org.id} value={org.id}>
@@ -356,17 +354,16 @@ export default function ApiRegistrationClient({
 
                 <div className="admin-page__org-card">
                   <p className="admin-page__org-card-title">
-                    Não pertence a nenhuma organização.
+                    {t("admin-dataservices:form.noOrganizationTitle")}
                   </p>
                   <p className="admin-page__org-card-description">
-                    Recomendamos que publique em nome de uma organização se se
-                    tratar de uma atividade profissional.
+                    {t("admin-dataservices:form.producerHelper")}
                   </p>
                   <Link
                     href="/admin/organizations/new"
                     className="admin-page__org-card-link"
                   >
-                    Crie ou integre uma organização em dados.gov.pt
+                    {t("admin-dataservices:form.organizationLink")}
                     <AppIcon
                       name="agora-line-arrow-right-circle"
                       className="w-24 h-24"
@@ -374,12 +371,14 @@ export default function ApiRegistrationClient({
                   </Link>
                 </div>
 
-                <h2 className="admin-page__section-title">Descrição</h2>
+                <h2 className="admin-page__section-title">
+                  {t("admin-dataservices:fields.description")}
+                </h2>
 
                 <div className="admin-page__fields-group">
                   <InputText
-                    label="Nome da API *"
-                    placeholder="Insira o nome aqui"
+                    label={t("admin-dataservices:fields.apiName")}
+                    placeholder={t("admin-dataservices:fields.namePlaceholder")}
                     id="api-name"
                     value={apiName}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -389,11 +388,11 @@ export default function ApiRegistrationClient({
                     hasError={!!formErrors.apiName}
                     hasFeedback={!!formErrors.apiName}
                     feedbackState="danger"
-                    errorFeedbackText="Campo obrigatório"
+                    errorFeedbackText={t("admin-common:forms.requiredField")}
                   />
                   <InputText
-                    label="Sigla"
-                    placeholder="Insira a sigla aqui"
+                    label={t("admin-dataservices:fields.acronym")}
+                    placeholder={t("admin-dataservices:fields.acronymPlaceholder")}
                     id="api-acronym"
                     value={apiAcronym}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -401,8 +400,8 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputTextArea
-                    label="Descrição *"
-                    placeholder="Insira a descrição aqui"
+                    label={t("admin-dataservices:fields.apiDescription")}
+                    placeholder={t("admin-dataservices:fields.descriptionPlaceholder")}
                     id="api-description"
                     rows={4}
                     maxLength={246}
@@ -414,11 +413,11 @@ export default function ApiRegistrationClient({
                     hasError={!!formErrors.apiDescription}
                     hasFeedback={!!formErrors.apiDescription}
                     feedbackState="danger"
-                    errorFeedbackText="Campo obrigatório"
+                    errorFeedbackText={t("admin-common:forms.requiredField")}
                   />
                   <InputText
-                    label="Link raiz da API"
-                    placeholder="Insira o URL aqui"
+                    label={t("admin-dataservices:fields.baseApiUrl")}
+                    placeholder={t("admin-dataservices:fields.urlPlaceholder")}
                     id="api-root-link"
                     value={baseApiUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -426,8 +425,8 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputText
-                    label="Link para a documentação da API (ficheiro OpenAPI ou Swagger)"
-                    placeholder="Insira o URL aqui"
+                    label={t("admin-dataservices:fields.machineDocUrl")}
+                    placeholder={t("admin-dataservices:fields.urlPlaceholder")}
                     id="api-doc-openapi"
                     value={machineDocUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -435,8 +434,8 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputText
-                    label="Link para a documentação técnica da API"
-                    placeholder="Insira o URL aqui"
+                    label={t("admin-dataservices:fields.technicalDocUrl")}
+                    placeholder={t("admin-dataservices:fields.urlPlaceholder")}
                     id="api-doc-technical"
                     value={technicalDocUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -444,7 +443,7 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputText
-                    label="Disponibilidade"
+                    label={t("admin-dataservices:fields.availability")}
                     placeholder="99,9"
                     id="api-availability"
                     value={availability}
@@ -454,30 +453,32 @@ export default function ApiRegistrationClient({
                   />
                 </div>
 
-                <h2 className="admin-page__section-title">Acesso</h2>
+                <h2 className="admin-page__section-title">
+                  {t("admin-dataservices:fields.access")}
+                </h2>
 
                 <div className="admin-page__fields-group">
                   <div className="flex flex-col gap-8">
                     <span className="text-primary-900 text-base font-medium leading-7">
-                      Tipo de acesso
+                      {t("admin-dataservices:fields.accessType")}
                     </span>
                     <div className="flex flex-row gap-4">
                       <RadioButton
-                        label="Abrir"
+                        label={t("admin-dataservices:fields.accessOpen")}
                         id="access-open"
                         name="access-type"
                         checked={accessType === "open"}
                         onChange={() => setAccessType("open")}
                       />
                       <RadioButton
-                        label="Abrir com conta"
+                        label={t("admin-dataservices:fields.accessAccount")}
                         id="access-account"
                         name="access-type"
                         checked={accessType === "open_with_account"}
                         onChange={() => setAccessType("open_with_account")}
                       />
                       <RadioButton
-                        label="Restrito"
+                        label={t("admin-dataservices:fields.accessRestricted")}
                         id="access-restricted"
                         name="access-type"
                         checked={accessType === "restricted"}
@@ -493,7 +494,7 @@ export default function ApiRegistrationClient({
                           <InputSelect
                             key={role.role}
                             label={role.label}
-                            placeholder="Selecione uma opção"
+                            placeholder={t("admin-dataservices:fields.selectOption")}
                             id={`access-audience-${role.role}`}
                             onChange={(options) =>
                               setAccessAudiences((prev) => ({
@@ -514,8 +515,8 @@ export default function ApiRegistrationClient({
                       </div>
 
                       <InputSelect
-                        label="Motivo da restrição"
-                        placeholder="Selecione uma opção"
+                        label={t("admin-dataservices:fields.restrictionReason")}
+                        placeholder={t("admin-dataservices:fields.selectOption")}
                         id="access-reason-category"
                         onChange={(options) =>
                           setReasonCategory((options[0]?.value as string) || "")
@@ -532,8 +533,8 @@ export default function ApiRegistrationClient({
 
                       {reasonCategory === "other" && (
                         <InputText
-                          label="Especifique o motivo da restrição"
-                          placeholder="Descreva o motivo"
+                          label={t("admin-dataservices:fields.restrictionReasonText")}
+                          placeholder={t("admin-dataservices:fields.restrictionReasonTextPlaceholder")}
                           id="access-reason-text"
                           value={reasonText}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -545,8 +546,8 @@ export default function ApiRegistrationClient({
                   )}
 
                   <InputText
-                    label="Link para a ferramenta de autorização de acesso"
-                    placeholder="Insira o URL aqui"
+                    label={t("admin-dataservices:fields.authRequestUrl")}
+                    placeholder={t("admin-dataservices:fields.urlPlaceholder")}
                     id="api-auth-tool"
                     value={authRequestUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -554,8 +555,8 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputText
-                    label="Link para a documentação comercial da API"
-                    placeholder="Insira o URL aqui"
+                    label={t("admin-dataservices:fields.businessDocUrl")}
+                    placeholder={t("admin-dataservices:fields.urlPlaceholder")}
                     id="api-doc-commercial"
                     value={businessDocUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -564,12 +565,14 @@ export default function ApiRegistrationClient({
                   />
                 </div>
 
-                <h2 className="admin-page__section-title">Termos de uso</h2>
+                <h2 className="admin-page__section-title">
+                  {t("admin-dataservices:fields.termsOfUse")}
+                </h2>
 
                 <div className="admin-page__fields-group">
                   <InputText
-                    label="Limite de chamadas"
-                    placeholder="Insira aqui"
+                    label={t("admin-dataservices:fields.rateLimiting")}
+                    placeholder={t("admin-dataservices:fields.shortPlaceholder")}
                     id="api-rate-limit"
                     value={rateLimiting}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -577,7 +580,7 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputText
-                    label="Link para a documentação sobre limites de chamadas"
+                    label={t("admin-dataservices:fields.rateLimitingUrl")}
                     placeholder="https://..."
                     id="api-rate-limit-url"
                     value={rateLimitingUrl}
@@ -596,7 +599,9 @@ export default function ApiRegistrationClient({
                     onClick={handleStep1Next}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "A criar..." : "Seguinte"}
+                    {isSubmitting
+                      ? t("admin-dataservices:form.creating")
+                      : t("admin-dataservices:form.next")}
                   </Button>
                 </div>
               </form>
@@ -609,18 +614,18 @@ export default function ApiRegistrationClient({
               <StatusCard
                 variant="informative"
                 showIcon
-                description="É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização."
+                description={t("admin-dataservices:form.datasetLinksInfo")}
               />
 
               <form className="admin-page__form">
                 <InputSelect
-                  label="Pesquisar um conjunto de dados"
-                  placeholder="Selecione conjuntos de dados..."
+                  label={t("admin-dataservices:datasetLinks.searchLabel")}
+                  placeholder={t("admin-dataservices:edit.datasetSelectPlaceholder")}
                   id="dataset-search"
                   type="checkbox"
                   searchable
-                  searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
-                  searchNoResultsText="Nenhum resultado encontrado"
+                  searchInputPlaceholder={t("admin-dataservices:edit.datasetSearchPlaceholder")}
+                  searchNoResultsText={t("admin-dataservices:edit.noDatasetResults")}
                   onSearchInputChange={setDatasetSearch}
                   onChange={(options) => {
                     const selectedIds = options.map((o) => String(o.value));
@@ -647,7 +652,9 @@ export default function ApiRegistrationClient({
                     {selectedDatasets.map((dataset) => (
                       <Tag
                         key={dataset.id}
-                        aria-label={`Remover ${dataset.title}`}
+                        aria-label={t("admin-dataservices:edit.removeDataset", {
+                          title: dataset.title,
+                        })}
                         onClick={() => removeDataset(dataset.id)}
                       >
                         {dataset.title}
@@ -657,12 +664,14 @@ export default function ApiRegistrationClient({
                 )}
 
                 <div className="admin-page__divider-or">
-                  <span className="admin-page__divider-or-text">ou</span>
+                  <span className="admin-page__divider-or-text">
+                    {t("admin-dataservices:edit.or")}
+                  </span>
                 </div>
 
                 <div className="flex flex-col gap-8">
                   <InputText
-                    label="Link para o conjunto de dados"
+                    label={t("admin-dataservices:datasetLinks.linkLabel")}
                     placeholder="https://..."
                     id="dataset-link-url"
                     value={datasetLinkUrl}
@@ -691,7 +700,7 @@ export default function ApiRegistrationClient({
                       onClick={handleAddDatasetLink}
                       disabled={isResolvingLink || !datasetLinkUrl.trim()}
                     >
-                      Adicionar
+                      {t("admin-dataservices:datasetLinks.add")}
                     </Button>
                   </div>
                 </div>
@@ -705,7 +714,7 @@ export default function ApiRegistrationClient({
                     leadingIconHover="agora-solid-arrow-left-circle"
                     onClick={onPreviousStep}
                   >
-                    Anterior
+                    {t("admin-dataservices:form.previous")}
                   </Button>
                   <Button
                     variant="primary"
@@ -715,7 +724,9 @@ export default function ApiRegistrationClient({
                     onClick={handleStep2Next}
                     disabled={isLinkingDatasets}
                   >
-                    {isLinkingDatasets ? "A vincular..." : "Seguinte"}
+                    {isLinkingDatasets
+                      ? t("admin-dataservices:form.linking")
+                      : t("admin-dataservices:form.next")}
                   </Button>
                 </div>
               </form>
@@ -730,9 +741,9 @@ export default function ApiRegistrationClient({
                 showIcon
                 description={
                   <>
-                    <strong>A sua API foi criada!</strong>
+                    <strong>{t("admin-dataservices:form.publishSuccessTitle")}</strong>
                     <br />
-                    Agora pode publicar ou guardar como rascunho.
+                    {t("admin-dataservices:form.publishSuccessDescription")}
                   </>
                 }
               />
@@ -740,10 +751,10 @@ export default function ApiRegistrationClient({
               <div className="agora-card-links-admin-px0">
                 <div className="mb-8">
                   {createdDataservice?.archived_at ? (
-                    <Pill variant="neutral">ARQUIVADO</Pill>
+                    <Pill variant="neutral">{t("admin-dataservices:edit.archivedStatus")}</Pill>
                   ) : (
                     (createdDataservice?.private ?? true) && (
-                      <Pill variant="warning">RASCUNHO</Pill>
+                      <Pill variant="warning">{t("admin-dataservices:edit.draftStatus")}</Pill>
                     )
                   )}
                 </div>
@@ -755,12 +766,12 @@ export default function ApiRegistrationClient({
                     src:
                       createdDataservice?.organization?.logo ||
                       "/images/placeholders/organization.png",
-                    alt: createdDataservice?.title || apiName || "Sem título",
+                    alt: createdDataservice?.title || apiName || t("admin-dataservices:form.untitled"),
                   }}
                   category={createdDataservice?.organization?.name || "API"}
                   title={
                     <div className="underline text-xl-bold">
-                      {createdDataservice?.title || apiName || "Sem título"}
+                      {createdDataservice?.title || apiName || t("admin-dataservices:form.untitled")}
                     </div>
                   }
                   description={
@@ -770,11 +781,13 @@ export default function ApiRegistrationClient({
                   }
                   date={
                     <span className="font-[300]">
-                      {`Atualizado há ${formatDateToTimeAgo(
-                        createdDataservice?.last_modified ||
-                          createdDataservice?.created_at ||
-                          ""
-                      )}`}
+                      {t("admin-dataservices:form.updatedAgo", {
+                        time: formatDateToTimeAgo(
+                          createdDataservice?.last_modified ||
+                            createdDataservice?.created_at ||
+                            ""
+                        ),
+                      })}
                     </span>
                   }
                   links={[
@@ -787,7 +800,7 @@ export default function ApiRegistrationClient({
                       trailingIconHover: "",
                       trailingIconActive: "",
                       children: createdDataservice?.metrics?.views?.toLocaleString("pt-PT") || "0",
-                      title: "Visualizações",
+                      title: t("admin-dataservices:form.viewsLabel"),
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
                     },
@@ -799,8 +812,10 @@ export default function ApiRegistrationClient({
                       trailingIcon: "",
                       trailingIconHover: "",
                       trailingIconActive: "",
-                      children: `${createdDataservice?.datasets?.length || 0} datasets`,
-                      title: "Datasets",
+                      children: t("admin-dataservices:form.datasetsCount", {
+                        count: createdDataservice?.datasets?.length || 0,
+                      }),
+                      title: t("admin-dataservices:form.datasetsLabel"),
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
                     },
@@ -813,7 +828,7 @@ export default function ApiRegistrationClient({
                       trailingIconHover: "",
                       trailingIconActive: "",
                       children: createdDataservice?.metrics?.followers || 0,
-                      title: "Favoritos",
+                      title: t("admin-dataservices:form.favoritesLabel"),
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
                     },
@@ -826,7 +841,9 @@ export default function ApiRegistrationClient({
                         </span>
                       </Link>
                     ) : (
-                      <span className="underline">{apiName || "Sem título"}</span>
+                      <span className="underline">
+                        {apiName || t("admin-dataservices:form.untitled")}
+                      </span>
                     )
                   }
                   blockedLink={true}
@@ -848,10 +865,12 @@ export default function ApiRegistrationClient({
                   onClick={handleSaveDraft}
                   disabled={isPublishing}
                 >
-                  Salvar rascunho
+                  {t("admin-dataservices:form.saveDraft")}
                 </Button>
                 <Button variant="primary" onClick={handlePublish} disabled={isPublishing}>
-                  {isPublishing ? "A publicar..." : "Publicar API"}
+                  {isPublishing
+                    ? t("admin-dataservices:form.publishing")
+                    : t("admin-dataservices:form.publishApi")}
                 </Button>
               </div>
             </>
@@ -867,7 +886,9 @@ export default function ApiRegistrationClient({
                   name="agora-line-question-mark"
                   className="w-24 h-24"
                 />
-                <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
+                <h2 className="admin-page__auxiliar-title">
+                  {t("admin-common:auxiliary.title")}
+                </h2>
               </div>
               <AuxiliarList items={auxiliarItems} />
             </div>

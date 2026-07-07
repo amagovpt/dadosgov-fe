@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   CardNoResults,
   Icon,
@@ -34,6 +35,7 @@ const SORT_FIELD_MAP: Record<DataserviceSortField, string> = {
 };
 
 export default function SystemDataservicesClient() {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,11 +94,11 @@ export default function SystemDataservicesClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "API", url: "/admin/system/dataservices" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-dataservices:title"), url: "/admin/system/dataservices" },
       ]}
-      title="API"
+      title={t("admin-dataservices:title")}
     >
 
       <ResultsCount count={totalItems} isLoading={isLoading} />
@@ -105,9 +107,9 @@ export default function SystemDataservicesClient() {
         <div className="admin-search-wrapper">
           <InputSearchBar
             hasVoiceActionButton={false}
-            label="Pesquisar"
-            placeholder="Pesquise o nome da API"
-            aria-label="Pesquisar APIs"
+            label={t("admin-common:search.label")}
+            placeholder={t("admin-dataservices:search.placeholder")}
+            aria-label={t("admin-dataservices:search.ariaLabel")}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleSearch(e.target.value);
             }}
@@ -123,7 +125,7 @@ export default function SystemDataservicesClient() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-neutral-700">A carregar...</p>
+        <p className="text-sm text-neutral-700">{t("admin-common:loading")}</p>
       ) : filteredApis.length > 0 ? (
         <Table
           paginationProps={createPaginationProps(
@@ -141,43 +143,45 @@ export default function SystemDataservicesClient() {
                 sortOrder={getSortOrder("title")}
                 onSortChange={handleSort("title")}
               >
-                Título da API
+                {t("admin-dataservices:columns.title")}
               </TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
+              <TableHeaderCell>{t("admin-dataservices:columns.status")}</TableHeaderCell>
               <TableHeaderCell
                 sortType="date"
                 sortOrder={getSortOrder("created_at")}
                 onSortChange={handleSort("created_at")}
               >
-                Criado em
+                {t("admin-dataservices:columns.createdAt")}
               </TableHeaderCell>
               <TableHeaderCell
                 sortType="date"
                 sortOrder={getSortOrder("last_modified")}
                 onSortChange={handleSort("last_modified")}
               >
-                Modificado em
+                {t("admin-dataservices:columns.modifiedAt")}
               </TableHeaderCell>
-              <TableHeaderCell>Ações</TableHeaderCell>
+              <TableHeaderCell>{t("admin-dataservices:columns.actions")}</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredApis.map((api) => (
               <TableRow key={api.id}>
-                <TableCell headerLabel="Título">
+                <TableCell headerLabel={t("admin-dataservices:columns.titleShort")}>
                   <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>
                 </TableCell>
-                <TableCell headerLabel="Estado">
+                <TableCell headerLabel={t("admin-dataservices:columns.status")}>
                   <ResourceStatusBadge item={api} />
                 </TableCell>
-                <TableCell headerLabel="Criado em">{formatDateToDMY(api.created_at)}</TableCell>
-                <TableCell headerLabel="Modificado em">
+                <TableCell headerLabel={t("admin-dataservices:columns.createdAt")}>
+                  {formatDateToDMY(api.created_at)}
+                </TableCell>
+                <TableCell headerLabel={t("admin-dataservices:columns.modifiedAt")}>
                   {formatDateToDMY(api.metadata_modified_at || api.last_modified)}
                   {(api.owner || api.organization) && (
                     <>
                       <br />
                       <span className="text-sm text-neutral-500">
-                        por{" "}
+                        {t("admin-dataservices:columns.by")}{" "}
                         {api.owner
                           ? `${api.owner.first_name} ${api.owner.last_name}`
                           : api.organization?.name}
@@ -185,7 +189,7 @@ export default function SystemDataservicesClient() {
                     </>
                   )}
                 </TableCell>
-                <TableCell headerLabel="Ações">
+                <TableCell headerLabel={t("admin-dataservices:columns.actions")}>
                   <TableActionsCell
                     viewAction={{
                       href: `/dataservices/${api.slug}`,
@@ -203,8 +207,8 @@ export default function SystemDataservicesClient() {
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-code" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem APIs"
-          description="Nenhuma API encontrada."
+          title={t("admin-dataservices:empty.title")}
+          description={t("admin-dataservices:empty.description")}
           hasAnchor={false}
         />
       )}

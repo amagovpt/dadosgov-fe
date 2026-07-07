@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import DataservicesEditClient from "@/components/admin/dataservices/DataservicesEditClient";
+import DataservicesEditClient from "@/components/admin/dataservices/views/DataservicesEditClient";
 
 export const metadata: Metadata = {
   title: "Editar API - Admin - dados.gov.pt",

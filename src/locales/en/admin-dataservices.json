@@ -17,7 +17,8 @@
     "createdAt": "Created at",
     "modifiedAt": "Modified at",
     "by": "by",
-    "about": "about"
+    "about": "about",
+    "actions": "Actions"
   },
   "form": {
     "registrationTitle": "Registration form",
@@ -31,9 +32,15 @@
     "requiredFields": "Fields marked with an asterisk ( * ) are required.",
     "createError": "Error creating the API. Try again.",
     "creating": "Creating...",
+    "linking": "Linking...",
+    "publishing": "Publishing...",
     "previous": "Previous",
     "next": "Next",
     "me": "Myself",
+    "producerIdentityLabel": "Check the identity you want to use for publication.",
+    "producerIdentityPlaceholder": "Search...",
+    "noOrganizationTitle": "You do not belong to any organization.",
+    "organizationLink": "Create or join an organization on dados.gov.pt",
     "validationErrors": {
       "name": "Enter the API name.",
       "description": "Describe the API."
@@ -44,6 +51,11 @@
     "publishSuccessDescription": "You can now publish it or save it as a draft.",
     "untitled": "Untitled",
     "noDescription": "No description",
+    "updatedAgo": "Updated {{time}} ago",
+    "viewsLabel": "Views",
+    "datasetsLabel": "Datasets",
+    "datasetsCount": "{{count}} datasets",
+    "favoritesLabel": "Favorites",
     "saveDraft": "Save draft",
     "publishApi": "Publish API"
   },
