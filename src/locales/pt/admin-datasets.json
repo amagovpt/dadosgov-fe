@@ -115,6 +115,16 @@
     "title": "Conjuntos de dados",
     "searchPlaceholder": "Pesquise o nome, código ou sigla da entidade",
     "searchAriaLabel": "Pesquisar conjuntos de dados",
+    "columns": {
+      "title": "Título do conjunto de dados",
+      "titleShort": "Título",
+      "status": "Estado",
+      "createdAt": "Criado em",
+      "lastModified": "Última modificação",
+      "resources": "Ficheiros",
+      "quality": "Pontuação",
+      "actions": "Ações"
+    },
     "emptyMineTitle": "Sem conjuntos de dados",
     "emptyMineDescription": "Não publicou conjuntos de dados.",
     "emptyOrgTitle": "Sem publicações",
@@ -136,6 +146,7 @@
     "statusFeatured": "DESTAQUE",
     "statisticsCount": "{{count}} estatísticas",
     "metadataCount": "{{count}} metadados",
+    "qualityScoreLabel": "Pontuação",
     "latestActivityPrefix": "Atividade mais recente:",
     "latestActivityFallback": "editou o conjunto de dados",
     "tabs": {

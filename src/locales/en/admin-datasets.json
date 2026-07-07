@@ -115,6 +115,16 @@
     "title": "Datasets",
     "searchPlaceholder": "Search by the entity name, code, or acronym",
     "searchAriaLabel": "Search datasets",
+    "columns": {
+      "title": "Dataset title",
+      "titleShort": "Title",
+      "status": "Status",
+      "createdAt": "Created at",
+      "lastModified": "Last modified",
+      "resources": "Files",
+      "quality": "Score",
+      "actions": "Actions"
+    },
     "emptyMineTitle": "No datasets",
     "emptyMineDescription": "You have not published any datasets.",
     "emptyOrgTitle": "No publications",
@@ -136,6 +146,7 @@
     "statusFeatured": "FEATURED",
     "statisticsCount": "{{count}} statistics",
     "metadataCount": "{{count}} metadata",
+    "qualityScoreLabel": "Score",
     "latestActivityPrefix": "Most recent activity:",
     "latestActivityFallback": "edited the dataset",
     "tabs": {

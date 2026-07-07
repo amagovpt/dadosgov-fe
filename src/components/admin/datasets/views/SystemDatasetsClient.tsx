@@ -39,8 +39,18 @@ export default function SystemDatasetsClient() {
         editHref: (dataset) => `/admin/datasets/${dataset.id}`,
         showResourceCount: true,
         showQualityScore: true,
+        labels: {
+          title: t("admin-datasets:list.columns.title"),
+          titleShort: t("admin-datasets:list.columns.titleShort"),
+          status: t("admin-datasets:list.columns.status"),
+          createdAt: t("admin-datasets:list.columns.createdAt"),
+          lastModified: t("admin-datasets:list.columns.lastModified"),
+          resources: t("admin-datasets:list.columns.resources"),
+          quality: t("admin-datasets:list.columns.quality"),
+          actions: t("admin-datasets:list.columns.actions"),
+        },
       }),
-    [],
+    [t],
   );
 
   const loadDatasets = useCallback(async () => {

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Icon, Pill } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -23,13 +24,15 @@ export default function DatasetsEditInfoPanel({
   qualityScore,
   translateActivityLabel,
 }: DatasetsEditInfoPanelProps) {
+  const { t } = useTranslation("admin-datasets");
+
   return (
     <div className="admin-edit-info">
       <div className="admin-edit-info__badges">
         <Pill variant={dataset.private ? "warning" : "success"}>
-          {dataset.private ? "RASCUNHO" : "PÚBLICO"}
+          {dataset.private ? t("edit.statusDraft") : t("edit.statusPublic")}
         </Pill>
-        {dataset.featured && <Pill variant="informative">DESTAQUE</Pill>}
+        {dataset.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
         <span className="admin-edit-info__stat">
           <svg
             width="14"
@@ -44,11 +47,17 @@ export default function DatasetsEditInfoPanel({
               fill="#64718B"
             />
           </svg>
-          {`${(dataset.metrics?.views ?? 0) + (dataset.metrics?.resources_downloads ?? 0) + (dataset.metrics?.reuses ?? 0) + (dataset.metrics?.followers ?? 0)} estatísticas`}
+          {t("edit.statisticsCount", {
+            count:
+              (dataset.metrics?.views ?? 0) +
+              (dataset.metrics?.resources_downloads ?? 0) +
+              (dataset.metrics?.reuses ?? 0) +
+              (dataset.metrics?.followers ?? 0),
+          })}
         </span>
         <span className="admin-edit-info__stat">
           <Icon name="agora-line-document" className="admin-edit-info__stat-icon" />
-          {`${metadataCount} metadados`}
+          {t("edit.metadataCount", { count: metadataCount })}
         </span>
         <span className="admin-edit-info__stat">
           <Icon name="agora-line-star" className="admin-edit-info__stat-icon" />
@@ -60,13 +69,14 @@ export default function DatasetsEditInfoPanel({
         <Icon name="agora-line-clock" className="admin-edit-info__clock-icon" />
         {latestActivity ? (
           <>
-            {" Atividade mais recente: "}
+            {" "}
+            {t("edit.latestActivityPrefix")}{" "}
             <TextLink href={`/users/${latestActivity.actor.slug}`}>
               {latestActivity.actor.first_name} {latestActivity.actor.last_name}
             </TextLink>
-            {" — "}
+            {" - "}
             {translateActivityLabel(latestActivity.label)}
-            {" — "}
+            {" - "}
             <span>
               {format(new Date(latestActivity.created_at), "d 'de' MMMM 'de' yyyy", {
                 locale: pt,
@@ -75,13 +85,16 @@ export default function DatasetsEditInfoPanel({
           </>
         ) : (
           <>
-            {" Atividade mais recente: "}
+            {" "}
+            {t("edit.latestActivityPrefix")}{" "}
             {dataset.owner && (
               <TextLink href={`/users/${dataset.owner.slug}`}>
                 {dataset.owner.first_name} {dataset.owner.last_name}
               </TextLink>
             )}
-            {" — editou o conjunto de dados — "}
+            {" - "}
+            {t("edit.latestActivityFallback")}
+            {" - "}
             <span>
               {format(new Date(dataset.last_modified), "d 'de' MMMM 'de' yyyy", {
                 locale: pt,

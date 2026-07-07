@@ -50,8 +50,18 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         showOwner: true,
         showOrganizationFallback: true,
         sortVariant: "org",
+        labels: {
+          title: t("admin-datasets:list.columns.title"),
+          titleShort: t("admin-datasets:list.columns.titleShort"),
+          status: t("admin-datasets:list.columns.status"),
+          createdAt: t("admin-datasets:list.columns.createdAt"),
+          lastModified: t("admin-datasets:list.columns.lastModified"),
+          resources: t("admin-datasets:list.columns.resources"),
+          quality: t("admin-datasets:list.columns.quality"),
+          actions: t("admin-datasets:list.columns.actions"),
+        },
       }),
-    [orgId],
+    [orgId, t],
   );
 
   const loadDatasets = useCallback(

@@ -85,8 +85,18 @@ export default function DatasetsClient() {
         showOwner: true,
         showResourceCount: true,
         showQualityScore: true,
+        labels: {
+          title: t("admin-datasets:list.columns.title"),
+          titleShort: t("admin-datasets:list.columns.titleShort"),
+          status: t("admin-datasets:list.columns.status"),
+          createdAt: t("admin-datasets:list.columns.createdAt"),
+          lastModified: t("admin-datasets:list.columns.lastModified"),
+          resources: t("admin-datasets:list.columns.resources"),
+          quality: t("admin-datasets:list.columns.quality"),
+          actions: t("admin-datasets:list.columns.actions"),
+        },
       }),
-    [],
+    [t],
   );
 
   const { handleSort, getSortOrder } = useSortControls(
