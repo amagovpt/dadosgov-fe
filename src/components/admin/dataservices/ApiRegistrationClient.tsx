@@ -463,14 +463,14 @@ export default function ApiRegistrationClient({
                     </span>
                     <div className="flex flex-row gap-4">
                       <RadioButton
-                        label="Abrir"
+                        label="Aberto"
                         id="access-open"
                         name="access-type"
                         checked={accessType === "open"}
                         onChange={() => setAccessType("open")}
                       />
                       <RadioButton
-                        label="Abrir com conta"
+                        label="Aberto com conta"
                         id="access-account"
                         name="access-type"
                         checked={accessType === "open_with_account"}
@@ -554,7 +554,7 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputText
-                    label="Link para a documentação comercial da API"
+                    label="Link para a documentação funcional"
                     placeholder="Insira o URL aqui"
                     id="api-doc-commercial"
                     value={businessDocUrl}
