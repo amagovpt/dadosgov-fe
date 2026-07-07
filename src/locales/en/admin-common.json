@@ -1,0 +1,58 @@
+{
+  "loading": "Loading...",
+  "results_one": "{{count}} result",
+  "results_other": "{{count}} results",
+  "search": {
+    "label": "Search"
+  },
+  "filters": {
+    "all": "All",
+    "statusPlaceholder": "Filter by status"
+  },
+  "actions": {
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "header": {
+    "search": "Search",
+    "adminOptions": "Administrator options bar",
+    "profile": "My profile",
+    "notifications": "Notifications",
+    "deleteAccount": "Delete account",
+    "logout": "Sign out"
+  },
+  "deleteAccount": {
+    "title": "Are you sure you want to delete this account?",
+    "closeAriaLabel": "Close",
+    "irreversible": "This action is irreversible.",
+    "contentRemains": "All content published in your name will remain online, at the same URLs, but anonymously, without being associated with a data producer.",
+    "deletePublishedContentFirst": "If you also want to delete the content you published, delete it before deleting the account."
+  },
+  "auxiliary": {
+    "title": "Help"
+  },
+  "emptyState": {
+    "title": "No publications",
+    "description": "You have not published an API yet.",
+    "create": "Publish on the portal"
+  },
+  "forms": {
+    "requiredField": "Required field"
+  },
+  "status": {
+    "deleted": "Deleted",
+    "archived": "Archived",
+    "draft": "Draft",
+    "public": "Public"
+  },
+  "danger": {
+    "irreversible": "Warning, this action is irreversible."
+  },
+  "pagination": {
+    "itemsPerPage": "Rows per page",
+    "selectItemsPerPage": "Select rows per page",
+    "itemsPerPageOptions": "Rows per page options",
+    "previous": "Previous page",
+    "next": "Next page"
+  }
+}

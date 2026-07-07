@@ -1,4 +1,7 @@
+"use client";
+
 import StatusDot from "@/components/admin/StatusDot";
+import { useTranslation } from "react-i18next";
 
 type StatusDotVariant =
   | "success"
@@ -33,13 +36,6 @@ type PublicationStateDotProps = {
   variants?: Partial<PublicationVariants>;
 };
 
-const DEFAULT_LABELS: PublicationLabels = {
-  deleted: "Excluído",
-  archived: "Arquivado",
-  private: "Rascunho",
-  public: "Público",
-};
-
 const DEFAULT_VARIANTS: PublicationVariants = {
   deleted: "danger",
   archived: "neutral",
@@ -54,7 +50,14 @@ export default function PublicationStateDot({
   labels,
   variants,
 }: PublicationStateDotProps) {
-  const mergedLabels = { ...DEFAULT_LABELS, ...labels };
+  const { t } = useTranslation("admin-common");
+  const defaultLabels: PublicationLabels = {
+    deleted: t("status.deleted"),
+    archived: t("status.archived"),
+    private: t("status.draft"),
+    public: t("status.public"),
+  };
+  const mergedLabels = { ...defaultLabels, ...labels };
   const mergedVariants = { ...DEFAULT_VARIANTS, ...variants };
   const deletedFlag = Boolean(deleted);
   const archivedFlag = Boolean(archived);

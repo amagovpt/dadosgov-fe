@@ -2,6 +2,7 @@
 
 import type { ChangeEvent, ComponentProps, ReactNode } from "react";
 import { InputSearchBar, Table } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { AdminLayoutProps } from "@/components/Layout/AdminLayout";
 import ResultsCount from "@/components/admin/ResultsCount";
@@ -54,12 +55,14 @@ export default function AdminListPage({
   feedback,
   emptyState,
   children,
-  loadingContent = <p className="text-sm text-neutral-700">A carregar...</p>,
+  loadingContent,
   resultsCount,
   paginationOptions,
 }: AdminListPageProps) {
+  const { t } = useTranslation("admin-common");
   const shouldRenderToolbar = Boolean(search || filters || toolbarActions);
   const shouldRenderTable = hasItems ?? count > 0;
+  const defaultLoadingContent = <p className="text-sm text-neutral-700">{t("loading")}</p>;
 
   return (
     <AdminLayout title={title} breadcrumbItems={breadcrumbItems} headerAction={headerAction}>
@@ -71,7 +74,7 @@ export default function AdminListPage({
             <div className="admin-search-wrapper">
               <InputSearchBar
                 hasVoiceActionButton={false}
-                label={search.label ?? "Pesquisar"}
+                label={search.label ?? t("search.label")}
                 placeholder={search.placeholder}
                 aria-label={search.ariaLabel}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +91,7 @@ export default function AdminListPage({
       {feedback}
 
       {isLoading ? (
-        loadingContent
+        loadingContent ?? defaultLoadingContent
       ) : shouldRenderTable ? (
         <AdminPaginatedTable
           pageSize={pageSize}

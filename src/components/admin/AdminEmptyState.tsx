@@ -5,6 +5,7 @@ import AppIcon from "../Primitives/AppIcon";
 import Button from "../Primitives/Button";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 
 export interface AdminEmptyStateI {
   icon: IconName;
@@ -16,12 +17,16 @@ export interface AdminEmptyStateI {
 
 export default function AdminEmptyState({
   icon,
-  title = "Sem publicações",
-  description = "Ainda não publicou uma API.",
+  title,
+  description,
   createUrl,
-  createTitle = "Publique no portal",
+  createTitle,
 }: AdminEmptyStateI) {
+  const { t } = useTranslation("admin-common");
   const routerNav = useRouter();
+  const emptyTitle = title ?? t("emptyState.title");
+  const emptyDescription = description ?? t("emptyState.description");
+  const actionTitle = createTitle ?? t("emptyState.create");
 
   const handleNavigation = useCallback(() => {
     if (createUrl) routerNav.push(createUrl);
@@ -35,14 +40,14 @@ export default function AdminEmptyState({
             className="admin-page__empty"
             position="center"
             icon={<AppIcon name={icon} className="icon-xl h-12 w-12 text-primary-500" />}
-            title={title}
-            description={description}
+            title={emptyTitle}
+            description={emptyDescription}
             hasAnchor={false}
             extraDescription={
               createUrl && (
                 <div className="mt-24">
                   <Button variant="primary" appearance="outline" onClick={() => handleNavigation()}>
-                    {createTitle}
+                    {actionTitle}
                   </Button>
                 </div>
               )

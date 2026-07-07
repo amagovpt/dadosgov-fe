@@ -1,0 +1,58 @@
+{
+  "loading": "A carregar...",
+  "results_one": "{{count}} resultado",
+  "results_other": "{{count}} resultados",
+  "search": {
+    "label": "Pesquisar"
+  },
+  "filters": {
+    "all": "Todos",
+    "statusPlaceholder": "Filtrar por estado"
+  },
+  "actions": {
+    "delete": "Eliminar",
+    "cancel": "Cancelar"
+  },
+  "header": {
+    "search": "Pesquisar",
+    "adminOptions": "Barra de opções do administrador",
+    "profile": "O meu perfil",
+    "notifications": "Notificações",
+    "deleteAccount": "Eliminar conta",
+    "logout": "Terminar sessão"
+  },
+  "deleteAccount": {
+    "title": "Tem a certeza que deseja eliminar esta conta?",
+    "closeAriaLabel": "Fechar",
+    "irreversible": "Esta ação é irreversível.",
+    "contentRemains": "Todo o conteúdo publicado em seu nome permanecerá online, nos mesmos URLs, mas de forma anónima, ou seja, sem estar associado a um produtor de dados.",
+    "deletePublishedContentFirst": "Se também pretender eliminar o conteúdo que publicou, apague-o antes de eliminar a conta."
+  },
+  "auxiliary": {
+    "title": "Auxiliar"
+  },
+  "emptyState": {
+    "title": "Sem publicações",
+    "description": "Ainda não publicou uma API.",
+    "create": "Publique no portal"
+  },
+  "forms": {
+    "requiredField": "Campo obrigatório"
+  },
+  "status": {
+    "deleted": "Excluído",
+    "archived": "Arquivado",
+    "draft": "Rascunho",
+    "public": "Público"
+  },
+  "danger": {
+    "irreversible": "Atenção, esta ação é irreversível."
+  },
+  "pagination": {
+    "itemsPerPage": "Linhas por página",
+    "selectItemsPerPage": "Selecionar linhas por página",
+    "itemsPerPageOptions": "Opções de linhas por página",
+    "previous": "Página anterior",
+    "next": "Próxima página"
+  }
+}
