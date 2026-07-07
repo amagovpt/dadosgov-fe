@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Avatar, Icon } from "@ama-pt/agora-design-system";
+import { useRouter } from "next/navigation";
+import { Avatar, Button, Icon } from "@ama-pt/agora-design-system";
 import type { Organization } from "@/service/types/identity";
 
 interface OrganizationProfileHeaderCardProps {
@@ -13,8 +14,25 @@ export default function OrganizationProfileHeaderCard({
   organization,
   logoPreview,
 }: OrganizationProfileHeaderCardProps) {
+  const router = useRouter();
+
   return (
     <div className="profile-card">
+      {organization.slug && (
+        <div className="absolute right-32 top-32">
+          <Button
+            variant="primary"
+            appearance="outline"
+            className="bg-white"
+            hasIcon
+            leadingIcon="agora-line-eye"
+            leadingIconHover="agora-solid-eye"
+            onClick={() => router.push(`/organizations/${organization.slug}`)}
+          >
+            Ver perfil público
+          </Button>
+        </div>
+      )}
       <div className="profile-card__avatar-container">
         {logoPreview || organization.logo_thumbnail ? (
           <img
