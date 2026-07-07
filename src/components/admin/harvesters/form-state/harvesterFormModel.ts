@@ -59,14 +59,13 @@ export function validateHarvesterDetails(
     values.requireOrganizationProducer &&
     (!values.producer || values.producer === "user")
   ) {
-    errors.harvesterProducer =
-      values.messages?.harvesterProducer ?? "Selecione uma organização produtora.";
+    errors.harvesterProducer = values.messages?.harvesterProducer ?? "";
   }
   if (!values.name.trim()) {
-    errors.harvesterName = values.messages?.harvesterName ?? "Indique o nome do harvester.";
+    errors.harvesterName = values.messages?.harvesterName ?? "";
   }
   if (!values.url.trim()) {
-    errors.harvesterUrl = values.messages?.harvesterUrl ?? "Indique o URL do harvester.";
+    errors.harvesterUrl = values.messages?.harvesterUrl ?? "";
   }
 
   return errors;

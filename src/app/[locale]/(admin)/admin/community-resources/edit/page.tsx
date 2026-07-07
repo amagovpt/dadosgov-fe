@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
-import CommunityResourceEditClient from "@/components/admin/community-resources/views/CommunityResourceEditClient";
+import CommunityResourcesEditClient from "@/components/admin/community-resources/views/CommunityResourcesEditClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Editar recurso comunitário - Admin - dados.gov.pt",
-  description: "Editar um recurso comunitário no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-community-resources"],
+  });
 
-export default function CommunityResourceEditPage() {
-  return <CommunityResourceEditClient />;
+  return {
+    title: t("metadata.editTitle", { ns: "admin-community-resources" }),
+    description: t("metadata.editDescription", { ns: "admin-community-resources" }),
+  };
+}
+
+export default function CommunityResourcesEditPage() {
+  return <CommunityResourcesEditClient />;
 }

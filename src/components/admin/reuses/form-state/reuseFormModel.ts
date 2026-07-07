@@ -49,21 +49,21 @@ export function validateReuseDetails(
   const messages = values.messages || {};
 
   if (!values.name.trim()) {
-    errors.reuseName = messages.reuseName || "Indique o nome da reutilização.";
+    errors.reuseName = messages.reuseName || "";
   }
   if (!values.url.trim()) {
-    errors.reuseLink = messages.reuseLink || "Indique o URL da reutilização.";
+    errors.reuseLink = messages.reuseLink || "";
   } else if (!normalizeReuseUrl(values.url)) {
-    errors.reuseLink = messages.reuseLink || "Indique um URL válido.";
+    errors.reuseLink = messages.reuseLink || "";
   }
   if (!values.type) {
-    errors.reuseType = messages.reuseType || "Selecione o tipo de reutilização.";
+    errors.reuseType = messages.reuseType || "";
   }
   if (!values.topic) {
-    errors.reuseTopic = messages.reuseTopic || "Selecione o tema da reutilização.";
+    errors.reuseTopic = messages.reuseTopic || "";
   }
   if (!values.description.trim()) {
-    errors.reuseDescription = messages.reuseDescription || "Descreva a reutilização.";
+    errors.reuseDescription = messages.reuseDescription || "";
   }
 
   return errors;
@@ -120,8 +120,5 @@ export function validateReuseDatasetSelection(
   remoteDatasets: RemoteDatasetEntry[],
   errorMessage?: string,
 ): string | null {
-  return localDatasetCount > 0 && remoteDatasets.length > 0
-    ? errorMessage ||
-        "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
-    : null;
+  return localDatasetCount > 0 && remoteDatasets.length > 0 ? errorMessage || "" : null;
 }

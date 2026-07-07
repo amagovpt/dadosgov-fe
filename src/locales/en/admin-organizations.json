@@ -1,5 +1,11 @@
 {
   "title": "Organizations",
+  "metadata": {
+    "newTitle": "Create organization - Admin - dados.gov.pt",
+    "newDescription": "Creation of a new organization on the dados.gov.pt portal.",
+    "systemTitle": "Organizations - System - Admin - dados.gov.pt",
+    "systemDescription": "System organization management on the dados.gov.pt portal."
+  },
   "search": {
     "placeholder": "Search by organization name",
     "ariaLabel": "Search organizations"

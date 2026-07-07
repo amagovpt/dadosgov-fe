@@ -1,16 +1,29 @@
 import type { Metadata } from "next";
-import HarvestJobDetailClient from "@/components/admin/harvesters/views/HarvestJobDetailClient";
+import HarvesterJobDetailClient from "@/components/admin/harvesters/views/HarvesterJobDetailClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Detalhe do trabalho - Admin - dados.gov.pt",
-  description: "Detalhe de um trabalho de harvesting no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string; jobId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-harvesters"],
+  });
 
-export default async function HarvestJobDetailPage({
+  return {
+    title: t("metadata.jobDetailTitle", { ns: "admin-harvesters" }),
+    description: t("metadata.jobDetailDescription", { ns: "admin-harvesters" }),
+  };
+}
+
+export default async function HarvesterJobDetailPage({
   params,
 }: {
   params: Promise<{ slug: string; jobId: string }>;
 }) {
   const { slug, jobId } = await params;
-  return <HarvestJobDetailClient slug={slug} jobId={jobId} />;
+  return <HarvesterJobDetailClient slug={slug} jobId={jobId} />;
 }

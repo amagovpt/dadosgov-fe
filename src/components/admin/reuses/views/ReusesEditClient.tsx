@@ -458,7 +458,7 @@ export default function ReusesEditClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("title"), url: "/admin/me/reuses" },
         { label: reuse.title },
       ]}

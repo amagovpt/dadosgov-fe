@@ -1,5 +1,19 @@
 {
   "title": "Community resources",
+  "metadata": {
+    "listTitle": "Community resources - Admin - dados.gov.pt",
+    "listDescription": "Community resource management on the dados.gov.pt portal.",
+    "newTitle": "New community resource - Admin - dados.gov.pt",
+    "newDescription": "Community resource creation form on the dados.gov.pt portal.",
+    "editTitle": "Edit community resource - Admin - dados.gov.pt",
+    "editDescription": "Edit a community resource on the dados.gov.pt portal.",
+    "orgTitle": "Community resources - Organization - Admin - dados.gov.pt",
+    "orgDescription": "Organization community resource management on the dados.gov.pt portal.",
+    "orgRedirectTitle": "Organization community resources - Admin - dados.gov.pt",
+    "orgRedirectDescription": "Organization community resource management on the dados.gov.pt portal.",
+    "systemTitle": "Community resources - System - Admin - dados.gov.pt",
+    "systemDescription": "System community resource management on the dados.gov.pt portal."
+  },
   "search": {
     "placeholder": "Search community resources",
     "ariaLabel": "Search community resources"

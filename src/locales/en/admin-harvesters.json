@@ -1,5 +1,19 @@
 {
   "title": "Harvesters",
+  "metadata": {
+    "newTitle": "Create harvester - Admin - dados.gov.pt",
+    "newDescription": "Creation of a new harvester on the dados.gov.pt portal.",
+    "detailTitle": "Harvester detail - Admin - dados.gov.pt",
+    "detailDescription": "Detail of a harvester on the dados.gov.pt portal.",
+    "jobDetailTitle": "Job detail - Admin - dados.gov.pt",
+    "jobDetailDescription": "Detail of a harvesting job on the dados.gov.pt portal.",
+    "orgRedirectTitle": "Organization harvesters - Admin - dados.gov.pt",
+    "orgRedirectDescription": "Organization harvester management on the dados.gov.pt portal.",
+    "orgTitle": "Harvesters - Organization - Admin - dados.gov.pt",
+    "orgDescription": "Organization harvester management on the dados.gov.pt portal.",
+    "systemTitle": "Harvesters - System - Admin - dados.gov.pt",
+    "systemDescription": "System harvester management on the dados.gov.pt portal."
+  },
   "publicationFormTitle": "Harvester publication form",
   "search": {
     "placeholder": "Search by harvester name",

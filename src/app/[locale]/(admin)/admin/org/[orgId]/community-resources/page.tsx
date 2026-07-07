@@ -1,11 +1,29 @@
 import type { Metadata } from "next";
 import OrgCommunityResourcesClient from "@/components/admin/community-resources/views/OrgCommunityResourcesClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Recursos comunitários - Organização - Admin - dados.gov.pt",
-  description: "Gestão de recursos comunitários da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-community-resources"],
+  });
 
-export default function OrgCommunityResourcesPage() {
-  return <OrgCommunityResourcesClient />;
+  return {
+    title: t("metadata.orgTitle", { ns: "admin-community-resources" }),
+    description: t("metadata.orgDescription", { ns: "admin-community-resources" }),
+  };
+}
+
+export default async function OrgCommunityResourcesPage({
+  params,
+}: {
+  params: Promise<{ orgId: string }>;
+}) {
+  const { orgId } = await params;
+  return <OrgCommunityResourcesClient orgId={orgId} />;
 }

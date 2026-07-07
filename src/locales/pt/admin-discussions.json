@@ -1,5 +1,11 @@
 {
   "title": "Discussões",
+  "metadata": {
+    "orgRedirectTitle": "Discussões da organização - Admin - dados.gov.pt",
+    "orgRedirectDescription": "Gestão de discussões da organização no portal dados.gov.pt.",
+    "orgTitle": "Discussões - Organização - Admin - dados.gov.pt",
+    "orgDescription": "Gestão de discussões da organização no portal dados.gov.pt."
+  },
   "popup": {
     "title": "Discussão"
   },
@@ -18,10 +24,10 @@
   },
   "empty": {
     "title": "Sem discussões",
-    "descriptionOrganization": "Ainda não há discussões sobre esta organização."
+    "descriptionOrganization": "Ainda não existem discussões sobre esta organização."
   },
   "organizationFallback": "Organização",
-  "withoutOrganization": "Sem Organização",
+  "withoutOrganization": "Sem organização",
   "metrics": {
     "views": "Visualizações",
     "downloads": "Downloads",

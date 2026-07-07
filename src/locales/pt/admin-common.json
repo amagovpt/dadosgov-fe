@@ -47,7 +47,24 @@
     "create": "Publique no portal"
   },
   "forms": {
-    "requiredField": "Campo obrigatório"
+    "requiredField": "Campo obrigatório",
+    "producerTitle": "Produtor",
+    "producerLabel": "Verifique a identidade que deseja usar na publicação.",
+    "producerPlaceholder": "Para pesquisar...",
+    "noOrganizationTitle": "Não pertence a nenhuma organização.",
+    "organizationLink": "Crie ou integre uma organização em dados.gov.pt",
+    "imageUpload": {
+      "coverImage": "Imagem de capa",
+      "files": "Ficheiros",
+      "dragAndDrop": "Arraste e largue o ficheiro aqui",
+      "selectOrDrag": "Selecione ou arraste o ficheiro",
+      "selectedFile": "ficheiro selecionado",
+      "removeFile": "Remover ficheiro",
+      "replaceFile": "Substituir ficheiro",
+      "extensionsInstructions": "Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG.",
+      "maxSizeExceeded": "O ficheiro excede o tamanho máximo de 4 MB.",
+      "forbiddenExtension": "Formato de ficheiro não permitido."
+    }
   },
   "status": {
     "deleted": "Excluído",
@@ -82,5 +99,8 @@
       "harvester": "Um harvester",
       "organization": "Uma organização"
     }
+  },
+  "feedback": {
+    "publicationProcess": "Dê-nos o seu feedback sobre o processo de publicação"
   }
 }

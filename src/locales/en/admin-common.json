@@ -47,7 +47,24 @@
     "create": "Publish on the portal"
   },
   "forms": {
-    "requiredField": "Required field"
+    "requiredField": "Required field",
+    "producerTitle": "Producer",
+    "producerLabel": "Check the identity you want to use for publication.",
+    "producerPlaceholder": "Search...",
+    "noOrganizationTitle": "You do not belong to any organization.",
+    "organizationLink": "Create or join an organization on dados.gov.pt",
+    "imageUpload": {
+      "coverImage": "Cover image",
+      "files": "Files",
+      "dragAndDrop": "Drag and drop the file here",
+      "selectOrDrag": "Select or drag the file",
+      "selectedFile": "file selected",
+      "removeFile": "Remove file",
+      "replaceFile": "Replace file",
+      "extensionsInstructions": "Maximum size: 4 MB. Accepted formats: JPG, JPEG, PNG.",
+      "maxSizeExceeded": "The file exceeds the maximum size of 4 MB.",
+      "forbiddenExtension": "File format not allowed."
+    }
   },
   "status": {
     "deleted": "Deleted",
@@ -82,5 +99,8 @@
       "harvester": "A harvester",
       "organization": "An organization"
     }
+  },
+  "feedback": {
+    "publicationProcess": "Give us your feedback on the publication process"
   }
 }

@@ -1,5 +1,19 @@
 {
   "title": "Harvesters",
+  "metadata": {
+    "newTitle": "Criar harvester - Admin - dados.gov.pt",
+    "newDescription": "Criação de um novo harvester no portal dados.gov.pt.",
+    "detailTitle": "Detalhe do harvester - Admin - dados.gov.pt",
+    "detailDescription": "Detalhe de um harvester no portal dados.gov.pt.",
+    "jobDetailTitle": "Detalhe do trabalho - Admin - dados.gov.pt",
+    "jobDetailDescription": "Detalhe de um trabalho de harvesting no portal dados.gov.pt.",
+    "orgRedirectTitle": "Harvesters da organização - Admin - dados.gov.pt",
+    "orgRedirectDescription": "Gestão de harvesters da organização no portal dados.gov.pt.",
+    "orgTitle": "Harvesters - Organização - Admin - dados.gov.pt",
+    "orgDescription": "Gestão de harvesters da organização no portal dados.gov.pt.",
+    "systemTitle": "Harvesters - Sistema - Admin - dados.gov.pt",
+    "systemDescription": "Gestão de harvesters do sistema no portal dados.gov.pt."
+  },
   "publicationFormTitle": "Formulário de publicação de um harvester",
   "search": {
     "placeholder": "Pesquise o nome do harvester",

@@ -1,5 +1,11 @@
 {
   "title": "Organizações",
+  "metadata": {
+    "newTitle": "Criar organização - Admin - dados.gov.pt",
+    "newDescription": "Criação de uma nova organização no portal dados.gov.pt.",
+    "systemTitle": "Organizações - Sistema - Admin - dados.gov.pt",
+    "systemDescription": "Gestão de organizações do sistema no portal dados.gov.pt."
+  },
   "search": {
     "placeholder": "Pesquise o nome da organização",
     "ariaLabel": "Pesquisar organizações"

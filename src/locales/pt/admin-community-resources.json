@@ -1,5 +1,19 @@
 {
   "title": "Recursos comunitários",
+  "metadata": {
+    "listTitle": "Recursos comunitários - Admin - dados.gov.pt",
+    "listDescription": "Gestão de recursos comunitários no portal dados.gov.pt.",
+    "newTitle": "Novo recurso comunitário - Admin - dados.gov.pt",
+    "newDescription": "Formulário de criação de recurso comunitário no portal dados.gov.pt.",
+    "editTitle": "Editar recurso comunitário - Admin - dados.gov.pt",
+    "editDescription": "Editar um recurso comunitário no portal dados.gov.pt.",
+    "orgTitle": "Recursos comunitários - Organização - Admin - dados.gov.pt",
+    "orgDescription": "Gestão de recursos comunitários da organização no portal dados.gov.pt.",
+    "orgRedirectTitle": "Recursos da comunidade da organização - Admin - dados.gov.pt",
+    "orgRedirectDescription": "Gestão de recursos da comunidade da organização no portal dados.gov.pt.",
+    "systemTitle": "Recursos comunitários - Sistema - Admin - dados.gov.pt",
+    "systemDescription": "Gestão de recursos comunitários do sistema no portal dados.gov.pt."
+  },
   "search": {
     "placeholder": "Pesquisar recursos comunitários",
     "ariaLabel": "Pesquisar recursos comunitários"

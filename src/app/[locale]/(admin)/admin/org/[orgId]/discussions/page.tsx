@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import OrgDiscussionsClient from "@/components/admin/discussions/OrgDiscussionsClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Discussões - Organização - Admin - dados.gov.pt",
-  description: "Gestão de discussões da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-discussions"],
+  });
+
+  return {
+    title: t("metadata.orgTitle", { ns: "admin-discussions" }),
+    description: t("metadata.orgDescription", { ns: "admin-discussions" }),
+  };
+}
 
 export default async function OrgDiscussionsPage({
   params,
