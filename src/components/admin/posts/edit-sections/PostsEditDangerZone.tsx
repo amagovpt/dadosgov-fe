@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
 
 interface PostsEditDangerZoneProps {
@@ -18,27 +19,27 @@ export default function PostsEditDangerZone({
   onRepublish,
   onOpenDeletePopup,
 }: PostsEditDangerZoneProps) {
+  const { t } = useTranslation("admin-posts");
+
   const primaryActionLabel = isSaving
     ? isPublished
-      ? "A retirar..."
-      : "A publicar..."
+      ? t("danger.unpublishing")
+      : t("danger.republishing")
     : isPublished
-      ? "Retirar"
-      : "Publicar novamente";
+      ? t("danger.unpublish")
+      : t("danger.republish");
 
   return (
     <AdminDangerActions
       primaryVariant={isPublished ? "warning" : "informative"}
-      primaryHeading={isPublished ? "Retirar o artigo" : "Artigo despublicado"}
+      primaryHeading={isPublished ? t("danger.unpublishHeading") : t("danger.unpublishedHeading")}
       primaryDescription={
-        isPublished
-          ? "Por favor, note que o item não será mais visível."
-          : "Este artigo não está visível para o público."
+        isPublished ? t("danger.unpublishDescription") : t("danger.unpublishedDescription")
       }
       primaryActionLabel={primaryActionLabel}
       onPrimaryAction={() => (isPublished ? onUnpublish() : onRepublish())}
-      dangerHeading="Atenção, esta ação não pode ser corrigida."
-      dangerActionLabel="Eliminar o artigo"
+      dangerHeading={t("danger.deleteHeading")}
+      dangerActionLabel={t("danger.deleteAction")}
       onDangerAction={() => onOpenDeletePopup()}
       disabled={isSaving}
     />

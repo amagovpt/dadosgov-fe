@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { InputText, InputTextArea, RadioButton } from "@ama-pt/agora-design-system";
 import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import KeywordSelectField from "@/components/admin/forms/KeywordSelectField";
@@ -48,12 +49,12 @@ export default function PostMetadataSection({
   hasTitleError = false,
   hasHeaderError = false,
   contentTypeOptions = ["html", "markdown"],
-  sectionTitle = "Descrição",
+  sectionTitle,
   sectionTitleClassName = "admin-page__section-title",
-  headerPlaceholder = "Insira o cabeçalho aqui",
-  articleTypeLabel = "Tipo de artigo",
-  pageLabel = "Página",
-  contentTypeLabel = "Tipo de conteúdo",
+  headerPlaceholder,
+  articleTypeLabel,
+  pageLabel,
+  contentTypeLabel,
   onTitleChange,
   onHeaderChange,
   onArticleTypeChange,
@@ -64,26 +65,30 @@ export default function PostMetadataSection({
   onImageChange,
   onImageSecurityError,
 }: PostMetadataSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-posts"]);
+
   return (
     <>
-      <h2 className={sectionTitleClassName}>{sectionTitle}</h2>
+      <h2 className={sectionTitleClassName}>
+        {sectionTitle || t("admin-posts:metadataForm.sectionTitle")}
+      </h2>
 
       <div className="admin-page__fields-group">
         <InputText
-          label="Título do artigo *"
-          placeholder="Insira o título aqui"
+          label={t("admin-posts:metadataForm.articleTitle")}
+          placeholder={t("admin-posts:metadataForm.articleTitlePlaceholder")}
           id="article-title"
           value={title}
           onChange={onTitleChange}
           hasError={hasTitleError}
           hasFeedback={hasTitleError}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("admin-common:forms.requiredField")}
         />
 
         <InputTextArea
-          label="Cabeçalho *"
-          placeholder={headerPlaceholder}
+          label={t("admin-posts:metadataForm.header")}
+          placeholder={headerPlaceholder || t("admin-posts:metadataForm.headerPlaceholder")}
           id="article-header"
           rows={3}
           value={header}
@@ -91,23 +96,23 @@ export default function PostMetadataSection({
           hasError={hasHeaderError}
           hasFeedback={hasHeaderError}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("admin-common:forms.requiredField")}
         />
 
         <div className="flex flex-col gap-8">
           <span className="text-primary-900 text-base font-medium leading-7">
-            {articleTypeLabel}
+            {articleTypeLabel || t("admin-posts:metadataForm.articleType")}
           </span>
           <div className="flex flex-row gap-4">
             <RadioButton
-              label="Notícias"
+              label={t("admin-posts:list.news")}
               id="article-type-news"
               name="article-type"
               checked={articleType === "news"}
               onChange={() => onArticleTypeChange("news")}
             />
             <RadioButton
-              label={pageLabel}
+              label={pageLabel || t("admin-posts:list.page")}
               id="article-type-page"
               name="article-type"
               checked={articleType === "page"}
@@ -118,7 +123,7 @@ export default function PostMetadataSection({
 
         <div className="flex flex-col gap-8">
           <span className="text-primary-900 text-base font-medium leading-7">
-            {contentTypeLabel}
+            {contentTypeLabel || t("admin-posts:metadataForm.contentType")}
           </span>
           <div className="flex flex-row gap-4">
             {contentTypeOptions.includes("html") && (
@@ -168,7 +173,7 @@ export default function PostMetadataSection({
           onSecurityError={onImageSecurityError}
           error={imageError}
           previewSrc={previewSrc}
-          previewAlt="Cobertura do artigo"
+          previewAlt={t("admin-posts:metadataForm.previewAlt")}
         />
       </div>
     </>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
@@ -10,6 +11,7 @@ import { fetchTopics } from "@/service/api/discussions-topics";
 import { Topic } from "@/service/types/topic";
 
 export default function SystemTopicsClient() {
+  const { t } = useTranslation(["admin-common", "admin-topics"]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,16 +45,25 @@ export default function SystemTopicsClient() {
     };
   }, [currentPage, pageSize]);
 
-  const columns = useMemo(() => createTopicColumns(), []);
+  const columns = useMemo(
+    () =>
+      createTopicColumns({
+        name: t("admin-topics:columns.name"),
+        createdAt: t("admin-topics:columns.createdAt"),
+        datasets: t("admin-topics:columns.datasets"),
+        reuses: t("admin-topics:columns.reuses"),
+      }),
+    [t]
+  );
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Temas", url: "/admin/system/topics" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-topics:title"), url: "/admin/system/topics" },
       ]}
-      title="Temas"
+      title={t("admin-topics:title")}
       isLoading={isLoading}
       count={totalItems}
       hasItems={topics.length > 0}
@@ -64,8 +75,8 @@ export default function SystemTopicsClient() {
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-tag" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem temas"
-          description="Nenhum tema encontrado."
+          title={t("admin-topics:empty.title")}
+          description={t("admin-topics:empty.description")}
           hasAnchor={false}
         />
       }
@@ -74,4 +85,3 @@ export default function SystemTopicsClient() {
     </AdminListPage>
   );
 }
-

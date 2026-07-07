@@ -1,0 +1,128 @@
+{
+  "title": "Posts",
+  "metadata": {
+    "systemTitle": "Posts - System - Admin - dados.gov.pt",
+    "systemDescription": "System post management on the dados.gov.pt portal.",
+    "newTitle": "Create post - Admin - dados.gov.pt",
+    "newDescription": "Creation of a new post on the dados.gov.pt portal.",
+    "editTitle": "Edit post - Admin - dados.gov.pt",
+    "editDescription": "Editing posts on the dados.gov.pt portal."
+  },
+  "list": {
+    "searchPlaceholder": "Search the post title",
+    "searchAriaLabel": "Search posts",
+    "typePlaceholder": "Filter by type",
+    "all": "All",
+    "news": "News",
+    "page": "Page",
+    "published": "Published",
+    "unpublished": "Unpublished",
+    "create": "Create a post",
+    "emptyTitle": "No posts",
+    "emptyDescription": "No posts found."
+  },
+  "columns": {
+    "title": "Title",
+    "type": "Type",
+    "status": "Status",
+    "createdAt": "Created on",
+    "updatedAt": "Updated on",
+    "action": "Action"
+  },
+  "new": {
+    "breadcrumbsHome": "Welcome",
+    "publicationForm": "Post publication form",
+    "stepCreate": "Create your post",
+    "stepContent": "Content",
+    "imageMaxSize": "The file exceeds the maximum size of 4 MB.",
+    "saveAuthError": "Error saving the post. Check authentication.",
+    "saveError": "Error saving the post."
+  },
+  "edit": {
+    "loadingEditor": "Loading editor...",
+    "deletePopupTitle": "Are you sure you want to delete this post?",
+    "deletePopupDescription": "This action cannot be undone.",
+    "loading": "Loading...",
+    "notFound": "Post not found.",
+    "viewPage": "View the post page",
+    "metadataTab": "Metadata",
+    "contentTab": "Content",
+    "metadataSaved": "Metadata saved successfully.",
+    "contentSaved": "Content saved successfully.",
+    "unpublishedSuccess": "Post unpublished successfully.",
+    "publishedSuccess": "Post published successfully.",
+    "saveAuthError": "Error saving. Check authentication.",
+    "saveMetadataError": "Error saving metadata.",
+    "saveContentError": "Error saving content.",
+    "unpublishAuthError": "Error unpublishing. Check authentication.",
+    "unpublishError": "Error unpublishing the post.",
+    "publishAuthError": "Error publishing. Check authentication.",
+    "publishError": "Error publishing the post.",
+    "deleteAuthError": "Error deleting. Check authentication.",
+    "deleteError": "Error deleting the post.",
+    "imageMaxSize": "The file exceeds the maximum size of 4 MB.",
+    "imageUploaded": "Image uploaded successfully.",
+    "imageUploadError": "Error uploading the image."
+  },
+  "metadataForm": {
+    "requiredInfo": "Fields marked with an asterisk (*) are required.",
+    "requiredInfoAlt": "Fields preceded by an asterisk (*) are required.",
+    "sectionTitle": "Description",
+    "sectionTitleUpper": "DESCRIPTION",
+    "articleTitle": "Post title *",
+    "articleTitlePlaceholder": "Enter the title here",
+    "header": "Header *",
+    "headerPlaceholder": "Enter the header here",
+    "headerPlaceholderShort": "Enter here",
+    "articleType": "Post type",
+    "itemType": "Item type",
+    "contentType": "Content type",
+    "previewAlt": "Post cover"
+  },
+  "contentForm": {
+    "label": "Content *",
+    "placeholder": "Enter here"
+  },
+  "validation": {
+    "titleRequired": "Provide the post title.",
+    "headerRequired": "Provide the post header.",
+    "contentRequired": "Add the post content."
+  },
+  "steps": {
+    "next": "Next",
+    "previous": "Previous",
+    "saveDraft": "Save as draft",
+    "savingDraft": "Saving...",
+    "publishArticle": "Publish post",
+    "publishingArticle": "Publishing..."
+  },
+  "danger": {
+    "unpublishing": "Unpublishing...",
+    "republishing": "Publishing...",
+    "unpublish": "Unpublish",
+    "republish": "Publish again",
+    "unpublishHeading": "Unpublish the post",
+    "unpublishedHeading": "Post unpublished",
+    "unpublishDescription": "Please note that the item will no longer be visible.",
+    "unpublishedDescription": "This post is not visible to the public.",
+    "deleteHeading": "Warning, this action cannot be undone.",
+    "deleteAction": "Delete the post"
+  },
+  "editor": {
+    "undo": "Undo",
+    "redo": "Redo",
+    "bold": "Bold",
+    "italic": "Italic",
+    "heading2": "Heading H2",
+    "heading3": "Heading H3",
+    "table": "Table",
+    "link": "Link",
+    "image": "Image",
+    "bulletList": "Bullet list",
+    "orderedList": "Ordered list",
+    "codeBlock": "Code block",
+    "blockquote": "Quote",
+    "linkPrompt": "Link URL:",
+    "imagePrompt": "Image URL:"
+  }
+}

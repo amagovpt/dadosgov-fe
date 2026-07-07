@@ -4,26 +4,33 @@ import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers"
 import { formatDateToDMY } from "@/utils/formatDate";
 import type { Topic } from "@/service/types/topic";
 
-export function createTopicColumns(): AdminListColumn<Topic>[] {
+export interface TopicColumnLabels {
+  name: string;
+  createdAt: string;
+  datasets: string;
+  reuses: string;
+}
+
+export function createTopicColumns(labels: TopicColumnLabels): AdminListColumn<Topic>[] {
   return [
     {
       id: "name",
-      header: "Nome",
+      header: labels.name,
       renderCell: (topic) => <TextLink href={`/themes/${topic.slug}`}>{topic.name}</TextLink>,
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       renderCell: (topic) => formatDateToDMY(topic.created_at),
     },
     {
       id: "datasets",
-      header: "Conjuntos de dados",
+      header: labels.datasets,
       renderCell: (topic) => topic.datasets_count ?? 0,
     },
     {
       id: "reuses",
-      header: "Reutilizações",
+      header: labels.reuses,
       renderCell: (topic) => topic.reuses_count ?? 0,
     },
     createTableActionsColumn<Topic>({
@@ -33,4 +40,3 @@ export function createTopicColumns(): AdminListColumn<Topic>[] {
     }),
   ];
 }
-

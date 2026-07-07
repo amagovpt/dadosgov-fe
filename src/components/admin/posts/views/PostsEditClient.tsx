@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Icon,
@@ -37,18 +38,24 @@ import {
 } from "@/components/admin/posts/form-state/postFormModel";
 
 function DeletePostPopupContent({
+  labels,
   onClose,
   onConfirm,
 }: {
+  labels: {
+    description: string;
+    cancel: string;
+    delete: string;
+  };
   onClose: () => void;
   onConfirm: () => void;
 }) {
   return (
     <div className="flex flex-col gap-16">
-      <p>Essa ação não pode ser desfeita.</p>
+      <p>{labels.description}</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Cancelar
+          {labels.cancel}
         </Button>
         <Button
           variant="danger"
@@ -57,7 +64,7 @@ function DeletePostPopupContent({
           leadingIcon="agora-line-trash"
           leadingIconHover="agora-solid-trash"
         >
-          Eliminar
+          {labels.delete}
         </Button>
       </div>
     </div>
@@ -65,6 +72,7 @@ function DeletePostPopupContent({
 }
 
 export default function PostsEditClient() {
+  const { t } = useTranslation(["admin-common", "admin-posts"]);
   const params = useParams();
   const router = useRouter();
   const { show, hide } = usePopupContext();
@@ -124,6 +132,9 @@ export default function PostsEditClient() {
     const errors = validatePostMetadata({
       title: articleTitle,
       header: articleHeader,
+    }, {
+      titleRequired: t("admin-posts:validation.titleRequired"),
+      headerRequired: t("admin-posts:validation.headerRequired"),
     });
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -148,12 +159,12 @@ export default function PostsEditClient() {
       const result = await updatePost(postId, payload);
       if (result) {
         setPost(result);
-        showApiSuccess("Metadados guardados com sucesso.");
+        showApiSuccess(t("admin-posts:edit.metadataSaved"));
       } else {
-        setApiError("Erro ao guardar. Verifique a autenticação.");
+        setApiError(t("admin-posts:edit.saveAuthError"));
       }
     } catch {
-      setApiError("Erro ao guardar os metadados.");
+      setApiError(t("admin-posts:edit.saveMetadataError"));
     } finally {
       setIsSaving(false);
     }
@@ -161,7 +172,9 @@ export default function PostsEditClient() {
 
   const handleSaveContent = async () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    const errors = validatePostContent(articleContent);
+    const errors = validatePostContent(articleContent, {
+      contentRequired: t("admin-posts:validation.contentRequired"),
+    });
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       focusFirstError();
@@ -179,12 +192,12 @@ export default function PostsEditClient() {
       const result = await updatePost(postId, payload);
       if (result) {
         setPost(result);
-        showApiSuccess("Conteúdo guardado com sucesso.");
+        showApiSuccess(t("admin-posts:edit.contentSaved"));
       } else {
-        setApiError("Erro ao guardar. Verifique a autenticação.");
+        setApiError(t("admin-posts:edit.saveAuthError"));
       }
     } catch {
-      setApiError("Erro ao guardar o conteúdo.");
+      setApiError(t("admin-posts:edit.saveContentError"));
     } finally {
       setIsSaving(false);
     }
@@ -199,12 +212,12 @@ export default function PostsEditClient() {
       const result = await unpublishPost(postId);
       if (result) {
         setPost(result);
-        showApiSuccess("Artigo despublicado com sucesso.");
+        showApiSuccess(t("admin-posts:edit.unpublishedSuccess"));
       } else {
-        setApiError("Erro ao retirar. Verifique a autenticação.");
+        setApiError(t("admin-posts:edit.unpublishAuthError"));
       }
     } catch {
-      setApiError("Erro ao retirar o artigo.");
+      setApiError(t("admin-posts:edit.unpublishError"));
     } finally {
       setIsSaving(false);
     }
@@ -219,12 +232,12 @@ export default function PostsEditClient() {
       const result = await publishPost(postId);
       if (result) {
         setPost(result);
-        showApiSuccess("Artigo publicado com sucesso.");
+        showApiSuccess(t("admin-posts:edit.publishedSuccess"));
       } else {
-        setApiError("Erro ao publicar. Verifique a autenticação.");
+        setApiError(t("admin-posts:edit.publishAuthError"));
       }
     } catch {
-      setApiError("Erro ao publicar o artigo.");
+      setApiError(t("admin-posts:edit.publishError"));
     } finally {
       setIsSaving(false);
     }
@@ -241,10 +254,10 @@ export default function PostsEditClient() {
       if (success) {
         router.push("/admin/system/posts");
       } else {
-        setApiError("Erro ao eliminar. Verifique a autenticação.");
+        setApiError(t("admin-posts:edit.deleteAuthError"));
       }
     } catch {
-      setApiError("Erro ao eliminar o artigo.");
+      setApiError(t("admin-posts:edit.deleteError"));
     } finally {
       setIsSaving(false);
     }
@@ -256,7 +269,7 @@ export default function PostsEditClient() {
 
     const file = files[0];
     if (file.size > 4194304) {
-      setImageError("O ficheiro excede o tamanho máximo de 4 MB.");
+      setImageError(t("admin-posts:edit.imageMaxSize"));
       return;
     }
 
@@ -269,12 +282,12 @@ export default function PostsEditClient() {
       const result = await uploadPostImage(postId, file);
       if (result) {
         setPost(result);
-        showApiSuccess("Imagem carregada com sucesso.");
+        showApiSuccess(t("admin-posts:edit.imageUploaded"));
       } else {
-        setApiError("Erro ao carregar a imagem.");
+        setApiError(t("admin-posts:edit.imageUploadError"));
       }
     } catch {
-      setApiError("Erro ao carregar a imagem.");
+      setApiError(t("admin-posts:edit.imageUploadError"));
     } finally {
       setIsSaving(false);
     }
@@ -304,7 +317,7 @@ export default function PostsEditClient() {
   if (isLoading) {
     return (
       <div className="admin-page">
-        <p>A carregar...</p>
+        <p>{t("admin-posts:edit.loading")}</p>
       </div>
     );
   }
@@ -312,7 +325,7 @@ export default function PostsEditClient() {
   if (!post) {
     return (
       <div className="admin-page">
-        <p>Artigo não encontrado.</p>
+        <p>{t("admin-posts:edit.notFound")}</p>
       </div>
     );
   }
@@ -320,8 +333,8 @@ export default function PostsEditClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Bem-vindo", url: "/admin" },
-        { label: "Artigos", url: "/admin/system/posts" },
+        { label: t("admin-posts:new.breadcrumbsHome"), url: "/admin" },
+        { label: t("admin-posts:title"), url: "/admin/system/posts" },
         { label: post.name },
       ]}
       title={post.name}
@@ -333,7 +346,7 @@ export default function PostsEditClient() {
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="w-16 h-16" />
-            Veja a página do artigo
+            {t("admin-posts:edit.viewPage")}
           </span>
         </Button>
       }
@@ -349,7 +362,7 @@ export default function PostsEditClient() {
         }}
       >
         <Tab>
-          <TabHeader>Metadados</TabHeader>
+          <TabHeader>{t("admin-posts:edit.metadataTab")}</TabHeader>
           <TabBody>
             <PostsEditMetadataTab
               post={post}
@@ -382,18 +395,29 @@ export default function PostsEditClient() {
               onUnpublish={handleUnpublish}
               onRepublish={handleRepublish}
               onOpenDeletePopup={() => {
-                show(<DeletePostPopupContent onClose={hide} onConfirm={handleDelete} />, {
-                  title: "Tem a certeza que quer eliminar este artigo?",
-                  closeAriaLabel: "Fechar",
-                  dimensions: "m",
-                });
+                show(
+                  <DeletePostPopupContent
+                    labels={{
+                      description: t("admin-posts:edit.deletePopupDescription"),
+                      cancel: t("admin-common:actions.cancel"),
+                      delete: t("admin-common:actions.delete"),
+                    }}
+                    onClose={hide}
+                    onConfirm={handleDelete}
+                  />,
+                  {
+                    title: t("admin-posts:edit.deletePopupTitle"),
+                    closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
+                    dimensions: "m",
+                  }
+                );
               }}
             />
           </TabBody>
         </Tab>
 
         <Tab>
-          <TabHeader>Conteúdo</TabHeader>
+          <TabHeader>{t("admin-posts:edit.contentTab")}</TabHeader>
           <TabBody>
             <PostsEditContentTab
               articleContent={articleContent}
