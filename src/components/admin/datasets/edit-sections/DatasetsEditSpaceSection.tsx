@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { type DropdownSectionProps, Tag } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import type { SpatialZone } from "@/service/types/catalog";
@@ -36,18 +37,20 @@ export default function DatasetsEditSpaceSection({
   onSpatialSearch,
   onRemoveSpatialZone,
 }: DatasetsEditSpaceSectionProps) {
+  const { t } = useTranslation("admin-datasets");
+
   return (
     <>
-      <h2 className="admin-page__section-title">Espaço</h2>
+      <h2 className="admin-page__section-title">{t("edit.spaceSectionTitle")}</h2>
       <div className="admin-page__fields-group">
         <IsolatedSelect
-          label="Cobertura espacial"
-          placeholder="Selecione uma cobertura espacial..."
+          label={t("edit.spatialCoverageField")}
+          placeholder={t("edit.spatialCoveragePlaceholder")}
           id="edit-spatial-coverage"
           type="checkbox"
           searchable
-          searchInputPlaceholder="Escreva para pesquisar..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          searchInputPlaceholder={t("edit.searchPlaceholder")}
+          searchNoResultsText={t("edit.searchNoResults")}
           defaultValue={spatialCoverageValue || loadedSpatialZones.join(",")}
           onChangeRef={spatialCoverageRef}
           onChangeCallback={onSpatialCoverageChange}
@@ -57,11 +60,11 @@ export default function DatasetsEditSpaceSection({
         </IsolatedSelect>
 
         {selectedZoneObjects.length > 0 && (
-          <div className="flex flex-wrap gap-8 -mt-8">
+          <div className="-mt-8 flex flex-wrap gap-8">
             {selectedZoneObjects.map((zone) => (
               <Tag
                 key={zone.id}
-                aria-label={`Remover ${zone.name}`}
+                aria-label={t("edit.removeSpatialZone", { name: zone.name })}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={(event) => {
                   event.preventDefault();
@@ -85,8 +88,8 @@ export default function DatasetsEditSpaceSection({
         )}
 
         <IsolatedSelect
-          label="Granularidade espacial"
-          placeholder="Selecione uma granularidade..."
+          label={t("edit.spatialGranularityField")}
+          placeholder={t("edit.spatialGranularityPlaceholder")}
           id="edit-spatial-granularity"
           defaultValue={loadedSpatialGranularity}
           onChangeRef={spatialGranularityRef}

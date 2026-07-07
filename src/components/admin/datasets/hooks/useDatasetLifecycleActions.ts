@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import { deleteDataset, updateDataset } from "@/service/api/datasets";
 import type { Dataset } from "@/service/types/dataset";
 
@@ -25,6 +26,8 @@ export function useDatasetLifecycleActions({
   setApiError,
   showApiSuccess,
 }: UseDatasetLifecycleActionsParams) {
+  const { t } = useTranslation("admin-datasets");
+
   async function handlePublishDataset() {
     if (!dataset) return;
 
@@ -52,9 +55,9 @@ export function useDatasetLifecycleActions({
       });
 
       setDataset(updated);
-      showApiSuccess("Conjunto de dados publicado com sucesso.");
+      showApiSuccess(t("edit.publishSuccess"));
     } catch {
-      setApiError("Erro ao publicar o conjunto de dados.");
+      setApiError(t("edit.publishError"));
     }
   }
 
@@ -67,7 +70,7 @@ export function useDatasetLifecycleActions({
       push("/admin/me/datasets?status=archived");
     } catch (error) {
       console.error("Error archiving dataset:", error);
-      setApiError("Erro ao arquivar o conjunto de dados.");
+      setApiError(t("edit.archiveError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -82,7 +85,7 @@ export function useDatasetLifecycleActions({
       setDataset(updated);
     } catch (error) {
       console.error("Error unarchiving dataset:", error);
-      setApiError("Erro ao desarquivar o conjunto de dados.");
+      setApiError(t("edit.unarchiveError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -98,7 +101,7 @@ export function useDatasetLifecycleActions({
       push("/admin/me/datasets");
     } catch (error) {
       console.error("Error deleting dataset:", error);
-      setApiError("Erro ao eliminar o conjunto de dados.");
+      setApiError(t("edit.deleteError"));
       hide();
     } finally {
       setIsSubmitting(false);

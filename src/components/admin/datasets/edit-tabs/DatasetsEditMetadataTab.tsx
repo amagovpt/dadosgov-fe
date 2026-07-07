@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, type DropdownSectionProps, Switch } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import { getDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
@@ -114,9 +115,10 @@ export default function DatasetsEditMetadataTab({
   onToggleArchive,
   onOpenDeletePopup,
 }: DatasetsEditMetadataTabProps) {
-  // Authorization is decided by the backend (single source of truth).
+  const { t } = useTranslation("admin-datasets");
   const canEdit = can(dataset, "edit");
   const canDelete = can(dataset, "delete");
+
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
@@ -124,13 +126,12 @@ export default function DatasetsEditMetadataTab({
           <AdminVisibilityBanner
             description={
               <>
-                <strong>Modifique a visibilidade do conjunto de dados.</strong>
+                <strong>{t("edit.visibilityTitle")}</strong>
                 <br />
-                Este conjunto de dados encontra-se atualmente em <strong>modo privado</strong>.
-                Apenas os membros da organização o podem visualizar e editar.
+                {t("edit.visibilityDescription")}
               </>
             }
-            actionLabel="Publicar o conjunto de dados"
+            actionLabel={t("edit.publishAction")}
             disabled={isSubmitting}
             onAction={onPublishDataset}
           />
@@ -144,17 +145,15 @@ export default function DatasetsEditMetadataTab({
             void onSaveMetadata();
           }}
         >
-          <p className="text-neutral-900 text-base leading-7">
-            Os campos marcados com um asterisco ( * ) são obrigatórios.
-          </p>
+          <p className="text-neutral-900 text-base leading-7">{t("edit.requiredFields")}</p>
 
           <div>
             <h2 className="admin-page__section-title admin-page__section-title--no-top">
-              Destaque
+              {t("edit.featuredSectionTitle")}
             </h2>
             <Switch
               id="edit-featured"
-              label="Destaque"
+              label={t("edit.featuredLabel")}
               checked={featured}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => onFeaturedChange(e.target.checked)}
             />
@@ -215,7 +214,7 @@ export default function DatasetsEditMetadataTab({
               trailingIconHover="agora-solid-check-circle"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "A guardar..." : "Guardar"}
+              {isSubmitting ? t("edit.saving") : t("edit.save")}
             </Button>
           </div>
 

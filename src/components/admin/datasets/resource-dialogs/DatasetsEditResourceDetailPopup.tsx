@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -18,6 +19,8 @@ export default function DatasetsEditResourceDetailPopup({
   onDelete,
   onClose,
 }: DatasetsEditResourceDetailPopupProps) {
+  const { t } = useTranslation("admin-datasets");
+
   const formatSize = (bytes?: number) => {
     if (!bytes) return "-";
     if (bytes < 1024) return `${bytes} B`;
@@ -25,29 +28,35 @@ export default function DatasetsEditResourceDetailPopup({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const typeLabel = resource.type === "main" ? "Main file" : resource.type || "-";
+  const typeLabel = resource.type === "main" ? t("edit.resourceMainType") : resource.type || "-";
 
   const location =
     resource.filetype === "remote"
-      ? "Este recurso é um link externo"
-      : "Este recurso encontra-se nos nossos servidores";
+      ? t("edit.resourceExternalLocation")
+      : t("edit.resourceInternalLocation");
 
   return (
     <div className="flex flex-col gap-16" style={{ minHeight: "60vh" }}>
       {resource.description && <p className="text-sm text-neutral-700">{resource.description}</p>}
       <div className="flex-1 overflow-y-auto">
-        <table className="text-sm w-full">
+        <table className="w-full text-sm">
           <tbody>
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Tipo</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                {t("edit.resourcesTable.type")}
+              </td>
               <td className="py-4">{typeLabel}</td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Localização</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                {t("edit.resourceLocation")}
+              </td>
               <td className="py-4">{location}</td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">URL</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                {t("edit.resourceUrlLabel")}
+              </td>
               <td className="break-all py-4">
                 <TextLink href={resource.url}>{resource.url}</TextLink>
               </td>
@@ -55,17 +64,21 @@ export default function DatasetsEditResourceDetailPopup({
             {resource.filetype !== "remote" && (
               <>
                 <tr>
-                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Formato</td>
+                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                    {t("edit.resourcesTable.format")}
+                  </td>
                   <td className="py-4">{resource.format || "-"}</td>
                 </tr>
                 <tr>
                   <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
-                    Mime Type
+                    {t("edit.resourceMimeField")}
                   </td>
                   <td className="py-4">{resource.mime || "-"}</td>
                 </tr>
                 <tr>
-                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Tamanho</td>
+                  <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                    {t("edit.resourceSizeLabel")}
+                  </td>
                   <td className="py-4">{formatSize(resource.filesize)}</td>
                 </tr>
               </>
@@ -75,11 +88,13 @@ export default function DatasetsEditResourceDetailPopup({
                 <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
                   {resource.checksum.type}
                 </td>
-                <td className="font-mono text-xs break-all py-4">{resource.checksum.value}</td>
+                <td className="break-all py-4 font-mono text-xs">{resource.checksum.value}</td>
               </tr>
             )}
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Criado em</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                {t("edit.resourcesTable.createdAt")}
+              </td>
               <td className="py-4">
                 {format(new Date(resource.created_at), "d 'de' MMMM 'de' yyyy HH:mm", {
                   locale: pt,
@@ -88,16 +103,12 @@ export default function DatasetsEditResourceDetailPopup({
             </tr>
             <tr>
               <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
-                Modificado em
+                {t("edit.resourceModifiedAt")}
               </td>
               <td className="py-4">
-                {format(
-                  new Date(resource.last_modified || resource.created_at),
-                  "d 'de' MMMM 'de' yyyy HH:mm",
-                  {
-                    locale: pt,
-                  }
-                )}
+                {format(new Date(resource.last_modified || resource.created_at), "d 'de' MMMM 'de' yyyy HH:mm", {
+                  locale: pt,
+                })}
               </td>
             </tr>
           </tbody>
@@ -105,7 +116,7 @@ export default function DatasetsEditResourceDetailPopup({
       </div>
       <div className="flex justify-between pt-8">
         <Button appearance="outline" variant="primary" onClick={onClose}>
-          Cancelar
+          {t("edit.cancel")}
         </Button>
         <div className="flex gap-8">
           <Button
@@ -115,7 +126,7 @@ export default function DatasetsEditResourceDetailPopup({
             leadingIconHover="agora-solid-trash"
             onClick={onDelete}
           >
-            Eliminar
+            {t("edit.confirmDelete")}
           </Button>
           <Button
             variant="primary"
@@ -124,7 +135,7 @@ export default function DatasetsEditResourceDetailPopup({
             leadingIconHover="agora-solid-edit"
             onClick={onEdit}
           >
-            Editar
+            {t("edit.resourceEditAction")}
           </Button>
         </div>
       </div>

@@ -37,6 +37,7 @@ const namespaces = [
   "admin-common",
   "admin-harvesters",
   "admin-dataservices",
+  "admin-datasets",
   "admin-community-resources",
   "admin-organizations",
   "admin-reuses",

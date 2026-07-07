@@ -1,10 +1,10 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
 
 type DatasetsEditDangerZoneProps = {
   datasetArchived: boolean;
   isSubmitting: boolean;
-  // Backend-computed authorization. Archiving is an edit; deleting needs delete.
   canEdit?: boolean;
   canDelete?: boolean;
   onToggleArchive: (event: React.MouseEvent) => void | Promise<void>;
@@ -19,22 +19,20 @@ export default function DatasetsEditDangerZone({
   onToggleArchive,
   onOpenDeletePopup,
 }: DatasetsEditDangerZoneProps) {
+  const { t } = useTranslation("admin-datasets");
+
   return (
     <AdminDangerActions
-      primaryHeading={
-        canEdit
-          ? "Um conjunto de dados arquivado deixa de estar indexado no portal, mas permanece acessível através de um link direto."
-          : undefined
-      }
+      primaryHeading={canEdit ? t("edit.archiveInfo") : undefined}
       primaryActionLabel={
         canEdit
           ? datasetArchived
-            ? "Desarquivar o conjunto de dados"
-            : "Arquivar o conjunto de dados"
+            ? t("edit.unarchiveAction")
+            : t("edit.archiveAction")
           : undefined
       }
       onPrimaryAction={canEdit ? onToggleArchive : undefined}
-      dangerActionLabel={canDelete ? "Eliminar o conjunto de dados" : undefined}
+      dangerActionLabel={canDelete ? t("edit.deleteAction") : undefined}
       onDangerAction={canDelete ? onOpenDeletePopup : undefined}
       disabled={isSubmitting}
     />

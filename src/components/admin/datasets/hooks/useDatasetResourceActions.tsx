@@ -1,11 +1,9 @@
 "use client";
 
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import { usePopupContext } from "@ama-pt/agora-design-system";
-import {
-  fetchDataset,
-  uploadResource,
-} from "@/service/api/datasets";
+import { fetchDataset, uploadResource } from "@/service/api/datasets";
 import type { ResourceType } from "@/service/types/catalog";
 import type { Dataset, Resource } from "@/service/types/dataset";
 import { translateUploadError } from "@/lib/security/translateUploadError";
@@ -42,6 +40,8 @@ export function useDatasetResourceActions({
   showApiSuccess,
   isUploadingRef,
 }: UseDatasetResourceActionsParams) {
+  const { t } = useTranslation("admin-datasets");
+
   async function refreshDataset() {
     const updated = await fetchDataset(slug);
     setDataset(updated);
@@ -64,7 +64,7 @@ export function useDatasetResourceActions({
       const updated = await fetchDataset(slug);
       setDataset(updated);
       setUploaderKey((currentKey) => currentKey + 1);
-      showApiSuccess("Ficheiro(s) carregado(s) com sucesso.");
+      showApiSuccess(t("edit.resourceUploadSuccess"));
     } catch (error) {
       const err = error as { status?: number; data?: Record<string, unknown>; message?: string };
       console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
@@ -86,12 +86,12 @@ export function useDatasetResourceActions({
             .map(([key, value]) => `${key}: ${flattenValue(value)}`)
             .join(", ");
 
-        setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(message)}`);
+        setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(message)}`);
       } else if (err.message) {
-        setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(err.message)}`);
+        setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(err.message)}`);
       } else {
         const statusHint = err.status ? ` (HTTP ${err.status})` : "";
-        setFileUploadError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
+        setFileUploadError(`${t("edit.resourceUploadError")}${statusHint}. ${t("edit.resourceUploadRetry")}`);
       }
     } finally {
       isUploadingRef.current = false;
@@ -115,12 +115,12 @@ export function useDatasetResourceActions({
                 }
               : previousDataset,
           );
-          showApiSuccess("Ficheiro eliminado com sucesso.");
+          showApiSuccess(t("edit.resourceDeleted"));
         }}
       />,
       {
-        title: "Eliminar ficheiro",
-        closeAriaLabel: "Fechar",
+        title: t("edit.resourceDeleteModalTitle"),
+        closeAriaLabel: t("edit.closeAriaLabel"),
         dimensions: "m",
       },
     );
@@ -136,13 +136,13 @@ export function useDatasetResourceActions({
         resourceTypes={resourceTypes}
         onSaved={async () => {
           await refreshDataset();
-          showApiSuccess("Recurso atualizado com sucesso.");
+          showApiSuccess(t("edit.resourceUpdated"));
         }}
         onCancel={hide}
       />,
       {
         title: resource.title,
-        closeAriaLabel: "Fechar",
+        closeAriaLabel: t("edit.closeAriaLabel"),
         dimensions: "l",
       },
     );
@@ -161,13 +161,13 @@ export function useDatasetResourceActions({
             resourceTypes={resourceTypes}
             onSaved={async () => {
               await refreshDataset();
-              showApiSuccess("Recurso atualizado com sucesso.");
+              showApiSuccess(t("edit.resourceUpdated"));
             }}
             onCancel={hide}
           />,
           {
             title: resource.title,
-            closeAriaLabel: "Fechar",
+            closeAriaLabel: t("edit.closeAriaLabel"),
             dimensions: "l",
           },
         );
@@ -190,7 +190,7 @@ export function useDatasetResourceActions({
       />,
       {
         title: resource.title,
-        closeAriaLabel: "Fechar",
+        closeAriaLabel: t("edit.closeAriaLabel"),
         dimensions: "l",
       },
     );

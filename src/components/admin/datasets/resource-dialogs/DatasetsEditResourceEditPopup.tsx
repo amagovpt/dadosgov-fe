@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, InputText, InputTextArea, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
@@ -23,6 +24,7 @@ export default function DatasetsEditResourceEditPopup({
   onSaved,
   onCancel,
 }: DatasetsEditResourceEditPopupProps) {
+  const { t } = useTranslation("admin-datasets");
   const { hide } = usePopupContext();
   const [title, setTitle] = useState(resource.title);
   const [description, setDescription] = useState(resource.description || "");
@@ -44,9 +46,7 @@ export default function DatasetsEditResourceEditPopup({
       if (parsed.protocol !== "https:") return false;
       if (!parsed.hostname) return false;
       const hostname = parsed.hostname.toLowerCase();
-      const isIpv4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(
-        hostname,
-      );
+      const isIpv4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/.test(hostname);
       const labels = hostname.split(".");
       const hasValidDomainShape = labels.length >= 2;
       const hasValidLabels = labels.every(
@@ -71,16 +71,14 @@ export default function DatasetsEditResourceEditPopup({
     const trimmedUrl = resourceUrl.trim();
     if (trimmedUrl) {
       if (!isValidHttpsUrl(trimmedUrl)) {
-        setUrlError("Insira um URL válido, começando com https://");
+        setUrlError(t("edit.resourceInvalidUrl"));
         return;
       }
       setIsCheckingUrl(true);
       const reachable = await checkUrlReachable(trimmedUrl);
       setIsCheckingUrl(false);
       if (!reachable) {
-        setUrlError(
-          "URL não acessível. Verifique se o endereço está correto e acessível publicamente.",
-        );
+        setUrlError(t("edit.resourceUnreachableUrl"));
         return;
       }
     }
@@ -101,7 +99,7 @@ export default function DatasetsEditResourceEditPopup({
       onSaved();
     } catch (err) {
       console.error("Error updating resource:", err);
-      setError("Erro ao guardar as alterações.");
+      setError(t("edit.resourceSaveError"));
     } finally {
       setIsSaving(false);
     }
@@ -121,7 +119,7 @@ export default function DatasetsEditResourceEditPopup({
       console.error("Error replacing file:", apiErr.status, apiErr.data);
       const msg = apiErr.data?.message
         ? translateUploadError(String(apiErr.data.message))
-        : `Erro ao substituir o ficheiro (${apiErr.status || "desconhecido"}).`;
+        : t("edit.resourceReplaceError", { status: apiErr.status || "desconhecido" });
       setError(msg);
     } finally {
       setIsReplacing(false);
@@ -140,18 +138,18 @@ export default function DatasetsEditResourceEditPopup({
     >
       {error && <StatusCard variant="danger" description={error} />}
 
-      <div className="flex-1 overflow-y-auto flex flex-col gap-16">
+      <div className="flex flex-1 flex-col gap-16 overflow-y-auto">
         <InputText
-          label="Título *"
-          placeholder="Título do recurso"
+          label={t("edit.resourceTitleField")}
+          placeholder={t("edit.resourceTitlePlaceholder")}
           id="res-edit-title"
           value={title}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
         />
 
         <IsolatedSelect
-          label="Tipo *"
-          placeholder="Selecione um tipo..."
+          label={t("edit.resourceTypeField")}
+          placeholder={t("edit.resourceTypePlaceholder")}
           id="res-edit-type"
           defaultValue={resource.type || "main"}
           onChangeRef={resourceTypeRef}
@@ -170,8 +168,8 @@ export default function DatasetsEditResourceEditPopup({
         </IsolatedSelect>
 
         <InputTextArea
-          label="Descrição"
-          placeholder="Descrição do recurso"
+          label={t("edit.resourceDescriptionField")}
+          placeholder={t("edit.resourceDescriptionPlaceholder")}
           id="res-edit-description"
           rows={4}
           value={description}
@@ -179,8 +177,8 @@ export default function DatasetsEditResourceEditPopup({
         />
 
         <InputText
-          label="URL *"
-          placeholder="URL do recurso"
+          label={t("edit.resourceUrlField")}
+          placeholder={t("edit.resourceUrlPlaceholder")}
           id="res-edit-url"
           value={resourceUrl}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -196,16 +194,16 @@ export default function DatasetsEditResourceEditPopup({
           <>
             <div className="grid grid-cols-2 gap-16">
               <InputText
-                label="Tamanho"
-                placeholder="Tamanho em bytes"
+                label={t("edit.resourceSizeField")}
+                placeholder={t("edit.resourceSizePlaceholder")}
                 id="res-edit-filesize"
                 value={filesize}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilesize(e.target.value)}
                 disabled
               />
               <InputText
-                label="Formato"
-                placeholder="csv, json, xlsx..."
+                label={t("edit.resourceFormatField")}
+                placeholder={t("edit.resourceFormatPlaceholder")}
                 id="res-edit-format"
                 value={resourceFormat}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setResourceFormat(e.target.value)}
@@ -214,8 +212,8 @@ export default function DatasetsEditResourceEditPopup({
             </div>
 
             <InputText
-              label="Mime Type"
-              placeholder="application/json, text/csv..."
+              label={t("edit.resourceMimeField")}
+              placeholder={t("edit.resourceMimePlaceholder")}
               id="res-edit-mime"
               value={mime}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMime(e.target.value)}
@@ -226,18 +224,18 @@ export default function DatasetsEditResourceEditPopup({
 
         {resource.checksum && (
           <div className="flex items-center gap-8">
-            <span className="text-sm font-semibold">Soma de verificação</span>
-            <span className="bg-neutral-100 rounded px-8 py-2 text-xs font-mono">
+            <span className="text-sm font-semibold">{t("edit.resourceChecksum")}</span>
+            <span className="rounded bg-neutral-100 px-8 py-2 text-xs font-mono">
               {resource.checksum.type}
             </span>
-            <span className="text-xs font-mono break-all">{resource.checksum.value}</span>
+            <span className="break-all text-xs font-mono">{resource.checksum.value}</span>
           </div>
         )}
       </div>
 
       <div className="flex justify-between pt-8">
         <Button type="button" appearance="outline" variant="primary" onClick={onCancel}>
-          Cancelar
+          {t("edit.cancel")}
         </Button>
         <div className="flex gap-8">
           <input
@@ -254,7 +252,7 @@ export default function DatasetsEditResourceEditPopup({
             onClick={() => replaceFileInputRef.current?.click()}
             disabled={isReplacing}
           >
-            {isReplacing ? "A substituir..." : "Substituir o ficheiro"}
+            {isReplacing ? t("edit.resourceReplacing") : t("edit.resourceReplaceAction")}
           </Button>
           <Button
             type="submit"
@@ -264,7 +262,7 @@ export default function DatasetsEditResourceEditPopup({
             trailingIconHover="agora-solid-check-circle"
             disabled={isSaving || isCheckingUrl || !title.trim()}
           >
-            {isCheckingUrl ? "A verificar URL..." : isSaving ? "A guardar..." : "Guardar"}
+            {isCheckingUrl ? t("edit.resourceCheckingUrl") : isSaving ? t("edit.saving") : t("edit.save")}
           </Button>
         </div>
       </div>
