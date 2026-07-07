@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
 import ReusesEditClient from "@/components/admin/reuses/views/ReusesEditClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Editar reutilização - Admin - dados.gov.pt",
-  description: "Edição de reutilizações no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; reuseId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-reuses"],
+  });
 
-export default function ReusesEditByIdPage() {
+  return {
+    title: t("metadata.editTitle", { ns: "admin-reuses" }),
+    description: t("metadata.editDescription", { ns: "admin-reuses" }),
+  };
+}
+
+export default function ReusePage() {
   return <ReusesEditClient />;
 }

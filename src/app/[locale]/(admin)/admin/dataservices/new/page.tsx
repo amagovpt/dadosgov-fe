@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import ApiNewClient from "@/components/admin/dataservices/views/ApiNewClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Descreva a sua API - Admin - dados.gov.pt",
-  description: "Formulário de inscrição para novas APIs no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-dataservices"],
+  });
+
+  return {
+    title: t("metadata.newTitle", { ns: "admin-dataservices" }),
+    description: t("metadata.newDescription", { ns: "admin-dataservices" }),
+  };
+}
 
 export default function ApiRegistrationPage() {
   return <ApiNewClient />;

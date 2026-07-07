@@ -1,5 +1,24 @@
 {
   "title": "Conjuntos de dados",
+  "metadata": {
+    "listTitle": "Conjuntos de dados - Admin - dados.gov.pt",
+    "listDescription": "Gestão de conjuntos de dados no portal dados.gov.pt.",
+    "newTitle": "Publique em dados.gov.pt - Admin - dados.gov.pt",
+    "newDescription": "Escolha como publicar os seus dados no portal dados.gov.pt.",
+    "editTitle": "Editar conjunto de dados - Admin - dados.gov.pt",
+    "editDescription": "Edição de conjuntos de dados no portal dados.gov.pt.",
+    "myEditDescription": "Edição dos meus conjuntos de dados no portal dados.gov.pt.",
+    "orgListTitle": "Conjuntos de dados da organização - Admin - dados.gov.pt",
+    "orgListDescription": "Gestão de conjuntos de dados da organização no portal dados.gov.pt.",
+    "orgNewTitle": "Publicar conjuntos de dados da organização - Admin - dados.gov.pt",
+    "orgNewDescription": "Publicação de conjuntos de dados da organização no portal dados.gov.pt.",
+    "orgEditTitle": "Editar conjunto de dados da organização - Admin - dados.gov.pt",
+    "orgEditDescription": "Edição de conjuntos de dados da organização no portal dados.gov.pt.",
+    "systemTitle": "Conjuntos de dados do sistema - Admin - dados.gov.pt",
+    "systemDescription": "Gestão de conjuntos de dados do sistema no portal dados.gov.pt.",
+    "wizardTitle": "Publicação assistida de conjuntos de dados - Admin - dados.gov.pt",
+    "wizardDescription": "Publicação assistida de conjuntos de dados no portal dados.gov.pt."
+  },
   "form": {
     "registrationTitle": "Formulário de publicação de um conjunto de dados",
     "breadcrumbs": {

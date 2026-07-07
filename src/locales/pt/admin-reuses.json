@@ -1,5 +1,28 @@
 {
   "title": "Reutilizações",
+  "metadata": {
+    "listTitle": "Reutilizações - Admin - dados.gov.pt",
+    "listDescription": "Gestão de reutilizações no portal dados.gov.pt.",
+    "newTitle": "Descreva a sua reutilização - Admin - dados.gov.pt",
+    "newDescription": "Formulário de inscrição para novas reutilizações no portal dados.gov.pt.",
+    "editTitle": "Editar reutilização - Admin - dados.gov.pt",
+    "editDescription": "Edição de reutilizações no portal dados.gov.pt.",
+    "myEditDescription": "Edição das minhas reutilizações no portal dados.gov.pt.",
+    "orgTitle": "Reutilizações - Organização - Admin - dados.gov.pt",
+    "orgDescription": "Gestão de reutilizações da organização no portal dados.gov.pt.",
+    "orgRedirectTitle": "Reutilizações da organização - Admin - dados.gov.pt",
+    "orgRedirectDescription": "Gestão de reutilizações da organização no portal dados.gov.pt.",
+    "orgNewTitle": "Nova reutilização da organização - Admin - dados.gov.pt",
+    "orgNewDescription": "Criação de reutilizações da organização no portal dados.gov.pt.",
+    "orgMemberNewTitle": "Nova reutilização - Organização - Admin - dados.gov.pt",
+    "orgMemberNewDescription": "Publique uma nova reutilização da organização no portal dados.gov.pt.",
+    "orgEditTitle": "Editar reutilização da organização - Admin - dados.gov.pt",
+    "orgEditDescription": "Edição de reutilizações da organização no portal dados.gov.pt.",
+    "orgMemberEditTitle": "Editar reutilização - Organização - Admin - dados.gov.pt",
+    "orgMemberEditDescription": "Editar reutilização da organização no portal dados.gov.pt.",
+    "systemTitle": "Reutilizações - Sistema - Admin - dados.gov.pt",
+    "systemDescription": "Gestão de reutilizações do sistema no portal dados.gov.pt."
+  },
   "search": {
     "placeholder": "Pesquise o nome da reutilização",
     "ariaLabel": "Pesquisar reutilizações"

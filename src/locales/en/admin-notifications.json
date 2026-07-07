@@ -1,5 +1,9 @@
 {
   "title": "Notifications",
+  "metadata": {
+    "title": "Notifications - Admin - dados.gov.pt",
+    "description": "Administration notifications on the dados.gov.pt portal."
+  },
   "intro": "Harvester validation requests and other notifications addressed to the administration team.",
   "empty": "No notifications at the moment.",
   "read": "read",

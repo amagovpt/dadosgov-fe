@@ -1,5 +1,24 @@
 {
   "title": "Datasets",
+  "metadata": {
+    "listTitle": "Datasets - Admin - dados.gov.pt",
+    "listDescription": "Dataset management on the dados.gov.pt portal.",
+    "newTitle": "Publish on dados.gov.pt - Admin - dados.gov.pt",
+    "newDescription": "Choose how to publish your data on the dados.gov.pt portal.",
+    "editTitle": "Edit dataset - Admin - dados.gov.pt",
+    "editDescription": "Dataset editing on the dados.gov.pt portal.",
+    "myEditDescription": "Editing my datasets on the dados.gov.pt portal.",
+    "orgListTitle": "Organization datasets - Admin - dados.gov.pt",
+    "orgListDescription": "Organization dataset management on the dados.gov.pt portal.",
+    "orgNewTitle": "Publish organization datasets - Admin - dados.gov.pt",
+    "orgNewDescription": "Publishing organization datasets on the dados.gov.pt portal.",
+    "orgEditTitle": "Edit organization dataset - Admin - dados.gov.pt",
+    "orgEditDescription": "Editing organization datasets on the dados.gov.pt portal.",
+    "systemTitle": "System datasets - Admin - dados.gov.pt",
+    "systemDescription": "System dataset management on the dados.gov.pt portal.",
+    "wizardTitle": "Guided dataset publication - Admin - dados.gov.pt",
+    "wizardDescription": "Guided dataset publication on the dados.gov.pt portal."
+  },
   "form": {
     "registrationTitle": "Dataset publication form",
     "breadcrumbs": {

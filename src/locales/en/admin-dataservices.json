@@ -1,5 +1,19 @@
 {
   "title": "API",
+  "metadata": {
+    "listTitle": "API - Admin - dados.gov.pt",
+    "listDescription": "API management on the dados.gov.pt portal.",
+    "newTitle": "Describe your API - Admin - dados.gov.pt",
+    "newDescription": "Registration form for new APIs on the dados.gov.pt portal.",
+    "editTitle": "Edit API - Admin - dados.gov.pt",
+    "editDescription": "API editing on the dados.gov.pt portal.",
+    "orgTitle": "API - Organization - Admin - dados.gov.pt",
+    "orgDescription": "Organization API management on the dados.gov.pt portal.",
+    "orgRedirectTitle": "Organization APIs - Admin - dados.gov.pt",
+    "orgRedirectDescription": "Organization API management on the dados.gov.pt portal.",
+    "systemTitle": "API - System - Admin - dados.gov.pt",
+    "systemDescription": "System API management on the dados.gov.pt portal."
+  },
   "search": {
     "placeholder": "Search by API name",
     "ariaLabel": "Search APIs"

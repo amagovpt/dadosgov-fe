@@ -1,11 +1,29 @@
 import type { Metadata } from "next";
 import OrgReusesClient from "@/components/admin/reuses/views/OrgReusesClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Reutilizações - Organização - Admin - dados.gov.pt",
-  description: "Gestão de reutilizações da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-reuses"],
+  });
 
-export default function OrgReusesPage() {
-  return <OrgReusesClient />;
+  return {
+    title: t("metadata.orgTitle", { ns: "admin-reuses" }),
+    description: t("metadata.orgDescription", { ns: "admin-reuses" }),
+  };
+}
+
+export default async function OrgReusesPage({
+  params,
+}: {
+  params: Promise<{ orgId: string }>;
+}) {
+  const { orgId } = await params;
+  return <OrgReusesClient orgId={orgId} />;
 }

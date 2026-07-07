@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
-import OrgReusesNewClient from "@/components/admin/reuses/views/OrgReusesNewClient";
+import ReusesNewClient from "@/components/admin/reuses/views/ReusesNewClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Nova reutilização - Organização - Admin - dados.gov.pt",
-  description: "Publique uma nova reutilização da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-reuses"],
+  });
+
+  return {
+    title: t("metadata.orgMemberNewTitle", { ns: "admin-reuses" }),
+    description: t("metadata.orgMemberNewDescription", { ns: "admin-reuses" }),
+  };
+}
 
 export default function OrgReusesNewPage() {
-  return <OrgReusesNewClient />;
+  return <ReusesNewClient />;
 }

@@ -1,5 +1,28 @@
 {
   "title": "Reuses",
+  "metadata": {
+    "listTitle": "Reuses - Admin - dados.gov.pt",
+    "listDescription": "Reuse management on the dados.gov.pt portal.",
+    "newTitle": "Describe your reuse - Admin - dados.gov.pt",
+    "newDescription": "Registration form for new reuses on the dados.gov.pt portal.",
+    "editTitle": "Edit reuse - Admin - dados.gov.pt",
+    "editDescription": "Reuse editing on the dados.gov.pt portal.",
+    "myEditDescription": "Editing my reuses on the dados.gov.pt portal.",
+    "orgTitle": "Reuses - Organization - Admin - dados.gov.pt",
+    "orgDescription": "Organization reuse management on the dados.gov.pt portal.",
+    "orgRedirectTitle": "Organization reuses - Admin - dados.gov.pt",
+    "orgRedirectDescription": "Organization reuse management on the dados.gov.pt portal.",
+    "orgNewTitle": "New organization reuse - Admin - dados.gov.pt",
+    "orgNewDescription": "Creating organization reuses on the dados.gov.pt portal.",
+    "orgMemberNewTitle": "New reuse - Organization - Admin - dados.gov.pt",
+    "orgMemberNewDescription": "Publish a new organization reuse on the dados.gov.pt portal.",
+    "orgEditTitle": "Edit organization reuse - Admin - dados.gov.pt",
+    "orgEditDescription": "Editing organization reuses on the dados.gov.pt portal.",
+    "orgMemberEditTitle": "Edit reuse - Organization - Admin - dados.gov.pt",
+    "orgMemberEditDescription": "Edit organization reuse on the dados.gov.pt portal.",
+    "systemTitle": "Reuses - System - Admin - dados.gov.pt",
+    "systemDescription": "System reuse management on the dados.gov.pt portal."
+  },
   "search": {
     "placeholder": "Search by reuse name",
     "ariaLabel": "Search reuses"

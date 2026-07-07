@@ -1,5 +1,19 @@
 {
   "title": "API",
+  "metadata": {
+    "listTitle": "API - Admin - dados.gov.pt",
+    "listDescription": "Gestão de APIs no portal dados.gov.pt.",
+    "newTitle": "Descreva a sua API - Admin - dados.gov.pt",
+    "newDescription": "Formulário de inscrição para novas APIs no portal dados.gov.pt.",
+    "editTitle": "Editar API - Admin - dados.gov.pt",
+    "editDescription": "Edição de APIs no portal dados.gov.pt.",
+    "orgTitle": "API - Organização - Admin - dados.gov.pt",
+    "orgDescription": "Gestão de APIs da organização no portal dados.gov.pt.",
+    "orgRedirectTitle": "APIs da organização - Admin - dados.gov.pt",
+    "orgRedirectDescription": "Gestão de APIs da organização no portal dados.gov.pt.",
+    "systemTitle": "API - Sistema - Admin - dados.gov.pt",
+    "systemDescription": "Gestão de APIs do sistema no portal dados.gov.pt."
+  },
   "search": {
     "placeholder": "Pesquise o nome da API",
     "ariaLabel": "Pesquisar APIs"

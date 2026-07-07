@@ -1,12 +1,29 @@
 import type { Metadata } from "next";
 import OrgDatasetsClient from "@/components/admin/datasets/views/OrgDatasetsClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Conjuntos de dados da organização - Admin - dados.gov.pt",
-  description: "Gestão de conjuntos de dados da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-datasets"],
+  });
 
-export default async function OrgDatasetsPage({ params }: { params: Promise<{ orgId: string }> }) {
+  return {
+    title: t("metadata.orgListTitle", { ns: "admin-datasets" }),
+    description: t("metadata.orgListDescription", { ns: "admin-datasets" }),
+  };
+}
+
+export default async function OrgDatasetsPage({
+  params,
+}: {
+  params: Promise<{ orgId: string }>;
+}) {
   const { orgId } = await params;
   return <OrgDatasetsClient orgId={orgId} />;
 }

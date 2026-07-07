@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import DatasetsEditClient from "@/components/admin/datasets/views/DatasetsEditClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Editar conjunto de dados da organização - Admin - dados.gov.pt",
-  description: "Edição de conjuntos de dados da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-datasets"],
+  });
+
+  return {
+    title: t("metadata.orgEditTitle", { ns: "admin-datasets" }),
+    description: t("metadata.orgEditDescription", { ns: "admin-datasets" }),
+  };
+}
 
 export default function OrgDatasetsEditPage() {
   return <DatasetsEditClient />;

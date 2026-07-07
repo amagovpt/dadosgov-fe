@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import DatasetsNewClient from "@/components/admin/datasets/views/DatasetsNewClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Publique em dados.gov.pt - Admin - dados.gov.pt",
-  description: "Escolha como publicar os seus dados no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-datasets"],
+  });
+
+  return {
+    title: t("metadata.newTitle", { ns: "admin-datasets" }),
+    description: t("metadata.newDescription", { ns: "admin-datasets" }),
+  };
+}
 
 export default function DatasetsNewPage() {
   return <DatasetsNewClient />;

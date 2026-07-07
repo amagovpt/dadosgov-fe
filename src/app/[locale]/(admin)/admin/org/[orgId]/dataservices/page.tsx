@@ -1,11 +1,29 @@
 import type { Metadata } from "next";
 import OrgDataservicesClient from "@/components/admin/dataservices/views/OrgDataservicesClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "API - Organização - Admin - dados.gov.pt",
-  description: "Gestão de APIs da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-dataservices"],
+  });
 
-export default function OrgDataservicesPage() {
-  return <OrgDataservicesClient />;
+  return {
+    title: t("metadata.orgTitle", { ns: "admin-dataservices" }),
+    description: t("metadata.orgDescription", { ns: "admin-dataservices" }),
+  };
+}
+
+export default async function OrgDataservicesPage({
+  params,
+}: {
+  params: Promise<{ orgId: string }>;
+}) {
+  const { orgId } = await params;
+  return <OrgDataservicesClient orgId={orgId} />;
 }
