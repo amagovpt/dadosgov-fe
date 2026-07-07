@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   InputText,
-  InputTextArea,
-  RadioButton,
   Icon,
   StatusCard,
   InputSelect,
@@ -26,6 +25,8 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import DataservicesEditDeletePopup from "@/components/admin/dataservices/DataservicesEditDeletePopup";
 import DataservicesEditDiscussionsTab from "@/components/admin/dataservices/DataservicesEditDiscussionsTab";
 import DataservicesEditActivitiesTab from "@/components/admin/dataservices/DataservicesEditActivitiesTab";
+import DataserviceDescriptionSection from "@/components/admin/dataservices/form-sections/DataserviceDescriptionSection";
+import DataserviceAccessSection from "@/components/admin/dataservices/form-sections/DataserviceAccessSection";
 import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDataserviceAuxiliarItems } from "@/components/admin/dataservices/dataservicesAuxiliarItems";
 import AppIcon from "@/components/Primitives/AppIcon";
@@ -56,6 +57,7 @@ export default function DataservicesEditClient() {
   const router = useRouter();
   const { user } = useAuth();
   const { show, hide } = usePopupContext();
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const searchParams = useSearchParams();
   const idOrSlug = searchParams.get("id") || searchParams.get("slug") || "";
 
@@ -221,7 +223,7 @@ export default function DataservicesEditClient() {
       slug = raw.split("/").filter(Boolean).pop() || "";
     }
     if (!slug) {
-      setDatasetLinkError("URL inválido. Cole o link de um conjunto de dados deste portal.");
+      setDatasetLinkError(t("admin-dataservices:edit.invalidDatasetUrl"));
       return;
     }
 
@@ -229,13 +231,13 @@ export default function DataservicesEditClient() {
     try {
       const dataset = await fetchDataset(slug);
       if (selectedDatasets.some((d) => d.id === dataset.id)) {
-        setDatasetLinkError("Este conjunto de dados já foi adicionado.");
+        setDatasetLinkError(t("admin-dataservices:edit.datasetAlreadyAdded"));
         return;
       }
       setLinkDatasets((prev) => [...prev, dataset]);
       setDatasetLinkUrl("");
     } catch {
-      setDatasetLinkError("Conjunto de dados não encontrado neste portal.");
+      setDatasetLinkError(t("admin-dataservices:edit.datasetNotFound"));
     } finally {
       setIsResolvingLink(false);
     }
@@ -327,7 +329,7 @@ export default function DataservicesEditClient() {
           isRestricted && usesOtherReason ? reasonText.trim() || undefined : undefined,
       });
       setDataservice(updated);
-      setApiSuccess("API atualizada com sucesso.");
+      setApiSuccess(t("admin-dataservices:edit.updateSuccess"));
       setTimeout(() => setApiSuccess(null), 10000);
     } catch (error: unknown) {
       const err = error as { data?: Record<string, unknown> };
@@ -336,7 +338,7 @@ export default function DataservicesEditClient() {
           ? Object.entries(err.data)
               .map(([k, v]) => `${k}: ${v}`)
               .join(", ")
-          : "Erro ao guardar. Tente novamente."
+          : t("admin-dataservices:edit.saveError")
       );
     } finally {
       setIsSaving(false);
@@ -353,7 +355,7 @@ export default function DataservicesEditClient() {
         datasets: selectedDatasets.map((d) => d.id),
       });
       setDataservice(updated);
-      setApiSuccess("Conjuntos de dados associados com sucesso.");
+      setApiSuccess(t("admin-dataservices:edit.datasetAssociationSuccess"));
       setTimeout(() => setApiSuccess(null), 10000);
     } catch (error: unknown) {
       const err = error as { data?: Record<string, unknown> };
@@ -362,7 +364,7 @@ export default function DataservicesEditClient() {
           ? Object.entries(err.data)
               .map(([k, v]) => `${k}: ${v}`)
               .join(", ")
-          : "Erro ao associar conjuntos de dados."
+          : t("admin-dataservices:edit.datasetAssociationError")
       );
     } finally {
       setIsSaving(false);
@@ -377,10 +379,10 @@ export default function DataservicesEditClient() {
     try {
       const updated = await updateDataservice(dataservice.id, { private: false });
       setDataservice(updated);
-      setApiSuccess("API publicada com sucesso.");
+      setApiSuccess(t("admin-dataservices:edit.publishSuccess"));
       setTimeout(() => setApiSuccess(null), 10000);
     } catch {
-      setApiError("Erro ao publicar a API. Tente novamente.");
+      setApiError(t("admin-dataservices:edit.publishError"));
     } finally {
       setIsSaving(false);
     }
@@ -397,14 +399,18 @@ export default function DataservicesEditClient() {
         archived_at: isArchiving ? new Date().toISOString() : null,
       });
       setDataservice(updated);
-      setApiSuccess(isArchiving ? "API arquivada com sucesso." : "API desarquivada com sucesso.");
+      setApiSuccess(
+        isArchiving
+          ? t("admin-dataservices:edit.archiveSuccess")
+          : t("admin-dataservices:edit.unarchiveSuccess")
+      );
       setTimeout(() => setApiSuccess(null), 10000);
     } catch (error) {
       console.error("Error archiving dataservice:", error);
       setApiError(
         isArchiving
-          ? "Erro ao arquivar a API. Tente novamente."
-          : "Erro ao desarquivar a API. Tente novamente."
+          ? t("admin-dataservices:edit.archiveError")
+          : t("admin-dataservices:edit.unarchiveError")
       );
     } finally {
       setIsSaving(false);
@@ -427,8 +433,8 @@ export default function DataservicesEditClient() {
   const handleOpenDeletePopup = () => {
     if (!dataservice) return;
     show(<DataservicesEditDeletePopup onClose={hide} onConfirm={confirmDelete} />, {
-      title: "Elimine a API",
-      closeAriaLabel: "Fechar",
+      title: t("admin-dataservices:edit.deleteTitle"),
+      closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
       dimensions: "m",
     });
   };
@@ -450,11 +456,11 @@ export default function DataservicesEditClient() {
 
   return (
     <AdminLayout
-      title={dataservice?.title || "Editar API"}
+      title={dataservice?.title || t("admin-dataservices:edit.titleFallback")}
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "API", url: "/admin/dataservices" },
-        { label: dataservice?.title || "Editar", url: "#" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-dataservices:title"), url: "/admin/dataservices" },
+        { label: dataservice?.title || t("admin-dataservices:edit.breadcrumb"), url: "#" },
       ]}
       headerAction={
         <Button
@@ -467,13 +473,13 @@ export default function DataservicesEditClient() {
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="h-16 w-16" />
-            Ver página pública
+            {t("admin-dataservices:edit.viewPublicPage")}
           </span>
         </Button>
       }
     >
       {isLoading ? null : !dataservice ? (
-        <p className="text-neutral-500">API não encontrada.</p>
+        <p className="text-neutral-500">{t("admin-dataservices:edit.notFound")}</p>
       ) : (
         <>
           {apiError && (
@@ -490,28 +496,36 @@ export default function DataservicesEditClient() {
           <div className="admin-edit-info">
             <div className="admin-edit-info__badges">
               <Pill variant={dataservice.private ? "warning" : "success"}>
-                {dataservice.private ? "RASCUNHO" : "PÚBLICO"}
+                {dataservice.private
+                  ? t("admin-dataservices:edit.draftStatus")
+                  : t("admin-dataservices:edit.publicStatus")}
               </Pill>
-              {dataservice.archived_at && <Pill variant="neutral">ARQUIVADO</Pill>}
+              {dataservice.archived_at && (
+                <Pill variant="neutral">{t("admin-dataservices:edit.archivedStatus")}</Pill>
+              )}
               <span className="admin-edit-info__stat">
                 <Icon name="agora-line-eye" className="admin-edit-info__stat-icon" />
-                {`${dataservice.metrics?.views || 0} visualizações`}
+                {t("admin-dataservices:edit.views", {
+                  count: dataservice.metrics?.views || 0,
+                })}
               </span>
               <span className="admin-edit-info__stat">
                 <Icon name="agora-line-star" className="admin-edit-info__stat-icon" />
-                {`${dataservice.metrics?.followers || 0} favoritos`}
+                {t("admin-dataservices:edit.favorites", {
+                  count: dataservice.metrics?.followers || 0,
+                })}
               </span>
             </div>
 
             <p className="admin-edit-info__activity">
               <Icon name="agora-line-clock" className="admin-edit-info__clock-icon" />
-              {" Atividade mais recente: "}
+              {` ${t("admin-dataservices:edit.latestActivity")} `}
               {dataservice.owner && (
                 <TextLink href={`/users/${dataservice.owner.slug}`}>
                   {dataservice.owner.first_name} {dataservice.owner.last_name}
                 </TextLink>
               )}
-              {" — atualizou a API — "}
+              {` — ${t("admin-dataservices:edit.updatedApi")} — `}
               <span>{lastActivityDate}</span>
             </p>
           </div>
@@ -526,7 +540,7 @@ export default function DataservicesEditClient() {
           >
             {/* Metadata Tab */}
             <Tab>
-              <TabHeader>Metadados</TabHeader>
+              <TabHeader>{t("admin-dataservices:edit.metadataTab")}</TabHeader>
               <TabBody>
                 <div className="admin-page__body">
                   <div className="admin-page__form-area">
@@ -537,11 +551,13 @@ export default function DataservicesEditClient() {
                           showIcon
                           description={
                             <>
-                              <strong>Modifique a visibilidade da API.</strong>
+                              <strong>
+                                {t("admin-dataservices:edit.visibilityTitle")}
+                              </strong>
                               <br />
-                              Esta API encontra-se atualmente em{" "}
-                              <strong>modo rascunho</strong>. Apenas o produtor e os membros
-                              da organização a podem visualizar e editar.
+                              {t("admin-dataservices:edit.visibilityDescriptionPrefix")}{" "}
+                              <strong>{t("admin-dataservices:edit.draftMode")}</strong>.{" "}
+                              {t("admin-dataservices:edit.visibilityDescriptionSuffix")}
                             </>
                           }
                         />
@@ -552,7 +568,7 @@ export default function DataservicesEditClient() {
                             onClick={handlePublish}
                             disabled={isSaving}
                           >
-                            Publicar API
+                            {t("admin-dataservices:form.publishApi")}
                           </Button>
                         </div>
                       </div>
@@ -564,210 +580,67 @@ export default function DataservicesEditClient() {
                       onSubmit={(e) => e.preventDefault()}
                     >
                       <p className="text-neutral-900 text-base leading-7">
-                        Os campos marcados com um asterisco ( * ) são obrigatórios.
+                        {t("admin-dataservices:form.requiredFields")}
                       </p>
 
-                      <h2 className="admin-page__section-title">Descrição</h2>
+                      <DataserviceDescriptionSection
+                        idPrefix="edit-api"
+                        apiName={title}
+                        apiAcronym={acronym}
+                        apiDescription={description}
+                        baseApiUrl={baseApiUrl}
+                        machineDocUrl={machineDocUrl}
+                        technicalDocUrl={technicalDocUrl}
+                        rateLimiting={rateLimiting}
+                        availability={availability}
+                        hasApiNameError={!!formErrors.title}
+                        hasApiDescriptionError={!!formErrors.description}
+                        showRateLimiting={false}
+                        onApiNameChange={(e) => {
+                          setTitle(e.target.value);
+                          if (e.target.value.trim()) clearError("title");
+                        }}
+                        onApiAcronymChange={(e) => setAcronym(e.target.value)}
+                        onApiDescriptionChange={(e) => {
+                          setDescription(e.target.value);
+                          if (e.target.value.trim()) clearError("description");
+                        }}
+                        onBaseApiUrlChange={(e) => setBaseApiUrl(e.target.value)}
+                        onMachineDocUrlChange={(e) => setMachineDocUrl(e.target.value)}
+                        onTechnicalDocUrlChange={(e) => setTechnicalDocUrl(e.target.value)}
+                        onRateLimitingChange={(e) => setRateLimiting(e.target.value)}
+                        onAvailabilityChange={(e) => setAvailability(e.target.value)}
+                      />
+
+                      <DataserviceAccessSection
+                        idPrefix="edit-api"
+                        accountAccessValue="open_with_account"
+                        accessType={accessType}
+                        authRequestUrl={authRequestUrl}
+                        businessDocUrl={businessDocUrl}
+                        accessAudiences={accessAudiences}
+                        audienceRoles={AUDIENCE_ROLES}
+                        audienceConditions={AUDIENCE_CONDITIONS}
+                        reasonCategory={reasonCategory}
+                        restrictionReasons={RESTRICTION_REASONS}
+                        reasonText={reasonText}
+                        onAccessTypeChange={setAccessType}
+                        onAuthRequestUrlChange={(e) => setAuthRequestUrl(e.target.value)}
+                        onBusinessDocUrlChange={(e) => setBusinessDocUrl(e.target.value)}
+                        onAudienceChange={(role, condition) =>
+                          setAccessAudiences((prev) => ({ ...prev, [role]: condition }))
+                        }
+                        onReasonCategoryChange={setReasonCategory}
+                        onReasonTextChange={(e) => setReasonText(e.target.value)}
+                      />
+
+                      <h2 className="admin-page__section-title">
+                        {t("admin-dataservices:fields.termsOfUse")}
+                      </h2>
                       <div className="admin-page__fields-group">
                         <InputText
-                          label="Nome da API *"
-                          placeholder="Insira o nome aqui"
-                          id="edit-api-name"
-                          value={title}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            setTitle(e.target.value);
-                            if (e.target.value.trim()) clearError("title");
-                          }}
-                          hasError={!!formErrors.title}
-                          hasFeedback={!!formErrors.title}
-                          feedbackState="danger"
-                          errorFeedbackText="Campo obrigatório"
-                        />
-                        <InputText
-                          label="Sigla"
-                          placeholder="Insira a sigla aqui"
-                          id="edit-api-acronym"
-                          value={acronym}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setAcronym(e.target.value)
-                          }
-                        />
-                        <InputTextArea
-                          label="Descrição *"
-                          placeholder="Insira a descrição aqui"
-                          id="edit-api-description"
-                          rows={4}
-                          maxLength={246}
-                          value={description}
-                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                            setDescription(e.target.value);
-                            if (e.target.value.trim()) clearError("description");
-                          }}
-                          hasError={!!formErrors.description}
-                          hasFeedback={!!formErrors.description}
-                          feedbackState="danger"
-                          errorFeedbackText="Campo obrigatório"
-                        />
-                        <InputText
-                          label="Link raiz da API"
-                          placeholder="Insira o URL aqui"
-                          id="edit-api-root-link"
-                          value={baseApiUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setBaseApiUrl(e.target.value)
-                          }
-                        />
-                        <InputText
-                          label="Link para a documentação da API (ficheiro OpenAPI ou Swagger)"
-                          placeholder="Insira o URL aqui"
-                          id="edit-api-doc-openapi"
-                          value={machineDocUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setMachineDocUrl(e.target.value)
-                          }
-                        />
-                        <InputText
-                          label="Link para a documentação técnica da API"
-                          placeholder="Insira o URL aqui"
-                          id="edit-api-doc-technical"
-                          value={technicalDocUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setTechnicalDocUrl(e.target.value)
-                          }
-                        />
-                        <InputText
-                          label="Disponibilidade"
-                          placeholder="99,9"
-                          id="edit-api-availability"
-                          value={availability}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setAvailability(e.target.value)
-                          }
-                        />
-                      </div>
-
-                      <h2 className="admin-page__section-title">Acesso</h2>
-                      <div className="admin-page__fields-group">
-                        <div className="flex flex-col gap-8">
-                          <span className="text-primary-900 text-base font-medium leading-7">
-                            Tipo de acesso
-                          </span>
-                          <div className="flex flex-row gap-4">
-                            <RadioButton
-                              label="Abrir"
-                              id="edit-access-open"
-                              name="edit-access-type"
-                              checked={accessType === "open"}
-                              onChange={() => setAccessType("open")}
-                            />
-                            <RadioButton
-                              label="Abrir com conta"
-                              id="edit-access-account"
-                              name="edit-access-type"
-                              checked={accessType === "open_with_account"}
-                              onChange={() => setAccessType("open_with_account")}
-                            />
-                            <RadioButton
-                              label="Restrito"
-                              id="edit-access-restricted"
-                              name="edit-access-type"
-                              checked={accessType === "restricted"}
-                              onChange={() => setAccessType("restricted")}
-                            />
-                          </div>
-                        </div>
-
-                        {accessType === "restricted" && (
-                          <>
-                            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                              {AUDIENCE_ROLES.map((role) => (
-                                <InputSelect
-                                  key={role.role}
-                                  label={role.label}
-                                  placeholder="Selecione uma opção"
-                                  id={`edit-access-audience-${role.role}`}
-                                  onChange={(options) =>
-                                    setAccessAudiences((prev) => ({
-                                      ...prev,
-                                      [role.role]: (options[0]?.value as string) || "",
-                                    }))
-                                  }
-                                >
-                                  <DropdownSection name={`audience-${role.role}`}>
-                                    {AUDIENCE_CONDITIONS.map((condition) => (
-                                      <DropdownOption
-                                        key={condition.value}
-                                        value={condition.value}
-                                        selected={accessAudiences[role.role] === condition.value}
-                                      >
-                                        {condition.label}
-                                      </DropdownOption>
-                                    ))}
-                                  </DropdownSection>
-                                </InputSelect>
-                              ))}
-                            </div>
-
-                            <InputSelect
-                              label="Motivo da restrição"
-                              placeholder="Selecione uma opção"
-                              id="edit-access-reason-category"
-                              onChange={(options) =>
-                                setReasonCategory((options[0]?.value as string) || "")
-                              }
-                            >
-                              <DropdownSection name="reason-category">
-                                {RESTRICTION_REASONS.map((reason) => (
-                                  <DropdownOption
-                                    key={reason.value}
-                                    value={reason.value}
-                                    selected={reasonCategory === reason.value}
-                                  >
-                                    {reason.label}
-                                  </DropdownOption>
-                                ))}
-                              </DropdownSection>
-                            </InputSelect>
-
-                            {reasonCategory === "other" && (
-                              <InputText
-                                label="Especifique o motivo da restrição"
-                                placeholder="Descreva o motivo"
-                                id="edit-access-reason-text"
-                                value={reasonText}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                  setReasonText(e.target.value)
-                                }
-                              />
-                            )}
-                          </>
-                        )}
-
-                        <InputText
-                          label="Link para a ferramenta de autorização de acesso"
-                          placeholder="Insira o URL aqui"
-                          id="edit-api-auth-tool"
-                          value={authRequestUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setAuthRequestUrl(e.target.value)
-                          }
-                        />
-                        <InputText
-                          label="Link para a documentação comercial da API"
-                          placeholder="Insira o URL aqui"
-                          id="edit-api-doc-commercial"
-                          value={businessDocUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setBusinessDocUrl(e.target.value)
-                          }
-                        />
-                      </div>
-
-                      <h2 className="admin-page__section-title">Termos de uso</h2>
-                      <div className="admin-page__fields-group">
-                        <InputText
-                          label="Limite de chamadas"
-                          placeholder="Insira aqui"
+                          label={t("admin-dataservices:fields.rateLimiting")}
+                          placeholder={t("admin-dataservices:fields.shortPlaceholder")}
                           id="edit-api-rate-limit"
                           value={rateLimiting}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -775,7 +648,7 @@ export default function DataservicesEditClient() {
                           }
                         />
                         <InputText
-                          label="Link para a documentação sobre limites de chamadas"
+                          label={t("admin-dataservices:fields.rateLimitingUrl")}
                           placeholder="https://..."
                           id="edit-api-rate-limit-url"
                           value={rateLimitingUrl}
@@ -794,7 +667,9 @@ export default function DataservicesEditClient() {
                           onClick={handleSave}
                           disabled={isSaving}
                         >
-                          {isSaving ? "A guardar..." : "Guardar"}
+                          {isSaving
+                            ? t("admin-common:actions.saving")
+                            : t("admin-common:actions.save")}
                         </Button>
                       </div>
 
@@ -806,8 +681,8 @@ export default function DataservicesEditClient() {
                             <>
                               <strong>
                                 {dataservice.archived_at
-                                  ? "Esta API está arquivada. Pode desarquivar para voltar a indexá-la no portal."
-                                  : "Uma API arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto."}
+                                  ? t("admin-dataservices:edit.archiveInfoArchived")
+                                  : t("admin-dataservices:edit.archiveInfoActive")}
                               </strong>
                               <br />
                               <Button
@@ -819,7 +694,9 @@ export default function DataservicesEditClient() {
                                 onClick={handleArchive}
                                 disabled={isSaving}
                               >
-                                {dataservice.archived_at ? "Desarquivar a API" : "Arquivar a API"}
+                                {dataservice.archived_at
+                                  ? t("admin-dataservices:edit.unarchive")
+                                  : t("admin-dataservices:edit.archive")}
                               </Button>
                             </>
                           }
@@ -829,7 +706,7 @@ export default function DataservicesEditClient() {
                           showIcon
                           description={
                             <>
-                              <strong>Atenção esta ação é irreversível.</strong>
+                              <strong>{t("admin-common:danger.irreversible")}</strong>
                               <br />
                               <Button
                                 appearance="link"
@@ -840,7 +717,7 @@ export default function DataservicesEditClient() {
                                 onClick={handleOpenDeletePopup}
                                 disabled={isSaving}
                               >
-                                Eliminar a API
+                                {t("admin-common:actions.delete")}
                               </Button>
                             </>
                           }
@@ -853,7 +730,9 @@ export default function DataservicesEditClient() {
                     <div className="admin-page__auxiliar-inner">
                       <div className="admin-page__auxiliar-header">
                         <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
-                        <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
+                        <h2 className="admin-page__auxiliar-title">
+                          {t("admin-common:auxiliary.title")}
+                        </h2>
                       </div>
                       <AuxiliarList items={auxiliarItems} />
                     </div>
@@ -864,24 +743,28 @@ export default function DataservicesEditClient() {
 
             {/* Datasets Tab */}
             <Tab>
-              <TabHeader>Conjuntos de dados associados ({selectedDatasets.length})</TabHeader>
+              <TabHeader>
+                {t("admin-dataservices:edit.datasetsTab", {
+                  count: selectedDatasets.length,
+                })}
+              </TabHeader>
               <TabBody>
                 <div className="mt-24 admin-page__form-area">
                   <StatusCard
                     variant="informative"
                     showIcon
-                    description="É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização."
+                    description={t("admin-dataservices:form.datasetLinksInfo")}
                   />
 
                   <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
                     <InputSelect
-                      label="Pesquisar um conjunto de dados"
-                      placeholder="Selecione conjuntos de dados..."
+                      label={t("admin-dataservices:datasetLinks.searchLabel")}
+                      placeholder={t("admin-dataservices:edit.datasetSelectPlaceholder")}
                       id="edit-dataservice-datasets"
                       type="checkbox"
                       searchable
-                      searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
-                      searchNoResultsText="Nenhum resultado encontrado"
+                      searchInputPlaceholder={t("admin-dataservices:edit.datasetSearchPlaceholder")}
+                      searchNoResultsText={t("admin-dataservices:edit.noDatasetResults")}
                       onSearchInputChange={setDatasetSearch}
                       onChange={(options) => {
                         const ids = options.map((o) => String(o.value));
@@ -908,7 +791,9 @@ export default function DataservicesEditClient() {
                         {selectedDatasets.map((dataset) => (
                           <Tag
                             key={dataset.id}
-                            aria-label={`Remover ${dataset.title}`}
+                            aria-label={t("admin-dataservices:edit.removeDataset", {
+                              title: dataset.title,
+                            })}
                             onClick={() => removeDataset(dataset.id)}
                           >
                             {dataset.title}
@@ -918,12 +803,14 @@ export default function DataservicesEditClient() {
                     )}
 
                     <div className="admin-page__divider-or">
-                      <span className="admin-page__divider-or-text">ou</span>
+                      <span className="admin-page__divider-or-text">
+                        {t("admin-dataservices:edit.or")}
+                      </span>
                     </div>
 
                     <div className="flex flex-col gap-8">
                       <InputText
-                        label="Link para o conjunto de dados"
+                        label={t("admin-dataservices:datasetLinks.linkLabel")}
                         placeholder="https://..."
                         id="edit-dataset-link-url"
                         value={datasetLinkUrl}
@@ -952,7 +839,7 @@ export default function DataservicesEditClient() {
                           onClick={handleAddDatasetLink}
                           disabled={isResolvingLink || !datasetLinkUrl.trim()}
                         >
-                          Adicionar
+                          {t("admin-dataservices:datasetLinks.add")}
                         </Button>
                       </div>
                     </div>
@@ -966,7 +853,9 @@ export default function DataservicesEditClient() {
                         onClick={handleSaveDatasets}
                         disabled={isSaving}
                       >
-                        {isSaving ? "A guardar..." : "Guardar"}
+                        {isSaving
+                          ? t("admin-common:actions.saving")
+                          : t("admin-common:actions.save")}
                       </Button>
                     </div>
                   </form>
@@ -976,7 +865,9 @@ export default function DataservicesEditClient() {
 
             {/* Discussions Tab */}
             <Tab>
-              <TabHeader>Discussões ({discussionsCount})</TabHeader>
+              <TabHeader>
+                {t("admin-dataservices:edit.discussionsTab", { count: discussionsCount })}
+              </TabHeader>
               <TabBody>
                 <DataservicesEditDiscussionsTab
                   discussions={discussions}
@@ -988,7 +879,7 @@ export default function DataservicesEditClient() {
 
             {/* Activities Tab */}
             <Tab>
-              <TabHeader>Atividades</TabHeader>
+              <TabHeader>{t("admin-dataservices:edit.activitiesTab")}</TabHeader>
               <TabBody>
                 <DataservicesEditActivitiesTab
                   activities={activities}

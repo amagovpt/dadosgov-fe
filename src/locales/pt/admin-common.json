@@ -19,7 +19,9 @@
   },
   "actions": {
     "delete": "Eliminar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "A guardar..."
   },
   "header": {
     "search": "Pesquisar",

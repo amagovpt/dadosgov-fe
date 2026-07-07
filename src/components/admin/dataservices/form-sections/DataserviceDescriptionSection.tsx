@@ -15,6 +15,8 @@ interface DataserviceDescriptionSectionProps {
   availability: string;
   hasApiNameError: boolean;
   hasApiDescriptionError: boolean;
+  idPrefix?: string;
+  showRateLimiting?: boolean;
   onApiNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onApiAcronymChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onApiDescriptionChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -36,6 +38,8 @@ export default function DataserviceDescriptionSection({
   availability,
   hasApiNameError,
   hasApiDescriptionError,
+  idPrefix = "api",
+  showRateLimiting = true,
   onApiNameChange,
   onApiAcronymChange,
   onApiDescriptionChange,
@@ -55,7 +59,7 @@ export default function DataserviceDescriptionSection({
         <InputText
           label={t("admin-dataservices:fields.apiName")}
           placeholder={t("admin-dataservices:fields.namePlaceholder")}
-          id="api-name"
+          id={`${idPrefix}-name`}
           value={apiName}
           onChange={onApiNameChange}
           hasError={hasApiNameError}
@@ -66,14 +70,14 @@ export default function DataserviceDescriptionSection({
         <InputText
           label={t("admin-dataservices:fields.acronym")}
           placeholder={t("admin-dataservices:fields.acronymPlaceholder")}
-          id="api-acronym"
+          id={`${idPrefix}-acronym`}
           value={apiAcronym}
           onChange={onApiAcronymChange}
         />
         <InputTextArea
           label={t("admin-dataservices:fields.apiDescription")}
           placeholder={t("admin-dataservices:fields.descriptionPlaceholder")}
-          id="api-description"
+          id={`${idPrefix}-description`}
           rows={4}
           maxLength={246}
           value={apiDescription}
@@ -86,35 +90,37 @@ export default function DataserviceDescriptionSection({
         <InputText
           label={t("admin-dataservices:fields.baseApiUrl")}
           placeholder={t("admin-dataservices:fields.urlPlaceholder")}
-          id="api-root-link"
+          id={`${idPrefix}-root-link`}
           value={baseApiUrl}
           onChange={onBaseApiUrlChange}
         />
         <InputText
           label={t("admin-dataservices:fields.machineDocUrl")}
           placeholder={t("admin-dataservices:fields.urlPlaceholder")}
-          id="api-doc-openapi"
+          id={`${idPrefix}-doc-openapi`}
           value={machineDocUrl}
           onChange={onMachineDocUrlChange}
         />
         <InputText
           label={t("admin-dataservices:fields.technicalDocUrl")}
           placeholder={t("admin-dataservices:fields.urlPlaceholder")}
-          id="api-doc-technical"
+          id={`${idPrefix}-doc-technical`}
           value={technicalDocUrl}
           onChange={onTechnicalDocUrlChange}
         />
-        <InputText
-          label={t("admin-dataservices:fields.rateLimiting")}
-          placeholder={t("admin-dataservices:fields.shortPlaceholder")}
-          id="api-rate-limit"
-          value={rateLimiting}
-          onChange={onRateLimitingChange}
-        />
+        {showRateLimiting && (
+          <InputText
+            label={t("admin-dataservices:fields.rateLimiting")}
+            placeholder={t("admin-dataservices:fields.shortPlaceholder")}
+            id={`${idPrefix}-rate-limit`}
+            value={rateLimiting}
+            onChange={onRateLimitingChange}
+          />
+        )}
         <InputText
           label={t("admin-dataservices:fields.availability")}
           placeholder="99,9"
-          id="api-availability"
+          id={`${idPrefix}-availability`}
           value={availability}
           onChange={onAvailabilityChange}
         />

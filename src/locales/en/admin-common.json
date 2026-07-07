@@ -19,7 +19,9 @@
   },
   "actions": {
     "delete": "Delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving..."
   },
   "header": {
     "search": "Search",
