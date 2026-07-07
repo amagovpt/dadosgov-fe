@@ -1,0 +1,23 @@
+{
+  "title": "Reutilizações",
+  "search": {
+    "placeholder": "Pesquise o nome da reutilização",
+    "ariaLabel": "Pesquisar reutilizações"
+  },
+  "empty": {
+    "title": "Sem reutilizações",
+    "description": "Nenhuma reutilização encontrada.",
+    "myDescription": "Não publicou reutilizações",
+    "orgDescription": "A organização ainda não publicou uma reutilização.",
+    "noOrganizationTitle": "Sem organizações",
+    "noOrganizationDescription": "Não pertence a nenhuma organização.",
+    "publicationsTitle": "Sem publicações"
+  },
+  "columns": {
+    "title": "Título da reutilização",
+    "titleShort": "Título",
+    "status": "Estado",
+    "createdAt": "Criado em",
+    "datasets": "Conjuntos de dados"
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgReuses } from "@/service/api/organizations";
@@ -17,6 +18,7 @@ import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
 
 export default function OrgReusesClient() {
+  const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const params = useParams();
   const routeOrgId = (params?.orgId as string | undefined) ?? undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -81,16 +83,23 @@ export default function OrgReusesClient() {
       createReuseColumns({
         linkStyle: "anchor",
         editHref: (reuse) => `/admin/org/reuses/edit?slug=${reuse.slug}`,
+        labels: {
+          title: t("admin-reuses:columns.title"),
+          titleShort: t("admin-reuses:columns.titleShort"),
+          status: t("admin-reuses:columns.status"),
+          createdAt: t("admin-reuses:columns.createdAt"),
+          datasets: t("admin-reuses:columns.datasets"),
+        },
       }),
-    []
+    [t]
   );
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
       <AdminEmptyState
         icon="agora-line-user-buildings"
-        title="Sem organizações"
-        description="Não pertence a nenhuma organização."
+        title={t("admin-reuses:empty.noOrganizationTitle")}
+        description={t("admin-reuses:empty.noOrganizationDescription")}
       />
     );
   }
@@ -98,11 +107,11 @@ export default function OrgReusesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: orgName || "Organização", url: "#" },
-        { label: "Reutilizações", url: "#" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
+        { label: t("admin-reuses:title"), url: "#" },
       ]}
-      title="Reutilizações"
+      title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={filteredReuses.length}
       currentPage={currentPage}
@@ -110,8 +119,8 @@ export default function OrgReusesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: "Pesquise o nome da reutilização",
-        ariaLabel: "Pesquisar reutilizações",
+        placeholder: t("admin-reuses:search.placeholder"),
+        ariaLabel: t("admin-reuses:search.ariaLabel"),
       }}
       filters={
         <StatusFilterSelect
@@ -125,8 +134,8 @@ export default function OrgReusesClient() {
       emptyState={
         <AdminEmptyState
           icon="agora-line-edit"
-          title="Sem publicações"
-          description="A organização ainda não publicou uma reutilização."
+          title={t("admin-reuses:empty.publicationsTitle")}
+          description={t("admin-reuses:empty.orgDescription")}
           createUrl="/admin/reuses/new"
         />
       }

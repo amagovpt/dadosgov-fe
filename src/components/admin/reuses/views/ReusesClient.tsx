@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchMyReuses } from "@/service/api/reuses";
@@ -16,6 +17,7 @@ import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
 
 export default function ReusesClient() {
+  const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const { displayName } = useCurrentUser();
   const searchParams = useSearchParams();
 
@@ -94,18 +96,25 @@ export default function ReusesClient() {
         showOwner: true,
         linkStyle: "textLink",
         editHref: (reuse) => `/admin/me/reuses/edit?id=${reuse.id}`,
+        labels: {
+          title: t("admin-reuses:columns.title"),
+          titleShort: t("admin-reuses:columns.titleShort"),
+          status: t("admin-reuses:columns.status"),
+          createdAt: t("admin-reuses:columns.createdAt"),
+          datasets: t("admin-reuses:columns.datasets"),
+        },
       }),
-    []
+    [t]
   );
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Reutilizações", url: "/admin/me/reuses" },
+        { label: t("admin-reuses:title"), url: "/admin/me/reuses" },
       ]}
-      title="Reutilizações"
+      title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={filteredReuses.length}
       currentPage={currentPage}
@@ -113,8 +122,8 @@ export default function ReusesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: "Pesquise o nome da reutilização",
-        ariaLabel: "Pesquisar reutilizações",
+        placeholder: t("admin-reuses:search.placeholder"),
+        ariaLabel: t("admin-reuses:search.ariaLabel"),
         onChange: handleSearch,
       }}
       filters={
@@ -130,8 +139,8 @@ export default function ReusesClient() {
       emptyState={
         <AdminEmptyState
           icon="bar_chart"
-          title="Sem reutilizações"
-          description="Não publicou reutilizações"
+          title={t("admin-reuses:empty.title")}
+          description={t("admin-reuses:empty.myDescription")}
           createUrl="/admin/reuses/new"
         />
       }

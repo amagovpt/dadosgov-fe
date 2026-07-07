@@ -48,6 +48,15 @@ interface ReuseColumnsOptions<TSortableDatasets extends boolean = true> {
   linkStyle?: "textLink" | "anchor";
   editHref: (reuse: Reuse) => string;
   sortableDatasets?: TSortableDatasets;
+  labels: ReuseColumnLabels;
+}
+
+interface ReuseColumnLabels {
+  title: string;
+  titleShort: string;
+  status: string;
+  createdAt: string;
+  datasets: string;
 }
 
 export function createReuseColumns<TSortableDatasets extends boolean = true>({
@@ -55,6 +64,7 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
   linkStyle = "textLink",
   editHref,
   sortableDatasets = true as TSortableDatasets,
+  labels,
 }: ReuseColumnsOptions<TSortableDatasets>): AdminListColumn<
   Reuse,
   ReuseSortFieldByDatasets<TSortableDatasets>
@@ -62,8 +72,8 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
   return [
     {
       id: "title",
-      header: "Título da reutilização",
-      headerLabel: "Título",
+      header: labels.title,
+      headerLabel: labels.titleShort,
       sortField: "title" as ReuseSortFieldByDatasets<TSortableDatasets>,
       sortType: "numeric",
       renderCell: (reuse) =>
@@ -77,12 +87,12 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
       renderCell: (reuse) => <ResourceStatusBadge item={reuse} />,
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created_at" as ReuseSortFieldByDatasets<TSortableDatasets>,
       sortType: "date",
       renderCell: (reuse) => (
@@ -107,8 +117,8 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
     },
     {
       id: "datasets",
-      header: "Conjuntos de dados",
-      headerLabel: "Conjuntos de dados",
+      header: labels.datasets,
+      headerLabel: labels.datasets,
       sortField: sortableDatasets
         ? ("datasets" as ReuseSortFieldByDatasets<TSortableDatasets>)
         : undefined,

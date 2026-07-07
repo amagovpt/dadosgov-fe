@@ -38,7 +38,7 @@ export function sortDataservices(
 
 interface DataserviceColumnsOptions {
   ownerMetaStyle?: "dot" | "by";
-  labels?: DataserviceColumnLabels;
+  labels: DataserviceColumnLabels;
 }
 
 interface DataserviceColumnLabels {
@@ -51,20 +51,10 @@ interface DataserviceColumnLabels {
   about: string;
 }
 
-const DEFAULT_LABELS: DataserviceColumnLabels = {
-  title: "Título da API",
-  titleShort: "Título",
-  status: "Estado",
-  createdAt: "Criado em",
-  modifiedAt: "Modificado em",
-  by: "por",
-  about: "sobre",
-};
-
 export function createDataserviceColumns({
   ownerMetaStyle = "dot",
-  labels = DEFAULT_LABELS,
-}: DataserviceColumnsOptions = {}): AdminListColumn<Dataservice, DataserviceSortField>[] {
+  labels,
+}: DataserviceColumnsOptions): AdminListColumn<Dataservice, DataserviceSortField>[] {
   return [
     {
       id: "title",

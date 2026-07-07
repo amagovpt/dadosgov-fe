@@ -39,6 +39,7 @@ const namespaces = [
   "admin-dataservices",
   "admin-community-resources",
   "admin-organizations",
+  "admin-reuses",
 ];
 
 export async function generateMetadata({

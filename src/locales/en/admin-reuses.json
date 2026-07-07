@@ -1,0 +1,23 @@
+{
+  "title": "Reuses",
+  "search": {
+    "placeholder": "Search by reuse name",
+    "ariaLabel": "Search reuses"
+  },
+  "empty": {
+    "title": "No reuses",
+    "description": "No reuse found.",
+    "myDescription": "You have not published reuses",
+    "orgDescription": "The organization has not published a reuse yet.",
+    "noOrganizationTitle": "No organizations",
+    "noOrganizationDescription": "You do not belong to any organization.",
+    "publicationsTitle": "No publications"
+  },
+  "columns": {
+    "title": "Reuse title",
+    "titleShort": "Title",
+    "status": "Status",
+    "createdAt": "Created at",
+    "datasets": "Datasets"
+  }
+}

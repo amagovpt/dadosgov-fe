@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -18,6 +19,7 @@ import {
 } from "@/components/admin/reuses/config/reusesListConfig";
 
 export default function SystemReusesClient() {
+  const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,8 +39,15 @@ export default function SystemReusesClient() {
       createReuseColumns({
         sortableDatasets: false,
         editHref: (reuse) => `/admin/reuses/${reuse.id}`,
+        labels: {
+          title: t("admin-reuses:columns.title"),
+          titleShort: t("admin-reuses:columns.titleShort"),
+          status: t("admin-reuses:columns.status"),
+          createdAt: t("admin-reuses:columns.createdAt"),
+          datasets: t("admin-reuses:columns.datasets"),
+        },
       }),
-    []
+    [t]
   );
 
   const { handleSort, getSortOrder } = useSortControls(
@@ -91,11 +100,11 @@ export default function SystemReusesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Reutilizações", url: "/admin/system/reuses" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-reuses:title"), url: "/admin/system/reuses" },
       ]}
-      title="Reutilizações"
+      title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={totalItems}
       hasItems={filteredReuses.length > 0}
@@ -104,8 +113,8 @@ export default function SystemReusesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome da reutilização",
-        ariaLabel: "Pesquisar reutilizações",
+        placeholder: t("admin-reuses:search.placeholder"),
+        ariaLabel: t("admin-reuses:search.ariaLabel"),
         onChange: handleSearch,
       }}
       filters={
@@ -121,8 +130,8 @@ export default function SystemReusesClient() {
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem reutilizações"
-          description="Nenhuma reutilização encontrada."
+          title={t("admin-reuses:empty.title")}
+          description={t("admin-reuses:empty.description")}
           hasAnchor={false}
         />
       }
