@@ -1,0 +1,71 @@
+{
+  "title": "Members",
+  "metadata": {
+    "redirectTitle": "Organization Members - Admin - dados.gov.pt",
+    "redirectDescription": "Organization member management on the dados.gov.pt portal.",
+    "pageTitle": "Members - Admin - dados.gov.pt",
+    "pageDescription": "Organization member management on the dados.gov.pt portal."
+  },
+  "breadcrumbs": {
+    "members": "Members"
+  },
+  "organizationFallback": "Organization",
+  "requestError": "An error occurred while accepting the request. Please try again.",
+  "count_one": "{{count}} member",
+  "count_other": "{{count}} members",
+  "addMember": "Add a member",
+  "columns": {
+    "member": "Members",
+    "role": "Role",
+    "since": "Member since",
+    "actions": "Actions",
+    "editRole": "Edit role",
+    "removeMember": "Remove member"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "editor": "Editor"
+  },
+  "pendingRequests": {
+    "title": "Pending membership requests ({{count}})",
+    "user": "User",
+    "comment": "Comment",
+    "requestDate": "Request date",
+    "actions": "Actions",
+    "accepting": "Accepting...",
+    "accept": "Accept",
+    "refuse": "Refuse"
+  },
+  "popups": {
+    "refuseTitle": "Refuse membership request",
+    "removeTitle": "Remove member",
+    "editRoleTitle": "Edit member role",
+    "addTitle": "Add a member to the organization"
+  },
+  "addPopup": {
+    "pendingInvite": "This user has already been invited to this organization. The invitation is still pending acceptance.",
+    "userLabel": "User",
+    "searchPlaceholder": "Search for a user",
+    "searchInputPlaceholder": "Type at least 2 characters...",
+    "searching": "Searching...",
+    "noResults": "No users found",
+    "alreadyMember": "User is already associated with this organization",
+    "roleLabel": "Member role",
+    "addError": "An error occurred while adding the member. Please try again.",
+    "add": "Add"
+  },
+  "editRolePopup": {
+    "description": "Change the role of {{name}}",
+    "roleLabel": "Member role"
+  },
+  "removePopup": {
+    "description": "Are you sure you want to remove this member?",
+    "deleting": "Removing..."
+  },
+  "refusePopup": {
+    "description": "Refuse the membership request from {{name}}?",
+    "reasonLabel": "Reason for refusal",
+    "reasonPlaceholder": "Provide the reason for refusal (optional)",
+    "refusing": "Refusing..."
+  }
+}

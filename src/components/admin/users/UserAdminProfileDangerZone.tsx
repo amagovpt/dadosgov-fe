@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
 
 type UserAdminProfileDangerZoneProps = {
@@ -16,6 +17,8 @@ export default function UserAdminProfileDangerZone({
   onToggleActive,
   onOpenDeletePopup,
 }: UserAdminProfileDangerZoneProps) {
+  const { t } = useTranslation("admin-users");
+
   return (
     <div className="dataset-edit-danger-actions">
       <StatusCard
@@ -25,8 +28,8 @@ export default function UserAdminProfileDangerZone({
           <>
             <strong>
               {userActive
-                ? "Uma conta desativada impede o utilizador de iniciar sessão no portal, mas os seus dados permanecem acessíveis."
-                : "Esta conta está desativada. O utilizador não consegue iniciar sessão no portal."}
+                ? t("dangerZone.deactivateDescription")
+                : t("dangerZone.inactiveDescription")}
             </strong>
             <br />
             <Button
@@ -38,7 +41,7 @@ export default function UserAdminProfileDangerZone({
               trailingIconHover="agora-solid-arrow-right-circle"
               onClick={onToggleActive}
             >
-              {userActive ? "Desativar conta" : "Ativar conta"}
+              {userActive ? t("dangerZone.deactivateAction") : t("dangerZone.activateAction")}
             </Button>
           </>
         }
@@ -48,7 +51,7 @@ export default function UserAdminProfileDangerZone({
         showIcon
         description={
           <>
-            <strong>Atenção esta ação é irreversível.</strong>
+            <strong>{t("dangerZone.deleteWarning")}</strong>
             <br />
             <Button
               type="button"
@@ -60,7 +63,7 @@ export default function UserAdminProfileDangerZone({
               onClick={onOpenDeletePopup}
               disabled={isDeleting}
             >
-              Eliminar o perfil
+              {t("dangerZone.deleteAction")}
             </Button>
           </>
         }

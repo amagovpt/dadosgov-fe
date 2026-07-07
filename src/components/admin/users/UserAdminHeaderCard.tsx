@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar, Button } from "@ama-pt/agora-design-system";
 import type { UserAdmin } from "@/service/types/identity";
 
@@ -17,6 +18,8 @@ export default function UserAdminHeaderCard({
   lastModified,
   onViewPublicProfile,
 }: UserAdminHeaderCardProps) {
+  const { t } = useTranslation("admin-users");
+
   return (
     <div className="profile-card">
       <Avatar
@@ -39,7 +42,7 @@ export default function UserAdminHeaderCard({
           <p className="text-neutral-900 text-xl font-semibold leading-8">{displayName}</p>
           {lastModified && (
             <p className="text-neutral-900 text-base leading-7">
-              <span className="font-semibold">Membro desde:</span> {lastModified}
+              <span className="font-semibold">{t("headerCard.memberSince")}</span> {lastModified}
             </p>
           )}
         </div>
@@ -54,7 +57,7 @@ export default function UserAdminHeaderCard({
             leadingIconHover="agora-solid-eye"
             onClick={onViewPublicProfile}
           >
-            Ver perfil público
+            {t("headerCard.viewPublicProfile")}
           </Button>
         </div>
       </div>

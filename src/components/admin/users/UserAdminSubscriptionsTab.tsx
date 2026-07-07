@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Avatar, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import type { UserFollowing } from "@/service/types/identity";
 
@@ -21,17 +22,19 @@ export default function UserAdminSubscriptionsTab({
   subscriptions,
   isLoading,
 }: UserAdminSubscriptionsTabProps) {
+  const { t } = useTranslation("admin-users");
+
   return (
     <div className="mt-24">
       {isLoading ? (
-        <p className="text-neutral-900 text-base">A carregar subscrições...</p>
+        <p className="text-neutral-900 text-base">{t("subscriptions.loading")}</p>
       ) : subscriptions.length === 0 ? (
         <CardNoResults
           className="admin-page__empty"
           position="center"
           icon={<Icon name="agora-line-bell" className="w-12 h-12 text-primary-500 icon-xl" />}
-          title="Sem subscrições"
-          description="Não segue conteúdos"
+          title={t("subscriptions.emptyTitle")}
+          description={t("subscriptions.emptyDescription")}
           hasAnchor={false}
         />
       ) : (

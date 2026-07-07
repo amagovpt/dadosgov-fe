@@ -43,6 +43,8 @@ const namespaces = [
   "admin-reuses",
   "admin-discussions",
   "admin-notifications",
+  "admin-users",
+  "admin-members",
 ];
 
 export async function generateMetadata({

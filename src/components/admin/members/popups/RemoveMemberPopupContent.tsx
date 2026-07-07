@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, usePopupContext } from "@ama-pt/agora-design-system";
 import { removeMember } from "@/service/api/organizations";
 import type { OrganizationMember } from "@/service/types/identity";
@@ -16,6 +17,7 @@ export function RemoveMemberPopupContent({
   member,
   onMemberRemoved,
 }: RemoveMemberPopupContentProps) {
+  const { t } = useTranslation(["admin-common", "admin-members"]);
   const { hide } = usePopupContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,10 +36,10 @@ export function RemoveMemberPopupContent({
 
   return (
     <div className="flex flex-col gap-24">
-      <p className="text-neutral-900">Tem a certeza que deseja eliminar este membro?</p>
+      <p className="text-neutral-900">{t("admin-members:removePopup.description")}</p>
       <div className="flex gap-16">
         <Button appearance="outline" variant="primary" onClick={() => hide()}>
-          Cancelar
+          {t("admin-common:actions.cancel")}
         </Button>
         <Button
           variant="danger"
@@ -47,7 +49,7 @@ export function RemoveMemberPopupContent({
           onClick={handleRemove}
           disabled={isSubmitting}
         >
-          {isSubmitting ? "A eliminar..." : "Eliminar"}
+          {isSubmitting ? t("admin-members:removePopup.deleting") : t("admin-common:actions.delete")}
         </Button>
       </div>
     </div>

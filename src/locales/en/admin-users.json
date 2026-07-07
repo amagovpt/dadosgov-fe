@@ -1,0 +1,98 @@
+{
+  "title": "Users",
+  "profileTitle": "Profile",
+  "metadata": {
+    "systemUsersTitle": "Users - System - Admin - dados.gov.pt",
+    "systemUsersDescription": "System user management on the dados.gov.pt portal.",
+    "profileTitle": "User Profile - Admin - dados.gov.pt",
+    "profileDescription": "Edit a user profile on the dados.gov.pt portal."
+  },
+  "breadcrumbs": {
+    "users": "Users"
+  },
+  "tabs": {
+    "profile": "Profile",
+    "activities": "Activities",
+    "subscriptions": "Subscriptions",
+    "followings": "Followers"
+  },
+  "deletePopup": {
+    "title": "Are you sure you want to delete this user?",
+    "description": "This action is irreversible."
+  },
+  "messages": {
+    "loading": "Loading...",
+    "saveError": "Error saving the profile. Please try again."
+  },
+  "followings": {
+    "emptyTitle": "No followers",
+    "emptyDescription": "This user has no followers"
+  },
+  "profileTab": {
+    "sectionTitle": "EDIT PROFILE",
+    "saveSuccess": "Profile saved successfully.",
+    "firstNameLabel": "First name *",
+    "firstNamePlaceholder": "Enter the first name here",
+    "lastNameLabel": "Last name *",
+    "lastNamePlaceholder": "Enter the last name here",
+    "biographyLabel": "Biography",
+    "biographyPlaceholder": "Enter the description here",
+    "roleLabel": "Profile",
+    "roleAdmin": "Administrator",
+    "roleEditor": "Editor",
+    "websiteLabel": "Website",
+    "websitePlaceholder": "Enter the URL here",
+    "avatarLabel": "Profile picture",
+    "avatarUploaderLabel": "Files",
+    "avatarInputLabel": "Select or drag the file",
+    "avatarRemoveFileButtonLabel": "Remove file",
+    "avatarReplaceFileButtonLabel": "Replace file",
+    "avatarExtensionsInstructions": "Maximum size: 4 MB. Accepted formats: JPG, JPEG, PNG.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "Enter the email address here",
+    "saveLoading": "Saving..."
+  },
+  "dangerZone": {
+    "deactivateDescription": "A disabled account prevents the user from signing in to the portal, but their data remains accessible.",
+    "inactiveDescription": "This account is disabled. The user cannot sign in to the portal.",
+    "deactivateAction": "Disable account",
+    "activateAction": "Enable account",
+    "deleteWarning": "Warning: this action is irreversible.",
+    "deleteAction": "Delete profile"
+  },
+  "headerCard": {
+    "memberSince": "Member since:",
+    "viewPublicProfile": "View public profile"
+  },
+  "activities": {
+    "loading": "Loading activities...",
+    "emptyTitle": "No activities",
+    "emptyDescription": "No recorded activities.",
+    "previous": "Previous",
+    "page": "Page {{page}} of {{total}}",
+    "next": "Next"
+  },
+  "subscriptions": {
+    "loading": "Loading subscriptions...",
+    "emptyTitle": "No subscriptions",
+    "emptyDescription": "This user is not following any content"
+  },
+  "list": {
+    "searchPlaceholder": "Search the user's name",
+    "searchAriaLabel": "Search users",
+    "filterPlaceholder": "Filter by profile",
+    "filterAll": "All",
+    "filterAdmin": "Admin",
+    "filterEditor": "Editor",
+    "emptyTitle": "No users",
+    "emptyDescription": "No users found."
+  },
+  "columns": {
+    "name": "Name",
+    "createdAt": "Created on",
+    "datasets": "Datasets",
+    "reuses": "Reuses",
+    "followers": "Followers",
+    "profile": "Profiles"
+  }
+}

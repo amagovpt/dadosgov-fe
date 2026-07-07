@@ -1,0 +1,98 @@
+{
+  "title": "Utilizadores",
+  "profileTitle": "Perfil",
+  "metadata": {
+    "systemUsersTitle": "Utilizadores - Sistema - Admin - dados.gov.pt",
+    "systemUsersDescription": "Gestão de utilizadores do sistema no portal dados.gov.pt.",
+    "profileTitle": "Perfil do Utilizador - Admin - dados.gov.pt",
+    "profileDescription": "Editar perfil de utilizador no portal dados.gov.pt."
+  },
+  "breadcrumbs": {
+    "users": "Utilizadores"
+  },
+  "tabs": {
+    "profile": "Perfil",
+    "activities": "Atividades",
+    "subscriptions": "Subscrições",
+    "followings": "Acompanhamentos"
+  },
+  "deletePopup": {
+    "title": "Tem a certeza que quer eliminar este utilizador?",
+    "description": "Esta ação é irreversível."
+  },
+  "messages": {
+    "loading": "A carregar...",
+    "saveError": "Erro ao guardar o perfil. Tente novamente."
+  },
+  "followings": {
+    "emptyTitle": "Sem acompanhamentos",
+    "emptyDescription": "Não tem seguidores"
+  },
+  "profileTab": {
+    "sectionTitle": "EDITAR PERFIL",
+    "saveSuccess": "Perfil guardado com sucesso.",
+    "firstNameLabel": "Nome *",
+    "firstNamePlaceholder": "Insira o nome aqui",
+    "lastNameLabel": "Último nome *",
+    "lastNamePlaceholder": "Insira o último nome aqui",
+    "biographyLabel": "Biografia",
+    "biographyPlaceholder": "Insira a descrição aqui",
+    "roleLabel": "Perfil",
+    "roleAdmin": "Administrador",
+    "roleEditor": "Editor",
+    "websiteLabel": "Site da Internet",
+    "websitePlaceholder": "Insira o URL aqui",
+    "avatarLabel": "Foto de perfil",
+    "avatarUploaderLabel": "Ficheiros",
+    "avatarInputLabel": "Selecione ou arraste o ficheiro",
+    "avatarRemoveFileButtonLabel": "Remover ficheiro",
+    "avatarReplaceFileButtonLabel": "Substituir ficheiro",
+    "avatarExtensionsInstructions": "Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG.",
+    "emailLabel": "Endereço de e-mail",
+    "emailPlaceholder": "Insira o endereço de e-mail aqui",
+    "saveLoading": "A guardar..."
+  },
+  "dangerZone": {
+    "deactivateDescription": "Uma conta desativada impede o utilizador de iniciar sessão no portal, mas os seus dados permanecem acessíveis.",
+    "inactiveDescription": "Esta conta está desativada. O utilizador não consegue iniciar sessão no portal.",
+    "deactivateAction": "Desativar conta",
+    "activateAction": "Ativar conta",
+    "deleteWarning": "Atenção esta ação é irreversível.",
+    "deleteAction": "Eliminar o perfil"
+  },
+  "headerCard": {
+    "memberSince": "Membro desde:",
+    "viewPublicProfile": "Ver perfil público"
+  },
+  "activities": {
+    "loading": "A carregar atividades...",
+    "emptyTitle": "Sem atividades",
+    "emptyDescription": "Nenhuma atividade registada.",
+    "previous": "Anterior",
+    "page": "Página {{page}} de {{total}}",
+    "next": "Seguinte"
+  },
+  "subscriptions": {
+    "loading": "A carregar subscrições...",
+    "emptyTitle": "Sem subscrições",
+    "emptyDescription": "Não segue conteúdos"
+  },
+  "list": {
+    "searchPlaceholder": "Pesquise o nome do utilizador",
+    "searchAriaLabel": "Pesquisar utilizadores",
+    "filterPlaceholder": "Filtrar por perfil",
+    "filterAll": "Todos",
+    "filterAdmin": "Admin",
+    "filterEditor": "Editor",
+    "emptyTitle": "Sem utilizadores",
+    "emptyDescription": "Nenhum utilizador encontrado."
+  },
+  "columns": {
+    "name": "Nome",
+    "createdAt": "Criado em",
+    "datasets": "Conjuntos de dados",
+    "reuses": "Reutilizações",
+    "followers": "Seguidores",
+    "profile": "Perfis"
+  }
+}

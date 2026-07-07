@@ -3,6 +3,7 @@
 import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { fetchUserFollowing } from "@/service/api/followers";
 import {
@@ -34,18 +35,24 @@ import UserAdminSubscriptionsTab from "@/components/admin/users/UserAdminSubscri
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 
 function DeleteUserPopupContent({
+  labels,
   onClose,
   onConfirm,
 }: {
+  labels: {
+    description: string;
+    cancel: string;
+    delete: string;
+  };
   onClose: () => void;
   onConfirm: () => void;
 }) {
   return (
     <div className="flex flex-col gap-16">
-      <p>Esta ação é irreversível.</p>
+      <p>{labels.description}</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Cancelar
+          {labels.cancel}
         </Button>
         <Button
           variant="danger"
@@ -54,7 +61,7 @@ function DeleteUserPopupContent({
           leadingIcon="agora-line-trash"
           leadingIconHover="agora-solid-trash"
         >
-          Eliminar
+          {labels.delete}
         </Button>
       </div>
     </div>
@@ -62,6 +69,7 @@ function DeleteUserPopupContent({
 }
 
 export default function UserProfileClient() {
+  const { t } = useTranslation(["admin-common", "admin-users"]);
   const params = useParams();
   const router = useRouter();
   const { isAdmin } = useAuth();
@@ -208,13 +216,13 @@ export default function UserProfileClient() {
       }
     } catch (error) {
       console.error("Error saving user:", error);
-      setSaveError("Erro ao guardar o perfil. Tente novamente.");
+      setSaveError(t("admin-users:messages.saveError"));
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (isLoading) return <p>A carregar...</p>;
+  if (isLoading) return <p>{t("admin-users:messages.loading")}</p>;
   if (!user) return null;
 
   const displayName = `${user.first_name} ${user.last_name}`.trim();
@@ -225,11 +233,11 @@ export default function UserProfileClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Utilizadores", url: "/admin/system/users" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-users:breadcrumbs.users"), url: "/admin/system/users" },
         { label: displayName || "..." },
       ]}
-      title="Perfil"
+      title={t("admin-users:profileTitle")}
       headerAction={null}
     >
       <UserAdminHeaderCard
@@ -242,7 +250,7 @@ export default function UserProfileClient() {
       <div className="mt-32">
         <Tabs>
           <Tab active>
-            <TabHeader>Perfil</TabHeader>
+            <TabHeader>{t("admin-users:tabs.profile")}</TabHeader>
             <TabBody>
               <UserAdminProfileTab
                 isAdmin={isAdmin}
@@ -272,17 +280,28 @@ export default function UserProfileClient() {
                 onOpenDeletePopup={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  show(<DeleteUserPopupContent onClose={hide} onConfirm={handleDeleteUser} />, {
-                    title: "Tem a certeza que quer eliminar este utilizador?",
-                    closeAriaLabel: "Fechar",
-                    dimensions: "m",
-                  });
+                  show(
+                    <DeleteUserPopupContent
+                      labels={{
+                        description: t("admin-users:deletePopup.description"),
+                        cancel: t("admin-common:actions.cancel"),
+                        delete: t("admin-common:actions.delete"),
+                      }}
+                      onClose={hide}
+                      onConfirm={handleDeleteUser}
+                    />,
+                    {
+                      title: t("admin-users:deletePopup.title"),
+                      closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
+                      dimensions: "m",
+                    }
+                  );
                 }}
               />
             </TabBody>
           </Tab>
           <Tab>
-            <TabHeader>Atividades</TabHeader>
+            <TabHeader>{t("admin-users:tabs.activities")}</TabHeader>
             <TabBody>
               <UserAdminActivitiesTab
                 activities={activities}
@@ -297,7 +316,7 @@ export default function UserProfileClient() {
             </TabBody>
           </Tab>
           <Tab>
-            <TabHeader>Subscrições</TabHeader>
+            <TabHeader>{t("admin-users:tabs.subscriptions")}</TabHeader>
             <TabBody>
               <UserAdminSubscriptionsTab
                 subscriptions={subscriptions}
@@ -306,15 +325,15 @@ export default function UserProfileClient() {
             </TabBody>
           </Tab>
           <Tab>
-            <TabHeader>Acompanhamentos</TabHeader>
+            <TabHeader>{t("admin-users:tabs.followings")}</TabHeader>
             <TabBody>
               <div className="mt-24">
                 <CardNoResults
                   className="admin-page__empty"
                   position="center"
                   icon={<Icon name="agora-line-star" className="w-12 h-12 text-primary-500 icon-xl" />}
-                  title="Sem acompanhamentos"
-                  description="Não tem seguidores"
+                  title={t("admin-users:followings.emptyTitle")}
+                  description={t("admin-users:followings.emptyDescription")}
                   hasAnchor={false}
                 />
               </div>

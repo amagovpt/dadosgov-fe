@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, usePopupContext } from "@ama-pt/agora-design-system";
 import { updateMemberRole } from "@/service/api/organizations";
 import type { OrganizationMember } from "@/service/types/identity";
@@ -19,6 +20,7 @@ export function EditRolePopupContent({
   onRoleUpdated,
   openKey,
 }: EditRolePopupContentProps) {
+  const { t } = useTranslation(["admin-common", "admin-members"]);
   const { hide } = usePopupContext();
   const [selectedRole, setSelectedRole] = useState(member.role);
 
@@ -42,14 +44,15 @@ export function EditRolePopupContent({
       }}
     >
       <p className="text-neutral-900">
-        Alterar o papel de{" "}
-        <strong>
-          {member.user.first_name} {member.user.last_name}
-        </strong>
+        {t("admin-members:editRolePopup.description", {
+          name: `${member.user.first_name} ${member.user.last_name}`,
+        })}
       </p>
 
       <div className="flex flex-col gap-12">
-        <span className="text-base font-medium leading-7 text-primary-900">Papel do membro</span>
+        <span className="text-base font-medium leading-7 text-primary-900">
+          {t("admin-members:editRolePopup.roleLabel")}
+        </span>
         <MemberRoleRadioGroup
           value={selectedRole}
           onChange={setSelectedRole}
@@ -62,7 +65,7 @@ export function EditRolePopupContent({
 
       <div className="flex gap-16">
         <Button type="button" appearance="outline" variant="primary" onClick={() => hide()}>
-          Cancelar
+          {t("admin-common:actions.cancel")}
         </Button>
         <Button
           type="submit"
@@ -71,7 +74,7 @@ export function EditRolePopupContent({
           trailingIcon="agora-line-check-circle"
           trailingIconHover="agora-solid-check-circle"
         >
-          Guardar
+          {t("admin-common:actions.save")}
         </Button>
       </div>
     </form>

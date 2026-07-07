@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CardNoResults, DropdownOption, DropdownSection, Icon, InputSelect } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
+import {
+  CardNoResults,
+  DropdownOption,
+  DropdownSection,
+  Icon,
+  InputSelect,
+} from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
@@ -11,6 +18,7 @@ import { fetchUsers } from "@/service/api/users";
 import { UserAdmin } from "@/service/types/identity";
 
 export default function SystemUsersClient() {
+  const { t } = useTranslation(["admin-common", "admin-users"]);
   const [users, setUsers] = useState<UserAdmin[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +43,20 @@ export default function SystemUsersClient() {
     sortFieldMap: userSortFieldMap,
   });
 
-  const columns = useMemo(() => createUserColumns(), []);
+  const columns = useMemo(
+    () =>
+      createUserColumns({
+        name: t("admin-users:columns.name"),
+        createdAt: t("admin-users:columns.createdAt"),
+        datasets: t("admin-users:columns.datasets"),
+        reuses: t("admin-users:columns.reuses"),
+        followers: t("admin-users:columns.followers"),
+        profile: t("admin-users:columns.profile"),
+        profileAdmin: t("admin-users:list.filterAdmin"),
+        profileEditor: t("admin-users:list.filterEditor"),
+      }),
+    [t]
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -92,11 +113,11 @@ export default function SystemUsersClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Utilizadores", url: "/admin/system/users" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-users:title"), url: "/admin/system/users" },
       ]}
-      title="Utilizadores"
+      title={t("admin-users:title")}
       isLoading={isLoading}
       count={totalItems}
       hasItems={users.length > 0}
@@ -105,15 +126,15 @@ export default function SystemUsersClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome do utilizador",
-        ariaLabel: "Pesquisar utilizadores",
+        placeholder: t("admin-users:list.searchPlaceholder"),
+        ariaLabel: t("admin-users:list.searchAriaLabel"),
         onChange: handleSearch,
       }}
       filters={
         <InputSelect
           label=""
           hideLabel
-          placeholder="Filtrar por perfil"
+          placeholder={t("admin-users:list.filterPlaceholder")}
           id="filter-profile"
           onChange={(options) => {
             updateFilter("profileFilter", options.length > 0 ? (options[0].value as string) : "");
@@ -121,13 +142,13 @@ export default function SystemUsersClient() {
         >
           <DropdownSection name="profile">
             <DropdownOption value="" selected={filters.profileFilter === ""}>
-              Todos
+              {t("admin-users:list.filterAll")}
             </DropdownOption>
             <DropdownOption value="admin" selected={filters.profileFilter === "admin"}>
-              Admin
+              {t("admin-users:list.filterAdmin")}
             </DropdownOption>
             <DropdownOption value="editor" selected={filters.profileFilter === "editor"}>
-              Editor
+              {t("admin-users:list.filterEditor")}
             </DropdownOption>
           </DropdownSection>
         </InputSelect>
@@ -136,8 +157,8 @@ export default function SystemUsersClient() {
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-user" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem utilizadores"
-          description="Nenhum utilizador encontrado."
+          title={t("admin-users:list.emptyTitle")}
+          description={t("admin-users:list.emptyDescription")}
           hasAnchor={false}
         />
       }
@@ -152,4 +173,3 @@ export default function SystemUsersClient() {
     </AdminListPage>
   );
 }
-

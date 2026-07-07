@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   ButtonUploader,
@@ -57,6 +58,8 @@ export default function UserAdminProfileTab({
   onToggleActive,
   onOpenDeletePopup,
 }: UserAdminProfileTabProps) {
+  const { t } = useTranslation(["admin-common", "admin-users"]);
+
   return (
     <form
       className="admin-page__form mt-24"
@@ -69,10 +72,14 @@ export default function UserAdminProfileTab({
         maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))",
       }}
     >
-      <h2 className="admin-page__section-title">EDITAR PERFIL</h2>
+      <h2 className="admin-page__section-title">{t("admin-users:profileTab.sectionTitle")}</h2>
 
       {saveSuccess && (
-        <StatusCard variant="success" showIcon description="Perfil guardado com sucesso." />
+        <StatusCard
+          variant="success"
+          showIcon
+          description={t("admin-users:profileTab.saveSuccess")}
+        />
       )}
       {saveError && <StatusCard variant="danger" showIcon description={saveError} />}
 
@@ -80,8 +87,8 @@ export default function UserAdminProfileTab({
         <div className="flex gap-[18px]">
           <div className="flex-1">
             <InputText
-              label="Nome *"
-              placeholder="Insira o nome aqui"
+              label={t("admin-users:profileTab.firstNameLabel")}
+              placeholder={t("admin-users:profileTab.firstNamePlaceholder")}
               id="first-name"
               value={firstName}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -91,8 +98,8 @@ export default function UserAdminProfileTab({
           </div>
           <div className="flex-1">
             <InputText
-              label="Último nome *"
-              placeholder="Insira o último nome aqui"
+              label={t("admin-users:profileTab.lastNameLabel")}
+              placeholder={t("admin-users:profileTab.lastNamePlaceholder")}
               id="last-name"
               value={lastName}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -103,8 +110,8 @@ export default function UserAdminProfileTab({
         </div>
 
         <InputTextArea
-          label="Biografia"
-          placeholder="Insira a descrição aqui"
+          label={t("admin-users:profileTab.biographyLabel")}
+          placeholder={t("admin-users:profileTab.biographyPlaceholder")}
           id="biography"
           rows={4}
           value={about}
@@ -116,12 +123,12 @@ export default function UserAdminProfileTab({
         {isAdmin && (
           <div className="flex flex-col gap-12">
             <span className="text-primary-900 text-base font-medium leading-7">
-              Perfil <span className="text-danger-600">*</span>
+              {t("admin-users:profileTab.roleLabel")} <span className="text-danger-600">*</span>
             </span>
             <div className="flex gap-24">
               {[
-                { value: "admin", label: "Administrador" },
-                { value: "editor", label: "Editor" },
+                { value: "admin", label: t("admin-users:profileTab.roleAdmin") },
+                { value: "editor", label: t("admin-users:profileTab.roleEditor") },
               ].map(({ value, label }) => (
                 <button
                   key={value}
@@ -156,8 +163,8 @@ export default function UserAdminProfileTab({
         )}
 
         <InputText
-          label="Site da Internet"
-          placeholder="Insira o URL aqui"
+          label={t("admin-users:profileTab.websiteLabel")}
+          placeholder={t("admin-users:profileTab.websitePlaceholder")}
           id="website"
           value={website}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -166,14 +173,16 @@ export default function UserAdminProfileTab({
         />
 
         <div>
-          <span className="text-primary-900 text-base font-medium leading-7">Foto de perfil</span>
+          <span className="text-primary-900 text-base font-medium leading-7">
+            {t("admin-users:profileTab.avatarLabel")}
+          </span>
           <div className="mt-2">
             <ButtonUploader
-              label="Ficheiros"
-              inputLabel="Selecione ou arraste o ficheiro"
-              removeFileButtonLabel="Remover ficheiro"
-              replaceFileButtonLabel="Substituir ficheiro"
-              extensionsInstructions="Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG."
+              label={t("admin-users:profileTab.avatarUploaderLabel")}
+              inputLabel={t("admin-users:profileTab.avatarInputLabel")}
+              removeFileButtonLabel={t("admin-users:profileTab.avatarRemoveFileButtonLabel")}
+              replaceFileButtonLabel={t("admin-users:profileTab.avatarReplaceFileButtonLabel")}
+              extensionsInstructions={t("admin-users:profileTab.avatarExtensionsInstructions")}
               accept=".jpg,.jpeg,.png"
               maxSize={4194304}
               maxCount={1}
@@ -184,8 +193,8 @@ export default function UserAdminProfileTab({
 
         {userEmail && (
           <InputText
-            label="Endereço de e-mail"
-            placeholder="Insira o endereço de e-mail aqui"
+            label={t("admin-users:profileTab.emailLabel")}
+            placeholder={t("admin-users:profileTab.emailPlaceholder")}
             id="email"
             value={userEmail}
             readOnly
@@ -202,7 +211,7 @@ export default function UserAdminProfileTab({
           leadingIconHover="agora-solid-check-circle"
           disabled={isSaving}
         >
-          {isSaving ? "A guardar..." : "Guardar"}
+          {isSaving ? t("admin-users:profileTab.saveLoading") : t("admin-common:actions.save")}
         </Button>
       </div>
 

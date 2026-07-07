@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import MembersClient from "@/components/admin/members/MembersClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Membros - Admin - dados.gov.pt",
-  description: "Gestão de membros da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-members"],
+  });
+
+  return {
+    title: t("metadata.pageTitle", { ns: "admin-members" }),
+    description: t("metadata.pageDescription", { ns: "admin-members" }),
+  };
+}
 
 export default async function MembersPage({
   params,
