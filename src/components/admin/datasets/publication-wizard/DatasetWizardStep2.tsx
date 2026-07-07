@@ -1,6 +1,7 @@
 "use client";
 
 import React, { type ReactElement } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Checkbox,
@@ -76,6 +77,7 @@ export interface DatasetWizardStep2Props {
 }
 
 export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
+  const { t } = useTranslation("admin-datasets");
   const {
     router,
     user,
@@ -134,8 +136,8 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
   const hasTemporalCoverageError =
     !!formErrors.temporalCoverage || !!formErrors.temporalCoverageInvalidFormat;
   const temporalCoverageErrorText = formErrors.temporalCoverageInvalidFormat
-    ? "Formato de data inválido. Utilize o formato dd/mm/aaaa."
-    : "A data de início não pode ser posterior à data de fim.";
+    ? t("form.invalidDateFormat")
+    : t("form.invalidTemporalRange");
 
   return (
     <>
@@ -144,30 +146,28 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
         showIcon
         description={
           <>
-            <strong>O que é um conjunto de dados?</strong>
+            <strong>{t("form.whatIsDatasetTitle")}</strong>
             <br />
-            Em dados.gov.pt, um conjunto de dados é um conjunto de ficheiros.
+            {t("form.whatIsDatasetDescription")}
           </>
         }
       />
-      <p className="pt-32 text-base leading-7 text-neutral-900">
-        Os campos marcados com um asterisco ( * ) são obrigatórios.
-      </p>
-      <h2 className="admin-page__section-title">Produtor</h2>
+      <p className="pt-32 text-base leading-7 text-neutral-900">{t("form.requiredFields")}</p>
+      <h2 className="admin-page__section-title">{t("form.producerSectionTitle")}</h2>
 
       <div className="admin-page__fields-group">
         <span className="text-base font-medium leading-7 text-primary-900">
-          Confirme a identidade que pretende utilizar na publicação.
+          {t("form.producerHelper")}
         </span>
         <IsolatedSelect
-          label="Produtor*"
-          placeholder="Selecione o produtor..."
+          label={t("form.producerLabel")}
+          placeholder={t("form.producerPlaceholder")}
           id="dataset-producer"
           defaultValue={producerDefaultValue}
           onChangeRef={selectedProducerRef}
           onChangeCallback={(value) => onProducerChange(value)}
           hasError={!!formErrors.datasetProducer}
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("form.fieldRequired")}
         >
           {producerOptions}
         </IsolatedSelect>
@@ -176,14 +176,13 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
       {(!user?.organizations || user.organizations.length === 0) && (
         <div className="admin-page__org-card rounded-lg mt-24 flex flex-col items-center gap-16 bg-neutral-50 p-8 text-center">
           <h3 className="text-lg font-bold leading-7 text-primary-900">
-            Não pertence a uma organização.
+            {t("form.noOrganizationTitle")}
           </h3>
           <p className="text-base leading-7 text-neutral-700">
-            Quando o conjunto de dados for produzido no contexto de atividade profissional, é
-            recomendável que seja publicado em nome da organização responsável.
+            {t("form.noOrganizationDescription")}
           </p>
           <Button variant="primary" onClick={() => router.push("/admin/organizations/new")}>
-            Crie ou integre uma organização em dados.gov.pt
+            {t("form.organizationLink")}
           </Button>
         </div>
       )}
@@ -196,19 +195,15 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
           onStep2Next();
         }}
       >
-        <h2 className="admin-page__section-title">Descrição</h2>
+        <h2 className="admin-page__section-title">{t("form.descriptionSectionTitle")}</h2>
 
         <div className="admin-page__fields-group">
           {formErrors.datasetTitleTooLong && (
-            <StatusCard
-              variant="danger"
-              showIcon
-              description="O título não pode ter mais do que 350 caracteres."
-            />
+            <StatusCard variant="danger" showIcon description={t("form.titleTooLong")} />
           )}
           <InputText
-            label="Título*"
-            placeholder="Insira o título aqui"
+            label={t("form.titleField")}
+            placeholder={t("form.titlePlaceholder")}
             id="api-name"
             value={datasetTitle}
             onChange={onDatasetTitleChange}
@@ -216,22 +211,20 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             hasFeedback={!!formErrors.datasetTitle || !!formErrors.datasetTitleTooLong}
             feedbackState="danger"
             errorFeedbackText={
-              formErrors.datasetTitleTooLong
-                ? "O título não pode ter mais do que 350 caracteres."
-                : "Campo obrigatório"
+              formErrors.datasetTitleTooLong ? t("form.titleTooLong") : t("form.fieldRequired")
             }
           />
           <InputText
-            label="Sigla"
-            placeholder="Insira a sigla aqui"
+            label={t("form.acronymField")}
+            placeholder={t("form.acronymPlaceholder")}
             id="api-acronym"
             required={false}
             value={datasetAcronym}
             onChange={onDatasetAcronymChange}
           />
           <InputTextArea
-            label="Descrição *"
-            placeholder="Insira a descrição aqui"
+            label={t("form.descriptionField")}
+            placeholder={t("form.descriptionPlaceholder")}
             id="dataset-description"
             rows={4}
             maxLength={3000}
@@ -241,17 +234,17 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             hasError={!!formErrors.datasetDescription}
             hasFeedback={!!formErrors.datasetDescription || datasetDescription.length < 1000}
             feedbackState={formErrors.datasetDescription ? "danger" : "warning"}
-            feedbackText="Recomenda-se que a descrição tenha pelo menos 1000 caracteres."
-            errorFeedbackText="Campo obrigatório"
+            feedbackText={t("form.descriptionRecommendation")}
+            errorFeedbackText={t("form.fieldRequired")}
           />
           <IsolatedSelect
-            label="Palavras-chave"
-            placeholder="Pesquise ou insira palavras-chave..."
+            label={t("form.keywordsField")}
+            placeholder={t("form.keywordsPlaceholder")}
             id="dataset-keywords"
             type="checkbox"
             searchable
-            searchInputPlaceholder="Escreva para pesquisar ou criar..."
-            searchNoResultsText="Nenhum resultado encontrado"
+            searchInputPlaceholder={t("form.keywordsSearchPlaceholder")}
+            searchNoResultsText={t("form.keywordsNoResults")}
             defaultValue={keywordsDefaultValue}
             onChangeRef={selectedKeywordsRef}
             onSearchCallback={onKeywordsSearch}
@@ -265,7 +258,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
               {selectedKeywords.map((keyword) => (
                 <Tag
                   key={keyword}
-                  aria-label={`Remover ${keyword}`}
+                  aria-label={t("form.removeKeyword", { keyword })}
                   onClick={() => onKeywordTagRemove(keyword)}
                 >
                   {keyword}
@@ -275,12 +268,12 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
           )}
         </div>
 
-        <h2 className="admin-page__section-title">Acesso</h2>
+        <h2 className="admin-page__section-title">{t("form.accessSectionTitle")}</h2>
 
         <div className="admin-page__fields-group">
           <IsolatedSelect
-            label="Licença"
-            placeholder="Selecione uma licença..."
+            label={t("form.licenseField")}
+            placeholder={t("form.licensePlaceholder")}
             id="dataset-license"
             defaultValue={licenseDefaultValue}
             onChangeRef={selectedLicenseRef}
@@ -291,14 +284,14 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
 
         {selectedProducer && selectedProducer !== "user" && (
           <>
-            <h2 className="admin-page__section-title">Pontos de contacto *</h2>
+            <h2 className="admin-page__section-title">{t("form.contactPointsSectionTitle")}</h2>
 
             <div className="admin-page__fields-group">
               {formErrors.contactDrafts && (
                 <StatusCard
                   variant="danger"
                   showIcon
-                  description="É obrigatório adicionar pelo menos um ponto de contacto."
+                  description={t("form.contactPointRequired")}
                 />
               )}
               {orgContactPoints.length > 0 && (
@@ -322,12 +315,12 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                     className="text-base font-medium leading-7 text-primary-900"
                     style={{ paddingBottom: "16px" }}
                   >
-                    Novo ponto de contacto
+                    {t("form.newContactTitle")}
                   </div>
                   <div style={{ paddingBottom: "24px" }}>
                     <InputText
-                      label="Nome *"
-                      placeholder="Por exemplo, o nome do serviço."
+                      label={t("form.contactNameField")}
+                      placeholder={t("form.contactNamePlaceholder")}
                       id={`contact-name-${draft.id}`}
                       value={draft.name}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -336,13 +329,13 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                       hasError={!!draft.errors.name}
                       hasFeedback={!!draft.errors.name}
                       feedbackState="danger"
-                      errorFeedbackText="Campo obrigatório"
+                      errorFeedbackText={t("form.fieldRequired")}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-[18px]" style={{ paddingBottom: "24px" }}>
                     <InputText
-                      label="E-mail"
-                      placeholder="contact@organisation.org"
+                      label={t("form.contactEmailField")}
+                      placeholder={t("form.contactEmailPlaceholder")}
                       id={`contact-email-${draft.id}`}
                       value={draft.email}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -351,11 +344,11 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                       hasError={!!draft.errors.email}
                       hasFeedback={!!draft.errors.email}
                       feedbackState="danger"
-                      errorFeedbackText="É necessário um endereço de e-mail caso não seja fornecido um link."
+                      errorFeedbackText={t("form.contactEmailRequired")}
                     />
                     <InputText
-                      label="Website"
-                      placeholder="https://..."
+                      label={t("form.contactLinkField")}
+                      placeholder={t("form.contactLinkPlaceholder")}
                       id={`contact-link-${draft.id}`}
                       value={draft.link}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -364,7 +357,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                       hasError={!!draft.errors.link}
                       hasFeedback={!!draft.errors.link}
                       feedbackState="danger"
-                      errorFeedbackText="É necessário um link caso não seja fornecido um endereço de e‑mail."
+                      errorFeedbackText={t("form.contactLinkRequired")}
                     />
                   </div>
                   <div style={{ paddingBottom: "24px" }}>
@@ -377,7 +370,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                       leadingIconHover="agora-solid-check-circle"
                       onClick={() => onSaveContactDraft(draft.id)}
                     >
-                      Guardar contacto
+                      {t("form.saveContactAction")}
                     </Button>
                   </div>
                 </div>
@@ -393,46 +386,46 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
                   leadingIconHover="agora-solid-plus-circle"
                   onClick={onAddDraftContactRow}
                 >
-                  Novo contacto
+                  {t("form.addContactAction")}
                 </Button>
               </div>
             </div>
           </>
         )}
 
-        <h2 className="admin-page__section-title">Tempo</h2>
+        <h2 className="admin-page__section-title">{t("form.timeSectionTitle")}</h2>
 
         <div className="admin-page__fields-group">
           <IsolatedSelect
-            label="Frequência de atualização *"
-            placeholder="Selecione uma frequência..."
+            label={t("form.frequencyField")}
+            placeholder={t("form.frequencyPlaceholder")}
             id="dataset-frequency"
             defaultValue={frequencyDefaultValue}
             onChangeRef={selectedFrequencyRef}
             hasError={!!formErrors.datasetFrequency}
-            errorFeedbackText="Campo obrigatório"
+            errorFeedbackText={t("form.fieldRequired")}
           >
             {frequencyOptions}
           </IsolatedSelect>
 
           <div className="grid grid-cols-2 gap-[18px]">
             <InputDate
-              label="Cobertura temporal (Data de início)"
+              label={t("form.temporalStartField")}
               id="dataset-date-start"
               defaultValue={temporalStart}
-              dayInputPlaceholder="dd"
-              monthInputPlaceholder="mm"
-              yearInputPlaceholder="aaaa"
-              calendarIconAriaLabel="Abrir calendário"
-              previousYearAriaLabel="Ano anterior"
-              previousMonthAriaLabel="Mês anterior"
-              nextMonthAriaLabel="Próximo mês"
-              nextYearAriaLabel="Próximo ano"
-              selectedDayAriaLabel="Dia selecionado"
-              todayDayAriaLabel="Hoje"
-              todayLabel="Hoje"
-              cancelLabel="Cancelar"
-              okLabel="OK"
+              dayInputPlaceholder={t("edit.date.day")}
+              monthInputPlaceholder={t("edit.date.month")}
+              yearInputPlaceholder={t("edit.date.year")}
+              calendarIconAriaLabel={t("edit.date.openCalendar")}
+              previousYearAriaLabel={t("edit.date.previousYear")}
+              previousMonthAriaLabel={t("edit.date.previousMonth")}
+              nextMonthAriaLabel={t("edit.date.nextMonth")}
+              nextYearAriaLabel={t("edit.date.nextYear")}
+              selectedDayAriaLabel={t("edit.date.selectedDay")}
+              todayDayAriaLabel={t("edit.date.todayDay")}
+              todayLabel={t("edit.date.today")}
+              cancelLabel={t("edit.date.cancel")}
+              okLabel={t("edit.date.ok")}
               hasError={hasTemporalCoverageError}
               hasFeedback={hasTemporalCoverageError}
               feedbackState="danger"
@@ -443,22 +436,22 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
               }}
             />
             <InputDate
-              label="Data de fim"
+              label={t("form.temporalEndField")}
               id="dataset-date-end"
               defaultValue={temporalEnd}
-              dayInputPlaceholder="dd"
-              monthInputPlaceholder="mm"
-              yearInputPlaceholder="aaaa"
-              calendarIconAriaLabel="Abrir calendário"
-              previousYearAriaLabel="Ano anterior"
-              previousMonthAriaLabel="Mês anterior"
-              nextMonthAriaLabel="Próximo mês"
-              nextYearAriaLabel="Próximo ano"
-              selectedDayAriaLabel="Dia selecionado"
-              todayDayAriaLabel="Hoje"
-              todayLabel="Hoje"
-              cancelLabel="Cancelar"
-              okLabel="OK"
+              dayInputPlaceholder={t("edit.date.day")}
+              monthInputPlaceholder={t("edit.date.month")}
+              yearInputPlaceholder={t("edit.date.year")}
+              calendarIconAriaLabel={t("edit.date.openCalendar")}
+              previousYearAriaLabel={t("edit.date.previousYear")}
+              previousMonthAriaLabel={t("edit.date.previousMonth")}
+              nextMonthAriaLabel={t("edit.date.nextMonth")}
+              nextYearAriaLabel={t("edit.date.nextYear")}
+              selectedDayAriaLabel={t("edit.date.selectedDay")}
+              todayDayAriaLabel={t("edit.date.todayDay")}
+              todayLabel={t("edit.date.today")}
+              cancelLabel={t("edit.date.cancel")}
+              okLabel={t("edit.date.ok")}
               hasError={hasTemporalCoverageError}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 onTemporalEndChange(e);
@@ -468,18 +461,18 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
           </div>
         </div>
 
-        <h2 className="admin-page__section-title">Espaço</h2>
+        <h2 className="admin-page__section-title">{t("form.spaceSectionTitle")}</h2>
 
         <div className="admin-page__fields-group">
           <IsolatedSelect
-            label="Cobertura espacial"
-            placeholder="Selecione uma cobertura espacial..."
+            label={t("form.spatialCoverageField")}
+            placeholder={t("form.spatialCoveragePlaceholder")}
             id="dataset-spatial-coverage"
             type="checkbox"
             defaultValue={spatialCoverageDefaultValue}
             searchable
-            searchInputPlaceholder="Escreva para pesquisar..."
-            searchNoResultsText="Nenhum resultado encontrado"
+            searchInputPlaceholder={t("form.searchPlaceholder")}
+            searchNoResultsText={t("form.searchNoResults")}
             onChangeRef={spatialCoverageRef}
             onChangeCallback={onSpatialCoverageChange}
             onSearchCallback={onSpatialZoneSearch}
@@ -492,7 +485,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
               {selectedZoneObjects.map((zone) => (
                 <Tag
                   key={zone.id}
-                  aria-label={`Remover ${getZoneName(zone)}`}
+                  aria-label={t("form.removeSpatialZone", { name: getZoneName(zone) })}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => onRemoveSpatialZoneTag(zone.id)}
                 >
@@ -503,13 +496,13 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
           )}
 
           <IsolatedSelect
-            label="Granularidade espacial"
-            placeholder="Selecione uma granularidade espacial..."
+            label={t("form.spatialGranularityField")}
+            placeholder={t("form.spatialGranularityPlaceholder")}
             id="dataset-spatial-granularity"
             defaultValue={spatialGranularityDefaultValue}
             searchable
-            searchInputPlaceholder="Escreva para pesquisar..."
-            searchNoResultsText="Nenhum resultado encontrado"
+            searchInputPlaceholder={t("form.searchPlaceholder")}
+            searchNoResultsText={t("form.searchNoResults")}
             onChangeRef={spatialGranularityRef}
           >
             {granularityOptions}
@@ -526,7 +519,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             leadingIconHover="agora-solid-arrow-left-circle"
             onClick={onPreviousStep}
           >
-            Anterior
+            {t("form.previousAction")}
           </Button>
           <Button
             type="submit"
@@ -536,7 +529,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
             trailingIconHover="agora-solid-arrow-right-circle"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "A criar..." : "Seguinte"}
+            {isSubmitting ? t("form.creating") : t("form.nextAction")}
           </Button>
         </div>
       </form>

@@ -2,11 +2,8 @@
 
 import React, { useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
-import {
-  Button,
-  CardAction,
-  StatusCard,
-} from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
+import { Button, CardAction, StatusCard } from "@ama-pt/agora-design-system";
 import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
@@ -15,6 +12,7 @@ import { AdminStepper } from "@/components/admin/AdminStepper";
 import AdminLayout from "@/components/Layout/AdminLayout";
 
 export default function OrgDatasetsNewClient() {
+  const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const routeParams = useParams();
@@ -33,127 +31,127 @@ export default function OrgDatasetsNewClient() {
     return `/admin/org/datasets/new?step=${step}`;
   };
 
-
   const stepTitles: Record<number, string> = {
-    1: "Inicie a publicação do seu conjunto de dados",
-    2: "Descreva o seu conjunto de dados",
-    3: "Adicione os ficheiros",
-    4: "Finalize a publicação do seu conjunto de dados",
+    1: t("admin-datasets:form.steps.start"),
+    2: t("admin-datasets:form.steps.describe"),
+    3: t("admin-datasets:form.steps.files"),
+    4: t("admin-datasets:form.steps.publish"),
   };
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: orgName || "Organização", url: "#" },
-        { label: "Conjuntos de dados", url: resolvedOrgId ? `/admin/org/${resolvedOrgId}/datasets` : "#" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
+        {
+          label: t("admin-datasets:form.breadcrumbs.datasets"),
+          url: resolvedOrgId ? `/admin/org/${resolvedOrgId}/datasets` : "#",
+        },
       ]}
-
-      title="Formulário de publicação de um conjunto de dados"
+      title={t("admin-datasets:form.registrationTitle")}
     >
       <>
         {/* Stepper */}
         <AdminStepper
           currentStep={currentStep}
           totalSteps={totalSteps}
-          labelWord="Passo"
+          labelWord={t("admin-common:stepper.step")}
           labelFormat="slash"
           stepTitle={stepTitles[currentStep] || ""}
         />
 
         {currentStep === 1 && (
           <>
-            <h2 className="admin-page__section-title mb-16">Tipo de publicação</h2>
+            <h2 className="admin-page__section-title mb-16">
+              {t("admin-datasets:form.publicationTypeTitle")}
+            </h2>
 
             <StatusCard
               variant="informative"
               showIcon
-              description="Se desejar realizar testes, utilize demo.dados.gov.pt"
+              description={t("admin-datasets:form.demoInfo")}
             />
 
-          <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
-            <CardAction
-              variant="neutral-100"
-              titleText="Publique um conjunto de dados"
-              descriptionText="Seja uma entidade da administração pública ou uma empresa pública, todos podem publicar em dados.gov.pt!"
-              icon={{ name: "agora-line-edit" }}
-              button={{
-                children: "Comece a publicação",
-                variant: "primary",
-                appearance: "outline",
-                onClick: () => router.push(buildStepUrl(2)),
-              }}
-            />
-          </div>
-
-          {/* Admin sections */}
-          <div className="admin-new-page__admin-sections">
-            <div className="admin-new-page__admin-section">
-              <p className="text-primary-900 text-base font-bold leading-7">
-                É administrador e deseja automatizar a publicação dos seus dados?
-              </p>
-              <p className="text-neutral-700 text-sm leading-relaxed">
-                Pode automatizar a publicação através da API ou ligando o seu portal ao dados.gov.pt
-                através de um harvester de dados.
-              </p>
-              <div className="flex gap-4 flex-wrap">
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/recursos/desenvolvimento/referencia-api")}
-                >
-                  Consulte a documentação da API
-                </Button>
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/recursos/como-usar-o-portal/como-reutilizar-dados")}
-                >
-                  Saiba mais sobre o harvester.
-                </Button>
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/ajuda-e-contactos")}
-                >
-                  Contacte-nos
-                </Button>
-              </div>
+            <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
+              <CardAction
+                variant="neutral-100"
+                titleText={t("admin-datasets:form.startCardTitle")}
+                descriptionText={t("admin-datasets:form.startCardDescription")}
+                icon={{ name: "agora-line-edit" }}
+                button={{
+                  children: t("admin-datasets:form.startCardAction"),
+                  variant: "primary",
+                  appearance: "outline",
+                  onClick: () => router.push(buildStepUrl(2)),
+                }}
+              />
             </div>
 
-            <div className="admin-new-page__admin-section">
-              <p className="text-primary-900 text-base font-bold leading-7">
-                É administrador e deseja catalogar os seus dados?
-              </p>
-              <p className="text-neutral-700 text-sm leading-relaxed">
-                Pode utilizar o serviço de catalogação e publicação do dados.gov.pt, que permite aos
-                organismos da Administração Pública Central organizarem e disponibilizarem o seu
-                catálogo de dados abertos.
-              </p>
-              <div className="flex gap-4 flex-wrap">
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                >
-                  Aceda à área de catálogo.
-                </Button>
+            {/* Admin sections */}
+            <div className="admin-new-page__admin-sections">
+              <div className="admin-new-page__admin-section">
+                <p className="text-primary-900 text-base font-bold leading-7">
+                  {t("admin-datasets:form.adminAutomationTitle")}
+                </p>
+                <p className="text-neutral-700 text-sm leading-relaxed">
+                  {t("admin-datasets:form.adminAutomationDescription")}
+                </p>
+                <div className="flex gap-4 flex-wrap">
+                  <Button
+                    appearance="link"
+                    variant="primary"
+                    hasIcon
+                    trailingIcon="agora-line-external-link"
+                    trailingIconHover="agora-solid-external-link"
+                    onClick={() => router.push("/recursos/desenvolvimento/referencia-api")}
+                  >
+                    {t("admin-datasets:form.apiDocsAction")}
+                  </Button>
+                  <Button
+                    appearance="link"
+                    variant="primary"
+                    hasIcon
+                    trailingIcon="agora-line-external-link"
+                    trailingIconHover="agora-solid-external-link"
+                    onClick={() => router.push("/recursos/como-usar-o-portal/como-reutilizar-dados")}
+                  >
+                    {t("admin-datasets:form.harvesterAction")}
+                  </Button>
+                  <Button
+                    appearance="link"
+                    variant="primary"
+                    hasIcon
+                    trailingIcon="agora-line-external-link"
+                    trailingIconHover="agora-solid-external-link"
+                    onClick={() => router.push("/ajuda-e-contactos")}
+                  >
+                    {t("admin-datasets:form.contactAction")}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="admin-new-page__admin-section">
+                <p className="text-primary-900 text-base font-bold leading-7">
+                  {t("admin-datasets:form.catalogTitle")}
+                </p>
+                <p className="text-neutral-700 text-sm leading-relaxed">
+                  {t("admin-datasets:form.catalogDescription")}
+                </p>
+                <div className="flex gap-4 flex-wrap">
+                  <Button
+                    appearance="link"
+                    variant="primary"
+                    hasIcon
+                    trailingIcon="agora-line-external-link"
+                    trailingIconHover="agora-solid-external-link"
+                  >
+                    {t("admin-datasets:form.catalogAction")}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
 
         {currentStep >= 2 && (
           <DatasetsAdminClient

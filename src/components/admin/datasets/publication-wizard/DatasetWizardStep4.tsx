@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Button, CardGeneral, Icon, ProgressBar, StatusCard } from "@ama-pt/agora-design-system";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import type { Dataset } from "@/service/types/dataset";
@@ -16,6 +17,7 @@ export interface DatasetWizardStep4Props {
 }
 
 export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
+  const { t } = useTranslation("admin-datasets");
   const { createdDataset, datasetTitle, datasetDescription, onPublish, onSaveDraft, isSubmitting } =
     props;
 
@@ -39,9 +41,9 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
         showIcon
         description={
           <>
-            <strong>O seu conjunto de dados foi criado!</strong>
+            <strong>{t("form.publishSuccessTitle")}</strong>
             <br />
-            Agora pode publicar ou guardar como rascunho.
+            {t("form.publishSuccessDescription")}
           </>
         }
       />
@@ -51,7 +53,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
           variant="neutral-100"
           image={{
             src: createdDataset?.organization?.logo || "/images/placeholders/organization.png",
-            alt: createdDataset?.organization?.name || "Organização",
+            alt: createdDataset?.organization?.name || t("form.organizationFallback"),
             height: "56px",
             className: "bg-primary-100 !object-contain !h-[56px]",
           }}
@@ -65,17 +67,19 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
                   style={{ fontSize: "16px", fontWeight: 300 }}
                   className="mt-4 text-neutral-900"
                 >
-                  {createdDataset?.organization?.name || "Sem Organização"}
+                  {createdDataset?.organization?.name || t("form.withoutOrganization")}
                 </span>
               </div>
             ) as unknown as string
           }
-          titleText={createdDataset?.title || datasetTitle || "Sem título"}
+          titleText={createdDataset?.title || datasetTitle || t("form.untitledFallback")}
           descriptionText={
             (
               <div className="flex grow flex-col">
                 <p className="mb-16 line-clamp-3 text-m-regular text-neutral-800">
-                  {createdDataset?.description || datasetDescription || "Sem descrição"}
+                  {createdDataset?.description ||
+                    datasetDescription ||
+                    t("form.withoutDescription")}
                 </p>
                 <div
                   className={`mt-auto ${qualityScore <= 45 ? "quality-progress-warning" : qualityScore > 50 ? "quality-progress-success" : ""}`}
@@ -87,10 +91,10 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
                     hidePercentageValue={true}
                   />
                   <span className="mt-4 block text-s-regular text-neutral-900">
-                    {qualityScore}% Qualidade dos metadados
+                    {qualityScore}% {t("form.metadataQuality")}
                   </span>
                   <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
-                    <div className="flex items-center gap-8" title="Visualizações">
+                    <div className="flex items-center gap-8" title={t("form.metricViews")}>
                       <Icon
                         name={createdDataset?.metrics?.views ? "agora-solid-eye" : "agora-line-eye"}
                         dimensions="xs"
@@ -99,7 +103,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
                       />
                       <span>{formatMetric(createdDataset?.metrics?.views)}</span>
                     </div>
-                    <div className="flex items-center gap-8" title="Downloads">
+                    <div className="flex items-center gap-8" title={t("form.metricDownloads")}>
                       <Icon
                         name={
                           createdDataset?.metrics?.resources_downloads
@@ -112,7 +116,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
                       />
                       <span>{formatMetric(createdDataset?.metrics?.resources_downloads)}</span>
                     </div>
-                    <div className="flex items-center gap-8" title="Reutilizações">
+                    <div className="flex items-center gap-8" title={t("form.metricReuses")}>
                       <img
                         src="/Icons/bar_chart.svg"
                         className="h-16 w-16"
@@ -121,7 +125,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
                       />
                       <span>{createdDataset?.metrics?.reuses || 0}</span>
                     </div>
-                    <div className="flex items-center gap-8" title="Favoritos">
+                    <div className="flex items-center gap-8" title={t("form.metricFavorites")}>
                       <Icon
                         name={
                           createdDataset?.metrics?.followers
@@ -155,10 +159,10 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
 
       <div className="admin-page__actions flex justify-end gap-[18px]">
         <Button appearance="outline" variant="neutral" onClick={onSaveDraft} disabled={isSubmitting}>
-          Guardar o rascunho
+          {isSubmitting ? t("form.savingDraft") : t("form.saveDraftAction")}
         </Button>
         <Button variant="primary" onClick={onPublish} disabled={isSubmitting}>
-          {isSubmitting ? "A publicar..." : "Publicar o conjunto de dados"}
+          {isSubmitting ? t("form.publishingDataset") : t("form.publishDatasetAction")}
         </Button>
       </div>
     </>

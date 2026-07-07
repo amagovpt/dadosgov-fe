@@ -24,6 +24,17 @@ interface DatasetValidationValues {
   draftContacts: DatasetWizardDraftContact[];
 }
 
+interface DatasetValidationMessages {
+  producerRequired?: string;
+  titleRequired?: string;
+  titleTooLong?: string;
+  descriptionRequired?: string;
+  frequencyRequired?: string;
+  invalidDate?: string;
+  invalidRange?: string;
+  contactDraftRequired?: string;
+}
+
 interface DatasetValidationResult {
   errors: FormErrors<DatasetFormField>;
   draftErrors: Record<number, Record<string, boolean>>;
@@ -84,20 +95,28 @@ export function toDatasetIsoDate(value: string): string | null {
 
 export function validateDatasetDetails(
   values: DatasetValidationValues,
+  messages: DatasetValidationMessages = {},
 ): DatasetValidationResult {
   const errors: FormErrors<DatasetFormField> = {};
   const draftErrors: Record<number, Record<string, boolean>> = {};
 
-  if (!values.producer) errors.datasetProducer = "Selecione o produtor.";
+  if (!values.producer) {
+    errors.datasetProducer = messages.producerRequired || "Selecione o produtor.";
+  }
   if (!values.title.trim()) {
-    errors.datasetTitle = "Indique o título do conjunto de dados.";
+    errors.datasetTitle = messages.titleRequired || "Indique o título do conjunto de dados.";
   } else if (values.title.trim().length > 350) {
-    errors.datasetTitleTooLong = "O título não pode exceder 350 caracteres.";
+    errors.datasetTitleTooLong =
+      messages.titleTooLong || "O título não pode exceder 350 caracteres.";
   }
   if (!values.description.trim()) {
-    errors.datasetDescription = "Descreva o conjunto de dados.";
+    errors.datasetDescription =
+      messages.descriptionRequired || "Descreva o conjunto de dados.";
   }
-  if (!values.frequency) errors.datasetFrequency = "Selecione a frequência de atualização.";
+  if (!values.frequency) {
+    errors.datasetFrequency =
+      messages.frequencyRequired || "Selecione a frequência de atualização.";
+  }
 
   const startRaw = values.temporalStart.trim();
   const endRaw = values.temporalEnd.trim();
@@ -105,9 +124,10 @@ export function validateDatasetDetails(
   const endTime = endRaw ? parseDatasetDateToTime(endRaw) : null;
 
   if ((startRaw && startTime === null) || (endRaw && endTime === null)) {
-    errors.temporalCoverageInvalidFormat = "Indique datas válidas.";
+    errors.temporalCoverageInvalidFormat = messages.invalidDate || "Indique datas válidas.";
   } else if (startTime !== null && endTime !== null && startTime > endTime) {
-    errors.temporalCoverage = "A data inicial não pode ser posterior à data final.";
+    errors.temporalCoverage =
+      messages.invalidRange || "A data inicial não pode ser posterior à data final.";
   }
 
   if (values.selectedProducer && values.selectedProducer !== "user") {
@@ -130,7 +150,8 @@ export function validateDatasetDetails(
     });
 
     if (!hasSavedContact && !hasValidDraft) {
-      errors.contactDrafts = "Adicione pelo menos um contacto válido.";
+      errors.contactDrafts =
+        messages.contactDraftRequired || "Adicione pelo menos um contacto válido.";
     }
   }
 
@@ -152,7 +173,8 @@ export function buildDatasetCreatePayload(
     frequency: values.frequency,
     private: true,
     description_short:
-      shortDescription || (description.length > 197 ? `${description.slice(0, 197)}...` : description),
+      shortDescription ||
+      (description.length > 197 ? `${description.slice(0, 197)}...` : description),
     ...(values.acronym.trim() ? { acronym: values.acronym.trim() } : {}),
     ...(values.producer && values.producer !== "user"
       ? { organization: values.producer }

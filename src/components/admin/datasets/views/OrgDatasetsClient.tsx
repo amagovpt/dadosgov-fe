@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -12,7 +13,10 @@ import { useAuth } from "@/context/AuthContext";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
-import { createDatasetColumns, OrgDatasetSortField } from "@/components/admin/datasets/config/datasetsListConfig";
+import {
+  createDatasetColumns,
+  OrgDatasetSortField,
+} from "@/components/admin/datasets/config/datasetsListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 
 const ORG_DATASET_SORT_MAP: Record<OrgDatasetSortField, string> = {
@@ -26,6 +30,7 @@ interface OrgDatasetsClientProps {
 }
 
 export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const { user } = useAuth();
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
@@ -46,7 +51,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         showOrganizationFallback: true,
         sortVariant: "org",
       }),
-    [orgId]
+    [orgId],
   );
 
   const loadDatasets = useCallback(
@@ -87,7 +92,7 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         setIsLoading(false);
       }
     },
-    [orgId]
+    [orgId],
   );
 
   useEffect(() => {
@@ -116,17 +121,17 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
     sortOrder,
     setSortField,
     setSortOrder,
-    setCurrentPage
+    setCurrentPage,
   );
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: orgName || "Organização", url: "#" },
-        { label: "Conjuntos de dados", url: "#" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
+        { label: t("admin-datasets:list.title"), url: "#" },
       ]}
-      title="Conjuntos de dados"
+      title={t("admin-datasets:list.title")}
       isLoading={isLoading}
       count={total}
       hasItems={datasets.length > 0}
@@ -135,8 +140,8 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: "Pesquise o nome, código ou sigla da entidade",
-        ariaLabel: "Pesquisar conjuntos de dados",
+        placeholder: t("admin-datasets:list.searchPlaceholder"),
+        ariaLabel: t("admin-datasets:list.searchAriaLabel"),
         onChange: handleSearch,
       }}
       filters={
@@ -157,15 +162,15 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
             leadingIcon="agora-line-download"
             leadingIconHover="agora-solid-download"
           >
-            Catálogo
+            {t("admin-datasets:list.catalogDownload")}
           </Button>
         </a>
       }
       emptyState={
         <AdminEmptyState
           icon="agora-line-edit"
-          title="Sem publicações"
-          description="A organização ainda não publicou conjuntos de dados."
+          title={t("admin-datasets:list.emptyOrgTitle")}
+          description={t("admin-datasets:list.emptyOrgDescription")}
           createUrl="/admin/datasets/new"
         />
       }
