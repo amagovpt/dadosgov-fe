@@ -21,5 +21,7 @@
     "openFilters": "Abrir filtros"
   },
   "results": "Resultados",
-  "publishedTimeAgo": "Publicado há {{timeAgo}}"
+  "publishedTimeAgo": "Publicado há {{timeAgo}}",
+  "close": "Fechar",
+  "cancel": "Cancelar"
 }

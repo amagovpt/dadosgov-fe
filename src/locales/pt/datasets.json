@@ -1,0 +1,13 @@
+{
+  "sort": {
+    "relevancia": "Relevância",
+    "criacao": "Mais recente",
+    "antigo": "Mais antigo",
+    "subscritores": "Subscritores"
+  },
+  "delete": {
+    "delete": "Eliminar",
+    "irreversible": "Esta ação é irreversível.",
+    "confirmation": "Tem a certeza que quer eliminar este conjunto de dados?"
+  }
+}

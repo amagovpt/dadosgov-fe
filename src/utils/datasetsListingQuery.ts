@@ -7,13 +7,6 @@ export const DATASET_SORT_OPTIONS: Record<string, string> = {
   subscritores: "-followers",
 };
 
-export const DATASET_SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  criacao: "Mais recente",
-  antigo: "Mais antigo",
-  subscritores: "Subscritores",
-};
-
 export function parseDatasetsFilters(params: URLSearchParams): DatasetFilters {
   const tags = params
     .getAll("tag")

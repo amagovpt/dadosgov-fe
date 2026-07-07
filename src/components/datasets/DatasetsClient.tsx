@@ -22,10 +22,10 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import Button from "../Primitives/Button";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
-import { DATASET_SORT_LABELS } from "@/utils/datasetsListingQuery";
 import { useDatasetsListing } from "@/hooks/useDatasetsListing";
 import { twJoin } from "tailwind-merge";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
+import { useTranslation } from "react-i18next";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -46,6 +46,15 @@ export default function DatasetsClient({
   allFrequencies = [],
   allGranularities = [],
 }: DatasetsClientProps) {
+  const { t: tds } = useTranslation("datasets");
+
+  const DATASET_SORT_LABELS: Record<string, string> = {
+    relevancia: tds("sort.relevancia"),
+    criacao: tds("sort.criacao"),
+    antigo: tds("sort.antigo"),
+    subscritores: tds("sort.subscritores"),
+  };
+
   const { show, hide } = usePopupContext();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
