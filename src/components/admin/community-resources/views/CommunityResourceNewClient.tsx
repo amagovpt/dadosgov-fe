@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 import CommunityResourceFormClient from "@/components/admin/community-resources/views/CommunityResourceFormClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -9,6 +10,7 @@ import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 
 export default function CommunityResourceNewClient() {
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { displayName } = useCurrentUser();
@@ -18,18 +20,21 @@ export default function CommunityResourceNewClient() {
   const [publicPageUrl, setPublicPageUrl] = useState<string | null>(null);
 
   const stepTitles: Record<number, string> = {
-    1: "Descreva o recurso da sua comunidade.",
-    2: "Finalizar a publicação",
+    1: t("admin-community-resources:form.steps.describe"),
+    2: t("admin-community-resources:form.steps.publish"),
   };
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Recursos comunitários", url: "/admin/me/community-resources" },
+        {
+          label: t("admin-community-resources:title"),
+          url: "/admin/me/community-resources",
+        },
       ]}
-      title="Formulário de inscrição"
+      title={t("admin-community-resources:form.registrationTitle")}
     >
       {currentStep === 2 && publicPageUrl && (
         <div className="flex justify-end mb-16">
@@ -41,7 +46,7 @@ export default function CommunityResourceNewClient() {
             leadingIconHover="agora-solid-eye"
             onClick={() => router.push(publicPageUrl)}
           >
-            Veja a página pública
+            {t("admin-community-resources:form.viewPublicPage")}
           </Button>
         </div>
       )}

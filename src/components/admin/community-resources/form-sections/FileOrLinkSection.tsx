@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { InputText } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 
@@ -23,24 +24,26 @@ export default function FileOrLinkSection({
   onSecurityError,
   onResourceUrlChange,
 }: FileOrLinkSectionProps) {
+  const { t } = useTranslation("admin-community-resources");
+
   return (
     <>
-      <h2 className="admin-page__section-title">Ficheiro ou link</h2>
+      <h2 className="admin-page__section-title">{t("form.fileOrLink")}</h2>
 
       <div className="admin-page__fields-group">
         <div className="[&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center">
           <DragAndDropUploader
-            label="Ficheiros"
-            dragAndDropLabel="Arraste e largue o ficheiro aqui"
-            inputLabel="Selecione ou arraste o ficheiro"
-            selectedFilesLabel="ficheiro selecionado"
-            removeFileButtonLabel="Remover ficheiro"
-            replaceFileButtonLabel="Substituir ficheiro"
-            extensionsInstructions="Tamanho máximo: 420 MB."
+            label={t("form.files")}
+            dragAndDropLabel={t("form.dragAndDropFile")}
+            inputLabel={t("form.selectOrDragFile")}
+            selectedFilesLabel={t("form.selectedFile")}
+            removeFileButtonLabel={t("form.removeFile")}
+            replaceFileButtonLabel={t("form.replaceFile")}
+            extensionsInstructions={t("form.maxSize420")}
             maxSize={440401920}
             maxCount={1}
-            maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo de 420 MB."
-            forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+            maxSizeExceededErrorLabel={t("form.maxSizeExceeded420")}
+            forbiddenExtensionErrorLabel={t("form.forbiddenExtension")}
             hasError={!!fileError}
             hasFeedback={!!fileError}
             feedbackState="danger"
@@ -51,11 +54,11 @@ export default function FileOrLinkSection({
         </div>
 
         <div className="admin-page__divider-or">
-          <span className="admin-page__divider-or-text">ou</span>
+          <span className="admin-page__divider-or-text">{t("form.or")}</span>
         </div>
 
         <InputText
-          label={file ? "Link exato para o ficheiro" : "Link exato para o ficheiro *"}
+          label={file ? t("form.exactFileLink") : t("form.exactFileLinkRequired")}
           placeholder="https://..."
           id="resource-url"
           value={resourceUrl}
@@ -63,7 +66,7 @@ export default function FileOrLinkSection({
           hasError={hasResourceUrlError}
           hasFeedback={hasResourceUrlError}
           feedbackState="danger"
-          errorFeedbackText="Forneça um ficheiro ou um link."
+          errorFeedbackText={t("form.fileOrLinkRequired")}
         />
       </div>
     </>

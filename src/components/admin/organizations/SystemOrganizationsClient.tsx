@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, CardNoResults, Icon, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
@@ -14,18 +15,24 @@ import { fetchOrganizations, deleteOrganization } from "@/service/api/organizati
 import { Organization } from "@/service/types/identity";
 
 function DeleteOrgPopupContent({
+  labels,
   onClose,
   onConfirm,
 }: {
+  labels: {
+    description: string;
+    cancel: string;
+    delete: string;
+  };
   onClose: () => void;
   onConfirm: () => void;
 }) {
   return (
     <div className="flex flex-col gap-16">
-      <p>Esta ação é irreversível.</p>
+      <p>{labels.description}</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Cancelar
+          {labels.cancel}
         </Button>
         <Button
           variant="danger"
@@ -34,7 +41,7 @@ function DeleteOrgPopupContent({
           leadingIcon="agora-line-trash"
           leadingIconHover="agora-solid-trash"
         >
-          Eliminar
+          {labels.delete}
         </Button>
       </div>
     </div>
@@ -42,6 +49,7 @@ function DeleteOrgPopupContent({
 }
 
 export default function SystemOrganizationsClient() {
+  const { t } = useTranslation(["admin-common", "admin-organizations"]);
   const { show, hide } = usePopupContext();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -83,6 +91,11 @@ export default function SystemOrganizationsClient() {
     (organization: Organization) => {
       show(
         <DeleteOrgPopupContent
+          labels={{
+            description: t("admin-organizations:delete.description"),
+            cancel: t("admin-common:actions.cancel"),
+            delete: t("admin-common:actions.delete"),
+          }}
           onClose={hide}
           onConfirm={async () => {
             setDeletingOrgId(organization.id);
@@ -99,22 +112,31 @@ export default function SystemOrganizationsClient() {
           }}
         />,
         {
-          title: "Tem a certeza que quer eliminar esta organização?",
-          closeAriaLabel: "Fechar",
+          title: t("admin-organizations:delete.title"),
+          closeAriaLabel: t("admin-organizations:delete.closeAriaLabel"),
           dimensions: "m",
         }
       );
     },
-    [hide, loadData, show]
+    [hide, loadData, show, t]
   );
 
   const columns = useMemo(
     () =>
       createOrganizationColumns({
         deletingOrgId,
+        labels: {
+          name: t("admin-organizations:columns.name"),
+          createdAt: t("admin-organizations:columns.createdAt"),
+          datasets: t("admin-organizations:columns.datasets"),
+          reuses: t("admin-organizations:columns.reuses"),
+          members: t("admin-organizations:columns.members"),
+          deleteAriaLabel: (name) =>
+            t("admin-organizations:columns.deleteAriaLabel", { name }),
+        },
         onDelete: handleDeleteOrg,
       }),
-    [deletingOrgId, handleDeleteOrg]
+    [deletingOrgId, handleDeleteOrg, t]
   );
 
   useEffect(() => {
@@ -149,11 +171,11 @@ export default function SystemOrganizationsClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Organizações", url: "/admin/system/organizations" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-organizations:title"), url: "/admin/system/organizations" },
       ]}
-      title="Organizações"
+      title={t("admin-organizations:title")}
       isLoading={isLoading}
       count={totalItems}
       hasItems={organizations.length > 0}
@@ -162,16 +184,16 @@ export default function SystemOrganizationsClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome da organização",
-        ariaLabel: "Pesquisar organizações",
+        placeholder: t("admin-organizations:search.placeholder"),
+        ariaLabel: t("admin-organizations:search.ariaLabel"),
         onChange: handleSearch,
       }}
       emptyState={
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-building" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem organizações"
-          description="Nenhuma organização encontrada."
+          title={t("admin-organizations:empty.title")}
+          description={t("admin-organizations:empty.description")}
           hasAnchor={false}
         />
       }

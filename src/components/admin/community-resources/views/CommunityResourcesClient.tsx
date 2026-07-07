@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -17,6 +18,7 @@ import AdminEmptyState from "@/components/admin/AdminEmptyState";
 
 export default function CommunityResourcesClient() {
   const { displayName } = useCurrentUser();
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
 
   const [allResources, setAllResources] = useState<CommunityResource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,19 +77,36 @@ export default function CommunityResourcesClient() {
       createCommunityResourceColumns({
         includeFormat: true,
         showDatasetLink: true,
+        titleHeader: t("admin-community-resources:columns.title"),
+        labels: {
+          title: t("admin-community-resources:columns.title"),
+          status: t("admin-community-resources:columns.status"),
+          format: t("admin-community-resources:columns.format"),
+          createdAt: t("admin-community-resources:columns.createdAt"),
+          modifiedAt: t("admin-community-resources:columns.modifiedAt"),
+          lastModified: t("admin-community-resources:columns.lastModified"),
+          action: t("admin-community-resources:columns.action"),
+          actions: t("admin-community-resources:columns.actions"),
+          deleted: t("admin-community-resources:status.deleted"),
+          archived: t("admin-community-resources:status.archived"),
+          published: t("admin-community-resources:status.published"),
+        },
         editHref: (resource) => `/admin/me/community-resources/edit?id=${resource.id}`,
       }),
-    []
+    [t]
   );
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Recursos comunitários", url: "/admin/me/community-resources" },
+        {
+          label: t("admin-community-resources:title"),
+          url: "/admin/me/community-resources",
+        },
       ]}
-      title="Recursos comunitários"
+      title={t("admin-community-resources:title")}
       isLoading={isLoading}
       count={sortedResources.length}
       currentPage={currentPage}
@@ -95,8 +114,8 @@ export default function CommunityResourcesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquisar recursos comunitários",
-        ariaLabel: "Pesquisar recursos comunitários",
+        placeholder: t("admin-community-resources:search.placeholder"),
+        ariaLabel: t("admin-community-resources:search.ariaLabel"),
         onChange: (value) => {
           setSearchQuery(value);
           setCurrentPage(1);
@@ -105,7 +124,7 @@ export default function CommunityResourcesClient() {
       emptyState={
         <AdminEmptyState
           icon="agora-line-user-group"
-          description="Ainda não publicou um recurso comunitário."
+          description={t("admin-community-resources:empty.myDescription")}
           createUrl="/admin/community-resources/new"
         />
       }

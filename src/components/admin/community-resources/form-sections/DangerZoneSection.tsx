@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
 
 interface DangerZoneSectionProps {
@@ -15,9 +16,11 @@ export default function DangerZoneSection({
   canDelete = true,
   onDelete,
 }: DangerZoneSectionProps) {
+  const { t } = useTranslation("admin-community-resources");
+
   return (
     <AdminDangerActions
-      dangerActionLabel={canDelete ? "Eliminar o recurso comunitário" : undefined}
+      dangerActionLabel={canDelete ? t("form.deleteResource") : undefined}
       onDangerAction={canDelete ? () => onDelete() : undefined}
       disabled={isSubmitting}
     />

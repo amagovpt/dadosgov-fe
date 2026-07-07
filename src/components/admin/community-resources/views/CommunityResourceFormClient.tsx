@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import {
   createCommunityResource,
@@ -67,6 +68,7 @@ export default function CommunityResourceFormClient({
   onPublicPageReady,
 }: CommunityResourceFormClientProps) {
   const { user } = useAuth();
+  const { t } = useTranslation("admin-community-resources");
 
   const [title, setTitle] = useState("");
   const [resourceUrl, setResourceUrl] = useState("");
@@ -99,12 +101,12 @@ export default function CommunityResourceFormClient({
   const { isSubmitting, run } = useAsyncSubmit({
     clearError: () => setApiError(null),
     onError: (error) => {
-      const normalized = normalizeApiError(error, "Erro ao criar recurso comunitário.");
+      const normalized = normalizeApiError(error, t("form.createError"));
       if (normalized.status === 401) {
-        setApiError("Sessão expirada. Faça login novamente.");
+        setApiError(t("form.sessionExpired"));
         return;
       }
-      setApiError(normalized.message || "Erro ao criar recurso comunitário.");
+      setApiError(normalized.message || t("form.createError"));
     },
   });
 
@@ -154,7 +156,7 @@ export default function CommunityResourceFormClient({
     const selected = files && files.length > 0 ? files[0] : null;
 
     if (selected && selected.size > MAX_UPLOAD_SIZE) {
-      setFileError("O ficheiro excede o tamanho máximo de 800 MB.");
+      setFileError(t("form.fileTooLarge"));
       setFile(null);
       return;
     }
@@ -211,7 +213,7 @@ export default function CommunityResourceFormClient({
       setErrors(errors);
       focusFirstError();
       if (errors.dataset) {
-        setApiError("Selecione um conjunto de dados antes de continuar.");
+        setApiError(t("form.selectDataset"));
       }
       return;
     }
@@ -242,14 +244,16 @@ export default function CommunityResourceFormClient({
       renderDropdownSection(
         "identity",
         buildProducerItems(
-          user ? `${user.first_name} ${user.last_name}` : "Eu próprio",
+          user
+            ? `${user.first_name} ${user.last_name}`
+            : t("form.producerSelf"),
           (user?.organizations || []).map((organization) => ({
             id: organization.id,
             name: organization.name,
           })),
         ),
       ),
-    [user],
+    [t, user],
   );
 
   const typeOptions = useMemo(
@@ -292,11 +296,9 @@ export default function CommunityResourceFormClient({
                 showIcon
                 description={
                   <>
-                    <strong>O que é um recurso comunitário?</strong>
+                    <strong>{t("form.introTitle")}</strong>
                     <br />
-                    Um recurso comunitário é um conteúdo adicionado por um usuário, como dados de
-                    referência cruzada, para enriquecer ou complementar um recurso comunitário
-                    público.
+                    {t("form.introDescription")}
                   </>
                 }
               />
@@ -312,7 +314,7 @@ export default function CommunityResourceFormClient({
                 }}
               >
                 <p className="pt-32 text-base leading-7 text-neutral-900">
-                  Os campos marcados com um asterisco ( * ) são obrigatórios.
+                  {t("form.requiredFields")}
                 </p>
 
                 <ProducerSection
@@ -361,7 +363,7 @@ export default function CommunityResourceFormClient({
                 <AdminStepActions
                   className="admin-page__actions flex justify-between gap-[18px]"
                   previousAction={{
-                    label: "Anterior",
+                    label: t("form.previous"),
                     appearance: "outline",
                     variant: "primary",
                     hasIcon: true,
@@ -370,7 +372,7 @@ export default function CommunityResourceFormClient({
                     onClick: onPreviousStep,
                   }}
                   primaryAction={{
-                    label: isSubmitting ? "A criar..." : "Seguinte",
+                    label: isSubmitting ? t("form.creating") : t("form.next"),
                     type: "submit",
                     hasIcon: true,
                     trailingIcon: "agora-line-arrow-right-circle",
@@ -389,9 +391,9 @@ export default function CommunityResourceFormClient({
                 showIcon
                 description={
                   <>
-                    <strong>O seu recurso comunitário foi criado!</strong>
+                    <strong>{t("form.createdTitle")}</strong>
                     <br />
-                    Veja na página pública.
+                    {t("form.createdDescription")}
                   </>
                 }
               />

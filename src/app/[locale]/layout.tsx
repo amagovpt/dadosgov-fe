@@ -37,6 +37,8 @@ const namespaces = [
   "admin-common",
   "admin-harvesters",
   "admin-dataservices",
+  "admin-community-resources",
+  "admin-organizations",
 ];
 
 export async function generateMetadata({

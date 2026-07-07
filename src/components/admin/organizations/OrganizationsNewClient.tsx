@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import { suggestOrganizations, createOrganization, uploadOrgLogo } from "@/service/api/organizations";
 import type { OrganizationSuggestion } from "@/service/types/identity";
@@ -17,6 +18,7 @@ import OrganizationSuccessStep from "@/components/admin/organizations/Organizati
 import { getOrganizationAuxiliaryItems } from "@/components/admin/organizations/organizationAuxiliaryContent";
 
 export default function OrganizationsNewClient() {
+  const { t } = useTranslation(["admin-common", "admin-organizations"]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const totalSteps = 3;
@@ -56,8 +58,12 @@ export default function OrganizationsNewClient() {
 
   async function handleCreateOrg() {
     const errors: Partial<Record<"orgName" | "orgDescription", string>> = {};
-    if (!orgName.trim()) errors.orgName = "Indique o nome da organização.";
-    if (!orgDescription.trim()) errors.orgDescription = "Descreva a organização.";
+    if (!orgName.trim()) {
+      errors.orgName = t("admin-organizations:form.nameRequired");
+    }
+    if (!orgDescription.trim()) {
+      errors.orgDescription = t("admin-organizations:form.descriptionRequired");
+    }
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -83,7 +89,9 @@ export default function OrganizationsNewClient() {
 
       router.push(`/organizations/${organization.slug}`);
     } catch (error) {
-      setApiError(normalizeApiError(error, "Erro ao criar a organização.").message);
+      setApiError(
+        normalizeApiError(error, t("admin-organizations:form.createError")).message
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +101,7 @@ export default function OrganizationsNewClient() {
     const file = event.target.files?.[0] || null;
 
     if (file && file.size > 4194304) {
-      setOrgLogoError("O ficheiro excede o tamanho máximo de 4 MB.");
+      setOrgLogoError(t("admin-organizations:form.fileTooLarge"));
       setOrgLogo(null);
       setOrgLogoPreview(null);
       return;
@@ -112,9 +120,9 @@ export default function OrganizationsNewClient() {
   }
 
   const stepTitles: Record<number, string> = {
-    1: "Crie ou integre uma organização em dados.gov.pt",
-    2: "Descreva a sua organização",
-    3: "Finalize sua organização",
+    1: t("admin-organizations:form.steps.select"),
+    2: t("admin-organizations:form.steps.describe"),
+    3: t("admin-organizations:form.steps.finish"),
   };
 
   const auxiliaryItems = getOrganizationAuxiliaryItems({
@@ -125,19 +133,19 @@ export default function OrganizationsNewClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Organizações", url: "/admin/system/organizations" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-organizations:title"), url: "/admin/system/organizations" },
         {
-          label: "Formulário de registo de uma organização",
+          label: t("admin-organizations:form.registrationTitle"),
           url: "/admin/organizations/new",
         },
       ]}
-      title="Formulário de registo de uma organização"
+      title={t("admin-organizations:form.registrationTitle")}
     >
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
-        labelWord="Passo"
+        labelWord={t("admin-common:stepper.step")}
         labelFormat="slash"
         stepTitle={stepTitles[currentStep] || ""}
       />

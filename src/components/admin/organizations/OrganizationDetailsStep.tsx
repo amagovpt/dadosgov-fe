@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, InputText, InputTextArea, StatusCard } from "@ama-pt/agora-design-system";
 import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 
@@ -47,6 +48,8 @@ export default function OrganizationDetailsStep({
   onPrevious,
   onSubmit,
 }: OrganizationDetailsStepProps) {
+  const { t } = useTranslation("admin-organizations");
+
   return (
     <>
       <StatusCard
@@ -54,10 +57,9 @@ export default function OrganizationDetailsStep({
         showIcon
         description={
           <>
-            <strong>O que é uma organização?</strong>
+            <strong>{t("form.whatIsOrganizationTitle")}</strong>
             <br />
-            Uma organização é uma entidade na qual muitos utilizadores podem colaborar. Conjuntos
-            de dados publicados sob a égide da organização podem ser editados pelos seus membros.
+            {t("form.whatIsOrganizationDescription")}
           </>
         }
       />
@@ -71,15 +73,17 @@ export default function OrganizationDetailsStep({
         }}
       >
         <p className="pt-32 text-base leading-7 text-neutral-900">
-          Os campos marcados com um asterisco ( * ) são obrigatórios.
+          {t("form.requiredFields")}
         </p>
 
-        <h2 className="admin-page__section-title">Descrição</h2>
+        <h2 className="admin-page__section-title">
+          {t("form.descriptionSectionTitle")}
+        </h2>
 
         <div className="admin-page__fields-group">
           <InputText
-            label="Nome *"
-            placeholder="Insira o nome aqui"
+            label={t("form.nameField")}
+            placeholder={t("form.namePlaceholder")}
             id="org-name"
             value={orgName}
             onChange={onNameChange}
@@ -90,16 +94,16 @@ export default function OrganizationDetailsStep({
           />
 
           <InputText
-            label="Sigla"
-            placeholder="Insira a sigla aqui"
+            label={t("form.acronymField")}
+            placeholder={t("form.acronymPlaceholder")}
             id="org-acronym"
             value={orgAcronym}
             onChange={onAcronymChange}
           />
 
           <InputTextArea
-            label="Descrição *"
-            placeholder="Insira a descrição aqui"
+            label={t("form.descriptionField")}
+            placeholder={t("form.descriptionPlaceholder")}
             id="org-description"
             rows={6}
             value={orgDescription}
@@ -111,25 +115,25 @@ export default function OrganizationDetailsStep({
           />
 
           <InputText
-            label="Website"
-            placeholder="Insira o URL aqui"
+            label={t("form.websiteField")}
+            placeholder={t("form.websitePlaceholder")}
             id="org-website"
             value={orgWebsite}
             onChange={onWebsiteChange}
           />
         </div>
 
-        <h2 className="admin-page__section-title">Logotipo</h2>
+        <h2 className="admin-page__section-title">{t("form.logoSectionTitle")}</h2>
 
         <div className="admin-page__fields-group">
           <ImageUploadField
-            label="Ficheiro"
+            label={t("form.logoFileLabel")}
             onChange={onLogoChange}
             onSecurityError={onLogoSecurityError}
             error={orgLogoError}
             previewSrc={orgLogoPreview || undefined}
-            previewAlt="Pré-visualização do logotipo"
-            previewLabel="Pré-visualização:"
+            previewAlt={t("form.logoPreviewAlt")}
+            previewLabel={t("form.logoPreviewLabel")}
             previewWrapperClassName="mt-12"
             previewImageClassName="max-h-[120px] max-w-[240px] rounded-8 border border-neutral-200 object-contain p-8"
             uploaderWrapperClassName="[&_.drag-and-drop-area_.agora-btn]:w-fit [&_.instructions]:items-center [&_.instructions]:text-center"
@@ -138,10 +142,10 @@ export default function OrganizationDetailsStep({
 
         <div className="admin-page__actions">
           <Button type="button" appearance="outline" variant="neutral" onClick={onPrevious}>
-            Anterior
+            {t("form.previous")}
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            Criar a organização
+            {t("form.createOrganization")}
           </Button>
         </div>
       </form>

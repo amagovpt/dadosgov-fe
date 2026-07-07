@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 
@@ -13,6 +14,8 @@ export default function OrganizationSuccessStep({
   onPrevious,
   onFinish,
 }: OrganizationSuccessStepProps) {
+  const { t } = useTranslation(["admin-common", "admin-organizations"]);
+
   return (
     <div className="admin-page__form">
       <StatusCard
@@ -20,22 +23,22 @@ export default function OrganizationSuccessStep({
         showIcon
         description={
           <>
-            <strong>A sua organização foi criada!</strong>
+            <strong>{t("admin-organizations:form.successTitle")}</strong>
             <br />
-            Agora pode gerir a sua organização.
+            {t("admin-organizations:form.successDescription")}
           </>
         }
       />
 
       <AdminStepActions
         previousAction={{
-          label: "Anterior",
+          label: t("admin-organizations:form.previous"),
           appearance: "outline",
           variant: "neutral",
           onClick: onPrevious,
         }}
         primaryAction={{
-          label: "Guardar",
+          label: t("admin-common:actions.save"),
           hasIcon: true,
           trailingIcon: "agora-line-check-circle",
           trailingIconHover: "agora-solid-check-circle",

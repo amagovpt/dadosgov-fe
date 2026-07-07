@@ -1,0 +1,63 @@
+{
+  "title": "Organizations",
+  "search": {
+    "placeholder": "Search by organization name",
+    "ariaLabel": "Search organizations"
+  },
+  "empty": {
+    "title": "No organizations",
+    "description": "No organization found."
+  },
+  "columns": {
+    "name": "Name",
+    "createdAt": "Created at",
+    "datasets": "Datasets",
+    "reuses": "Reuses",
+    "members": "Members",
+    "deleteAriaLabel": "Delete {{name}}"
+  },
+  "delete": {
+    "title": "Are you sure you want to delete this organization?",
+    "description": "This action is irreversible.",
+    "closeAriaLabel": "Close"
+  },
+  "form": {
+    "registrationTitle": "Organization registration form",
+    "steps": {
+      "select": "Create or join an organization on dados.gov.pt",
+      "describe": "Describe your organization",
+      "finish": "Finish your organization"
+    },
+    "nameRequired": "Enter the organization name.",
+    "descriptionRequired": "Describe the organization.",
+    "createError": "Error creating the organization.",
+    "fileTooLarge": "The file exceeds the maximum size of 4 MB.",
+    "requiredFields": "Fields marked with an asterisk ( * ) are required.",
+    "selectionIntroTitle": "Join an organization",
+    "selectionIntroDescription": "An organization is an entity where users can collaborate. Datasets published within an organization can be edited by its members.",
+    "organizationLabel": "Organization",
+    "organizationPlaceholder": "Search for an organization on dados.gov.pt...",
+    "searchInputPlaceholder": "Type to search...",
+    "noResults": "No results found",
+    "or": "or",
+    "createOrganization": "Create an organization",
+    "whatIsOrganizationTitle": "What is an organization?",
+    "whatIsOrganizationDescription": "An organization is an entity where many users can collaborate. Datasets published under the organization can be edited by its members.",
+    "descriptionSectionTitle": "Description",
+    "nameField": "Name *",
+    "namePlaceholder": "Enter the name here",
+    "acronymField": "Acronym",
+    "acronymPlaceholder": "Enter the acronym here",
+    "descriptionField": "Description *",
+    "descriptionPlaceholder": "Enter the description here",
+    "websiteField": "Website",
+    "websitePlaceholder": "Enter the URL here",
+    "logoSectionTitle": "Logo",
+    "logoFileLabel": "File",
+    "logoPreviewAlt": "Logo preview",
+    "logoPreviewLabel": "Preview:",
+    "previous": "Previous",
+    "successTitle": "Your organization was created!",
+    "successDescription": "You can now manage your organization."
+  }
+}

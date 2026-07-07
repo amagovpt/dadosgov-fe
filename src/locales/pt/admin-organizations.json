@@ -1,0 +1,63 @@
+{
+  "title": "Organizações",
+  "search": {
+    "placeholder": "Pesquise o nome da organização",
+    "ariaLabel": "Pesquisar organizações"
+  },
+  "empty": {
+    "title": "Sem organizações",
+    "description": "Nenhuma organização encontrada."
+  },
+  "columns": {
+    "name": "Nome",
+    "createdAt": "Criado em",
+    "datasets": "Conjuntos de dados",
+    "reuses": "Reutilizações",
+    "members": "Membros",
+    "deleteAriaLabel": "Eliminar {{name}}"
+  },
+  "delete": {
+    "title": "Tem a certeza que quer eliminar esta organização?",
+    "description": "Esta ação é irreversível.",
+    "closeAriaLabel": "Fechar"
+  },
+  "form": {
+    "registrationTitle": "Formulário de registo de uma organização",
+    "steps": {
+      "select": "Crie ou integre uma organização em dados.gov.pt",
+      "describe": "Descreva a sua organização",
+      "finish": "Finalize a sua organização"
+    },
+    "nameRequired": "Indique o nome da organização.",
+    "descriptionRequired": "Descreva a organização.",
+    "createError": "Erro ao criar a organização.",
+    "fileTooLarge": "O ficheiro excede o tamanho máximo de 4 MB.",
+    "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
+    "selectionIntroTitle": "Inscreva-se numa organização",
+    "selectionIntroDescription": "Uma organização é uma entidade na qual os utilizadores podem colaborar. Conjuntos de dados publicados dentro de uma organização podem ser editados pelos seus membros.",
+    "organizationLabel": "Organização",
+    "organizationPlaceholder": "Pesquisar uma organização em dados.gov.pt...",
+    "searchInputPlaceholder": "Escreva para pesquisar...",
+    "noResults": "Nenhum resultado encontrado",
+    "or": "ou",
+    "createOrganization": "Criar uma organização",
+    "whatIsOrganizationTitle": "O que é uma organização?",
+    "whatIsOrganizationDescription": "Uma organização é uma entidade na qual muitos utilizadores podem colaborar. Conjuntos de dados publicados sob a égide da organização podem ser editados pelos seus membros.",
+    "descriptionSectionTitle": "Descrição",
+    "nameField": "Nome *",
+    "namePlaceholder": "Insira o nome aqui",
+    "acronymField": "Sigla",
+    "acronymPlaceholder": "Insira a sigla aqui",
+    "descriptionField": "Descrição *",
+    "descriptionPlaceholder": "Insira a descrição aqui",
+    "websiteField": "Website",
+    "websitePlaceholder": "Insira o URL aqui",
+    "logoSectionTitle": "Logotipo",
+    "logoFileLabel": "Ficheiro",
+    "logoPreviewAlt": "Pré-visualização do logotipo",
+    "logoPreviewLabel": "Pré-visualização:",
+    "previous": "Anterior",
+    "successTitle": "A sua organização foi criada!",
+    "successDescription": "Agora pode gerir a sua organização."
+  }
+}

@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import ProducerIdentitySection from "@/components/admin/forms/ProducerIdentitySection";
 
 interface ProducerSectionProps {
@@ -15,16 +16,13 @@ export default function ProducerSection({
   producerOptions,
   selectedProducerRef,
 }: ProducerSectionProps) {
+  const { t } = useTranslation("admin-community-resources");
+
   return (
     <ProducerIdentitySection
       producerOptions={producerOptions}
       selectedProducerRef={selectedProducerRef}
-      helperDescription={
-        <>
-          Quando o conjunto de dados for produzido no contexto de atividade profissional, é
-          recomendável que seja publicado em nome da organização responsável.
-        </>
-      }
+      helperDescription={t("form.producerHelper")}
     />
   );
 }
