@@ -1,0 +1,22 @@
+{
+  "filters": {
+    "updated": {
+      "updated": "Data da atualização",
+      "last30d": "Últimos 30 dias",
+      "last12M": "Últimos 12 meses",
+      "last3y": "Últimos 3 anos"
+    },
+    "themes": {
+      "themes": "Temas"
+    },
+    "tags": {
+      "tags": "Palavras-chave",
+      "searchPlaceholder": "Escreva para pesquisar...",
+      "minCharsMessage": "Escreva pelo menos 2 caracteres...",
+      "emptyMessage": "Sem resultados"
+    },
+    "all": "Todos",
+    "clear": "Limpar filtros",
+    "advanced": "Filtros avançados"
+  }
+}

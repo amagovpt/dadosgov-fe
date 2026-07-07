@@ -4,16 +4,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@ama-pt/agora-design-system";
 import { suggestTags } from "@/service/api/search";
 import { Datastories } from "@/service/types/datastories/datastories";
-import { DataStoriesFilterState, DataStoriesToggleState } from "@/service/types/datastories/filters";
 import {
-  AdvancedFilterGroup,
-  AdvancedFiltersSidebar,
-} from "@/components/filters/AdvancedFiltersSidebar";
+  DataStoriesFilterState,
+  DataStoriesToggleState,
+} from "@/service/types/datastories/filters";
+import { AdvancedFilterGroup } from "@/components/filters/AdvancedFiltersSidebar";
 import {
   ToggleFilterSection,
   ToggleFilterSections,
 } from "@/components/filters/ToggleFilterSections";
 import { toggleSelection } from "@/utils/filterUtils";
+import { useTranslation } from "react-i18next";
 
 const daysAgo = (dateStr: string, days: number) =>
   (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24) <= days;
@@ -29,6 +30,8 @@ export function DataStoriesFilters({
   onFiltersChange,
   onClearSearch,
 }: DataStoriesFiltersProps) {
+  const { t } = useTranslation("datastories");
+
   const safeStories = Array.isArray(stories) ? stories : [];
   const [selectedToggleFilters, setSelectedToggleFilters] = useState<DataStoriesToggleState>({
     temas: "all",
@@ -99,35 +102,36 @@ export function DataStoriesFilters({
     () => [
       {
         id: "all",
-        label: "Todos",
+        label: t("filters.all"),
         count: String(safeStories.length),
       },
       {
         id: "30_days",
-        label: "Os últimos 30 dias",
+        label: t("filters.updated.last30d"),
+
         count: String(safeStories.filter((story) => daysAgo(story.createdAt, 30)).length),
       },
       {
         id: "12_months",
-        label: "Os últimos 12 meses",
+        label: t("filters.updated.last12M"),
         count: String(safeStories.filter((story) => daysAgo(story.createdAt, 365)).length),
       },
       {
         id: "3_years",
-        label: "Os últimos 3 anos",
+        label: t("filters.updated.last3y"),
         count: String(safeStories.filter((story) => daysAgo(story.createdAt, 365 * 3)).length),
       },
     ],
-    [safeStories]
+    [safeStories, t]
   );
 
   const toggleSections = useMemo<ToggleFilterSection[]>(
     () => [
       {
         key: "temas",
-        title: "Temas",
+        title: t("filters.themes.themes"),
         options: [
-          { id: "all", label: "Todos", count: safeStories.length },
+          { id: "all", label: t("filters.all"), count: safeStories.length },
           ...safeStories.reduce(
             (acc, story) => {
               if (!acc.some((option) => option.id === story.theme)) {
@@ -145,7 +149,7 @@ export function DataStoriesFilters({
       },
       {
         key: "atualizacao",
-        title: "Data da atualização",
+        title: t("filters.updated.updated"),
         options: atualizacaoOptions.map((option) => ({
           id: option.id,
           label: option.label,
@@ -153,23 +157,23 @@ export function DataStoriesFilters({
         })),
       },
     ],
-    [atualizacaoOptions, safeStories]
+    [atualizacaoOptions, safeStories, t]
   );
 
   const advancedFilterGroups = useMemo<AdvancedFilterGroup[]>(
     () => [
       {
-        name: "Palavras-chave",
+        name: t("filters.tags.tags"),
         param: "tag",
         data: filterTagOptions,
         searchable: true,
         suggest: true,
-        searchPlaceholder: "Escreva para pesquisar...",
-        minCharsMessage: "Escreva pelo menos 2 caracteres...",
-        emptyMessage: "Sem resultados",
+        searchPlaceholder: t("filters.tags.searchPlaceholder"),
+        minCharsMessage: t("filters.tags.minCharsMessage"),
+        emptyMessage: t("filters.tags.emptyMessage"),
       },
     ],
-    [filterTagOptions]
+    [filterTagOptions, t]
   );
 
   return (
@@ -182,7 +186,7 @@ export function DataStoriesFilters({
       />
       {/*
       <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">
-        Filtros avançados
+        {t("filters.advanced")}
       </h2>
 
       <AdvancedFiltersSidebar
@@ -196,7 +200,7 @@ export function DataStoriesFilters({
         checkboxIdPrefix="datastory"
       />
       */}
-      <div className="mt-32 mb-64">
+      <div className="mb-64 mt-32">
         <Button
           variant="primary"
           appearance="outline"
@@ -206,7 +210,7 @@ export function DataStoriesFilters({
             onClearSearch();
           }}
         >
-          Limpar filtros
+          {t("filters.clear")}
         </Button>
       </div>
     </div>

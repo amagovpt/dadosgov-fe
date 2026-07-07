@@ -32,7 +32,7 @@ export default async function page() {
             { label: "Home", url: "/" },
             { label: "Recursos", url: "/recursos" },
             { label: "Como usar o portal", url: "/recursos/como-usar-o-portal" },
-            { label: "Licenças", url: "/recursos/como-usar-o-portal/licencas" },
+            { label: title, url: "/recursos/como-usar-o-portal/licencas" },
           ]}
         />
       </div>

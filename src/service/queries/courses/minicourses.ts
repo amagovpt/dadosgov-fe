@@ -5,7 +5,7 @@ import { gql } from "@apollo/client";
 
 export function getMiniCoursesPages(locale: string = "pt") {
     return gql`
-        query MyQuery {
+        query GetMiniCoursesPages {
             findPageMinicursosSingleton {
                 data {
                 hero {
