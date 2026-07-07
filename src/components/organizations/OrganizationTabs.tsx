@@ -50,7 +50,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
     async function loadDatasets() {
       if (!datasetsResponse) setIsLoadingDatasets(true);
       try {
-        const response = await fetchOrgDatasets(organization.slug, datasetsPage, 20);
+        const response = await fetchOrgDatasets(organization.slug, datasetsPage, 20, undefined, true);
         setDatasetsResponse(response);
       } catch (error) {
         console.error("Error loading organization datasets:", error);
