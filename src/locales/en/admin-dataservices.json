@@ -1,0 +1,95 @@
+{
+  "title": "API",
+  "search": {
+    "placeholder": "Search by API name",
+    "ariaLabel": "Search APIs"
+  },
+  "empty": {
+    "title": "No APIs",
+    "description": "No API found.",
+    "publicationsTitle": "No publications",
+    "orgDescription": "The organization has not published an API yet."
+  },
+  "columns": {
+    "title": "API title",
+    "titleShort": "Title",
+    "status": "Status",
+    "createdAt": "Created at",
+    "modifiedAt": "Modified at",
+    "by": "by",
+    "about": "about"
+  },
+  "form": {
+    "registrationTitle": "Registration form",
+    "steps": {
+      "describe": "Describe your API",
+      "datasets": "Link datasets",
+      "publish": "Finish publication"
+    },
+    "whatIsApiTitle": "What is an API?",
+    "whatIsApiDescription": "An API is a computing tool that allows a website or software to communicate with another computer and exchange data.",
+    "requiredFields": "Fields marked with an asterisk ( * ) are required.",
+    "createError": "Error creating the API. Try again.",
+    "creating": "Creating...",
+    "previous": "Previous",
+    "next": "Next",
+    "me": "Myself",
+    "validationErrors": {
+      "name": "Enter the API name.",
+      "description": "Describe the API."
+    },
+    "producerHelper": "We recommend publishing on behalf of an organization if this is a professional activity.",
+    "datasetLinksInfo": "It is important to link all datasets used, as this helps understand the required cross-references and improve the visibility of your reuse.",
+    "publishSuccessTitle": "Your API was created!",
+    "publishSuccessDescription": "You can now publish it or save it as a draft.",
+    "untitled": "Untitled",
+    "noDescription": "No description",
+    "saveDraft": "Save draft",
+    "publishApi": "Publish API"
+  },
+  "datasetLinks": {
+    "searchLabel": "Search for a dataset",
+    "searchPlaceholder": "Searching for a dataset...",
+    "sampleDataset": "Dataset 1",
+    "linkLabel": "Dataset link",
+    "add": "Add"
+  },
+  "edit": {
+    "deleteConfirm": "This action is irreversible. Are you sure you want to delete this API?",
+    "discussionsEmptyTitle": "No discussions",
+    "discussionsEmptyDescription": "There are no discussions on this API yet.",
+    "discussionCount_one": "{{count}} DISCUSSION",
+    "discussionCount_other": "{{count}} DISCUSSIONS",
+    "publishedAt": "Published at",
+    "closed": "Closed",
+    "open": "Open",
+    "activitiesEmptyTitle": "No activities",
+    "activitiesEmptyDescription": "There are no activities registered on this API yet.",
+    "activitiesCount_one": "{{count}} ACTIVITY",
+    "activitiesCount_other": "{{count}} ACTIVITIES"
+  },
+  "fields": {
+    "producer": "Producer",
+    "description": "Description",
+    "apiName": "API name *",
+    "namePlaceholder": "Enter the name here",
+    "acronym": "Acronym",
+    "acronymPlaceholder": "Enter the acronym here",
+    "apiDescription": "Description *",
+    "descriptionPlaceholder": "Enter the description here",
+    "baseApiUrl": "API root link",
+    "urlPlaceholder": "Enter the URL here",
+    "machineDocUrl": "Link to API documentation (OpenAPI or Swagger file)",
+    "technicalDocUrl": "Link to technical API documentation",
+    "rateLimiting": "Rate limit",
+    "shortPlaceholder": "Enter here",
+    "availability": "Availability",
+    "access": "Access",
+    "accessType": "Access type",
+    "accessOpen": "Open",
+    "accessAccount": "Open with account",
+    "accessRestricted": "Restricted",
+    "authRequestUrl": "Link to the access authorization tool",
+    "businessDocUrl": "Link to commercial API documentation"
+  }
+}

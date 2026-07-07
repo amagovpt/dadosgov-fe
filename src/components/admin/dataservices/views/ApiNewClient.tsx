@@ -2,35 +2,38 @@
 
 import React from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import ApiRegistrationClient from "@/components/admin/dataservices/views/ApiRegistrationClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 
 export default function ApiNewClient() {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { displayName } = useCurrentUser();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
   const stepTitles: Record<number, string> = {
-    1: "Descreva a sua API",
-    2: "Vincular conjuntos de dados",
-    3: "Finalizar a publicação",
+    1: t("admin-dataservices:form.steps.describe"),
+    2: t("admin-dataservices:form.steps.datasets"),
+    3: t("admin-dataservices:form.steps.publish"),
   };
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "API", url: "/admin/dataservices" },
+        { label: t("admin-dataservices:title"), url: "/admin/dataservices" },
       ]}
-      title="Formulário de inscrição"
+      title={t("admin-dataservices:form.registrationTitle")}
     >
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
+        labelWord={t("admin-common:stepper.step")}
         stepTitle={stepTitles[currentStep]}
       />
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import { createDataservice } from "@/service/api/dataservices";
 import type { Dataservice } from "@/service/types/dataservice";
@@ -27,6 +28,7 @@ export default function ApiRegistrationClient({
   onNextStep,
   onPreviousStep,
 }: ApiRegistrationClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const { user } = useAuth();
   const [accessType, setAccessType] = useState("open");
   const [apiName, setApiName] = useState("");
@@ -49,8 +51,10 @@ export default function ApiRegistrationClient({
 
   async function handleStep1Next() {
     const errors: Partial<Record<"apiName" | "apiDescription", string>> = {};
-    if (!apiName.trim()) errors.apiName = "Indique o nome da API.";
-    if (!apiDescription.trim()) errors.apiDescription = "Descreva a API.";
+    if (!apiName.trim()) errors.apiName = t("admin-dataservices:form.validationErrors.name");
+    if (!apiDescription.trim()) {
+      errors.apiDescription = t("admin-dataservices:form.validationErrors.description");
+    }
 
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -81,7 +85,7 @@ export default function ApiRegistrationClient({
       setCreatedDataservice(dataservice);
       handleStepChange(onNextStep);
     } catch (error: unknown) {
-      setApiError(normalizeApiError(error, "Erro ao criar a API. Tente novamente.").message);
+      setApiError(normalizeApiError(error, t("admin-dataservices:form.createError")).message);
     } finally {
       setIsSubmitting(false);
     }
@@ -106,7 +110,7 @@ export default function ApiRegistrationClient({
     if (!datasetLinks[lastIndex].url.trim()) {
       setDatasetLinkErrors((previousErrors) => ({
         ...previousErrors,
-        [lastIndex]: "Campo obrigatório",
+        [lastIndex]: t("admin-common:forms.requiredField"),
       }));
       return;
     }
@@ -147,10 +151,9 @@ export default function ApiRegistrationClient({
               showIcon
               description={
                 <>
-                  <strong>O que é uma API?</strong>
+                  <strong>{t("admin-dataservices:form.whatIsApiTitle")}</strong>
                   <br />
-                  Uma API é uma ferramenta informática que permite que um website ou software se
-                  comunique com outro computador e troque dados.
+                  {t("admin-dataservices:form.whatIsApiDescription")}
                 </>
               }
             />
@@ -166,11 +169,13 @@ export default function ApiRegistrationClient({
               }}
             >
               <p className="pt-32 text-base leading-7 text-neutral-900">
-                Os campos marcados com um asterisco ( * ) são obrigatórios.
+                {t("admin-dataservices:form.requiredFields")}
               </p>
 
               <DataserviceProducerSection
-                displayName={user ? `${user.first_name} ${user.last_name}` : "Eu próprio"}
+                displayName={
+                  user ? `${user.first_name} ${user.last_name}` : t("admin-dataservices:form.me")
+                }
                 organizations={(user?.organizations || []).map((organization) => ({
                   id: organization.id,
                   name: organization.name,
@@ -219,7 +224,9 @@ export default function ApiRegistrationClient({
 
               <AdminStepActions
                 primaryAction={{
-                  label: isSubmitting ? "A criar..." : "Seguinte",
+                  label: isSubmitting
+                    ? t("admin-dataservices:form.creating")
+                    : t("admin-dataservices:form.next"),
                   type: "submit",
                   hasIcon: true,
                   trailingIcon: "agora-line-arrow-right-circle",

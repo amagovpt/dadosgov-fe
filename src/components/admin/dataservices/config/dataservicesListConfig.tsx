@@ -38,35 +38,57 @@ export function sortDataservices(
 
 interface DataserviceColumnsOptions {
   ownerMetaStyle?: "dot" | "by";
+  labels?: DataserviceColumnLabels;
 }
+
+interface DataserviceColumnLabels {
+  title: string;
+  titleShort: string;
+  status: string;
+  createdAt: string;
+  modifiedAt: string;
+  by: string;
+  about: string;
+}
+
+const DEFAULT_LABELS: DataserviceColumnLabels = {
+  title: "Título da API",
+  titleShort: "Título",
+  status: "Estado",
+  createdAt: "Criado em",
+  modifiedAt: "Modificado em",
+  by: "por",
+  about: "sobre",
+};
 
 export function createDataserviceColumns({
   ownerMetaStyle = "dot",
+  labels = DEFAULT_LABELS,
 }: DataserviceColumnsOptions = {}): AdminListColumn<Dataservice, DataserviceSortField>[] {
   return [
     {
       id: "title",
-      header: "Título da API",
-      headerLabel: "Título",
+      header: labels.title,
+      headerLabel: labels.titleShort,
       sortField: "title",
       sortType: "numeric",
       renderCell: (api) => <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>,
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
       renderCell: (api) => <ResourceStatusBadge item={api} />,
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created_at",
       sortType: "date",
       renderCell: (api) => formatDateToDMY(api.created_at),
     },
     {
       id: "last_modified",
-      header: "Modificado em",
+      header: labels.modifiedAt,
       sortField: "last_modified",
       sortType: "date",
       renderCell: (api) => (
@@ -76,7 +98,7 @@ export function createDataserviceColumns({
             <>
               <br />
               <span className="text-sm text-neutral-500">
-                {ownerMetaStyle === "by" ? "por" : "sobre"}{" "}
+                {ownerMetaStyle === "by" ? labels.by : labels.about}{" "}
                 {ownerMetaStyle === "dot" ? <span className="text-success-600">●</span> : null}{" "}
                 {api.owner.first_name} {api.owner.last_name}
               </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import DataserviceDatasetLinksSection from "@/components/admin/dataservices/form-sections/DataserviceDatasetLinksSection";
@@ -24,12 +25,14 @@ export default function ApiRegistrationDatasetsStep({
   onPreviousStep,
   onNextStep,
 }: ApiRegistrationDatasetsStepProps) {
+  const { t } = useTranslation("admin-dataservices");
+
   return (
     <>
       <StatusCard
         variant="informative"
         showIcon
-        description="É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização."
+        description={t("form.datasetLinksInfo")}
       />
 
       <form
@@ -49,13 +52,13 @@ export default function ApiRegistrationDatasetsStep({
 
         <AdminStepActions
           previousAction={{
-            label: "Anterior",
+            label: t("form.previous"),
             appearance: "outline",
             variant: "neutral",
             onClick: onPreviousStep,
           }}
           primaryAction={{
-            label: "Seguinte",
+            label: t("form.next"),
             type: "submit",
             hasIcon: true,
             trailingIcon: "agora-line-arrow-right-circle",

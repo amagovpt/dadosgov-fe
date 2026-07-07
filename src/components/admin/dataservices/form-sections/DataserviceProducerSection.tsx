@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
 import ProducerIdentitySection from "@/components/admin/forms/ProducerIdentitySection";
 import { buildProducerItems, renderDropdownSection } from "@/components/admin/community-resources/config/dropdownOptions";
@@ -19,6 +20,7 @@ export default function DataserviceProducerSection({
   displayName,
   organizations,
 }: DataserviceProducerSectionProps) {
+  const { t } = useTranslation("admin-dataservices");
   const producerOptions = useMemo(
     () =>
       renderDropdownSection(
@@ -35,8 +37,7 @@ export default function DataserviceProducerSection({
       producerOptions={producerOptions}
       helperDescription={
         <>
-          Recomendamos que publique em nome de uma organização se se tratar de uma atividade
-          profissional.
+          {t("form.producerHelper")}
         </>
       }
     />

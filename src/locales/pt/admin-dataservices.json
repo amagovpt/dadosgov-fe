@@ -1,0 +1,95 @@
+{
+  "title": "API",
+  "search": {
+    "placeholder": "Pesquise o nome da API",
+    "ariaLabel": "Pesquisar APIs"
+  },
+  "empty": {
+    "title": "Sem APIs",
+    "description": "Nenhuma API encontrada.",
+    "publicationsTitle": "Sem publicações",
+    "orgDescription": "A organização ainda não publicou uma API."
+  },
+  "columns": {
+    "title": "Título da API",
+    "titleShort": "Título",
+    "status": "Estado",
+    "createdAt": "Criado em",
+    "modifiedAt": "Modificado em",
+    "by": "por",
+    "about": "sobre"
+  },
+  "form": {
+    "registrationTitle": "Formulário de inscrição",
+    "steps": {
+      "describe": "Descreva a sua API",
+      "datasets": "Vincular conjuntos de dados",
+      "publish": "Finalizar a publicação"
+    },
+    "whatIsApiTitle": "O que é uma API?",
+    "whatIsApiDescription": "Uma API é uma ferramenta informática que permite que um website ou software se comunique com outro computador e troque dados.",
+    "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
+    "createError": "Erro ao criar a API. Tente novamente.",
+    "creating": "A criar...",
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "me": "Eu próprio",
+    "validationErrors": {
+      "name": "Indique o nome da API.",
+      "description": "Descreva a API."
+    },
+    "producerHelper": "Recomendamos que publique em nome de uma organização se se tratar de uma atividade profissional.",
+    "datasetLinksInfo": "É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização.",
+    "publishSuccessTitle": "A sua API foi criada!",
+    "publishSuccessDescription": "Agora pode publicar ou guardar como rascunho.",
+    "untitled": "Sem título",
+    "noDescription": "Sem descrição",
+    "saveDraft": "Salvar rascunho",
+    "publishApi": "Publicar API"
+  },
+  "datasetLinks": {
+    "searchLabel": "Pesquisar um conjunto de dados",
+    "searchPlaceholder": "Procurando um conjunto de dados...",
+    "sampleDataset": "Conjunto de dados 1",
+    "linkLabel": "Link para o conjunto de dados",
+    "add": "Adicionar"
+  },
+  "edit": {
+    "deleteConfirm": "Esta ação é irreversível. Tem a certeza que quer eliminar esta API?",
+    "discussionsEmptyTitle": "Sem discussões",
+    "discussionsEmptyDescription": "Ainda não existem discussões nesta API.",
+    "discussionCount_one": "{{count}} DISCUSSÃO",
+    "discussionCount_other": "{{count}} DISCUSSÕES",
+    "publishedAt": "Publicado em",
+    "closed": "Fechada",
+    "open": "Aberta",
+    "activitiesEmptyTitle": "Sem atividades",
+    "activitiesEmptyDescription": "Ainda não existem atividades registadas nesta API.",
+    "activitiesCount_one": "{{count}} ATIVIDADE",
+    "activitiesCount_other": "{{count}} ATIVIDADES"
+  },
+  "fields": {
+    "producer": "Produtor",
+    "description": "Descrição",
+    "apiName": "Nome da API *",
+    "namePlaceholder": "Insira o nome aqui",
+    "acronym": "Sigla",
+    "acronymPlaceholder": "Insira a sigla aqui",
+    "apiDescription": "Descrição *",
+    "descriptionPlaceholder": "Insira a descrição aqui",
+    "baseApiUrl": "Link raiz da API",
+    "urlPlaceholder": "Insira o URL aqui",
+    "machineDocUrl": "Link para a documentação da API (ficheiro OpenAPI ou Swagger)",
+    "technicalDocUrl": "Link para a documentação técnica da API",
+    "rateLimiting": "Limite de chamadas",
+    "shortPlaceholder": "Insira aqui",
+    "availability": "Disponibilidade",
+    "access": "Acesso",
+    "accessType": "Tipo de acesso",
+    "accessOpen": "Abrir",
+    "accessAccount": "Abrir com conta",
+    "accessRestricted": "Restrito",
+    "authRequestUrl": "Link para a ferramenta de autorização de acesso",
+    "businessDocUrl": "Link para a documentação comercial da API"
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -18,6 +19,7 @@ import {
 } from "@/components/admin/dataservices/config/dataservicesListConfig";
 
 export default function SystemDataservicesClient() {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,8 +35,20 @@ export default function SystemDataservicesClient() {
     [sortField, sortOrder]
   );
   const columns = useMemo(
-    () => createDataserviceColumns({ ownerMetaStyle: "by" }),
-    []
+    () =>
+      createDataserviceColumns({
+        ownerMetaStyle: "by",
+        labels: {
+          title: t("admin-dataservices:columns.title"),
+          titleShort: t("admin-dataservices:columns.titleShort"),
+          status: t("admin-dataservices:columns.status"),
+          createdAt: t("admin-dataservices:columns.createdAt"),
+          modifiedAt: t("admin-dataservices:columns.modifiedAt"),
+          by: t("admin-dataservices:columns.by"),
+          about: t("admin-dataservices:columns.about"),
+        },
+      }),
+    [t]
   );
 
   const { handleSort, getSortOrder } = useSortControls(
@@ -84,11 +98,11 @@ export default function SystemDataservicesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "API", url: "/admin/system/dataservices" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-dataservices:title"), url: "/admin/system/dataservices" },
       ]}
-      title="API"
+      title={t("admin-dataservices:title")}
       isLoading={isLoading}
       count={totalItems}
       hasItems={filteredApis.length > 0}
@@ -97,8 +111,8 @@ export default function SystemDataservicesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome da API",
-        ariaLabel: "Pesquisar APIs",
+        placeholder: t("admin-dataservices:search.placeholder"),
+        ariaLabel: t("admin-dataservices:search.ariaLabel"),
         onChange: handleSearch,
       }}
       filters={
@@ -114,8 +128,8 @@ export default function SystemDataservicesClient() {
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-code" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem APIs"
-          description="Nenhuma API encontrada."
+          title={t("admin-dataservices:empty.title")}
+          description={t("admin-dataservices:empty.description")}
           hasAnchor={false}
         />
       }

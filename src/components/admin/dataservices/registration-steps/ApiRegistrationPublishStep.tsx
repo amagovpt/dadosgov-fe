@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, CardGeneral, StatusCard } from "@ama-pt/agora-design-system";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import type { Dataservice } from "@/service/types/dataservice";
@@ -16,6 +17,8 @@ export default function ApiRegistrationPublishStep({
   apiName,
   apiDescription,
 }: ApiRegistrationPublishStepProps) {
+  const { t } = useTranslation("admin-dataservices");
+
   return (
     <>
       <StatusCard
@@ -23,9 +26,9 @@ export default function ApiRegistrationPublishStep({
         showIcon
         description={
           <>
-            <strong>A sua API foi criada!</strong>
+            <strong>{t("form.publishSuccessTitle")}</strong>
             <br />
-            Agora pode publicar ou guardar como rascunho.
+            {t("form.publishSuccessDescription")}
           </>
         }
       />
@@ -36,8 +39,10 @@ export default function ApiRegistrationPublishStep({
         isBlockedLink
         iconDefault="agora-line-layers-menu"
         iconHover="agora-solid-layers-menu"
-        titleText={createdDataservice?.title || apiName || "Sem título"}
-        descriptionText={createdDataservice?.description || apiDescription || "Sem descrição"}
+        titleText={createdDataservice?.title || apiName || t("form.untitled")}
+        descriptionText={
+          createdDataservice?.description || apiDescription || t("form.noDescription")
+        }
         anchor={{
           href: createdDataservice ? `/dataservices/${createdDataservice.id}` : "#",
           children: "",
@@ -48,9 +53,9 @@ export default function ApiRegistrationPublishStep({
 
       <div className="admin-page__actions flex justify-end gap-[18px]">
         <Button appearance="outline" variant="neutral">
-          Salvar rascunho
+          {t("form.saveDraft")}
         </Button>
-        <Button variant="primary">Publicar API</Button>
+        <Button variant="primary">{t("form.publishApi")}</Button>
       </div>
     </>
   );

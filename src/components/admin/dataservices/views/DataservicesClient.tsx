@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -14,6 +15,7 @@ import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { createDataserviceColumns, DataserviceSortField, sortDataservices } from "../config/dataservicesListConfig";
 
 export default function DataservicesClient() {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const { displayName } = useCurrentUser();
 
   const [apis, setApis] = useState<Dataservice[]>([]);
@@ -42,8 +44,20 @@ export default function DataservicesClient() {
     [sortedApis, currentPage, pageSize]
   );
   const columns = useMemo(
-    () => createDataserviceColumns({ ownerMetaStyle: "dot" }),
-    []
+    () =>
+      createDataserviceColumns({
+        ownerMetaStyle: "dot",
+        labels: {
+          title: t("admin-dataservices:columns.title"),
+          titleShort: t("admin-dataservices:columns.titleShort"),
+          status: t("admin-dataservices:columns.status"),
+          createdAt: t("admin-dataservices:columns.createdAt"),
+          modifiedAt: t("admin-dataservices:columns.modifiedAt"),
+          by: t("admin-dataservices:columns.by"),
+          about: t("admin-dataservices:columns.about"),
+        },
+      }),
+    [t]
   );
 
   useEffect(() => {
@@ -64,11 +78,11 @@ export default function DataservicesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "API", url: "/admin/dataservices" },
+        { label: t("admin-dataservices:title"), url: "/admin/dataservices" },
       ]}
-      title="API"
+      title={t("admin-dataservices:title")}
       isLoading={isLoading}
       count={filteredApis.length}
       currentPage={currentPage}
@@ -76,8 +90,8 @@ export default function DataservicesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome da API",
-        ariaLabel: "Pesquisar APIs",
+        placeholder: t("admin-dataservices:search.placeholder"),
+        ariaLabel: t("admin-dataservices:search.ariaLabel"),
       }}
       filters={
         <StatusFilterSelect
