@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button, InputText, StatusCard } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
@@ -29,21 +30,20 @@ export function ApiKeysSection({
   onCopy,
   onRevoke,
 }: ApiKeysSectionProps) {
+  const { t } = useTranslation("admin-profile");
+
   return (
     <div className="flex flex-col gap-16">
       <div>
-        <p className="mb-8 text-base font-medium text-neutral-900">Chaves da API</p>
-        <p className="text-sm mb-16 text-neutral-700">
-          Gere uma chave para autenticar pedidos à API. Por motivos de segurança, a chave completa
-          só é apresentada uma vez no momento da criação — guarde-a num local seguro.
-        </p>
+        <p className="mb-8 text-base font-medium text-neutral-900">{t("apiKeys.title")}</p>
+        <p className="text-sm mb-16 text-neutral-700">{t("apiKeys.description")}</p>
       </div>
 
       <div className="flex items-end gap-16">
         <div className="flex-1">
           <InputText
-            label="Nome da nova chave (opcional)"
-            placeholder="Ex.: Script backup, Integração X..."
+            label={t("apiKeys.newKeyNameLabel")}
+            placeholder={t("apiKeys.newKeyNamePlaceholder")}
             id="new-token-name"
             value={newTokenName}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => onNameChange(e.target.value)}
@@ -58,7 +58,7 @@ export function ApiKeysSection({
           onClick={onGenerate}
           disabled={isGeneratingKey}
         >
-          {isGeneratingKey ? "A gerar..." : "Gerar nova chave"}
+          {isGeneratingKey ? t("apiKeys.generating") : t("apiKeys.generate")}
         </Button>
       </div>
 
@@ -69,7 +69,7 @@ export function ApiKeysSection({
           description={
             <div className="flex flex-col gap-8">
               <p>
-                <strong>Copie esta chave agora.</strong> Não voltará a ser apresentada.
+                <strong>{t("apiKeys.copyNowTitle")}</strong> {t("apiKeys.copyNowDescription")}
               </p>
               <div className="flex items-center gap-8">
                 <code className="text-xs flex-1 break-all rounded-4 border border-neutral-300 bg-neutral-50 px-12 py-8">
@@ -83,7 +83,7 @@ export function ApiKeysSection({
                   leadingIconHover={tokenCopied ? "agora-solid-check" : "agora-solid-copy"}
                   onClick={onCopy}
                 >
-                  {tokenCopied ? "Copiado" : "Copiar"}
+                  {tokenCopied ? t("apiKeys.copied") : t("apiKeys.copy")}
                 </Button>
               </div>
             </div>
@@ -94,7 +94,7 @@ export function ApiKeysSection({
       {apiTokens.length > 0 ? (
         <div className="flex flex-col gap-8">
           <p className="text-sm font-medium text-neutral-900">
-            Chaves activas ({apiTokens.length})
+            {t("apiKeys.activeKeys", { count: apiTokens.length })}
           </p>
           <div className="flex flex-col divide-y divide-neutral-200 rounded-4 border border-neutral-200">
             {apiTokens.map((token) => (
@@ -105,21 +105,24 @@ export function ApiKeysSection({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-8">
                     <code className="text-sm font-mono text-neutral-900">
-                      {token.token_prefix}…
+                      {token.token_prefix}...
                     </code>
                     {token.name && (
-                      <span className="text-sm text-neutral-700">— {token.name}</span>
+                      <span className="text-sm text-neutral-700"> - {token.name}</span>
                     )}
                   </div>
                   <p className="text-xs mt-4 text-neutral-700">
-                    Criada em{" "}
-                    {format(new Date(token.created_at), "dd/MM/yyyy", { locale: pt })}
+                    {t("apiKeys.createdAt", {
+                      date: format(new Date(token.created_at), "dd/MM/yyyy", { locale: pt }),
+                    })}
                     {token.last_used_at
-                      ? ` · último uso ${formatDistanceToNow(new Date(token.last_used_at), {
-                          locale: pt,
-                          addSuffix: true,
+                      ? ` - ${t("apiKeys.lastUsed", {
+                          value: formatDistanceToNow(new Date(token.last_used_at), {
+                            locale: pt,
+                            addSuffix: true,
+                          }),
                         })}`
-                      : " · nunca utilizada"}
+                      : ` - ${t("apiKeys.neverUsed")}`}
                   </p>
                 </div>
                 <Button
@@ -131,14 +134,14 @@ export function ApiKeysSection({
                   onClick={() => onRevoke(token.id)}
                   disabled={revokingTokenId === token.id}
                 >
-                  {revokingTokenId === token.id ? "A revogar..." : "Revogar"}
+                  {revokingTokenId === token.id ? t("apiKeys.revoking") : t("apiKeys.revoke")}
                 </Button>
               </div>
             ))}
           </div>
         </div>
       ) : (
-        <p className="text-sm italic text-neutral-700">Ainda não tem chaves de API geradas.</p>
+        <p className="text-sm italic text-neutral-700">{t("apiKeys.empty")}</p>
       )}
     </div>
   );

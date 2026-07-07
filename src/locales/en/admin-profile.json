@@ -1,0 +1,167 @@
+{
+  "title": "Profile",
+  "metadata": {
+    "title": "Profile - Admin - dados.gov.pt",
+    "description": "User profile on the dados.gov.pt portal."
+  },
+  "breadcrumbs": {
+    "profile": "Profile"
+  },
+  "tabs": {
+    "profile": "Profile",
+    "subscriptions": "Subscriptions",
+    "followings": "Followers",
+    "activities": "Activities"
+  },
+  "messages": {
+    "saveError": "Error saving the profile. Please try again.",
+    "generateApiKeyError": "Error generating the API key. Please try again.",
+    "revokeApiKeyError": "Error revoking the API key. Please try again.",
+    "deleteAvatarError": "Error deleting the profile picture. Please try again.",
+    "uploadAvatarError": "Error uploading the profile picture. Please try again.",
+    "emailChangeError": "Error requesting the email change. Check the address and try again.",
+    "avatarMaxSize": "The file exceeds the maximum size of 4 MB."
+  },
+  "followings": {
+    "emptyTitle": "No followers",
+    "emptyDescription": "This user has no followers"
+  },
+  "header": {
+    "memberSince": "Member since:",
+    "viewPublicProfile": "View public profile"
+  },
+  "form": {
+    "sectionTitle": "EDIT PROFILE",
+    "saveSuccess": "Profile saved successfully.",
+    "firstNameLabel": "First name *",
+    "firstNamePlaceholder": "Enter the first name here",
+    "lastNameLabel": "Last name *",
+    "lastNamePlaceholder": "Enter the surname here",
+    "biographyLabel": "Biography",
+    "biographyPlaceholder": "Enter the description here",
+    "websiteLabel": "Website",
+    "websitePlaceholder": "Enter the URL here",
+    "passwordLabel": "Password",
+    "changePasswordButton": "Change password",
+    "changePasswordTitle": "Change your password",
+    "deleteAvatarTitle": "Delete profile picture",
+    "deleteAvatarButton": "Delete profile picture",
+    "deleteAvatarLoading": "Deleting..."
+  },
+  "avatar": {
+    "label": "Profile picture",
+    "filesLabel": "Files",
+    "dragAndDropLabel": "Drag and drop the file here",
+    "inputLabel": "Select or drag the file",
+    "selectedFilesLabel": "selected file",
+    "removeFileButtonLabel": "Remove file",
+    "replaceFileButtonLabel": "Replace file",
+    "extensionsInstructions": "Maximum size: 4 MB. Accepted formats: JPG, JPEG, PNG.",
+    "maxSizeExceededErrorLabel": "The file exceeds the maximum size of 4 MB.",
+    "forbiddenExtensionErrorLabel": "File format not allowed."
+  },
+  "apiKeys": {
+    "title": "API keys",
+    "description": "Generate a key to authenticate API requests. For security reasons, the full key is shown only once at creation time and should be stored in a safe place.",
+    "newKeyNameLabel": "New key name (optional)",
+    "newKeyNamePlaceholder": "Ex.: Backup script, Integration X...",
+    "generate": "Generate new key",
+    "generating": "Generating...",
+    "copyNowTitle": "Copy this key now.",
+    "copyNowDescription": "It will not be shown again.",
+    "copied": "Copied",
+    "copy": "Copy",
+    "activeKeys": "Active keys ({{count}})",
+    "createdAt": "Created on {{date}}",
+    "lastUsed": "last used {{value}}",
+    "neverUsed": "never used",
+    "revoke": "Revoke",
+    "revoking": "Revoking...",
+    "empty": "You do not have any generated API keys yet."
+  },
+  "email": {
+    "success": "Confirmation email sent to {{email}}. Check your inbox and click the link to finish.",
+    "newEmailLabel": "New email address",
+    "newEmailPlaceholder": "Enter the new email here",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "Enter the email here",
+    "changeButton": "Change email",
+    "pendingConfirmation": "Waiting for email confirmation; until then, the active email is {{email}}.",
+    "confirm": "Confirm",
+    "sending": "Sending..."
+  },
+  "changePassword": {
+    "requiredField": "Required field",
+    "passwordMismatch": "Passwords do not match",
+    "error": "Error changing the password. Check the data and try again.",
+    "success": "Password changed successfully.",
+    "currentPasswordLabel": "Current password *",
+    "newPasswordLabel": "New password *",
+    "confirmPasswordLabel": "Confirm the new password *",
+    "submitting": "Changing...",
+    "submit": "Change your password"
+  },
+  "deleteAvatarPopup": {
+    "description": "Are you sure you want to delete the profile picture?"
+  },
+  "subscriptions": {
+    "loading": "Loading subscriptions...",
+    "emptyTitle": "No subscriptions",
+    "emptyDescription": "Not following any content"
+  },
+  "activities": {
+    "loading": "Loading...",
+    "emptyTitle": "No activities",
+    "emptyDescription": "No recorded activities.",
+    "count": "{{count}} ACTIVITIES",
+    "user": "User",
+    "action": "Action",
+    "date": "Date"
+  },
+  "danger": {
+    "irreversible": "Warning: this action is irreversible."
+  },
+  "organization": {
+    "metadata": {
+      "redirectTitle": "Organization Profile - Admin - dados.gov.pt",
+      "redirectDescription": "Organization profile management on the dados.gov.pt portal.",
+      "pageTitle": "Profile - Organization - Admin - dados.gov.pt",
+      "pageDescription": "Editing the organization profile on the dados.gov.pt portal."
+    },
+    "emptyStateTitle": "No organizations",
+    "emptyStateDescription": "You do not belong to any organization.",
+    "organizationFallback": "Organization",
+    "title": "Organization profile",
+    "deletePopupTitle": "Are you sure you want to delete this organization?",
+    "deleteError": "An error occurred while deleting the organization. Please try again.",
+    "logoMaxSize": "The file exceeds the maximum size of 500 KB.",
+    "logoUploadError": "Error uploading the logo. Please try again.",
+    "deletePopupDescription": "This action is irreversible.",
+    "header": {
+      "members": "{{count}} members",
+      "datasets": "{{count}} datasets",
+      "reuses": "{{count}} reuses"
+    },
+    "form": {
+      "sectionTitle": "EDIT ORGANIZATION",
+      "saveSuccess": "Organization profile updated successfully.",
+      "saveError": "An error occurred while saving. Please try again.",
+      "nameLabel": "Name *",
+      "namePlaceholder": "Enter the name here",
+      "acronymLabel": "Acronym",
+      "acronymPlaceholder": "Enter the acronym here",
+      "descriptionLabel": "Description *",
+      "descriptionPlaceholder": "Enter the description here",
+      "websiteLabel": "Website",
+      "websitePlaceholder": "Enter the URL here",
+      "badges": "Badges",
+      "logoLabel": "Logo",
+      "logoUploaderLabel": "File",
+      "logoExtensions": "Maximum size: 500 KB. Accepted formats: JPG, JPEG, PNG.",
+      "logoMaxSizeExceeded": "The file exceeds the maximum size of 500 KB."
+    },
+    "danger": {
+      "deleteAction": "Delete organization"
+    }
+  }
+}

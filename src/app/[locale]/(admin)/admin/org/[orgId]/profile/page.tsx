@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import OrgProfileClient from "@/components/admin/profile/organization/OrgProfileClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Perfil - Organização - Admin - dados.gov.pt",
-  description: "Edição do perfil da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-profile"],
+  });
+
+  return {
+    title: t("organization.metadata.pageTitle", { ns: "admin-profile" }),
+    description: t("organization.metadata.pageDescription", { ns: "admin-profile" }),
+  };
+}
 
 export default function OrgProfilePage() {
   return <OrgProfileClient />;

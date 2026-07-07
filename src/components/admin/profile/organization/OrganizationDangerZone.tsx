@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
 
 interface OrganizationDangerZoneProps {
@@ -16,6 +17,8 @@ export default function OrganizationDangerZone({
   deleteError,
   onDeleteClick,
 }: OrganizationDangerZoneProps) {
+  const { t } = useTranslation("admin-profile");
+
   if (!canDelete) {
     return null;
   }
@@ -26,7 +29,7 @@ export default function OrganizationDangerZone({
         <StatusCard
           variant="danger"
           showIcon
-          description="Ocorreu um erro ao eliminar a organização. Por favor, tente novamente."
+          description={t("organization.deleteError")}
         />
       )}
       <StatusCard
@@ -34,7 +37,7 @@ export default function OrganizationDangerZone({
         showIcon
         description={
           <>
-            <strong>Atenção Esta ação é irreversível.</strong>
+            <strong>{t("danger.irreversible")}</strong>
             <br />
             <Button
               appearance="link"
@@ -45,7 +48,7 @@ export default function OrganizationDangerZone({
               onClick={onDeleteClick}
               disabled={isDeleting}
             >
-              Eliminar a organização
+              {t("organization.danger.deleteAction")}
             </Button>
           </>
         }

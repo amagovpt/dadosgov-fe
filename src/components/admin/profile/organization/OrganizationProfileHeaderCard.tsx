@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar, Icon } from "@ama-pt/agora-design-system";
 import type { Organization } from "@/service/types/identity";
 
@@ -13,6 +14,8 @@ export default function OrganizationProfileHeaderCard({
   organization,
   logoPreview,
 }: OrganizationProfileHeaderCardProps) {
+  const { t } = useTranslation("admin-profile");
+
   return (
     <div className="profile-card">
       <div className="profile-card__avatar-container">
@@ -41,11 +44,11 @@ export default function OrganizationProfileHeaderCard({
           <div className="flex items-center gap-16 text-sm text-neutral-900">
             <span className="flex items-center gap-4">
               <Icon name="agora-line-user-group" className="h-16 w-16" />
-              {organization.metrics.members} membros
+              {t("organization.header.members", { count: organization.metrics.members })}
             </span>
             <span className="flex items-center gap-4">
               <Icon name="agora-line-layers-menu" className="h-16 w-16" />
-              {organization.metrics.datasets} conjuntos de dados
+              {t("organization.header.datasets", { count: organization.metrics.datasets })}
             </span>
             <span className="flex items-center gap-4">
               <svg
@@ -62,7 +65,7 @@ export default function OrganizationProfileHeaderCard({
                   fill="currentColor"
                 />
               </svg>
-              {organization.metrics.reuses} reutilizações
+              {t("organization.header.reuses", { count: organization.metrics.reuses })}
             </span>
           </div>
         </div>

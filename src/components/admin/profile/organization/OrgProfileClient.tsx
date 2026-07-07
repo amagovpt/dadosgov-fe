@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Button, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import {
@@ -31,18 +32,24 @@ function badgeKindsFromOrg(badges: Organization["badges"] | undefined): string[]
 }
 
 function DeleteOrgPopupContent({
+  labels,
   onClose,
   onConfirm,
 }: {
+  labels: {
+    description: string;
+    cancel: string;
+    delete: string;
+  };
   onClose: () => void;
   onConfirm: () => void;
 }) {
   return (
     <div className="flex flex-col gap-16">
-      <p>Esta ação é irreversível.</p>
+      <p>{labels.description}</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Cancelar
+          {labels.cancel}
         </Button>
         <Button
           variant="danger"
@@ -51,7 +58,7 @@ function DeleteOrgPopupContent({
           leadingIcon="agora-line-trash"
           leadingIconHover="agora-solid-trash"
         >
-          Eliminar
+          {labels.delete}
         </Button>
       </div>
     </div>
@@ -59,6 +66,7 @@ function DeleteOrgPopupContent({
 }
 
 export default function OrgProfileClient() {
+  const { t } = useTranslation(["admin-common", "admin-profile"]);
   const params = useParams();
   const router = useRouter();
   const { show, hide } = usePopupContext();
@@ -120,7 +128,7 @@ export default function OrgProfileClient() {
 
   // Authorization is decided by the backend (single source of truth):
   // editing/deleting an organization requires EditOrganizationPermission
-  // (org admin or sysadmin) — editors cannot. `org` is fetched with the
+  // (org admin or sysadmin) - editors cannot. `org` is fetched with the
   // session, so org.permissions reflects this user.
   const canEdit = can(org, "edit");
   const canDelete = can(org, "delete");
@@ -196,7 +204,7 @@ export default function OrgProfileClient() {
 
     const file = files[0];
     if (file.size > 512000) {
-      setLogoError("O ficheiro excede o tamanho máximo de 500 KB.");
+      setLogoError(t("admin-profile:organization.logoMaxSize"));
       return;
     }
 
@@ -212,7 +220,7 @@ export default function OrgProfileClient() {
       URL.revokeObjectURL(localPreview);
       setLogoPreview(null);
       const serverMessage = (error as { data?: { message?: string } })?.data?.message;
-      setLogoError(serverMessage || "Erro ao carregar o logotipo. Por favor, tente novamente.");
+      setLogoError(serverMessage || t("admin-profile:organization.logoUploadError"));
     }
   };
 
@@ -220,8 +228,8 @@ export default function OrgProfileClient() {
     return (
       <AdminEmptyState
         icon="agora-line-user-buildings"
-        title="Sem organizações"
-        description="Não pertence a nenhuma organização."
+        title={t("admin-profile:organization.emptyStateTitle")}
+        description={t("admin-profile:organization.emptyStateDescription")}
       />
     );
   }
@@ -229,11 +237,14 @@ export default function OrgProfileClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: org?.name || cachedOrgName || "Organização", url: "#" },
-        { label: "Perfil" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        {
+          label: org?.name || cachedOrgName || t("admin-profile:organization.organizationFallback"),
+          url: "#",
+        },
+        { label: t("admin-profile:breadcrumbs.profile") },
       ]}
-      title="Perfil da organização"
+      title={t("admin-profile:organization.title")}
       headerAction={null}
     >
       {org && <OrganizationProfileHeaderCard organization={org} logoPreview={logoPreview} />}
@@ -278,11 +289,22 @@ export default function OrgProfileClient() {
             onDeleteClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
-              show(<DeleteOrgPopupContent onClose={hide} onConfirm={handleDeleteOrg} />, {
-                title: "Tem a certeza que quer eliminar esta organização?",
-                closeAriaLabel: "Fechar",
-                dimensions: "m",
-              });
+              show(
+                <DeleteOrgPopupContent
+                  labels={{
+                    description: t("admin-profile:organization.deletePopupDescription"),
+                    cancel: t("admin-common:actions.cancel"),
+                    delete: t("admin-common:actions.delete"),
+                  }}
+                  onClose={hide}
+                  onConfirm={handleDeleteOrg}
+                />,
+                {
+                  title: t("admin-profile:organization.deletePopupTitle"),
+                  closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
+                  dimensions: "m",
+                }
+              );
             }}
           />
         </div>
