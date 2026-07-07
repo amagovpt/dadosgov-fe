@@ -254,6 +254,12 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           </span>
         </div>
         <div className="flex items-center gap-8">
+          <Icon name="agora-line-buildings" className="w-16 h-16" />
+          <span>
+            <strong>Produtor:</strong> {source.organization?.name || "—"}
+          </span>
+        </div>
+        <div className="flex items-center gap-8">
           <Icon name="agora-line-globe" className="w-16 h-16" />
           <span>
             <strong>URL:</strong>{" "}
