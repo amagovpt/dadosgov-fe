@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   DropdownOption,
@@ -57,22 +58,23 @@ export default function HarvesterImplementationSection({
   onToggleEnabled,
   onToggleAutoArchive,
 }: HarvesterImplementationSectionProps) {
+  const { t } = useTranslation("admin-harvesters");
   const supportsCkanFilters = selectedType === "ckan" || selectedType === "ckanpt";
   const supportsRemoteUrlPrefix =
     selectedType === "csw-dcat" || selectedType === "csw-iso-19139";
 
   return (
     <>
-      <h2 className="admin-page__section-title">Implementação</h2>
+      <h2 className="admin-page__section-title">{t("detail.fields.implementation")}</h2>
 
       <div className="admin-page__fields-group">
         <IsolatedSelect
-          label="Tipo"
-          placeholder="Selecione um tipo..."
+          label={t("form.typeFieldPlain")}
+          placeholder={t("form.typePlaceholder")}
           id="harvester-type"
           searchable
-          searchInputPlaceholder="Escreva para pesquisar..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          searchInputPlaceholder={t("form.searchInputPlaceholder")}
+          searchNoResultsText={t("form.noResults")}
           onChangeRef={selectedTypeRef}
           onChangeCallback={onTypeChange}
         >
@@ -92,7 +94,9 @@ export default function HarvesterImplementationSection({
 
         {supportsCkanFilters && (
           <div>
-            <p className="text-base font-medium leading-7 text-primary-900">Filtros</p>
+            <p className="text-base font-medium leading-7 text-primary-900">
+              {t("form.filtersTitle")}
+            </p>
 
             {filters.map((filter, index) => (
               <div
@@ -103,25 +107,31 @@ export default function HarvesterImplementationSection({
                   <IsolatedSelect
                     label=""
                     hideLabel
-                    placeholder="Incluir"
+                    placeholder={t("form.filterModeInclude")}
                     id={`filter-mode-${index}`}
                     onChangeCallback={(value) => onUpdateFilter(index, "mode", value)}
                   >
                     <DropdownSection name={`filter-mode-${index}`}>
-                      <DropdownOption value="include">Incluir</DropdownOption>
-                      <DropdownOption value="exclude">Excluir</DropdownOption>
+                      <DropdownOption value="include">
+                        {t("form.filterModeInclude")}
+                      </DropdownOption>
+                      <DropdownOption value="exclude">
+                        {t("form.filterModeExclude")}
+                      </DropdownOption>
                     </DropdownSection>
                   </IsolatedSelect>
                   <IsolatedSelect
                     label=""
                     hideLabel
-                    placeholder="Organização"
+                    placeholder={t("form.filterLabels.organization")}
                     id={`filter-type-${index}`}
                     onChangeCallback={(value) => onUpdateFilter(index, "type", value)}
                   >
                     <DropdownSection name={`filter-type-${index}`}>
-                      <DropdownOption value="organization">Organização</DropdownOption>
-                      <DropdownOption value="tag">Marcação</DropdownOption>
+                      <DropdownOption value="organization">
+                        {t("form.filterLabels.organization")}
+                      </DropdownOption>
+                      <DropdownOption value="tag">{t("form.filterLabels.tag")}</DropdownOption>
                     </DropdownSection>
                   </IsolatedSelect>
                 </div>
@@ -146,7 +156,7 @@ export default function HarvesterImplementationSection({
                     leadingIcon="agora-line-trash"
                     leadingIconHover="agora-solid-trash"
                     onClick={() => onRemoveFilter(index)}
-                    aria-label="Excluir filtro"
+                    aria-label={t("form.removeFilter")}
                   >
                     {" "}
                   </Button>
@@ -163,7 +173,7 @@ export default function HarvesterImplementationSection({
               leadingIconHover="agora-solid-plus-circle"
               onClick={onAddFilter}
             >
-              Adicionar um filtro
+              {t("form.addFilter")}
             </Button>
           </div>
         )}
@@ -185,13 +195,13 @@ export default function HarvesterImplementationSection({
                   leadingIconHover="agora-solid-plus-circle"
                   onClick={onShowRemoteUrlPrefix}
                 >
-                  Configurar prefixo de URL remoto
+                  {t("form.configureRemoteUrlPrefix")}
                 </Button>
               </div>
             ) : (
               <div>
                 <p className="text-base font-medium leading-7 text-primary-900">
-                  Prefixo de URL remoto
+                  {t("form.remoteUrlPrefix")}
                 </p>
                 <div className="mt-8 flex items-center gap-8">
                   <div className="flex-1">
@@ -213,7 +223,7 @@ export default function HarvesterImplementationSection({
                     leadingIconHover="agora-solid-trash"
                     onClick={onClearRemoteUrlPrefix}
                   >
-                    EXCLUIR
+                    {t("actions.delete")}
                   </Button>
                 </div>
               </div>
@@ -223,9 +233,9 @@ export default function HarvesterImplementationSection({
 
         {selectedType && (
           <div className="flex gap-48">
-            <Switch label="Ativado" checked={isEnabled} onChange={onToggleEnabled} />
+            <Switch label={t("form.enabled")} checked={isEnabled} onChange={onToggleEnabled} />
             <Switch
-              label="Arquivo automático"
+              label={t("form.autoArchiveShort")}
               checked={isAutoArchive}
               onChange={onToggleAutoArchive}
             />
