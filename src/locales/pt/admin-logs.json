@@ -1,0 +1,38 @@
+{
+  "title": "Logs",
+  "metadata": {
+    "title": "Logs - Sistema - Admin - dados.gov.pt",
+    "description": "Visualização de logs do servidor no portal dados.gov.pt."
+  },
+  "actions": {
+    "stopAutoRefresh": "Parar auto-atualizar",
+    "autoRefresh": "Auto-atualizar (10s)",
+    "refresh": "Atualizar",
+    "download": "Descarregar"
+  },
+  "intro": "Visualização do conteúdo dos ficheiros de log do servidor. Para ficheiros grandes, é apresentado apenas o final (até 1 MB).",
+  "loadingFiles": "A carregar ficheiros de log...",
+  "empty": {
+    "title": "Sem logs disponíveis",
+    "description": "Não foi possível encontrar ficheiros de log no servidor."
+  },
+  "select": {
+    "label": "Ficheiro de log",
+    "placeholder": "Selecionar ficheiro"
+  },
+  "summary": {
+    "file": "Ficheiro:",
+    "size": "Tamanho:",
+    "modified": "Modificado:",
+    "truncated": "A mostrar apenas o final do ficheiro",
+    "updatedAt": "Atualizado às {{time}}"
+  },
+  "errors": {
+    "contentLoad": "Não foi possível carregar o conteúdo do ficheiro."
+  },
+  "viewer": {
+    "ariaLabel": "Conteúdo do ficheiro de log",
+    "loading": "A carregar conteúdo...",
+    "empty": "Ficheiro vazio."
+  }
+}

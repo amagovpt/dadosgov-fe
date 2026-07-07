@@ -48,6 +48,7 @@ const namespaces = [
   "admin-profile",
   "admin-posts",
   "admin-topics",
+  "admin-logs",
 ];
 
 export async function generateMetadata({
