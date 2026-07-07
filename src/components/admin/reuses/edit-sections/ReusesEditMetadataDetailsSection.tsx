@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   DropdownOption,
   type DropdownSectionProps,
@@ -76,44 +77,46 @@ export default function ReusesEditMetadataDetailsSection({
   onImageUpload,
   onImageSecurityError,
 }: ReusesEditMetadataDetailsSectionProps) {
+  const { t } = useTranslation("admin-reuses");
+
   return (
     <>
-      <h2 className="admin-page__section-title">Destaque</h2>
+      <h2 className="admin-page__section-title">{t("edit.featuredSectionTitle")}</h2>
       <div className="admin-page__fields-group">
-        <Switch label="Destaque" checked={featured} onChange={onToggleFeatured} />
+        <Switch label={t("edit.featuredLabel")} checked={featured} onChange={onToggleFeatured} />
       </div>
 
-      <h2 className="admin-page__section-title">Descrição</h2>
+      <h2 className="admin-page__section-title">{t("edit.metadataSectionTitle")}</h2>
       <div className="admin-page__fields-group">
         <IsolatedInput
-          label="Nome da reutilização *"
-          placeholder="Insira o nome aqui"
+          label={t("form.nameField")}
+          placeholder={t("form.namePlaceholder")}
           id="edit-title"
           defaultValue={title}
           onChange={onTitleChange}
           hasError={!!formErrors.title}
           hasFeedback={!!formErrors.title}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("form.fieldRequired")}
         />
         <IsolatedInput
           label="URL *"
-          placeholder="Insira o URL aqui (ex: https://...)"
+          placeholder={t("form.linkPlaceholder")}
           id="edit-url"
           defaultValue={url}
           onChange={onUrlChange}
           hasError={!!formErrors.url}
           hasFeedback={!!formErrors.url}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("form.fieldRequired")}
         />
         <IsolatedSelect
-          label="Tipo *"
-          placeholder="Selecione um tipo..."
+          label={t("form.typeField")}
+          placeholder={t("form.typePlaceholder")}
           id="edit-type"
           searchable
-          searchInputPlaceholder="Escreva para pesquisar..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          searchInputPlaceholder={t("form.datasetSearchInputPlaceholder")}
+          searchNoResultsText={t("form.noResults")}
           onChangeRef={selectedTypeRef}
           defaultValue={selectedType}
           onChangeCallback={(value) => onTypeChange(value || "")}
@@ -131,12 +134,12 @@ export default function ReusesEditMetadataDetailsSection({
           </DropdownSection>
         </IsolatedSelect>
         <IsolatedSelect
-          label="Tema *"
-          placeholder="Selecione um tema..."
+          label={t("form.topicField")}
+          placeholder={t("form.topicPlaceholder")}
           id="edit-topic"
           searchable
-          searchInputPlaceholder="Escreva para pesquisar..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          searchInputPlaceholder={t("form.datasetSearchInputPlaceholder")}
+          searchNoResultsText={t("form.noResults")}
           onChangeRef={selectedTopicRef}
           defaultValue={selectedTopic}
           onChangeCallback={(value) => onTopicChange(value || "")}
@@ -154,8 +157,8 @@ export default function ReusesEditMetadataDetailsSection({
           </DropdownSection>
         </IsolatedSelect>
         <IsolatedTextArea
-          label="Descrição *"
-          placeholder="Insira a descrição aqui"
+          label={t("form.descriptionField")}
+          placeholder={t("form.descriptionPlaceholder")}
           id="edit-description"
           rows={6}
           maxLength={246}
@@ -165,8 +168,8 @@ export default function ReusesEditMetadataDetailsSection({
           hasError={formErrors.description ? true : undefined}
           hasFeedback={formErrors.description ? true : undefined}
           feedbackState="danger"
-          feedbackText="Campo obrigatório"
-          errorFeedbackText="Campo obrigatório"
+          feedbackText={t("form.fieldRequired")}
+          errorFeedbackText={t("form.fieldRequired")}
         />
         <KeywordSelectField
           id="edit-keywords"
@@ -181,13 +184,13 @@ export default function ReusesEditMetadataDetailsSection({
         />
 
         <ImageUploadField
-          label="Imagem de capa"
+          label={t("form.coverImageField")}
           required
           onChange={onImageUpload}
           onSecurityError={onImageSecurityError}
           error={imageError}
           previewSrc={reuse.image_thumbnail || reuse.image || undefined}
-          previewAlt="Imagem de capa atual"
+          previewAlt={t("edit.imagePreviewAlt")}
           previewPlacement="before"
           previewWrapperClassName="mt-2 mb-2"
           previewImageClassName="rounded border border-neutral-200 max-h-[180px] object-cover"

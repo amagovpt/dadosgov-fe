@@ -1,12 +1,14 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import ReusesFormClient from "@/components/admin/reuses/views/ReusesFormClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import AdminLayout from "@/components/Layout/AdminLayout";
 
 export default function ReusesNewClient() {
+  const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -15,24 +17,24 @@ export default function ReusesNewClient() {
   const currentStep = Number(searchParams.get("step")) || 1;
 
   const stepTitles: Record<number, string> = {
-    1: "Descreva a sua reutilização",
-    2: "Associe os conjuntos de dados",
-    3: "Finalize a publicação da sua reutilização",
+    1: t("admin-reuses:form.steps.describe"),
+    2: t("admin-reuses:form.steps.datasets"),
+    3: t("admin-reuses:form.steps.publish"),
   };
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Reutilizações", url: "/admin/me/reuses" },
+        { label: t("admin-reuses:title"), url: "/admin/me/reuses" },
       ]}
-      title="Formulário de publicação de uma reutilização"
+      title={t("admin-reuses:form.registrationTitle")}
     >
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
-        labelWord="Passo"
+        labelWord={t("admin-common:stepper.step")}
         labelFormat="slash"
         stepTitle={stepTitles[currentStep] || ""}
       />

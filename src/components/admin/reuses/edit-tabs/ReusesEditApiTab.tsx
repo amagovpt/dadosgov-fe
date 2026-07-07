@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   DropdownOption,
@@ -32,24 +33,26 @@ export default function ReusesEditApiTab({
   onAddApiLink,
   onSave,
 }: ReusesEditApiTabProps) {
+  const { t } = useTranslation("admin-reuses");
+
   return (
     <div className="admin-page__body mt-24">
       <div className="admin-page__form-area">
         {dataservices && dataservices.length > 0 && (
-          <div className="space-y-16 mb-24">
+          <div className="mb-24 space-y-16">
             {dataservices.map((api) => (
               <div
                 key={api.id}
-                className="border border-neutral-200 rounded-4 p-16 flex items-center justify-between"
+                className="flex items-center justify-between rounded-4 border border-neutral-200 p-16"
               >
                 <div className="flex items-center gap-12">
-                  <AppIcon name="agora-line-code" className="w-24 h-24" />
-                  <span className="text-neutral-900 font-medium">{api.title}</span>
+                  <AppIcon name="agora-line-code" className="h-24 w-24" />
+                  <span className="font-medium text-neutral-900">{api.title}</span>
                 </div>
                 <button
                   type="button"
-                  className="border border-neutral-300 rounded-4 p-8 hover:bg-neutral-100"
-                  title="Eliminar API"
+                  className="rounded-4 border border-neutral-300 p-8 hover:bg-neutral-100"
+                  title={t("edit.apiRemoveTitle")}
                 >
                   <AppIcon name="agora-line-trash" />
                 </button>
@@ -67,32 +70,32 @@ export default function ReusesEditApiTab({
           }}
         >
           <InputSelect
-            label="Pesquisar uma API"
-            placeholder="Pesquise uma API..."
+            label={t("edit.apiSearchLabel")}
+            placeholder={t("edit.apiSearchPlaceholder")}
             id="edit-api-search"
             searchable
-            searchInputPlaceholder="Escreva para pesquisar..."
-            searchNoResultsText="Nenhum resultado encontrado"
+            searchInputPlaceholder={t("form.datasetSearchInputPlaceholder")}
+            searchNoResultsText={t("form.noResults")}
           >
             <DropdownSection name="apis">
-              <DropdownOption value="">—</DropdownOption>
+              <DropdownOption value="">-</DropdownOption>
             </DropdownSection>
           </InputSelect>
 
           <div className="admin-page__divider-or">
-            <span className="admin-page__divider-or-text">ou</span>
+            <span className="admin-page__divider-or-text">{t("form.or")}</span>
           </div>
 
           <AdminExternalUrlFields
             entries={apiLinks}
             errors={apiLinkErrors}
             idPrefix="edit-api-url"
-            label="Link para a API"
-            placeholder="https://..."
+            label={t("edit.apiLinkLabel")}
+            placeholder={t("edit.apiLinkPlaceholder")}
             removeButtonMarginClassName="mt-24"
             onEntryChange={onApiLinkChange}
             onRemoveEntry={onRemoveApiLink}
-            addLabel="Adicionar"
+            addLabel={t("form.addDatasetLink")}
             onAddEntry={onAddApiLink}
           />
 
@@ -105,7 +108,7 @@ export default function ReusesEditApiTab({
               trailingIconHover="agora-solid-check-circle"
               disabled={isSubmitting || !apiLinks.some((link) => link.url.trim())}
             >
-              {isSubmitting ? "A guardar..." : "Guardar"}
+              {isSubmitting ? t("edit.saving") : t("edit.save")}
             </Button>
           </div>
         </form>

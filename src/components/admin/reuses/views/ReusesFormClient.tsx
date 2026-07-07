@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DropdownOption, DropdownSection } from "@ama-pt/agora-design-system";
 import { fetchMyDatasets } from "@/service/api/datasets";
 import { fetchOrgDatasets } from "@/service/api/organizations";
@@ -56,6 +57,7 @@ export default function ReusesFormClient({
   onNextStep,
   onPreviousStep,
 }: ReusesFormClientProps) {
+  const { t } = useTranslation("admin-reuses");
   const { user, hasOrganization } = useAuth();
   const selectedProducerRef = useRef("user");
   const selectedReuseTypeRef = useRef("");
@@ -79,18 +81,13 @@ export default function ReusesFormClient({
     focusFirstError,
   } = useFormErrors<ReuseFormField>();
 
-  // Dynamic options from backend
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
   const [reuseTopics, setReuseTopics] = useState<ReuseTopic[]>([]);
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
-  // Persist selected values across step navigation (uncontrolled IsolatedSelect
-  // remounts when the step 1 JSX unmounts/remounts; state survives because the
-  // parent component does not remount).
   const [selectedProducerValue, setSelectedProducerValue] = useState("user");
   const [selectedReuseTypeValue, setSelectedReuseTypeValue] = useState("");
   const [selectedReuseTopicValue, setSelectedReuseTopicValue] = useState("");
 
-  // Step 2 state
   const [datasetLinks, setDatasetLinks] = useState<RemoteDatasetEntry[]>([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
   const [apiLinks, setApiLinks] = useState([{ url: "" }]);
@@ -110,11 +107,6 @@ export default function ReusesFormClient({
     const dedupe = (items: Dataset[]) =>
       Array.from(new Map(items.map((dataset) => [dataset.id, dataset])).values());
 
-    // When publishing as the user, preload the pool with the user's own
-    // datasets AND every dataset from each organization the user belongs
-    // to. When publishing as a specific organization, show that org's
-    // datasets only. In both cases the search bar still queries the whole
-    // portal via searchDatasets().
     if (producerId === "user" || producerId === "") {
       const personal = fetchMyDatasets(1, 100);
       const organizations = (user?.organizations || []).map((organization) =>
@@ -153,8 +145,6 @@ export default function ReusesFormClient({
       return;
     }
 
-    // Search datasets across the whole portal when the user types in the
-    // dataset search dropdown. Debounced lightly via the setTimeout below.
     const timer = setTimeout(async () => {
       try {
         const response = await searchDatasets(query, 1, 20);
@@ -199,6 +189,15 @@ export default function ReusesFormClient({
       type: selectedReuseTypeRef.current,
       topic: selectedReuseTopicRef.current,
       description: reuseDescription,
+      messages: {
+        reuseName: t("form.validationErrors.name"),
+        reuseLink: reuseLink.trim()
+          ? t("form.validationErrors.urlInvalid")
+          : t("form.validationErrors.urlRequired"),
+        reuseType: t("form.validationErrors.type"),
+        reuseTopic: t("form.validationErrors.topic"),
+        reuseDescription: t("form.validationErrors.description"),
+      },
     });
     setReuseLinkInvalid(Boolean(reuseLink.trim() && errors.reuseLink));
 
@@ -240,21 +239,19 @@ export default function ReusesFormClient({
       };
 
       const fieldLabels: Record<string, string> = {
-        url: "URL da reutilização",
-        title: "Nome da reutilização",
-        description: "Descrição",
-        type: "Tipo",
-        topic: "Tema",
-        organization: "Organização",
+        url: t("form.fieldLabels.url"),
+        title: t("form.fieldLabels.title"),
+        description: t("form.fieldLabels.description"),
+        type: t("form.fieldLabels.type"),
+        topic: t("form.fieldLabels.topic"),
+        organization: t("form.fieldLabels.organization"),
       };
       const errorMessages: Record<string, string> = {
-        "This URL is already registered": "Este URL já está registado. Utilize um URL diferente.",
+        "This URL is already registered": t("form.errorMessages.urlRegistered"),
       };
 
       if (err.status === 500) {
-        setApiError(
-          "Erro interno do servidor. Verifique se todos os campos estão preenchidos corretamente e tente novamente.",
-        );
+        setApiError(t("form.errorMessages.server"));
       } else if (err.data?.errors && typeof err.data.errors === "object") {
         const messages = Object.entries(err.data.errors)
           .map(([field, message]) => {
@@ -268,7 +265,7 @@ export default function ReusesFormClient({
         const translated = errorMessages[err.data.message] || err.data.message;
         setApiError(translateUploadError(translated));
       } else {
-        setApiError("Erro ao criar a reutilização. Tente novamente.");
+        setApiError(t("form.errorMessages.create"));
       }
     } finally {
       setIsSubmitting(false);
@@ -294,7 +291,7 @@ export default function ReusesFormClient({
     const result = addRemoteDatasetEntry(
       datasetLinks,
       datasetLinkErrors,
-      "Campo obrigat\u00f3rio",
+      t("form.fieldRequired"),
     );
     setDatasetLinks(result.entries);
     setDatasetLinkErrors(result.errors);
@@ -317,7 +314,7 @@ export default function ReusesFormClient({
   const producerOptions = useMemo(() => {
     const options = [
       <DropdownOption key="user" value="user">
-        {user ? `${user.first_name} ${user.last_name}` : "Eu próprio"}
+        {user ? `${user.first_name} ${user.last_name}` : t("form.producerSelf")}
       </DropdownOption>,
       ...(user?.organizations || []).map((organization) => (
         <DropdownOption key={organization.id} value={organization.id}>
@@ -326,7 +323,7 @@ export default function ReusesFormClient({
       )),
     ];
     return <DropdownSection name="identity">{options}</DropdownSection>;
-  }, [user]);
+  }, [t, user]);
 
   const typeOptions = useMemo(
     () => (
@@ -345,10 +342,7 @@ export default function ReusesFormClient({
     const selectedIds = new Set(selectedDatasets.map((dataset) => dataset.id));
     const visibleDatasetSearchResults =
       datasetSearch.trim().length >= 2 ? datasetSearchResults : [];
-    // Show first the selected (keeps them visible even when not in results),
-    // then the search results (if any), then the producer's own datasets.
     const combined: Dataset[] = [...selectedDatasets, ...visibleDatasetSearchResults, ...myDatasets];
-    // Deduplicate while preserving order
     const unique = Array.from(new Map(combined.map((dataset) => [dataset.id, dataset])).values());
     const options = unique.map((dataset) => (
       <DropdownOption
@@ -377,9 +371,8 @@ export default function ReusesFormClient({
 
   return (
     <div className="admin-page__body">
-      {/* Left: Form */}
       <div className="admin-page__form-area">
-        {/* Step 1: Descreva sua reutilização */}
+        {/* Step 1 */}
         {currentStep === 1 && (
           <ReusesFormDetailsStep
             apiError={apiError}
@@ -466,7 +459,7 @@ export default function ReusesFormClient({
           />
         )}
 
-        {/* Step 2: Vinculando conjuntos de dados e APIs */}
+        {/* Step 2 */}
         {currentStep === 2 && (
           <ReusesFormDatasetsStep
             apiError={apiError}
@@ -493,17 +486,13 @@ export default function ReusesFormClient({
             onNextStep={async () => {
               if (!createdReuse) return;
 
-              // LEDG-1748 PR 2: persist remote datasets as
-              // { url, title?, description? } entries (deduped by URL,
-              // first occurrence wins so user-typed metadata sticks).
               const remoteEntries = buildRemoteDatasetEntries(datasetLinks);
-
               const hasRemote = remoteEntries.length > 0;
 
-              // Mutual exclusion: local datasets OR remote URLs, not both.
               const selectionError = validateReuseDatasetSelection(
                 selectedDatasets.length,
                 remoteEntries,
+                t("form.validationErrors.datasetSelection"),
               );
               if (selectionError) {
                 setApiError(selectionError);
@@ -513,16 +502,11 @@ export default function ReusesFormClient({
               setIsSubmitting(true);
               setApiError(null);
               try {
-                // Local datasets -> link via the reuse/datasets endpoint.
                 for (const dataset of selectedDatasets) {
                   const updated = await linkDatasetToReuse(createdReuse.id, dataset.id);
                   setCreatedReuse(updated);
                 }
 
-                // Remote datasets -> stored as objects on the reuse's
-                // extras field. The backend model only accepts local
-                // Dataset references on `datasets`, so remote entries
-                // live on extras.remote_datasets.
                 if (hasRemote) {
                   const updated = await updateReuse(createdReuse.id, {
                     extras: {
@@ -538,7 +522,7 @@ export default function ReusesFormClient({
                     try {
                       await linkDataserviceToReuse(createdReuse.id, link.url.trim());
                     } catch {
-                      // Silent; API links UI is hidden for now.
+                      // API links UI is hidden for now.
                     }
                   }
                 }
@@ -552,9 +536,7 @@ export default function ReusesFormClient({
                     .join(", ");
                   setApiError(messages);
                 } else {
-                  setApiError(
-                    "Erro ao associar dados. Verifique os links inseridos e tente novamente.",
-                  );
+                  setApiError(t("form.errorMessages.associateData"));
                 }
               } finally {
                 setIsSubmitting(false);
@@ -564,7 +546,7 @@ export default function ReusesFormClient({
           />
         )}
 
-        {/* Step 3: Finalizar a publicação */}
+        {/* Step 3 */}
         {currentStep === 3 && (
           <ReusesFormPublishStep
             createdReuse={createdReuse}
@@ -580,7 +562,7 @@ export default function ReusesFormClient({
                 await updateReuse(createdReuse.id, { private: false });
                 window.location.href = "/admin/me/reuses";
               } catch {
-                setApiError("Erro ao publicar. Tente novamente.");
+                setApiError(t("form.errorMessages.publish"));
               } finally {
                 setIsSubmitting(false);
               }
@@ -589,7 +571,6 @@ export default function ReusesFormClient({
         )}
       </div>
 
-      {/* Right: Auxiliar sidebar (only for step 1) */}
       {currentStep === 1 && <AdminAuxiliarySidebar items={auxiliarItems} />}
     </div>
   );

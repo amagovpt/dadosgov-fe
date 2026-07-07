@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
@@ -83,9 +84,10 @@ export default function ReusesEditMetadataTab({
   onUnarchiveReuse,
   onOpenDeletePopup,
 }: ReusesEditMetadataTabProps) {
-  // Authorization is decided by the backend (single source of truth).
+  const { t } = useTranslation("admin-reuses");
   const canEdit = can(reuse, "edit");
   const canDelete = can(reuse, "delete");
+
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
@@ -93,13 +95,12 @@ export default function ReusesEditMetadataTab({
           <AdminVisibilityBanner
             description={
               <>
-                <strong>Modifique a visibilidade da reutilização.</strong>
+                <strong>{t("edit.visibilityTitle")}</strong>
                 <br />
-                Esta reutilização encontra-se atualmente em <strong>modo rascunho</strong>.
-                Apenas o produtor e os membros da organização a podem visualizar e editar.
+                {t("edit.visibilityDescription")}
               </>
             }
-            actionLabel="Publicar reutilização"
+            actionLabel={t("edit.publishAction")}
             disabled={isSubmitting}
             onAction={onPublishReuse}
           />
@@ -113,9 +114,7 @@ export default function ReusesEditMetadataTab({
             void onSaveMetadata();
           }}
         >
-          <p className="text-neutral-900 text-base leading-7">
-            Os campos marcados com um asterisco ( * ) são obrigatórios.
-          </p>
+          <p className="text-neutral-900 text-base leading-7">{t("edit.draftInfo")}</p>
 
           <ReusesEditMetadataDetailsSection
             reuse={reuse}
@@ -148,7 +147,7 @@ export default function ReusesEditMetadataTab({
             onImageSecurityError={onImageSecurityError}
           />
 
-          <div className="admin-page__actions flex justify-end mt-24">
+          <div className="admin-page__actions mt-24 flex justify-end">
             <Button
               type="submit"
               variant="primary"
@@ -157,7 +156,7 @@ export default function ReusesEditMetadataTab({
               trailingIconHover="agora-solid-check-circle"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "A guardar..." : "Guardar"}
+              {isSubmitting ? t("edit.saving") : t("edit.save")}
             </Button>
           </div>
 

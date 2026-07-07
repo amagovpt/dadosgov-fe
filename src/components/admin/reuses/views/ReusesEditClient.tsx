@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Button,
@@ -21,14 +22,19 @@ import { fetchActivity } from "@/service/api/activity";
 import { fetchDataset, fetchMyDatasets } from "@/service/api/datasets";
 import { fetchDiscussions } from "@/service/api/discussions-topics";
 import { fetchOrgDatasets } from "@/service/api/organizations";
-import { fetchReuse, fetchReuseTypes, fetchReuseTopics, unlinkDatasetFromReuse } from "@/service/api/reuses";
+import {
+  fetchReuse,
+  fetchReuseTopics,
+  fetchReuseTypes,
+  unlinkDatasetFromReuse,
+} from "@/service/api/reuses";
 import { searchDatasets } from "@/service/api/search";
 import { requestTransfer } from "@/service/api/transfers";
 import { useAuth } from "@/context/AuthContext";
-import { Activity } from "@/service/types/catalog";
-import { Dataset } from "@/service/types/dataset";
-import { Discussion } from "@/service/types/discussion";
-import { Reuse, ReuseType, ReuseTopic } from "@/service/types/reuse";
+import type { Activity } from "@/service/types/catalog";
+import type { Dataset } from "@/service/types/dataset";
+import type { Discussion } from "@/service/types/discussion";
+import type { Reuse, ReuseType, ReuseTopic } from "@/service/types/reuse";
 import { normalizeRemoteDatasets, type RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import type { RecipientSelection } from "@/components/admin/RecipientSelect";
 import ReusesEditMetadataTab from "@/components/admin/reuses/edit-tabs/ReusesEditMetadataTab";
@@ -54,10 +60,10 @@ import {
   updateRemoteDatasetEntry,
   updateUrlItem,
 } from "@/components/admin/reuses/form-state/reuseAssociationHelpers";
-
 import { translateActivityLabel } from "@/utils/activityLabels";
 
 export default function ReusesEditClient() {
+  const { t } = useTranslation("admin-reuses");
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
@@ -67,8 +73,6 @@ export default function ReusesEditClient() {
 
   const [reuse, setReuse] = useState<Reuse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Form state
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [description, setDescription] = useState("");
@@ -76,8 +80,6 @@ export default function ReusesEditClient() {
   const [selectedTopic, setSelectedTopic] = useState("");
   const selectedTypeRef = useRef("");
   const selectedTopicRef = useRef("");
-
-  // API state
   const [featured, setFeatured] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -89,26 +91,16 @@ export default function ReusesEditClient() {
   } = useTemporaryMessage<string | null>(null);
   const { errors: formErrors, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors();
-
-  // Dropdown data
   const [reuseTypes, setReuseTypes] = useState<ReuseType[]>([]);
   const [reuseTopics, setReuseTopics] = useState<ReuseTopic[]>([]);
-
-  // Keywords state (IsolatedSelect pattern)
   const selectedKeywordsRef = useRef("");
   const [selectedKeywordsValue, setSelectedKeywordsValue] = useState("");
-
-  // Discussions tab state
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [discussionsLoading, setDiscussionsLoading] = useState(false);
   const [discussionsLoaded, setDiscussionsLoaded] = useState(false);
-
-  // Activities tab state
   const [activities, setActivities] = useState<Activity[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
   const [activitiesLoaded, setActivitiesLoaded] = useState(false);
-
-  // Datasets tab state
   const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
   const [associatedDatasets, setAssociatedDatasets] = useState<Dataset[]>([]);
   const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([]);
@@ -116,10 +108,6 @@ export default function ReusesEditClient() {
   const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
   const [datasetLinks, setDatasetLinks] = useState<RemoteDatasetEntry[]>([{ url: "" }]);
   const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
-  // Tracks the entries that were already persisted on the reuse when the page
-  // loaded. Used to detect whether the save needs to write a (possibly empty)
-  // remote_datasets list when the user removes all rows OR edits any of the
-  // per-URL metadata fields (title / description).
   const previousRemoteEntriesRef = useRef<RemoteDatasetEntry[]>([]);
   const [apiLinks, setApiLinks] = useState([{ url: "" }]);
   const [apiLinkErrors, setApiLinkErrors] = useState<Record<number, string>>({});
@@ -147,28 +135,19 @@ export default function ReusesEditClient() {
         const initialKeywords = (r.tags || []).join(",");
         setSelectedKeywordsValue(initialKeywords);
         selectedKeywordsRef.current = initialKeywords;
-        // LEDG-1748: populate the external dataset URL inputs from
-        // extras.remote_datasets so the user can see, edit or remove what
-        // was already saved (instead of seeing empty fields and assuming
-        // the URLs were lost). The normaliser also reads per-URL title /
-        // description from the richer entry shape (PR 2) while still
-        // accepting the legacy string[] shape from older data.
         const remoteEntries = normalizeRemoteDatasets(r.extras);
         previousRemoteEntriesRef.current = remoteEntries;
         setDatasetLinks(remoteEntries.length > 0 ? remoteEntries : [{ url: "" }]);
       } catch (error) {
         console.error("Error loading reuse:", error);
-        setApiError("Erro ao carregar a reutilização.");
+        setApiError(t("edit.notFound"));
       } finally {
         setIsLoading(false);
       }
     }
-    if (reuseId) loadData();
-  }, [reuseId]);
+    if (reuseId) void loadData();
+  }, [reuseId, t]);
 
-  // Load an initial pool of datasets (user's own + from each org the user
-  // belongs to). The search dropdown still queries the whole portal via
-  // searchDatasets() when the user types a query.
   useEffect(() => {
     const dedupe = (items: Dataset[]) => Array.from(new Map(items.map((d) => [d.id, d])).values());
     const personal = fetchMyDatasets(1, 100);
@@ -179,11 +158,10 @@ export default function ReusesEditClient() {
         setMyDatasets(dedupe(all));
       })
       .catch(() => {
-        /* graceful fallback: dropdown stays empty, search still works */
+        /* keep empty */
       });
   }, [user?.organizations]);
 
-  // Debounced portal-wide dataset search when the user types in the dropdown.
   useEffect(() => {
     const q = datasetSearch.trim();
     if (q.length < 2) return;
@@ -204,7 +182,7 @@ export default function ReusesEditClient() {
         .split(",")
         .map((v) => v.trim())
         .filter(Boolean),
-    [selectedKeywordsValue]
+    [selectedKeywordsValue],
   );
 
   const { keywordOptions, setKeywordSearch, registerSelectedKeywordValue } = useKeywordSelect({
@@ -215,14 +193,14 @@ export default function ReusesEditClient() {
     if (!reuse || !reuse.datasets || reuse.datasets.length === 0) return;
     async function loadAssociatedDatasets() {
       try {
-        const slugs = reuse!.datasets.map((d) => d.uri.split("/").filter(Boolean).pop() || d.id);
+        const slugs = reuse.datasets.map((d) => d.uri.split("/").filter(Boolean).pop() || d.id);
         const results = await Promise.all(slugs.map((s) => fetchDataset(s).catch(() => null)));
         setAssociatedDatasets(results.filter((d): d is Dataset => d !== null));
       } catch {
         setAssociatedDatasets([]);
       }
     }
-    loadAssociatedDatasets();
+    void loadAssociatedDatasets();
   }, [reuse]);
 
   const loadActivities = () => {
@@ -249,9 +227,7 @@ export default function ReusesEditClient() {
       .finally(() => setDiscussionsLoading(false));
   };
 
-  const discussionsCount = discussionsLoaded
-    ? discussions.length
-    : (reuse?.metrics?.discussions ?? 0);
+  const discussionsCount = discussionsLoaded ? discussions.length : (reuse?.metrics?.discussions ?? 0);
 
   const handleDatasetSearchChange = (value: string) => {
     setDatasetSearch(value);
@@ -287,7 +263,7 @@ export default function ReusesEditClient() {
       await handleImageUploadBase(e);
     } catch (error) {
       if (error instanceof Error && error.message === "MAX_FILE_SIZE") {
-        setImageError("O ficheiro excede o tamanho m\u00e1ximo de 4 MB.");
+        setImageError(t("edit.imageTooLarge"));
       }
     }
   };
@@ -326,8 +302,6 @@ export default function ReusesEditClient() {
     setDatasetLinkErrors((previous) => clearIndexedErrorIfFilled(previous, index, value));
   };
 
-  // LEDG-1748 PR 2: per-URL metadata fields kept on the same row so the
-  // user can describe each external dataset alongside its URL.
   const handleDatasetTitleChange = (index: number, value: string) => {
     setDatasetLinks((previous) => updateRemoteDatasetEntry(previous, index, { title: value }));
   };
@@ -348,7 +322,7 @@ export default function ReusesEditClient() {
     const result = addRemoteDatasetEntry(
       datasetLinks,
       datasetLinkErrors,
-      "Campo obrigat\u00f3rio",
+      t("form.fieldRequired"),
     );
     setDatasetLinks(result.entries);
     setDatasetLinkErrors(result.errors);
@@ -363,9 +337,9 @@ export default function ReusesEditClient() {
       const updated = await fetchReuse(reuseId);
       setReuse(updated);
       setAssociatedDatasets((prev) => prev.filter((d) => d.id !== datasetId));
-      showApiSuccess("Conjunto de dados removido com sucesso.");
+      showApiSuccess(t("edit.datasetRemoved"));
     } catch {
-      setApiError("Erro ao remover o conjunto de dados.");
+      setApiError(t("edit.datasetRemoveError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -382,9 +356,9 @@ export default function ReusesEditClient() {
       const updated = await fetchReuse(reuseId);
       setReuse(updated);
       setAssociatedDatasets([]);
-      showApiSuccess("Todos os conjuntos de dados foram removidos.");
+      showApiSuccess(t("edit.allDatasetsRemoved"));
     } catch {
-      setApiError("Erro ao remover os conjuntos de dados.");
+      setApiError(t("edit.allDatasetsRemoveError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -403,7 +377,7 @@ export default function ReusesEditClient() {
     const result = addUrlItem(
       apiLinks,
       apiLinkErrors,
-      "Campo obrigat\u00f3rio",
+      t("form.fieldRequired"),
       () => ({ url: "" }),
     );
     setApiLinks(result.items);
@@ -448,7 +422,7 @@ export default function ReusesEditClient() {
   });
 
   const handleTransferReuse = async (recipient: RecipientSelection, comment: string) => {
-    if (!reuse) throw new Error("Reutilização não carregada.");
+    if (!reuse) throw new Error(t("edit.transferNotLoaded"));
     setApiError(null);
     setApiSuccess(null);
     await requestTransfer({
@@ -457,16 +431,15 @@ export default function ReusesEditClient() {
       comment: comment || undefined,
     });
     hide();
-    showApiSuccess(
-      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
-      15000,
-    );
+    showApiSuccess(t("edit.transferSent", { recipient: recipient.label }), 15000);
   };
+
+  void handleTransferReuse;
 
   if (isLoading) {
     return (
       <div className="admin-page">
-        <p className="text-neutral-600">A carregar...</p>
+        <p className="text-neutral-600">{t("edit.loading")}</p>
       </div>
     );
   }
@@ -474,9 +447,9 @@ export default function ReusesEditClient() {
   if (!reuse) {
     return (
       <div className="admin-page">
-        <StatusCard variant="danger" showIcon description="Reutilização não encontrada." />
+        <StatusCard variant="danger" showIcon description={t("edit.notFound")} />
         <Button variant="primary" onClick={() => router.push("/admin/me/reuses")}>
-          Voltar
+          {t("edit.back")}
         </Button>
       </div>
     );
@@ -486,7 +459,7 @@ export default function ReusesEditClient() {
     <AdminLayout
       breadcrumbItems={[
         { label: "Administração", url: "/admin" },
-        { label: "Reutilizações", url: "/admin/me/reuses" },
+        { label: t("title"), url: "/admin/me/reuses" },
         { label: reuse.title },
       ]}
       title={reuse.title}
@@ -499,28 +472,19 @@ export default function ReusesEditClient() {
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="h-16 w-16" />
-            Ver página pública
+            {t("edit.viewPublicPage")}
           </span>
         </Button>
       }
     >
-
       {reuse.deleted && (
         <div className="mb-16">
-          <StatusCard
-            variant="warning"
-            showIcon
-            description="Esta reutilização foi excluída e a sua página pública não está disponível."
-          />
+          <StatusCard variant="warning" showIcon description={t("edit.deletedBanner")} />
         </div>
       )}
       {!reuse.deleted && reuse.archived && (
         <div className="mb-16">
-          <StatusCard
-            variant="warning"
-            showIcon
-            description="Esta reutilização está arquivada e a sua página pública não está disponível."
-          />
+          <StatusCard variant="warning" showIcon description={t("edit.archivedBanner")} />
         </div>
       )}
       {apiError && (
@@ -537,34 +501,32 @@ export default function ReusesEditClient() {
       <div className="admin-edit-info">
         <div className="admin-edit-info__badges">
           <Pill variant={reuse.private ? "warning" : "success"}>
-            {reuse.private ? "RASCUNHO" : "PÚBLICO"}
+            {reuse.private ? t("edit.statusDraft") : t("edit.statusPublic")}
           </Pill>
-          {reuse.featured && <Pill variant="informative">DESTAQUE</Pill>}
+          {reuse.featured && <Pill variant="informative">{t("edit.statusFeatured")}</Pill>}
           <span className="admin-edit-info__stat">
             <Icon name="agora-line-eye" className="admin-edit-info__stat-icon" />
-            {`${reuse.metrics?.views || 0} visualizações`}
+            {t("edit.viewsCount", { count: reuse.metrics?.views || 0 })}
           </span>
           <span className="admin-edit-info__stat">
             <Icon name="agora-line-star" className="admin-edit-info__stat-icon" />
-            {`${reuse.metrics?.followers || 0} favoritos`}
+            {t("edit.favoritesCount", { count: reuse.metrics?.followers || 0 })}
           </span>
         </div>
 
         <p className="admin-edit-info__activity">
           <Icon name="agora-line-clock" className="admin-edit-info__clock-icon" />
-          {" Atividade mais recente: "}
+          {` ${t("edit.recentActivityPrefix")} `}
           {reuse.owner && (
-            <>
-              <TextLink href={`/users/${reuse.owner.slug}`}>
-                {reuse.owner.first_name} {reuse.owner.last_name}
-              </TextLink>
-            </>
+            <TextLink href={`/users/${reuse.owner.slug}`}>
+              {reuse.owner.first_name} {reuse.owner.last_name}
+            </TextLink>
           )}
-          {" — editou a reutilização — "}
+          {` — ${t("edit.recentActivityAction")} — `}
           <span>
             {reuse.last_modified && !isNaN(new Date(reuse.last_modified).getTime())
               ? format(new Date(reuse.last_modified), "d 'de' MMMM 'de' yyyy", { locale: pt })
-              : "—"}
+              : t("edit.unknownDate")}
           </span>
         </p>
       </div>
@@ -578,7 +540,7 @@ export default function ReusesEditClient() {
         }}
       >
         <Tab>
-          <TabHeader>Metadados</TabHeader>
+          <TabHeader>{t("edit.tabs.metadata")}</TabHeader>
           <TabBody>
             <ReusesEditMetadataTab
               reuse={reuse}
@@ -627,9 +589,8 @@ export default function ReusesEditClient() {
             />
           </TabBody>
         </Tab>
-        {/* Datasets Tab */}
         <Tab>
-          <TabHeader>Conjuntos de dados ({reuse.datasets?.length || 0})</TabHeader>
+          <TabHeader>{`${t("edit.tabs.datasets")} (${reuse.datasets?.length || 0})`}</TabHeader>
           <TabBody>
             <ReusesEditDatasetsTab
               associatedDatasets={associatedDatasets}
@@ -653,9 +614,8 @@ export default function ReusesEditClient() {
             />
           </TabBody>
         </Tab>
-        {/* API Tab */}
         <Tab>
-          <TabHeader>API ({reuse.dataservices?.length || 0})</TabHeader>
+          <TabHeader>{`${t("edit.tabs.api")} (${reuse.dataservices?.length || 0})`}</TabHeader>
           <TabBody>
             <ReusesEditApiTab
               dataservices={reuse.dataservices}
@@ -669,9 +629,8 @@ export default function ReusesEditClient() {
             />
           </TabBody>
         </Tab>
-        {/* Discussions Tab */}
         <Tab>
-          <TabHeader>Discussões ({discussionsCount})</TabHeader>
+          <TabHeader>{`${t("edit.tabs.discussions")} (${discussionsCount})`}</TabHeader>
           <TabBody>
             <ReusesEditDiscussionsTab
               discussions={discussions}
@@ -680,9 +639,8 @@ export default function ReusesEditClient() {
             />
           </TabBody>
         </Tab>
-        {/* Activities Tab */}
         <Tab>
-          <TabHeader>Atividades</TabHeader>
+          <TabHeader>{t("edit.tabs.activities")}</TabHeader>
           <TabBody>
             <ReusesEditActivitiesTab
               activities={activities}

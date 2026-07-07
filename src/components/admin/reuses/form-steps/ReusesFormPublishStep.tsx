@@ -1,6 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, CardLinks, StatusCard } from "@ama-pt/agora-design-system";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -25,20 +26,21 @@ export default function ReusesFormPublishStep({
   isSubmitting,
   onPublish,
 }: ReusesFormPublishStepProps) {
+  const { t } = useTranslation("admin-reuses");
+
   return (
     <>
       <div className="mb-24">
         <StatusCard
           variant="success"
           showIcon
-          description={
-            <>
-              <strong>A sua reutilização foi criada!</strong>
-              <br />
-              Foi guardada automaticamente como rascunho. Pode publicá-la agora ou mais tarde, a
-              partir da lista de reutilizações.
-            </>
-          }
+        description={
+          <>
+            <strong>{t("form.publishSuccessTitle")}</strong>
+            <br />
+            {t("form.publishSuccessDescription")}
+          </>
+        }
         />
       </div>
 
@@ -49,15 +51,15 @@ export default function ReusesFormPublishStep({
           variant="transparent"
           image={{
             src: createdReuse?.image_thumbnail || createdReuse?.image || "/laptop.png",
-            alt: reuseName || "Sem título",
+            alt: reuseName || t("form.untitled"),
           }}
           category={
             createdReuse?.organization?.name ||
             (createdReuse?.owner
               ? `${createdReuse.owner.first_name} ${createdReuse.owner.last_name}`.trim()
-              : "Reutilização")
+              : t("form.reuseCategory"))
           }
-          title={<div className="text-xl-bold underline">{reuseName || "Sem título"}</div>}
+          title={<div className="text-xl-bold underline">{reuseName || t("form.untitled")}</div>}
           description={
             <p className="mt-8 max-w-[592px] text-sm leading-relaxed text-neutral-900 line-clamp-3">
               {reuseDescription || ""}
@@ -65,7 +67,9 @@ export default function ReusesFormPublishStep({
           }
           date={
             <span className="font-[300]">
-              {`Atualizado ${format(new Date(), "dd MM yyyy", { locale: pt })}`}
+              {t("form.updatedToday", {
+                date: format(new Date(), "dd MM yyyy", { locale: pt }),
+              })}
             </span>
           }
           links={[
@@ -78,7 +82,7 @@ export default function ReusesFormPublishStep({
               trailingIconHover: "",
               trailingIconActive: "",
               children: "0",
-              title: "Visualizações",
+              title: t("form.views"),
               onClick: (event: MouseEvent) => event.preventDefault(),
               className: "text-[#034AD8]",
             },
@@ -91,7 +95,7 @@ export default function ReusesFormPublishStep({
               trailingIconHover: "",
               trailingIconActive: "",
               children: `${createdReuse?.datasets?.length || 0} datasets`,
-              title: "Datasets",
+              title: t("columns.datasets"),
               onClick: (event: MouseEvent) => event.preventDefault(),
               className: "text-[#034AD8]",
             },
@@ -104,7 +108,7 @@ export default function ReusesFormPublishStep({
                   <span>0</span>
                 </span>
               ),
-              title: "Métricas",
+              title: t("form.metrics"),
               onClick: (event: MouseEvent) => event.preventDefault(),
             },
             {
@@ -116,7 +120,7 @@ export default function ReusesFormPublishStep({
               trailingIconHover: "",
               trailingIconActive: "",
               children: 0,
-              title: "Favoritos",
+              title: t("form.favorites"),
               onClick: (event: MouseEvent) => event.preventDefault(),
               className: "text-[#034AD8]",
             },
@@ -127,7 +131,7 @@ export default function ReusesFormPublishStep({
                 <span className="underline">{reuseName}</span>
               </Link>
             ) : (
-              <span className="underline">{reuseName || "Sem título"}</span>
+              <span className="underline">{reuseName || t("form.untitled")}</span>
             )
           }
           blockedLink
@@ -144,7 +148,7 @@ export default function ReusesFormPublishStep({
 
       <div className="admin-page__actions flex justify-end gap-[18px]">
         <Button variant="primary" disabled={isSubmitting} onClick={onPublish}>
-          {isSubmitting ? "A publicar..." : "Publicar a reutilização"}
+          {isSubmitting ? t("form.publishing") : t("form.publishReuse")}
         </Button>
       </div>
     </>
