@@ -294,6 +294,7 @@
     "resourceModifiedAt": "Modificado em",
     "resourceEditAction": "Editar",
     "transferError": "Erro ao pedir a transferência do conjunto de dados.",
+    "transferRequested": "Pedido de transferência enviado para {{recipient}}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.",
     "transferIrreversible": "Esta ação é irreversível.",
     "transferWarning": "Vai deixar de gerir este conjunto de dados",
     "transferRecipientLabel": "Organização ou utilizador",

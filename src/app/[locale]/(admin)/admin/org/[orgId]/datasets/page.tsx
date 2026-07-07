@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import OrgDatasetsClient from "@/components/admin/datasets/views/OrgDatasetsClient";
 
 export const metadata: Metadata = {
-  title: "Conjunto de dados - Organização - Admin - dados.gov.pt",
+  title: "Conjuntos de dados da organização - Admin - dados.gov.pt",
   description: "Gestão de conjuntos de dados da organização no portal dados.gov.pt.",
 };
 

@@ -294,6 +294,7 @@
     "resourceModifiedAt": "Modified at",
     "resourceEditAction": "Edit",
     "transferError": "Error requesting the transfer of the dataset.",
+    "transferRequested": "Transfer request sent to {{recipient}}. The recipient must accept the request for the transfer to be completed.",
     "transferIrreversible": "This action is irreversible.",
     "transferWarning": "You will no longer manage this dataset",
     "transferRecipientLabel": "Organization or user",

@@ -383,10 +383,7 @@ export default function DatasetsEditClient() {
       comment: comment || undefined,
     });
     hide();
-    showApiSuccess(
-      `Pedido de transferência enviado para ${recipient.label}. O destinatário tem de aceitar o pedido para a transferência ficar concluída.`,
-      15000,
-    );
+    showApiSuccess(t("edit.transferRequested", { recipient: recipient.label }), 15000);
   };
 
   void handleTransferDataset;
@@ -530,9 +527,9 @@ export default function DatasetsEditClient() {
               <TextLink href={`/users/${latestActivity.actor.slug}`}>
                 {latestActivity.actor.first_name} {latestActivity.actor.last_name}
               </TextLink>
-              {" — "}
+              {" - "}
               {translateActivityLabel(latestActivity.label)}
-              {" — "}
+              {" - "}
               <span>
                 {format(new Date(latestActivity.created_at), "d 'de' MMMM 'de' yyyy", {
                   locale: pt,
@@ -547,7 +544,7 @@ export default function DatasetsEditClient() {
                   {dataset.owner.first_name} {dataset.owner.last_name}
                 </TextLink>
               )}
-              {` — ${t("edit.latestActivityFallback")} — `}
+              {` - ${t("edit.latestActivityFallback")} - `}
               <span>
                 {format(new Date(dataset.last_modified), "d 'de' MMMM 'de' yyyy", {
                   locale: pt,
