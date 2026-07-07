@@ -68,12 +68,19 @@ export function useDatasetMetadataActions({
   async function handleSaveMetadata() {
     if (!dataset) return;
 
-    const errors = validateDatasetEditMetadata({
-      title,
-      description,
-      temporalStart,
-      temporalEnd,
-    });
+    const errors = validateDatasetEditMetadata(
+      {
+        title,
+        description,
+        temporalStart,
+        temporalEnd,
+      },
+      {
+        titleRequired: t("edit.fieldRequired"),
+        descriptionRequired: t("edit.fieldRequired"),
+        invalidRange: t("edit.invalidTemporalRange"),
+      },
+    );
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       focusFirstError();
