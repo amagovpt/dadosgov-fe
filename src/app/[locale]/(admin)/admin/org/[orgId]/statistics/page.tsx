@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import OrgStatisticsClient from "@/components/admin/statistics/OrgStatisticsClient";
+import initTranslations from "@/app/i18n";
 
-export const metadata: Metadata = {
-  title: "Estatísticas - Organização - Admin - dados.gov.pt",
-  description: "Estatísticas da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { t } = await initTranslations({
+    locale,
+    namespaces: ["admin-statistics"],
+  });
+
+  return {
+    title: t("metadata.organizationTitle", { ns: "admin-statistics" }),
+    description: t("metadata.organizationDescription", { ns: "admin-statistics" }),
+  };
+}
 
 export default async function OrgStatisticsPage({
   params,

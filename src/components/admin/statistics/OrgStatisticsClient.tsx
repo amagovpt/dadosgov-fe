@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   CardFrame,
@@ -37,6 +38,7 @@ interface OrgStatisticsClientProps {
 const PAGE_SIZE = 10;
 
 export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-statistics"]);
   const [org, setOrg] = useState<Organization | null>(null);
   const [metrics, setMetrics] = useState<OrganizationMetrics | null>(null);
   const [isOrgLoading, setIsOrgLoading] = useState(true);
@@ -127,8 +129,8 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
     return (
       <AdminEmptyState
         icon="agora-line-buildings"
-        title="Sem organizações"
-        description="Não pertence a nenhuma organização."
+        title={t("admin-statistics:states.noOrganizations")}
+        description={t("admin-statistics:states.noOrganizationDescription")}
       />
     );
   }
@@ -136,16 +138,15 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: org?.name || "Organização", url: "#" },
-        { label: "Estatísticas", url: "/admin/org/statistics" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: org?.name || t("admin-statistics:tabs.organization"), url: "#" },
+        { label: t("admin-statistics:breadcrumbs.organization"), url: "/admin/org/statistics" },
       ]}
-      title="Estatísticas"
+      title={t("admin-statistics:title")}
     >
-
       <Tabs>
         <Tab active>
-          <TabHeader>Organização</TabHeader>
+          <TabHeader>{t("admin-statistics:tabs.organization")}</TabHeader>
           <TabBody>
             <div className="mt-48">
               <div className="mb-24 flex justify-end">
@@ -156,45 +157,45 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   leadingIcon="agora-line-download"
                   leadingIconHover="agora-solid-download"
                 >
-                  Estatísticas agregadas
+                  {t("admin-statistics:actions.aggregatedStatistics")}
                 </Button>
               </div>
               <div className="mb-24 flex gap-24">
                 <div className="flex-1">
                   <CardFrame label={isDatasetsLoading ? "..." : String(datasetsTotal)}>
-                    <p className="text-base text-neutral-700">Conjuntos de dados</p>
+                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.datasets")}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={isDataservicesLoading ? "..." : String(dataservicesTotal)}>
-                    <p className="text-base text-neutral-700">API</p>
+                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.dataservices")}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={isReusesLoading ? "..." : String(reuses.length)}>
-                    <p className="text-base text-neutral-700">Reutilizações</p>
+                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.reuses")}</p>
                   </CardFrame>
                 </div>
               </div>
               <div className="flex gap-24">
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.views ?? 0)}>
-                    <p className="text-base text-neutral-700">Visitas ao conjunto de dados</p>
+                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.datasetViews")}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.resource_downloads ?? 0)}>
-                    <p className="text-base text-neutral-700">Downloads de dados</p>
+                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.resourceDownloads")}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.dataservice_views ?? 0)}>
-                    <p className="text-base text-neutral-700">Passeios pela API</p>
+                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.dataserviceViews")}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.reuse_views ?? 0)}>
-                    <p className="text-base text-neutral-700">Visitas a locais de reutilização</p>
+                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.reuseViews")}</p>
                   </CardFrame>
                 </div>
               </div>
@@ -203,16 +204,16 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
         </Tab>
 
         <Tab>
-          <TabHeader>Conjuntos de dados</TabHeader>
+          <TabHeader>{t("admin-statistics:tabs.datasets")}</TabHeader>
           <TabBody>
             <div className="mt-24">
               <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
-                    label="Pesquisar"
-                    placeholder="Pesquise o nome do conjunto de dados"
-                    aria-label="Pesquisar conjuntos de dados"
+                    label={t("admin-statistics:search.label")}
+                    placeholder={t("admin-statistics:search.datasetsPlaceholder")}
+                    aria-label={t("admin-statistics:search.datasetsAriaLabel")}
                   />
                 </div>
                 <Button
@@ -222,7 +223,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   leadingIcon="agora-line-download"
                   leadingIconHover="agora-solid-download"
                 >
-                  Relatório
+                  {t("admin-statistics:actions.report")}
                 </Button>
                 <Button
                   variant="primary"
@@ -231,20 +232,20 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   leadingIcon="agora-line-download"
                   leadingIconHover="agora-solid-download"
                 >
-                  Catálogo
+                  {t("admin-statistics:actions.catalog")}
                 </Button>
               </div>
 
               {isDatasetsLoading ? (
-                <p className="text-sm text-neutral-500">A carregar...</p>
+                <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
               ) : datasets.length === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
                     <Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />
                   }
-                  title="Sem publicações"
-                  description="Ainda não publicou um conjunto de dados."
+                  title={t("admin-statistics:states.noPublications")}
+                  description={t("admin-statistics:states.noDatasetsDescription")}
                   hasAnchor={false}
                   extraDescription={
                     <div className="mt-24">
@@ -253,7 +254,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                         appearance="outline"
                         onClick={() => (window.location.href = "/admin/datasets/new")}
                       >
-                        Publique no portal
+                        {t("admin-statistics:actions.publishOnPortal")}
                       </Button>
                     </div>
                   }
@@ -271,16 +272,16 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
         </Tab>
 
         <Tab>
-          <TabHeader>API</TabHeader>
+          <TabHeader>{t("admin-statistics:tabs.dataservices")}</TabHeader>
           <TabBody>
             <div className="mt-24">
               <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
-                    label="Pesquisar"
-                    placeholder="Pesquise o nome da API"
-                    aria-label="Pesquisar APIs"
+                    label={t("admin-statistics:search.label")}
+                    placeholder={t("admin-statistics:search.dataservicesPlaceholder")}
+                    aria-label={t("admin-statistics:search.dataservicesAriaLabel")}
                   />
                 </div>
                 <Button
@@ -290,20 +291,20 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   leadingIcon="agora-line-download"
                   leadingIconHover="agora-solid-download"
                 >
-                  Catálogo
+                  {t("admin-statistics:actions.catalog")}
                 </Button>
               </div>
 
               {isDataservicesLoading ? (
-                <p className="text-sm text-neutral-500">A carregar...</p>
+                <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
               ) : dataservices.length === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
                     <Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />
                   }
-                  title="Sem publicações"
-                  description="Ainda não publicou uma API."
+                  title={t("admin-statistics:states.noPublications")}
+                  description={t("admin-statistics:states.noDataservicesDescription")}
                   hasAnchor={false}
                   extraDescription={
                     <div className="mt-24">
@@ -312,7 +313,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                         appearance="outline"
                         onClick={() => (window.location.href = "/admin/dataservices/new")}
                       >
-                        Publique no portal
+                        {t("admin-statistics:actions.publishOnPortal")}
                       </Button>
                     </div>
                   }
@@ -328,26 +329,32 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                 >
                   <TableHeader>
                     <TableRow>
-                      <TableHeaderCell>TÍTULO DA API</TableHeaderCell>
+                      <TableHeaderCell>{t("admin-statistics:table.dataserviceTitle")}</TableHeaderCell>
                       <TableHeaderCell>
                         <Icon name="agora-line-eye" className="h-16 w-16" />
                       </TableHeaderCell>
                       <TableHeaderCell>
                         <Icon name="agora-line-star" className="h-16 w-16" />
                       </TableHeaderCell>
-                      <TableHeaderCell>ESTADO</TableHeaderCell>
+                      <TableHeaderCell>{t("admin-statistics:table.status")}</TableHeaderCell>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {dataservices.map((ds) => (
                       <TableRow key={ds.id}>
-                        <TableCell headerLabel="Título">
+                        <TableCell headerLabel={t("admin-statistics:table.title")}>
                           <span className="text-primary-600">{ds.title}</span>
                         </TableCell>
-                        <TableCell headerLabel="Visualizações">{ds.metrics?.views ?? 0}</TableCell>
-                        <TableCell headerLabel="Favoritos">{ds.metrics?.followers ?? 0}</TableCell>
-                        <TableCell headerLabel="Estado">
-                          {ds.private ? "Privado" : ds.archived_at ? "Arquivado" : "Público"}
+                        <TableCell headerLabel={t("admin-statistics:table.views")}>{ds.metrics?.views ?? 0}</TableCell>
+                        <TableCell headerLabel={t("admin-statistics:table.favorites")}>
+                          {ds.metrics?.followers ?? 0}
+                        </TableCell>
+                        <TableCell headerLabel={t("admin-statistics:table.status")}>
+                          {ds.private
+                            ? t("admin-statistics:status.private")
+                            : ds.archived_at
+                              ? t("admin-statistics:status.archived")
+                              : t("admin-statistics:status.public")}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -359,30 +366,30 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
         </Tab>
 
         <Tab>
-          <TabHeader>Reutilizações</TabHeader>
+          <TabHeader>{t("admin-statistics:tabs.reuses")}</TabHeader>
           <TabBody>
             <div className="mt-24">
               <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
-                    label="Pesquisar"
-                    placeholder="Pesquise o nome da reutilização"
-                    aria-label="Pesquisar reutilizações"
+                    label={t("admin-statistics:search.label")}
+                    placeholder={t("admin-statistics:search.reusesPlaceholder")}
+                    aria-label={t("admin-statistics:search.reusesAriaLabel")}
                   />
                 </div>
               </div>
 
               {isReusesLoading ? (
-                <p className="text-sm text-neutral-500">A carregar...</p>
+                <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
               ) : reuses.length === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
                     <Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />
                   }
-                  title="Sem publicações"
-                  description="Ainda não publicou uma reutilização."
+                  title={t("admin-statistics:states.noPublications")}
+                  description={t("admin-statistics:states.noReusesDescription")}
                   hasAnchor={false}
                   extraDescription={
                     <div className="mt-24">
@@ -391,7 +398,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                         appearance="outline"
                         onClick={() => (window.location.href = "/admin/reuses/new")}
                       >
-                        Publique no portal
+                        {t("admin-statistics:actions.publishOnPortal")}
                       </Button>
                     </div>
                   }

@@ -1,0 +1,23 @@
+{
+  "title": "Editorial",
+  "metadata": {
+    "title": "Editorial - Sistema - Admin - dados.gov.pt",
+    "description": "Gestão editorial do sistema no portal dados.gov.pt."
+  },
+  "actions": {
+    "viewPublicPage": "Veja a página pública",
+    "editOnPublicPage": "Editar na página pública",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "A guardar..."
+  },
+  "messages": {
+    "loading": "A carregar...",
+    "saved": "Alterações guardadas.",
+    "saveError": "Erro ao guardar alterações."
+  },
+  "tabs": {
+    "datasets": "Conjuntos de dados",
+    "reuses": "Reutilizar"
+  }
+}

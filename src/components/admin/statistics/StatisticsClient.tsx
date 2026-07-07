@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   CardFrame,
@@ -23,6 +24,7 @@ import { ReuseMetricsTable } from "./ReuseMetricsTable";
 const PAGE_SIZE = 10;
 
 export default function StatisticsClient() {
+  const { t } = useTranslation(["admin-common", "admin-statistics"]);
   const { displayName } = useCurrentUser();
 
   const [datasets, setDatasets] = useState<Dataset[]>([]);
@@ -70,27 +72,26 @@ export default function StatisticsClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Estatísticas", url: "/admin/me/statistics" },
+        { label: t("admin-statistics:breadcrumbs.user"), url: "/admin/me/statistics" },
       ]}
-      title="Estatísticas"
+      title={t("admin-statistics:title")}
       headerAction={null}
     >
-
       <Tabs>
         <Tab active>
-          <TabHeader>Utilizador</TabHeader>
+          <TabHeader>{t("admin-statistics:tabs.user")}</TabHeader>
           <TabBody>
             <div className="mt-48 flex gap-24">
               <div className="flex-1">
                 <CardFrame label={isDatasetsLoading ? "..." : String(datasetsTotal)}>
-                  <p className="text-base text-neutral-700">Conjuntos de dados</p>
+                  <p className="text-base text-neutral-700">{t("admin-statistics:cards.datasets")}</p>
                 </CardFrame>
               </div>
               <div className="flex-1">
                 <CardFrame label={isReusesLoading ? "..." : String(reusesTotal)}>
-                  <p className="text-base text-neutral-700">Reutilizar</p>
+                  <p className="text-base text-neutral-700">{t("admin-statistics:cards.reuses")}</p>
                 </CardFrame>
               </div>
             </div>
@@ -98,30 +99,30 @@ export default function StatisticsClient() {
         </Tab>
 
         <Tab>
-          <TabHeader>Conjuntos de dados</TabHeader>
+          <TabHeader>{t("admin-statistics:tabs.datasets")}</TabHeader>
           <TabBody>
             <div className="mt-24">
               <div className="mb-24 flex items-end gap-16">
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
-                    label="Pesquisar"
-                    placeholder="Pesquise o nome do conjunto de dados"
-                    aria-label="Pesquisar conjuntos de dados"
+                    label={t("admin-statistics:search.label")}
+                    placeholder={t("admin-statistics:search.datasetsPlaceholder")}
+                    aria-label={t("admin-statistics:search.datasetsAriaLabel")}
                   />
                 </div>
               </div>
 
               {isDatasetsLoading ? (
-                <p className="text-sm text-neutral-500">A carregar...</p>
+                <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
               ) : datasets.length === 0 ? (
                 <CardNoResults
                   position="center"
                   icon={
                     <img src="/Icons/reduce.svg" alt="" className="h-40 w-40" />
                   }
-                  title="Sem publicações"
-                  description="Ainda não publicou um conjunto de dados."
+                  title={t("admin-statistics:states.noPublications")}
+                  description={t("admin-statistics:states.noDatasetsDescription")}
                   hasAnchor={false}
                   extraDescription={
                     <div className="mt-24">
@@ -130,7 +131,7 @@ export default function StatisticsClient() {
                         appearance="outline"
                         onClick={() => (window.location.href = "/admin/datasets/new")}
                       >
-                        Publique no portal
+                        {t("admin-statistics:actions.publishOnPortal")}
                       </Button>
                     </div>
                   }
@@ -148,21 +149,23 @@ export default function StatisticsClient() {
         </Tab>
 
         <Tab>
-          <TabHeader>Reutilizar</TabHeader>
+          <TabHeader>{t("admin-statistics:tabs.reuses")}</TabHeader>
           <TabBody>
             <div className="mt-24">
               {isReusesLoading ? (
-                <p className="text-sm text-neutral-500">A carregar...</p>
+                <p className="text-sm text-neutral-500">{t("admin-statistics:states.loading")}</p>
               ) : reuses.length === 0 ? (
                 <>
-                  <p className="text-sm mb-16 text-neutral-700">0 resultados</p>
+                  <p className="text-sm mb-16 text-neutral-700">
+                    {t("admin-statistics:states.results", { count: 0 })}
+                  </p>
                   <CardNoResults
                     position="center"
                     icon={
                       <img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />
                     }
-                    title="Sem publicações"
-                    description="Ainda não publicou uma reutilização."
+                    title={t("admin-statistics:states.noPublications")}
+                    description={t("admin-statistics:states.noReusesDescription")}
                     hasAnchor={false}
                     extraDescription={
                       <div className="mt-24">
@@ -171,7 +174,7 @@ export default function StatisticsClient() {
                           appearance="outline"
                           onClick={() => (window.location.href = "/admin/reuses/new")}
                         >
-                          Publique no portal
+                          {t("admin-statistics:actions.publishOnPortal")}
                         </Button>
                       </div>
                     }
@@ -179,7 +182,9 @@ export default function StatisticsClient() {
                 </>
               ) : (
                 <>
-                  <p className="text-sm mb-16 text-neutral-700">{reusesTotal} resultados</p>
+                  <p className="text-sm mb-16 text-neutral-700">
+                    {t("admin-statistics:states.results", { count: reusesTotal })}
+                  </p>
                   <ReuseMetricsTable
                     reuses={reuses}
                     total={reusesTotal}

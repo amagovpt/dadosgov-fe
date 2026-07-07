@@ -1,0 +1,23 @@
+{
+  "title": "Editorial",
+  "metadata": {
+    "title": "Editorial - System - Admin - dados.gov.pt",
+    "description": "System editorial management on the dados.gov.pt portal."
+  },
+  "actions": {
+    "viewPublicPage": "View public page",
+    "editOnPublicPage": "Edit on public page",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving..."
+  },
+  "messages": {
+    "loading": "Loading...",
+    "saved": "Changes saved.",
+    "saveError": "Error saving changes."
+  },
+  "tabs": {
+    "datasets": "Datasets",
+    "reuses": "Reuses"
+  }
+}
