@@ -647,7 +647,7 @@ const ResourceCard: React.FC<{
           </button>
         </h4>
         <p className="text-base text-neutral-900">
-          Atualizado em {formatDate(resource.created_at)}
+          Atualizado em {formatDate(resource.last_modified ?? resource.created_at)}
         </p>
         {authorName && (
           <p className="text-sm text-neutral-900">
