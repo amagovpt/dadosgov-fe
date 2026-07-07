@@ -41,6 +41,8 @@ const namespaces = [
   "admin-community-resources",
   "admin-organizations",
   "admin-reuses",
+  "admin-discussions",
+  "admin-notifications",
 ];
 
 export async function generateMetadata({

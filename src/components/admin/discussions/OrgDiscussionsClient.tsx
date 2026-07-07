@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { usePopupContext } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import {
@@ -36,6 +37,7 @@ interface OrgDiscussionsClientProps {
 }
 
 export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-discussions"]);
   const { user } = useAuth();
   const { show } = usePopupContext();
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
@@ -76,12 +78,12 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
         created: createDateSorter((discussion) => discussion.created),
         closed: createDateSorter((discussion) => discussion.closed),
       }),
-    [discussions, sortField, sortOrder]
+    [discussions, sortField, sortOrder],
   );
 
   const paginatedDiscussions = useMemo(
     () => paginateItems(sortedDiscussions, currentPage, pageSize),
-    [sortedDiscussions, currentPage, pageSize]
+    [sortedDiscussions, currentPage, pageSize],
   );
 
   const openDiscussion = (discussion: Discussion) => {
@@ -93,7 +95,11 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
         }
         onDeleted={() => setDiscussions((prev) => prev.filter((item) => item.id !== discussion.id))}
       />,
-      { title: "Discussão", closeAriaLabel: "Fechar", dimensions: "l" }
+      {
+        title: t("admin-discussions:popup.title"),
+        closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
+        dimensions: "l",
+      },
     );
   };
 
@@ -102,18 +108,29 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
       createOrgDiscussionColumns({
         onOpenDiscussion: openDiscussion,
         formatDate,
+        labels: {
+          title: t("admin-discussions:columns.title"),
+          author: t("admin-discussions:columns.author"),
+          status: t("admin-discussions:columns.status"),
+          date: t("admin-discussions:columns.date"),
+          messages: t("admin-discussions:columns.messages"),
+          createdAt: t("admin-discussions:columns.createdAt"),
+          closedAt: t("admin-discussions:columns.closedAt"),
+          open: t("admin-discussions:status.open"),
+          closed: t("admin-discussions:status.closed"),
+        },
       }),
-    []
+    [t],
   );
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: orgName || "Organização", url: "#" },
-        { label: "Discussões" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
+        { label: t("admin-discussions:title") },
       ]}
-      title="Discussões"
+      title={t("admin-discussions:title")}
       isLoading={isLoading}
       count={discussions.length}
       currentPage={currentPage}
@@ -123,8 +140,8 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
       emptyState={
         <AdminEmptyState
           icon="agora-line-chat"
-          title="Sem discussões"
-          description="Ainda não há discussões sobre esta organização."
+          title={t("admin-discussions:empty.title")}
+          description={t("admin-discussions:empty.descriptionOrganization")}
         />
       }
     >
@@ -140,4 +157,3 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
     </AdminListPage>
   );
 }
-

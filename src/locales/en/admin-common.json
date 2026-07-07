@@ -64,5 +64,23 @@
     "itemsPerPageOptions": "Rows per page options",
     "previous": "Previous page",
     "next": "Next page"
+  },
+  "recipient": {
+    "minChars": "Type at least {{count}} characters to search...",
+    "searching": "Searching...",
+    "noResults": "No users or organizations found",
+    "searchPlaceholder": "Type to search...",
+    "usersSection": "Users",
+    "organizationsSection": "Organizations"
+  },
+  "publish": {
+    "buttonPrefix": "Publish",
+    "items": {
+      "dataset": "A dataset",
+      "api": "An API",
+      "reuse": "A reuse",
+      "harvester": "A harvester",
+      "organization": "An organization"
+    }
   }
 }

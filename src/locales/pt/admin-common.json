@@ -64,5 +64,23 @@
     "itemsPerPageOptions": "Opções de linhas por página",
     "previous": "Página anterior",
     "next": "Próxima página"
+  },
+  "recipient": {
+    "minChars": "Escreva pelo menos {{count}} caracteres para procurar...",
+    "searching": "A pesquisar...",
+    "noResults": "Nenhum utilizador ou organização encontrado",
+    "searchPlaceholder": "Escreva para procurar...",
+    "usersSection": "Utilizadores",
+    "organizationsSection": "Organizações"
+  },
+  "publish": {
+    "buttonPrefix": "Publicar",
+    "items": {
+      "dataset": "Um conjunto de dados",
+      "api": "Uma API",
+      "reuse": "Uma reutilização",
+      "harvester": "Um harvester",
+      "organization": "Uma organização"
+    }
   }
 }

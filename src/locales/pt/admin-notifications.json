@@ -1,0 +1,20 @@
+{
+  "title": "Notificações",
+  "intro": "Pedidos de validação de harvesters e outras notificações dirigidas à equipa de administração.",
+  "empty": "Sem notificações de momento.",
+  "read": "lida",
+  "markAsRead": "Marcar como lida",
+  "statuses": {
+    "pending": "Pendente",
+    "accepted": "Validada",
+    "refused": "Recusada"
+  },
+  "harvesterValidation": {
+    "title": "Validação de harvester — {{status}}",
+    "sourceUnavailable": "Fonte indisponível (poderá ter sido eliminada).",
+    "viewHarvester": "Ver harvester"
+  },
+  "generic": {
+    "title": "Nova notificação"
+  }
+}

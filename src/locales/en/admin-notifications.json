@@ -1,0 +1,20 @@
+{
+  "title": "Notifications",
+  "intro": "Harvester validation requests and other notifications addressed to the administration team.",
+  "empty": "No notifications at the moment.",
+  "read": "read",
+  "markAsRead": "Mark as read",
+  "statuses": {
+    "pending": "Pending",
+    "accepted": "Validated",
+    "refused": "Refused"
+  },
+  "harvesterValidation": {
+    "title": "Harvester validation — {{status}}",
+    "sourceUnavailable": "Source unavailable (it may have been deleted).",
+    "viewHarvester": "View harvester"
+  },
+  "generic": {
+    "title": "New notification"
+  }
+}
