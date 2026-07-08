@@ -14,7 +14,7 @@ export default function TextLink(args: TextLinkI) {
   return (
     <Link
       href={args.href}
-      target={args.target ?? "_blank"}
+      target={args.target ?? "_self"}
       rel="noopener noreferrer"
       className={twMerge("text-primary-600 underline", args.className)}
     >

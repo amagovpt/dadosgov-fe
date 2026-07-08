@@ -13,7 +13,7 @@ const columns: AdminListColumn<Reuse>[] = [
     id: "title",
     header: "TÍTULO DA REUTILIZAÇÃO",
     headerLabel: "Título",
-    renderCell: (reuse) => <TextLink href={reuse.url}>{reuse.title}</TextLink>,
+    renderCell: (reuse) => <TextLink href={reuse.url} target="_blank">{reuse.title}</TextLink>,
   },
   {
     id: "views",
