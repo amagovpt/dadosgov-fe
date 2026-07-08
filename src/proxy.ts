@@ -100,6 +100,7 @@ export async function proxy(request: NextRequest) {
       if (isPathRestricted(pathname, disabledPaths)) {
         const notFound = NextResponse.rewrite(new URL("/_not-found", request.url), {
           request: { headers: requestHeaders },
+          status: 404,
         });
         if (nonce) {
           notFound.headers.set("Content-Security-Policy", buildCsp(nonce));
