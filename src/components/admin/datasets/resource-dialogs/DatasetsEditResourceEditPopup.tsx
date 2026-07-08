@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Button, InputText, InputTextArea, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
+import { Button, InputText, InputTextArea, LoaderDialog, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { replaceResourceFile, updateResource } from "@/service/api/datasets";
@@ -125,12 +125,17 @@ export default function DatasetsEditResourceEditPopup({
       setError(msg);
     } finally {
       setIsReplacing(false);
+      // Reset the input so a subsequent selection — including re-picking the
+      // same file — always fires `onChange`. Without this the browser keeps the
+      // previous value and a second replacement silently does nothing (no
+      // loader, no update).
+      if (replaceFileInputRef.current) replaceFileInputRef.current.value = "";
     }
   };
 
   return (
     <form
-      className="flex flex-col gap-16"
+      className="relative flex flex-col gap-16"
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
@@ -139,6 +144,12 @@ export default function DatasetsEditResourceEditPopup({
       style={{ minHeight: "60vh" }}
     >
       {error && <StatusCard variant="danger" description={error} />}
+
+      {isReplacing && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">
+          <LoaderDialog title="A substituir o ficheiro..." />
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto flex flex-col gap-16">
         <InputText
