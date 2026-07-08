@@ -52,6 +52,8 @@ interface DatasetMetricsTableProps {
   total: number;
   page: number;
   onPageChange: (page: number) => void;
+  pageSize?: number;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
 export function DatasetMetricsTable({
@@ -59,13 +61,16 @@ export function DatasetMetricsTable({
   total,
   page,
   onPageChange,
+  pageSize = PAGE_SIZE,
+  onPageSizeChange,
 }: DatasetMetricsTableProps) {
   return (
     <AdminPaginatedTable
-      pageSize={PAGE_SIZE}
+      pageSize={pageSize}
       totalItems={total}
       currentPage={page}
       setCurrentPage={onPageChange}
+      setPageSize={onPageSizeChange}
     >
       <AdminListTable items={datasets} columns={columns} getRowKey={(dataset) => dataset.id} />
     </AdminPaginatedTable>
