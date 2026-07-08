@@ -5,7 +5,7 @@ import { TematicAreaPage } from "@/service/types/tematic-areas";
 
 export async function getTematicAreas(locale: string = "pt"): Promise<TematicAreaPage> {
   const query = gql(/* GraphQL */ `
-        query MyQuery {
+        query GetTematicAreas {
             findTematicPageSingleton{
                 data{
                     hero{
