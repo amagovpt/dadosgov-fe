@@ -6,10 +6,10 @@ const isServer = typeof window === "undefined";
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:7000";
 export const API_BASE_URL = isServer
   ? `${BACKEND_URL}/api/1`
-  : (process.env.NEXT_PUBLIC_API_BASE || "/api/1");
+  : process.env.NEXT_PUBLIC_API_BASE || "/api/1";
 export const API_V2_BASE_URL = isServer
   ? `${BACKEND_URL}/api/2`
-  : (process.env.NEXT_PUBLIC_API_V2_BASE || "/api/2");
+  : process.env.NEXT_PUBLIC_API_V2_BASE || "/api/2";
 // Relative API URL for authenticated requests (passes through Next.js proxy which forwards cookies)
 export const API_AUTH_URL = "/api/1";
 
@@ -19,6 +19,42 @@ export function authFetch(path: string, init?: RequestInit): Promise<Response> {
     ...init,
     credentials: "include",
   });
+}
+
+// A large resource is sent as hundreds of sequential 1 MB parts plus a final
+// combine request (a 600 MB file ≈ 601 round-trips). A single dropped
+// connection anywhere in that sequence used to reject the whole upload with a
+// native fetch `TypeError` ("Failed to fetch" / ECONNRESET), surfacing to the
+// user as a failed upload even though nothing was wrong with the file. We retry
+// only these transient transport failures; HTTP error responses (413/415/400)
+// are deterministic and must surface immediately, so they are never retried.
+const UPLOAD_MAX_RETRIES = 3;
+const UPLOAD_RETRY_BASE_DELAY_MS = 500;
+
+/**
+ * POST one upload request, retrying only transient network failures (a thrown
+ * fetch `TypeError`, e.g. "Failed to fetch"). A resolved `Response` — success
+ * or HTTP error — is returned as-is and never retried.
+ *
+ * Safe to replay: chunk parts are idempotent on the backend (`save_chunk`
+ * overwrites by `uuid`+`partindex`), and the FormData holds a re-readable Blob
+ * slice, so the same body can be sent again after a dropped connection.
+ */
+async function uploadFetchWithRetry(url: string, body: FormData): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= UPLOAD_MAX_RETRIES; attempt++) {
+    try {
+      return await fetch(url, { method: "POST", credentials: "include", body });
+    } catch (error) {
+      // Only network-level failures reach here; HTTP errors resolve normally.
+      lastError = error;
+      if (attempt < UPLOAD_MAX_RETRIES) {
+        const delay = UPLOAD_RETRY_BASE_DELAY_MS * 2 ** attempt;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError;
 }
 
 /**
@@ -42,7 +78,8 @@ export function authFetch(path: string, init?: RequestInit): Promise<Response> {
  * mismatch); then a final request with no `file` (just `uuid`/`filename`/
  * `totalparts`) triggers the combine and returns the resource (same shape as a
  * single-shot upload). A failing part short-circuits and its Response is
- * returned so callers surface the error exactly as before.
+ * returned so callers surface the error exactly as before. Transient network
+ * failures on any request are retried by `uploadFetchWithRetry`.
  */
 export async function chunkedUploadFetch(url: string, file: File): Promise<Response> {
   const chunkSize = uiConfig.resourceFileUploadChunk;
@@ -50,7 +87,7 @@ export async function chunkedUploadFetch(url: string, file: File): Promise<Respo
   if (file.size <= chunkSize) {
     const body = new FormData();
     body.append("file", file);
-    return fetch(url, { method: "POST", credentials: "include", body });
+    return uploadFetchWithRetry(url, body);
   }
 
   const uuid =
@@ -71,7 +108,7 @@ export async function chunkedUploadFetch(url: string, file: File): Promise<Respo
     body.append("totalparts", String(totalparts));
     body.append("chunksize", String(end - start));
 
-    const res = await fetch(url, { method: "POST", credentials: "include", body });
+    const res = await uploadFetchWithRetry(url, body);
     if (!res.ok) return res;
   }
 
@@ -79,7 +116,7 @@ export async function chunkedUploadFetch(url: string, file: File): Promise<Respo
   combine.append("uuid", uuid);
   combine.append("filename", file.name);
   combine.append("totalparts", String(totalparts));
-  return fetch(url, { method: "POST", credentials: "include", body: combine });
+  return uploadFetchWithRetry(url, combine);
 }
 
 /**
@@ -88,7 +125,7 @@ export async function chunkedUploadFetch(url: string, file: File): Promise<Respo
  * rejection. Other error messages pass through unchanged.
  */
 export function translateUploadErrorPayload(
-  data: Record<string, unknown>,
+  data: Record<string, unknown>
 ): Record<string, unknown> {
   if (typeof data?.message !== "string") return data;
   return { ...data, message: translateUploadError(data.message) };
