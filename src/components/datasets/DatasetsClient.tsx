@@ -2,10 +2,8 @@
 
 import React, { useState } from "react";
 import {
-  Icon,
   ToggleGroup,
   Toggle,
-  CardNoResults,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import { deleteDataset } from "@/service/api/datasets";
@@ -26,6 +24,7 @@ import { useDatasetsListing } from "@/hooks/useDatasetsListing";
 import { twJoin } from "tailwind-merge";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { useTranslation } from "react-i18next";
+import FoNoResults from "../common/FoNoResults";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -46,6 +45,7 @@ export default function DatasetsClient({
   allFrequencies = [],
   allGranularities = [],
 }: DatasetsClientProps) {
+  const { t } = useTranslation("common");
   const { t: tds } = useTranslation("datasets");
 
   const DATASET_SORT_LABELS: Record<string, string> = {
@@ -77,14 +77,12 @@ export default function DatasetsClient({
     show(
       <div className="flex flex-col gap-16">
         <p>
-          Essa ação é irreversível.{" "}
-          <span className="text-red-600">
-            Tem a certeza que quer eliminar este conjunto de dados?
-          </span>
+          {tds("delete.irreversible")}{" "}
+          <span className="text-red-600">{tds("delete.confirmation")}</span>
         </p>
         <div className="flex justify-end gap-16 pt-16">
           <Button appearance="outline" variant="neutral" onClick={hide}>
-            Cancelar
+            {t("cancel")}
           </Button>
           <Button
             variant="danger"
@@ -100,22 +98,22 @@ export default function DatasetsClient({
               }
             }}
           >
-            Eliminar
+            {tds("delete.delete")}
           </Button>
         </div>
       </div>,
-      { title: "Elimine o conjunto de dados", closeAriaLabel: "Fechar", dimensions: "m" }
+      { title: tds("delete.modal"), closeAriaLabel: t("close"), dimensions: "m" }
     );
   };
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        title="Conjuntos de dados"
         breadcrumbItems={[
-          { label: "Início", url: "/" },
-          { label: "Conjuntos de dados", url: "/datasets" },
+          { label: t("home"), url: "/" },
+          { label: t("datasets"), url: "/datasets" },
         ]}
+        title={"Conjuntos de Dados"}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
             Explore conjuntos de dados abertos de diversas origens, temas e em diferentes formatos,
@@ -154,10 +152,10 @@ export default function DatasetsClient({
                   })}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
-              {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
+              {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total.toLocaleString("pt-PT")} Resultados
+              {total.toLocaleString("pt-PT")} {t("results")}
             </span>
           </div>
           <div className="flex w-full items-center xl:justify-end">
@@ -172,7 +170,7 @@ export default function DatasetsClient({
               }}
             >
               {Object.entries(DATASET_SORT_LABELS).map(([key, label]) => (
-                <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
+                <Toggle key={key} value={key} aria-label={tds("sort.label", { key })}>
                   {label}
                 </Toggle>
               ))}
@@ -222,25 +220,11 @@ export default function DatasetsClient({
                   })
                 ) : (
                   <div className="col-span-full">
-                    <CardNoResults
-                      icon={
-                        <Icon
-                          name="agora-line-search"
-                          className="icon-xl h-12 w-12 text-primary-500"
-                        />
-                      }
-                      title="Não encontrámos o que procura"
-                      subtitle={
-                        <span className="font-bold">A sua pesquisa não devolveu resultados.</span>
-                      }
-                      description={
-                        <div className="mx-auto max-w-[592px]">
-                          Verifique os termos introduzidos ou ajuste os filtros para ver mais
-                          resultados.
-                        </div>
-                      }
-                      position="center"
-                      hasAnchor={false}
+                    <FoNoResults
+                      icon={pageContent.noResults.icon}
+                      title={pageContent.noResults.title}
+                      subtitle={pageContent.noResults.subtitle}
+                      description={pageContent.noResults.description}
                     />
                   </div>
                 )}

@@ -2,6 +2,23 @@ import { fetchDatasetsListing } from "@/service/api/datasets";
 import { DatasetFilters } from "@/service/types/dataset";
 import DatasetsClient from "@/components/datasets/DatasetsClient";
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  const metadata = await getDatasetsMetadata(locale);
+
+  return {
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
+  };
+}
 
 // The page is already dynamic (it reads searchParams); we intentionally do NOT
 // force-dynamic so the listing fetch can use the Next.js Data Cache

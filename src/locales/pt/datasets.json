@@ -1,5 +1,6 @@
 {
   "sort": {
+    "label": "`Ordenar por {{label}}`",
     "relevancia": "Relevância",
     "criacao": "Mais recente",
     "antigo": "Mais antigo",
@@ -8,6 +9,7 @@
   "delete": {
     "delete": "Eliminar",
     "irreversible": "Esta ação é irreversível.",
-    "confirmation": "Tem a certeza que quer eliminar este conjunto de dados?"
+    "confirmation": "Tem a certeza que quer eliminar este conjunto de dados?",
+    "modal": "Elimine o conjunto de dados"
   }
 }

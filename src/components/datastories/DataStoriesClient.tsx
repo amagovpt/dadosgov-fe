@@ -17,6 +17,7 @@ import { DATA_STORIES_PAGE_SIZE } from "@/utils/dataStoriesListingQuery";
 import { useDataStoriesListing } from "@/hooks/useDataStoriesListing";
 import { twJoin } from "tailwind-merge";
 import { useTranslation } from "react-i18next";
+import FoNoResults from "../common/FoNoResults";
 
 interface DataStoriesClientProps {
   currentPage: number;
@@ -166,18 +167,11 @@ export default function DataStoriesClient({
                 })
               ) : (
                 <div className="col-span-full">
-                  <CardNoResults
-                    icon={
-                      <Icon
-                        name={pageContent.noResults.icon ?? "agora-line-search"}
-                        className="h-12 w-12 text-primary-500"
-                      />
-                    }
+                  <FoNoResults
+                    icon={pageContent.noResults.icon}
                     title={pageContent.noResults.title}
-                    subtitle={<span className="font-bold">{pageContent.noResults.subtitle}</span>}
+                    subtitle={pageContent.noResults.subtitle}
                     description={pageContent.noResults.description}
-                    position="center"
-                    hasAnchor={true}
                   />
                 </div>
               )}
