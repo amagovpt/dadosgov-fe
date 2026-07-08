@@ -6,6 +6,7 @@ import {
   AccordionGroup,
   Button,
   Icon,
+  LoaderDialog,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -92,7 +93,9 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
             <TabBody>
               <div className="py-16">
                 {isLoading ? (
-                  <p className="text-neutral-900 text-sm">A carregar pré-visualização...</p>
+                  <div className="flex items-center justify-center py-16">
+                    <LoaderDialog title="A carregar pré-visualização..." />
+                  </div>
                 ) : error || !tabularData ? (
                   <p className="text-neutral-900 text-sm">
                     {error || "Pré-visualização não disponível para este recurso."}
@@ -178,7 +181,9 @@ export const ResourceExpandedContent: React.FC<{ resource: Resource }> = ({ reso
             <TabBody>
               <div className="py-16">
                 {isLoading ? (
-                  <p className="text-neutral-900 text-sm">A carregar estrutura...</p>
+                  <div className="flex items-center justify-center py-16">
+                    <LoaderDialog title="A carregar estrutura..." />
+                  </div>
                 ) : error || !tabularData ? (
                   <p className="text-neutral-900 text-sm">
                     {error || "Estrutura de dados não disponível para este recurso."}
