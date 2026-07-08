@@ -6,9 +6,13 @@ import { InputSearchBar } from "@ama-pt/agora-design-system";
 
 interface ArticlesSearchBarProps {
   initialQuery: string;
+  label?: string;
+  placeholder?: string;
+  voiceActionAltText?: string;
+  searchActionAltText?: string;
 }
 
-export function ArticlesSearchBar({ initialQuery }: ArticlesSearchBarProps) {
+export function ArticlesSearchBar({ initialQuery, label, placeholder, searchActionAltText, voiceActionAltText }: ArticlesSearchBarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -29,12 +33,12 @@ export function ArticlesSearchBar({ initialQuery }: ArticlesSearchBarProps) {
 
   return (
     <InputSearchBar
-      label="O que procura nas novidades?"
-      placeholder="Pesquisar artigos, notícias, webinars..."
+      label={label ?? "O que procura nas novidades?"}
+      placeholder={placeholder ?? "Pesquisar artigos, notícias, webinars..."}
       id="articles-search"
       hasVoiceActionButton={false}
-      voiceActionAltText="Pesquisar por voz"
-      searchActionAltText="Pesquisar"
+      voiceActionAltText={voiceActionAltText ?? "Pesquisar por voz"}
+      searchActionAltText={searchActionAltText ?? "Pesquisar"}
       darkMode={true}
       minLength={1}
       value={searchInput}

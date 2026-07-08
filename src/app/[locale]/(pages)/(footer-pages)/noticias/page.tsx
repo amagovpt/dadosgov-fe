@@ -13,12 +13,23 @@ import {
   formatPostDate,
   parseArticlesSort,
 } from "@/utils/articlesListing";
+import { getNewsPage } from "@/service/queries/news";
+import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 
-export const metadata: Metadata = {
-  title: "Últimas novidades - dados.gov.pt",
-  description:
-    "Acompanhe as últimas novidades, eventos e publicações sobre dados abertos em Portugal.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  const { hero } = await getNewsPage(locale);
+
+  return {
+    title: `${hero.title} - dados.gov.pt`,
+    description: hero.subtitle,
+  };
+}
 
 export default async function ArticleListPage({
   params,
@@ -29,6 +40,7 @@ export default async function ArticleListPage({
 }) {
   const { locale } = await params;
   const { t } = await initTranslations({ locale, namespaces: ["common"] });
+  const { hero, searchBar } = await getNewsPage("pt");
   const { page: pageParam, sort: sortParam, q } = await searchParams;
   const currentPage = Math.max(1, Number(pageParam) || 1);
   const sort = parseArticlesSort(sortParam);
@@ -44,16 +56,22 @@ export default async function ArticleListPage({
   return (
     <main className="flex w-full flex-col items-center justify-center bg-primary-50">
       <HeroGeneral
-        title="Últimas novidades"
+        title={hero.title}
         backgroundImageUrl="/Banner/hero-bg.png"
         breadcrumbItems={[
           { label: t("home"), url: "/" },
           { label: t("news"), url: "/noticias" },
         ]}
       >
-        <ArticlesSearchBar initialQuery={query ?? ""} />
+        <ArticlesSearchBar
+          initialQuery={query ?? ""}
+          label={searchBar.label}
+          placeholder={searchBar.placeholder}
+          searchActionAltText={searchBar.searchActionAltText}
+          voiceActionAltText={searchBar.voiceActionAltText}
+        />
         <div className="mt-8 text-s-regular text-neutral-200">
-          Exemplos: &quot;webinar&quot;, &quot;estudos&quot;, &quot;eventos&quot;
+          {parseHtmlToParagraphs(hero.description)}
         </div>
       </HeroGeneral>
       <div className="container flex flex-col items-center justify-center gap-32 py-32">

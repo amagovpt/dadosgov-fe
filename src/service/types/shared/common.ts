@@ -7,6 +7,7 @@ export interface Image {
 
 export interface Hero {
   title: string;
+  subtitle: string;
   description: string;
   image: Image[];
   updatedAt: string;
@@ -31,4 +32,11 @@ export interface FileDocument {
   fileSize: number
   fileType: string
   metadataText: string
+}
+
+export interface SearchBar{
+  label: string;
+  placeholder: string;
+  searchActionAltText: string;
+  voiceActionAltText: string;
 }
