@@ -546,8 +546,7 @@ export default function PublicProfileClient() {
               setCurrentPage,
               setItemsPerPage,
               {
-                currentPageIsZeroBased: true,
-                onPageChange: (page) => handlePageChange(page),
+                onPageChange: (page) => handlePageChange(page + 1),
                 onPageSizeChange: (size) => handleItemsPerPageChange(String(size)),
               }
             )}
