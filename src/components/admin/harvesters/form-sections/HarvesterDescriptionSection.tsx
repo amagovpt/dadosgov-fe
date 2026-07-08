@@ -68,7 +68,7 @@ export default function HarvesterDescriptionSection({
         />
 
         <InputText
-          label="URL *"
+          label={`${t("detail.fields.url")} *`}
           placeholder={resolvedUrlPlaceholder}
           id="harvester-url"
           value={harvesterUrl}

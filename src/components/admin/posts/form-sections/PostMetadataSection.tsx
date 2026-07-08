@@ -146,7 +146,7 @@ export default function PostMetadataSection({
             )}
             {contentTypeOptions.includes("blocks") && (
               <RadioButton
-                label="Blocos"
+                label={t("admin-posts:metadataForm.blocks")}
                 id="content-blocks"
                 name="content-type"
                 checked={contentType === "blocks"}

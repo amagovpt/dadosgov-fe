@@ -100,7 +100,7 @@ export default function ReusesEditMetadataDetailsSection({
           errorFeedbackText={t("form.fieldRequired")}
         />
         <IsolatedInput
-          label="URL *"
+          label={t("form.fieldLabels.url") + " *"}
           placeholder={t("form.linkPlaceholder")}
           id="edit-url"
           defaultValue={url}

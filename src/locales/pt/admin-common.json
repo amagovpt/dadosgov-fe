@@ -64,6 +64,13 @@
       "extensionsInstructions": "Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG.",
       "maxSizeExceeded": "O ficheiro excede o tamanho máximo de 4 MB.",
       "forbiddenExtension": "Formato de ficheiro não permitido."
+    },
+    "keywords": {
+      "label": "Palavras-chave",
+      "placeholder": "Pesquise ou insira palavras-chave...",
+      "searchPlaceholder": "Escreva para pesquisar ou criar...",
+      "noResults": "Nenhum resultado encontrado",
+      "remove": "Remover {{keyword}}"
     }
   },
   "status": {
