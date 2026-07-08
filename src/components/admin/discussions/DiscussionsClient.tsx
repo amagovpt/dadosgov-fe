@@ -20,24 +20,37 @@ export default function DiscussionsClient() {
   });
 
   useEffect(() => {
+    let frameId: number | null = null;
+    let isCancelled = false;
+
     if (!activeOrg) {
-      setIsLoading(false);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setIsLoading(false);
+      });
+      return () => {
+        isCancelled = true;
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
     const orgId = activeOrg.id;
 
     async function loadDiscussions() {
       try {
         const { data } = await fetchOrgDiscussions(orgId);
-        if (data) setDiscussions(data);
+        if (!isCancelled && data) setDiscussions(data);
       } catch (error) {
         console.error("Error loading discussions:", error);
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) setIsLoading(false);
       }
     }
 
     void loadDiscussions();
+
+    return () => {
+      isCancelled = true;
+      if (frameId !== null) cancelAnimationFrame(frameId);
+    };
   }, [activeOrg]);
 
   const columns = useMemo(() => createDiscussionColumns(), []);
@@ -53,9 +66,9 @@ export default function DiscussionsClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: activeOrg?.name || "Organização", url: "#" },
-        { label: "Discussões", url: "/pages/admin/org/discussions" },
+        { label: "Discussões", url: "/admin/org/discussions" },
       ]}
       title="Discussões"
       isLoading={false}

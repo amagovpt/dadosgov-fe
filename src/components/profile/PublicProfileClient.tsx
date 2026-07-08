@@ -29,6 +29,8 @@ import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
 import AppIcon from "../Primitives/AppIcon";
+import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
 export default function PublicProfileClient() {
@@ -272,7 +274,7 @@ export default function PublicProfileClient() {
                 hasIcon={true}
                 leadingIcon="agora-line-edit"
                 leadingIconHover="agora-solid-edit"
-                onClick={() => router.push("/pages/admin/me/profile")}
+                onClick={() => router.push("/admin/me/profile")}
               >
                 Editar o meu perfil
               </Button>
@@ -297,12 +299,12 @@ export default function PublicProfileClient() {
             {displayUser.organizations.length === 1 ? "Organização" : "Organizações"}
           </h2>
 
-          <div className="grid grid-cols-2 agora-card-links-datasets-px0 profile-org-cards gap-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
             {displayUser.organizations.map((org) => (
               <div key={org.id} className="h-full">
                 <CardLinks
                   onClick={() =>
-                    (window.location.href = `/pages/organizations/${org.slug}`)
+                    (window.location.href = `/organizations/${org.slug}`)
                   }
                   className="cursor-pointer text-neutral-900"
                   variant="transparent"
@@ -396,7 +398,7 @@ export default function PublicProfileClient() {
                     },
                   ]}
                   mainLink={
-                    <Link href={`/pages/organizations/${org.slug}`}>
+                    <Link href={`/organizations/${org.slug}`}>
                       <span className="underline">{org.name}</span>
                     </Link>
                   }
@@ -544,8 +546,7 @@ export default function PublicProfileClient() {
               setCurrentPage,
               setItemsPerPage,
               {
-                currentPageIsZeroBased: true,
-                onPageChange: (page) => handlePageChange(page),
+                onPageChange: (page) => handlePageChange(page + 1),
                 onPageSizeChange: (size) => handleItemsPerPageChange(String(size)),
               }
             )}
@@ -595,7 +596,7 @@ export default function PublicProfileClient() {
                     {formatShortDate(dataset.last_modified || dataset.created_at)}
                   </TableCell>
                   <TableCell headerLabel="">
-                    <a href={`/pages/datasets/${dataset.slug}`}>
+                    <a href={`/datasets/${dataset.slug}`}>
                       <AppIcon name="agora-line-eye" />
                     </a>
                   </TableCell>
@@ -627,7 +628,7 @@ export default function PublicProfileClient() {
             {reuses.map((reuse) => (
               <div key={reuse.id} className="h-full">
                 <CardLinks
-                  onClick={() => (window.location.href = `/pages/reuses/${reuse.slug}`)}
+                  onClick={() => (window.location.href = `/reuses/${reuse.slug}`)}
                   className="cursor-pointer text-neutral-900"
                   variant="transparent"
                   image={{
@@ -677,7 +678,7 @@ export default function PublicProfileClient() {
                     },
                   ]}
                   mainLink={
-                    <Link href={`/pages/reuses/${reuse.slug}`}>
+                    <Link href={`/reuses/${reuse.slug}`}>
                       <span className="underline">{reuse.title}</span>
                     </Link>
                   }

@@ -5,7 +5,7 @@ import apolloClient from "@/service/utils/apollo-client";
 
 export async function getRoadmapPage(locale: string = "pt"): Promise<RoadmapPageData> {
   const query = gql(/* GraphQL */ `
-    query MyQuery {
+    query GetRoadmapPage {
         findRoadmapPageSingleton {
             data {
                 hero {

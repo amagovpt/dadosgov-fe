@@ -103,9 +103,15 @@ function PublicAdminCards({
 
 // ----------------------------------------------------------------------------------------------------------------
 
-export default function PublicAdminStructure({ className, title, parts }: PublicAdminStructureI) {
+export default function PublicAdminStructure({
+  className,
+  id,
+  title,
+  parts,
+}: PublicAdminStructureI) {
   return (
     <Section
+      id={id}
       className={twMerge(
         "flex flex-col items-center justify-center gap-64 bg-white py-64",
         className

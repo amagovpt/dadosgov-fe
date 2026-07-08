@@ -4,7 +4,6 @@ import { OtherSection } from "@/service/types/datastories/datastory";
 import Section from "../../Section";
 import { InfoBlock } from "../../InfoBlock";
 import { CardAction } from "@ama-pt/agora-design-system";
-import { useRouter } from "next/navigation";
 
 export type OtherResourcesI = OtherSection;
 
@@ -13,10 +12,8 @@ type ResourceI = OtherResourcesI["resources"][number];
 // ----------------------------------------------------------------------------------------------------------------
 
 function Resource({ icon, title, subtitle, anchor }: ResourceI) {
-  const routerNav = useRouter();
-
   const handleClick = () => {
-    routerNav.push(anchor.href);
+    window.open(anchor.href, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -43,9 +40,9 @@ function Resource({ icon, title, subtitle, anchor }: ResourceI) {
 
 // ----------------------------------------------------------------------------------------------------------------
 
-export default function OtherResources({ title, resources }: OtherResourcesI) {
+export default function OtherResources({ id, title, resources }: OtherResourcesI) {
   return (
-    <Section className="flex w-full justify-center py-64 bg-primary-100">
+    <Section id={id} className="flex w-full justify-center bg-primary-100 py-64">
       <InfoBlock.Root className="flex-col gap-32">
         <InfoBlock.Header className="w-full gap-16 lg:w-1/2">
           <InfoBlock.Title

@@ -88,15 +88,40 @@ export default function SystemLogsClient() {
   }, []);
 
   useEffect(() => {
-    loadFiles(false);
+    let isCancelled = false;
+
+    const loadInitialFiles = async () => {
+      if (isCancelled) return;
+      await loadFiles(false);
+    };
+
+    void loadInitialFiles();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [loadFiles]);
 
   useEffect(() => {
-    if (selected) {
-      loadContent(selected);
-    } else {
-      setContent(null);
-    }
+    let isCancelled = false;
+
+    const loadSelectedContent = async () => {
+      if (!selected) {
+        if (!isCancelled) {
+          setContent(null);
+        }
+        return;
+      }
+
+      if (isCancelled) return;
+      await loadContent(selected);
+    };
+
+    void loadSelectedContent();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [selected, loadContent]);
 
   useEffect(() => {
@@ -140,9 +165,9 @@ export default function SystemLogsClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Logs", url: "/pages/admin/system/logs" },
+        { label: "Logs", url: "/admin/system/logs" },
       ]}
       title="Logs"
       headerAction={

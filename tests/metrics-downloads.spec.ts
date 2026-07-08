@@ -139,7 +139,7 @@ with app.app_context():
   });
 
   test("5. Frontend displays updated download count", async ({ page }) => {
-    await page.goto(`${FRONTEND_URL}/pages/datasets/${DATASET_SLUG}`, {
+    await page.goto(`${FRONTEND_URL}/datasets/${DATASET_SLUG}`, {
       waitUntil: "networkidle",
     });
 

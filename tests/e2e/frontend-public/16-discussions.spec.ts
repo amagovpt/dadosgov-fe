@@ -1,11 +1,11 @@
 import { test, expect, type Page } from "playwright/test";
 
-const DATASETS_URL = "/pages/datasets";
+const DATASETS_URL = "/datasets";
 
 async function getFirstDatasetHref(page: Page): Promise<string> {
   await page.goto(DATASETS_URL);
   await page.waitForLoadState("networkidle");
-  const firstLink = page.locator("a[href^='/pages/datasets/']").first();
+  const firstLink = page.locator("a[href^='/datasets/']").first();
   await expect(firstLink).toBeVisible({ timeout: 15000 });
   const href = await firstLink.getAttribute("href");
   if (!href) throw new Error("No dataset link found on listing");
@@ -16,7 +16,7 @@ async function gotoFirstDatasetDiscussions(page: Page) {
   await page.goto(DATASETS_URL);
   await page.waitForLoadState("networkidle");
 
-  const firstLink = page.locator("a[href^='/pages/datasets/']").first();
+  const firstLink = page.locator("a[href^='/datasets/']").first();
   await expect(firstLink).toBeVisible({ timeout: 15000 });
   const href = await firstLink.getAttribute("href");
   await page.goto(href!);
@@ -84,10 +84,10 @@ test.describe("Discussions on Dataset Detail", () => {
     }
 
     await newDiscussionBtn.first().click();
-    // Anonymous flow either redirects to /pages/login or surfaces a login modal.
+    // Anonymous flow either redirects to /login or surfaces a login modal.
     await page.waitForTimeout(1500);
     const url = page.url();
-    const onLogin = url.includes("/pages/login");
+    const onLogin = url.includes("/login");
     const loginInputVisible = await page
       .locator("#login-email")
       .first()

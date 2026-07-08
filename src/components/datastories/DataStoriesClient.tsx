@@ -7,7 +7,7 @@ import { CardLinks, Button, Icon, CardNoResults } from "@ama-pt/agora-design-sys
 import { Pagination } from "@/components/Pagination";
 import HeroGeneral from "@/components/HeroGeneral";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { Datastories } from "@/service/types/datastories/datastories";
+import { Datastories, DataStoriesPage } from "@/service/types/datastories/datastories";
 import { DataStoriesFilterState } from "@/service/types/datastories/filters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getAssets } from "@/utils/getAssets";
@@ -16,16 +16,19 @@ import { DataStoriesFilters } from "@/components/datastories/DataStoriesFilters"
 import { DATA_STORIES_PAGE_SIZE } from "@/utils/dataStoriesListingQuery";
 import { useDataStoriesListing } from "@/hooks/useDataStoriesListing";
 import { twJoin } from "tailwind-merge";
+import { useTranslation } from "react-i18next";
 
 interface DataStoriesClientProps {
   currentPage: number;
   initialFilters?: { q?: string; sort?: string };
+  pageContent: DataStoriesPage;
   datastories: Datastories;
 }
 
 export default function DataStoriesClient({
   currentPage,
   initialFilters,
+  pageContent,
   datastories,
 }: DataStoriesClientProps) {
   const router = useRouter();
@@ -51,31 +54,28 @@ export default function DataStoriesClient({
     stories,
     activeFilters,
   });
+  const { t } = useTranslation("common");
 
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        title="Data Stories"
+        title={pageContent.hero.title}
         breadcrumbItems={[
-          { label: "Home", url: "/" },
-          { label: "Data Stories", url: "/pages/datastories" },
+          { label: t("home"), url: "/" },
+          { label: t("datastories"), url: "/datastories" },
         ]}
-        subtitle={
-          <p className="max-w-[592px] text-primary-100">
-            Explore as nossas data stories, narrativas visuais e interativas sobre a realidade
-            nacional, criadas a partir de dados abertos disponíveis neste portal
-          </p>
-        }
+        subtitle={formatHtmlParagraphs(pageContent.hero.description) as string[]}
       />
 
       {/* Search Filter */}
       <SearchFilter
         id="datastories-search"
-        placeholder="Pesquisar data stories, temas..."
+        label={pageContent.search.label}
+        placeholder={pageContent.search.placeholder}
         value={searchQuery}
         onChange={setSearchQuery}
         onSearch={handleSearch}
-        examplesText='Exemplos: "serviços públicos", "turismo", "territórios"'
+        examplesText={pageContent.search.hint}
       />
       {/* Main Content */}
       <div className="container flex flex-col items-center justify-center gap-24 py-32">
@@ -97,10 +97,10 @@ export default function DataStoriesClient({
                   })}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
-              {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
+              {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total.toLocaleString("pt-PT")} Resultados
+              {total.toLocaleString("pt-PT")} {t("results")}
             </span>
           </div>
         </div>
@@ -132,7 +132,7 @@ export default function DataStoriesClient({
                   return (
                     <div key={story.slug} className="h-full">
                       <CardLinks
-                        onClick={() => router.push(`/pages/datastories/${story.slug}`)}
+                        onClick={() => router.push(`/datastories/${story.slug}`)}
                         className="!h-full cursor-pointer text-neutral-900 [&_.card-links-container]:!h-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse [&_.text-content]:!w-full"
                         variant="transparent"
                         image={{
@@ -149,9 +149,13 @@ export default function DataStoriesClient({
                             {formatHtmlParagraphs(story.description)}
                           </p>
                         }
-                        date={<span className="font-[300]">Publicado há {timeAgo}</span>}
+                        date={
+                          <span className="font-[300]">
+                            {t("publishedTimeAgo", { timeAgo: timeAgo })}
+                          </span>
+                        }
                         mainLink={
-                          <Link href={`/pages/datastories/${story.slug}`}>
+                          <Link href={`/datastories/${story.slug}`}>
                             <span className="underline">{story.title}</span>
                           </Link>
                         }
@@ -163,20 +167,17 @@ export default function DataStoriesClient({
               ) : (
                 <div className="col-span-full">
                   <CardNoResults
-                    icon={<Icon name="agora-line-search" className="h-12 w-12 text-primary-500" />}
-                    title="Não encontrou nenhuma data story?"
-                    subtitle={
-                      <span className="font-bold">
-                        Tente redefinir os filtros para ampliar sua busca.
-                      </span>
+                    icon={
+                      <Icon
+                        name={pageContent.noResults.icon ?? "agora-line-search"}
+                        className="h-12 w-12 text-primary-500"
+                      />
                     }
-                    description="Explore a nossa lista completa de data stories."
+                    title={pageContent.noResults.title}
+                    subtitle={<span className="font-bold">{pageContent.noResults.subtitle}</span>}
+                    description={pageContent.noResults.description}
                     position="center"
                     hasAnchor={true}
-                    valueAnchor="Redefinir filtros"
-                    anchorHref="/pages/datastories"
-                    anchorTrailingIcon="agora-line-arrow-right-circle"
-                    anchorTrailingIconHover="agora-solid-arrow-right-circle"
                   />
                 </div>
               )}

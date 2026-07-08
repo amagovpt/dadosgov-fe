@@ -78,14 +78,14 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
 
   const handleNext = () => {
     if (isLastStep) {
-      router.push(`/pages/learn/mini-courses`);
+      router.push(`/recursos/aprender/minicursos`);
     } else {
-      router.push(`/pages/learn/mini-courses/${slug}/${step + 1}`);
+      router.push(`/recursos/aprender/minicursos/${slug}/${step + 1}`);
     }
   };
 
   const handlePrevious = () => {
-    router.push(`/pages/learn/mini-courses/${slug}/${step - 1}`);
+    router.push(`/recursos/aprender/minicursos/${slug}/${step - 1}`);
   };
 
 
@@ -95,10 +95,10 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
       <div className='container '>
         <Breadcrumb
           items={[
-            { label: 'Home', url: '/' },
-            { label: "Recursos", url: "#" },
-            { label: 'Aprender', url: '/pages/learn/' },
-            { label: 'Minicursos', url: '/pages/learn/mini-courses/' },
+            { label: "Início", url: "/" },
+            { label: "Recursos", url: "/recursos/" },
+            { label: 'Aprender', url: '/recursos/aprender/' },
+            { label: 'Minicursos', url: '/recursos/aprender/minicursos/' },
             { label: title, url: '#' },
           ]}
         />

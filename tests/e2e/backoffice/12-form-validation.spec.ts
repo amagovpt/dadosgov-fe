@@ -12,7 +12,7 @@ test.describe("Backoffice - Form Validation", () => {
   test("FV-01: Dataset wizard step 2 surfaces title input #api-name", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/?step=2");
+    await page.goto("/admin/me/datasets/new/?step=2");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -23,7 +23,7 @@ test.describe("Backoffice - Form Validation", () => {
   test("FV-02: Reuse wizard step 1 surfaces title and URL inputs", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/reuses/new/");
+    await page.goto("/admin/me/reuses/new/");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -36,7 +36,7 @@ test.describe("Backoffice - Form Validation", () => {
   test("FV-03: Harvester wizard step 1 renders step indicator", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/harvesters/new");
+    await page.goto("/admin/harvesters/new");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -47,7 +47,7 @@ test.describe("Backoffice - Form Validation", () => {
   test("FV-04: Organisation wizard step 1 renders step indicator", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/organizations/new");
+    await page.goto("/admin/organizations/new");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -56,7 +56,7 @@ test.describe("Backoffice - Form Validation", () => {
   });
 
   test("FV-05: Profile editor exposes 'Nome' label", async ({ page }) => {
-    await page.goto("/pages/admin/me/profile");
+    await page.goto("/admin/me/profile");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -72,7 +72,7 @@ test.describe("Backoffice - Form Validation", () => {
   test("FV-09: Dataset step 2 frequency dropdown is empty by default (no 'Desconhecida' pre-selected)", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/?step=2");
+    await page.goto("/admin/me/datasets/new/?step=2");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -92,7 +92,7 @@ test.describe("Backoffice - Form Validation", () => {
   test("FV-09: Upload modal rejects file with invalid extension and shows error", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/?step=3");
+    await page.goto("/admin/me/datasets/new/?step=3");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -120,7 +120,7 @@ test.describe("Backoffice - Form Validation", () => {
   test("FV-10: Upload modal accepts file with valid extension and shows no error", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/datasets/new/?step=3");
+    await page.goto("/admin/me/datasets/new/?step=3");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

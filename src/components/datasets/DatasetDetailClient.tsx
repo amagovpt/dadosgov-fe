@@ -75,37 +75,44 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
   const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function loadDataset() {
       try {
         const data = await fetchDataset(slug);
-        setDataset(data);
-        if (user && data) {
-          const following = await isFollowing("datasets", data.id, user.id);
-          setIsFavorite(following);
-        }
+        if (!cancelled) setDataset(data);
       } catch (error) {
         console.error("Error loading dataset:", error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
     loadDataset();
-  }, [slug, user]);
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!user || !dataset) return;
+    let cancelled = false;
+    isFollowing("datasets", dataset.id, user.id)
+      .then((following) => { if (!cancelled) setIsFavorite(following); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user?.id, dataset?.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
     if (!dataset || isTogglingFavorite) return;
     setIsTogglingFavorite(true);
     try {
       if (isFavorite) {
-        const success = await unfollowEntity("datasets", dataset.id);
-        if (success) setIsFavorite(false);
+        await unfollowEntity("datasets", dataset.id);
+        setIsFavorite(false);
       } else {
-        const result = await followEntity("datasets", dataset.id);
-        if (result) setIsFavorite(true);
+        await followEntity("datasets", dataset.id);
+        setIsFavorite(true);
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
@@ -140,9 +147,9 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
       <div className="container flex items-center justify-between py-64">
         <Breadcrumb
           items={[
-            { label: "Home", url: "/" },
-            { label: "Conjuntos de dados", url: "/pages/datasets" },
-            { label: dataset.title, url: `/pages/datasets/${dataset.slug}` },
+            { label: "Início", url: "/" },
+            { label: "Conjuntos de dados", url: "/datasets" },
+            { label: dataset.title, url: `/datasets/${dataset.slug}` },
           ]}
         />
       </div>
@@ -152,8 +159,8 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
         {dataset.private && <Pill variant="warning">Rascunho</Pill>}
         {dataset.archived && <Pill variant="neutral">Arquivado</Pill>}
         <Button
-          variant="primary"
-          appearance={isFavorite ? "solid" : "outline"}
+          variant="neutral"
+          appearance="link"
           hasIcon={true}
           leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
           leadingIconHover="agora-solid-star"
@@ -167,7 +174,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
           (user && dataset.owner?.id === user.id) ||
           (dataset.organization &&
             organizations.some((org) => org.id === dataset.organization?.id))) && (
-          <Link href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
+          <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
             <Button
               variant="primary"
               hasIcon={true}
@@ -228,7 +235,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                 <div className="mb-8 text-m-light text-neutral-900">
                   {dataset.organization ? (
                     <Link
-                      href={`/pages/organizations/${dataset.organization.slug}`}
+                      href={`/organizations/${dataset.organization.slug}`}
                       className="hover:underline"
                     >
                       {dataset.organization.name}
@@ -238,7 +245,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                        profile instead of the broken "Organização Desconhecida"
                        fallback. */
                     <Link
-                      href={`/pages/users/${dataset.owner.slug}`}
+                      href={`/users/${dataset.owner.slug}`}
                       className="hover:underline"
                     >
                       {ownerFullName}
@@ -260,8 +267,9 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     <TextLink
                       href={
                         dataset.license_url ||
-                        `/pages/licenses/${dataset.license}/`
+                        `/licenses/${dataset.license}/`
                       }
+                      target="_blank"
                     >
                       <span className="text-m-semibold">Licença:</span>{" "}
                       {dataset.license_title || dataset.license}
@@ -282,7 +290,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                           </TextLink>
                         )}
                         {cp.contact_form && (
-                          <TextLink href={cp.contact_form} className="block">
+                          <TextLink href={cp.contact_form} target="_blank" className="block">
                             Formulário de contacto
                           </TextLink>
                         )}

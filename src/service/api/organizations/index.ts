@@ -202,7 +202,8 @@ export async function fetchOrgDatasets(
     private?: boolean;
     archived?: boolean;
     deleted?: boolean;
-  }
+  },
+  publicView: boolean = false
 ): Promise<APIResponse<Dataset>> {
   try {
     const params = new URLSearchParams({
@@ -215,9 +216,15 @@ export async function fetchOrgDatasets(
     if (filters?.archived !== undefined) params.set("archived", String(filters.archived));
     if (filters?.deleted !== undefined) params.set("deleted", String(filters.deleted));
 
+    // On the public organization page we deliberately fetch anonymously
+    // (credentials omitted) so the backend applies public visibility rules and
+    // never exposes private/archived datasets to privileged viewers (members,
+    // sysadmins) — matching the public /datasets listing and the org reuses tab.
     const res = await fetch(
       `${API_AUTH_URL}/organizations/${org}/datasets/?${params.toString()}`,
-      { cache: "no-store", credentials: "include" }
+      publicView
+        ? { cache: "no-store", credentials: "omit" }
+        : { cache: "no-store", credentials: "include" }
     );
 
     if (!res.ok) {
@@ -497,7 +504,7 @@ export interface OrganizationsListingResponse {
 
 
 /**
- * Aggregated fetch for the /pages/organizations listing page (LEDG-1836).
+ * Aggregated fetch for the /organizations listing page (LEDG-1836).
  * Replaces 3 + N (one per badge) parallel calls with 1.
  */
 export async function fetchOrganizationsListing(

@@ -14,7 +14,7 @@ export function TabBodyWrapper({
 }: TabBodyWrapperProps) {
   return (
     <TabBody>
-      <div className="relative">
+      <div className="tab-body-bleed relative">
         <div
           className={`absolute inset-y-0 z-0 -mx-4 sm:-mx-8 md:-mx-16 lg:-mx-32 xl:-mx-64 ${bleedClassName}`}
           aria-hidden="true"

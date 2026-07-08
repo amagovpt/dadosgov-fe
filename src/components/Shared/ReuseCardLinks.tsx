@@ -65,7 +65,7 @@ export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLi
   return (
     <div className="h-full">
       <CardLinks
-        onClick={() => router.push(`/pages/reuses/${reuse.slug}`)}
+        onClick={() => router.push(`/reuses/${reuse.slug}`)}
         className="cursor-pointer text-neutral-900"
         variant="transparent"
         image={{
@@ -95,7 +95,7 @@ export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLi
         }
         links={links}
         mainLink={
-          <Link href={`/pages/reuses/${reuse.slug}`}>
+          <Link href={`/reuses/${reuse.slug}`}>
             <span className="underline">{sanitizeUserMarkdown(reuse.title)}</span>
           </Link>
         }

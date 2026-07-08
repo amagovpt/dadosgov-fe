@@ -25,10 +25,10 @@ import { test, expect } from "playwright/test";
 
 const ROUTES = [
   "/",
-  "/pages/datasets",
-  "/pages/organizations",
-  "/pages/reuses",
-  "/pages/login",
+  "/datasets",
+  "/organizations",
+  "/reuses",
+  "/login",
 ];
 
 const EXPECTED_HEADERS: Array<{

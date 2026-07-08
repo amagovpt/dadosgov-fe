@@ -2,6 +2,11 @@ import type { Organization, UserRef } from '@/service/types/identity';
 import type { SchemaRef } from '@/service/types/shared';
 import type { DatasetRef } from '@/service/types/dataset';
 
+export interface CommunityResourcePermissions {
+  edit: boolean;
+  delete: boolean;
+}
+
 export interface CommunityResource {
   id: string;
   title: string;
@@ -21,6 +26,8 @@ export interface CommunityResource {
   archived: boolean;
   deleted: boolean;
   schema: SchemaRef | null;
+  // Backend-computed authorization for the current user (single source of truth).
+  permissions?: CommunityResourcePermissions;
 }
 
 export interface CommunityResourceCreatePayload {

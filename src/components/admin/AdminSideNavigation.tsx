@@ -9,6 +9,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { fetchOrganization } from "@/service/api/organizations";
 import { Organization } from "@/service/types/identity";
+import type {
+  AdminNavLink,
+  AdminSideNavigationData,
+} from "@/service/types/admin-side-navigation";
+import { stripLocale } from "@/utils/stripLocale";
 
 interface NavChild {
   label: string;
@@ -18,230 +23,157 @@ interface NavChild {
 }
 
 interface NavGroup {
-  key: "profile" | "organization" | "system";
+  key: string;
   label: string;
   icon?: string;
   children: NavChild[];
 }
-
-const navGroups: NavGroup[] = [
-  {
-    key: "profile",
-    label: "Meu perfil",
-    icon: "agora-line-user",
-    children: [
-      {
-        label: "Conjunto de dados",
-        href: "/pages/admin/me/datasets",
-      },
-      // API (dataservices) oculta temporariamente — feature incompleta para PRD
-      // {
-      //   label: "API",
-      //   href: "/pages/admin/me/dataservices",
-      // },
-      {
-        label: "Reutilizações",
-        href: "/pages/admin/me/reuses",
-      },
-      {
-        label: "Recursos comunitários",
-        href: "/pages/admin/me/community-resources",
-      },
-      {
-        label: "Perfil",
-        href: "/pages/admin/me/profile",
-      },
-      {
-        label: "Estatísticas",
-        href: "/pages/admin/me/statistics",
-      },
-    ],
-  },
-  {
-    key: "organization",
-    label: "Organização",
-    icon: "agora-line-user-group",
-    children: [],
-  },
-  {
-    key: "system",
-    label: "Sistema",
-    icon: "agora-line-shield",
-    children: [
-      {
-        label: "Conjunto de dados",
-        href: "/pages/admin/system/datasets",
-      },
-      // API (dataservices) oculta temporariamente — feature incompleta para PRD
-      // {
-      //   label: "API",
-      //   href: "/pages/admin/system/dataservices",
-      // },
-      {
-        label: "Reutilizações",
-        href: "/pages/admin/system/reuses",
-      },
-      {
-        label: "Organizações",
-        href: "/pages/admin/system/organizations",
-      },
-      {
-        label: "Utilizadores",
-        href: "/pages/admin/system/users",
-      },
-      {
-        label: "Harvesters",
-        href: "/pages/admin/system/harvesters",
-      },
-      {
-        label: "Recursos comunitários",
-        href: "/pages/admin/system/community-resources",
-      },
-      // Temas oculto temporariamente
-      // {
-      //   label: "Temas",
-      //   href: "/pages/admin/system/topics",
-      // },
-      {
-        label: "Artigos",
-        href: "/pages/admin/system/posts",
-      },
-      {
-        label: "Editorial",
-        href: "/pages/admin/system/editorial",
-      },
-      {
-        label: "Logs",
-        href: "/pages/admin/system/logs",
-      },
-    ],
-  },
-];
 
 function toSentenceCase(str: string): string {
   if (!str) return str;
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
-export function AdminSideNavigation() {
+function toNavChild(link: AdminNavLink, href: string): NavChild {
+  return {
+    label: link.label,
+    href,
+    icon: link.icon ?? undefined,
+    customIcon: link.logo ?? undefined,
+  };
+}
+
+export function AdminSideNavigation({ data }: { data: AdminSideNavigationData }) {
   const pathname = usePathname();
-  const { isAdmin, hasOrganization } = useAuth();
+  // usePathname() is locale-prefixed (`/pt/admin/...`) because prefixDefault is
+  // true; normalize before matching so `/admin`-anchored logic keeps working.
+  const localePath = useMemo(() => stripLocale(pathname), [pathname]);
+  const { isAdmin } = useAuth();
   const { organizations } = useActiveOrganization();
   const [urlOrg, setUrlOrg] = useState<Organization | null>(null);
 
-  // Extract orgId from URL like /pages/admin/org/{orgId}/...
+  // Extract orgId from URL like /admin/org/{orgId}/...
   const urlOrgId = useMemo(() => {
-    const match = pathname?.match(/^\/pages\/admin\/org\/([^/]+)/);
+    const match = localePath.match(/^\/admin\/org\/([^/]+)/);
     return match ? match[1] : null;
-  }, [pathname]);
+  }, [localePath]);
 
   // Fetch org from URL if not already in user's org list
   useEffect(() => {
+    let frameId: number | null = null;
+
     if (!urlOrgId) {
-      setUrlOrg(null);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setUrlOrg(null);
+      });
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
     const alreadyLoaded = organizations.some((o) => o.id === urlOrgId || o.slug === urlOrgId);
     if (alreadyLoaded) {
-      setUrlOrg(null);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setUrlOrg(null);
+      });
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
     fetchOrganization(urlOrgId)
       .then((org) => setUrlOrg(org))
       .catch(() => setUrlOrg(null));
+
+    return () => {
+      if (frameId !== null) cancelAnimationFrame(frameId);
+    };
   }, [urlOrgId, organizations]);
 
-  const orgChildren = (orgBase: string): NavChild[] => [
-    {
-      label: "Conjunto de dados",
-      href: `${orgBase}/datasets`,
-    },
-    // API (dataservices) oculta temporariamente — feature incompleta para PRD
-    // {
-    //   label: "API",
-    //   href: `${orgBase}/dataservices`,
-    // },
-    {
-      label: "Reutilizações",
-      href: `${orgBase}/reuses`,
-    },
-    {
-      label: "Discussões",
-      href: `${orgBase}/discussions`,
-    },
-    {
-      label: "Membros",
-      href: `${orgBase}/members`,
-    },
-    {
-      label: "Harvesters",
-      href: `${orgBase}/harvesters`,
-    },
-    {
-      label: "Recursos comunitários",
-      href: `${orgBase}/community-resources`,
-    },
-    {
-      label: "Perfil",
-      href: `${orgBase}/profile`,
-    },
-    {
-      label: "Estatísticas",
-      href: `${orgBase}/statistics`,
-    },
-  ];
+  // Static groups (profile/system) come from the Squidex singleton
+  const staticGroups = useMemo<NavGroup[]>(
+    () =>
+      (data?.groups ?? [])
+        .filter((group) => group.enabled !== false)
+        .map((group) => ({
+          key: group.key,
+          label: group.label,
+          icon: group.icon ?? undefined,
+          children: (group.children ?? [])
+            .filter((child) => child.enabled !== false)
+            .map((child) => toNavChild(child, child.href)),
+        })),
+    [data]
+  );
+
+  // Template for per-organization items; href holds the path suffix (e.g. "datasets")
+  const orgTemplate = useMemo(
+    () => (data?.orgChildren ?? []).filter((child) => child.enabled !== false),
+    [data]
+  );
 
   const visibleGroups = useMemo(() => {
-    const profileGroups = navGroups.filter((group) => {
+    const buildOrgChildren = (orgBase: string): NavChild[] =>
+      orgTemplate.map((child) => toNavChild(child, `${orgBase}/${child.href.replace(/^\//, "")}`));
+
+    const profileGroups = staticGroups.filter((group) => {
       return group.key !== "organization" && group.key !== "system";
     });
 
-    const orgGroups: NavGroup[] = organizations.map((org) => ({
-      key: "organization" as const,
-      label: org.name,
-      children: orgChildren(`/pages/admin/org/${org.id}`),
-    }));
+    const orgGroups: NavGroup[] =
+      orgTemplate.length > 0
+        ? organizations.map((org) => ({
+            key: "organization",
+            label: org.name,
+            children: buildOrgChildren(`/admin/org/${org.id}`),
+          }))
+        : [];
 
     // Inject the org from the URL if it's not already in the user's org list
-    if (urlOrg && !organizations.some((o) => o.id === urlOrg.id)) {
+    if (orgTemplate.length > 0 && urlOrg && !organizations.some((o) => o.id === urlOrg.id)) {
       orgGroups.push({
-        key: "organization" as const,
+        key: "organization",
         label: urlOrg.name,
-        children: orgChildren(`/pages/admin/org/${urlOrg.id}`),
+        children: buildOrgChildren(`/admin/org/${urlOrg.id}`),
       });
     }
 
-    const systemGroups = isAdmin
-      ? navGroups.filter((group) => group.key === "system")
-      : [];
+    const systemGroups = isAdmin ? staticGroups.filter((group) => group.key === "system") : [];
 
     return [...profileGroups, ...orgGroups, ...systemGroups];
-  }, [isAdmin, hasOrganization, organizations, urlOrg]);
+  }, [staticGroups, orgTemplate, isAdmin, organizations, urlOrg]);
+
+  const homeLink = data?.homeLink;
+  const showHomeLink = Boolean(homeLink?.label) && homeLink?.enabled !== false;
 
   return (
     <nav className="admin-side-nav">
       <Sidebar variant="navigation" darkMode className="admin-sidebar-nav">
         {[
-          <SidebarItem
-            key="home"
-            variant="navigation"
-            darkMode
-            className="admin-sidebar-nav__home-item"
-            item={{
-              children: (
-                <Link href="/" className="admin-sidebar-nav__group-label">
-                  <Icon
-                    name="agora-line-home"
-                    className="admin-sidebar-nav__group-icon"
-                  />
-                  Ir para dados.gov.pt
-                </Link>
-              ),
-            }}
-          />,
+          ...(showHomeLink
+            ? [
+                <SidebarItem
+                  key="home"
+                  variant="navigation"
+                  darkMode
+                  className="admin-sidebar-nav__home-item"
+                  item={{
+                    children: (
+                      <Link href={homeLink.href || "/"} className="admin-sidebar-nav__group-label">
+                        {homeLink.icon && (
+                          <Icon
+                            name={homeLink.icon}
+                            className="admin-sidebar-nav__group-icon"
+                          />
+                        )}
+                        {homeLink.label}
+                      </Link>
+                    ),
+                  }}
+                />,
+              ]
+            : []),
           ...visibleGroups.map((group) => {
           const hasActiveChild = group.children.some(
-            (child) => pathname?.startsWith(child.href),
+            (child) => localePath.startsWith(child.href),
           );
 
           return (
@@ -271,7 +203,7 @@ export function AdminSideNavigation() {
             >
               <ul className="admin-sidebar-nav__children">
                 {group.children.map((child) => {
-                  const isActive = pathname?.startsWith(child.href);
+                  const isActive = localePath.startsWith(child.href);
                   return (
                     <li key={child.href}>
                       <Link

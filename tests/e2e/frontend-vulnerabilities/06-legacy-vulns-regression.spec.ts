@@ -25,14 +25,14 @@ import { test, expect, type APIResponse } from "playwright/test";
 
 const PUBLIC_ROUTES = [
   "/",
-  "/pages/datasets",
-  "/pages/organizations",
-  "/pages/reuses",
+  "/datasets",
+  "/organizations",
+  "/reuses",
 ];
 
 const SENSITIVE_AUTHENTICATED_ROUTES = [
-  "/pages/admin/me/datasets",
-  "/pages/admin/me/reuses",
+  "/admin/me/datasets",
+  "/admin/me/reuses",
 ];
 
 // RFC1918 private-network IPs that must never appear in a public response.
@@ -92,7 +92,7 @@ test.describe("Legacy KITS24 vulnerabilities — regression suite", () => {
       await page.addInitScript(`window.__geozoneXss = 0;`);
 
       const payload = "<script>window.__geozoneXss=1;alert('vuln-1596')</script>";
-      await page.goto(`/pages/datasets?geozone=${encodeURIComponent(payload)}`);
+      await page.goto(`/datasets?geozone=${encodeURIComponent(payload)}`);
       await page.waitForLoadState("networkidle");
 
       const flag = await page.evaluate(
@@ -162,7 +162,7 @@ test.describe("Legacy KITS24 vulnerabilities — regression suite", () => {
       const slug = json?.data?.[0]?.slug;
       test.skip(!slug, "no public datasets available to probe");
 
-      const res = await request.get(`/pages/datasets/${slug}`);
+      const res = await request.get(`/datasets/${slug}`);
       const xfo = (res.headers()["x-frame-options"] || "").toLowerCase();
       const csp = (res.headers()["content-security-policy"] || "").toLowerCase();
 

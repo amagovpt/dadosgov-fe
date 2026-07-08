@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
@@ -17,31 +17,40 @@ export default function SystemTopicsClient() {
     initialFilters: {},
   });
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetchTopics(currentPage, pageSize);
-      setTopics(response.data || []);
-      setTotalItems(response.total || 0);
-    } catch (error) {
-      console.error("Error loading topics:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, pageSize]);
-
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    let isActive = true;
+
+    const run = async () => {
+      try {
+        const response = await fetchTopics(currentPage, pageSize);
+        if (!isActive) return;
+        setTopics(response.data || []);
+        setTotalItems(response.total || 0);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Error loading topics:", error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentPage, pageSize]);
 
   const columns = useMemo(() => createTopicColumns(), []);
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Temas", url: "/pages/admin/system/topics" },
+        { label: "Temas", url: "/admin/system/topics" },
       ]}
       title="Temas"
       isLoading={isLoading}

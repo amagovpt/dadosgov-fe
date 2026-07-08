@@ -12,7 +12,7 @@ test.describe("Backoffice - Topics CRUD", () => {
   test("TP-01: System topics listing renders with Temas heading", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/topics");
+    await page.goto("/admin/system/topics");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -23,7 +23,7 @@ test.describe("Backoffice - Topics CRUD", () => {
   test("TP-02: Empty-state copy or topic rows are rendered", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/topics");
+    await page.goto("/admin/system/topics");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

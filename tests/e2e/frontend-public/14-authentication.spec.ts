@@ -1,7 +1,7 @@
 import { test, expect, type Locator, type Page } from "playwright/test";
 import { ADMIN_CREDS } from "../../helpers/auth";
 
-const LOGIN_URL = "/pages/login";
+const LOGIN_URL = "/login";
 
 async function getTabByText(page: Page, label: RegExp): Promise<Locator> {
   // Agora <Tabs> renders TabHeader as a clickable element; matching by text covers both
@@ -21,11 +21,11 @@ test.describe("Authentication Page", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    const authLink = page.locator('header a[href="/pages/login"]').first();
+    const authLink = page.locator('header a[href="/login"]').first();
     await expect(authLink).toBeVisible({ timeout: 10000 });
     await authLink.click();
     await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
-    expect(page.url()).toContain("/pages/login");
+    expect(page.url()).toContain("/login");
   });
 
   test("AU-02: Three auth tabs visible: CMD, eIDAS, Email/Password", async ({
@@ -120,39 +120,39 @@ test.describe("Authentication Page", () => {
     await expect(submitButton).toBeDisabled();
   });
 
-  test("AU-10: Terms link to /pages/faqs/terms is reachable from CMD tab", async ({
+  test("AU-10: Terms link to /faqs/terms is reachable from CMD tab", async ({
     page,
   }) => {
     const termsLink = page
-      .locator('a[href="/pages/faqs/terms"]')
+      .locator('a[href="/faqs/terms"]')
       .first();
     await expect(termsLink).toBeVisible({ timeout: 10000 });
   });
 
   test("AU-11: Register page redirects to login", async ({ page }) => {
-    await page.goto("/pages/register");
+    await page.goto("/register");
     await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
-    expect(page.url()).toContain("/pages/login");
+    expect(page.url()).toContain("/login");
   });
 
   test.skip("AU-12: Logout (needs auth)", async () => {
     // Skipped: requires authenticated session
   });
 
-  test("AU-13: /pages/loginregister redirects to /pages/login", async ({
+  test("AU-13: /loginregister redirects to /login", async ({
     page,
   }) => {
-    await page.goto("/pages/loginregister");
+    await page.goto("/loginregister");
     await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
-    expect(page.url()).toContain("/pages/login");
+    expect(page.url()).toContain("/login");
   });
 
-  test("AU-14: /pages/migrate-account without pending migration redirects to login", async ({
+  test("AU-14: /migrate-account without pending migration redirects to login", async ({
     page,
   }) => {
-    await page.goto("/pages/migrate-account");
+    await page.goto("/migrate-account");
     await page.waitForLoadState("networkidle");
-    // MigrateAccountClient routes to /pages/login when no migration is pending.
+    // MigrateAccountClient routes to /login when no migration is pending.
     await page.waitForURL(/\/pages\/(login|migrate-account)/, {
       timeout: 10000,
     });
@@ -164,25 +164,25 @@ test.describe("Authentication - Post-login redirect", () => {
   test("AU-15: Header 'Autenticar' link includes ?next= with the current page path", async ({
     page,
   }) => {
-    await page.goto("/pages/datasets");
+    await page.goto("/datasets");
     await page.waitForLoadState("networkidle");
 
     const authLink = page
-      .locator('header a[href*="/pages/login?next="]')
+      .locator('header a[href*="/login?next="]')
       .first();
     await expect(authLink).toBeVisible({ timeout: 10000 });
 
     const href = await authLink.getAttribute("href");
     expect(href).toContain("next=");
-    expect(href).toContain(encodeURIComponent("/pages/datasets"));
+    expect(href).toContain(encodeURIComponent("/datasets"));
   });
 
   // Requires seeded e2e-admin user: run `udata user create --admin` with e2e-admin@dados.gov.pt
   test("AU-16: After email/password login, user is redirected back to the page they came from", async ({
     page,
   }) => {
-    const targetPage = "/pages/datasets";
-    await page.goto(`/pages/login?next=${encodeURIComponent(targetPage)}`);
+    const targetPage = "/datasets";
+    await page.goto(`/login?next=${encodeURIComponent(targetPage)}`);
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CardNoResults, DropdownOption, DropdownSection, Icon, InputSelect } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
@@ -37,28 +37,37 @@ export default function SystemUsersClient() {
 
   const columns = useMemo(() => createUserColumns(), []);
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetchUsers(
-        currentPage,
-        searchQuery.trim() || undefined,
-        sortParam,
-        pageSize,
-        filters.profileFilter || undefined
-      );
-      setUsers(response.data || []);
-      setTotalItems(response.total || 0);
-    } catch (error) {
-      console.error("Error loading users:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentPage, pageSize, searchQuery, sortParam, filters.profileFilter]);
-
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    let isActive = true;
+
+    const run = async () => {
+      try {
+        const response = await fetchUsers(
+          currentPage,
+          searchQuery.trim() || undefined,
+          sortParam,
+          pageSize,
+          filters.profileFilter || undefined
+        );
+        if (!isActive) return;
+        setUsers(response.data || []);
+        setTotalItems(response.total || 0);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Error loading users:", error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentPage, pageSize, searchQuery, sortParam, filters.profileFilter]);
 
   const handleSort = (field: UserSortField) => (newOrder: SortOrder) => {
     if (field === "name") {
@@ -83,9 +92,9 @@ export default function SystemUsersClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Utilizadores", url: "/pages/admin/system/users" },
+        { label: "Utilizadores", url: "/admin/system/users" },
       ]}
       title="Utilizadores"
       isLoading={isLoading}

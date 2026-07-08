@@ -98,7 +98,7 @@ test.describe("Homepage", () => {
       .first();
     await expect(heading).toBeVisible({ timeout: 10000 });
 
-    const datasetLinks = page.locator("a[href^='/pages/datasets/']");
+    const datasetLinks = page.locator("a[href^='/datasets/']");
     await expect(datasetLinks.first()).toBeVisible({ timeout: 15000 });
 
     const count = await datasetLinks.count();
@@ -108,7 +108,7 @@ test.describe("Homepage", () => {
   test("HP-08: Click featured dataset card navigates to dataset detail", async ({
     page,
   }) => {
-    const datasetLink = page.locator("a[href^='/pages/datasets/']").first();
+    const datasetLink = page.locator("a[href^='/datasets/']").first();
     await expect(datasetLink).toBeVisible({ timeout: 15000 });
 
     await datasetLink.click();
@@ -152,7 +152,7 @@ test.describe("Homepage", () => {
     const storiesGrid = page.locator(".storytellings");
     await expect(storiesGrid).toBeVisible({ timeout: 10000 });
 
-    const cards = storiesGrid.locator("a[href*='/pages/datastories/']");
+    const cards = storiesGrid.locator("a[href*='/datastories/']");
     await expect(cards.first()).toBeVisible({ timeout: 10000 });
   });
 
@@ -162,7 +162,7 @@ test.describe("Homepage", () => {
     const newsHeading = page.getByRole("heading", { name: /Últimas novidades/i });
     await expect(newsHeading).toBeVisible({ timeout: 10000 });
 
-    const postLinks = page.locator("a[href^='/pages/posts/']");
+    const postLinks = page.locator("a[href^='/posts/']");
     await expect(postLinks.first()).toBeVisible({ timeout: 15000 });
 
     const count = await postLinks.count();
@@ -174,7 +174,7 @@ test.describe("Homepage", () => {
     await expect(newsHeading).toBeVisible({ timeout: 10000 });
 
     const postLink = page
-      .locator("a[href^='/pages/posts/']")
+      .locator("a[href^='/posts/']")
       .filter({ hasNotText: "" })
       .first();
     await expect(postLink).toBeVisible({ timeout: 15000 });
@@ -188,7 +188,7 @@ test.describe("Homepage", () => {
   test("HP-14: Featured dataset cards render an img element with a non-empty src", async ({
     page,
   }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     const count = await cards.count();
@@ -207,13 +207,13 @@ test.describe("Homepage", () => {
   test("HP-15: Org logos from the API reach the homepage dataset card img src (no server-side stripping)", async ({
     page,
   }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     // Collect every dataset card img src from the DOM
     const srcs: string[] = await page.evaluate(() =>
       Array.from(
-        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        document.querySelectorAll("a[href^='/datasets/'] img")
       ).map((img) => (img as HTMLImageElement).getAttribute("src") ?? "")
     );
 
@@ -229,13 +229,13 @@ test.describe("Homepage", () => {
   test("HP-16: onError fallback replaces a failed org logo with the placeholder on homepage cards", async ({
     page,
   }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     // Find card indices whose img currently shows a real logo (not the placeholder).
     const indicesWithLogo: number[] = await page.evaluate((placeholder) => {
       const imgs = Array.from(
-        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        document.querySelectorAll("a[href^='/datasets/'] img")
       );
       return imgs
         .map((img, i) => ({ i, src: (img as HTMLImageElement).getAttribute("src") ?? "" }))
@@ -258,7 +258,7 @@ test.describe("Homepage", () => {
     // triggers the setImgSrc(PLACEHOLDER) state update in CardMetrics.
     await page.evaluate((placeholder) => {
       const imgs = Array.from(
-        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        document.querySelectorAll("a[href^='/datasets/'] img")
       ) as HTMLImageElement[];
       imgs.forEach((img) => {
         const src = img.getAttribute("src") ?? "";
@@ -272,7 +272,7 @@ test.describe("Homepage", () => {
     await page.waitForFunction(
       ({ indices, placeholder }: { indices: number[]; placeholder: string }) => {
         const imgs = Array.from(
-          document.querySelectorAll("a[href^='/pages/datasets/'] img")
+          document.querySelectorAll("a[href^='/datasets/'] img")
         ) as HTMLImageElement[];
         return indices.every((i) =>
           (imgs[i]?.getAttribute("src") ?? "").includes("organization.png")
@@ -284,7 +284,7 @@ test.describe("Homepage", () => {
 
     // Verify the placeholder is now shown for each formerly-logo card.
     for (const idx of indicesWithLogo.slice(0, 3)) {
-      const img = page.locator("a[href^='/pages/datasets/'] img").nth(idx);
+      const img = page.locator("a[href^='/datasets/'] img").nth(idx);
       const src = await img.getAttribute("src");
       expect(src).toContain("organization.png");
     }

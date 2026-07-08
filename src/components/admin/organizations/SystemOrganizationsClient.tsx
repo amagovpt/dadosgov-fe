@@ -118,15 +118,40 @@ export default function SystemOrganizationsClient() {
   );
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    let isActive = true;
+
+    const run = async () => {
+      try {
+        const response = await fetchOrganizations(currentPage, pageSize, {
+          q: searchQuery.trim() || undefined,
+          sort: sortParam,
+        });
+        if (!isActive) return;
+        setOrganizations(response.data || []);
+        setTotalItems(response.total || 0);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Error loading organizations:", error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentPage, pageSize, searchQuery, sortParam]);
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: "Sistema", url: "#" },
-        { label: "Organizações", url: "/pages/admin/system/organizations" },
+        { label: "Organizações", url: "/admin/system/organizations" },
       ]}
       title="Organizações"
       isLoading={isLoading}

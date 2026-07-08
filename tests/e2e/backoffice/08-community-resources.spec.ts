@@ -12,7 +12,7 @@ test.describe("Backoffice - Community Resources", () => {
   test("CR-01: Personal community resources listing renders with empty state", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/me/community-resources");
+    await page.goto("/admin/me/community-resources");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -29,7 +29,7 @@ test.describe("Backoffice - Community Resources", () => {
   test("CR-02: System community resources listing renders for admin", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/community-resources");
+    await page.goto("/admin/system/community-resources");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 

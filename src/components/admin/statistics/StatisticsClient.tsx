@@ -28,18 +28,20 @@ export default function StatisticsClient() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [datasetsTotal, setDatasetsTotal] = useState(0);
   const [datasetsPage, setDatasetsPage] = useState(1);
+  const [datasetsPageSize, setDatasetsPageSize] = useState(PAGE_SIZE);
   const [isDatasetsLoading, setIsDatasetsLoading] = useState(true);
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [reusesTotal, setReusesTotal] = useState(0);
   const [reusesPage, setReusesPage] = useState(1);
+  const [reusesPageSize, setReusesPageSize] = useState(PAGE_SIZE);
   const [isReusesLoading, setIsReusesLoading] = useState(true);
 
   useEffect(() => {
     async function loadDatasets() {
       setIsDatasetsLoading(true);
       try {
-        const res = await fetchMyDatasets(datasetsPage, PAGE_SIZE);
+        const res = await fetchMyDatasets(datasetsPage, datasetsPageSize);
         setDatasets(res.data);
         setDatasetsTotal(res.total);
       } catch (error) {
@@ -49,13 +51,13 @@ export default function StatisticsClient() {
       }
     }
     loadDatasets();
-  }, [datasetsPage]);
+  }, [datasetsPage, datasetsPageSize]);
 
   useEffect(() => {
     async function loadReuses() {
       setIsReusesLoading(true);
       try {
-        const res = await fetchMyReuses(reusesPage, PAGE_SIZE);
+        const res = await fetchMyReuses(reusesPage, reusesPageSize);
         setReuses(res.data);
         setReusesTotal(res.total);
       } catch (error) {
@@ -65,14 +67,14 @@ export default function StatisticsClient() {
       }
     }
     loadReuses();
-  }, [reusesPage]);
+  }, [reusesPage, reusesPageSize]);
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
+        { label: "Administração", url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Estatísticas", url: "/pages/admin/me/statistics" },
+        { label: "Estatísticas", url: "/admin/me/statistics" },
       ]}
       title="Estatísticas"
       headerAction={null}
@@ -118,7 +120,6 @@ export default function StatisticsClient() {
                 <CardNoResults
                   position="center"
                   icon={
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img src="/Icons/reduce.svg" alt="" className="h-40 w-40" />
                   }
                   title="Sem publicações"
@@ -129,7 +130,7 @@ export default function StatisticsClient() {
                       <Button
                         variant="primary"
                         appearance="outline"
-                        onClick={() => (window.location.href = "/pages/admin/datasets/new")}
+                        onClick={() => (window.location.href = "/admin/datasets/new")}
                       >
                         Publique no portal
                       </Button>
@@ -142,6 +143,8 @@ export default function StatisticsClient() {
                   total={datasetsTotal}
                   page={datasetsPage}
                   onPageChange={setDatasetsPage}
+                  pageSize={datasetsPageSize}
+                  onPageSizeChange={setDatasetsPageSize}
                 />
               )}
             </div>
@@ -160,7 +163,6 @@ export default function StatisticsClient() {
                   <CardNoResults
                     position="center"
                     icon={
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />
                     }
                     title="Sem publicações"
@@ -171,7 +173,7 @@ export default function StatisticsClient() {
                         <Button
                           variant="primary"
                           appearance="outline"
-                          onClick={() => (window.location.href = "/pages/admin/reuses/new")}
+                          onClick={() => (window.location.href = "/admin/reuses/new")}
                         >
                           Publique no portal
                         </Button>
@@ -187,6 +189,8 @@ export default function StatisticsClient() {
                     total={reusesTotal}
                     page={reusesPage}
                     onPageChange={setReusesPage}
+                    pageSize={reusesPageSize}
+                    onPageSizeChange={setReusesPageSize}
                   />
                 </>
               )}

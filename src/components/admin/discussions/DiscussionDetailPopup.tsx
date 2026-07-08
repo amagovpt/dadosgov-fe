@@ -34,8 +34,8 @@ function SubjectCard({ subject }: { subject: Subject }) {
 
   const logo = subject.organization?.logo_thumbnail || subject.organization?.logo || null;
   const href = isDataset
-    ? `/pages/datasets/${(subject as Dataset).slug}`
-    : `/pages/reuses/${(subject as Reuse).slug}`;
+    ? `/datasets/${(subject as Dataset).slug}`
+    : `/reuses/${(subject as Reuse).slug}`;
 
   return (
     <Link

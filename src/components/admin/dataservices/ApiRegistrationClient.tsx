@@ -1,26 +1,39 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import Link from "next/link";
 import {
   Button,
   InputText,
   InputTextArea,
   RadioButton,
-  Icon,
   StatusCard,
   Accordion,
   AccordionGroup,
   InputSelect,
   DropdownSection,
   DropdownOption,
-  CardGeneral,
+  CardLinks,
+  Pill,
+  Tag,
 } from "@ama-pt/agora-design-system";
-import { createDataservice } from "@/service/api/dataservices";
+import { createDataservice, updateDataservice } from "@/service/api/dataservices";
+import { fetchMyDatasets, fetchDataset } from "@/service/api/datasets";
+import { fetchOrgDatasets } from "@/service/api/organizations";
+import { searchDatasets } from "@/service/api/search";
 import type { Dataservice } from "@/service/types/dataservice";
+import type { Dataset } from "@/service/types/dataset";
 import AuxiliarList from "@/components/admin/AuxiliarList";
+import { getDataserviceAuxiliarItems } from "@/components/admin/dataservices/dataservicesAuxiliarItems";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import { useAuth } from "@/context/AuthContext";
 import AppIcon from "@/components/Primitives/AppIcon";
+import { formatDateToTimeAgo } from "@/utils/formatDate";
+import {
+  AUDIENCE_CONDITIONS,
+  AUDIENCE_ROLES,
+  RESTRICTION_REASONS,
+} from "@/utils/dataserviceLabels";
 
 interface ApiRegistrationClientProps {
   currentStep: number;
@@ -42,19 +55,145 @@ export default function ApiRegistrationClient({
   const [machineDocUrl, setMachineDocUrl] = useState("");
   const [technicalDocUrl, setTechnicalDocUrl] = useState("");
   const [rateLimiting, setRateLimiting] = useState("");
+  const [rateLimitingUrl, setRateLimitingUrl] = useState("");
   const [availability, setAvailability] = useState("");
   const [authRequestUrl, setAuthRequestUrl] = useState("");
   const [businessDocUrl, setBusinessDocUrl] = useState("");
+  // Restricted-access details (only sent when accessType === "restricted").
+  // Maps each audience role to its selected condition ("" = not set).
+  const [accessAudiences, setAccessAudiences] = useState<Record<string, string>>({});
+  const [reasonCategory, setReasonCategory] = useState("");
+  const [reasonText, setReasonText] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdDataservice, setCreatedDataservice] = useState<Dataservice | null>(null);
-  const [datasetLinks, setDatasetLinks] = useState([{ url: "" }]);
-  const [datasetLinkErrors, setDatasetLinkErrors] = useState<Record<number, string>>({});
+  // Producer identity: "user" (publish in my own name) or an organization id.
+  // The Agora InputSelect reports the selected value into this ref's `.current`.
+  const producerRef = useRef("user");
+  // Step 2: link internal datasets to the created API. The two input methods
+  // write to independent buckets so neither clobbers the other:
+  // `dropdownDatasets` is owned by the search multi-select (replace semantics),
+  // `linkDatasets` by the "add by URL" field. The persisted/displayed selection
+  // is their deduped union.
+  const [myDatasets, setMyDatasets] = useState<Dataset[]>([]);
+  const [dropdownDatasets, setDropdownDatasets] = useState<Dataset[]>([]);
+  const [linkDatasets, setLinkDatasets] = useState<Dataset[]>([]);
+  const [datasetSearch, setDatasetSearch] = useState("");
+  const [datasetSearchResults, setDatasetSearchResults] = useState<Dataset[]>([]);
+  const [isLinkingDatasets, setIsLinkingDatasets] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  // Step 2: add a portal dataset by pasting its public URL.
+  const [datasetLinkUrl, setDatasetLinkUrl] = useState("");
+  const [datasetLinkError, setDatasetLinkError] = useState<string | null>(null);
+  const [isResolvingLink, setIsResolvingLink] = useState(false);
 
+  // Preload the dataset pool with the user's own datasets and every dataset
+  // from each organization they belong to. The search bar still queries the
+  // whole portal via searchDatasets().
   useEffect(() => {
-    setDatasetLinkErrors({});
-  }, [currentStep]);
+    const dedupe = (items: Dataset[]) =>
+      Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const personal = fetchMyDatasets(1, 100);
+    const orgs = (user?.organizations || []).map((org) => fetchOrgDatasets(org.id, 1, 100));
+    Promise.all([personal, ...orgs])
+      .then((results) => setMyDatasets(dedupe(results.flatMap((r) => r.data || []))))
+      .catch(() => {});
+  }, [user?.organizations]);
+
+  // Search datasets across the whole portal when the user types (debounced).
+  useEffect(() => {
+    const q = datasetSearch.trim();
+    if (q.length < 2) return;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchDatasets(q, 1, 20);
+        setDatasetSearchResults(res.data || []);
+      } catch {
+        setDatasetSearchResults([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [datasetSearch]);
+
+  // Deduped union of both buckets — the persisted/displayed selection.
+  const selectedDatasets = useMemo(() => {
+    const seen = new Set<string>();
+    return [...dropdownDatasets, ...linkDatasets].filter((d) => {
+      if (seen.has(d.id)) return false;
+      seen.add(d.id);
+      return true;
+    });
+  }, [dropdownDatasets, linkDatasets]);
+
+  // Options offered by the search multi-select. Excludes link-added datasets so
+  // the dropdown never reports (and thus can't drop) selections it doesn't own.
+  const availableDatasets = (() => {
+    const combined: Dataset[] = [...dropdownDatasets, ...datasetSearchResults, ...myDatasets];
+    const seen = new Set<string>();
+    return combined.filter((d) => {
+      if (seen.has(d.id) || d.archived || d.deleted) return false;
+      seen.add(d.id);
+      return true;
+    });
+  })();
+
+  const removeDataset = (id: string) => {
+    setDropdownDatasets((prev) => prev.filter((d) => d.id !== id));
+    setLinkDatasets((prev) => prev.filter((d) => d.id !== id));
+  };
+
+  // Resolve a pasted dados.gov.pt dataset URL to a portal dataset and add it to
+  // the selection. The backend only accepts internal dataset references, so the
+  // last path segment (the slug) is used to fetch the matching dataset.
+  const handleAddDatasetLink = async () => {
+    const raw = datasetLinkUrl.trim();
+    if (!raw) return;
+    setDatasetLinkError(null);
+
+    let slug = "";
+    try {
+      const path = new URL(raw).pathname;
+      slug = path.split("/").filter(Boolean).pop() || "";
+    } catch {
+      slug = raw.split("/").filter(Boolean).pop() || "";
+    }
+    if (!slug) {
+      setDatasetLinkError("URL inválido. Cole o link de um conjunto de dados deste portal.");
+      return;
+    }
+
+    setIsResolvingLink(true);
+    try {
+      const dataset = await fetchDataset(slug);
+      if (selectedDatasets.some((d) => d.id === dataset.id)) {
+        setDatasetLinkError("Este conjunto de dados já foi adicionado.");
+        return;
+      }
+      setLinkDatasets((prev) => [...prev, dataset]);
+      setDatasetLinkUrl("");
+    } catch {
+      setDatasetLinkError("Conjunto de dados não encontrado neste portal.");
+    } finally {
+      setIsResolvingLink(false);
+    }
+  };
+
+  const handleStep2Next = async () => {
+    if (createdDataservice && selectedDatasets.length > 0) {
+      setIsLinkingDatasets(true);
+      try {
+        await updateDataservice(createdDataservice.id, {
+          datasets: selectedDatasets.map((d) => d.id),
+        });
+      } catch (error) {
+        console.error("Error linking datasets to dataservice:", error);
+      } finally {
+        setIsLinkingDatasets(false);
+      }
+    }
+    onNextStep();
+  };
 
   const handleStep1Next = async () => {
     const errors: Record<string, boolean> = {};
@@ -69,8 +208,20 @@ export default function ApiRegistrationClient({
     setIsSubmitting(true);
 
     try {
+      const producer = producerRef.current;
+      const organization =
+        producer && producer !== "user" ? producer : undefined;
+      const isRestricted = accessType === "restricted";
+      const audiences = isRestricted
+        ? AUDIENCE_ROLES.filter((r) => accessAudiences[r.role]).map((r) => ({
+            role: r.role,
+            condition: accessAudiences[r.role],
+          }))
+        : undefined;
+      const usesOtherReason = reasonCategory === "other";
       const dataservice = await createDataservice({
         title: apiName.trim(),
+        organization,
         description: apiDescription.trim(),
         acronym: apiAcronym.trim() || undefined,
         base_api_url: baseApiUrl.trim() || undefined,
@@ -79,8 +230,14 @@ export default function ApiRegistrationClient({
         business_documentation_url: businessDocUrl.trim() || undefined,
         authorization_request_url: authRequestUrl.trim() || undefined,
         rate_limiting: rateLimiting.trim() || undefined,
+        rate_limiting_url: rateLimitingUrl.trim() || undefined,
         availability: availability.trim() ? parseFloat(availability) : undefined,
         access_type: accessType,
+        access_audiences: audiences,
+        access_type_reason_category:
+          isRestricted && reasonCategory && !usesOtherReason ? reasonCategory : undefined,
+        access_type_reason:
+          isRestricted && usesOtherReason ? reasonText.trim() || undefined : undefined,
         private: true,
       });
 
@@ -101,6 +258,28 @@ export default function ApiRegistrationClient({
     }
   };
 
+  // Step 3: the API was created as a draft (private: true) in step 1. Publishing
+  // flips it public and redirects to the API's public page; saving keeps it as a
+  // draft and returns to the list.
+  const handlePublish = async () => {
+    if (!createdDataservice) return;
+    setIsPublishing(true);
+    setApiError(null);
+    try {
+      await updateDataservice(createdDataservice.id, { private: false });
+      window.location.href = createdDataservice.slug
+        ? `/dataservices/${createdDataservice.slug}`
+        : "/admin/me/dataservices";
+    } catch {
+      setApiError("Erro ao publicar a API. Tente novamente.");
+      setIsPublishing(false);
+    }
+  };
+
+  const handleSaveDraft = () => {
+    window.location.href = "/admin/me/dataservices";
+  };
+
   const clearError = (field: string) => {
     if (formErrors[field]) {
       setFormErrors((prev) => {
@@ -111,106 +290,10 @@ export default function ApiRegistrationClient({
     }
   };
 
-  const handleDatasetUrlChange = (index: number, value: string) => {
-    const updated = [...datasetLinks];
-    updated[index] = { url: value };
-    setDatasetLinks(updated);
-
-    if (value.trim() && datasetLinkErrors[index]) {
-      setDatasetLinkErrors((prev) => {
-        const next = { ...prev };
-        delete next[index];
-        return next;
-      });
-    }
-  };
-
-  const addDatasetLink = () => {
-    const lastIndex = datasetLinks.length - 1;
-    if (!datasetLinks[lastIndex].url.trim()) {
-      setDatasetLinkErrors((prev) => ({
-        ...prev,
-        [lastIndex]: "Campo obrigatório",
-      }));
-      return;
-    }
-    setDatasetLinks((prev) => [...prev, { url: "" }]);
-  };
-
-  const removeDatasetLink = (index: number) => {
-    setDatasetLinks((prev) => prev.filter((_, i) => i !== index));
-    setDatasetLinkErrors((prev) => {
-      const next: Record<number, string> = {};
-      Object.entries(prev).forEach(([key, value]) => {
-        const k = Number(key);
-        if (k < index) next[k] = value;
-        else if (k > index) next[k - 1] = value;
-      });
-      return next;
-    });
-  };
-
-  const auxiliarItemsStep1 = [
-    {
-      title: "Como dar nome à sua API",
-      content:
-        'Dê à sua API um nome relevante e descritivo que reflita sua função ou área de aplicação. Um bom nome facilita a busca e a identificação por parte dos utilizadores. Sempre adicione o prefixo "API" para manter a consistência.',
-      hasError: !!formErrors.apiName,
-    },
-    {
-      title: "Adicione uma abreviação ou sigla à API.",
-      content:
-        "Tem a opção de adicionar uma sigla à sua API. As letras que compõem essa sigla não precisam ser separadas por pontos.",
-    },
-    {
-      title: "Escreva uma boa descrição",
-      content:
-        "Escreva uma descrição clara e precisa da API. Os utilizadores precisam entender a finalidade da API, os dados fornecidos, o escopo abrangido (os dados são completos? Há alguma lacuna?), a frequência de atualização dos dados e os parâmetros que podem ser usados para fazer uma chamada.",
-      hasError: !!formErrors.apiDescription,
-    },
-    {
-      title: "Defina o link correto para a API.",
-      content:
-        "A URL base de uma API é o ponto de entrada comum para todas as requisições, geralmente consistindo em um domínio ou endereço de servidor. Ela serve como base para a qual caminhos específicos (endpoints) são adicionados para acessar os diversos recursos da API.",
-    },
-    {
-      title: "Adicione um link para a documentação da máquina.",
-      content:
-        "Idealmente, forneça um link OpenAPI (Swagger) que permita aos desenvolvedores explorar os endpoints, visualizar os métodos disponíveis e testar consultas diretamente da documentação. Para serviços geográficos, pode fornecer um link para o serviço com uma consulta GetCapabilities para recuperar os metadados do serviço.",
-    },
-    {
-      title: "Adicione um link para a documentação técnica.",
-      content:
-        "Adicione um link para a documentação técnica geral da API, descrevendo os passos de integração.",
-    },
-    {
-      title: "Especifique o limite de chamadas",
-      content:
-        "Caso o número de chamadas à sua API seja limitado, defina aqui o número máximo de chamadas por minuto, ou mesmo por IP e/ou token.",
-    },
-    {
-      title: "Indique a disponibilidade",
-      content:
-        "Especifique a disponibilidade média da sua API. O valor deve ser uma porcentagem.",
-    },
-    {
-      title: "Selecione um tipo de acesso",
-      content:
-        'Escolha o tipo de acesso (aberto, aberto com conta ou restrito). Selecione "aberto" se os dados forem públicos. Selecione "aberto com conta" se o acesso aos dados exigir uma conta. Se selecionar "restrito", especifique os tipos de utilizadores que podem aceder a esta API.',
-    },
-    {
-      title: "Adicione um link à solicitação de autorização.",
-      content:
-        "Se a sua API tiver acesso restrito, adicione o link ao formulário de solicitação de acesso. É administrador? A solução Datapass permite criar e gerenciar formulários de solicitação de acesso a dados com facilidade.",
-    },
-    {
-      title: "Adicione um link para a documentação da empresa.",
-      content:
-        "A documentação comercial da sua API explica seu escopo e casos de uso. Ela complementa a documentação técnica.",
-    },
-  ];
-
-  const auxiliarItems = auxiliarItemsStep1;
+  const auxiliarItems = getDataserviceAuxiliarItems({
+    name: !!formErrors.apiName,
+    description: !!formErrors.apiDescription,
+  });
 
   return (
     <>
@@ -228,8 +311,11 @@ export default function ApiRegistrationClient({
                   <>
                     <strong>O que é uma API?</strong>
                     <br />
-                    Uma API é uma ferramenta informática que permite que um website
-                    ou software se comunique com outro computador e troque dados.
+                    Uma API (Application Programming Interface) é uma
+                    ferramenta/solução informática que permite o acesso automático e
+                    estruturado aos dados entre sistemas, ou seja, funciona como uma
+                    ponte ou um tradutor que permite que dois aplicativos diferentes
+                    comuniquem entre si.
                   </>
                 }
               />
@@ -248,20 +334,23 @@ export default function ApiRegistrationClient({
                   label="Verifique a identidade que deseja usar na publicação."
                   placeholder="Para pesquisar..."
                   id="producer-identity"
+                  onChange={(options) => {
+                    producerRef.current = (options[0]?.value as string) || "user";
+                  }}
                 >
                   <DropdownSection name="identity">
-                    <DropdownOption value="user">
-                      {user
-                        ? `${user.first_name} ${user.last_name}`
-                        : "Eu próprio"}
-                    </DropdownOption>
-                    <>
-                      {(user?.organizations || []).map((org) => (
+                    {[
+                      <DropdownOption key="user" value="user">
+                        {user
+                          ? `${user.first_name} ${user.last_name}`
+                          : "Eu próprio"}
+                      </DropdownOption>,
+                      ...(user?.organizations || []).map((org) => (
                         <DropdownOption key={org.id} value={org.id}>
                           {org.name}
                         </DropdownOption>
-                      ))}
-                    </>
+                      )),
+                    ]}
                   </DropdownSection>
                 </InputSelect>
 
@@ -273,8 +362,8 @@ export default function ApiRegistrationClient({
                     Recomendamos que publique em nome de uma organização se se
                     tratar de uma atividade profissional.
                   </p>
-                  <a
-                    href="/pages/admin/organizations/new"
+                  <Link
+                    href="/admin/organizations/new"
                     className="admin-page__org-card-link"
                   >
                     Crie ou integre uma organização em dados.gov.pt
@@ -282,7 +371,7 @@ export default function ApiRegistrationClient({
                       name="agora-line-arrow-right-circle"
                       className="w-24 h-24"
                     />
-                  </a>
+                  </Link>
                 </div>
 
                 <h2 className="admin-page__section-title">Descrição</h2>
@@ -355,15 +444,6 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputText
-                    label="Limite de chamadas"
-                    placeholder="Insira aqui"
-                    id="api-rate-limit"
-                    value={rateLimiting}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setRateLimiting(e.target.value)
-                    }
-                  />
-                  <InputText
                     label="Disponibilidade"
                     placeholder="99,9"
                     id="api-availability"
@@ -383,18 +463,18 @@ export default function ApiRegistrationClient({
                     </span>
                     <div className="flex flex-row gap-4">
                       <RadioButton
-                        label="Abrir"
+                        label="Aberto"
                         id="access-open"
                         name="access-type"
                         checked={accessType === "open"}
                         onChange={() => setAccessType("open")}
                       />
                       <RadioButton
-                        label="Abrir com conta"
+                        label="Aberto com conta"
                         id="access-account"
                         name="access-type"
-                        checked={accessType === "account"}
-                        onChange={() => setAccessType("account")}
+                        checked={accessType === "open_with_account"}
+                        onChange={() => setAccessType("open_with_account")}
                       />
                       <RadioButton
                         label="Restrito"
@@ -405,6 +485,65 @@ export default function ApiRegistrationClient({
                       />
                     </div>
                   </div>
+
+                  {accessType === "restricted" && (
+                    <>
+                      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                        {AUDIENCE_ROLES.map((role) => (
+                          <InputSelect
+                            key={role.role}
+                            label={role.label}
+                            placeholder="Selecione uma opção"
+                            id={`access-audience-${role.role}`}
+                            onChange={(options) =>
+                              setAccessAudiences((prev) => ({
+                                ...prev,
+                                [role.role]: (options[0]?.value as string) || "",
+                              }))
+                            }
+                          >
+                            <DropdownSection name={`audience-${role.role}`}>
+                              {AUDIENCE_CONDITIONS.map((condition) => (
+                                <DropdownOption key={condition.value} value={condition.value}>
+                                  {condition.label}
+                                </DropdownOption>
+                              ))}
+                            </DropdownSection>
+                          </InputSelect>
+                        ))}
+                      </div>
+
+                      <InputSelect
+                        label="Motivo da restrição"
+                        placeholder="Selecione uma opção"
+                        id="access-reason-category"
+                        onChange={(options) =>
+                          setReasonCategory((options[0]?.value as string) || "")
+                        }
+                      >
+                        <DropdownSection name="reason-category">
+                          {RESTRICTION_REASONS.map((reason) => (
+                            <DropdownOption key={reason.value} value={reason.value}>
+                              {reason.label}
+                            </DropdownOption>
+                          ))}
+                        </DropdownSection>
+                      </InputSelect>
+
+                      {reasonCategory === "other" && (
+                        <InputText
+                          label="Especifique o motivo da restrição"
+                          placeholder="Descreva o motivo"
+                          id="access-reason-text"
+                          value={reasonText}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setReasonText(e.target.value)
+                          }
+                        />
+                      )}
+                    </>
+                  )}
+
                   <InputText
                     label="Link para a ferramenta de autorização de acesso"
                     placeholder="Insira o URL aqui"
@@ -415,12 +554,35 @@ export default function ApiRegistrationClient({
                     }
                   />
                   <InputText
-                    label="Link para a documentação comercial da API"
+                    label="Link para a documentação funcional"
                     placeholder="Insira o URL aqui"
                     id="api-doc-commercial"
                     value={businessDocUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setBusinessDocUrl(e.target.value)
+                    }
+                  />
+                </div>
+
+                <h2 className="admin-page__section-title">Termos de uso</h2>
+
+                <div className="admin-page__fields-group">
+                  <InputText
+                    label="Limite de chamadas"
+                    placeholder="Insira aqui"
+                    id="api-rate-limit"
+                    value={rateLimiting}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setRateLimiting(e.target.value)
+                    }
+                  />
+                  <InputText
+                    label="Link para a documentação sobre limites de chamadas"
+                    placeholder="https://..."
+                    id="api-rate-limit-url"
+                    value={rateLimitingUrl}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setRateLimitingUrl(e.target.value)
                     }
                   />
                 </div>
@@ -453,67 +615,94 @@ export default function ApiRegistrationClient({
               <form className="admin-page__form">
                 <InputSelect
                   label="Pesquisar um conjunto de dados"
-                  placeholder="Procurando um conjunto de dados..."
+                  placeholder="Selecione conjuntos de dados..."
                   id="dataset-search"
+                  type="checkbox"
+                  searchable
+                  searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
+                  searchNoResultsText="Nenhum resultado encontrado"
+                  onSearchInputChange={setDatasetSearch}
+                  onChange={(options) => {
+                    const selectedIds = options.map((o) => String(o.value));
+                    setDropdownDatasets(
+                      availableDatasets.filter((d) => selectedIds.includes(d.id))
+                    );
+                  }}
                 >
                   <DropdownSection name="datasets">
-                    <DropdownOption value="dataset1">
-                      Conjunto de dados 1
-                    </DropdownOption>
+                    {availableDatasets.map((dataset) => (
+                      <DropdownOption
+                        key={dataset.id}
+                        value={dataset.id}
+                        selected={dropdownDatasets.some((s) => s.id === dataset.id)}
+                      >
+                        {dataset.title}
+                      </DropdownOption>
+                    ))}
                   </DropdownSection>
                 </InputSelect>
 
-                {datasetLinks.map((link, index) => (
-                  <div key={index} className="mt-16">
-                    <div>
-                      <InputText
-                        label="Link para o conjunto de dados"
-                        placeholder="Insira o URL aqui"
-                        id={`dataset-url-${index}`}
-                        value={link.url}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleDatasetUrlChange(index, e.target.value)
-                        }
-                        hasError={!!datasetLinkErrors[index]}
-                        hasFeedback={!!datasetLinkErrors[index]}
-                        feedbackState="danger"
-                        errorFeedbackText={datasetLinkErrors[index]}
-                      />
-                      {link.url.trim() && (
-                        <div className="flex justify-end mt-8">
-                          <Button
-                            appearance="link"
-                            variant="danger"
-                            hasIcon
-                            leadingIcon="agora-line-trash"
-                            leadingIconHover="agora-solid-trash"
-                            onClick={() => removeDatasetLink(index)}
-                          >
-                            Eliminar
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                {selectedDatasets.length > 0 && (
+                  <div className="mt-16 flex flex-wrap gap-8">
+                    {selectedDatasets.map((dataset) => (
+                      <Tag
+                        key={dataset.id}
+                        aria-label={`Remover ${dataset.title}`}
+                        onClick={() => removeDataset(dataset.id)}
+                      >
+                        {dataset.title}
+                      </Tag>
+                    ))}
                   </div>
-                ))}
+                )}
 
-                <div className="flex justify-end">
-                  <Button
-                    appearance="outline"
-                    variant="primary"
-                    hasIcon
-                    leadingIcon="agora-line-plus-circle"
-                    leadingIconHover="agora-solid-plus-circle"
-                    onClick={addDatasetLink}
-                  >
-                    Adicionar
-                  </Button>
+                <div className="admin-page__divider-or">
+                  <span className="admin-page__divider-or-text">ou</span>
+                </div>
+
+                <div className="flex flex-col gap-8">
+                  <InputText
+                    label="Link para o conjunto de dados"
+                    placeholder="https://..."
+                    id="dataset-link-url"
+                    value={datasetLinkUrl}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setDatasetLinkUrl(e.target.value);
+                      if (datasetLinkError) setDatasetLinkError(null);
+                    }}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddDatasetLink();
+                      }
+                    }}
+                    hasError={!!datasetLinkError}
+                  />
+                  {datasetLinkError && (
+                    <span className="text-sm text-danger-600">{datasetLinkError}</span>
+                  )}
+                  <div className="flex justify-end">
+                    <Button
+                      appearance="outline"
+                      variant="primary"
+                      hasIcon
+                      leadingIcon="agora-line-plus-circle"
+                      leadingIconHover="agora-solid-plus-circle"
+                      onClick={handleAddDatasetLink}
+                      disabled={isResolvingLink || !datasetLinkUrl.trim()}
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="admin-page__actions">
                   <Button
                     appearance="outline"
                     variant="neutral"
+                    hasIcon
+                    leadingIcon="agora-line-arrow-left-circle"
+                    leadingIconHover="agora-solid-arrow-left-circle"
                     onClick={onPreviousStep}
                   >
                     Anterior
@@ -523,9 +712,10 @@ export default function ApiRegistrationClient({
                     hasIcon
                     trailingIcon="agora-line-arrow-right-circle"
                     trailingIconHover="agora-solid-arrow-right-circle"
-                    onClick={onNextStep}
+                    onClick={handleStep2Next}
+                    disabled={isLinkingDatasets}
                   >
-                    Seguinte
+                    {isLinkingDatasets ? "A vincular..." : "Seguinte"}
                   </Button>
                 </div>
               </form>
@@ -547,32 +737,121 @@ export default function ApiRegistrationClient({
                 }
               />
 
-              <CardGeneral
-                variant="white-outline"
-                isCardHorizontal
-                isBlockedLink
-                iconDefault="agora-line-layers-menu"
-                iconHover="agora-solid-layers-menu"
-                titleText={createdDataservice?.title || apiName || "Sem título"}
-                descriptionText={
-                  createdDataservice?.description || apiDescription || "Sem descrição"
-                }
-                anchor={{
-                  href: createdDataservice
-                    ? `/pages/dataservices/${createdDataservice.id}`
-                    : "#",
-                  children: "",
-                }}
-              />
+              <div className="agora-card-links-admin-px0">
+                <div className="mb-8">
+                  {createdDataservice?.archived_at ? (
+                    <Pill variant="neutral">ARQUIVADO</Pill>
+                  ) : (
+                    (createdDataservice?.private ?? true) && (
+                      <Pill variant="warning">RASCUNHO</Pill>
+                    )
+                  )}
+                </div>
+                <CardLinks
+                  onClick={() => {}}
+                  className="cursor-pointer text-neutral-900"
+                  variant="transparent"
+                  image={{
+                    src:
+                      createdDataservice?.organization?.logo ||
+                      "/images/placeholders/organization.png",
+                    alt: createdDataservice?.title || apiName || "Sem título",
+                  }}
+                  category={createdDataservice?.organization?.name || "API"}
+                  title={
+                    <div className="underline text-xl-bold">
+                      {createdDataservice?.title || apiName || "Sem título"}
+                    </div>
+                  }
+                  description={
+                    <p className="text-sm line-clamp-3 leading-relaxed text-neutral-900 mt-8 max-w-[592px]">
+                      {createdDataservice?.description || apiDescription || ""}
+                    </p>
+                  }
+                  date={
+                    <span className="font-[300]">
+                      {`Atualizado há ${formatDateToTimeAgo(
+                        createdDataservice?.last_modified ||
+                          createdDataservice?.created_at ||
+                          ""
+                      )}`}
+                    </span>
+                  }
+                  links={[
+                    {
+                      href: "#",
+                      hasIcon: true,
+                      leadingIcon: "agora-line-eye",
+                      leadingIconHover: "agora-solid-eye",
+                      trailingIcon: "",
+                      trailingIconHover: "",
+                      trailingIconActive: "",
+                      children: createdDataservice?.metrics?.views?.toLocaleString("pt-PT") || "0",
+                      title: "Visualizações",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                    {
+                      href: "#",
+                      hasIcon: true,
+                      leadingIcon: "agora-line-layers-menu",
+                      leadingIconHover: "agora-solid-layers-menu",
+                      trailingIcon: "",
+                      trailingIconHover: "",
+                      trailingIconActive: "",
+                      children: `${createdDataservice?.datasets?.length || 0} datasets`,
+                      title: "Datasets",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                    {
+                      href: "#",
+                      hasIcon: true,
+                      leadingIcon: "agora-line-star",
+                      leadingIconHover: "agora-solid-star",
+                      trailingIcon: "",
+                      trailingIconHover: "",
+                      trailingIconActive: "",
+                      children: createdDataservice?.metrics?.followers || 0,
+                      title: "Favoritos",
+                      onClick: (e: React.MouseEvent) => e.preventDefault(),
+                      className: "text-[#034AD8]",
+                    },
+                  ]}
+                  mainLink={
+                    createdDataservice ? (
+                      <Link href={`/dataservices/${createdDataservice.slug}`}>
+                        <span className="underline">
+                          {createdDataservice.title || apiName}
+                        </span>
+                      </Link>
+                    ) : (
+                      <span className="underline">{apiName || "Sem título"}</span>
+                    )
+                  }
+                  blockedLink={true}
+                />
+              </div>
 
               <PublicationFeedbackButton />
 
+              {apiError && (
+                <div className="mt-16">
+                  <StatusCard variant="danger" showIcon description={apiError} />
+                </div>
+              )}
+
               <div className="admin-page__actions flex justify-end gap-[18px]">
-                <Button appearance="outline" variant="neutral">
+                <Button
+                  appearance="outline"
+                  variant="neutral"
+                  onClick={handleSaveDraft}
+                  disabled={isPublishing}
+                >
                   Salvar rascunho
                 </Button>
-                <Button variant="primary">
-                  Publicar API
+                <Button variant="primary" onClick={handlePublish} disabled={isPublishing}>
+                  {isPublishing ? "A publicar..." : "Publicar API"}
                 </Button>
               </div>
             </>

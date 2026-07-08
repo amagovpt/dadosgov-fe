@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Tabs, Tab, TabHeader, TabBody } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import {
   fetchHomeFeaturedDatasets,
   updateHomeFeaturedDatasets,
@@ -24,10 +25,13 @@ export default function SystemEditorialClient() {
   const [reuseBlocks, setReuseBlocks] = useState<ContentBlock[]>([]);
   const [, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<{
+  const {
+    message: saveMessage,
+    setTemporaryMessage: showSaveMessage,
+  } = useTemporaryMessage<{
     type: "success" | "error";
     text: string;
-  } | null>(null);
+  } | null>(null, 4000);
   const [datasetNameMap, setDatasetNameMap] = useState<Record<string, Dataset>>({});
   const [reuseNameMap, setReuseNameMap] = useState<Record<string, Reuse>>({});
   const initialDatasetsRef = useRef<Dataset[]>([]);
@@ -93,15 +97,6 @@ export default function SystemEditorialClient() {
     void loadFeatured();
   }, []);
 
-  useEffect(() => {
-    if (!saveMessage) {
-      return;
-    }
-
-    const timer = setTimeout(() => setSaveMessage(null), 4000);
-    return () => clearTimeout(timer);
-  }, [saveMessage]);
-
   const handleSave = async () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setIsSaving(true);
@@ -120,10 +115,10 @@ export default function SystemEditorialClient() {
       ]);
 
       setHasChanges(false);
-      setSaveMessage({ type: "success", text: "Alterações guardadas." });
+      showSaveMessage({ type: "success", text: "Alterações guardadas." });
     } catch (error) {
       console.error("Error saving:", error);
-      setSaveMessage({ type: "error", text: "Erro ao guardar alterações." });
+      showSaveMessage({ type: "error", text: "Erro ao guardar alterações." });
     } finally {
       setIsSaving(false);
     }
@@ -172,8 +167,8 @@ export default function SystemEditorialClient() {
     return (
       <AdminLayout
         breadcrumbItems={[
-          { label: "Administração", url: "/pages/admin" },
-          { label: "Editorial", url: "/pages/admin/system/editorial" },
+          { label: "Administração", url: "/admin" },
+          { label: "Editorial", url: "/admin/system/editorial" },
         ]}
         title="Editorial"
         headerAction={
@@ -208,8 +203,8 @@ export default function SystemEditorialClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: "Editorial", url: "/pages/admin/system/editorial" },
+        { label: "Administração", url: "/admin" },
+        { label: "Editorial", url: "/admin/system/editorial" },
       ]}
       title="Editorial"
       headerAction={

@@ -12,7 +12,7 @@ test.describe("Backoffice - Editorial", () => {
   test("ED-01: Editorial page renders with Editorial heading", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/editorial");
+    await page.goto("/admin/system/editorial");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -23,7 +23,7 @@ test.describe("Backoffice - Editorial", () => {
   test("ED-02: Editorial page exposes 'Adicionar um bloco' affordance", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/editorial");
+    await page.goto("/admin/system/editorial");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
