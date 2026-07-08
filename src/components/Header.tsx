@@ -29,6 +29,7 @@ import SearchDropdown from "@/components/search/SearchDropdown";
 import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/service/api/auth";
+import { stripLocale } from "@/utils/stripLocale";
 import TextLink from "@/components/Primitives/TextLink";
 import { areas, isEnabled, languages } from "@/config/headerNav";
 import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
@@ -52,6 +53,9 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   const headerRef = useRef<HeaderElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+  // usePathname() is locale-prefixed (`/pt/login`); normalize for route
+  // comparisons while keeping the full path for the post-login `next` redirect.
+  const localePath = stripLocale(pathname);
   const { user, samlLogin } = useAuth();
 
   const [ecosystemOpen, setEcosystemOpen] = useState(false);
@@ -142,7 +146,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
 
   const [selectedLanguage, setSelectedLanguage] = useState("pt");
   const [submenu, setSubmenu] = useState<string | null>(null);
-  const selectedArea = pathname === "/login" ? "2" : "1";
+  const selectedArea = localePath === "/login" ? "2" : "1";
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
@@ -169,7 +173,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
   }, [ecosystemOpen, ecosystemPanelNode]);
 
   // Mark header when on auth pages so CSS can style the "Autenticar" button
-  const isAuthPage = pathname === "/login" || pathname === "/login";
+  const isAuthPage = localePath === "/login";
 
   // Reset submenu when clicking anywhere outside the card grid (.links)
   const handleHeaderClickCapture = React.useCallback((e: React.MouseEvent) => {
@@ -373,7 +377,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                   href={
                     user
                       ? `/users/${user.slug}`
-                      : `/login${pathname && pathname !== "/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`
+                      : `/login${pathname && localePath !== "/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`
                   }
                 >
                   {user ? `${user.first_name} ${user.last_name}` : "Autenticar"}
@@ -576,6 +580,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                     <TextLink
                       key={link.href}
                       href={link.href}
+                      target="_blank"
                       className="text-base hover:text-primary-800"
                     >
                       {link.label}

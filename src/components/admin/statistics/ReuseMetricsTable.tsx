@@ -13,7 +13,7 @@ const columns: AdminListColumn<Reuse>[] = [
     id: "title",
     header: "TÍTULO DA REUTILIZAÇÃO",
     headerLabel: "Título",
-    renderCell: (reuse) => <TextLink href={reuse.url}>{reuse.title}</TextLink>,
+    renderCell: (reuse) => <TextLink href={reuse.url} target="_blank">{reuse.title}</TextLink>,
   },
   {
     id: "views",
@@ -40,15 +40,25 @@ interface ReuseMetricsTableProps {
   total: number;
   page: number;
   onPageChange: (page: number) => void;
+  pageSize?: number;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
-export function ReuseMetricsTable({ reuses, total, page, onPageChange }: ReuseMetricsTableProps) {
+export function ReuseMetricsTable({
+  reuses,
+  total,
+  page,
+  onPageChange,
+  pageSize = PAGE_SIZE,
+  onPageSizeChange,
+}: ReuseMetricsTableProps) {
   return (
     <AdminPaginatedTable
-      pageSize={PAGE_SIZE}
+      pageSize={pageSize}
       totalItems={total}
       currentPage={page}
       setCurrentPage={onPageChange}
+      setPageSize={onPageSizeChange}
     >
       <AdminListTable items={reuses} columns={columns} getRowKey={(reuse) => reuse.id} />
     </AdminPaginatedTable>

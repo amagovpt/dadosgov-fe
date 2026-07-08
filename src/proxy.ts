@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { i18nRouter } from "next-i18n-router";
 import { i18nConfig } from "./config/i18nConfig";
+import { getRouteRestrictions } from "./service/commom/routeRestrictions";
+import { isPathRestricted } from "./utils/matchRestrictedPath";
 
 /**
  * Next.js proxy (formerly middleware) for dados.gov.pt.
@@ -64,10 +66,16 @@ function buildCsp(nonce: string): string {
   ].join("; ");
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const isBackendProxy = BACKEND_PROXY_PATHS.some((p) => pathname.startsWith(p));
+
+  // Route gatekeeper: only localized page requests (path already carries a
+  // valid locale prefix) are eligible. Requests missing a locale are left to
+  // i18nRouter to redirect; they come back through here with the locale.
+  const localeSegment = pathname.split("/")[1];
+  const hasLocale = i18nConfig.locales.includes(localeSegment);
 
   const skipCsp = NO_CSP_PATHS.some((p) => pathname.startsWith(p));
 
@@ -82,6 +90,26 @@ export function proxy(request: NextRequest) {
   if (!skipCsp) {
     nonce = generateNonce();
     requestHeaders.set("x-nonce", nonce);
+  }
+
+  // Gatekeeper: 404 requests to routes disabled in the Header / Admin nav CMS.
+  // Fails open — any error here lets the request proceed rather than 404ing.
+  if (!isBackendProxy && hasLocale) {
+    try {
+      const disabledPaths = await getRouteRestrictions(localeSegment);
+      if (isPathRestricted(pathname, disabledPaths)) {
+        const notFound = NextResponse.rewrite(new URL("/_not-found", request.url), {
+          request: { headers: requestHeaders },
+          status: 404,
+        });
+        if (nonce) {
+          notFound.headers.set("Content-Security-Policy", buildCsp(nonce));
+        }
+        return notFound;
+      }
+    } catch (error) {
+      console.error("Route gatekeeper error; allowing request:", error);
+    }
   }
 
   const response = i18nRouter(request, i18nConfig);

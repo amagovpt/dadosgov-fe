@@ -31,5 +31,20 @@
   "backToArticles": "Voltar aos artigos",
   "loading": "A carregar...",
   "results_one": "{{count}} resultado",
-  "results_other": "{{count}} resultados"
+  "results_other": "{{count}} resultados",
+  "datastories": "Data Stories",
+  "pagination": {
+    "pagination": "Paginação",
+    "previous": "Página anterior",
+    "next": "Página seguinte"
+  },
+  "filters": {
+    "filters": "Filtros",
+    "hideFilters": "Ocultar filtros",
+    "openFilters": "Abrir filtros"
+  },
+  "results": "Resultados",
+  "publishedTimeAgo": "Publicado há {{timeAgo}}"
 }
+  
+

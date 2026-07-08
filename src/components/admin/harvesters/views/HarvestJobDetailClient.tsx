@@ -161,7 +161,7 @@ function ItemsTable({
                 </TableCell>
                 <TableCell headerLabel="Link fonte">
                   {item.remote_url ? (
-                    <TextLink href={item.remote_url}>
+                    <TextLink href={item.remote_url} target="_blank">
                       {item.remote_url.length > 60
                         ? `${item.remote_url.slice(0, 60)}...`
                         : item.remote_url}

@@ -6,6 +6,7 @@ export type RichAnswerKey =
   | "problemas-tecnicos"
   | "pedidos-dados"
   | "outros"
+  | "emblema"
   | true;
 
 export interface FaqItem {

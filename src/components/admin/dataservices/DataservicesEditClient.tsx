@@ -654,14 +654,14 @@ export default function DataservicesEditClient() {
                           </span>
                           <div className="flex flex-row gap-4">
                             <RadioButton
-                              label="Abrir"
+                              label="Aberto"
                               id="edit-access-open"
                               name="edit-access-type"
                               checked={accessType === "open"}
                               onChange={() => setAccessType("open")}
                             />
                             <RadioButton
-                              label="Abrir com conta"
+                              label="Aberto com conta"
                               id="edit-access-account"
                               name="edit-access-type"
                               checked={accessType === "open_with_account"}
@@ -753,7 +753,7 @@ export default function DataservicesEditClient() {
                           }
                         />
                         <InputText
-                          label="Link para a documentação comercial da API"
+                          label="Link para a documentação funcional"
                           placeholder="Insira o URL aqui"
                           id="edit-api-doc-commercial"
                           value={businessDocUrl}
