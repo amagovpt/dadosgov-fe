@@ -81,7 +81,7 @@ export default function DataserviceDescriptionSection({
           errorFeedbackText="Campo obrigatório"
         />
         <InputText
-          label="URL base da API"
+          label="Link raiz da API"
           placeholder="Insira o URL aqui"
           id="api-root-link"
           value={baseApiUrl}
