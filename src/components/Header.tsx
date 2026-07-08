@@ -580,6 +580,7 @@ export const Header = ({ data }: { data: HeaderNavigationData }) => {
                     <TextLink
                       key={link.href}
                       href={link.href}
+                      target="_blank"
                       className="text-base hover:text-primary-800"
                     >
                       {link.label}

@@ -57,7 +57,7 @@ export function ResourceViewPopupContent({
               <tr>
                 <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">URL</td>
                 <td className="break-all py-4">
-                  <TextLink href={name}>{name}</TextLink>
+                  <TextLink href={name} target="_blank">{name}</TextLink>
                 </td>
               </tr>
             )}

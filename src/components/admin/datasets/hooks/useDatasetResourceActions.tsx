@@ -1,11 +1,9 @@
 "use client";
 
 import type React from "react";
+import { useRef } from "react";
 import { usePopupContext } from "@ama-pt/agora-design-system";
-import {
-  fetchDataset,
-  uploadResource,
-} from "@/service/api/datasets";
+import { fetchDataset, uploadResource } from "@/service/api/datasets";
 import type { ResourceType } from "@/service/types/catalog";
 import type { Dataset, Resource } from "@/service/types/dataset";
 import { translateUploadError } from "@/lib/security/translateUploadError";
@@ -42,6 +40,11 @@ export function useDatasetResourceActions({
   showApiSuccess,
   isUploadingRef,
 }: UseDatasetResourceActionsParams) {
+  // Bumped on every edit-popup open so React remounts a fresh instance instead
+  // of reusing the previous one (whose `useState` was seeded from the old
+  // resource), which would otherwise show stale field values on reopen.
+  const editPopupSeqRef = useRef(0);
+
   async function refreshDataset() {
     const updated = await fetchDataset(slug);
     setDataset(updated);
@@ -58,41 +61,57 @@ export function useDatasetResourceActions({
     setFileUploadError(null);
 
     try {
-      for (const file of Array.from(files)) {
-        await uploadResource(dataset.id, file);
+      try {
+        for (const file of Array.from(files)) {
+          await uploadResource(dataset.id, file);
+        }
+      } catch (error) {
+        const err = error as {
+          status?: number;
+          data?: Record<string, unknown>;
+          message?: string;
+        };
+        console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
+
+        if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
+          const flattenValue = (value: unknown): string => {
+            if (Array.isArray(value)) return value.map(flattenValue).join("; ");
+            if (value && typeof value === "object") {
+              return Object.values(value as Record<string, unknown>)
+                .map(flattenValue)
+                .join("; ");
+            }
+            return String(value);
+          };
+
+          const message =
+            (err.data.message as string) ||
+            Object.entries(err.data)
+              .map(([key, value]) => `${key}: ${flattenValue(value)}`)
+              .join(", ");
+
+          setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(message)}`);
+        } else if (err.message) {
+          setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(err.message)}`);
+        } else {
+          const statusHint = err.status ? ` (HTTP ${err.status})` : "";
+          setFileUploadError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
+        }
+        return;
       }
-      const updated = await fetchDataset(slug);
-      setDataset(updated);
+
+      // Upload succeeded (the files are stored on the backend). The dataset
+      // refresh below is best-effort: a transient failure here must NOT be
+      // reported as an upload error, otherwise a network blip on the refresh
+      // makes a successful upload look failed.
+      try {
+        const updated = await fetchDataset(slug);
+        setDataset(updated);
+      } catch (refreshError) {
+        console.error("Resource uploaded but dataset refresh failed:", refreshError);
+      }
       setUploaderKey((currentKey) => currentKey + 1);
       showApiSuccess("Ficheiro(s) carregado(s) com sucesso.");
-    } catch (error) {
-      const err = error as { status?: number; data?: Record<string, unknown>; message?: string };
-      console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
-
-      if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
-        const flattenValue = (value: unknown): string => {
-          if (Array.isArray(value)) return value.map(flattenValue).join("; ");
-          if (value && typeof value === "object") {
-            return Object.values(value as Record<string, unknown>)
-              .map(flattenValue)
-              .join("; ");
-          }
-          return String(value);
-        };
-
-        const message =
-          (err.data.message as string) ||
-          Object.entries(err.data)
-            .map(([key, value]) => `${key}: ${flattenValue(value)}`)
-            .join(", ");
-
-        setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(message)}`);
-      } else if (err.message) {
-        setFileUploadError(`Erro ao carregar ficheiro(s): ${translateUploadError(err.message)}`);
-      } else {
-        const statusHint = err.status ? ` (HTTP ${err.status})` : "";
-        setFileUploadError(`Erro ao carregar ficheiro(s)${statusHint}. Tente novamente.`);
-      }
     } finally {
       isUploadingRef.current = false;
       setIsSubmitting(false);
@@ -113,7 +132,7 @@ export function useDatasetResourceActions({
                   ...previousDataset,
                   resources: previousDataset.resources.filter((item) => item.id !== resource.id),
                 }
-              : previousDataset,
+              : previousDataset
           );
           showApiSuccess("Ficheiro eliminado com sucesso.");
         }}
@@ -122,7 +141,7 @@ export function useDatasetResourceActions({
         title: "Eliminar ficheiro",
         closeAriaLabel: "Fechar",
         dimensions: "m",
-      },
+      }
     );
   }
 
@@ -131,6 +150,7 @@ export function useDatasetResourceActions({
 
     show(
       <DatasetsEditResourceEditPopup
+        key={`resource-edit-${resource.id}-${++editPopupSeqRef.current}`}
         resource={resource}
         datasetId={dataset.id}
         resourceTypes={resourceTypes}
@@ -144,7 +164,7 @@ export function useDatasetResourceActions({
         title: resource.title,
         closeAriaLabel: "Fechar",
         dimensions: "l",
-      },
+      }
     );
   }
 
@@ -156,6 +176,7 @@ export function useDatasetResourceActions({
       setTimeout(() => {
         show(
           <DatasetsEditResourceEditPopup
+            key={`resource-edit-${resource.id}-${++editPopupSeqRef.current}`}
             resource={resource}
             datasetId={dataset.id}
             resourceTypes={resourceTypes}
@@ -169,7 +190,7 @@ export function useDatasetResourceActions({
             title: resource.title,
             closeAriaLabel: "Fechar",
             dimensions: "l",
-          },
+          }
         );
       }, 100);
     };
@@ -192,7 +213,7 @@ export function useDatasetResourceActions({
         title: resource.title,
         closeAriaLabel: "Fechar",
         dimensions: "l",
-      },
+      }
     );
   }
 
