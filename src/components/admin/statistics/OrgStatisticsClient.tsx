@@ -44,15 +44,18 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [datasetsTotal, setDatasetsTotal] = useState(0);
   const [datasetsPage, setDatasetsPage] = useState(1);
+  const [datasetsPageSize, setDatasetsPageSize] = useState(PAGE_SIZE);
   const [isDatasetsLoading, setIsDatasetsLoading] = useState(true);
 
   const [dataservices, setDataservices] = useState<Dataservice[]>([]);
   const [dataservicesTotal, setDataservicesTotal] = useState(0);
   const [dataservicesPage, setDataservicesPage] = useState(1);
+  const [dataservicesPageSize, setDataservicesPageSize] = useState(PAGE_SIZE);
   const [isDataservicesLoading, setIsDataservicesLoading] = useState(true);
 
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [reusesPage, setReusesPage] = useState(1);
+  const [reusesPageSize, setReusesPageSize] = useState(PAGE_SIZE);
   const [isReusesLoading, setIsReusesLoading] = useState(true);
 
   useEffect(() => {
@@ -78,7 +81,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
     async function loadDatasets() {
       setIsDatasetsLoading(true);
       try {
-        const res = await fetchOrgDatasets(orgId, datasetsPage, PAGE_SIZE);
+        const res = await fetchOrgDatasets(orgId, datasetsPage, datasetsPageSize);
         setDatasets(res.data);
         setDatasetsTotal(res.total);
       } catch (error) {
@@ -88,13 +91,13 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
       }
     }
     loadDatasets();
-  }, [orgId, datasetsPage]);
+  }, [orgId, datasetsPage, datasetsPageSize]);
 
   useEffect(() => {
     async function loadDataservices() {
       setIsDataservicesLoading(true);
       try {
-        const res = await fetchOrgDataservices(orgId, dataservicesPage, PAGE_SIZE);
+        const res = await fetchOrgDataservices(orgId, dataservicesPage, dataservicesPageSize);
         setDataservices(res.data);
         setDataservicesTotal(res.total);
       } catch (error) {
@@ -104,7 +107,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
       }
     }
     loadDataservices();
-  }, [orgId, dataservicesPage]);
+  }, [orgId, dataservicesPage, dataservicesPageSize]);
 
   useEffect(() => {
     async function loadReuses() {
@@ -121,7 +124,10 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
     loadReuses();
   }, [orgId]);
 
-  const reusesPagedData = reuses.slice((reusesPage - 1) * PAGE_SIZE, reusesPage * PAGE_SIZE);
+  const reusesPagedData = reuses.slice(
+    (reusesPage - 1) * reusesPageSize,
+    reusesPage * reusesPageSize
+  );
 
   if (!isOrgLoading && !org) {
     return (
@@ -264,6 +270,8 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   total={datasetsTotal}
                   page={datasetsPage}
                   onPageChange={setDatasetsPage}
+                  pageSize={datasetsPageSize}
+                  onPageSizeChange={setDatasetsPageSize}
                 />
               )}
             </div>
@@ -320,10 +328,11 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
               ) : (
                 <Table
                   paginationProps={createPaginationProps(
-                    PAGE_SIZE,
+                    dataservicesPageSize,
                     dataservicesTotal,
                     dataservicesPage,
-                    setDataservicesPage
+                    setDataservicesPage,
+                    setDataservicesPageSize
                   )}
                 >
                   <TableHeader>
@@ -402,6 +411,8 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   total={reuses.length}
                   page={reusesPage}
                   onPageChange={setReusesPage}
+                  pageSize={reusesPageSize}
+                  onPageSizeChange={setReusesPageSize}
                 />
               )}
             </div>

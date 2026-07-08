@@ -446,7 +446,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   key={`remote-dataset-${index}`}
                   className="rounded-8 border border-neutral-200 p-16"
                 >
-                  <TextLink href={entry.url} className="break-all font-medium">
+                  <TextLink href={entry.url} target="_blank" className="break-all font-medium">
                     {entry.title || entry.url}
                   </TextLink>
                   {entry.description && (
