@@ -282,24 +282,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                   <div className="mb-8 text-m-light text-neutral-900">Organização</div>
                 </div>
               }
-            >
-              <div className="space-y-16">
-                <div className="text-sm mb-16 text-neutral-900">
-                  <span className="text-m-semibold">Última atualização:</span>{" "}
-                  {new Date(organization.last_modified).toLocaleDateString("pt-PT", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </div>
-                {/* <div className="pt-8">
-                    <div className="text-neutral-900 text-sm font-medium">
-                      <span className="text-m-semibold">Tipo:</span> Publicador Oficial
-                    </div>
-                  </div> */}
-              </div>
-            </CardArticle>
-
+            />
             {/* Metrics Box */}
             <div className="mb-16 grid grid-cols-2 gap-16">
               <div className="rounded-4 bg-[#F2F6FF] p-32">
