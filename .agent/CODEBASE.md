@@ -42,7 +42,7 @@ As rotas estão localizadas em `src/app/pages/`.
 
 ### Outros
 - `MiniCoursesClient.tsx`: Gestão de minicursos.
-- `ArticleDetail.tsx`: Detalhe de notícias/artigos.
+- `noticias/[rid]/page.tsx`: Detalhe de notícias/artigos (Server Component).
 
 ---
 
