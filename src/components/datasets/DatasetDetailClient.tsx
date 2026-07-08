@@ -269,6 +269,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                         dataset.license_url ||
                         `/licenses/${dataset.license}/`
                       }
+                      target="_blank"
                     >
                       <span className="text-m-semibold">Licença:</span>{" "}
                       {dataset.license_title || dataset.license}
@@ -289,7 +290,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                           </TextLink>
                         )}
                         {cp.contact_form && (
-                          <TextLink href={cp.contact_form} className="block">
+                          <TextLink href={cp.contact_form} target="_blank" className="block">
                             Formulário de contacto
                           </TextLink>
                         )}
