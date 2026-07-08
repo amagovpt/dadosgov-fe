@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";
 import { ResourceType } from "@/service/types/catalog";
@@ -29,13 +30,14 @@ export function ResourceViewPopupContent({
   onDelete,
   onClose,
 }: ResourceViewPopupContentProps) {
+  const { t } = useTranslation("admin-common");
   const typeLabel =
     resourceTypes.find((rt) => rt.id === meta.resourceType)?.label ?? meta.resourceType;
   const rawExt = getFileExtension(name, isUrl);
   const fileExt = rawExt ? rawExt.slice(1).toUpperCase() : null;
   const location = isUrl
-    ? "Este recurso é um link externo"
-    : "Este recurso encontra-se nos nossos servidores";
+    ? t("fileUpload.resourceView.location.external")
+    : t("fileUpload.resourceView.location.internal");
   const mimeType = meta.mime || file?.type || null;
   const format = meta.format || fileExt?.toLowerCase() || null;
 
@@ -43,19 +45,25 @@ export function ResourceViewPopupContent({
     <div className="flex flex-col gap-16" style={{ minHeight: "40vh" }}>
       {meta.description && <p className="text-sm text-neutral-700">{meta.description}</p>}
       <div className="flex-1 overflow-y-auto">
-        <table className="text-sm w-full">
+        <table className="w-full text-sm">
           <tbody>
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Tipo</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                {t("fileUpload.table.type")}
+              </td>
               <td className="py-4">{typeLabel}</td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Localização</td>
+              <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                {t("fileUpload.resourceView.locationLabel")}
+              </td>
               <td className="py-4">{location}</td>
             </tr>
             {isUrl && (
               <tr>
-                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">URL</td>
+                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                  {t("fileUpload.resourceEdit.urlLabel")}
+                </td>
                 <td className="break-all py-4">
                   <TextLink href={name}>{name}</TextLink>
                 </td>
@@ -63,19 +71,25 @@ export function ResourceViewPopupContent({
             )}
             {format && (
               <tr>
-                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Formato</td>
+                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                  {t("fileUpload.table.format")}
+                </td>
                 <td className="py-4">{format}</td>
               </tr>
             )}
             {mimeType && (
               <tr>
-                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Mime Type</td>
+                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                  {t("fileUpload.resourceEdit.mimeTypeLabel")}
+                </td>
                 <td className="py-4">{mimeType}</td>
               </tr>
             )}
             {size && (
               <tr>
-                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">Tamanho</td>
+                <td className="whitespace-nowrap py-4 pr-16 align-top font-semibold">
+                  {t("fileUpload.table.size")}
+                </td>
                 <td className="py-4">{size}</td>
               </tr>
             )}
@@ -84,7 +98,7 @@ export function ResourceViewPopupContent({
       </div>
       <div className="flex justify-between pt-8">
         <Button appearance="outline" variant="primary" onClick={onClose}>
-          Cancelar
+          {t("actions.cancel")}
         </Button>
         <div className="flex gap-8">
           <Button
@@ -94,7 +108,7 @@ export function ResourceViewPopupContent({
             leadingIconHover="agora-solid-trash"
             onClick={onDelete}
           >
-            Eliminar
+            {t("actions.delete")}
           </Button>
           <Button
             variant="primary"
@@ -103,7 +117,7 @@ export function ResourceViewPopupContent({
             leadingIconHover="agora-solid-edit"
             onClick={onEdit}
           >
-            Editar
+            {t("fileUpload.actions.edit")}
           </Button>
         </div>
       </div>

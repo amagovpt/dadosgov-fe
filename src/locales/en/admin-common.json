@@ -102,5 +102,74 @@
   },
   "feedback": {
     "publicationProcess": "Give us your feedback on the publication process"
+  },
+  "fileUpload": {
+    "or": "or",
+    "url": {
+      "label": "Exact link to the file",
+      "invalid": "Enter a valid URL starting with https://"
+    },
+    "actions": {
+      "add": "Add",
+      "confirm": "Confirm",
+      "edit": "Edit",
+      "replaceFile": "Replace file",
+      "deleteFile": "Delete file",
+      "viewDetails": "View details",
+      "viewNamed": "View {{name}}",
+      "editNamed": "Edit {{name}}",
+      "deleteNamed": "Delete {{name}}"
+    },
+    "files": {
+      "label": "Files",
+      "dragAndDrop": "Drag and drop the files here",
+      "selectOrDrag": "Select or drag the files",
+      "selectedFiles": "files selected",
+      "removeFile": "Remove file",
+      "replaceFile": "Replace file",
+      "maxSizeExceeded": "The file exceeds the maximum allowed size.",
+      "forbiddenExtension": "File format not allowed.",
+      "securityError": "The file contains malicious code or unauthorized scripts that compromise system security.",
+      "invalidSingle": "Invalid file type. \"{{name}}\" was not added.",
+      "invalidMultiple": "Invalid file type. The following files were not added: {{names}}"
+    },
+    "table": {
+      "fileName": "File name",
+      "type": "Type",
+      "format": "Format",
+      "size": "Size",
+      "action": "Action"
+    },
+    "deleteConfirm": {
+      "message": {
+        "before": "Are you sure you want to delete ",
+        "after": "?"
+      }
+    },
+    "resourceEdit": {
+      "titleLabel": "Title *",
+      "titlePlaceholder": "Resource title",
+      "typeLabel": "Type *",
+      "typePlaceholder": "Select a type...",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Resource description",
+      "urlLabel": "URL *",
+      "sizeLabel": "Size",
+      "sizePlaceholder": "Size in bytes",
+      "formatLabel": "Format",
+      "formatPlaceholder": "csv, json, xlsx...",
+      "mimeTypeLabel": "Mime Type",
+      "mimeTypePlaceholder": "application/json, text/csv..."
+    },
+    "resourceView": {
+      "locationLabel": "Location",
+      "location": {
+        "external": "This resource is an external link",
+        "internal": "This resource is hosted on our servers"
+      }
+    },
+    "popup": {
+      "close": "Close"
+    }
   }
 }

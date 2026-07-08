@@ -102,5 +102,74 @@
   },
   "feedback": {
     "publicationProcess": "Dê-nos o seu feedback sobre o processo de publicação"
+  },
+  "fileUpload": {
+    "or": "ou",
+    "url": {
+      "label": "Link exato para o ficheiro",
+      "invalid": "Insira um URL válido, começando com https://"
+    },
+    "actions": {
+      "add": "Adicionar",
+      "confirm": "Confirmar",
+      "edit": "Editar",
+      "replaceFile": "Substituir o ficheiro",
+      "deleteFile": "Eliminar ficheiro",
+      "viewDetails": "Ver detalhes",
+      "viewNamed": "Ver {{name}}",
+      "editNamed": "Editar {{name}}",
+      "deleteNamed": "Eliminar {{name}}"
+    },
+    "files": {
+      "label": "Ficheiros",
+      "dragAndDrop": "Arraste e largue os ficheiros aqui",
+      "selectOrDrag": "Selecione ou arraste os ficheiros",
+      "selectedFiles": "ficheiros selecionados",
+      "removeFile": "Remover ficheiro",
+      "replaceFile": "Substituir ficheiro",
+      "maxSizeExceeded": "O ficheiro excede o tamanho máximo permitido.",
+      "forbiddenExtension": "Formato de ficheiro não permitido.",
+      "securityError": "O ficheiro contém código malicioso ou scripts não autorizados que comprometem a segurança do sistema.",
+      "invalidSingle": "Tipo de ficheiro inválido. \"{{name}}\" não foi adicionado.",
+      "invalidMultiple": "Tipo de ficheiro inválido. Os seguintes ficheiros não foram adicionados: {{names}}"
+    },
+    "table": {
+      "fileName": "Nome do ficheiro",
+      "type": "Tipo",
+      "format": "Formato",
+      "size": "Tamanho",
+      "action": "Ação"
+    },
+    "deleteConfirm": {
+      "message": {
+        "before": "Tem a certeza que pretende eliminar ",
+        "after": "?"
+      }
+    },
+    "resourceEdit": {
+      "titleLabel": "Título *",
+      "titlePlaceholder": "Título do recurso",
+      "typeLabel": "Tipo *",
+      "typePlaceholder": "Selecione um tipo...",
+      "descriptionLabel": "Descrição",
+      "descriptionPlaceholder": "Descrição do recurso",
+      "urlLabel": "URL *",
+      "sizeLabel": "Tamanho",
+      "sizePlaceholder": "Tamanho em bytes",
+      "formatLabel": "Formato",
+      "formatPlaceholder": "csv, json, xlsx...",
+      "mimeTypeLabel": "Mime Type",
+      "mimeTypePlaceholder": "application/json, text/csv..."
+    },
+    "resourceView": {
+      "locationLabel": "Localização",
+      "location": {
+        "external": "Este recurso é um link externo",
+        "internal": "Este recurso encontra-se nos nossos servidores"
+      }
+    },
+    "popup": {
+      "close": "Fechar"
+    }
   }
 }

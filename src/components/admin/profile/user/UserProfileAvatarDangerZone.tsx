@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
 
 interface UserProfileAvatarDangerZoneProps {
@@ -12,6 +13,8 @@ export default function UserProfileAvatarDangerZone({
   isDeletingAvatar,
   onDeleteAvatar,
 }: UserProfileAvatarDangerZoneProps) {
+  const { t } = useTranslation("admin-profile");
+
   return (
     <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
       <StatusCard
@@ -19,7 +22,7 @@ export default function UserProfileAvatarDangerZone({
         showIcon
         description={
           <>
-            <strong>Atenção esta ação é irreversível.</strong>
+            <strong>{t("danger.irreversible")}</strong>
             <br />
             <Button
               appearance="link"
@@ -30,7 +33,9 @@ export default function UserProfileAvatarDangerZone({
               onClick={onDeleteAvatar}
               disabled={isDeletingAvatar}
             >
-              {isDeletingAvatar ? "A eliminar..." : "Eliminar foto de perfil"}
+              {isDeletingAvatar
+                ? t("form.deleteAvatarLoading")
+                : t("form.deleteAvatarButton")}
             </Button>
           </>
         }
