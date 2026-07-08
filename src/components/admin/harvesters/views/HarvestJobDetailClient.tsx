@@ -100,8 +100,7 @@ function ItemsTable({
         filteredTotal,
         currentPage,
         setCurrentPage,
-        setPageSize,
-        { currentPageIsZeroBased: true }
+        setPageSize
       )}
     >
       <TableHeader>
