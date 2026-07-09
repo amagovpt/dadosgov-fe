@@ -106,8 +106,6 @@ export default function DatasetsClient({
     );
   };
 
-  console.log("pageContent", pageContent);
-
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
