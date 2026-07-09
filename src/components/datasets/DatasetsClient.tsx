@@ -1,11 +1,7 @@
 ﻿"use client";
 
 import React, { useState } from "react";
-import {
-  ToggleGroup,
-  Toggle,
-  usePopupContext,
-} from "@ama-pt/agora-design-system";
+import { ToggleGroup, Toggle, usePopupContext } from "@ama-pt/agora-design-system";
 import { deleteDataset } from "@/service/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
@@ -25,6 +21,8 @@ import { twJoin } from "tailwind-merge";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { useTranslation } from "react-i18next";
 import FoNoResults from "../common/FoNoResults";
+import { DatasetsPage } from "@/service/types/datasets/datasets";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -34,6 +32,7 @@ interface DatasetsClientProps {
   allLicenses?: License[];
   allFrequencies?: Frequency[];
   allGranularities?: Granularity[];
+  pageContent: DatasetsPage;
 }
 
 export default function DatasetsClient({
@@ -44,6 +43,7 @@ export default function DatasetsClient({
   allLicenses = [],
   allFrequencies = [],
   allGranularities = [],
+  pageContent,
 }: DatasetsClientProps) {
   const { t } = useTranslation("common");
   const { t: tds } = useTranslation("datasets");
@@ -106,6 +106,8 @@ export default function DatasetsClient({
     );
   };
 
+  console.log("pageContent", pageContent);
+
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
@@ -113,13 +115,8 @@ export default function DatasetsClient({
           { label: t("home"), url: "/" },
           { label: t("datasets"), url: "/datasets" },
         ]}
-        title={"Conjuntos de Dados"}
-        subtitle={
-          <p className="max-w-[592px] text-primary-100">
-            Explore conjuntos de dados abertos de diversas origens, temas e em diferentes formatos,
-            e utilize-os como base para novos estudos e insights.
-          </p>
-        }
+        title={pageContent.hero.title}
+        subtitle={formatHtmlParagraphs(pageContent.hero.description) as string[]}
       >
         <PublishDropdown darkMode={true} outline={false} />
       </HeroGeneral>
@@ -127,7 +124,7 @@ export default function DatasetsClient({
       {/* Search Filter */}
       <SearchFilter
         id="datasets-search"
-        placeholder="Pesquisar por conjuntos de dados..."
+        placeholder={pageContent.search as unknown as string}
         value={searchQuery}
         onChange={setSearchQuery}
         onSearch={handleSearch}
@@ -205,7 +202,7 @@ export default function DatasetsClient({
               >
                 {listData.error ? (
                   <ListingErrorBanner
-                    entity="os conjuntos de dados"
+                    entity={tds("theDatasets")}
                     errorStatus={listData.errorStatus}
                   />
                 ) : datasets.length > 0 ? (

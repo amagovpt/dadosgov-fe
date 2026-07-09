@@ -11,5 +11,6 @@
     "irreversible": "Esta ação é irreversível.",
     "confirmation": "Tem a certeza que quer eliminar este conjunto de dados?",
     "modal": "Elimine o conjunto de dados"
-  }
+  },
+  "theDatasets": "os conjuntos de dados"
 }

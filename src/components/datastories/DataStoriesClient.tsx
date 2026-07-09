@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CardLinks, Button, Icon, CardNoResults } from "@ama-pt/agora-design-system";
+import { CardLinks, Button } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import HeroGeneral from "@/components/HeroGeneral";
 import SearchFilter from "@/components/Shared/SearchFilter";
@@ -60,11 +60,11 @@ export default function DataStoriesClient({
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        title={pageContent.hero.title}
         breadcrumbItems={[
           { label: t("home"), url: "/" },
           { label: t("datastories"), url: "/datastories" },
         ]}
+        title={pageContent.hero.title}
         subtitle={formatHtmlParagraphs(pageContent.hero.description) as string[]}
       />
 

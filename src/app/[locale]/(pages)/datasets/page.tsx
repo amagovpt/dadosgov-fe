@@ -4,6 +4,7 @@ import DatasetsClient from "@/components/datasets/DatasetsClient";
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 import { Metadata } from "next";
+import { getDatasets, getDatasetsMetadata } from "@/service/queries/datasets/datasets";
 
 export async function generateMetadata({
   params,
@@ -26,10 +27,14 @@ export async function generateMetadata({
 // hit the backend rate-limit (per-IP, collapsed site-wide by the F5).
 
 export default async function Page({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const { locale } = await params;
+
   const resolved = await searchParams;
   const page = Number(resolved?.page) || 1;
 
@@ -61,8 +66,12 @@ export default async function Page({
   const forwarded = await serverForwardedHeaders();
   const data = await fetchDatasetsListing(page, 20, apiFilters, forwarded);
 
+  // get page content (hero, search, noResults) from the CMS
+  const { pageContent } = await getDatasets(locale);
+
   return (
     <DatasetsClient
+      pageContent={pageContent}
       initialData={data.listing}
       currentPage={page}
       filterCounts={data.filter_counts}

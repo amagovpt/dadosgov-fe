@@ -46,7 +46,18 @@
   "results": "Resultados",
   "publishedTimeAgo": "Publicado há {{timeAgo}}",
   "close": "Fechar",
-  "cancel": "Cancelar"
+  "cancel": "Cancelar",
+  "publish": "Publicar",
+  "publishSelection": {
+    "dataset": "Um conjunto de dados",
+    "api": "Uma API",
+    "reuse": "Uma reutilização",
+    "harvester": "Um harvester",
+    "organization": "Uma organização"
+  },
+  "listingError": {
+    "title": "Não foi possível carregar",
+    "subtitle": "Ocorreu um erro ao contactar o servidor. Tente novamente dentro de momentos."
+  },
+  "retry": "Tentar novamente"
 }
-  
-
