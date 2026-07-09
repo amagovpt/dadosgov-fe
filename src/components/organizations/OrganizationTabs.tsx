@@ -357,7 +357,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                 </h3>
                 <div className="grid grid-cols-3 gap-24">
                   <div>
-                    <p className="text-sm mb-8 font-bold">Última atualização</p>
+                    <p className="text-sm mb-8 font-bold">Atualização dos metadados</p>
                     <span className="text-sm">
                       {organization.last_modified
                         ? format(new Date(organization.last_modified), "d 'de' MMMM 'de' yyyy", {

@@ -1,12 +1,3 @@
 {
-    "seeAllDatasets":"Ver todos os conjuntos de dados",
-    "seeAllDataStories":"Ver todas as Data Stories",
-    "seeAllNews":"Ver todas as novidades",
-    "seeAllOrganizations":"Ver todas as organizações",
-    "usedDiaryBy":"Utilizado diariamente por:",
-    "404Organizations":"Nenhuma organização encontrada.",
-    "404News":"Nenhuma novidade encontrada.",
-    "404Datastory":"Nenhum Data Story encontrado.",
-    "404Dataset":"Nenhum conjunto de dados encontrado.",
-    "latestNews":"Últimas novidades"
+    
 }
