@@ -44,7 +44,10 @@
     "openFilters": "Abrir filtros"
   },
   "results": "Resultados",
-  "publishedTimeAgo": "Publicado há {{timeAgo}}"
+  "publishedTimeAgo": "Publicado há {{timeAgo}}",
+  "recursos": "Recursos",
+  "como-usar-o-portal": "Como usar o portal",
+  "como-reutilizar-dados": "Como reutilizar dados"
 }
   
 
