@@ -31,5 +31,21 @@
   "backToArticles": "Back to articles",
   "loading": "Loading...",
   "results_one": "{{count}} result",
-  "results_other": "{{count}} results"
+  "results_other": "{{count}} results",
+  "datastories": "Data Stories",
+  "pagination": {
+    "pagination": "Pagination",
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "filters": {
+    "filters": "Filters",
+    "hideFilters": "Hide filters",
+    "openFilters": "Open filters"
+  },
+  "results": "Results",
+  "publishedTimeAgo": "Published {{timeAgo}} ago",
+  "recursos": "Resources",
+  "como-usar-o-portal": "How to use the portal",
+  "como-reutilizar-dados": "How to reuse data"
 }
