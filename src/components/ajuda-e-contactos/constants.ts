@@ -89,6 +89,12 @@ export const FAQ_DATA: FaqCategory[] = [
         richAnswer: "outros",
         defaultExpanded: true,
       },
+      {
+        question: "Solicitar a atribuição ou alteração de um emblema",
+        answer: "",
+        richAnswer: "emblema",
+        defaultExpanded: true,
+      },
     ],
   },
 ];
