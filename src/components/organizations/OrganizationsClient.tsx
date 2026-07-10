@@ -103,9 +103,7 @@ export default function OrganizationsClient({
               {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total === 1
-                ? t("results_one", { count: total.toLocaleString("pt-PT") })
-                : t("results_other", { count: total.toLocaleString("pt-PT") })}
+              {t("results", { count: total })}
             </span>
           </div>
           <div className="flex w-full items-center xl:justify-end">

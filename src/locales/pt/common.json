@@ -30,8 +30,8 @@
   "articleNotFoundDescription": "O artigo que procura não existe ou foi removido.",
   "backToArticles": "Voltar aos artigos",
   "loading": "A carregar...",
-  "results_one": "{{count}} resultado",
-  "results_other": "{{count}} resultados",
+  "results_one": "{{count, number}} resultado",
+  "results_other": "{{count, number}} resultados",
   "datastories": "Data Stories",
   "pagination": {
     "pagination": "Paginação",
@@ -64,7 +64,6 @@
       }
     }
   },
-  "results": "Resultados",
   "publishedTimeAgo": "Publicado há {{timeAgo}}",
   "recursos": "Recursos",
   "como-usar-o-portal": "Como usar o portal",

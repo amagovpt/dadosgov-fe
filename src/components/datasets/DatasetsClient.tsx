@@ -150,9 +150,7 @@ export default function DatasetsClient({
               {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total === 1
-                ? t("results_one", { count: total.toLocaleString("pt-PT") })
-                : t("results_other", { count: total.toLocaleString("pt-PT") })}
+              {t("results", { count: total })}
             </span>
           </div>
           <div className="flex w-full items-center xl:justify-end">
