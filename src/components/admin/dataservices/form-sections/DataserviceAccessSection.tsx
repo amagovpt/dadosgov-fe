@@ -41,8 +41,8 @@ export default function DataserviceAccessSection({
               label="Aberto com conta"
               id="access-account"
               name="access-type"
-              checked={accessType === "account"}
-              onChange={() => onAccessTypeChange("account")}
+              checked={accessType === "open_with_account"}
+              onChange={() => onAccessTypeChange("open_with_account")}
             />
             <RadioButton
               label="Restrito"
