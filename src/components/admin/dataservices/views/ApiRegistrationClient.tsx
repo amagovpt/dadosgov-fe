@@ -33,6 +33,7 @@ export default function ApiRegistrationClient({
 }: ApiRegistrationClientProps) {
   const { user } = useAuth();
   const [accessType, setAccessType] = useState("open");
+  const [producer, setProducer] = useState("");
   const [apiName, setApiName] = useState("");
   const [apiAcronym, setApiAcronym] = useState("");
   const [apiDescription, setApiDescription] = useState("");
@@ -80,6 +81,7 @@ export default function ApiRegistrationClient({
     try {
       const dataservice = await createDataservice({
         title: apiName.trim(),
+        organization: producer && producer !== "user" ? producer : undefined,
         description: apiDescription.trim(),
         acronym: apiAcronym.trim() || undefined,
         base_api_url: baseApiUrl.trim() || undefined,
@@ -274,6 +276,8 @@ export default function ApiRegistrationClient({
                   id: organization.id,
                   name: organization.name,
                 }))}
+                initialValue={producer}
+                onValueChange={setProducer}
               />
 
               <DataserviceDescriptionSection
