@@ -43,9 +43,11 @@ export async function fetchUserFollowers(
   pageSize: number = 20
 ): Promise<APIResponse<Follow>> {
   try {
+    // /users/<id>/followers/ requires authentication (LEDG-2113 / VULN-2092),
+    // so the session cookie must be sent.
     const res = await fetch(
       `${API_BASE_URL}/users/${userId}/followers/?page=${page}&page_size=${pageSize}`,
-      { cache: "no-store" }
+      { cache: "no-store", credentials: "include" }
     );
     if (!res.ok) throw new Error(`Failed to fetch user followers: ${res.statusText}`);
     return await res.json();
@@ -94,9 +96,11 @@ export async function fetchUserFollowing(
   pageSize: number = 100
 ): Promise<APIResponse<UserFollowing>> {
   try {
+    // /users/<id>/following/ requires authentication (LEDG-2113 / VULN-2092),
+    // so the session cookie must be sent.
     const res = await fetch(
       `${API_BASE_URL}/users/${userId}/following/?page=${page}&page_size=${pageSize}`,
-      { cache: "no-store" }
+      { cache: "no-store", credentials: "include" }
     );
     if (!res.ok) throw new Error(`Failed to fetch user following: ${res.statusText}`);
     return await res.json();
