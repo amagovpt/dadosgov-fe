@@ -6,6 +6,7 @@ import { createDataservice, updateDataservice } from "@/service/api/dataservices
 import { fetchDataset, fetchMyDatasets } from "@/service/api/datasets";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { searchDatasets } from "@/service/api/search";
+import { AUDIENCE_ROLES } from "@/utils/dataserviceLabels";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { Dataset } from "@/service/types/dataset";
 import { useAuth } from "@/context/AuthContext";
@@ -42,6 +43,10 @@ export default function ApiRegistrationClient({
   const [technicalDocUrl, setTechnicalDocUrl] = useState("");
   const [rateLimiting, setRateLimiting] = useState("");
   const [availability, setAvailability] = useState("");
+  const [rateLimitingUrl, setRateLimitingUrl] = useState("");
+  const [accessAudiences, setAccessAudiences] = useState<Record<string, string>>({});
+  const [reasonCategory, setReasonCategory] = useState("");
+  const [reasonText, setReasonText] = useState("");
   const [authRequestUrl, setAuthRequestUrl] = useState("");
   const [businessDocUrl, setBusinessDocUrl] = useState("");
   const [apiError, setApiError] = useState<string | null>(null);
@@ -78,6 +83,15 @@ export default function ApiRegistrationClient({
     setApiError(null);
     setIsSubmitting(true);
 
+    const isRestricted = accessType === "restricted";
+    const audiences = isRestricted
+      ? AUDIENCE_ROLES.filter((r) => accessAudiences[r.role]).map((r) => ({
+          role: r.role,
+          condition: accessAudiences[r.role],
+        }))
+      : undefined;
+    const usesOtherReason = reasonCategory === "other";
+
     try {
       const dataservice = await createDataservice({
         title: apiName.trim(),
@@ -90,8 +104,14 @@ export default function ApiRegistrationClient({
         business_documentation_url: businessDocUrl.trim() || undefined,
         authorization_request_url: authRequestUrl.trim() || undefined,
         rate_limiting: rateLimiting.trim() || undefined,
+        rate_limiting_url: rateLimitingUrl.trim() || undefined,
         availability: availability.trim() ? parseFloat(availability) : undefined,
         access_type: accessType,
+        access_audiences: audiences,
+        access_type_reason_category:
+          isRestricted && reasonCategory && !usesOtherReason ? reasonCategory : undefined,
+        access_type_reason:
+          isRestricted && usesOtherReason ? reasonText.trim() || undefined : undefined,
         private: true,
       });
 
@@ -288,6 +308,7 @@ export default function ApiRegistrationClient({
                 machineDocUrl={machineDocUrl}
                 technicalDocUrl={technicalDocUrl}
                 rateLimiting={rateLimiting}
+                rateLimitingUrl={rateLimitingUrl}
                 availability={availability}
                 hasApiNameError={hasError("apiName")}
                 hasApiDescriptionError={hasError("apiDescription")}
@@ -308,6 +329,7 @@ export default function ApiRegistrationClient({
                 onMachineDocUrlChange={(event) => setMachineDocUrl(event.target.value)}
                 onTechnicalDocUrlChange={(event) => setTechnicalDocUrl(event.target.value)}
                 onRateLimitingChange={(event) => setRateLimiting(event.target.value)}
+                onRateLimitingUrlChange={(event) => setRateLimitingUrl(event.target.value)}
                 onAvailabilityChange={(event) => setAvailability(event.target.value)}
               />
 
@@ -315,7 +337,15 @@ export default function ApiRegistrationClient({
                 accessType={accessType}
                 authRequestUrl={authRequestUrl}
                 businessDocUrl={businessDocUrl}
+                accessAudiences={accessAudiences}
+                reasonCategory={reasonCategory}
+                reasonText={reasonText}
                 onAccessTypeChange={setAccessType}
+                onAudienceChange={(role, value) =>
+                  setAccessAudiences((prev) => ({ ...prev, [role]: value }))
+                }
+                onReasonCategoryChange={setReasonCategory}
+                onReasonTextChange={(event) => setReasonText(event.target.value)}
                 onAuthRequestUrlChange={(event) => setAuthRequestUrl(event.target.value)}
                 onBusinessDocUrlChange={(event) => setBusinessDocUrl(event.target.value)}
               />
