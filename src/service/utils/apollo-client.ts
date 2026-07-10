@@ -6,17 +6,10 @@ import {
   type OperationVariables,
 } from "@apollo/client";
 import type { MaybeMasked } from "@apollo/client";
-
-// Server-side (Node, inside container) prefers API_URL_INTERNAL.
-// Client-side (browser) only sees NEXT_PUBLIC_API_URL (baked at build time).
-const rawUrl =
-  (typeof window === "undefined" && process.env.API_URL_INTERNAL) ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:3333";
-const baseUrl = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
+import { getCmsBaseUrl } from "./cmsBaseUrl";
 
 const link = new HttpLink({
-  uri: `${baseUrl}/graphql`,
+  uri: `${getCmsBaseUrl()}/graphql`,
 });
 
 
