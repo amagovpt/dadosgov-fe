@@ -20,6 +20,7 @@ import { useOrganizationsListing } from "@/hooks/useOrganizationsListing";
 import { ORGANIZATION_SORT_LABELS } from "@/utils/organizationsListingQuery";
 import { twJoin } from "tailwind-merge";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
+import { useTranslation } from "react-i18next";
 
 interface OrganizationsClientProps {
   initialData: APIResponse<Organization>;
@@ -36,6 +37,8 @@ export default function OrganizationsClient({
   orgBadgeCounts,
   allOrganizations,
 }: OrganizationsClientProps) {
+  const { t } = useTranslation("common");
+
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const {
@@ -100,7 +103,9 @@ export default function OrganizationsClient({
               {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total.toLocaleString("pt-PT")} Resultados
+              {total === 1
+                ? t("results_one", { count: total.toLocaleString("pt-PT") })
+                : t("results_other", { count: total.toLocaleString("pt-PT") })}
             </span>
           </div>
           <div className="flex w-full items-center xl:justify-end">

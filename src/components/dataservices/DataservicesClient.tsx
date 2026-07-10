@@ -22,16 +22,14 @@ import HeroGeneral from "@/components/HeroGeneral";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useDataservicesListing } from "@/hooks/useDataservicesListing";
 import { DATASERVICE_SORT_LABELS } from "@/utils/dataservicesListingQuery";
+import { useTranslation } from "react-i18next";
 
 interface DataservicesClientProps {
   initialData: APIResponse<Dataservice>;
   currentPage: number;
 }
 
-export default function DataservicesClient({
-  initialData,
-  currentPage,
-}: DataservicesClientProps) {
+export default function DataservicesClient({ initialData, currentPage }: DataservicesClientProps) {
   const router = useRouter();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const {
@@ -44,10 +42,12 @@ export default function DataservicesClient({
     setSearchQuery,
     sortDefault,
   } = useDataservicesListing({ initialData, currentPage });
+  const { t } = useTranslation("common");
+
   const { data: dataservices, total, page_size } = listData;
 
   return (
-    <main className="w-full flex flex-col justify-center items-center bg-primary-50 gap-32">
+    <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
         title="APIs"
         breadcrumbItems={[
@@ -76,10 +76,10 @@ export default function DataservicesClient({
       />
 
       {/* Main Content */}
-      <div className="container flex flex-col gap-24 justify-center items-center py-32">
+      <div className="container flex flex-col items-center justify-center gap-24 py-32">
         {/* Filters toggle + results count + sort */}
-        <div className="w-full flex xl:flex-row flex-col gap-16">
-          <div className="w-full flex flex-row items-end gap-32">
+        <div className="flex w-full flex-col gap-16 xl:flex-row">
+          <div className="flex w-full flex-row items-end gap-32">
             <Button
               appearance="outline"
               variant="neutral"
@@ -97,11 +97,13 @@ export default function DataservicesClient({
             >
               {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
             </Button>
-            <span className="text-neutral-900 text-l-regular whitespace-nowrap">
-              {total.toLocaleString("pt-PT")} Resultados
+            <span className="whitespace-nowrap text-l-regular text-neutral-900">
+              {total === 1
+                ? t("results_one", { count: total.toLocaleString("pt-PT") })
+                : t("results_other", { count: total.toLocaleString("pt-PT") })}
             </span>
           </div>
-          <div className="w-full flex items-center xl:justify-end">
+          <div className="flex w-full items-center xl:justify-end">
             <ToggleGroup
               multiple={false}
               value={sortDefault}
@@ -120,8 +122,8 @@ export default function DataservicesClient({
             </ToggleGroup>
           </div>
         </div>
-        <div className="w-full divider-neutral-200 mb-24" />
-        <div className={twJoin("grid gap-32 w-full", filtersOpen ? "grid-cols-12" : "")}>
+        <div className="divider-neutral-200 mb-24 w-full" />
+        <div className={twJoin("grid w-full gap-32", filtersOpen ? "grid-cols-12" : "")}>
           {/* Sidebar */}
           {filtersOpen && (
             <div className="col-span-4">
@@ -146,7 +148,7 @@ export default function DataservicesClient({
                     <div key={ds.id} className="h-full">
                       <CardLinks
                         onClick={() => router.push(dsUrl)}
-                        className="!h-full [&_.card-links-container]:!h-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse cursor-pointer text-neutral-900"
+                        className="!h-full cursor-pointer text-neutral-900 [&_.card-links-container]:!h-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse"
                         variant="transparent"
                         image={{
                           src: ds.organization?.logo || "/images/placeholders/organization.png",
@@ -217,7 +219,10 @@ export default function DataservicesClient({
                 <div className="col-span-full">
                   <CardNoResults
                     icon={
-                      <Icon name="agora-line-search" className="icon-xl h-12 w-12 text-primary-500" />
+                      <Icon
+                        name="agora-line-search"
+                        className="icon-xl h-12 w-12 text-primary-500"
+                      />
                     }
                     title="Não encontrou o que procurava?"
                     subtitle={
@@ -240,7 +245,7 @@ export default function DataservicesClient({
         </div>
 
         {/* Pagination */}
-        <div className="w-1/2 flex justify-center">
+        <div className="flex w-1/2 justify-center">
           <Pagination
             currentPage={activePage}
             totalItems={total}
