@@ -19,5 +19,122 @@
   "tabs": {
     "datasets": "Datasets",
     "reuses": "Reuses"
+  },
+  "collapse": "Collapse",
+  "expand": "Expand",
+  "blockPicker": {
+    "addBlock": "Add block",
+    "categories": {
+      "layout": "LAYOUT",
+      "featuredContent": "FEATURED CONTENT",
+      "text": "TEXT"
+    },
+    "blocks": {
+      "hero": {
+        "label": "Hero",
+        "description": "Header banner with title and description"
+      },
+      "accordion": {
+        "label": "Accordion",
+        "description": "Expandable summary (FAQ, etc.)"
+      },
+      "featuredDatasets": {
+        "label": "Featured datasets",
+        "description": "Highlight up to 4 datasets"
+      },
+      "featuredReuses": {
+        "label": "Featured reuses",
+        "description": "Highlight up to 4 reuses"
+      },
+      "featuredLinks": {
+        "label": "Featured links",
+        "description": "Highlight up to 4 links"
+      },
+      "markdown": {
+        "label": "Markdown block",
+        "description": "Add formatted text content"
+      }
+    }
+  },
+  "blockActions": {
+    "deleteBlockTitle": "Delete block",
+    "deleteBlockMessage": "This action is irreversible. Are you sure you want to delete this block?",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "remove": "Remove block"
+  },
+  "accordion": {
+    "titlePlaceholder": "My accordions",
+    "descriptionPlaceholder": "Add a description",
+    "itemTitlePlaceholder": "Item title",
+    "itemContentPlaceholder": "Item content...",
+    "addItem": "Add item"
+  },
+  "hero": {
+    "titlePlaceholder": "Title",
+    "descriptionPlaceholder": "Add a description",
+    "buttonTitlePlaceholder": "Button title",
+    "buttonUrlPlaceholder": "Button URL",
+    "colorLabel": "Color:",
+    "colors": {
+      "blue": "Blue",
+      "green": "Green",
+      "red": "Red"
+    }
+  },
+  "featuredDatasets": {
+    "titlePlaceholder": "My datasets",
+    "legendPlaceholder": "Add legend",
+    "organizationFallback": "Organization",
+    "noOrganization": "No organization",
+    "metadataQuality": "Metadata quality",
+    "views": "Views",
+    "downloads": "Downloads",
+    "reuses": "Reuses",
+    "favorites": "Favorites",
+    "removeTitle": "Remove dataset",
+    "removeMessage": "This action is irreversible. Are you sure you want to remove this dataset?",
+    "add": "Add a dataset",
+    "searchPlaceholder": "Search dataset...",
+    "searching": "Searching...",
+    "noResults": "No results found"
+  },
+  "featuredReuses": {
+    "titlePlaceholder": "My reuses",
+    "legendPlaceholder": "Add legend",
+    "reuseFallback": "Reuse",
+    "noOrganization": "No organization",
+    "views": "Views",
+    "favorites": "Favorites",
+    "removeTitle": "Remove reuse",
+    "removeMessage": "This action is irreversible. Are you sure you want to remove this reuse?",
+    "add": "Add a reuse",
+    "searchPlaceholder": "Search reuse...",
+    "searching": "Searching...",
+    "noResults": "No results found"
+  },
+  "featuredLinks": {
+    "titlePlaceholder": "My links",
+    "legendPlaceholder": "Add legend",
+    "paragraphPlaceholder": "Paragraph text",
+    "addParagraph": "Add paragraph",
+    "addLink": "Add link",
+    "buttonTitlePlaceholder": "Button title",
+    "buttonUrlPlaceholder": "Button URL",
+    "linkTitlePlaceholder": "Link title",
+    "linkUrlPlaceholder": "URL"
+  },
+  "markdown": {
+    "undo": "Undo",
+    "redo": "Redo",
+    "bold": "Bold",
+    "italic": "Italic",
+    "heading": "Heading {{level}}",
+    "table": "Table",
+    "link": "Link",
+    "list": "List",
+    "orderedList": "Ordered list",
+    "code": "Code",
+    "contentPlaceholder": "Write content here..."
   }
 }

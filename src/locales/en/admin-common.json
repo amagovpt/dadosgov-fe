@@ -15,7 +15,8 @@
     "statusPlaceholder": "Filter by status"
   },
   "stepper": {
-    "step": "Step"
+    "step": "Step",
+    "of": "of"
   },
   "actions": {
     "delete": "Delete",

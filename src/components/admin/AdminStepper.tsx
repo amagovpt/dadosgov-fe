@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 interface AdminStepperProps {
     currentStep: number;
     totalSteps: number;
@@ -14,20 +16,22 @@ export function AdminStepper({
     currentStep,
     totalSteps,
     stepTitle,
-    labelWord = "Passo",
+    labelWord,
     labelFormat = "slash",
 }: AdminStepperProps) {
-    const filledSegments = Math.round((currentStep / totalSteps) * TOTAL_SEGMENTS);
+    const { t } = useTranslation("admin-common");
+    const resolvedLabelWord = labelWord ?? t("stepper.step");
     const label =
         labelFormat === "de"
-            ? `${labelWord} ${currentStep} de ${totalSteps}`
-            : `${labelWord} ${currentStep}/${totalSteps}`;
+            ? `${resolvedLabelWord} ${currentStep} ${t("stepper.of")} ${totalSteps}`
+            : `${resolvedLabelWord} ${currentStep}/${totalSteps}`;
+    const filledSegments = Math.round((currentStep / totalSteps) * TOTAL_SEGMENTS);
 
     return (
         <>
             <div className="mb-20">
                 <p className="text-l-bold">
-                    <span className="text-primary-600 text-m-bold">{labelWord} {currentStep} - </span>
+                    <span className="text-primary-600 text-m-bold">{resolvedLabelWord} {currentStep} - </span>
                     <span className="text-primary-900 text-m-bold">{stepTitle}</span>
                 </p>
             </div>

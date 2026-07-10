@@ -15,7 +15,8 @@
     "statusPlaceholder": "Filtrar por estado"
   },
   "stepper": {
-    "step": "Passo"
+    "step": "Passo",
+    "of": "de"
   },
   "actions": {
     "delete": "Eliminar",

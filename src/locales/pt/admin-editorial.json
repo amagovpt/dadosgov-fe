@@ -19,5 +19,122 @@
   "tabs": {
     "datasets": "Conjuntos de dados",
     "reuses": "Reutilizar"
+  },
+  "collapse": "Recolher",
+  "expand": "Expandir",
+  "blockPicker": {
+    "addBlock": "Adicionar um bloco",
+    "categories": {
+      "layout": "LAYOUT",
+      "featuredContent": "CONTEÚDO EM DESTAQUE",
+      "text": "TEXTO"
+    },
+    "blocks": {
+      "hero": {
+        "label": "Herói",
+        "description": "Banner de cabeçalho com título e descrição"
+      },
+      "accordion": {
+        "label": "Acordeão",
+        "description": "Sumário expansível (FAQ, etc.)"
+      },
+      "featuredDatasets": {
+        "label": "Dados em destaque",
+        "description": "Destaque até 4 conjuntos de dados"
+      },
+      "featuredReuses": {
+        "label": "Reutilização em destaque",
+        "description": "Destaque até 4 reutilizações"
+      },
+      "featuredLinks": {
+        "label": "Links em destaque",
+        "description": "Destaque até 4 links"
+      },
+      "markdown": {
+        "label": "Bloco Markdown",
+        "description": "Adicionar conteúdo de texto formatado"
+      }
+    }
+  },
+  "blockActions": {
+    "deleteBlockTitle": "Eliminar o bloco",
+    "deleteBlockMessage": "Essa ação é irreversível. Tem a certeza que quer eliminar este bloco?",
+    "moveUp": "Mover para cima",
+    "moveDown": "Mover para baixo",
+    "remove": "Remover bloco"
+  },
+  "accordion": {
+    "titlePlaceholder": "Os meus acordeões",
+    "descriptionPlaceholder": "Adicione uma descrição",
+    "itemTitlePlaceholder": "Título do item",
+    "itemContentPlaceholder": "Conteúdo do item...",
+    "addItem": "Adicionar item"
+  },
+  "hero": {
+    "titlePlaceholder": "Título",
+    "descriptionPlaceholder": "Adicione uma descrição",
+    "buttonTitlePlaceholder": "Título do botão",
+    "buttonUrlPlaceholder": "URL do botão",
+    "colorLabel": "Cor:",
+    "colors": {
+      "blue": "Azul",
+      "green": "Verde",
+      "red": "Vermelho"
+    }
+  },
+  "featuredDatasets": {
+    "titlePlaceholder": "Os meus conjuntos de dados",
+    "legendPlaceholder": "Adicionar legenda",
+    "organizationFallback": "Organização",
+    "noOrganization": "Sem organização",
+    "metadataQuality": "Qualidade dos metadados",
+    "views": "Visualizações",
+    "downloads": "Downloads",
+    "reuses": "Reutilizações",
+    "favorites": "Favoritos",
+    "removeTitle": "Remover conjunto de dados",
+    "removeMessage": "Essa ação é irreversível. Tem a certeza que quer remover este conjunto de dados?",
+    "add": "Adicionar um conjunto de dados",
+    "searchPlaceholder": "Pesquisar conjunto de dados...",
+    "searching": "A pesquisar...",
+    "noResults": "Nenhum resultado encontrado"
+  },
+  "featuredReuses": {
+    "titlePlaceholder": "As minhas reutilizações",
+    "legendPlaceholder": "Adicionar legenda",
+    "reuseFallback": "Reutilização",
+    "noOrganization": "Sem organização",
+    "views": "Visualizações",
+    "favorites": "Favoritos",
+    "removeTitle": "Remover reutilização",
+    "removeMessage": "Essa ação é irreversível. Tem a certeza que quer remover esta reutilização?",
+    "add": "Adicione uma reutilização",
+    "searchPlaceholder": "Pesquisar reutilização...",
+    "searching": "A pesquisar...",
+    "noResults": "Nenhum resultado encontrado"
+  },
+  "featuredLinks": {
+    "titlePlaceholder": "Os meus links",
+    "legendPlaceholder": "Adicionar legenda",
+    "paragraphPlaceholder": "Texto do parágrafo",
+    "addParagraph": "Adicione um parágrafo",
+    "addLink": "Adicionar um link",
+    "buttonTitlePlaceholder": "Título do botão",
+    "buttonUrlPlaceholder": "URL do botão",
+    "linkTitlePlaceholder": "Título do link",
+    "linkUrlPlaceholder": "URL"
+  },
+  "markdown": {
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "bold": "Negrito",
+    "italic": "Itálico",
+    "heading": "Cabeçalho {{level}}",
+    "table": "Tabela",
+    "link": "Link",
+    "list": "Lista",
+    "orderedList": "Lista ordenada",
+    "code": "Código",
+    "contentPlaceholder": "Escreva aqui o conteúdo..."
   }
 }

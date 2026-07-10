@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { CardGeneral, Icon, usePopupContext } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import { searchReuses } from "@/service/api/search";
 import type { Reuse } from "@/service/types/reuse";
 import type { FeaturedReusesData } from "../editorial-blocks";
 import { DeleteBlockPopupContent } from "./DeleteBlockPopupContent";
-import { getTimeAgoLabel } from "./utils";
+import { formatCompactMetric, getTimeAgoLabel } from "./utils";
 
 export function FeaturedReusesEditor({
   data,
@@ -17,6 +18,7 @@ export function FeaturedReusesEditor({
   nameMap?: Record<string, Reuse>;
   onNameMapUpdate?: (reuse: Reuse) => void;
 }) {
+  const { t, i18n } = useTranslation(["admin-common", "admin-editorial"]);
   const { show, hide } = usePopupContext();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,9 +33,13 @@ export function FeaturedReusesEditor({
           hide();
           onChange({ ...data, reuseIds: data.reuseIds.filter((_, i) => i !== index) });
         }}
-        message="Essa ação é irreversível. Tem a certeza que quer remover esta reutilização?"
+        message={t("admin-editorial:featuredReuses.removeMessage")}
       />,
-      { title: "Remover reutilização", closeAriaLabel: "Fechar", dimensions: "m" }
+      {
+        title: t("admin-editorial:featuredReuses.removeTitle"),
+        closeAriaLabel: t("admin-common:fileUpload.popup.close"),
+        dimensions: "m",
+      }
     );
   };
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -90,27 +96,21 @@ export function FeaturedReusesEditor({
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
-        placeholder="As minhas reutilizações"
+        placeholder={t("admin-editorial:featuredReuses.titlePlaceholder")}
         className="text-xl mb-4 w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
       <input
         type="text"
         value={data.legend}
         onChange={(e) => onChange({ ...data, legend: e.target.value })}
-        placeholder="Adicionar legenda"
+        placeholder={t("admin-editorial:featuredReuses.legendPlaceholder")}
         className="text-sm mb-[20px] w-full border-none text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
 
       <div className="grid grid-cols-3 gap-16">
         {data.reuseIds.map((id, index) => {
           const reuse = nameMap?.[id];
-          const formatMetric = (value: number | undefined) => {
-            if (!value) return "0";
-            if (value >= 1_000_000) return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
-            if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
-            return String(value);
-          };
-          const timeAgo = getTimeAgoLabel(reuse?.last_modified);
+          const timeAgo = getTimeAgoLabel(reuse?.last_modified, i18n.resolvedLanguage);
 
           return (
             <div key={id} className="relative">
@@ -122,7 +122,7 @@ export function FeaturedReusesEditor({
                       reuse?.image_thumbnail ||
                       reuse?.organization?.logo ||
                       "/images/placeholders/organization.png",
-                    alt: reuse?.title || "Reutilização",
+                    alt: reuse?.title || t("admin-editorial:featuredReuses.reuseFallback"),
                     height: "56px",
                     className: "bg-primary-100 !object-contain !h-[56px]",
                   }}
@@ -136,7 +136,7 @@ export function FeaturedReusesEditor({
                           style={{ fontSize: "16px", fontWeight: 300 }}
                           className="mt-4 text-neutral-900"
                         >
-                          {reuse?.organization?.name || "Sem Organização"}
+                          {reuse?.organization?.name || t("admin-editorial:featuredReuses.noOrganization")}
                         </span>
                       </div>
                     ) as unknown as string
@@ -150,23 +150,23 @@ export function FeaturedReusesEditor({
                         </p>
                         <div className="mt-auto">
                           <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
-                            <div className="flex items-center gap-8" title="Visualizações">
+                            <div className="flex items-center gap-8" title={t("admin-editorial:featuredReuses.views")}>
                               <Icon
                                 name="agora-solid-eye"
                                 dimensions="xs"
                                 className="fill-neutral-700"
                                 aria-hidden="true"
                               />
-                              <span>{formatMetric(reuse?.metrics?.views)}</span>
+                              <span>{formatCompactMetric(reuse?.metrics?.views, i18n.resolvedLanguage)}</span>
                             </div>
-                            <div className="flex items-center gap-8" title="Favoritos">
+                            <div className="flex items-center gap-8" title={t("admin-editorial:featuredReuses.favorites")}>
                               <Icon
                                 name="agora-solid-star"
                                 dimensions="xs"
                                 className="fill-neutral-700"
                                 aria-hidden="true"
                               />
-                              <span>{formatMetric(reuse?.metrics?.followers)}</span>
+                              <span>{formatCompactMetric(reuse?.metrics?.followers, i18n.resolvedLanguage)}</span>
                             </div>
                           </div>
                           <div className="mt-16 flex items-center gap-8 text-primary-600">
@@ -188,7 +188,7 @@ export function FeaturedReusesEditor({
                 type="button"
                 onClick={() => handleRemoveReuse(index)}
                 className="rounded group absolute right-8 top-8 z-10 p-4"
-                title="Remover"
+                title={t("admin-editorial:blockActions.remove")}
               >
                 <Icon
                   name="agora-line-trash"
@@ -210,7 +210,7 @@ export function FeaturedReusesEditor({
             className="flex min-h-[200px] flex-col items-center justify-center rounded-8 border-2 border-dashed border-neutral-300 text-neutral-900 transition-colors hover:border-neutral-400"
           >
             <Icon name="agora-line-plus-circle" className="mb-4 h-[20px] w-[20px]" />
-            <span className="text-xs">Adicione uma reutilização</span>
+            <span className="text-xs">{t("admin-editorial:featuredReuses.add")}</span>
           </button>
         )}
 
@@ -220,11 +220,11 @@ export function FeaturedReusesEditor({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Pesquisar reutilização..."
+              placeholder={t("admin-editorial:featuredReuses.searchPlaceholder")}
               className="text-sm w-full rounded-8 border border-neutral-300 px-12 py-[10px] outline-none focus:border-primary-500"
               autoFocus
             />
-            {isSearching && <p className="text-xs mt-4 text-neutral-400">A pesquisar...</p>}
+            {isSearching && <p className="text-xs mt-4 text-neutral-400">{t("admin-editorial:featuredReuses.searching")}</p>}
             {searchResults.length > 0 && (
               <ul className="shadow-lg absolute z-10 mt-4 max-h-[240px] w-full overflow-y-auto rounded-8 border border-neutral-200 bg-white">
                 {searchResults.map((r) => (
@@ -241,7 +241,7 @@ export function FeaturedReusesEditor({
               </ul>
             )}
             {searchQuery.length >= 2 && !isSearching && searchResults.length === 0 && (
-              <p className="text-xs mt-4 text-neutral-400">Nenhum resultado encontrado</p>
+              <p className="text-xs mt-4 text-neutral-400">{t("admin-editorial:featuredReuses.noResults")}</p>
             )}
             <button
               type="button"
@@ -252,7 +252,7 @@ export function FeaturedReusesEditor({
               }}
               className="text-xs mt-4 text-neutral-400 hover:text-neutral-600"
             >
-              Cancelar
+              {t("admin-common:actions.cancel")}
             </button>
           </div>
         )}
