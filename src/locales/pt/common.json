@@ -38,13 +38,50 @@
     "previous": "Página anterior",
     "next": "Página seguinte"
   },
+  "search": {
+    "label": "Pesquisar",
+    "placeholder": "Pesquisar...",
+    "noResults": "Nenhum resultado encontrado.",
+    "minCharsMessage": "Escreva pelo menos 2 caracteres..."
+  },
   "filters": {
     "filters": "Filtros",
     "hideFilters": "Ocultar filtros",
-    "openFilters": "Abrir filtros"
+    "openFilters": "Abrir filtros",
+    "advanced": {
+      "label": "Filtros avançados",
+      "organization": "Organizações",
+      "tag": "Palavras-chave",
+      "format": "Formatos",
+      "license": "Licenças",
+      "frequency": "Frequência",
+      "geozone": "Cobertura Espacial",
+      "granularity": "Granularidade Espacial",
+      "search": {
+        "placeholder": "Escreva para pesquisar...",
+        "minCharsMessage": "Escreva pelo menos 2 caracteres...",
+        "noResults": "Nenhum resultado encontrado."
+      }
+    }
   },
   "results": "Resultados",
-  "publishedTimeAgo": "Publicado há {{timeAgo}}"
+  "publishedTimeAgo": "Publicado há {{timeAgo}}",
+  "recursos": "Recursos",
+  "como-usar-o-portal": "Como usar o portal",
+  "como-reutilizar-dados": "Como reutilizar dados",
+  "close": "Fechar",
+  "cancel": "Cancelar",
+  "publish": "Publicar",
+  "publishSelection": {
+    "dataset": "Um conjunto de dados",
+    "api": "Uma API",
+    "reuse": "Uma reutilização",
+    "harvester": "Um harvester",
+    "organization": "Uma organização"
+  },
+  "listingError": {
+    "title": "Não foi possível carregar",
+    "subtitle": "Ocorreu um erro ao contactar o servidor. Tente novamente dentro de momentos."
+  },
+  "retry": "Tentar novamente"
 }
-  
-
