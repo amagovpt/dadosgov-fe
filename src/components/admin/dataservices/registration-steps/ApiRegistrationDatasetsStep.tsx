@@ -56,6 +56,7 @@ export default function ApiRegistrationDatasetsStep({
 
       <form
         className="admin-page__form"
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
           onNextStep();
@@ -108,6 +109,7 @@ export default function ApiRegistrationDatasetsStep({
             label="Link para o conjunto de dados"
             placeholder="https://..."
             id="api-registration-dataset-link-url"
+            required={false}
             value={datasetLinkUrl}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               onDatasetLinkUrlChange(e.target.value)
@@ -125,6 +127,7 @@ export default function ApiRegistrationDatasetsStep({
           )}
           <div className="flex justify-end">
             <Button
+              type="button"
               appearance="outline"
               variant="primary"
               hasIcon
