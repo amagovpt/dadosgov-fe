@@ -81,6 +81,10 @@ const nextConfig: NextConfig = {
         hostname: "localhost:7000/static",
       },
       {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+      },
+      {
         protocol: urlAPI.protocol.slice(0, -1) as "http" | "https", // remove trailing colon
         hostname: urlAPI.hostname || "",
       },
