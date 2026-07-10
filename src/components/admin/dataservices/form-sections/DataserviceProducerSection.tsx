@@ -13,11 +13,15 @@ interface UserOrganization {
 interface DataserviceProducerSectionProps {
   displayName: string;
   organizations: UserOrganization[];
+  initialValue?: string;
+  onValueChange?: (value: string) => void;
 }
 
 export default function DataserviceProducerSection({
   displayName,
   organizations,
+  initialValue,
+  onValueChange,
 }: DataserviceProducerSectionProps) {
   const producerOptions = useMemo(
     () =>
@@ -33,6 +37,8 @@ export default function DataserviceProducerSection({
   return (
     <ProducerIdentitySection
       producerOptions={producerOptions}
+      initialValue={initialValue}
+      onValueChange={onValueChange}
       helperDescription={
         <>
           Recomendamos que publique em nome de uma organização se se tratar de uma atividade
