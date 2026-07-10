@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { usePopupContext } from "@ama-pt/agora-design-system";
 import { fetchDataset, uploadResource } from "@/service/api/datasets";
@@ -41,6 +42,9 @@ export function useDatasetResourceActions({
   isUploadingRef,
 }: UseDatasetResourceActionsParams) {
   const { t } = useTranslation("admin-datasets");
+  // Force a fresh edit popup instance on each open so local state is re-seeded
+  // from the current resource instead of reusing stale values from a prior open.
+  const editPopupSeqRef = useRef(0);
 
   async function refreshDataset() {
     const updated = await fetchDataset(slug);
@@ -58,41 +62,49 @@ export function useDatasetResourceActions({
     setFileUploadError(null);
 
     try {
-      for (const file of Array.from(files)) {
-        await uploadResource(dataset.id, file);
+      try {
+        for (const file of Array.from(files)) {
+          await uploadResource(dataset.id, file);
+        }
+      } catch (error) {
+        const err = error as { status?: number; data?: Record<string, unknown>; message?: string };
+        console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
+
+        if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
+          const flattenValue = (value: unknown): string => {
+            if (Array.isArray(value)) return value.map(flattenValue).join("; ");
+            if (value && typeof value === "object") {
+              return Object.values(value as Record<string, unknown>)
+                .map(flattenValue)
+                .join("; ");
+            }
+            return String(value);
+          };
+
+          const message =
+            (err.data.message as string) ||
+            Object.entries(err.data)
+              .map(([key, value]) => `${key}: ${flattenValue(value)}`)
+              .join(", ");
+
+          setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(message)}`);
+        } else if (err.message) {
+          setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(err.message)}`);
+        } else {
+          const statusHint = err.status ? ` (HTTP ${err.status})` : "";
+          setFileUploadError(`${t("edit.resourceUploadError")}${statusHint}. ${t("edit.resourceUploadRetry")}`);
+        }
+        return;
       }
-      const updated = await fetchDataset(slug);
-      setDataset(updated);
+
+      try {
+        const updated = await fetchDataset(slug);
+        setDataset(updated);
+      } catch (refreshError) {
+        console.error("Resource uploaded but dataset refresh failed:", refreshError);
+      }
       setUploaderKey((currentKey) => currentKey + 1);
       showApiSuccess(t("edit.resourceUploadSuccess"));
-    } catch (error) {
-      const err = error as { status?: number; data?: Record<string, unknown>; message?: string };
-      console.error("Error uploading resource:", err.status, err.data ?? err.message ?? error);
-
-      if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
-        const flattenValue = (value: unknown): string => {
-          if (Array.isArray(value)) return value.map(flattenValue).join("; ");
-          if (value && typeof value === "object") {
-            return Object.values(value as Record<string, unknown>)
-              .map(flattenValue)
-              .join("; ");
-          }
-          return String(value);
-        };
-
-        const message =
-          (err.data.message as string) ||
-          Object.entries(err.data)
-            .map(([key, value]) => `${key}: ${flattenValue(value)}`)
-            .join(", ");
-
-        setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(message)}`);
-      } else if (err.message) {
-        setFileUploadError(`${t("edit.resourceUploadError")}: ${translateUploadError(err.message)}`);
-      } else {
-        const statusHint = err.status ? ` (HTTP ${err.status})` : "";
-        setFileUploadError(`${t("edit.resourceUploadError")}${statusHint}. ${t("edit.resourceUploadRetry")}`);
-      }
     } finally {
       isUploadingRef.current = false;
       setIsSubmitting(false);
@@ -131,6 +143,7 @@ export function useDatasetResourceActions({
 
     show(
       <DatasetsEditResourceEditPopup
+        key={`resource-edit-${resource.id}-${++editPopupSeqRef.current}`}
         resource={resource}
         datasetId={dataset.id}
         resourceTypes={resourceTypes}
@@ -156,6 +169,7 @@ export function useDatasetResourceActions({
       setTimeout(() => {
         show(
           <DatasetsEditResourceEditPopup
+            key={`resource-edit-${resource.id}-${++editPopupSeqRef.current}`}
             resource={resource}
             datasetId={dataset.id}
             resourceTypes={resourceTypes}

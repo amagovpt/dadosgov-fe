@@ -1,6 +1,13 @@
 import React, { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, InputText, InputTextArea, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
+import {
+  Button,
+  InputText,
+  InputTextArea,
+  LoaderDialog,
+  StatusCard,
+  usePopupContext,
+} from "@ama-pt/agora-design-system";
 import { Dropdown } from "@/components/Primitives/Dropdown";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import { replaceResourceFile, updateResource } from "@/service/api/datasets";
@@ -123,12 +130,13 @@ export default function DatasetsEditResourceEditPopup({
       setError(msg);
     } finally {
       setIsReplacing(false);
+      if (replaceFileInputRef.current) replaceFileInputRef.current.value = "";
     }
   };
 
   return (
     <form
-      className="flex flex-col gap-16"
+      className="relative flex flex-col gap-16"
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
@@ -137,6 +145,12 @@ export default function DatasetsEditResourceEditPopup({
       style={{ minHeight: "60vh" }}
     >
       {error && <StatusCard variant="danger" description={error} />}
+
+      {isReplacing && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">
+          <LoaderDialog title={t("edit.resourceReplacing")} />
+        </div>
+      )}
 
       <div className="flex flex-1 flex-col gap-16 overflow-y-auto">
         <InputText

@@ -14,9 +14,18 @@ interface ReuseMetricsTableProps {
   total: number;
   page: number;
   onPageChange: (page: number) => void;
+  pageSize?: number;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
-export function ReuseMetricsTable({ reuses, total, page, onPageChange }: ReuseMetricsTableProps) {
+export function ReuseMetricsTable({
+  reuses,
+  total,
+  page,
+  onPageChange,
+  pageSize = PAGE_SIZE,
+  onPageSizeChange,
+}: ReuseMetricsTableProps) {
   const { t } = useTranslation("admin-statistics");
 
   const columns: AdminListColumn<Reuse>[] = [
@@ -49,10 +58,11 @@ export function ReuseMetricsTable({ reuses, total, page, onPageChange }: ReuseMe
 
   return (
     <AdminPaginatedTable
-      pageSize={PAGE_SIZE}
+      pageSize={pageSize}
       totalItems={total}
       currentPage={page}
       setCurrentPage={onPageChange}
+      setPageSize={onPageSizeChange}
     >
       <AdminListTable items={reuses} columns={columns} getRowKey={(reuse) => reuse.id} />
     </AdminPaginatedTable>

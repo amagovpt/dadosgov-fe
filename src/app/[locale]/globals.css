@@ -774,9 +774,29 @@ li.section-name:empty {
   .bottom-container {
   margin-top: auto;
 }
-
-.agora-card-links-datasets .agora-card-links .title h2 {
+.agora-card-links .title h2 {
   text-decoration: underline;
+}
+
+.agora-card-links-datasets .agora-card-links .card-links-container,
+.agora-card-links-datasets .agora-card-links .card-links-container .top-container,
+.agora-card-links-datasets .agora-card-links .card-links-container .top-container .content,
+.agora-card-links-datasets
+  .agora-card-links
+  .card-links-container
+  .top-container
+  .content
+  .text-content {
+  height: 100% !important;
+}
+
+.agora-card-links-datasets .agora-card-links .text-content .date,
+.agora-card-links-datasets .agora-card-links .text-content .description {
+  flex-grow: 0 !important;
+}
+
+.agora-card-links-datasets .agora-card-links .text-content .title {
+  flex-grow: 1 !important;
 }
 
 .agora-card-links .card-links-container {

@@ -65,7 +65,7 @@ export function ResourceViewPopupContent({
                   {t("fileUpload.resourceEdit.urlLabel")}
                 </td>
                 <td className="break-all py-4">
-                  <TextLink href={name}>{name}</TextLink>
+                  <TextLink href={name} target="_blank">{name}</TextLink>
                 </td>
               </tr>
             )}

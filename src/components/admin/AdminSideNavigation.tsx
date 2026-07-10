@@ -13,6 +13,7 @@ import type {
   AdminNavLink,
   AdminSideNavigationData,
 } from "@/service/types/admin-side-navigation";
+import { stripLocale } from "@/utils/stripLocale";
 
 interface NavChild {
   label: string;
@@ -44,15 +45,18 @@ function toNavChild(link: AdminNavLink, href: string): NavChild {
 
 export function AdminSideNavigation({ data }: { data: AdminSideNavigationData }) {
   const pathname = usePathname();
+  // usePathname() is locale-prefixed (`/pt/admin/...`) because prefixDefault is
+  // true; normalize before matching so `/admin`-anchored logic keeps working.
+  const localePath = useMemo(() => stripLocale(pathname), [pathname]);
   const { isAdmin } = useAuth();
   const { organizations } = useActiveOrganization();
   const [urlOrg, setUrlOrg] = useState<Organization | null>(null);
 
   // Extract orgId from URL like /admin/org/{orgId}/...
   const urlOrgId = useMemo(() => {
-    const match = pathname?.match(/^\/admin\/org\/([^/]+)/);
+    const match = localePath.match(/^\/admin\/org\/([^/]+)/);
     return match ? match[1] : null;
-  }, [pathname]);
+  }, [localePath]);
 
   // Fetch org from URL if not already in user's org list
   useEffect(() => {
@@ -169,7 +173,7 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
             : []),
           ...visibleGroups.map((group) => {
           const hasActiveChild = group.children.some(
-            (child) => pathname?.startsWith(child.href),
+            (child) => localePath.startsWith(child.href),
           );
 
           return (
@@ -199,7 +203,7 @@ export function AdminSideNavigation({ data }: { data: AdminSideNavigationData })
             >
               <ul className="admin-sidebar-nav__children">
                 {group.children.map((child) => {
-                  const isActive = pathname?.startsWith(child.href);
+                  const isActive = localePath.startsWith(child.href);
                   return (
                     <li key={child.href}>
                       <Link

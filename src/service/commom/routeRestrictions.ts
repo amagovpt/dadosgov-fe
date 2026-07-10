@@ -66,10 +66,7 @@ function collectAdminRestrictions(
   admin: AdminSideNavigationData,
   locale: string
 ): void {
-  if (admin.homeLink) {
-    accumulate(map, toLocalePath(admin.homeLink.href, locale), isActive(admin.homeLink.enabled));
-  }
-
+  
   (admin.groups ?? []).forEach((group) => {
     const groupActive = isActive(group.enabled);
     (group.children ?? []).forEach((child) => {

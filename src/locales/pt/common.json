@@ -8,7 +8,30 @@
   "organizations": "Organizações",
   "publishedAt": "Publicado a {{date}}",
   "readMore": "Ler mais",
+  "seeAllDatasets": "Ver todos os conjuntos de dados",
+  "seeAllDataStories": "Ver todas as Data Stories",
+  "seeAllNews": "Ver todas as novidades",
+  "seeAllOrganizations": "Ver todas as organizações",
+  "usedDiaryBy": "Utilizado diariamente por:",
+  "404Articles": "Nenhum artigo encontrado.",
+  "404Organizations": "Nenhuma organização encontrada.",
+  "404News": "Nenhuma novidade encontrada.",
+  "404Datastory": "Nenhum Data Story encontrado.",
+  "404Dataset": "Nenhum conjunto de dados encontrado.",
+  "latestNews": "Últimas novidades",
+  "sortBy": "Ordenar por :",
+  "sortMostRecent": "Mais recentes",
+  "sortOldest": "Mais antigos",
+  "sortMostViewed": "Mais visualizados",
   "home": "Início",
+  "news": "Notícias",
+  "credits": "Créditos",
+  "articleNotFound": "Artigo não encontrado",
+  "articleNotFoundDescription": "O artigo que procura não existe ou foi removido.",
+  "backToArticles": "Voltar aos artigos",
+  "loading": "A carregar...",
+  "results_one": "{{count}} resultado",
+  "results_other": "{{count}} resultados",
   "datastories": "Data Stories",
   "pagination": {
     "pagination": "Paginação",
@@ -21,5 +44,10 @@
     "openFilters": "Abrir filtros"
   },
   "results": "Resultados",
-  "publishedTimeAgo": "Publicado há {{timeAgo}}"
+  "publishedTimeAgo": "Publicado há {{timeAgo}}",
+  "recursos": "Recursos",
+  "como-usar-o-portal": "Como usar o portal",
+  "como-reutilizar-dados": "Como reutilizar dados"
 }
+  
+

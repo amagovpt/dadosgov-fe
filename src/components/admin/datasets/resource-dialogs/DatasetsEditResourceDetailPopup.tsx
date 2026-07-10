@@ -58,7 +58,7 @@ export default function DatasetsEditResourceDetailPopup({
                 {t("edit.resourceUrlLabel")}
               </td>
               <td className="break-all py-4">
-                <TextLink href={resource.url}>{resource.url}</TextLink>
+                <TextLink href={resource.url} target="_blank">{resource.url}</TextLink>
               </td>
             </tr>
             {resource.filetype !== "remote" && (

@@ -4,6 +4,7 @@ import {
   Button,
   CardNoResults,
   Icon,
+  LoaderDialog,
   Table,
   TableBody,
   TableCell,
@@ -70,6 +71,12 @@ export default function DatasetsEditResourcesTab({
           {t("edit.resourcesReorder")}
         </Button>
       </div>
+
+      {isSubmitting && (
+        <div className="mb-16 flex items-center justify-center">
+          <LoaderDialog title="A carregar ficheiro(s)..." />
+        </div>
+      )}
 
       <h2 className="mb-16 text-base font-medium text-neutral-900">
         {dataset.resources.length}{" "}

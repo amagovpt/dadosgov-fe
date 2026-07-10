@@ -10,6 +10,7 @@ import { LegaisAnswer } from "./LegaisAnswer";
 import { ProblemasTecnicosAnswer } from "./ProblemasTecnicosAnswer";
 import { PedidosDadosAnswer } from "./PedidosDadosAnswer";
 import { OutrosAnswer } from "./OutrosAnswer";
+import { Emblemas } from "./Emblemas";
 
 const FAQ_ANSWERS: Partial<Record<string, ComponentType>> = {
   true: DadosEspecificosAnswer,
@@ -20,6 +21,7 @@ const FAQ_ANSWERS: Partial<Record<string, ComponentType>> = {
   "problemas-tecnicos": ProblemasTecnicosAnswer,
   "pedidos-dados": PedidosDadosAnswer,
   outros: OutrosAnswer,
+  emblema: Emblemas,
 };
 
 interface FaqAnswerProps {
