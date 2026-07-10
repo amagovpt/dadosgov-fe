@@ -10,12 +10,16 @@ interface ProducerIdentitySectionProps {
     | React.ReactElement<DropdownSectionProps>
     | React.ReactElement<DropdownSectionProps>[];
   selectedProducerRef?: React.RefObject<string>;
+  initialValue?: string;
+  onValueChange?: (value: string) => void;
   helperDescription: React.ReactNode;
 }
 
 export default function ProducerIdentitySection({
   producerOptions,
   selectedProducerRef,
+  initialValue,
+  onValueChange,
   helperDescription,
 }: ProducerIdentitySectionProps) {
   return (
@@ -27,6 +31,8 @@ export default function ProducerIdentitySection({
         placeholder="Para pesquisar..."
         id="producer-identity"
         valueRef={selectedProducerRef}
+        initialValue={initialValue}
+        onValueChange={onValueChange}
       >
         {producerOptions}
       </AdminSelectAdapter>

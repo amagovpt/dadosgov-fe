@@ -42,14 +42,20 @@ export default async function PublicationsPage({
   const getPagesNum = async (pdfDocument: string): Promise<number | null> => {
     if (pdfDocument === "#") return null;
 
+    const url = `${origin}${getAssets(pdfDocument)}`;
+
     try {
-      const res = await fetch(`${origin}${getAssets(pdfDocument)}`);
-      if (!res.ok) return null;
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.error(`[publications] page count fetch ${url} returned ${res.status}`);
+        return null;
+      }
 
       const bytes = await res.arrayBuffer();
       const pdf = await getDocumentProxy(new Uint8Array(bytes));
       return pdf.numPages;
-    } catch {
+    } catch (error) {
+      console.error(`[publications] page count fetch ${url} failed:`, error);
       return null;
     }
   };

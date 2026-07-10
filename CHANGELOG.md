@@ -6,6 +6,15 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(resources): resolve CMS base URL from runtime env in the assets proxy** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The `/assets/[...path]` proxy route read `NEXT_PUBLIC_API_URL`, which
+    webpack inlines at `docker build` time and can't be corrected once the
+    image is deployed to a VM with a different CMS URL. It now prefers the
+    runtime-only `API_URL_INTERNAL` (same pattern already used by the Apollo
+    client), fixing the publications page's missing "N páginas" count and
+    any other asset served through that proxy. Also logs proxy/fetch
+    failures instead of failing silently.
+
 <!-- Add new entries here before the next promotion. -->
 
 ## 2026-07 (julho de 2026)

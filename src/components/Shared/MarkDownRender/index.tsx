@@ -71,6 +71,8 @@ export default function MarkDownRender({ body }: {
                     <Image
                         src={String(src) || ""}
                         alt={alt ?? ""}
+                        width={800}
+                        height={600}
                         className="max-w-full h-auto mb-16 rounded"
                     />),
                 strong: ({ children }) => <strong>{children}</strong>,
