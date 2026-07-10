@@ -9,3 +9,4 @@ export type {
   APIResponse,
 } from "./core";
 export type { SiteMetrics, SiteInfo, SiteConfigUpdatePayload } from "./site-metrics";
+export type { FoListPageHero, FoListPageNoResults, FoListPageSearch } from "./fo-list-pages";
