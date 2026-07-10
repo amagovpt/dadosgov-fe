@@ -9,12 +9,20 @@ interface ApiRegistrationPublishStepProps {
   createdDataservice: Dataservice | null;
   apiName: string;
   apiDescription: string;
+  apiError?: string | null;
+  isPublishing: boolean;
+  onPublish: () => void;
+  onSaveDraft: () => void;
 }
 
 export default function ApiRegistrationPublishStep({
   createdDataservice,
   apiName,
   apiDescription,
+  apiError,
+  isPublishing,
+  onPublish,
+  onSaveDraft,
 }: ApiRegistrationPublishStepProps) {
   return (
     <>
@@ -29,6 +37,8 @@ export default function ApiRegistrationPublishStep({
           </>
         }
       />
+
+      {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
       <CardGeneral
         variant="white-outline"
@@ -47,10 +57,17 @@ export default function ApiRegistrationPublishStep({
       <PublicationFeedbackButton />
 
       <div className="admin-page__actions flex justify-end gap-[18px]">
-        <Button appearance="outline" variant="neutral">
+        <Button
+          appearance="outline"
+          variant="neutral"
+          onClick={onSaveDraft}
+          disabled={isPublishing}
+        >
           Salvar rascunho
         </Button>
-        <Button variant="primary">Publicar API</Button>
+        <Button variant="primary" onClick={onPublish} disabled={isPublishing || !createdDataservice}>
+          {isPublishing ? "A publicar..." : "Publicar API"}
+        </Button>
       </div>
     </>
   );

@@ -58,6 +58,7 @@ export default function ApiRegistrationClient({
   const [datasetLinkError, setDatasetLinkError] = useState<string | null>(null);
   const [isResolvingLink, setIsResolvingLink] = useState(false);
   const [isLinkingDatasets, setIsLinkingDatasets] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
     useFormErrors<"apiName" | "apiDescription">();
 
@@ -208,6 +209,28 @@ export default function ApiRegistrationClient({
     onNextStep();
   }
 
+  // Step 3: the API was created as a draft (private: true) in step 1. Publishing
+  // flips it public and redirects to the API's public page; saving keeps it as a
+  // draft and returns to the list.
+  async function handlePublish() {
+    if (!createdDataservice) return;
+    setIsPublishing(true);
+    setApiError(null);
+    try {
+      await updateDataservice(createdDataservice.id, { private: false });
+      window.location.href = createdDataservice.slug
+        ? `/dataservices/${createdDataservice.slug}`
+        : "/admin/me/dataservices";
+    } catch {
+      setApiError("Erro ao publicar a API. Tente novamente.");
+      setIsPublishing(false);
+    }
+  }
+
+  function handleSaveDraft() {
+    window.location.href = "/admin/me/dataservices";
+  }
+
   const auxiliaryItems = getDataserviceAuxiliaryItems({
     hasApiNameError: hasError("apiName"),
     hasApiDescriptionError: hasError("apiDescription"),
@@ -334,6 +357,10 @@ export default function ApiRegistrationClient({
             createdDataservice={createdDataservice}
             apiName={apiName}
             apiDescription={apiDescription}
+            apiError={apiError}
+            isPublishing={isPublishing}
+            onPublish={handlePublish}
+            onSaveDraft={handleSaveDraft}
           />
         )}
       </div>
