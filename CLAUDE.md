@@ -146,6 +146,24 @@ When fetching dynamic data in a client component (e.g., admin pages), use `useEf
 - `src/components/Primitives/` & `src/components/Shared/` - Agora design-system wrappers
 - `tailwind.config.ts` - Theme config extending `AgoraTailwindConfig`
 
+## Changelog
+
+- **Update `CHANGELOG.md` after every notable change** (mandatory once the implementation is done). This mirrors the backend's changelog convention.
+- Add the new entry at the top under `## Unreleased`. Keep newest first.
+- **Style** — follow the same detail level as the backend `CHANGELOG.md`: a **bold one-line summary**, optionally followed by indented sub-bullets explaining the *why/how* (not just a PR link), and a link to the PR:
+
+  ```markdown
+  ## Unreleased
+
+  - **fix(profile): gate the user profile behind login** [#413](https://github.com/amagovpt/dadosgov-fe/pull/413)
+    - User read endpoints now require authentication, so the profile page
+      sends the session cookie and redirects anonymous visitors to login.
+  ```
+
+- Describe the behaviour that changed and the reasoning — not just a bare `(#NNN)`.
+- Link the PR as `[#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)`. **Reference the PR, not Jira ticket ids** (no `LEDG-XXXX` in the changelog).
+- The repo has no version tags: historical entries are grouped by month; new work stays under `## Unreleased` until promoted.
+
 ## Branch & Commit Conventions
 
 All contributors must follow these conventions. References:

@@ -1,4 +1,9 @@
-import { Image } from "@/service/types/shared";
+import {
+  Image,
+  FoListPageHero,
+  FoListPageNoResults,
+  FoListPageSearch,
+} from "@/service/types/shared";
 
 // ----------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------
@@ -23,28 +28,8 @@ export type Datastories = DataStoryMetadata[];
 // ----------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------
 
-export type DataStoriesHero = {
-  title: string;
-  description: string;
-};
-
-export type DataStoriesSearch = {
-  label: string;
-  placeholder: string;
-  hint: string;
-};
-
-export type DataStoriesNoResults = {
-  icon: string;
-  title: string;
-  subtitle: string;
-  description: string;
-};
-
-// ----------------------------------------------------------------------------------------------
-
 export type DataStoriesPage = {
-  hero: DataStoriesHero;
-  search: DataStoriesSearch;
-  noResults: DataStoriesNoResults;
+  hero: FoListPageHero;
+  search: FoListPageSearch;
+  noResults: FoListPageNoResults;
 };

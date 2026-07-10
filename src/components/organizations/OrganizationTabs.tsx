@@ -156,7 +156,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                       <div key={dataset.id} className="h-full">
                         <CardLinks
                           onClick={() => router.push(`/datasets/${dataset.slug}`)}
-                          className="cursor-pointer text-neutral-900"
+                          className="cursor-pointer text-neutral-900 h-full"
                           variant="white"
                           image={{
                             src:
@@ -170,7 +170,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                               <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                                 {sanitizeUserMarkdown(dataset.description)}
                               </p>
-                              <div className="text-xs mt-16 flex flex-wrap items-center gap-32 text-[#034AD8]">
+                              <div className="text-xs flex flex-wrap items-center gap-8 text-[#034AD8]">
                                 <div className="flex items-center gap-8" title="Visualizações">
                                   <Icon name="agora-line-eye" aria-hidden="true" />
                                   <span>{formatMetricValue(dataset.metrics?.views, 0)}</span>
@@ -357,7 +357,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                 </h3>
                 <div className="grid grid-cols-3 gap-24">
                   <div>
-                    <p className="text-sm mb-8 font-bold">Última atualização</p>
+                    <p className="text-sm mb-8 font-bold">Atualização dos metadados</p>
                     <span className="text-sm">
                       {organization.last_modified
                         ? format(new Date(organization.last_modified), "d 'de' MMMM 'de' yyyy", {
