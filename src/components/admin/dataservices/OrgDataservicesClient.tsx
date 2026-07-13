@@ -74,6 +74,8 @@ export default function OrgDataservicesClient() {
 
   useEffect(() => {
     if (!resolvedOrgId) {
+      // No organization to load; drop the initial loading state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false);
       return;
     }

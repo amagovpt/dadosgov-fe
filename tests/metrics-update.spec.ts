@@ -1,4 +1,4 @@
-import { test, expect } from "playwright/test";
+import { test, expect, type APIRequestContext } from "playwright/test";
 import { execSync } from "child_process";
 import { Client } from "pg";
 
@@ -44,7 +44,7 @@ with app.app_context():
 }
 
 async function getDatasetMetricsFromApi(
-  request: any
+  request: APIRequestContext
 ): Promise<{ views: number; resources_downloads: number }> {
   const response = await request.get(
     `${BACKEND_API}/datasets/${DATASET_SLUG}/`
@@ -58,7 +58,7 @@ async function getDatasetMetricsFromApi(
 }
 
 async function triggerDagAndWait(
-  request: any,
+  request: APIRequestContext,
   maxWaitMs = 120_000,
   pollMs = 3_000
 ): Promise<string> {
@@ -90,7 +90,7 @@ async function triggerDagAndWait(
 }
 
 async function getTaskLogs(
-  request: any,
+  request: APIRequestContext,
   dagRunId: string,
   taskId: string
 ): Promise<string> {
