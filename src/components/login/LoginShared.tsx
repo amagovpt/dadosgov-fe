@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React, { useState } from "react";
 import { Checkbox, Icon, StatusCard } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";

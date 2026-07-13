@@ -126,6 +126,8 @@ export const CategoryToggles = ({ siteMetrics, searchQuery, exclude = [] }: Cate
 
   useEffect(() => {
     if (!hasQuery) {
+      // Clear search totals when the query is emptied.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchTotals(null);
       setIsLoadingTotals(false);
       return;
