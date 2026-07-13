@@ -16,7 +16,7 @@ export function DatasetInfoCard() {
               <b>1. Se a organização já está registada no portal</b>
             </p>
             <p>
-              Consulte a página da organização em causa e aceda ao separador <b>"Discussões"</b>.
+              Consulte a página da organização em causa e aceda ao separador <b>&quot;Discussões&quot;</b>.
               Este é o canal de contacto direto com a organização detentora dos dados, onde pode
               colocar o seu pedido.
             </p>
@@ -41,7 +41,7 @@ export function DatasetInfoCard() {
               administrativos (dados inclusive), junto de entidades públicas.
             </p>
             <p>
-              Para saber como proceder, consulte a secção <b>"Pedidos de novos dados"</b> nas
+              Para saber como proceder, consulte a secção <b>&quot;Pedidos de novos dados&quot;</b> nas
               Perguntas Frequentes desta página, onde encontra o link e as orientações para submeter
               um pedido junto da CADA.
             </p>

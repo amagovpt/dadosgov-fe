@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React, { useState } from "react";
 import { Checkbox, Icon, StatusCard } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";
@@ -105,7 +106,7 @@ export function SupportStatusCard() {
               <p className="text-sm">
                 Se precisar de ajuda, fale connosco através do nosso formulário.
               </p>
-              <a
+              <Link
                 href="/ajuda-e-contactos"
                 className="text-sm flex items-center gap-8 text-informative-600"
               >
@@ -114,7 +115,7 @@ export function SupportStatusCard() {
                   name="agora-line-arrow-right-circle"
                   className="h-16 w-16 text-informative-600"
                 />
-              </a>
+              </Link>
             </div>
           }
         />
