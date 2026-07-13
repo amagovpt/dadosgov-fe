@@ -1,9 +1,8 @@
 import { Metadata } from "next";
-import { headers } from "next/headers";
 import HeroGeneral from "@/components/HeroGeneral";
 import { getPublicationsPage } from "@/service/queries/resources/publications";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
-import { getAssets } from "@/utils/getAssets";
+import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
 import { getDocumentProxy } from "unpdf";
 import PublicationsClient from "@/components/resources/PublicationsClient";
 import {
@@ -34,18 +33,13 @@ export default async function PublicationsPage({
 
   const { hero, publications } = await getPublicationsPage("pt");
 
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  const origin = `${proto}://${host}`;
-
   const getPagesNum = async (pdfDocument: string): Promise<number | null> => {
     if (pdfDocument === "#") return null;
 
-    const url = `${origin}${getAssets(pdfDocument)}`;
+    const url = `${getCmsBaseUrl()}/api/assets/${pdfDocument}`;
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, { cache: "force-cache" });
       if (!res.ok) {
         console.error(`[publications] page count fetch ${url} returned ${res.status}`);
         return null;
