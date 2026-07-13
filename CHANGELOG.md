@@ -6,6 +6,16 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **perf(harvesters): read job list counts from the lightweight API shape** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The harvester detail page showed no jobs for large sources (e.g. INE,
+    ~13k items per job): the jobs list endpoint used to inline the full
+    `items` array (~8.4 MB / ~29 s), so the fetch timed out. The backend now
+    returns per-status `item_counts` and only the failed `error_items`; the
+    jobs table consumes those instead of deriving counts from `items`, and the
+    error panel reads `error_items`. `HarvestJob.items` is now optional in the
+    types (still present on the job detail endpoint). Pairs with the udata-pt
+    backend change.
+
 - **fix(resources): resolve CMS base URL from runtime env in the assets proxy** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - The `/assets/[...path]` proxy route read `NEXT_PUBLIC_API_URL`, which
     webpack inlines at `docker build` time and can't be corrected once the
