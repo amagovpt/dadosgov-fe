@@ -1,0 +1,106 @@
+{
+  "title": "Authentication",
+  "description": "Choose an authentication method to sign in to the portal and access the various online services and features.",
+  "tabs": {
+    "cmd": "Digital Mobile Key (CMD)",
+    "eidas": "European authentication (eIDAS)",
+    "email": "Email and password"
+  },
+  "beforeStart": {
+    "title": "Before you start..."
+  },
+  "cmd": {
+    "intro": "You need the PIN code of your Digital Mobile Key (CMD) and the mobile phone associated with it.",
+    "noAccountQuestion": "Don't have a Digital Mobile Key?",
+    "discoverHowToCreate": "Find out how to create an account",
+    "loginAs": "Sign in as",
+    "citizenNational": "Person with Portuguese nationality",
+    "citizenForeign": "Person with foreign nationality",
+    "submit": "Sign in with Digital Mobile Key"
+  },
+  "eidas": {
+    "intro": "You need a digital authentication method provided by your country of origin in the European Union (EU). This authentication method is available to any EU citizen.",
+    "noAccountQuestion": "Don't have European Authentication?",
+    "discoverHowToCreate": "Find out how to create an account",
+    "documentsPart1": "Need to ",
+    "documentsBold1": "provide documents",
+    "documentsPart2": " that were issued by a public entity of ",
+    "documentsBold2": "another Member State",
+    "documentsPart3": " of the EU? It is now possible to retrieve them directly from the issuing portal by signing in with your European authentication.",
+    "submit": "Sign in with eIDAS"
+  },
+  "email": {
+    "beforeStartDescription": "Only existing users who created an account with email and password can sign in this way.",
+    "requiredFieldsNote": "Fields marked with an asterisk ( * ) are required.",
+    "emailLabel": "Email address *",
+    "emailPlaceholder": "Enter text here",
+    "passwordLabel": "Password *",
+    "passwordPlaceholder": "Enter your password here",
+    "rememberPassword": "Remember password",
+    "forgotPassword": "Forgot your password?",
+    "recoverPassword": "Recover password",
+    "submit": "Sign in",
+    "submitLoading": "Signing in..."
+  },
+  "recovery": {
+    "title": "Recover password",
+    "description": "Enter your email address and we will send you instructions to reset your password.",
+    "emailLabel": "Email address *",
+    "emailPlaceholder": "Enter text here",
+    "submit": "Reset password",
+    "submitLoading": "Sending...",
+    "back": "Back to sign in",
+    "success": "If the email address is associated with an account, you will receive an email with instructions to reset your password.",
+    "errorRequest": "Error sending request. Please try again.",
+    "errorConnection": "Connection error. Please try again."
+  },
+  "migration": {
+    "title": "Mandatory migration",
+    "description": "Sign in with email and password will be discontinued. To keep accessing the portal, you must migrate your account to the Digital Mobile Key (CMD) or European authentication (eIDAS).",
+    "howToTitle": "How to migrate?",
+    "howToDescription": "Sign in with the Digital Mobile Key (\"CMD\" tab) or with European authentication (\"eIDAS\" tab). The system will detect your existing account and guide you through the migration process. Your data (datasets, organizations, reuses) will be kept.",
+    "migrateCmd": "Migrate with CMD",
+    "migrateEidas": "Migrate with eIDAS"
+  },
+  "terms": {
+    "title": "Terms and conditions",
+    "readCarefully": "You should carefully read the",
+    "link": "Terms and conditions for the processing of your data",
+    "checkbox": "I declare that I have read and accept the terms and conditions for the processing of my personal data in accessing and using the Reserved Area of dados.gov.pt."
+  },
+  "help": {
+    "title": "Have questions?",
+    "description": "If you need help, contact us through our form.",
+    "link": "Contact form"
+  },
+  "cmdModal": {
+    "title": "What do you need to create an account?",
+    "item1": "For national and foreign citizens with an active Digital Mobile Key (CMD).",
+    "item2Before": "You need the PIN code of your CMD and the mobile phone associated with it. If you haven't done so yet, you can",
+    "item2Link": "activate the Digital Mobile Key at Autenticação.gov.",
+    "item3": "Registration with CMD allows access to all online services provided on this portal.",
+    "createNational": "Create an account as a national citizen",
+    "createForeign": "Create an account as a foreign citizen"
+  },
+  "eidasModal": {
+    "title": "What do you need to create an account?",
+    "item1": "Have an electronic identification mechanism issued by another European Union Member State that already has authentication infrastructure (eIDAS) available.",
+    "createAccount": "Create an account with European Authentication"
+  },
+  "newAccountNotice": {
+    "title": "New account created",
+    "description": "A new account associated with your Digital Mobile Key has been created. You can complete your profile in your personal area.",
+    "close": "Close notice"
+  },
+  "common": {
+    "close": "Close"
+  },
+  "errors": {
+    "requiredFields": "Please fill in all required fields.",
+    "loginFailed": "An error occurred while trying to sign in.",
+    "samlStart": "Error starting authentication ({{status}}). Please try again.",
+    "samlBadResponse": "Error starting authentication. The server did not respond correctly.",
+    "samlIncomplete": "Error starting authentication. Incomplete response from the server.",
+    "samlConnection": "Could not reach the authentication server. Please check your connection."
+  }
+}

@@ -2,10 +2,13 @@
 
 import React, { useState } from "react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useTranslation } from "react-i18next";
 import { Button, InputText, StatusCard } from "@ama-pt/agora-design-system";
 import { PRIMARY_BUTTON_CLASS, TEXT_LINK_BUTTON_CLASS } from "./constants";
+import { Typograph } from "../Shared/Generics/Typograph";
 
 export function PasswordRecoveryView({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation("login");
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,10 +39,10 @@ export function PasswordRecoveryView({ onBack }: { onBack: () => void }) {
       if (res.ok) {
         setSuccess(true);
       } else {
-        setError(data.message || "Erro ao enviar pedido. Tente novamente.");
+        setError(data.message || t("recovery.errorRequest"));
       }
     } catch {
-      setError("Erro de ligação. Tente novamente.");
+      setError(t("recovery.errorConnection"));
     } finally {
       setLoading(false);
     }
@@ -58,11 +61,11 @@ export function PasswordRecoveryView({ onBack }: { onBack: () => void }) {
         <StatusCard
           variant="success"
           showIcon
-          description="Se o endereço de e-mail estiver associado a uma conta, receberá um e-mail com instruções para redefinir a sua palavra-passe."
+          description={t("recovery.success")}
         />
         <div className="mt-16">
           <button type="button" className={TEXT_LINK_BUTTON_CLASS} onClick={handleBack}>
-            Voltar ao início de sessão
+            {t("recovery.back")}
           </button>
         </div>
       </>
@@ -72,19 +75,20 @@ export function PasswordRecoveryView({ onBack }: { onBack: () => void }) {
   return (
     <>
       <div>
-        <h2 className="mb-8 text-xl-bold text-brand-blue-dark">Recuperar palavra-passe</h2>
-        <p className="text-neutral-900">
-          Introduza o seu endereço de e-mail e enviaremos instruções para redefinir a sua
-          palavra-passe.
-        </p>
+        <Typograph tag="h2" className="mb-8 text-xl-bold text-brand-blue-dark">
+          {t("recovery.title")}
+        </Typograph>
+        <Typograph tag="p" className="text-neutral-900">
+          {t("recovery.description")}
+        </Typograph>
       </div>
 
       {error && <StatusCard variant="danger" showIcon description={error} />}
 
       <form className="flex flex-col gap-24" onSubmit={handleSubmit}>
         <InputText
-          label="Endereço de e-mail *"
-          placeholder="Introduza aqui o texto"
+          label={t("recovery.emailLabel")}
+          placeholder={t("recovery.emailPlaceholder")}
           id="recovery-email"
           name="email"
           type="email"
@@ -100,10 +104,10 @@ export function PasswordRecoveryView({ onBack }: { onBack: () => void }) {
             className={PRIMARY_BUTTON_CLASS}
             disabled={loading || !email}
           >
-            {loading ? "A enviar..." : "Redefinir palavra-passe"}
+            {loading ? t("recovery.submitLoading") : t("recovery.submit")}
           </Button>
           <button type="button" className={TEXT_LINK_BUTTON_CLASS} onClick={handleBack}>
-            Voltar ao início de sessão
+            {t("recovery.back")}
           </button>
         </div>
       </form>
