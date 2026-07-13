@@ -77,6 +77,8 @@ export default function SystemDataservicesClient() {
   }, [currentPage, pageSize, searchQuery, sortParam]);
 
   useEffect(() => {
+    // loadData() toggles the loading flag before its awaited fetch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
 
