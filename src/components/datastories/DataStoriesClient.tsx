@@ -101,7 +101,7 @@ export default function DataStoriesClient({
               {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total.toLocaleString("pt-PT")} {t("results")}
+              {t("results", { count: total })}
             </span>
           </div>
         </div>
