@@ -48,6 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // refresh() only sets state after an awaited fetch, so it cannot trigger a
+    // synchronous cascading render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
   }, [refresh]);
 

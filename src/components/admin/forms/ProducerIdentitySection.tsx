@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
 import AppIcon from "@/components/Primitives/AppIcon";
 import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
@@ -40,10 +41,10 @@ export default function ProducerIdentitySection({
       <div className="admin-page__org-card">
         <p className="admin-page__org-card-title">Não pertence a nenhuma organização.</p>
         <p className="admin-page__org-card-description">{helperDescription}</p>
-        <a href="/admin/organizations/new" className="admin-page__org-card-link">
+        <Link href="/admin/organizations/new" className="admin-page__org-card-link">
           Crie ou integre uma organização em dados.gov.pt
           <AppIcon name="agora-line-arrow-right-circle" className="h-24 w-24" />
-        </a>
+        </Link>
       </div>
     </>
   );

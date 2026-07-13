@@ -1,4 +1,4 @@
-import { test, expect } from "playwright/test";
+import { test, expect, type APIRequestContext } from "playwright/test";
 import { execSync } from "child_process";
 import { Client } from "pg";
 
@@ -31,7 +31,7 @@ function runUdata(cmd: string): string {
 }
 
 async function triggerDagAndWait(
-  request: any,
+  request: APIRequestContext,
   maxWaitMs = 120_000,
   pollMs = 3_000
 ): Promise<string> {
