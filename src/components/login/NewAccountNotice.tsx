@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Icon } from "@ama-pt/agora-design-system";
+import { Typograph } from "../Shared/Generics/Typograph";
 
 /**
  * Dismissible banner shown after a CMD (Chave Móvel Digital) login that
@@ -10,6 +12,7 @@ import { Icon } from "@ama-pt/agora-design-system";
  * The query parameter is stripped from the URL once the notice is shown.
  */
 export default function NewAccountNotice() {
+  const { t } = useTranslation("login");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -37,15 +40,16 @@ export default function NewAccountNotice() {
         aria-hidden
       />
       <div className="flex-grow">
-        <p className="text-base-bold text-neutral-900">Nova conta criada</p>
-        <p className="text-sm text-neutral-700">
-          Foi criada uma nova conta associada à sua Chave Móvel Digital. Pode completar o seu
-          perfil na área pessoal.
-        </p>
+        <Typograph tag="p" className="text-base-bold text-neutral-900">
+          {t("newAccountNotice.title")}
+        </Typograph>
+        <Typograph tag="p" className="text-sm text-neutral-700">
+          {t("newAccountNotice.description")}
+        </Typograph>
       </div>
       <button
         onClick={() => setVisible(false)}
-        aria-label="Fechar aviso"
+        aria-label={t("newAccountNotice.close")}
         className="shrink-0 rounded-4 p-4 text-neutral-700 hover:bg-neutral-100"
       >
         <Icon name="agora-line-close" className="h-20 w-20" aria-hidden />
