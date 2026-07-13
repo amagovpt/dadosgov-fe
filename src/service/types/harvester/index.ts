@@ -2,6 +2,7 @@ export type {
   HarvestError,
   HarvestItem,
   HarvestJob,
+  HarvestJobItemCounts,
   HarvestSourceValidation,
   HarvestValidationDecision,
   HarvestValidationPayload,
