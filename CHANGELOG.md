@@ -6,7 +6,7 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
-- **perf(harvesters): read job list counts from the lightweight API shape** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **perf(harvesters): read job list counts from the lightweight API shape** [#427](https://github.com/amagovpt/dadosgov-fe/pull/427)
   - The harvester detail page showed no jobs for large sources (e.g. INE,
     ~13k items per job): the jobs list endpoint used to inline the full
     `items` array (~8.4 MB / ~29 s), so the fetch timed out. The backend now
