@@ -216,6 +216,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                     <TabPagination
                       total={datasetsResponse.total}
                       pageSize={datasetsResponse.page_size}
+                      currentPage={datasetsPage}
                       onChange={setDatasetsPage}
                     />
                   )}

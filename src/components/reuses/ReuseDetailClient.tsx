@@ -418,6 +418,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 <TabPagination
                   total={fullDatasets.length}
                   pageSize={datasetsPageSize}
+                  currentPage={datasetsPage}
                   onChange={setDatasetsPage}
                 />
               </>
