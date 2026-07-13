@@ -83,5 +83,6 @@
     "title": "Unable to load",
     "subtitle": "An error occurred while contacting the server. Please try again in a few moments."
   },
-  "retry": "Try again"
+  "retry": "Try again",
+  "auth": "Authentication"
 }

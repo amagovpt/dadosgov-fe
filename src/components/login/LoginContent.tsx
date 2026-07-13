@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   Breadcrumb,
   Tabs,
@@ -10,7 +11,6 @@ import {
   TabBody,
 } from "@ama-pt/agora-design-system";
 import { login } from "@/service/api/auth";
-import { BREADCRUMB_ITEMS } from "./constants";
 import { buildSamlEndpoint, sanitizeNextUrl, submitSamlForm } from "./loginUtils";
 import { SupportStatusCard } from "./LoginShared";
 import { CmdModalContent } from "./CmdModalContent";
@@ -18,11 +18,18 @@ import { EidasModalContent } from "./EidasModalContent";
 import { CmdTab } from "./CmdTab";
 import { EidasTab } from "./EidasTab";
 import { EmailTab } from "./EmailTab";
+import { Typograph } from "../Shared/Generics/Typograph";
 
 export function LoginContent() {
+  const { t } = useTranslation("login");
   const searchParams = useSearchParams();
   const nextUrl = sanitizeNextUrl(searchParams.get("next"));
   const prefilledEmail = searchParams.get("email") || "";
+
+  const breadcrumbItems = [
+    { label: t("home"), url: "/" },
+    { label: t("auth"), url: "#" },
+  ];
 
   const [cmdModalOpen, setCmdModalOpen] = useState(false);
   const [eidasModalOpen, setEidasModalOpen] = useState(false);
@@ -35,7 +42,7 @@ export function LoginContent() {
   const runSamlLogin = async (base: string) => {
     setIsLoading(true);
     setError(null);
-    const samlError = await submitSamlForm(buildSamlEndpoint(base, nextUrl));
+    const samlError = await submitSamlForm(buildSamlEndpoint(base, nextUrl), t);
     if (samlError) {
       setError(samlError);
     }
@@ -47,7 +54,7 @@ export function LoginContent() {
 
   const handleEmailLogin = async (email: string, password: string) => {
     if (!email || !password) {
-      setError("Por favor, preencha todos os campos obrigatórios.");
+      setError(t("errors.requiredFields"));
       return;
     }
 
@@ -64,7 +71,7 @@ export function LoginContent() {
       window.location.href = nextUrl;
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Ocorreu um erro ao tentar iniciar sessão.";
+        err instanceof Error ? err.message : t("errors.loginFailed");
       if (message === "migration_required") {
         setMigrationRequired(true);
         setError(null);
@@ -93,7 +100,7 @@ export function LoginContent() {
       <div className="login-page container mx-auto max-w-7xl px-16 pb-64 pt-32">
         {showMainView && (
           <div>
-            <Breadcrumb items={BREADCRUMB_ITEMS} />
+            <Breadcrumb items={breadcrumbItems} />
           </div>
         )}
 
@@ -103,17 +110,17 @@ export function LoginContent() {
           <CmdModalContent onClose={() => setCmdModalOpen(false)} />
         ) : (
           <>
-            <div>
-              <h1 className="mb-16 mt-64 text-2xl-medium text-brand-blue-dark">Autenticação</h1>
-              <p className="text-lg mb-32 max-w-2xl text-neutral-700">
-                Escolha um meio de autenticação para se autenticar no portal e ter acesso aos vários{" "}
-                <br />
-                serviços e funcionalidades online.
-              </p>
+            <div className="flex flex-col max-w-1/2 ">
+              <Typograph tag="h1" className="mb-16 mt-64 text-2xl-medium text-brand-blue-dark">
+                {t("title")}
+              </Typograph>
+              <Typograph tag="p" className="text-lg mb-32 max-w-2xl text-neutral-700">
+                {t("description")}
+              </Typograph>
             </div>
             <Tabs vertically className="mt-24">
               <Tab>
-                <TabHeader>Chave Móvel Digital (CMD)</TabHeader>
+                <TabHeader>{t("tabs.cmd")}</TabHeader>
                 <TabBody>
                   <CmdTab
                     samlEnabled={samlEnabled}
@@ -123,7 +130,7 @@ export function LoginContent() {
                 </TabBody>
               </Tab>
               <Tab>
-                <TabHeader>Autenticação europeia (eIDAS)</TabHeader>
+                <TabHeader>{t("tabs.eidas")}</TabHeader>
                 <TabBody>
                   <EidasTab
                     samlEnabled={samlEnabled}
@@ -133,7 +140,7 @@ export function LoginContent() {
                 </TabBody>
               </Tab>
               <Tab>
-                <TabHeader>E-mail e palavra-passe</TabHeader>
+                <TabHeader>{t("tabs.email")}</TabHeader>
                 <TabBody>
                   <EmailTab
                     prefilledEmail={prefilledEmail}
