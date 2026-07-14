@@ -6,6 +6,13 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **chore(images): set `minimumCacheTTL` to 30 days to curb `.next/cache` growth** [#447](https://github.com/amagovpt/dadosgov-fe/pull/447)
+  - The Next.js image optimizer writes every optimized variant to
+    `.next/cache/images` and, with the default short TTL, keeps
+    re-generating (and re-writing) the same images once each entry goes
+    stale. On the persisted (bind-mounted) cache this bloated the host disk.
+    A 30-day `minimumCacheTTL` cuts the re-optimization churn.
+
 - **fix(docker): remove `./:/app` source bind mount that broke the container (502 in DEV)** [#444](https://github.com/amagovpt/dadosgov-fe/pull/444)
   - The image builds Next.js in standalone mode, copying the generated
     `server.js` to `/app/server.js`. Mounting the host `frontend/` folder over
