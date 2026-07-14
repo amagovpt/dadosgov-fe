@@ -35,7 +35,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./:/app
+      - ./logs:/logs
+      - ./.next/cache:/app/.next/cache
     environment:
       BACKEND_URL: http://host.docker.internal:7000
       BACKEND_HOST: localhost:7000
