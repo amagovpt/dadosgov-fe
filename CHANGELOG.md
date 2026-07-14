@@ -6,6 +6,14 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(docker): remove `./:/app` source bind mount that broke the container (502 in DEV)** [#444](https://github.com/amagovpt/dadosgov-fe/pull/444)
+  - The image builds Next.js in standalone mode, copying the generated
+    `server.js` to `/app/server.js`. Mounting the host `frontend/` folder over
+    `/app` shadowed that artifact (the host folder has no `server.js`), so
+    `node server.js` failed to start and the reverse proxy returned 502.
+    Dropped the source mount and kept only `./logs:/logs` and
+    `./.next/cache:/app/.next/cache`, so the image serves its own built `/app`.
+
 - **feat(analytics): add Google Analytics (GA4) tag to the shared layout** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - Loads `gtag.js` for measurement ID `G-6EQQ3VB8JY` from the root
     `[locale]/layout.tsx` (common to every page) via `next/script`
