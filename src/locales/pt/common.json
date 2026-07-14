@@ -83,5 +83,6 @@
     "title": "Não foi possível carregar",
     "subtitle": "Ocorreu um erro ao contactar o servidor. Tente novamente dentro de momentos."
   },
-  "retry": "Tentar novamente"
+  "retry": "Tentar novamente",
+  "auth": "Autenticação"
 }
