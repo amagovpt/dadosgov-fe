@@ -391,7 +391,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                           )
                         }
                       >
-                        Documentação comercial
+                        Documentação funcional
                       </Button>
                     )}
                   </div>

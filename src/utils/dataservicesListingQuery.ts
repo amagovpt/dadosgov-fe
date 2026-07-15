@@ -17,7 +17,6 @@ const DATASERVICE_SORT_REVERSE_MAP: Record<string, string> = {
 };
 
 export function parseDataservicesFilters(params: URLSearchParams): DataserviceListFilters {
-  const tags = params.getAll("tag");
   const organizations = params.getAll("organization");
 
   return {
@@ -30,7 +29,6 @@ export function parseDataservicesFilters(params: URLSearchParams): DataserviceLi
     ...(params.get("modified_since") && {
       modified_since: params.get("modified_since") as string,
     }),
-    ...(tags.length > 0 && { tag: tags.length === 1 ? tags[0] : tags }),
     ...(organizations.length > 0 && {
       organization: organizations.length === 1 ? organizations[0] : organizations,
     }),
