@@ -56,12 +56,12 @@ function buildCsp(nonce: string): string {
   const scriptSrcExtras = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
   return [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com${scriptSrcExtras}`,
+    `script-src 'self' 'nonce-${nonce}' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com${scriptSrcExtras}`,
     `style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com`,
-    `img-src 'self' data: blob: http://localhost:7000 ${API_URL} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com https://www.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com`,
+    `img-src 'self' data: blob: http://localhost:7000 ${API_URL} https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://raw.githubusercontent.com https://www.gstatic.com`,
     `frame-src 'self' https://app.powerbi.com https://www.google.com`,
     `font-src 'self' data:`,
-    `connect-src 'self' http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com`,
+    `connect-src 'self' http://localhost:7000 https://dados.gov.pt https://preprod.dados.gov.pt https://10.55.37.38 https://172.31.204.12 https://ppr-dadosgov.arte.gov.pt https://prd-dadosgov.arte.gov.pt`,
     `frame-ancestors 'none'`,
   ].join("; ");
 }
