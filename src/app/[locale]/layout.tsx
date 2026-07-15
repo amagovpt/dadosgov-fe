@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Noto_Sans, Noto_Sans_Mono } from "next/font/google";
 import "./globals.css";
 import { HeaderWrapper } from "@/components/HeaderWrapper";
@@ -79,10 +78,6 @@ export default async function RootLayout({
 }) {
   const { locale: rawLocale } = await params;
   const locale = i18nConfig.locales.includes(rawLocale) ? rawLocale : i18nConfig.defaultLocale;
-  // CSP nonce minted per-request in src/proxy.ts and exposed via the x-nonce
-  // header; applied to the Google Analytics scripts so they pass script-src.
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
-  const GA_MEASUREMENT_ID = "G-6EQQ3VB8JY";
   const { resources, t } = await initTranslations({
     locale,
     namespaces,
@@ -106,20 +101,6 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
-      {/* Google Analytics (gtag.js) — GA4 */}
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="afterInteractive"
-        nonce={nonce}
-      />
-      <Script id="gtag-init" strategy="afterInteractive" nonce={nonce}>
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}');
-        `}
-      </Script>
       <body className={`${notoSans.variable} ${notoSansMono.variable} antialiased`}>
         <AuthProvider>
           <ApolloWrapper>
