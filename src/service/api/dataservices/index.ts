@@ -58,7 +58,6 @@ export async function fetchMyDataservices(
 export interface DataserviceListFilters {
   q?: string;
   sort?: string;
-  tag?: string | string[];
   organization?: string | string[];
   access_type?: string;
   organization_badge?: string;
@@ -82,11 +81,10 @@ export async function fetchDataservices(
     if (filters?.modified_since) params.set("modified_since", filters.modified_since);
     if (filters?.dataset) params.set("dataset", filters.dataset);
     // Multi-value filters
-    for (const key of ["tag", "organization"] as const) {
-      const value = filters?.[key];
-      if (!value) continue;
-      for (const item of Array.isArray(value) ? value : [value]) {
-        if (item) params.append(key, item);
+    const organization = filters?.organization;
+    if (organization) {
+      for (const item of Array.isArray(organization) ? organization : [organization]) {
+        if (item) params.append("organization", item);
       }
     }
 
