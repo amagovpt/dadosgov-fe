@@ -11,7 +11,7 @@ export async function GET(
   const targetUrl = `${getCmsBaseUrl()}/api/assets/${assetPath}${search}`;
 
   try {
-    const response = await fetch(targetUrl, { cache: "force-cache" });
+    const response = await fetch(targetUrl, { cache: "no-cache" });
 
     if (!response.ok) {
       console.error(`[assets proxy] ${targetUrl} returned ${response.status}`);
