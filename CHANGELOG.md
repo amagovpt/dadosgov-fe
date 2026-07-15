@@ -6,6 +6,17 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(dataservices): remove the "Palavras-chave" (keywords) filter from the API listing** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - Dataservices have no author-facing way to be tagged (the admin exposes no
+    keyword input), and the filter's typeahead pulled suggestions from the
+    `Tag` collection, which is populated only from datasets and reuses — never
+    from dataservices. So the filter offered irrelevant suggestions and
+    returned empty/misleading results. Upstream data.gouv.fr keeps the `tags`
+    field (harvested HVD/DCAT) but exposes no keyword filter on its
+    `/dataservices/search` either. Dropped the filter and its `tag` param
+    wiring; the remaining filters (access type, update date, organization
+    type, organizations) now match the upstream set. Backend untouched.
+
 - **chore(images): set `minimumCacheTTL` to 30 days to curb `.next/cache` growth** [#447](https://github.com/amagovpt/dadosgov-fe/pull/447)
   - The Next.js image optimizer writes every optimized variant to
     `.next/cache/images` and, with the default short TTL, keeps
