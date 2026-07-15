@@ -6,6 +6,27 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(upload): send `totalfilesize` and harden chunked-upload retries against silent corruption** [#462](https://github.com/amagovpt/dadosgov-fe/pull/462)
+  - Resource files uploaded/replaced via the admin were sometimes corrupted in
+    production: behind the F5/WAF a dropped connection triggers the client's
+    transparent retry, and the backend reassembled the chunks with no
+    integrity verification (see the matching udata-pt fix, which must be
+    deployed first).
+  - Every part and the combine request now carry `totalfilesize` so the
+    backend can verify the reassembled file's size and reject a corrupted
+    result instead of storing it.
+  - A combine that needed a network retry and then gets a 400 with code
+    `upload-not-found`/`combine-in-progress` almost certainly succeeded on the
+    first attempt (only the response was lost); the client no longer surfaces
+    it as a generic failure — it asks the user to refresh and check before
+    retrying, avoiding duplicate resources.
+  - Retries now probe that the selected file is still readable; when the file
+    was modified on disk mid-upload (Chrome's `ERR_UPLOAD_FILE_CHANGED`, which
+    would otherwise be retried blindly or upload mixed old/new bytes), the
+    upload aborts with a clear PT message asking to re-select the file.
+  - Also fixed a wrong comment claiming chunk parts were already idempotent on
+    the backend (they weren't — a retried part used to 500 with `FileExists`).
+
 - **fix(dataservices): remove the "Palavras-chave" (keywords) filter from the API listing** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - Dataservices have no author-facing way to be tagged (the admin exposes no
     keyword input), and the filter's typeahead pulled suggestions from the

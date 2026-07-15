@@ -36,19 +36,36 @@ const UPLOAD_RETRY_BASE_DELAY_MS = 500;
  * fetch `TypeError`, e.g. "Failed to fetch"). A resolved `Response` — success
  * or HTTP error — is returned as-is and never retried.
  *
- * Safe to replay: chunk parts are idempotent on the backend (`save_chunk`
- * overwrites by `uuid`+`partindex`), and the FormData holds a re-readable Blob
- * slice, so the same body can be sent again after a dropped connection.
+ * Safe to replay: the backend `save_chunk` saves parts with overwrite by
+ * `uuid`+`partindex` (requires the matching udata-pt backend, deployed first),
+ * and the FormData holds a re-readable Blob slice, so the same body can be
+ * sent again after a dropped connection.
+ *
+ * `assertStillReadable` (optional) runs before each retry; it should throw to
+ * abort retrying with a permanent error (e.g. the source file was modified on
+ * disk mid-upload — Chrome's ERR_UPLOAD_FILE_CHANGED also surfaces as a
+ * generic network TypeError, so retrying would either fail forever or, worse,
+ * silently send a mix of old and new bytes).
+ *
+ * Returns the Response plus whether any network retry happened — a lost
+ * response means the backend may have already processed the request, which
+ * callers need to interpret error responses of a replayed combine.
  */
-async function uploadFetchWithRetry(url: string, body: FormData): Promise<Response> {
+async function uploadFetchWithRetry(
+  url: string,
+  body: FormData,
+  assertStillReadable?: () => Promise<void>
+): Promise<{ response: Response; retried: boolean }> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= UPLOAD_MAX_RETRIES; attempt++) {
     try {
-      return await fetch(url, { method: "POST", credentials: "include", body });
+      const response = await fetch(url, { method: "POST", credentials: "include", body });
+      return { response, retried: attempt > 0 };
     } catch (error) {
       // Only network-level failures reach here; HTTP errors resolve normally.
       lastError = error;
       if (attempt < UPLOAD_MAX_RETRIES) {
+        if (assertStillReadable) await assertStillReadable();
         const delay = UPLOAD_RETRY_BASE_DELAY_MS * 2 ** attempt;
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
@@ -56,6 +73,37 @@ async function uploadFetchWithRetry(url: string, body: FormData): Promise<Respon
   }
   throw lastError;
 }
+
+/**
+ * Probe that the browser can still read the selected file. When the file is
+ * modified/moved on disk after selection, reads fail (NotReadableError /
+ * ERR_UPLOAD_FILE_CHANGED) — retrying the upload can never succeed, so we
+ * surface a clear instruction instead.
+ */
+function makeFileReadableProbe(file: File): () => Promise<void> {
+  return async () => {
+    const probe = file.slice(0, 1);
+    // Environments without Blob.arrayBuffer (legacy browsers) can't probe;
+    // don't block the retry there.
+    if (typeof probe.arrayBuffer !== "function") return;
+    try {
+      await probe.arrayBuffer();
+    } catch (error) {
+      // Reads on a stale File fail with a DOMException (NotReadableError);
+      // anything else is an environment quirk and shouldn't stop the retry.
+      if (!(error instanceof DOMException)) return;
+      throw new Error(
+        "O ficheiro foi alterado durante o envio. Selecione o ficheiro novamente e tente outra vez."
+      );
+    }
+  };
+}
+
+/** Error codes the backend returns for a combine that cannot proceed because
+ * the chunks are already gone or another combine is running — after a network
+ * retry these almost always mean the original combine succeeded and only its
+ * response was lost. */
+const COMBINE_ALREADY_HANDLED_CODES = new Set(["upload-not-found", "combine-in-progress"]);
 
 /**
  * POST a file to a udata upload endpoint, splitting large files into
@@ -75,19 +123,24 @@ async function uploadFetchWithRetry(url: string, body: FormData): Promise<Respon
  * Protocol (udata `storages.api.handle_upload`): for each part POST
  * `file` + `uuid` + `filename` + `partindex` + `partbyteoffset` + `totalparts`
  * + `chunksize` (the part's actual byte length — the backend rejects a
- * mismatch); then a final request with no `file` (just `uuid`/`filename`/
- * `totalparts`) triggers the combine and returns the resource (same shape as a
- * single-shot upload). A failing part short-circuits and its Response is
- * returned so callers surface the error exactly as before. Transient network
- * failures on any request are retried by `uploadFetchWithRetry`.
+ * mismatch) + `totalfilesize` (whole-file size — the backend verifies the
+ * reassembled file against it); then a final request with no `file` (just
+ * `uuid`/`filename`/`totalparts`/`totalfilesize`) triggers the combine and
+ * returns the resource (same shape as a single-shot upload). A failing part
+ * short-circuits and its Response is returned so callers surface the error
+ * exactly as before. Transient network failures on any request are retried by
+ * `uploadFetchWithRetry`, aborting early when the source file is no longer
+ * readable (changed on disk mid-upload).
  */
 export async function chunkedUploadFetch(url: string, file: File): Promise<Response> {
   const chunkSize = uiConfig.resourceFileUploadChunk;
+  const assertStillReadable = makeFileReadableProbe(file);
 
   if (file.size <= chunkSize) {
     const body = new FormData();
     body.append("file", file);
-    return uploadFetchWithRetry(url, body);
+    const { response } = await uploadFetchWithRetry(url, body, assertStillReadable);
+    return response;
   }
 
   const uuid =
@@ -107,16 +160,36 @@ export async function chunkedUploadFetch(url: string, file: File): Promise<Respo
     body.append("partbyteoffset", String(start));
     body.append("totalparts", String(totalparts));
     body.append("chunksize", String(end - start));
+    body.append("totalfilesize", String(file.size));
 
-    const res = await uploadFetchWithRetry(url, body);
-    if (!res.ok) return res;
+    const { response } = await uploadFetchWithRetry(url, body, assertStillReadable);
+    if (!response.ok) return response;
   }
 
   const combine = new FormData();
   combine.append("uuid", uuid);
   combine.append("filename", file.name);
   combine.append("totalparts", String(totalparts));
-  return uploadFetchWithRetry(url, combine);
+  combine.append("totalfilesize", String(file.size));
+  const { response, retried } = await uploadFetchWithRetry(url, combine, assertStillReadable);
+
+  // A combine whose response was lost (network retry) may already have
+  // succeeded server-side: the replayed request then finds no chunks left (or
+  // the original still running) and fails with a specific code. Restarting
+  // automatically could duplicate the resource, so ask the user to check.
+  if (retried && response.status === 400) {
+    const code = await response
+      .clone()
+      .json()
+      .then((data) => data?.code)
+      .catch(() => undefined);
+    if (typeof code === "string" && COMBINE_ALREADY_HANDLED_CODES.has(code)) {
+      throw new Error(
+        "O envio pode já ter sido concluído. Atualize a página para verificar antes de tentar novamente."
+      );
+    }
+  }
+  return response;
 }
 
 /**
