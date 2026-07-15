@@ -21,6 +21,17 @@ This project has no version tags, so entries are grouped by month (newest first)
     Dropped the source mount and kept only `./logs:/logs` and
     `./.next/cache:/app/.next/cache`, so the image serves its own built `/app`.
 
+- **feat(analytics): add Google Analytics (GA4) tag to the shared layout** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - Loads `gtag.js` for measurement ID `G-6EQQ3VB8JY` from the root
+    `[locale]/layout.tsx` (common to every page) via `next/script`
+    (`afterInteractive`). Both the loader and the `gtag('config', ...)` init
+    script carry the per-request CSP nonce (`x-nonce` header minted in
+    `src/proxy.ts`), so they pass the strict `script-src` without
+    `'unsafe-inline'`. The CSP was extended to allow the GA endpoints:
+    `www.googletagmanager.com` in `script-src`/`img-src`/`connect-src` and
+    `www.google-analytics.com` (+ `*.google-analytics.com`,
+    `*.analytics.google.com`) in `img-src`/`connect-src`.
+
 - **perf(harvesters): read job list counts from the lightweight API shape** [#427](https://github.com/amagovpt/dadosgov-fe/pull/427)
   - The harvester detail page showed no jobs for large sources (e.g. INE,
     ~13k items per job): the jobs list endpoint used to inline the full
