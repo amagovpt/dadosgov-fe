@@ -417,7 +417,7 @@ export default function ApiRegistrationClient({
                     errorFeedbackText="Campo obrigatório"
                   />
                   <InputText
-                    label="Link raiz da API"
+                    label="URL base da API"
                     placeholder="Insira o URL aqui"
                     id="api-root-link"
                     value={baseApiUrl}

@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Icon, Breadcrumb, Pill } from "@ama-pt/agora-design-system";
 import { Dataservice } from "@/service/types/dataservice";
-import { fetchDataservice } from "@/service/api/dataservices";
+import { fetchDataservice, fetchSwaggerSpec } from "@/service/api/dataservices";
+import { DataserviceSwagger } from "@/components/dataservices/DataserviceSwagger";
+import type { ParsedSwagger } from "@/utils/parseOpenApi";
 import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -30,6 +32,8 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
   const { organizations } = useActiveOrganization();
   const router = useRouter();
   const [dataservice, setDataservice] = useState<Dataservice | null>(null);
+  const [swagger, setSwagger] = useState<ParsedSwagger | null>(null);
+  const [swaggerOpen, setSwaggerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -51,6 +55,18 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
     loadDataservice();
     return () => { cancelled = true; };
   }, [slug]);
+
+  // Fetch and parse the OpenAPI/Swagger spec (via the SSRF-guarded proxy) once
+  // the dataservice is loaded and exposes a machine documentation URL.
+  useEffect(() => {
+    const url = dataservice?.machine_documentation_url;
+    if (!url) return;
+    let cancelled = false;
+    fetchSwaggerSpec(url)
+      .then((parsed) => { if (!cancelled) setSwagger(parsed); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [dataservice?.machine_documentation_url]);
 
   useEffect(() => {
     if (!user || !dataservice) return;
@@ -138,7 +154,8 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
       dataservice.rate_limiting ||
       dataservice.availability != null ||
       dataservice.technical_documentation_url ||
-      dataservice.business_documentation_url
+      dataservice.business_documentation_url ||
+      swagger
   );
 
   const NOT_PROVIDED = "Não comunicado";
@@ -330,7 +347,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
 
               {dataservice.base_api_url && (
                 <div className="text-sm text-neutral-900">
-                  <div className="mb-4">Link raiz da API</div>
+                  <div className="mb-4">URL base da API</div>
                   <div className="rounded-4 bg-neutral-200 px-12 py-8 font-mono text-sm break-all text-neutral-900">
                     {dataservice.base_api_url}
                   </div>
@@ -356,7 +373,8 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
               )}
 
               {(dataservice.technical_documentation_url ||
-                dataservice.business_documentation_url) && (
+                dataservice.business_documentation_url ||
+                swagger) && (
                 <div className="text-sm text-neutral-900">
                   <div className="mb-8">Documentação</div>
                   <div className="flex flex-col items-start gap-8">
@@ -394,6 +412,23 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
                         Documentação funcional
                       </Button>
                     )}
+                    {swagger && (
+                      <Button
+                        appearance="outline"
+                        variant="neutral"
+                        hasIcon={true}
+                        trailingIcon="agora-line-chevron-down"
+                        trailingIconHover="agora-solid-chevron-down"
+                        onClick={() => {
+                          setSwaggerOpen(true);
+                          document
+                            .getElementById("swagger")
+                            ?.scrollIntoView({ behavior: "smooth" });
+                        }}
+                      >
+                        Swagger
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
@@ -419,6 +454,18 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
           </div>
         </div>
       </div>
+
+      {/* Swagger: parsed OpenAPI summary (mirrors data.gouv.fr) */}
+      {swagger && (
+        <div className="container my-32">
+          <DataserviceSwagger
+            swagger={swagger}
+            machineDocumentationUrl={dataservice.machine_documentation_url as string}
+            open={swaggerOpen}
+            onOpenChange={setSwaggerOpen}
+          />
+        </div>
+      )}
 
       {/* Tabs: Informações (inc. informações técnicas) + Discussões */}
       <section className="w-full">
