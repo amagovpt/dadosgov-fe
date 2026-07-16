@@ -32,6 +32,8 @@ export const TagsCollapse: React.FC<TagsCollapseProps> = ({
   const measureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Collapse back to the first row whenever the tag set changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsExpanded(false);
   }, [tags]);
 
@@ -55,6 +57,8 @@ export const TagsCollapse: React.FC<TagsCollapseProps> = ({
 
   useEffect(() => {
     if (!tags.length || !containerWidth) {
+      // Nothing measurable yet; show every tag until a width is known.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFirstRowCount(tags.length);
       return;
     }

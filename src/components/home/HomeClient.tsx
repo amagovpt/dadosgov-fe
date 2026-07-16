@@ -333,7 +333,7 @@ export default function HomeClient({
                       blockedLink={false}
                     >
                       <div className="mt-auto pt-16">
-                        <Link href={`/posts/${post.slug}`}>
+                        <Link href={`/noticias/${post.slug}`}>
                           <Button
                             variant="primary"
                             appearance="link"
@@ -356,7 +356,7 @@ export default function HomeClient({
               )}
             </div>
             <div className="mt-32">
-              <Link href="/posts">
+              <Link href="/noticias">
                 <Button
                   variant="primary"
                   appearance="link"

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import NextImage from "next/image";
+import { useTranslation } from "react-i18next";
 import { Button } from "@ama-pt/agora-design-system";
 import { PRIMARY_BUTTON_CLASS, TEXT_LINK_BUTTON_CLASS } from "./constants";
 import { TermsSection } from "./LoginShared";
+import { Typograph } from "../Shared/Generics/Typograph";
 
 export function EidasTab({
   samlEnabled,
@@ -15,6 +17,7 @@ export function EidasTab({
   onEidasLogin: () => void;
   onOpenModal: () => void;
 }) {
+  const { t } = useTranslation("login");
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   return (
@@ -22,12 +25,12 @@ export function EidasTab({
       <div className="flex flex-col gap-40">
         <div className="flex items-center justify-between gap-32">
           <div className="flex flex-col gap-8">
-            <h2 className="text-base font-bold text-brand-blue-dark">Antes de começar...</h2>
-            <p className="text-[#2B363C]">
-              Precisa de ter um meio de autenticação digital disponibilizado pelo seu país de origem
-              na União Europeia (UE). Este meio de autenticação está disponível para a qualquer
-              cidadã/o da UE.
-            </p>
+            <Typograph tag="h2" className="text-base font-bold text-brand-blue-dark">
+              {t("beforeStart.title")}
+            </Typograph>
+            <Typograph tag="p" className="text-neutral-900">
+              {t("eidas.intro")}
+            </Typograph>
           </div>
           <div className="flex shrink-0 items-center gap-32">
             <NextImage src="/eidas.svg" alt="eIDAS" width={64} height={64} />
@@ -35,19 +38,21 @@ export function EidasTab({
           </div>
         </div>
         <div className="mt-32 flex items-center gap-8">
-          <p className="text-sm text-neutral-900">
-            <strong>Não tem Autenticação Europeia?</strong>
-          </p>
+          <Typograph tag="p" className="text-sm text-neutral-900">
+            <strong>{t("eidas.noAccountQuestion")}</strong>
+          </Typograph>
           <button className={TEXT_LINK_BUTTON_CLASS} onClick={onOpenModal}>
-            Descubra como criar conta
+            {t("eidas.discoverHowToCreate")}
           </button>
         </div>
         <div className="my-32 h-[2px] w-full bg-neutral-400" />
-        <p className="text-sm text-neutral-900">
-          Precisa <strong>fornecer documentos</strong> que foram emitidos por uma entidade pública de{" "}
-          <strong>outro Estado-Membro</strong> da UE? Agora já é possível recupera-los diretamente do
-          portal emissor entrando com a sua autenticação Europeia.
-        </p>
+        <Typograph tag="p" className="text-sm text-neutral-900">
+          {t("eidas.documentsPart1")}
+          <strong>{t("eidas.documentsBold1")}</strong>
+          {t("eidas.documentsPart2")}
+          <strong>{t("eidas.documentsBold2")}</strong>
+          {t("eidas.documentsPart3")}
+        </Typograph>
         <TermsSection
           id="terms-eidas"
           checked={termsAccepted}
@@ -63,7 +68,7 @@ export function EidasTab({
             onClick={onEidasLogin}
             disabled={!samlEnabled || !termsAccepted}
           >
-            Autenticar com eIDAS
+            {t("eidas.submit")}
           </Button>
         </div>
       </div>

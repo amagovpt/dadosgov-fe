@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import {
   Header,
@@ -118,14 +119,14 @@ export function AdminHeader() {
                 leadingIcon="agora-line-user"
                 leadingIconHover="agora-solid-user"
               >
-                <a href={`/users/${user?.slug || ''}`}>O meu perfil</a>
+                <Link href={`/users/${user?.slug || ''}`}>O meu perfil</Link>
               </AuthenticatedBodyLink>
               <AuthenticatedBodyLink
                 hasIcon
                 leadingIcon="agora-line-mega-phone"
                 leadingIconHover="agora-solid-mega-phone"
               >
-                <a href="/admin/notificacoes">Notificações</a>
+                <Link href="/admin/notificacoes">Notificações</Link>
               </AuthenticatedBodyLink>
               {/* "As minhas definições" continua oculto até a página existir. */}
             </AuthenticatedBody>

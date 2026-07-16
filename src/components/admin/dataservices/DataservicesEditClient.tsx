@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Button,
-  InputText,
-  InputTextArea,
   RadioButton,
   Icon,
   StatusCard,
@@ -23,6 +21,8 @@ import {
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import IsolatedInput from "@/components/admin/IsolatedInput";
+import IsolatedTextArea from "@/components/admin/IsolatedTextArea";
 import DataservicesEditDeletePopup from "@/components/admin/dataservices/DataservicesEditDeletePopup";
 import DataservicesEditDiscussionsTab from "@/components/admin/dataservices/DataservicesEditDiscussionsTab";
 import DataservicesEditActivitiesTab from "@/components/admin/dataservices/DataservicesEditActivitiesTab";
@@ -569,80 +569,70 @@ export default function DataservicesEditClient() {
 
                       <h2 className="admin-page__section-title">Descrição</h2>
                       <div className="admin-page__fields-group">
-                        <InputText
+                        <IsolatedInput
                           label="Nome da API *"
                           placeholder="Insira o nome aqui"
                           id="edit-api-name"
-                          value={title}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            setTitle(e.target.value);
-                            if (e.target.value.trim()) clearError("title");
+                          defaultValue={title}
+                          onChange={(value) => {
+                            setTitle(value);
+                            if (value.trim()) clearError("title");
                           }}
                           hasError={!!formErrors.title}
                           hasFeedback={!!formErrors.title}
                           feedbackState="danger"
                           errorFeedbackText="Campo obrigatório"
                         />
-                        <InputText
+                        <IsolatedInput
                           label="Sigla"
                           placeholder="Insira a sigla aqui"
                           id="edit-api-acronym"
-                          value={acronym}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setAcronym(e.target.value)
-                          }
+                          defaultValue={acronym}
+                          onChange={setAcronym}
                         />
-                        <InputTextArea
+                        <IsolatedTextArea
                           label="Descrição *"
                           placeholder="Insira a descrição aqui"
                           id="edit-api-description"
                           rows={4}
                           maxLength={246}
-                          value={description}
-                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                            setDescription(e.target.value);
-                            if (e.target.value.trim()) clearError("description");
+                          defaultValue={description}
+                          onChange={(value) => {
+                            setDescription(value);
+                            if (value.trim()) clearError("description");
                           }}
                           hasError={!!formErrors.description}
                           hasFeedback={!!formErrors.description}
                           feedbackState="danger"
                           errorFeedbackText="Campo obrigatório"
                         />
-                        <InputText
-                          label="Link raiz da API"
+                        <IsolatedInput
+                          label="URL base da API"
                           placeholder="Insira o URL aqui"
                           id="edit-api-root-link"
-                          value={baseApiUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setBaseApiUrl(e.target.value)
-                          }
+                          defaultValue={baseApiUrl}
+                          onChange={setBaseApiUrl}
                         />
-                        <InputText
+                        <IsolatedInput
                           label="Link para a documentação da API (ficheiro OpenAPI ou Swagger)"
                           placeholder="Insira o URL aqui"
                           id="edit-api-doc-openapi"
-                          value={machineDocUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setMachineDocUrl(e.target.value)
-                          }
+                          defaultValue={machineDocUrl}
+                          onChange={setMachineDocUrl}
                         />
-                        <InputText
+                        <IsolatedInput
                           label="Link para a documentação técnica da API"
                           placeholder="Insira o URL aqui"
                           id="edit-api-doc-technical"
-                          value={technicalDocUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setTechnicalDocUrl(e.target.value)
-                          }
+                          defaultValue={technicalDocUrl}
+                          onChange={setTechnicalDocUrl}
                         />
-                        <InputText
+                        <IsolatedInput
                           label="Disponibilidade"
                           placeholder="99,9"
                           id="edit-api-availability"
-                          value={availability}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setAvailability(e.target.value)
-                          }
+                          defaultValue={availability}
+                          onChange={setAvailability}
                         />
                       </div>
 
@@ -730,58 +720,48 @@ export default function DataservicesEditClient() {
                             </InputSelect>
 
                             {reasonCategory === "other" && (
-                              <InputText
+                              <IsolatedInput
                                 label="Especifique o motivo da restrição"
                                 placeholder="Descreva o motivo"
                                 id="edit-access-reason-text"
-                                value={reasonText}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                  setReasonText(e.target.value)
-                                }
+                                defaultValue={reasonText}
+                                onChange={setReasonText}
                               />
                             )}
                           </>
                         )}
 
-                        <InputText
+                        <IsolatedInput
                           label="Link para a ferramenta de autorização de acesso"
                           placeholder="Insira o URL aqui"
                           id="edit-api-auth-tool"
-                          value={authRequestUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setAuthRequestUrl(e.target.value)
-                          }
+                          defaultValue={authRequestUrl}
+                          onChange={setAuthRequestUrl}
                         />
-                        <InputText
+                        <IsolatedInput
                           label="Link para a documentação funcional"
                           placeholder="Insira o URL aqui"
                           id="edit-api-doc-commercial"
-                          value={businessDocUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setBusinessDocUrl(e.target.value)
-                          }
+                          defaultValue={businessDocUrl}
+                          onChange={setBusinessDocUrl}
                         />
                       </div>
 
                       <h2 className="admin-page__section-title">Termos de uso</h2>
                       <div className="admin-page__fields-group">
-                        <InputText
+                        <IsolatedInput
                           label="Limite de chamadas"
                           placeholder="Insira aqui"
                           id="edit-api-rate-limit"
-                          value={rateLimiting}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setRateLimiting(e.target.value)
-                          }
+                          defaultValue={rateLimiting}
+                          onChange={setRateLimiting}
                         />
-                        <InputText
+                        <IsolatedInput
                           label="Link para a documentação sobre limites de chamadas"
                           placeholder="https://..."
                           id="edit-api-rate-limit-url"
-                          value={rateLimitingUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setRateLimitingUrl(e.target.value)
-                          }
+                          defaultValue={rateLimitingUrl}
+                          onChange={setRateLimitingUrl}
                         />
                       </div>
 
@@ -873,7 +853,11 @@ export default function DataservicesEditClient() {
                     description="É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização."
                   />
 
-                  <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
+                  <form
+                    className="admin-page__form"
+                    noValidate
+                    onSubmit={(e) => e.preventDefault()}
+                  >
                     <InputSelect
                       label="Pesquisar um conjunto de dados"
                       placeholder="Selecione conjuntos de dados..."
@@ -922,13 +906,14 @@ export default function DataservicesEditClient() {
                     </div>
 
                     <div className="flex flex-col gap-8">
-                      <InputText
+                      <IsolatedInput
                         label="Link para o conjunto de dados"
                         placeholder="https://..."
                         id="edit-dataset-link-url"
-                        value={datasetLinkUrl}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          setDatasetLinkUrl(e.target.value);
+                        required={false}
+                        defaultValue={datasetLinkUrl}
+                        onChange={(value) => {
+                          setDatasetLinkUrl(value);
                           if (datasetLinkError) setDatasetLinkError(null);
                         }}
                         onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -944,6 +929,7 @@ export default function DataservicesEditClient() {
                       )}
                       <div className="flex justify-end">
                         <Button
+                          type="button"
                           appearance="outline"
                           variant="primary"
                           hasIcon

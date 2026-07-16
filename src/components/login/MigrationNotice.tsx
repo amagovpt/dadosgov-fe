@@ -1,5 +1,9 @@
+"use client";
+
 import { Button, Icon } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import { PRIMARY_BUTTON_CLASS } from "./constants";
+import { Typograph } from "../Shared/Generics/Typograph";
 
 export function MigrationNotice({
   onSaml,
@@ -8,15 +12,17 @@ export function MigrationNotice({
   onSaml: () => void;
   onEidas: () => void;
 }) {
+  const { t } = useTranslation("login");
+
   return (
     <>
       <div>
-        <h2 className="mb-8 text-xl-bold text-brand-blue-dark">Migração obrigatória</h2>
-        <p className="text-neutral-900">
-          O login por email e palavra-passe vai ser descontinuado. Para continuar a aceder ao portal,
-          é necessário migrar a sua conta para a Chave Móvel Digital (CMD) ou autenticação europeia
-          (eIDAS).
-        </p>
+        <Typograph tag="h2" className="mb-8 text-xl-bold text-brand-blue-dark">
+          {t("migration.title")}
+        </Typograph>
+        <Typograph tag="p" className="text-neutral-900">
+          {t("migration.description")}
+        </Typograph>
       </div>
       <div className="bg-amber-50 border-amber-200 rounded-8 border p-24">
         <div className="flex items-start gap-12">
@@ -25,22 +31,21 @@ export function MigrationNotice({
             className="text-amber-600 mt-2 h-24 w-24 shrink-0"
           />
           <div>
-            <p className="text-sm-bold text-amber-800 mb-4">Como migrar?</p>
-            <p className="text-sm text-amber-700">
-              Autentique-se com a Chave Móvel Digital (separador &quot;CMD&quot;) ou com a
-              autenticação europeia (separador &quot;eIDAS&quot;). O sistema detetará a sua conta
-              existente e guiá-lo-á pelo processo de migração. Os seus dados (conjuntos de dados,
-              organizações, reutilizações) serão mantidos.
-            </p>
+            <Typograph tag="p" className="text-sm-bold text-amber-800 mb-4">
+              {t("migration.howToTitle")}
+            </Typograph>
+            <Typograph tag="p" className="text-sm text-amber-700">
+              {t("migration.howToDescription")}
+            </Typograph>
           </div>
         </div>
       </div>
       <div className="flex gap-16">
         <Button variant="primary" className={PRIMARY_BUTTON_CLASS} onClick={onSaml}>
-          Migrar com CMD
+          {t("migration.migrateCmd")}
         </Button>
         <Button variant="neutral" className={PRIMARY_BUTTON_CLASS} onClick={onEidas}>
-          Migrar com eIDAS
+          {t("migration.migrateEidas")}
         </Button>
       </div>
     </>

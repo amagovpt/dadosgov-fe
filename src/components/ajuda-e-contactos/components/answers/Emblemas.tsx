@@ -9,7 +9,7 @@ export function Emblemas() {
           Os emblemas permitem identificar determinadas características das organizações registadas
           no portal dados.gov.pt, facilitando a sua identificação pelos utilizadores. Estes emblemas
           são apresentados na página da organização e refletem a sua natureza ou enquadramento
-          institucional, como, por exemplo, "Serviço Público", "Associação" ou outras categorias
+          institucional, como, por exemplo, &quot;Serviço Público&quot;, &quot;Associação&quot; ou outras categorias
           aplicáveis.
         </p>
       </div>
@@ -17,7 +17,7 @@ export function Emblemas() {
         <p className="font-bold">Como solicitar a atribuição ou alteração de um emblema?</p>
         <p>
           O gestor da organização pode solicitar a atribuição de um novo emblema ou a alteração de
-          um emblema existente através do formulário <b>"Tenho uma pergunta"</b>, disponível nesta
+          um emblema existente através do formulário <b>&quot;Tenho uma pergunta&quot;</b>, disponível nesta
           página.
         </p>
         <p>No pedido, deverá indicar:</p>

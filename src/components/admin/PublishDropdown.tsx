@@ -5,13 +5,19 @@ import { useRouter } from "next/navigation";
 import { Button, Icon } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
 import AppIcon from "../Primitives/AppIcon";
+import { useTranslation } from "react-i18next";
 
 interface PublishDropdownProps {
   darkMode?: boolean;
   outline?: boolean;
 }
 
-export default function PublishDropdown({ darkMode = false, outline = true }: PublishDropdownProps) {
+export default function PublishDropdown({
+  darkMode = false,
+  outline = true,
+}: PublishDropdownProps) {
+  const { t } = useTranslation("common");
+
   const router = useRouter();
   const { hasOrganization } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -20,30 +26,29 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
   const PUBLISH_ITEMS = [
     {
       icon: "agora-line-layers-menu",
-      label: "Um conjunto de dados",
+      label: t("publishSelection.dataset"),
       href: "/admin/datasets/new",
     },
-    // Habilitar quando a criação de API estiver disponível
-    // {
-    //   icon: null as string | null,
-    //   customIcon: "/Icons/api.svg",
-    //   label: "Uma API",
-    //   href: "/admin/dataservices/new",
-    // },
+    {
+      icon: null as string | null,
+      customIcon: "/Icons/api.svg",
+      label: t("publishSelection.api"),
+      href: "/admin/dataservices/new",
+    },
     {
       icon: "agora-line-share",
-      label: "Uma reutilização",
+      label: t("publishSelection.reuse"),
       href: "/admin/reuses/new",
     },
     {
       icon: null as string | null,
       customIcon: "/Icons/harvester.svg",
-      label: "Um harvester",
+      label: t("publishSelection.harvester"),
       href: "/admin/harvesters/new",
     },
     {
       icon: "agora-line-buildings",
-      label: "Uma organização",
+      label: t("publishSelection.organization"),
       href: "/admin/organizations/new?step=1",
     },
   ];
@@ -73,28 +78,31 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
         onClick={() => setShowDropdown((v) => !v)}
       >
         <span className="text-lg font-medium">
-          Publicar <span className="font-bold">dados.gov.pt</span>
+          {t("publish")} <span className="font-bold">dados.gov.pt</span>
         </span>
       </Button>
       {showDropdown && (
-        <div className="absolute left-0 mt-8 bg-white border-1 rounded-4 shadow-lg py-8 z-10 max-w-256">
+        <div className="shadow-lg absolute left-0 z-10 mt-8 max-w-256 rounded-4 border-1 bg-white py-8">
           {PUBLISH_ITEMS.map((item, index) => (
             <button
               key={index}
-              className="flex items-center gap-8 w-full text-left text-nowrap p-16 border-b-2 border-b-neutral-200 last-of-type:border-none hover:bg-primary-50"
+              className="flex w-full items-center gap-8 text-nowrap border-b-2 border-b-neutral-200 p-16 text-left last-of-type:border-none hover:bg-primary-50"
               onClick={() => {
                 setShowDropdown(false);
                 router.push(item.href);
               }}
             >
               {item.icon ? (
-                <AppIcon name={item.icon} className="w-24 h-24 text-primary-600" />
+                <AppIcon name={item.icon} className="h-24 w-24 text-primary-600" />
               ) : (
                 <img
                   src={item.customIcon!}
                   alt=""
-                  className="w-24 h-24"
-                  style={{ filter: "invert(22%) sepia(93%) saturate(2500%) hue-rotate(215deg) brightness(95%) contrast(105%)" }}
+                  className="h-24 w-24"
+                  style={{
+                    filter:
+                      "invert(22%) sepia(93%) saturate(2500%) hue-rotate(215deg) brightness(95%) contrast(105%)",
+                  }}
                   aria-hidden="true"
                 />
               )}

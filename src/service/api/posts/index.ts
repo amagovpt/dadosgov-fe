@@ -38,11 +38,15 @@ export async function fetchPosts(
 }
 
 
-export async function fetchPost(slugOrId: string): Promise<Post | null> {
+export async function fetchPost(
+  slugOrId: string,
+  options?: { revalidate?: number }
+): Promise<Post | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/posts/${slugOrId}/`, {
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${API_BASE_URL}/posts/${slugOrId}/`,
+      options?.revalidate ? { next: { revalidate: options.revalidate } } : { cache: "no-store" }
+    );
 
     if (res.status === 404) {
       return null;

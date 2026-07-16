@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ChangeEvent, MutableRefObject, ReactElement } from "react";
 import {
   Button,
@@ -147,10 +148,10 @@ export default function ReusesFormDetailsStep({
               Quando a reutilização for produzida no contexto de atividade profissional, é
               recomendável que seja publicada em nome da organização responsável.
             </p>
-            <a href="/admin/organizations/new" className="admin-page__org-card-link">
+            <Link href="/admin/organizations/new" className="admin-page__org-card-link">
               Crie ou integre uma organização em dados.gov.pt
               <AppIcon name="agora-line-arrow-right-circle" className="h-24 w-24" />
-            </a>
+            </Link>
           </div>
         )}
 

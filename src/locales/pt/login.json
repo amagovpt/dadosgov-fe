@@ -1,0 +1,106 @@
+{
+  "title": "Autenticação",
+  "description": "Escolha um meio de autenticação para se autenticar no portal e ter acesso aos vários serviços e funcionalidades online.",
+  "tabs": {
+    "cmd": "Chave Móvel Digital (CMD)",
+    "eidas": "Autenticação europeia (eIDAS)",
+    "email": "E-mail e palavra-passe"
+  },
+  "beforeStart": {
+    "title": "Antes de começar..."
+  },
+  "cmd": {
+    "intro": "Precisa do código PIN da sua Chave Móvel Digital - CMD e do telemóvel que lhe está associado.",
+    "noAccountQuestion": "Não tem Chave Móvel Digital?",
+    "discoverHowToCreate": "Descubra como criar conta",
+    "loginAs": "Entrar como",
+    "citizenNational": "Pessoa com nacionalidade portuguesa",
+    "citizenForeign": "Pessoa com nacionalidade estrangeira",
+    "submit": "Entrar com Chave Móvel Digital"
+  },
+  "eidas": {
+    "intro": "Precisa de ter um meio de autenticação digital disponibilizado pelo seu país de origem na União Europeia (UE). Este meio de autenticação está disponível para a qualquer cidadã/o da UE.",
+    "noAccountQuestion": "Não tem Autenticação Europeia?",
+    "discoverHowToCreate": "Descubra como criar conta",
+    "documentsPart1": "Precisa ",
+    "documentsBold1": "fornecer documentos",
+    "documentsPart2": " que foram emitidos por uma entidade pública de ",
+    "documentsBold2": "outro Estado-Membro",
+    "documentsPart3": " da UE? Agora já é possível recupera-los diretamente do portal emissor entrando com a sua autenticação Europeia.",
+    "submit": "Autenticar com eIDAS"
+  },
+  "email": {
+    "beforeStartDescription": "Apenas utilizadores antigos, que tenham criado conta com email e palavra-passe, conseguem autenticar-se desta forma.",
+    "requiredFieldsNote": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
+    "emailLabel": "Endereço de e-mail *",
+    "emailPlaceholder": "Introduza aqui o texto",
+    "passwordLabel": "Palavra-passe *",
+    "passwordPlaceholder": "Introduza aqui a palavra-passe",
+    "rememberPassword": "Lembrar palavra-passe",
+    "forgotPassword": "Esqueceu-se da palavra-passe?",
+    "recoverPassword": "Recuperar palavra-passe",
+    "submit": "Autenticar",
+    "submitLoading": "A autenticar..."
+  },
+  "recovery": {
+    "title": "Recuperar palavra-passe",
+    "description": "Introduza o seu endereço de e-mail e enviaremos instruções para redefinir a sua palavra-passe.",
+    "emailLabel": "Endereço de e-mail *",
+    "emailPlaceholder": "Introduza aqui o texto",
+    "submit": "Redefinir palavra-passe",
+    "submitLoading": "A enviar...",
+    "back": "Voltar ao início de sessão",
+    "success": "Se o endereço de e-mail estiver associado a uma conta, receberá um e-mail com instruções para redefinir a sua palavra-passe.",
+    "errorRequest": "Erro ao enviar pedido. Tente novamente.",
+    "errorConnection": "Erro de ligação. Tente novamente."
+  },
+  "migration": {
+    "title": "Migração obrigatória",
+    "description": "O login por email e palavra-passe vai ser descontinuado. Para continuar a aceder ao portal, é necessário migrar a sua conta para a Chave Móvel Digital (CMD) ou autenticação europeia (eIDAS).",
+    "howToTitle": "Como migrar?",
+    "howToDescription": "Autentique-se com a Chave Móvel Digital (separador \"CMD\") ou com a autenticação europeia (separador \"eIDAS\"). O sistema detetará a sua conta existente e guiá-lo-á pelo processo de migração. Os seus dados (conjuntos de dados, organizações, reutilizações) serão mantidos.",
+    "migrateCmd": "Migrar com CMD",
+    "migrateEidas": "Migrar com eIDAS"
+  },
+  "terms": {
+    "title": "Termos e condições",
+    "readCarefully": "Deve ler atentamente os",
+    "link": "Termos e condições para o tratamento dos seus dados",
+    "checkbox": "Declaro que li e aceito os termos e condições para o tratamento dos meus dados pessoais no acesso e utilização da Área Reservada do dados.gov.pt."
+  },
+  "help": {
+    "title": "Tem dúvidas?",
+    "description": "Se precisar de ajuda, fale connosco através do nosso formulário.",
+    "link": "Formulário de contacto"
+  },
+  "cmdModal": {
+    "title": "O que precisa para criar uma conta?",
+    "item1": "Para cidadãs/ãos nacionais e estrangeiras/os com Chave Móvel Digital (CMD) ativa.",
+    "item2Before": "Precisa do código PIN da sua CMD e do telemóvel que lhe está associado. Se ainda não o fez, pode",
+    "item2Link": "ativar a Chave Móvel Digital em Autenticação.gov.",
+    "item3": "O registo com CMD permite a realização de todos os serviços online disponibilizados neste portal.",
+    "createNational": "Criar conta como cidadão nacional",
+    "createForeign": "Criar conta como cidadão estrangeiro"
+  },
+  "eidasModal": {
+    "title": "O que precisa para criar uma conta?",
+    "item1": "Ter um mecanismo de identificação eletrónica emitida por outro Estado-Membro da União Europeia que já tenha infraestruturas de autenticação (eIDAS) disponível.",
+    "createAccount": "Criar conta com Autenticação Europeia"
+  },
+  "newAccountNotice": {
+    "title": "Nova conta criada",
+    "description": "Foi criada uma nova conta associada à sua Chave Móvel Digital. Pode completar o seu perfil na área pessoal.",
+    "close": "Fechar aviso"
+  },
+  "common": {
+    "close": "Fechar"
+  },
+  "errors": {
+    "requiredFields": "Por favor, preencha todos os campos obrigatórios.",
+    "loginFailed": "Ocorreu um erro ao tentar iniciar sessão.",
+    "samlStart": "Erro ao iniciar autenticação ({{status}}). Tente novamente.",
+    "samlBadResponse": "Erro ao iniciar autenticação. O servidor não respondeu corretamente.",
+    "samlIncomplete": "Erro ao iniciar autenticação. Resposta incompleta do servidor.",
+    "samlConnection": "Não foi possível contactar o servidor de autenticação. Verifique a sua ligação."
+  }
+}

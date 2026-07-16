@@ -11,6 +11,7 @@ interface DataserviceDescriptionSectionProps {
   machineDocUrl: string;
   technicalDocUrl: string;
   rateLimiting: string;
+  rateLimitingUrl: string;
   availability: string;
   hasApiNameError: boolean;
   hasApiDescriptionError: boolean;
@@ -21,6 +22,7 @@ interface DataserviceDescriptionSectionProps {
   onMachineDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onTechnicalDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onRateLimitingChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onRateLimitingUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onAvailabilityChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -32,6 +34,7 @@ export default function DataserviceDescriptionSection({
   machineDocUrl,
   technicalDocUrl,
   rateLimiting,
+  rateLimitingUrl,
   availability,
   hasApiNameError,
   hasApiDescriptionError,
@@ -42,6 +45,7 @@ export default function DataserviceDescriptionSection({
   onMachineDocUrlChange,
   onTechnicalDocUrlChange,
   onRateLimitingChange,
+  onRateLimitingUrlChange,
   onAvailabilityChange,
 }: DataserviceDescriptionSectionProps) {
   return (
@@ -81,7 +85,7 @@ export default function DataserviceDescriptionSection({
           errorFeedbackText="Campo obrigatório"
         />
         <InputText
-          label="Link raiz da API"
+          label="URL base da API"
           placeholder="Insira o URL aqui"
           id="api-root-link"
           value={baseApiUrl}
@@ -107,6 +111,13 @@ export default function DataserviceDescriptionSection({
           id="api-rate-limit"
           value={rateLimiting}
           onChange={onRateLimitingChange}
+        />
+        <InputText
+          label="Link para a documentação sobre limites de chamadas"
+          placeholder="Insira o URL aqui"
+          id="api-rate-limit-url"
+          value={rateLimitingUrl}
+          onChange={onRateLimitingUrlChange}
         />
         <InputText
           label="Disponibilidade"
