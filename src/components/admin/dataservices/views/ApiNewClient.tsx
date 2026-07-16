@@ -7,8 +7,13 @@ import ApiRegistrationClient from "@/components/admin/dataservices/views/ApiRegi
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
-export default function ApiNewClient() {
+interface ApiNewClientProps {
+  pageContent: BoDataservicesPage;
+}
+
+export default function ApiNewClient({ pageContent }: ApiNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -45,6 +50,7 @@ export default function ApiNewClient() {
         onPreviousStep={() =>
           router.push(`/admin/dataservices/new?step=${currentStep - 1}`)
         }
+        pageContent={pageContent}
       />
     </AdminLayout>
   );

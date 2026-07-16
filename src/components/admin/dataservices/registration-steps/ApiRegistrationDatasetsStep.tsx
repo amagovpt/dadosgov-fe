@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import DataserviceDatasetLinksSection from "@/components/admin/dataservices/form-sections/DataserviceDatasetLinksSection";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ApiRegistrationDatasetsStepProps {
   datasetLinks: { url: string }[];
@@ -14,6 +16,7 @@ interface ApiRegistrationDatasetsStepProps {
   onAddDatasetLink: () => void;
   onPreviousStep: () => void;
   onNextStep: () => void;
+  datasetLinksInfo?: AdminHelpBlock;
 }
 
 export default function ApiRegistrationDatasetsStep({
@@ -24,16 +27,29 @@ export default function ApiRegistrationDatasetsStep({
   onAddDatasetLink,
   onPreviousStep,
   onNextStep,
+  datasetLinksInfo,
 }: ApiRegistrationDatasetsStepProps) {
   const { t } = useTranslation("admin-dataservices");
 
   return (
     <>
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={t("form.datasetLinksInfo")}
-      />
+      {datasetLinksInfo ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            datasetLinksInfo.title ? (
+              <>
+                <strong>{datasetLinksInfo.title}</strong>
+                <br />
+                {formatHtmlParagraphs(datasetLinksInfo.description)}
+              </>
+            ) : (
+              formatHtmlParagraphs(datasetLinksInfo.description)
+            )
+          }
+        />
+      ) : null}
 
       <form
         className="admin-page__form"

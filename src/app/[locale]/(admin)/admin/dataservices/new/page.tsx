@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ApiNewClient from "@/components/admin/dataservices/views/ApiNewClient";
-import initTranslations from "@/app/i18n";
+import { getBoDataservices, getBoDataservicesMetadata } from "@/service/queries/admin/dataservices";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 export async function generateMetadata({
   params,
@@ -8,17 +9,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-dataservices"],
-  });
+  const metadata = await getBoDataservicesMetadata(locale);
 
   return {
-    title: t("metadata.newTitle", { ns: "admin-dataservices" }),
-    description: t("metadata.newDescription", { ns: "admin-dataservices" }),
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
   };
 }
 
-export default function ApiRegistrationPage() {
-  return <ApiNewClient />;
+export default async function ApiRegistrationPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoDataservices(locale);
+
+  return <ApiNewClient pageContent={pageContent} />;
 }

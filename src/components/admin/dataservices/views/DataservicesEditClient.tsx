@@ -28,7 +28,7 @@ import DataservicesEditActivitiesTab from "@/components/admin/dataservices/Datas
 import DataserviceDescriptionSection from "@/components/admin/dataservices/form-sections/DataserviceDescriptionSection";
 import DataserviceAccessSection from "@/components/admin/dataservices/form-sections/DataserviceAccessSection";
 import AuxiliarList from "@/components/admin/AuxiliarList";
-import { getDataserviceAuxiliaryItems } from "@/components/admin/dataservices/config/dataserviceAuxiliaryContent";
+import { getEditDataserviceAuxiliaryItems } from "@/components/admin/dataservices/config/dataserviceAuxiliaryContent";
 import AppIcon from "@/components/Primitives/AppIcon";
 import TextLink from "@/components/Primitives/TextLink";
 import {
@@ -52,8 +52,20 @@ import type { Dataservice } from "@/service/types/dataservice";
 import type { Dataset } from "@/service/types/dataset";
 import type { Discussion } from "@/service/types/discussion";
 import type { Activity } from "@/service/types/catalog";
+import type { AdminCard } from "@/service/types/admin/common";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-export default function DataservicesEditClient() {
+interface DataservicesEditClientProps {
+  pageContent: BoDataservicesPage;
+}
+
+function findArchiveInfoCard(cards: AdminCard[] | undefined, isArchived: boolean) {
+  if (!cards?.length) return undefined;
+  return cards[isArchived ? 1 : 0] ?? cards[0];
+}
+
+export default function DataservicesEditClient({ pageContent }: DataservicesEditClientProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { show, hide } = usePopupContext();
@@ -439,10 +451,15 @@ export default function DataservicesEditClient() {
     });
   };
 
-  const auxiliarItems = getDataserviceAuxiliaryItems({
+  const auxiliarItems = getEditDataserviceAuxiliaryItems({
     hasApiNameError: !!formErrors.title,
     hasApiDescriptionError: !!formErrors.description,
+    items: pageContent.editAuxiliaryItems,
   });
+  const archiveInfoCard = findArchiveInfoCard(
+    pageContent.archiveInfoCard,
+    !!dataservice?.archived_at
+  );
 
   const lastActivityRaw =
     dataservice?.last_modified ||
@@ -544,20 +561,16 @@ export default function DataservicesEditClient() {
               <TabBody>
                 <div className="admin-page__body">
                   <div className="admin-page__form-area">
-                    {dataservice.private && (
+                    {dataservice.private && pageContent.draftVisibilityCard && (
                       <div className="dataset-edit-visibility-banner">
                         <StatusCard
                           variant="informative"
                           showIcon
                           description={
                             <>
-                              <strong>
-                                {t("admin-dataservices:edit.visibilityTitle")}
-                              </strong>
+                              <strong>{pageContent.draftVisibilityCard.title}</strong>
                               <br />
-                              {t("admin-dataservices:edit.visibilityDescriptionPrefix")}{" "}
-                              <strong>{t("admin-dataservices:edit.draftMode")}</strong>.{" "}
-                              {t("admin-dataservices:edit.visibilityDescriptionSuffix")}
+                              {formatHtmlParagraphs(pageContent.draftVisibilityCard.description)}
                             </>
                           }
                         />
@@ -674,33 +687,32 @@ export default function DataservicesEditClient() {
                       </div>
 
                       <div className="dataset-edit-danger-actions">
-                        <StatusCard
-                          variant="warning"
-                          showIcon
-                          description={
-                            <>
-                              <strong>
-                                {dataservice.archived_at
-                                  ? t("admin-dataservices:edit.archiveInfoArchived")
-                                  : t("admin-dataservices:edit.archiveInfoActive")}
-                              </strong>
-                              <br />
-                              <Button
-                                appearance="link"
-                                variant="primary"
-                                hasIcon
-                                trailingIcon="agora-line-arrow-right-circle"
-                                trailingIconHover="agora-solid-arrow-right-circle"
-                                onClick={handleArchive}
-                                disabled={isSaving}
-                              >
-                                {dataservice.archived_at
-                                  ? t("admin-dataservices:edit.unarchive")
-                                  : t("admin-dataservices:edit.archive")}
-                              </Button>
-                            </>
-                          }
-                        />
+                        {archiveInfoCard ? (
+                          <StatusCard
+                            variant="warning"
+                            showIcon
+                            description={
+                              <>
+                                <strong>{archiveInfoCard.title}</strong>
+                                <br />
+                                {formatHtmlParagraphs(archiveInfoCard.description)}
+                                <Button
+                                  appearance="link"
+                                  variant="primary"
+                                  hasIcon
+                                  trailingIcon="agora-line-arrow-right-circle"
+                                  trailingIconHover="agora-solid-arrow-right-circle"
+                                  onClick={handleArchive}
+                                  disabled={isSaving}
+                                >
+                                  {dataservice.archived_at
+                                    ? t("admin-dataservices:edit.unarchive")
+                                    : t("admin-dataservices:edit.archive")}
+                                </Button>
+                              </>
+                            }
+                          />
+                        ) : null}
                         <StatusCard
                           variant="danger"
                           showIcon
@@ -726,17 +738,19 @@ export default function DataservicesEditClient() {
                     </form>
                   </div>
 
-                  <aside className="admin-page__auxiliar">
-                    <div className="admin-page__auxiliar-inner">
-                      <div className="admin-page__auxiliar-header">
-                        <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
-                        <h2 className="admin-page__auxiliar-title">
-                          {t("admin-common:auxiliary.title")}
-                        </h2>
+                  {auxiliarItems.length > 0 ? (
+                    <aside className="admin-page__auxiliar">
+                      <div className="admin-page__auxiliar-inner">
+                        <div className="admin-page__auxiliar-header">
+                          <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
+                          <h2 className="admin-page__auxiliar-title">
+                            {t("admin-common:auxiliary.title")}
+                          </h2>
+                        </div>
+                        <AuxiliarList items={auxiliarItems} />
                       </div>
-                      <AuxiliarList items={auxiliarItems} />
-                    </div>
-                  </aside>
+                    </aside>
+                  ) : null}
                 </div>
               </TabBody>
             </Tab>
@@ -750,11 +764,23 @@ export default function DataservicesEditClient() {
               </TabHeader>
               <TabBody>
                 <div className="mt-24 admin-page__form-area">
-                  <StatusCard
-                    variant="informative"
-                    showIcon
-                    description={t("admin-dataservices:form.datasetLinksInfo")}
-                  />
+                  {pageContent.datasetLinksInfo ? (
+                    <StatusCard
+                      variant="informative"
+                      showIcon
+                      description={
+                        pageContent.datasetLinksInfo.title ? (
+                          <>
+                            <strong>{pageContent.datasetLinksInfo.title}</strong>
+                            <br />
+                            {formatHtmlParagraphs(pageContent.datasetLinksInfo.description)}
+                          </>
+                        ) : (
+                          formatHtmlParagraphs(pageContent.datasetLinksInfo.description)
+                        )
+                      }
+                    />
+                  ) : null}
 
                   <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
                     <InputSelect

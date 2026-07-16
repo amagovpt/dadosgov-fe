@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
 import ProducerIdentitySection from "@/components/admin/forms/ProducerIdentitySection";
 import { buildProducerItems, renderDropdownSection } from "@/components/admin/community-resources/config/dropdownOptions";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 interface UserOrganization {
   id: string;
@@ -14,13 +15,14 @@ interface UserOrganization {
 interface DataserviceProducerSectionProps {
   displayName: string;
   organizations: UserOrganization[];
+  helper?: AdminHelpBlock;
 }
 
 export default function DataserviceProducerSection({
   displayName,
   organizations,
+  helper,
 }: DataserviceProducerSectionProps) {
-  const { t } = useTranslation("admin-dataservices");
   const producerOptions = useMemo(
     () =>
       renderDropdownSection(
@@ -35,11 +37,7 @@ export default function DataserviceProducerSection({
   return (
     <ProducerIdentitySection
       producerOptions={producerOptions}
-      helperDescription={
-        <>
-          {t("form.producerHelper")}
-        </>
-      }
+      helperDescription={helper ? stripHtmlTags(helper.description) : undefined}
     />
   );
 }

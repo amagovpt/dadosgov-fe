@@ -15,18 +15,22 @@ import ApiRegistrationPublishStep from "@/components/admin/dataservices/registra
 import DataserviceProducerSection from "@/components/admin/dataservices/form-sections/DataserviceProducerSection";
 import DataserviceDescriptionSection from "@/components/admin/dataservices/form-sections/DataserviceDescriptionSection";
 import DataserviceAccessSection from "@/components/admin/dataservices/form-sections/DataserviceAccessSection";
-import { getDataserviceAuxiliaryItems } from "@/components/admin/dataservices/config/dataserviceAuxiliaryContent";
+import { getCreateDataserviceAuxiliaryItems } from "@/components/admin/dataservices/config/dataserviceAuxiliaryContent";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ApiRegistrationClientProps {
   currentStep: number;
   onNextStep: () => void;
   onPreviousStep: () => void;
+  pageContent: BoDataservicesPage;
 }
 
 export default function ApiRegistrationClient({
   currentStep,
   onNextStep,
   onPreviousStep,
+  pageContent,
 }: ApiRegistrationClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const { user } = useAuth();
@@ -136,9 +140,10 @@ export default function ApiRegistrationClient({
     callback();
   }
 
-  const auxiliaryItems = getDataserviceAuxiliaryItems({
+  const auxiliaryItems = getCreateDataserviceAuxiliaryItems({
     hasApiNameError: hasError("apiName"),
     hasApiDescriptionError: hasError("apiDescription"),
+    items: pageContent.createAuxiliaryItems,
   });
 
   return (
@@ -146,17 +151,19 @@ export default function ApiRegistrationClient({
       <div className="admin-page__form-area">
         {currentStep === 1 && (
           <>
-            <StatusCard
-              variant="informative"
-              showIcon
-              description={
-                <>
-                  <strong>{t("admin-dataservices:form.whatIsApiTitle")}</strong>
-                  <br />
-                  {t("admin-dataservices:form.whatIsApiDescription")}
-                </>
-              }
-            />
+            {pageContent.introduction ? (
+              <StatusCard
+                variant="informative"
+                showIcon
+                description={
+                  <>
+                    <strong>{pageContent.introduction.title}</strong>
+                    <br />
+                    {formatHtmlParagraphs(pageContent.introduction.description)}
+                  </>
+                }
+              />
+            ) : null}
 
             {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
@@ -180,6 +187,7 @@ export default function ApiRegistrationClient({
                   id: organization.id,
                   name: organization.name,
                 }))}
+                helper={pageContent.producerHelper}
               />
 
               <DataserviceDescriptionSection
@@ -247,6 +255,7 @@ export default function ApiRegistrationClient({
             onAddDatasetLink={addDatasetLink}
             onPreviousStep={() => handleStepChange(onPreviousStep)}
             onNextStep={() => handleStepChange(onNextStep)}
+            datasetLinksInfo={pageContent.datasetLinksInfo}
           />
         )}
 
@@ -255,11 +264,14 @@ export default function ApiRegistrationClient({
             createdDataservice={createdDataservice}
             apiName={apiName}
             apiDescription={apiDescription}
+            createdCard={pageContent.createdCard}
           />
         )}
       </div>
 
-      {currentStep === 1 && <AdminAuxiliarySidebar items={auxiliaryItems} />}
+      {currentStep === 1 && auxiliaryItems.length > 0 ? (
+        <AdminAuxiliarySidebar items={auxiliaryItems} />
+      ) : null}
     </div>
   );
 }
