@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import CommunityResourcesEditClient from "@/components/admin/community-resources/views/CommunityResourcesEditClient";
+import CommunityResourceEditClient from "@/components/admin/community-resources/views/CommunityResourceEditClient";
 import initTranslations from "@/app/i18n";
+import { getBoCommunityResources } from "@/service/queries/admin/community-resources";
 
 export async function generateMetadata({
   params,
@@ -19,6 +20,13 @@ export async function generateMetadata({
   };
 }
 
-export default function CommunityResourcePage() {
-  return <CommunityResourcesEditClient />;
+export default async function CommunityResourcePage({
+  params,
+}: {
+  params: Promise<{ locale: string; resourceId: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoCommunityResources(locale);
+
+  return <CommunityResourceEditClient pageContent={pageContent} />;
 }

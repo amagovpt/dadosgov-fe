@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
-import CommunityResourcesNewClient from "@/components/admin/community-resources/views/CommunityResourcesNewClient";
-import initTranslations from "@/app/i18n";
+import CommunityResourceNewClient from "@/components/admin/community-resources/views/CommunityResourceNewClient";
+import {
+  getBoCommunityResources,
+  getBoCommunityResourcesMetadata,
+} from "@/service/queries/admin/community-resources";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 export async function generateMetadata({
   params,
@@ -8,17 +12,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-community-resources"],
-  });
+  const metadata = await getBoCommunityResourcesMetadata(locale);
 
   return {
-    title: t("metadata.newTitle", { ns: "admin-community-resources" }),
-    description: t("metadata.newDescription", { ns: "admin-community-resources" }),
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
   };
 }
 
-export default function CommunityResourcesNewPage() {
-  return <CommunityResourcesNewClient />;
+export default async function CommunityResourcesNewPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoCommunityResources(locale);
+
+  return <CommunityResourceNewClient pageContent={pageContent} />;
 }

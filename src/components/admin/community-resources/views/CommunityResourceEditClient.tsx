@@ -41,6 +41,7 @@ import { can } from "@/utils/permissions";
 import FormStatusMessages from "@/components/admin/community-resources/form-ui/FormStatusMessages";
 import CommunityResourceAuxiliarySidebar from "@/components/admin/community-resources/form-ui/CommunityResourceAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
 type CommunityResourceEditField =
   | "url"
@@ -49,7 +50,13 @@ type CommunityResourceEditField =
   | "format"
   | "checksumValue";
 
-export default function CommunityResourceEditClient() {
+interface CommunityResourceEditClientProps {
+  pageContent: BoCommunityResourcesPage;
+}
+
+export default function CommunityResourceEditClient({
+  pageContent,
+}: CommunityResourceEditClientProps) {
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const searchParams = useSearchParams();
   const params = useParams();
@@ -357,6 +364,7 @@ export default function CommunityResourceEditClient() {
     hasUrlError: hasError("url"),
     hasTitleError: hasError("title"),
     hasTypeError: hasError("type"),
+    items: pageContent.editAuxiliaryItems,
   });
 
   if (isLoading) {
@@ -494,7 +502,9 @@ export default function CommunityResourceEditClient() {
           </form>
         </div>
 
-        <CommunityResourceAuxiliarySidebar items={auxiliarItems} />
+        {auxiliarItems.length > 0 ? (
+          <CommunityResourceAuxiliarySidebar items={auxiliarItems} />
+        ) : null}
       </div>
     </AdminLayout>
   );

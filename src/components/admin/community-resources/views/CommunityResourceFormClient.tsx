@@ -40,6 +40,8 @@ import DatasetSelectionSection from "@/components/admin/community-resources/form
 import FormStatusMessages from "@/components/admin/community-resources/form-ui/FormStatusMessages";
 import CommunityResourceAuxiliarySidebar from "@/components/admin/community-resources/form-ui/CommunityResourceAuxiliarySidebar";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface CommunityResourceFormClientProps {
   datasetId: string;
@@ -47,6 +49,7 @@ interface CommunityResourceFormClientProps {
   onNextStep: () => void;
   onPreviousStep: () => void;
   onPublicPageReady?: (url: string) => void;
+  pageContent: BoCommunityResourcesPage;
 }
 
 type CommunityResourceCreateField = "title" | "resourceUrl" | "type" | "dataset";
@@ -66,6 +69,7 @@ export default function CommunityResourceFormClient({
   onNextStep,
   onPreviousStep,
   onPublicPageReady,
+  pageContent,
 }: CommunityResourceFormClientProps) {
   const { user } = useAuth();
   const { t } = useTranslation("admin-community-resources");
@@ -237,6 +241,7 @@ export default function CommunityResourceFormClient({
     hasResourceUrlError: hasError("resourceUrl"),
     hasTitleError: hasError("title"),
     hasTypeError: hasError("type"),
+    items: pageContent.createAuxiliaryItems,
   });
 
   const producerOptions = useMemo(
@@ -291,17 +296,19 @@ export default function CommunityResourceFormClient({
         <div className="admin-page__form-area">
           {currentStep === 1 && (
             <>
-              <StatusCard
-                variant="informative"
-                showIcon
-                description={
-                  <>
-                    <strong>{t("form.introTitle")}</strong>
-                    <br />
-                    {t("form.introDescription")}
-                  </>
-                }
-              />
+              {pageContent.introduction ? (
+                <StatusCard
+                  variant="informative"
+                  showIcon
+                  description={
+                    <>
+                      <strong>{pageContent.introduction.title}</strong>
+                      <br />
+                      {formatHtmlParagraphs(pageContent.introduction.description)}
+                    </>
+                  }
+                />
+              ) : null}
 
               <FormStatusMessages errorMessage={apiError} errorClassName="mb-16 mt-32" />
 
@@ -320,6 +327,7 @@ export default function CommunityResourceFormClient({
                 <ProducerSection
                   producerOptions={producerOptions}
                   selectedProducerRef={selectedProducerRef}
+                  helper={pageContent.producerHelper}
                 />
 
                 <FileOrLinkSection
@@ -386,17 +394,19 @@ export default function CommunityResourceFormClient({
 
           {currentStep === 2 && (
             <>
-              <StatusCard
-                variant="success"
-                showIcon
-                description={
-                  <>
-                    <strong>{t("form.createdTitle")}</strong>
-                    <br />
-                    {t("form.createdDescription")}
-                  </>
-                }
-              />
+              {pageContent.createdCard ? (
+                <StatusCard
+                  variant="success"
+                  showIcon
+                  description={
+                    <>
+                      <strong>{pageContent.createdCard.title}</strong>
+                      <br />
+                      {formatHtmlParagraphs(pageContent.createdCard.description)}
+                    </>
+                  }
+                />
+              ) : null}
 
               {createdResource && <CreatedResourceCard resource={createdResource} />}
 
@@ -405,9 +415,9 @@ export default function CommunityResourceFormClient({
           )}
         </div>
 
-        {currentStep === 1 && (
+        {currentStep === 1 && auxiliarItems.length > 0 ? (
           <CommunityResourceAuxiliarySidebar items={auxiliarItems} />
-        )}
+        ) : null}
       </div>
     </>
   );

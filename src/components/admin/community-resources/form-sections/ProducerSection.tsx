@@ -2,27 +2,28 @@
 
 import React from "react";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
-import { useTranslation } from "react-i18next";
 import ProducerIdentitySection from "@/components/admin/forms/ProducerIdentitySection";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 interface ProducerSectionProps {
   producerOptions:
     | React.ReactElement<DropdownSectionProps>
     | React.ReactElement<DropdownSectionProps>[];
   selectedProducerRef: React.RefObject<string>;
+  helper?: AdminHelpBlock;
 }
 
 export default function ProducerSection({
   producerOptions,
   selectedProducerRef,
+  helper,
 }: ProducerSectionProps) {
-  const { t } = useTranslation("admin-community-resources");
-
   return (
     <ProducerIdentitySection
       producerOptions={producerOptions}
       selectedProducerRef={selectedProducerRef}
-      helperDescription={t("form.producerHelper")}
+      helperDescription={helper ? stripHtmlTags(helper.description) : undefined}
     />
   );
 }

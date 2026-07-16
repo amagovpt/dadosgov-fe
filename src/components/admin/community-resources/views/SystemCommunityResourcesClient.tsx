@@ -16,8 +16,15 @@ import {
   sortCommunityResources,
 } from "@/components/admin/community-resources/config/communityResourcesListConfig";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
-export default function SystemCommunityResourcesClient() {
+interface SystemCommunityResourcesClientProps {
+  pageContent: BoCommunityResourcesPage;
+}
+
+export default function SystemCommunityResourcesClient({
+  pageContent,
+}: SystemCommunityResourcesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const searchParams = useSearchParams();
   const resourceId = searchParams.get("resource_id");
@@ -100,7 +107,7 @@ export default function SystemCommunityResourcesClient() {
   }, [resourceId]);
 
   if (resourceId) {
-    return <CommunityResourceEditClient />;
+    return <CommunityResourceEditClient pageContent={pageContent} />;
   }
 
   return (

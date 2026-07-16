@@ -8,8 +8,15 @@ import CommunityResourceFormClient from "@/components/admin/community-resources/
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
-export default function CommunityResourceNewClient() {
+interface CommunityResourceNewClientProps {
+  pageContent: BoCommunityResourcesPage;
+}
+
+export default function CommunityResourceNewClient({
+  pageContent,
+}: CommunityResourceNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -73,6 +80,7 @@ export default function CommunityResourceNewClient() {
             `/admin/community-resources/new?dataset_id=${datasetId}&step=${currentStep - 1}`
           )
         }
+        pageContent={pageContent}
       />
     </AdminLayout>
   );
