@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import OrganizationsNewClient from "@/components/admin/organizations/OrganizationsNewClient";
-import initTranslations from "@/app/i18n";
+import {
+  getBoOrganizations,
+  getBoOrganizationsMetadata,
+} from "@/service/queries/admin/organizations";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 export async function generateMetadata({
   params,
@@ -8,17 +12,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-organizations"],
-  });
+  const metadata = await getBoOrganizationsMetadata(locale);
 
   return {
-    title: t("metadata.newTitle", { ns: "admin-organizations" }),
-    description: t("metadata.newDescription", { ns: "admin-organizations" }),
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
   };
 }
 
-export default function OrganizationsNewPage() {
-  return <OrganizationsNewClient />;
+export default async function OrganizationsNewPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoOrganizations(locale);
+
+  return <OrganizationsNewClient pageContent={pageContent} />;
 }

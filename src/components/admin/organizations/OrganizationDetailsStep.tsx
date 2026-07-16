@@ -4,6 +4,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Button, InputText, InputTextArea, StatusCard } from "@ama-pt/agora-design-system";
 import ImageUploadField from "@/components/admin/forms/ImageUploadField";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface OrganizationDetailsStepProps {
   orgName: string;
@@ -25,6 +27,7 @@ interface OrganizationDetailsStepProps {
   onLogoSecurityError: () => void;
   onPrevious: () => void;
   onSubmit: () => void;
+  introduction?: AdminHelpBlock;
 }
 
 export default function OrganizationDetailsStep({
@@ -47,22 +50,25 @@ export default function OrganizationDetailsStep({
   onLogoSecurityError,
   onPrevious,
   onSubmit,
+  introduction,
 }: OrganizationDetailsStepProps) {
   const { t } = useTranslation("admin-organizations");
 
   return (
     <>
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={
-          <>
-            <strong>{t("form.whatIsOrganizationTitle")}</strong>
-            <br />
-            {t("form.whatIsOrganizationDescription")}
-          </>
-        }
-      />
+      {introduction ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            <>
+              <strong>{introduction.title}</strong>
+              <br />
+              {formatHtmlParagraphs(introduction.description)}
+            </>
+          }
+        />
+      ) : null}
 
       <form
         className="admin-page__form"

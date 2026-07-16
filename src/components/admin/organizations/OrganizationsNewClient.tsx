@@ -16,8 +16,13 @@ import OrganizationSelectionStep from "@/components/admin/organizations/Organiza
 import OrganizationDetailsStep from "@/components/admin/organizations/OrganizationDetailsStep";
 import OrganizationSuccessStep from "@/components/admin/organizations/OrganizationSuccessStep";
 import { getOrganizationAuxiliaryItems } from "@/components/admin/organizations/organizationAuxiliaryContent";
+import type { BoOrganizationsPage } from "@/service/types/admin/organizations";
 
-export default function OrganizationsNewClient() {
+interface OrganizationsNewClientProps {
+  pageContent: BoOrganizationsPage;
+}
+
+export default function OrganizationsNewClient({ pageContent }: OrganizationsNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-organizations"]);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -128,6 +133,7 @@ export default function OrganizationsNewClient() {
   const auxiliaryItems = getOrganizationAuxiliaryItems({
     hasNameError: hasError("orgName"),
     hasDescriptionError: hasError("orgDescription"),
+    items: pageContent.createAuxiliaryItems,
   });
 
   return (
@@ -158,6 +164,7 @@ export default function OrganizationsNewClient() {
               onSearchChange={setOrgSearchQuery}
               onSelectOrganization={handleSelectSuggestedOrganization}
               onCreateOrganization={() => router.push("/admin/organizations/new?step=2")}
+              introduction={pageContent.selectionIntroduction}
             />
           )}
 
@@ -196,6 +203,7 @@ export default function OrganizationsNewClient() {
                 onSubmit={() => {
                   void handleCreateOrg();
                 }}
+                introduction={pageContent.detailsIntroduction}
               />
             </>
           )}
@@ -204,11 +212,14 @@ export default function OrganizationsNewClient() {
             <OrganizationSuccessStep
               onPrevious={() => router.push("/admin/organizations/new?step=2")}
               onFinish={() => router.push("/admin/system/organizations")}
+              createdCard={pageContent.createdCard}
             />
           )}
         </div>
 
-        {currentStep === 2 && <AdminAuxiliarySidebar items={auxiliaryItems} />}
+        {currentStep === 2 && auxiliaryItems.length > 0 ? (
+          <AdminAuxiliarySidebar items={auxiliaryItems} />
+        ) : null}
       </div>
     </AdminLayout>
   );

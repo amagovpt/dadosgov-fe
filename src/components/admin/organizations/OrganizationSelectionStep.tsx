@@ -10,12 +10,15 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import type { OrganizationSuggestion } from "@/service/types/identity";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface OrganizationSelectionStepProps {
   orgSuggestions: OrganizationSuggestion[];
   onSearchChange: (value: string) => void;
   onSelectOrganization: (organizationId: string) => void;
   onCreateOrganization: () => void;
+  introduction?: AdminHelpBlock;
 }
 
 export default function OrganizationSelectionStep({
@@ -23,22 +26,25 @@ export default function OrganizationSelectionStep({
   onSearchChange,
   onSelectOrganization,
   onCreateOrganization,
+  introduction,
 }: OrganizationSelectionStepProps) {
   const { t } = useTranslation("admin-organizations");
 
   return (
     <div className="admin-page__form">
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={
-          <>
-            <strong>{t("form.selectionIntroTitle")}</strong>
-            <br />
-            {t("form.selectionIntroDescription")}
-          </>
-        }
-      />
+      {introduction ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            <>
+              <strong>{introduction.title}</strong>
+              <br />
+              {formatHtmlParagraphs(introduction.description)}
+            </>
+          }
+        />
+      ) : null}
 
       <div>
         <InputSelect
