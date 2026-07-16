@@ -7,8 +7,13 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function OrgReusesNewClient() {
+interface OrgReusesNewClientProps {
+  pageContent: BoReusesPage;
+}
+
+export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -45,6 +50,7 @@ export default function OrgReusesNewClient() {
       />
 
       <ReusesFormClient
+        pageContent={pageContent}
         currentStep={currentStep}
         onNextStep={() => router.push(`${pathname}?step=${currentStep + 1}`)}
         onPreviousStep={() => router.push(`${pathname}?step=${currentStep - 1}`)}

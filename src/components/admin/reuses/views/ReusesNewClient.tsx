@@ -6,8 +6,13 @@ import ReusesFormClient from "@/components/admin/reuses/views/ReusesFormClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function ReusesNewClient() {
+interface ReusesNewClientProps {
+  pageContent: BoReusesPage;
+}
+
+export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -40,6 +45,7 @@ export default function ReusesNewClient() {
       />
 
       <ReusesFormClient
+        pageContent={pageContent}
         currentStep={currentStep}
         onNextStep={() => router.push(`${pathname}?step=${currentStep + 1}`)}
         onPreviousStep={() => router.push(`${pathname}?step=${currentStep - 1}`)}

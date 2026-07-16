@@ -45,14 +45,17 @@ import {
   removeRemoteDatasetEntry,
   updateRemoteDatasetEntry,
 } from "@/components/admin/reuses/form-state/reuseAssociationHelpers";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
 interface ReusesFormClientProps {
+  pageContent: BoReusesPage;
   currentStep: number;
   onNextStep: () => void;
   onPreviousStep: () => void;
 }
 
 export default function ReusesFormClient({
+  pageContent,
   currentStep,
   onNextStep,
   onPreviousStep,
@@ -304,6 +307,7 @@ export default function ReusesFormClient({
   };
 
   const auxiliarItems = getReuseAuxiliarItems({
+    items: pageContent.createAuxiliaryItems,
     title: hasError("reuseName"),
     link: hasError("reuseLink"),
     type: hasError("reuseType"),
@@ -375,6 +379,7 @@ export default function ReusesFormClient({
         {/* Step 1 */}
         {currentStep === 1 && (
           <ReusesFormDetailsStep
+            introduction={pageContent.introduction}
             apiError={apiError}
             hasOrganization={hasOrganization}
             selectedProducerRef={selectedProducerRef}
@@ -462,6 +467,8 @@ export default function ReusesFormClient({
         {/* Step 2 */}
         {currentStep === 2 && (
           <ReusesFormDatasetsStep
+            datasetAssociationInfo={pageContent.datasetAssociationInfo}
+            datasetAssociationWarning={pageContent.datasetAssociationWarning}
             apiError={apiError}
             producerId={producerId}
             datasetOptions={datasetOptions}
@@ -549,6 +556,7 @@ export default function ReusesFormClient({
         {/* Step 3 */}
         {currentStep === 3 && (
           <ReusesFormPublishStep
+            createdCard={pageContent.createdCard}
             createdReuse={createdReuse}
             reuseName={reuseName}
             reuseDescription={reuseDescription}
@@ -571,7 +579,9 @@ export default function ReusesFormClient({
         )}
       </div>
 
-      {currentStep === 1 && <AdminAuxiliarySidebar items={auxiliarItems} />}
+      {currentStep === 1 && auxiliarItems.length > 0 && (
+        <AdminAuxiliarySidebar items={auxiliarItems} />
+      )}
     </div>
   );
 }

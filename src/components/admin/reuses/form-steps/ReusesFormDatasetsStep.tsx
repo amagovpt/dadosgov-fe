@@ -12,8 +12,12 @@ import {
 import ReuseExternalDatasetFields from "@/components/admin/reuses/form-sections/ReuseExternalDatasetFields";
 import type { Dataset } from "@/service/types/dataset";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ReusesFormDatasetsStepProps {
+  datasetAssociationInfo?: AdminHelpBlock;
+  datasetAssociationWarning?: AdminHelpBlock;
   apiError: string | null;
   producerId: string;
   datasetOptions:
@@ -38,6 +42,8 @@ interface ReusesFormDatasetsStepProps {
 }
 
 export default function ReusesFormDatasetsStep({
+  datasetAssociationInfo,
+  datasetAssociationWarning,
   apiError,
   producerId,
   datasetOptions,
@@ -62,20 +68,44 @@ export default function ReusesFormDatasetsStep({
 
   return (
     <>
-      <div className="mb-24">
-        <StatusCard
-          variant="informative"
-          showIcon
-          description={t("form.datasetInfo")}
-        />
-      </div>
-      <div className="mb-24">
-        <StatusCard
-          variant="warning"
-          showIcon
-          description={t("form.datasetMutualExclusion")}
-        />
-      </div>
+      {datasetAssociationInfo ? (
+        <div className="mb-24">
+          <StatusCard
+            variant="informative"
+            showIcon
+            description={
+              datasetAssociationInfo.title ? (
+                <>
+                  <strong>{datasetAssociationInfo.title}</strong>
+                  <br />
+                  {formatHtmlParagraphs(datasetAssociationInfo.description)}
+                </>
+              ) : (
+                formatHtmlParagraphs(datasetAssociationInfo.description)
+              )
+            }
+          />
+        </div>
+      ) : null}
+      {datasetAssociationWarning ? (
+        <div className="mb-24">
+          <StatusCard
+            variant="warning"
+            showIcon
+            description={
+              datasetAssociationWarning.title ? (
+                <>
+                  <strong>{datasetAssociationWarning.title}</strong>
+                  <br />
+                  {formatHtmlParagraphs(datasetAssociationWarning.description)}
+                </>
+              ) : (
+                formatHtmlParagraphs(datasetAssociationWarning.description)
+              )
+            }
+          />
+        </div>
+      ) : null}
       {apiError && (
         <div className="mb-16 mt-32">
           <StatusCard variant="danger" showIcon description={apiError} />

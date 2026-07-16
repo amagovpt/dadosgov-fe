@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ReusesEditClient from "@/components/admin/reuses/views/ReusesEditClient";
 import initTranslations from "@/app/i18n";
+import { getBoReuses } from "@/service/queries/admin/reuses";
 
 export async function generateMetadata({
   params,
@@ -19,6 +20,13 @@ export async function generateMetadata({
   };
 }
 
-export default function ReusesEditPage() {
-  return <ReusesEditClient />;
+export default async function ReusesEditPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoReuses(locale);
+
+  return <ReusesEditClient pageContent={pageContent} />;
 }

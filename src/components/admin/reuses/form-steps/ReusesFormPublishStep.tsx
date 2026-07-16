@@ -8,8 +8,11 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import type { Reuse } from "@/service/types/reuse";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ReusesFormPublishStepProps {
+  createdCard?: AdminCard;
   createdReuse: Reuse | null;
   reuseName: string;
   reuseDescription: string;
@@ -19,6 +22,7 @@ interface ReusesFormPublishStepProps {
 }
 
 export default function ReusesFormPublishStep({
+  createdCard,
   createdReuse,
   reuseName,
   reuseDescription,
@@ -30,19 +34,21 @@ export default function ReusesFormPublishStep({
 
   return (
     <>
-      <div className="mb-24">
-        <StatusCard
-          variant="success"
-          showIcon
-        description={
-          <>
-            <strong>{t("form.publishSuccessTitle")}</strong>
-            <br />
-            {t("form.publishSuccessDescription")}
-          </>
-        }
-        />
-      </div>
+      {createdCard ? (
+        <div className="mb-24">
+          <StatusCard
+            variant="success"
+            showIcon
+            description={
+              <>
+                <strong>{createdCard.title}</strong>
+                <br />
+                {formatHtmlParagraphs(createdCard.description)}
+              </>
+            }
+          />
+        </div>
+      ) : null}
 
       <div className="agora-card-links-admin-px0">
         <CardLinks

@@ -61,8 +61,13 @@ import {
   updateUrlItem,
 } from "@/components/admin/reuses/form-state/reuseAssociationHelpers";
 import { translateActivityLabel } from "@/utils/activityLabels";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function ReusesEditClient() {
+interface ReusesEditClientProps {
+  pageContent: BoReusesPage;
+}
+
+export default function ReusesEditClient({ pageContent }: ReusesEditClientProps) {
   const { t } = useTranslation("admin-reuses");
   const searchParams = useSearchParams();
   const params = useParams();
@@ -543,6 +548,7 @@ export default function ReusesEditClient() {
           <TabHeader>{t("edit.tabs.metadata")}</TabHeader>
           <TabBody>
             <ReusesEditMetadataTab
+              auxiliaryItems={pageContent.editAuxiliaryItems}
               reuse={reuse}
               isSubmitting={isSubmitting}
               featured={featured}

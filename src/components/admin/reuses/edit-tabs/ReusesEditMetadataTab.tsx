@@ -6,10 +6,12 @@ import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanne
 import ReusesEditMetadataDangerZone from "@/components/admin/reuses/edit-sections/ReusesEditMetadataDangerZone";
 import { can } from "@/utils/permissions";
 import ReusesEditMetadataDetailsSection from "@/components/admin/reuses/edit-sections/ReusesEditMetadataDetailsSection";
-import { getReuseAuxiliarItems } from "@/components/admin/reuses/config/reusesAuxiliarItems";
+import { getEditReuseAuxiliarItems } from "@/components/admin/reuses/config/reusesAuxiliarItems";
 import type { Reuse, ReuseTopic, ReuseType } from "@/service/types/reuse";
+import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
 
 type ReusesEditMetadataTabProps = {
+  auxiliaryItems?: AdminAuxiliaryItem[];
   reuse: Reuse;
   isSubmitting: boolean;
   featured: boolean;
@@ -49,6 +51,7 @@ type ReusesEditMetadataTabProps = {
 };
 
 export default function ReusesEditMetadataTab({
+  auxiliaryItems,
   reuse,
   isSubmitting,
   featured,
@@ -87,6 +90,14 @@ export default function ReusesEditMetadataTab({
   const { t } = useTranslation("admin-reuses");
   const canEdit = can(reuse, "edit");
   const canDelete = can(reuse, "delete");
+  const auxiliarItems = getEditReuseAuxiliarItems({
+    items: auxiliaryItems,
+    title: !!formErrors.title,
+    link: !!formErrors.url,
+    type: !!formErrors.type,
+    topic: !!formErrors.topic,
+    description: !!formErrors.description,
+  });
 
   return (
     <div className="admin-page__body">
@@ -172,15 +183,7 @@ export default function ReusesEditMetadataTab({
         </form>
       </div>
 
-      <AdminAuxiliarySidebar
-        items={getReuseAuxiliarItems({
-          title: !!formErrors.title,
-          link: !!formErrors.url,
-          type: !!formErrors.type,
-          topic: !!formErrors.topic,
-          description: !!formErrors.description,
-        })}
-      />
+      {auxiliarItems.length > 0 && <AdminAuxiliarySidebar items={auxiliarItems} />}
     </div>
   );
 }

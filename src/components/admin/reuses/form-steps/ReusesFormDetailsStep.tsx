@@ -13,8 +13,11 @@ import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import KeywordSelectField from "@/components/admin/forms/KeywordSelectField";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 import AppIcon from "@/components/Primitives/AppIcon";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ReusesFormDetailsStepProps {
+  introduction?: AdminHelpBlock;
   apiError: string | null;
   hasOrganization: boolean;
   selectedProducerRef: MutableRefObject<string>;
@@ -60,6 +63,7 @@ interface ReusesFormDetailsStepProps {
 }
 
 export default function ReusesFormDetailsStep({
+  introduction,
   apiError,
   hasOrganization,
   selectedProducerRef,
@@ -99,17 +103,25 @@ export default function ReusesFormDetailsStep({
 
   return (
     <>
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={
-          <>
-            <strong>{t("form.whatIsReuseTitle")}</strong>
-            <br />
-            {t("form.whatIsReuseDescription")}
-          </>
-        }
-      />
+      {introduction ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            <>
+              {introduction.title ? (
+                <>
+                  <strong>{introduction.title}</strong>
+                  <br />
+                  {formatHtmlParagraphs(introduction.description)}
+                </>
+              ) : (
+                formatHtmlParagraphs(introduction.description)
+              )}
+            </>
+          }
+        />
+      ) : null}
 
       {apiError && (
         <div className="mt-32 mb-16">
