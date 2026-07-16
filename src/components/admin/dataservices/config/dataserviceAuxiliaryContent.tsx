@@ -13,61 +13,61 @@ export function getDataserviceAuxiliaryItems({
 }: DataserviceAuxiliaryContentParams): AuxiliarItem[] {
   return [
     {
-      title: "Como dar nome à sua API",
+      title: "Dar um nome à API",
       content:
-        'Dê à sua API um nome relevante e descritivo que reflita sua função ou área de aplicação. Um bom nome facilita a busca e a identificação por parte dos utilizadores. Sempre adicione o prefixo "API" para manter a consistência.',
+        'Atribua à API um nome claro, relevante e descritivo, que reflita a sua finalidade ou domínio de aplicação. Um nome adequado facilita a sua identificação e pesquisa no portal. Para garantir consistência na catalogação, inclua sempre o prefixo "API" no nome.',
       hasError: hasApiNameError,
     },
     {
-      title: "Adicione uma abreviação ou sigla à API.",
+      title: "Adicionar uma sigla à API",
       content:
-        "Tem a opção de adicionar uma sigla à sua API. As letras que compõem essa sigla não precisam ser separadas por pontos.",
+        "Pode incluir uma sigla para identificar a sua API de forma mais rápida e simplificada no portal. As letras da sigla não necessitam de ser separadas por pontos.",
     },
     {
-      title: "Escreva uma boa descrição",
+      title: "Escrever uma descrição da API",
       content:
-        "Escreva uma descrição clara e precisa da API. Os utilizadores precisam entender a finalidade da API, os dados fornecidos, o escopo abrangido (os dados são completos? Há alguma lacuna?), a frequência de atualização dos dados e os parâmetros que podem ser usados para fazer uma chamada.",
+        "Elabore uma descrição clara e precisa da API, de forma a que os utilizadores compreendam a sua finalidade, os dados disponibilizados e o respetivo âmbito (incluindo eventuais limitações ou lacunas). Deve também indicar a frequência de atualização dos dados e os parâmetros disponíveis para realização de pedidos à API no dados.gov.pt.",
       hasError: hasApiDescriptionError,
     },
     {
-      title: "Defina o link correto para a API.",
+      title: "Definir o link correto da API",
       content:
-        "A URL base de uma API é o ponto de entrada comum para todas as requisições, geralmente consistindo em um domínio ou endereço de servidor. Ela serve como base para a qual caminhos específicos (endpoints) são adicionados para acessar os diversos recursos da API.",
+        "Defina o URL base da API, que corresponde ao ponto de entrada para todas as requisições no portal. Este URL é composto pelo domínio ou endereço do servidor e serve de base para a construção dos diferentes endpoints, através dos quais se acede aos vários recursos disponibilizados pela API.",
     },
     {
-      title: "Adicione um link para a documentação da máquina.",
+      title: "Adicionar um link para a documentação da API",
       content:
-        "Idealmente, forneça um link OpenAPI (Swagger) que permita aos desenvolvedores explorar os endpoints, visualizar os métodos disponíveis e testar consultas diretamente da documentação. Para serviços geográficos, pode fornecer um link para o serviço com uma consulta GetCapabilities para recuperar os metadados do serviço.",
+        "Sempre que possível, forneça um link para a documentação técnica da API, para permitir que os utilizadores explorem os endpoints, consultem os métodos disponíveis e testem diretamente as chamadas a partir da documentação no dados.gov.pt.",
     },
     {
-      title: "Adicione um link para a documentação técnica.",
+      title: "Adicionar um link para a documentação técnica",
       content:
-        "Adicione um link para a documentação técnica geral da API, descrevendo os passos de integração.",
+        "Inclua um link para a documentação técnica geral da API no dados.gov.pt, onde sejam descritos os passos necessários para a sua integração, utilização e configuração.",
     },
     {
-      title: "Especifique o limite de chamadas",
+      title: "Especificar o limite de chamadas",
       content:
-        "Caso o número de chamadas à sua API seja limitado, defina aqui o número máximo de chamadas por minuto, ou mesmo por IP e/ou token.",
+        "Caso a API tenha limites de utilização, defina claramente o número máximo de chamadas permitidas por minuto, por IP e/ou por token no dados.gov.pt, de forma a garantir uma utilização equilibrada e estável do serviço.",
     },
     {
-      title: "Indique a disponibilidade",
+      title: "Indicar a disponibilidade",
       content:
-        "Especifique a disponibilidade média da sua API. O valor deve ser uma porcentagem.",
+        "Indique a disponibilidade média da API no portal, expressa em percentagem, refletindo o tempo em que o serviço se encontra operacional e acessível aos utilizadores.",
     },
     {
-      title: "Selecione um tipo de acesso",
+      title: "Selecionar o tipo de acesso",
       content:
-        'Escolha o tipo de acesso (aberto, aberto com conta ou restrito). Selecione "aberto" se os dados forem públicos. Selecione "aberto com conta" se o acesso aos dados exigir uma conta. Se selecionar "restrito", especifique os tipos de utilizadores que podem aceder a esta API.',
+        'Selecione o tipo de acesso à API: aberto, aberto com conta ou restrito. Escolha "aberto" quando os dados forem públicos. Opte por "aberto com conta" quando for necessário realizar a autenticação através de conta para aceder aos dados. No caso de "restrito", indique claramente os tipos de utilizadores autorizados a utilizar a API.',
     },
     {
-      title: "Adicione um link à solicitação de autorização.",
+      title: "Adicionar um link à solicitação de autorização",
       content:
-        "Se a sua API tiver acesso restrito, adicione o link ao formulário de solicitação de acesso. É administrador? A solução Datapass permite criar e gerenciar formulários de solicitação de acesso a dados com facilidade.",
+        "Se a API tiver acesso restrito no portal, inclua o link para o formulário de pedido de autorização de acesso.",
     },
     {
-      title: "Adicione um link para a documentação da empresa.",
+      title: "Adicionar um link para a documentação funcional",
       content:
-        "A documentação comercial da sua API explica seu escopo e casos de uso. Ela complementa a documentação técnica.",
+        "A documentação funcional (ou de negócio) da API descreve o seu âmbito e os seus principais casos de utilização, complementando a documentação técnica com informação sobre a forma como os dados podem ser aplicados.",
     },
   ];
 }

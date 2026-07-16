@@ -6,6 +6,13 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(dataservices): revise the API form auxiliary texts on the create flow** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The live "nova API" page (`views/ApiRegistrationClient` → shared
+    `dataserviceAuxiliaryContent` config) still showed the old pt-BR help
+    texts and "O que é uma API?" intro, while the edit page already had the
+    revised pt-PT copy. Updated the create-flow intro and all auxiliary items
+    to the reviewed wording (LEDG-2022), matching the edit flow.
+
 - **fix(dataservices): fix the admin "Modificado em" column across all three API listings** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - The column showed `NaN/NaN/NaN` and was inconsistent between the Meu
     perfil / Organização / Sistema listings, and org-owned APIs showed no

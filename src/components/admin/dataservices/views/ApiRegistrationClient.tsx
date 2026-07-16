@@ -270,8 +270,10 @@ export default function ApiRegistrationClient({
                 <>
                   <strong>O que é uma API?</strong>
                   <br />
-                  Uma API é uma ferramenta informática que permite que um website ou software se
-                  comunique com outro computador e troque dados.
+                  Uma API (Application Programming Interface) é uma ferramenta/solução informática
+                  que permite o acesso automático e estruturado entre sistemas, ou seja, funciona
+                  como uma ponte ou um tradutor que permite que dois aplicativos diferentes
+                  comuniquem entre si.
                 </>
               }
             />
