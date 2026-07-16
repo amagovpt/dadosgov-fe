@@ -356,7 +356,7 @@ export default function HomeClient({
               )}
             </div>
             <div className="mt-32">
-              <Link href="/posts">
+              <Link href="/noticias">
                 <Button
                   variant="primary"
                   appearance="link"

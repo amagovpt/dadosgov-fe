@@ -6,6 +6,16 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(dataservices): stop the native "fill this field" validation on the API edit datasets tab** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - Editing an API → "Conjuntos de dados associados" tab: clicking Guardar
+    fired the browser's "Preencha este campo" bubble on the empty (optional)
+    "Link para o conjunto de dados" input, even though the save went through.
+    Same bug already fixed on API creation step 2 (#420): the form had no
+    `noValidate` and the design-system `InputText` is required by default.
+    Mirrored that fix — added `noValidate` to the datasets form,
+    `required={false}` on the URL input, and `type="button"` on "Adicionar"
+    so it never triggers form submission.
+
 - **fix(upload): send `totalfilesize` and harden chunked-upload retries against silent corruption** [#462](https://github.com/amagovpt/dadosgov-fe/pull/462)
   - Resource files uploaded/replaced via the admin were sometimes corrupted in
     production: behind the F5/WAF a dropped connection triggers the client's
