@@ -5,6 +5,27 @@ import type {
 } from "@/service/types/dataservice";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL, authFetch } from "@/service/utils/API";
+import { parseOpenApi, type ParsedSwagger } from "@/utils/parseOpenApi";
+
+/**
+ * Fetch and parse a dataservice's OpenAPI/Swagger spec through the SSRF-guarded
+ * same-origin proxy. Returns null when the URL is missing/unreachable or the
+ * document is not recognisable JSON spec (e.g. a YAML spec).
+ */
+export async function fetchSwaggerSpec(
+  machineDocumentationUrl: string
+): Promise<ParsedSwagger | null> {
+  try {
+    const res = await fetch(
+      `/internal-api/proxy-swagger?url=${encodeURIComponent(machineDocumentationUrl)}`
+    );
+    if (!res.ok) return null;
+    return parseOpenApi(await res.json());
+  } catch (error) {
+    console.error("Error fetching Swagger spec:", error);
+    return null;
+  }
+}
 
 
 /**
