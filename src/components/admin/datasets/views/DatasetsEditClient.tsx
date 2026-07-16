@@ -51,8 +51,13 @@ import { useDatasetLifecycleActions } from "@/components/admin/datasets/hooks/us
 import { useDatasetMetadataActions } from "@/components/admin/datasets/hooks/useDatasetMetadataActions";
 import { useDatasetResourceActions } from "@/components/admin/datasets/hooks/useDatasetResourceActions";
 import { type DatasetEditField } from "@/components/admin/datasets/form-state/datasetEditFormModel";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
-export default function DatasetsEditClient() {
+interface DatasetsEditClientProps {
+  pageContent: BoDatasetsPage;
+}
+
+export default function DatasetsEditClient({ pageContent }: DatasetsEditClientProps) {
   const { t } = useTranslation("admin-datasets");
   const searchParams = useSearchParams();
   const params = useParams();
@@ -568,6 +573,7 @@ export default function DatasetsEditClient() {
             <TabHeader>{t("edit.tabs.metadata")}</TabHeader>
             <TabBody>
               <DatasetsEditMetadataTab
+                auxiliaryItems={pageContent.editAuxiliaryItems}
                 dataset={dataset}
                 featured={featured}
                 isSubmitting={isSubmitting}

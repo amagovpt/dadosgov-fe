@@ -7,8 +7,11 @@ import FileUploadModal from "@/components/admin/FileUploadModal";
 import { PendingResourceTable } from "@/components/admin/FileUploadModal/PendingResourceTable";
 import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import type { ResourceType } from "@/service/types/catalog";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 export interface DatasetWizardStep3Props {
+  introduction?: AdminHelpBlock;
   uploadedFiles: File[];
   setUploadedFiles: Dispatch<SetStateAction<File[]>>;
   resourceUrls: string[];
@@ -28,6 +31,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
   const { t } = useTranslation("admin-datasets");
   const {
     uploadedFiles,
+    introduction,
     setUploadedFiles,
     resourceUrls,
     setResourceUrls,
@@ -44,17 +48,23 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
 
   return (
     <>
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={
-          <>
-            <strong>{t("form.whatIsFileTitle")}</strong>
-            <br />
-            {t("form.whatIsFileDescription")}
-          </>
-        }
-      />
+      {introduction ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            introduction.title ? (
+              <>
+                <strong>{introduction.title}</strong>
+                <br />
+                {formatHtmlParagraphs(introduction.description)}
+              </>
+            ) : (
+              formatHtmlParagraphs(introduction.description)
+            )
+          }
+        />
+      ) : null}
 
       <div className="admin-page__form">
         <FileUploadModal

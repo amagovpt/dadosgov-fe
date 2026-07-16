@@ -25,7 +25,10 @@ import {
 } from "@/service/types/catalog";
 import { Dataset, ContactPoint } from "@/service/types/dataset";
 import AuxiliarList from "@/components/admin/AuxiliarList";
-import { getDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
+import {
+  getDatasetAuxiliarItems,
+  getResourceDatasetAuxiliarItems,
+} from "@/components/admin/datasets/config/datasetsAuxiliarItems";
 import { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import { useAuth } from "@/context/AuthContext";
 import { getFrequencyLabel } from "@/utils/frequencyLabels";
@@ -39,8 +42,10 @@ import type { DatasetWizardDraftContact } from "./datasetWizardTypes";
 import { useDatasetWizardContactActions } from "./hooks/useDatasetWizardContactActions";
 import { useDatasetWizardSubmissionActions } from "./hooks/useDatasetWizardSubmissionActions";
 import { type DatasetFormField } from "./datasetFormModel";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
 interface DatasetsAdminClientProps {
+  pageContent: BoDatasetsPage;
   currentStep?: number;
   datasetId?: string | null;
   onNextStep?: () => void;
@@ -50,6 +55,7 @@ interface DatasetsAdminClientProps {
 }
 
 export default function DatasetsAdminClient({
+  pageContent,
   currentStep: controlledCurrentStep,
   datasetId,
   onNextStep,
@@ -579,58 +585,13 @@ export default function DatasetsAdminClient({
   });
 
   const auxiliarItemsStep2 = getDatasetAuxiliarItems({
+    items: pageContent.createAuxiliaryItems,
     title: !!formErrors.datasetTitle || !!formErrors.datasetTitleTooLong,
     description: !!formErrors.datasetDescription,
     frequency: !!formErrors.datasetFrequency,
   });
 
-  const auxiliarItemsStep3 = [
-    {
-      title: "Escolher o formato certo",
-      content: (
-        <>
-          <p>O formato deve ser:</p>
-          <ul className="pl-5 mt-2 flex list-disc flex-col gap-2">
-            <li>
-              <strong>Aberto:</strong> um formato aberto não adiciona especificações técnicas que
-              restrinjam o uso dos dados (por exemplo, o uso de software pago);
-            </li>
-            <li>
-              <strong>Facilmente reutilizável:</strong> um formato facilmente reutilizável implica
-              que qualquer pessoa ou servidor pode reutilizar facilmente o conjunto de dados;
-            </li>
-            <li>
-              <strong>Utilizável num sistema de processamento automatizado:</strong> permite
-              operações automáticas de processamento de dados (por exemplo, um ficheiro CSV é
-              facilmente utilizável por um sistema automatizado, ao contrário de um ficheiro PDF).
-            </li>
-          </ul>
-        </>
-      ),
-    },
-    {
-      title: "Adicionar documentação",
-      content: (
-        <>
-          <p>
-            A descrição de um ficheiro facilita a reutilização de dados. Inclui, entre outras
-            coisas:
-          </p>
-          <ul className="pl-5 mt-2 flex list-disc flex-col gap-2">
-            <li>Uma descrição geral do conjunto de dados;</li>
-            <li>Uma descrição do método de produção de dados;</li>
-            <li>Uma descrição do modelo de dados;</li>
-            <li>Uma descrição do esquema de dados;</li>
-            <li>Uma descrição dos metadados;</li>
-            <li>Uma descrição das principais mudanças.</li>
-          </ul>
-          <p className="text-red-500 mt-3 font-medium">
-            Não adicionou nenhum ficheiro de documentação nem descreveu os seus ficheiros.
-          </p>
-        </>
-      ),
-    },
-  ];
+  const auxiliarItemsStep3 = getResourceDatasetAuxiliarItems(pageContent.resourceAuxiliaryItems);
 
   const auxiliarItems =
     currentStep === 3 || currentStep === 4 ? auxiliarItemsStep3 : auxiliarItemsStep2;
@@ -645,6 +606,7 @@ export default function DatasetsAdminClient({
 
         {currentStep === 2 && (
           <DatasetWizardStep2
+            introduction={pageContent.publicationIntroduction}
             router={router}
             user={user}
             producerDefaultValue={producerDefaultValue}
@@ -709,6 +671,7 @@ export default function DatasetsAdminClient({
 
         {currentStep === 3 && (
           <DatasetWizardStep3
+            introduction={pageContent.resourceIntroduction}
             uploadedFiles={uploadedFiles}
             setUploadedFiles={setUploadedFiles}
             resourceUrls={resourceUrls}
@@ -727,6 +690,7 @@ export default function DatasetsAdminClient({
 
         {currentStep === 4 && (
           <DatasetWizardStep4
+            publishStepCard={pageContent.publishStepCard}
             createdDataset={createdDataset}
             datasetTitle={datasetTitle}
             datasetDescription={datasetDescription}
@@ -738,7 +702,7 @@ export default function DatasetsAdminClient({
       </div>
 
       {/* Right: Auxiliar sidebar */}
-      {currentStep !== 4 && (
+      {currentStep !== 4 && auxiliarItems.length > 0 && (
         <aside className="admin-page__auxiliar">
           <div className="admin-page__auxiliar-inner">
             <div className="admin-page__auxiliar-header">

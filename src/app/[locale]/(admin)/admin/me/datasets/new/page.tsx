@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import DatasetsNewClient from "@/components/admin/datasets/views/DatasetsNewClient";
-import initTranslations from "@/app/i18n";
+import { getBoDatasets, getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 export async function generateMetadata({
   params,
@@ -8,17 +9,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-datasets"],
-  });
+  const metadata = await getBoDatasetsMetadata(locale);
 
   return {
-    title: t("metadata.newTitle", { ns: "admin-datasets" }),
-    description: t("metadata.newDescription", { ns: "admin-datasets" }),
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
   };
 }
 
-export default function DatasetsNewPage() {
-  return <DatasetsNewClient />;
+export default async function DatasetsNewPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoDatasets(locale);
+
+  return <DatasetsNewClient pageContent={pageContent} />;
 }

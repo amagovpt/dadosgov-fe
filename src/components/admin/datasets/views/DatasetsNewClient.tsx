@@ -8,8 +8,15 @@ import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
-export default function DatasetsNewClient() {
+interface DatasetsNewClientProps {
+  pageContent: BoDatasetsPage;
+}
+
+export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -32,6 +39,7 @@ export default function DatasetsNewClient() {
     3: t("admin-datasets:form.steps.files"),
     4: t("admin-datasets:form.steps.publish"),
   };
+  const [startEntry, adminAutomationEntry, catalogEntry] = pageContent.publicationEntry ?? [];
 
   return (
     <AdminLayout
@@ -53,73 +61,80 @@ export default function DatasetsNewClient() {
 
       {currentStep === 1 && (
         <>
-          <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
-            <CardAction
-              variant="neutral-100"
-              titleText={t("admin-datasets:form.startCardTitle")}
-              descriptionText={t("admin-datasets:form.startCardDescription")}
-              icon={{ name: "agora-line-edit" }}
-              button={{
-                children: t("admin-datasets:form.startCardAction"),
-                variant: "primary",
-                appearance: "outline",
-                onClick: () => {
-                  setSessionKey((k) => k + 1);
-                  setCreatedDatasetId(null);
-                  router.push("/admin/datasets/new?step=2");
-                },
-              }}
-            />
-          </div>
+          {startEntry ? (
+            <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
+              <CardAction
+                variant="neutral-100"
+                titleText={startEntry.title}
+                descriptionText={stripHtmlTags(startEntry.description)}
+                icon={{ name: "agora-line-edit" }}
+                button={{
+                  children: startEntry.anchor?.children || "",
+                  variant: "primary",
+                  appearance: "outline",
+                  onClick: () => {
+                    setSessionKey((k) => k + 1);
+                    setCreatedDatasetId(null);
+                    router.push("/admin/datasets/new?step=2");
+                  },
+                }}
+              />
+            </div>
+          ) : null}
 
           {/* Admin sections */}
           <div className="admin-new-page__admin-sections">
-            <div className="admin-new-page__admin-section">
-              <p className="text-primary-900 text-base font-bold leading-7">
-                {t("admin-datasets:form.adminAutomationTitle")}
-              </p>
-              <p className="text-neutral-700 text-sm leading-relaxed">
-                {t("admin-datasets:form.adminAutomationDescription")}
-              </p>
-              <div className="flex gap-4 flex-wrap">
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/recursos/desenvolvimento/referencia-api")}
-                >
-                  {t("admin-datasets:form.apiDocsAction")}
-                </Button>
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-external-link"
-                  trailingIconHover="agora-solid-external-link"
-                  onClick={() => router.push("/ajuda-e-contactos")}
-                >
-                  {t("admin-datasets:form.contactAction")}
-                </Button>
+            {adminAutomationEntry ? (
+              <div className="admin-new-page__admin-section">
+                <p className="text-primary-900 text-base font-bold leading-7">
+                  {adminAutomationEntry.title}
+                </p>
+                <div className="text-neutral-700 text-sm leading-relaxed">
+                  {formatHtmlParagraphs(adminAutomationEntry.description)}
+                </div>
+                <div className="flex gap-4 flex-wrap">
+                  <Button
+                    appearance="link"
+                    variant="primary"
+                    hasIcon
+                    trailingIcon="agora-line-external-link"
+                    trailingIconHover="agora-solid-external-link"
+                    onClick={() => router.push("/recursos/desenvolvimento/referencia-api")}
+                  >
+                    {t("admin-datasets:form.apiDocsAction")}
+                  </Button>
+                  <Button
+                    appearance="link"
+                    variant="primary"
+                    hasIcon
+                    trailingIcon="agora-line-external-link"
+                    trailingIconHover="agora-solid-external-link"
+                    onClick={() => router.push("/ajuda-e-contactos")}
+                  >
+                    {t("admin-datasets:form.contactAction")}
+                  </Button>
+                </div>
               </div>
-            </div>
+            ) : null}
 
-            <div className="admin-new-page__admin-section">
-              <p className="text-primary-900 text-base font-bold leading-7">
-                {t("admin-datasets:form.catalogTitle")}
-              </p>
-              <p className="text-neutral-700 text-sm leading-relaxed">
-                {t("admin-datasets:form.catalogDescription")}
-              </p>
-              <div className="flex gap-4 flex-wrap"></div>
-            </div>
+            {catalogEntry ? (
+              <div className="admin-new-page__admin-section">
+                <p className="text-primary-900 text-base font-bold leading-7">
+                  {catalogEntry.title}
+                </p>
+                <div className="text-neutral-700 text-sm leading-relaxed">
+                  {formatHtmlParagraphs(catalogEntry.description)}
+                </div>
+                <div className="flex gap-4 flex-wrap"></div>
+              </div>
+            ) : null}
           </div>
         </>
       )}
 
       {currentStep >= 2 && (
         <DatasetsAdminClient
+          pageContent={pageContent}
           key={sessionKey}
           currentStep={currentStep}
           datasetId={createdDatasetId}

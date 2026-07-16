@@ -18,10 +18,13 @@ import type { ContactPoint } from "@/service/types/dataset";
 import type { UserRef } from "@/service/types/identity";
 import { getZoneName } from "@/utils/spatialLabels";
 import type { DatasetWizardDraftContact } from "./datasetWizardTypes";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 type DropdownSection = ReactElement<DropdownSectionProps> | ReactElement<DropdownSectionProps>[];
 
 export interface DatasetWizardStep2Props {
+  introduction?: AdminHelpBlock;
   router: { push: (href: string) => void };
   user: UserRef | null;
   producerDefaultValue: string;
@@ -80,6 +83,7 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
   const { t } = useTranslation("admin-datasets");
   const {
     router,
+    introduction,
     user,
     producerDefaultValue,
     selectedProducerRef,
@@ -141,17 +145,23 @@ export function DatasetWizardStep2(props: DatasetWizardStep2Props) {
 
   return (
     <>
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={
-          <>
-            <strong>{t("form.whatIsDatasetTitle")}</strong>
-            <br />
-            {t("form.whatIsDatasetDescription")}
-          </>
-        }
-      />
+      {introduction ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            introduction.title ? (
+              <>
+                <strong>{introduction.title}</strong>
+                <br />
+                {formatHtmlParagraphs(introduction.description)}
+              </>
+            ) : (
+              formatHtmlParagraphs(introduction.description)
+            )
+          }
+        />
+      ) : null}
       <p className="pt-32 text-base leading-7 text-neutral-900">{t("form.requiredFields")}</p>
       <h2 className="admin-page__section-title">{t("form.producerSectionTitle")}</h2>
 

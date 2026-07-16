@@ -6,8 +6,11 @@ import { Button, CardGeneral, Icon, ProgressBar, StatusCard } from "@ama-pt/agor
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
 import type { Dataset } from "@/service/types/dataset";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 export interface DatasetWizardStep4Props {
+  publishStepCard?: AdminCard;
   createdDataset: Dataset | null;
   datasetTitle: string;
   datasetDescription: string;
@@ -18,7 +21,15 @@ export interface DatasetWizardStep4Props {
 
 export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
   const { t } = useTranslation("admin-datasets");
-  const { createdDataset, datasetTitle, datasetDescription, onPublish, onSaveDraft, isSubmitting } =
+  const {
+    publishStepCard,
+    createdDataset,
+    datasetTitle,
+    datasetDescription,
+    onPublish,
+    onSaveDraft,
+    isSubmitting,
+  } =
     props;
 
   const qualityScore =
@@ -36,17 +47,19 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
 
   return (
     <>
-      <StatusCard
-        variant="success"
-        showIcon
-        description={
-          <>
-            <strong>{t("form.publishSuccessTitle")}</strong>
-            <br />
-            {t("form.publishSuccessDescription")}
-          </>
-        }
-      />
+      {publishStepCard ? (
+        <StatusCard
+          variant="success"
+          showIcon
+          description={
+            <>
+              <strong>{publishStepCard.title}</strong>
+              <br />
+              {formatHtmlParagraphs(publishStepCard.description)}
+            </>
+          }
+        />
+      ) : null}
 
       <Link href={href} className="card-general-listing flex flex-col overflow-hidden rounded-4">
         <CardGeneral

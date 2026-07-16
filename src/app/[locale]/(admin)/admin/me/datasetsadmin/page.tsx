@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/DatasetsAdminClient";
-import initTranslations from "@/app/i18n";
+import { getBoDatasets, getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 export async function generateMetadata({
   params,
@@ -8,17 +9,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-datasets"],
-  });
+  const metadata = await getBoDatasetsMetadata(locale);
 
   return {
-    title: t("metadata.wizardTitle", { ns: "admin-datasets" }),
-    description: t("metadata.wizardDescription", { ns: "admin-datasets" }),
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
   };
 }
 
-export default function DatasetsAdminPage() {
-  return <DatasetsAdminClient />;
+export default async function DatasetsAdminPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoDatasets(locale);
+
+  return <DatasetsAdminClient pageContent={pageContent} />;
 }

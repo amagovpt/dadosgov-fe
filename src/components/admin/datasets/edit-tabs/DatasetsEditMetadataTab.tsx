@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Button, type DropdownSectionProps, Switch } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
-import { getDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
+import { getEditDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
 import type { SpatialZone } from "@/service/types/catalog";
 import type { Dataset } from "@/service/types/dataset";
 import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
@@ -11,8 +11,10 @@ import DatasetsEditAccessTimeSection from "@/components/admin/datasets/edit-sect
 import DatasetsEditSpaceSection from "@/components/admin/datasets/edit-sections/DatasetsEditSpaceSection";
 import DatasetsEditDangerZone from "@/components/admin/datasets/edit-sections/DatasetsEditDangerZone";
 import { can } from "@/utils/permissions";
+import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
 
 type DatasetsEditMetadataTabProps = {
+  auxiliaryItems?: AdminAuxiliaryItem[];
   dataset: Dataset;
   featured: boolean;
   isSubmitting: boolean;
@@ -70,6 +72,7 @@ type DatasetsEditMetadataTabProps = {
 };
 
 export default function DatasetsEditMetadataTab({
+  auxiliaryItems,
   dataset,
   featured,
   isSubmitting,
@@ -118,6 +121,11 @@ export default function DatasetsEditMetadataTab({
   const { t } = useTranslation("admin-datasets");
   const canEdit = can(dataset, "edit");
   const canDelete = can(dataset, "delete");
+  const auxiliarItems = getEditDatasetAuxiliarItems({
+    items: auxiliaryItems,
+    title: !!formErrors.title,
+    description: !!formErrors.description,
+  });
 
   return (
     <div className="admin-page__body">
@@ -229,12 +237,7 @@ export default function DatasetsEditMetadataTab({
         </form>
       </div>
 
-      <AdminAuxiliarySidebar
-        items={getDatasetAuxiliarItems({
-          title: !!formErrors.title,
-          description: !!formErrors.description,
-        })}
-      />
+      {auxiliarItems.length > 0 && <AdminAuxiliarySidebar items={auxiliarItems} />}
     </div>
   );
 }

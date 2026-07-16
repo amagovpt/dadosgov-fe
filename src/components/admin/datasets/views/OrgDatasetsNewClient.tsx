@@ -10,8 +10,15 @@ import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
-export default function OrgDatasetsNewClient() {
+interface OrgDatasetsNewClientProps {
+  pageContent: BoDatasetsPage;
+}
+
+export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -37,6 +44,7 @@ export default function OrgDatasetsNewClient() {
     3: t("admin-datasets:form.steps.files"),
     4: t("admin-datasets:form.steps.publish"),
   };
+  const [startEntry, adminAutomationEntry, catalogEntry] = pageContent.publicationEntry ?? [];
 
   return (
     <AdminLayout
@@ -72,30 +80,33 @@ export default function OrgDatasetsNewClient() {
               description={t("admin-datasets:form.demoInfo")}
             />
 
-            <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
-              <CardAction
-                variant="neutral-100"
-                titleText={t("admin-datasets:form.startCardTitle")}
-                descriptionText={t("admin-datasets:form.startCardDescription")}
-                icon={{ name: "agora-line-edit" }}
-                button={{
-                  children: t("admin-datasets:form.startCardAction"),
-                  variant: "primary",
-                  appearance: "outline",
-                  onClick: () => router.push(buildStepUrl(2)),
-                }}
-              />
-            </div>
+            {startEntry ? (
+              <div className="admin-new-page__cards mb-32" style={{ maxWidth: "50%" }}>
+                <CardAction
+                  variant="neutral-100"
+                  titleText={startEntry.title}
+                  descriptionText={stripHtmlTags(startEntry.description)}
+                  icon={{ name: "agora-line-edit" }}
+                  button={{
+                    children: startEntry.anchor?.children || "",
+                    variant: "primary",
+                    appearance: "outline",
+                    onClick: () => router.push(buildStepUrl(2)),
+                  }}
+                />
+              </div>
+            ) : null}
 
             {/* Admin sections */}
             <div className="admin-new-page__admin-sections">
+              {adminAutomationEntry ? (
               <div className="admin-new-page__admin-section">
                 <p className="text-primary-900 text-base font-bold leading-7">
-                  {t("admin-datasets:form.adminAutomationTitle")}
+                  {adminAutomationEntry.title}
                 </p>
-                <p className="text-neutral-700 text-sm leading-relaxed">
-                  {t("admin-datasets:form.adminAutomationDescription")}
-                </p>
+                <div className="text-neutral-700 text-sm leading-relaxed">
+                  {formatHtmlParagraphs(adminAutomationEntry.description)}
+                </div>
                 <div className="flex gap-4 flex-wrap">
                   <Button
                     appearance="link"
@@ -129,14 +140,16 @@ export default function OrgDatasetsNewClient() {
                   </Button>
                 </div>
               </div>
+              ) : null}
 
+              {catalogEntry ? (
               <div className="admin-new-page__admin-section">
                 <p className="text-primary-900 text-base font-bold leading-7">
-                  {t("admin-datasets:form.catalogTitle")}
+                  {catalogEntry.title}
                 </p>
-                <p className="text-neutral-700 text-sm leading-relaxed">
-                  {t("admin-datasets:form.catalogDescription")}
-                </p>
+                <div className="text-neutral-700 text-sm leading-relaxed">
+                  {formatHtmlParagraphs(catalogEntry.description)}
+                </div>
                 <div className="flex gap-4 flex-wrap">
                   <Button
                     appearance="link"
@@ -149,12 +162,14 @@ export default function OrgDatasetsNewClient() {
                   </Button>
                 </div>
               </div>
+              ) : null}
             </div>
           </>
         )}
 
         {currentStep >= 2 && (
           <DatasetsAdminClient
+            pageContent={pageContent}
             currentStep={currentStep}
             datasetId={createdDatasetId}
             onNextStep={() => router.push(buildStepUrl(currentStep + 1))}
