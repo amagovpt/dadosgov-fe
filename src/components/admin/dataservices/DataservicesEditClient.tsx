@@ -873,7 +873,11 @@ export default function DataservicesEditClient() {
                     description="É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização."
                   />
 
-                  <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
+                  <form
+                    className="admin-page__form"
+                    noValidate
+                    onSubmit={(e) => e.preventDefault()}
+                  >
                     <InputSelect
                       label="Pesquisar um conjunto de dados"
                       placeholder="Selecione conjuntos de dados..."
@@ -926,6 +930,7 @@ export default function DataservicesEditClient() {
                         label="Link para o conjunto de dados"
                         placeholder="https://..."
                         id="edit-dataset-link-url"
+                        required={false}
                         value={datasetLinkUrl}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setDatasetLinkUrl(e.target.value);
@@ -944,6 +949,7 @@ export default function DataservicesEditClient() {
                       )}
                       <div className="flex justify-end">
                         <Button
+                          type="button"
                           appearance="outline"
                           variant="primary"
                           hasIcon
