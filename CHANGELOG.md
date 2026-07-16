@@ -6,6 +6,21 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(dataservices): fix the admin "Modificado em" column across all three API listings** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The column showed `NaN/NaN/NaN` and was inconsistent between the Meu
+    perfil / Organização / Sistema listings, and org-owned APIs showed no
+    author. Root cause: an earlier fix (LEDG-1935) edited dead root-level
+    components, while the live pages render the `views/` variants that share
+    `createDataserviceColumns` — which never got the fix. Fixed at the shared
+    config: fall back to `metadata_modified_at` when `last_modified` is empty
+    (date and sort), attribute to `owner` **or** `organization.name`, and
+    unify the label to "por <…>" (removed the per-listing `ownerMetaStyle`).
+  - Hardened `formatDateToDMY` to return "—" for empty/invalid dates instead
+    of `NaN/NaN/NaN`, so this class of bug can't recur in other listings.
+  - Removed the three dead admin root components
+    (`DataservicesClient`/`OrgDataservicesClient`/`SystemDataservicesClient`)
+    that no page imported.
+
 - **fix(dataservices): stop the native "fill this field" validation on the API edit datasets tab** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - Editing an API → "Conjuntos de dados associados" tab: clicking Guardar
     fired the browser's "Preencha este campo" bubble on the empty (optional)

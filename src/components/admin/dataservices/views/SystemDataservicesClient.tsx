@@ -33,7 +33,7 @@ export default function SystemDataservicesClient() {
     [sortField, sortOrder]
   );
   const columns = useMemo(
-    () => createDataserviceColumns({ ownerMetaStyle: "by" }),
+    () => createDataserviceColumns(),
     []
   );
 
