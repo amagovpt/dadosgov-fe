@@ -609,7 +609,7 @@ export default function DataservicesEditClient() {
                           errorFeedbackText="Campo obrigatório"
                         />
                         <InputText
-                          label="Link raiz da API"
+                          label="URL base da API"
                           placeholder="Insira o URL aqui"
                           id="edit-api-root-link"
                           value={baseApiUrl}

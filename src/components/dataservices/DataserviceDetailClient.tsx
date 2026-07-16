@@ -330,7 +330,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
 
               {dataservice.base_api_url && (
                 <div className="text-sm text-neutral-900">
-                  <div className="mb-4">Link raiz da API</div>
+                  <div className="mb-4">URL base da API</div>
                   <div className="rounded-4 bg-neutral-200 px-12 py-8 font-mono text-sm break-all text-neutral-900">
                     {dataservice.base_api_url}
                   </div>
