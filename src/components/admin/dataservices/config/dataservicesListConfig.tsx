@@ -15,6 +15,9 @@ export const dataserviceSortFieldMap: Record<DataserviceSortField, string> = {
   last_modified: "last_modified",
 };
 
+const getDataserviceModifiedAt = (api: Dataservice) =>
+  api.metadata_modified_at || api.last_modified;
+
 export function sortDataservices(
   items: Dataservice[],
   sortField: DataserviceSortField | null,
@@ -28,10 +31,8 @@ export function sortDataservices(
     if (sortField === "title") {
       return collator.compare(a.title ?? "", b.title ?? "") * dir;
     }
-    const aValue =
-      sortField === "created_at" ? a.created_at : a.metadata_modified_at || a.last_modified;
-    const bValue =
-      sortField === "created_at" ? b.created_at : b.metadata_modified_at || b.last_modified;
+    const aValue = sortField === "created_at" ? a.created_at : getDataserviceModifiedAt(a);
+    const bValue = sortField === "created_at" ? b.created_at : getDataserviceModifiedAt(b);
     const aTime = aValue ? Date.parse(aValue) : 0;
     const bTime = bValue ? Date.parse(bValue) : 0;
     return (aTime - bTime) * dir;
@@ -71,7 +72,7 @@ export function createDataserviceColumns(): AdminListColumn<Dataservice, Dataser
           : api.organization?.name;
         return (
           <>
-            {formatDateToDMY(api.metadata_modified_at || api.last_modified)}
+            {formatDateToDMY(getDataserviceModifiedAt(api))}
             {author && (
               <>
                 <br />

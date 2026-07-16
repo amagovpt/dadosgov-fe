@@ -30,6 +30,7 @@ interface IsolatedInputProps {
   maxLength?: number;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   onChange?: (value: string) => void;
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
 }
 
 const IsolatedInput = React.memo(function IsolatedInput({
@@ -45,6 +46,7 @@ const IsolatedInput = React.memo(function IsolatedInput({
   maxLength,
   inputMode,
   onChange,
+  onKeyDown,
 }: IsolatedInputProps) {
   const [internalValue, setInternalValue] = React.useState(defaultValue ?? "");
   const cursorRef = React.useRef<number | null>(null);
@@ -76,6 +78,7 @@ const IsolatedInput = React.memo(function IsolatedInput({
         setInternalValue(newValue);
         onChange?.(newValue);
       }}
+      onKeyDown={onKeyDown}
       hasError={hasError}
       hasFeedback={hasFeedback}
       feedbackState={feedbackState}
