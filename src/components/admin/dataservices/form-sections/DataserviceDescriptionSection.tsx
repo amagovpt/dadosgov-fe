@@ -11,8 +11,6 @@ interface DataserviceDescriptionSectionProps {
   machineDocUrl: string;
   technicalDocUrl: string;
   rateLimiting: string;
-  rateLimitingUrl: string;
-  availability: string;
   hasApiNameError: boolean;
   hasApiDescriptionError: boolean;
   onApiNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -22,8 +20,6 @@ interface DataserviceDescriptionSectionProps {
   onMachineDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onTechnicalDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onRateLimitingChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onRateLimitingUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onAvailabilityChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function DataserviceDescriptionSection({
@@ -34,8 +30,6 @@ export default function DataserviceDescriptionSection({
   machineDocUrl,
   technicalDocUrl,
   rateLimiting,
-  rateLimitingUrl,
-  availability,
   hasApiNameError,
   hasApiDescriptionError,
   onApiNameChange,
@@ -45,8 +39,6 @@ export default function DataserviceDescriptionSection({
   onMachineDocUrlChange,
   onTechnicalDocUrlChange,
   onRateLimitingChange,
-  onRateLimitingUrlChange,
-  onAvailabilityChange,
 }: DataserviceDescriptionSectionProps) {
   return (
     <>
@@ -111,20 +103,6 @@ export default function DataserviceDescriptionSection({
           id="api-rate-limit"
           value={rateLimiting}
           onChange={onRateLimitingChange}
-        />
-        <InputText
-          label="Link para a documentação sobre limites de chamadas"
-          placeholder="Insira o URL aqui"
-          id="api-rate-limit-url"
-          value={rateLimitingUrl}
-          onChange={onRateLimitingUrlChange}
-        />
-        <InputText
-          label="Disponibilidade"
-          placeholder="99,9"
-          id="api-availability"
-          value={availability}
-          onChange={onAvailabilityChange}
         />
       </div>
     </>
