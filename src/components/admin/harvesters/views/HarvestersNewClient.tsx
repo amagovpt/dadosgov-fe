@@ -16,16 +16,22 @@ import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sect
 import HarvesterImplementationSection from "@/components/admin/harvesters/form-sections/HarvesterImplementationSection";
 import HarvesterPreviewSection from "@/components/admin/harvesters/form-sections/HarvesterPreviewSection";
 import HarvesterPublishStep from "@/components/admin/harvesters/form-steps/HarvesterPublishStep";
-import { getHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
+import { getCreateHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
 import { AdminStepper } from "@/components/admin/AdminStepper";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import {
   buildHarvesterCreatePayload,
   type HarvesterFormField,
   validateHarvesterDetails,
 } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 
-export default function HarvestersNewClient() {
+interface HarvestersNewClientProps {
+  pageContent: BoHarvestersPage;
+}
+
+export default function HarvestersNewClient({ pageContent }: HarvestersNewClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const { user } = useAuth();
   const searchParams = useSearchParams();
@@ -150,9 +156,10 @@ export default function HarvestersNewClient() {
     3: t("admin-harvesters:form.steps.publish"),
   };
 
-  const auxiliaryItems = getHarvesterAuxiliaryItems({
+  const auxiliaryItems = getCreateHarvesterAuxiliaryItems({
     hasHarvesterNameError: hasError("harvesterName"),
     hasHarvesterUrlError: hasError("harvesterUrl"),
+    items: pageContent.createAuxiliaryItems,
   });
 
   return (
@@ -179,17 +186,19 @@ export default function HarvestersNewClient() {
         <div className="admin-page__form-area">
           {currentStep === 1 && (
             <>
-              <StatusCard
-                variant="informative"
-                showIcon
-                description={
-                  <>
-                    <strong>{t("admin-harvesters:form.whatIsHarvesterTitle")}</strong>
-                    <br />
-                    {t("admin-harvesters:form.whatIsHarvesterDescription")}
-                  </>
-                }
-              />
+              {pageContent.introduction ? (
+                <StatusCard
+                  variant="informative"
+                  showIcon
+                  description={
+                    <>
+                      <strong>{pageContent.introduction.title}</strong>
+                      <br />
+                      {formatHtmlParagraphs(pageContent.introduction.description)}
+                    </>
+                  }
+                />
+              ) : null}
 
               <form
                 className="admin-page__form"
@@ -291,6 +300,7 @@ export default function HarvestersNewClient() {
           {currentStep === 3 && (
             <HarvesterPublishStep
               createError={createError}
+              createdPendingCard={pageContent.createdPendingCard}
               onViewInAdmin={() =>
                 router.push(
                   createdHarvesterId
@@ -303,7 +313,9 @@ export default function HarvestersNewClient() {
           )}
         </div>
 
-        {currentStep === 1 && <AdminAuxiliarySidebar items={auxiliaryItems} />}
+        {currentStep === 1 && auxiliaryItems.length > 0 ? (
+          <AdminAuxiliarySidebar items={auxiliaryItems} />
+        ) : null}
       </div>
     </AdminLayout>
   );

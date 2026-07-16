@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CommunityResourcesNewClient from "@/components/admin/community-resources/views/CommunityResourcesNewClient";
+import CommunityResourcesNewClient from "@/components/admin/community-resources/views/CommunityResourceNewClient";
 import initTranslations from "@/app/i18n";
 
 export async function generateMetadata({

@@ -18,6 +18,8 @@ import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/form-ui/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
 import type { HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
+import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
+import { getEditHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
 
 const FILTER_KEY_LABELS: Record<string, string> = {
   Organization: "organization",
@@ -80,6 +82,7 @@ interface HarvesterConfigFormProps {
   // only preview. Default true for the create flow (no source yet).
   canEdit?: boolean;
   canDelete?: boolean;
+  auxiliaryItems?: AdminAuxiliaryItem[];
 }
 
 export function HarvesterConfigForm({
@@ -116,6 +119,7 @@ export function HarvesterConfigForm({
   onDelete,
   canEdit = true,
   canDelete = true,
+  auxiliaryItems,
 }: HarvesterConfigFormProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [scheduleError, setScheduleError] = React.useState<string | null>(null);
@@ -160,30 +164,11 @@ export function HarvesterConfigForm({
     [filters, activeFilterKeys],
   );
 
-  const auxiliarItems = [
-    {
-      title: t("admin-harvesters:form.auxiliary.nameTitle"),
-      content:
-        t("admin-harvesters:form.auxiliary.nameContent"),
-      hasError: !!formErrors.harvesterName,
-    },
-    {
-      title: t("admin-harvesters:form.auxiliary.descriptionTitle"),
-      content:
-        t("admin-harvesters:form.auxiliary.descriptionContent"),
-    },
-    {
-      title: t("admin-harvesters:form.auxiliary.urlTitle"),
-      content:
-        t("admin-harvesters:form.auxiliary.urlContent"),
-      hasError: !!formErrors.harvesterUrl,
-    },
-    {
-      title: t("admin-harvesters:form.auxiliary.implementationTitle"),
-      content:
-        t("admin-harvesters:form.auxiliary.implementationContent"),
-    },
-  ];
+  const auxiliarItems = getEditHarvesterAuxiliaryItems({
+    hasHarvesterNameError: !!formErrors.harvesterName,
+    hasHarvesterUrlError: !!formErrors.harvesterUrl,
+    items: auxiliaryItems,
+  });
 
   return (
     <div className="admin-page__body">
@@ -197,8 +182,7 @@ export function HarvesterConfigForm({
           }}
         >
           <p className="pt-32 text-base leading-7 text-neutral-900">
-            {t("admin-harvesters:form.requiredFieldsRichPrefix")}
-            {" "}
+            {t("admin-harvesters:form.requiredFieldsRichPrefix")}{" "}
             <span className="text-red-600">*</span>
             {" "}
             {t("admin-harvesters:form.requiredFieldsRichSuffix")}
@@ -483,7 +467,7 @@ export function HarvesterConfigForm({
       </div>
 
       {/* Auxiliar sidebar */}
-      <AdminAuxiliarySidebar items={auxiliarItems} />
+      {auxiliarItems.length > 0 ? <AdminAuxiliarySidebar items={auxiliarItems} /> : null}
     </div>
   );
 }

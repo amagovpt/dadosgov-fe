@@ -4,17 +4,21 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
 import PublicationFeedbackButton from "@/components/admin/PublicationFeedbackButton";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface HarvesterPublishStepProps {
   createError: string | null;
   onViewInAdmin: () => void;
   onRequestValidation: () => void;
+  createdPendingCard?: AdminCard;
 }
 
 export default function HarvesterPublishStep({
   createError,
   onViewInAdmin,
   onRequestValidation,
+  createdPendingCard,
 }: HarvesterPublishStepProps) {
   const { t } = useTranslation("admin-harvesters");
 
@@ -34,17 +38,15 @@ export default function HarvesterPublishStep({
         />
       )}
 
-      {!createError && (
+      {!createError && createdPendingCard && (
         <StatusCard
           variant="warning"
           showIcon
           description={
             <>
-              <strong>
-                {t("form.createdPendingTitle")}
-              </strong>
+              <strong>{createdPendingCard.title}</strong>
               <br />
-              {t("form.createdPendingDescription")}
+              {formatHtmlParagraphs(createdPendingCard.description)}
             </>
           }
         />

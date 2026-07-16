@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import HarvesterDetailClient from "@/components/admin/harvesters/views/HarvesterDetailClient";
 import initTranslations from "@/app/i18n";
+import { getBoHarvesters } from "@/service/queries/admin/harvesters";
 
 export async function generateMetadata({
   params,
@@ -22,8 +23,9 @@ export async function generateMetadata({
 export default async function HarvesterDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  return <HarvesterDetailClient slug={slug} />;
+  const { locale, slug } = await params;
+  const pageContent = await getBoHarvesters(locale);
+  return <HarvesterDetailClient slug={slug} pageContent={pageContent} />;
 }

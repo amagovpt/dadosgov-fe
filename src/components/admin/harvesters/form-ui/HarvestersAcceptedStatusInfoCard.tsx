@@ -1,17 +1,32 @@
 "use client";
 
 import { StatusCard } from "@ama-pt/agora-design-system";
-import { useTranslation } from "react-i18next";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-export default function HarvestersAcceptedStatusInfoCard() {
-  const { t } = useTranslation("admin-harvesters");
+interface HarvestersAcceptedStatusInfoCardProps {
+  content: AdminHelpBlock;
+}
 
+export default function HarvestersAcceptedStatusInfoCard({
+  content,
+}: HarvestersAcceptedStatusInfoCardProps) {
   return (
     <div className="mb-24">
       <StatusCard
         variant="informative"
         showIcon
-        description={t("filters.acceptedInfo")}
+        description={
+          content.title ? (
+            <>
+              <strong>{content.title}</strong>
+              <br />
+              {formatHtmlParagraphs(content.description)}
+            </>
+          ) : (
+            formatHtmlParagraphs(content.description)
+          )
+        }
       />
     </div>
   );

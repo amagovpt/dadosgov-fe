@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import HarvestersNewClient from "@/components/admin/harvesters/views/HarvestersNewClient";
-import initTranslations from "@/app/i18n";
+import { getBoHarvesters, getBoHarvestersMetadata } from "@/service/queries/admin/harvesters";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
 export async function generateMetadata({
   params,
@@ -8,17 +9,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-harvesters"],
-  });
+  const metadata = await getBoHarvestersMetadata(locale);
 
   return {
-    title: t("metadata.newTitle", { ns: "admin-harvesters" }),
-    description: t("metadata.newDescription", { ns: "admin-harvesters" }),
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
   };
 }
 
-export default function HarvestersNewPage() {
-  return <HarvestersNewClient />;
+export default async function HarvestersNewPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoHarvesters(locale);
+
+  return <HarvestersNewClient pageContent={pageContent} />;
 }

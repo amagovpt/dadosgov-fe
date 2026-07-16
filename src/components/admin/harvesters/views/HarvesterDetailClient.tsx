@@ -29,9 +29,13 @@ import { can } from "@/utils/permissions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { type HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
+import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
+import HarvestersAcceptedStatusInfoCard from "@/components/admin/harvesters/form-ui/HarvestersAcceptedStatusInfoCard";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface HarvesterDetailClientProps {
   slug: string;
+  pageContent: BoHarvestersPage;
 }
 
 function CopyUrlButton({ url }: { url: string }) {
@@ -87,7 +91,7 @@ function DeleteHarvesterPopupContent({
   );
 }
 
-export default function HarvesterDetailClient({ slug }: HarvesterDetailClientProps) {
+export default function HarvesterDetailClient({ slug, pageContent }: HarvesterDetailClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const router = useRouter();
   const pathname = usePathname();
@@ -296,16 +300,17 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
       </div>
 
       {/* Validation pending banner */}
-      {validationState === "pending" && (
+      {validationState === "pending" &&
+      ((isAdmin && pageContent.pendingAdminCard) || (!isAdmin && pageContent.pendingOwnerCard)) ? (
         <div className="bg-neutral-100 rounded p-24 flex flex-col gap-8 mb-24" style={{ maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))" }}>
           {isAdmin ? (
             <>
               <p className="text-sm font-bold text-neutral-900">
-                {t("admin-harvesters:detail.pendingAdminTitle")}
+                {pageContent.pendingAdminCard!.title}
               </p>
-              <p className="text-sm text-neutral-700">
-                {t("admin-harvesters:detail.pendingAdminDescription")}
-              </p>
+              <div className="text-sm text-neutral-700">
+                {formatHtmlParagraphs(pageContent.pendingAdminCard!.description, "text-sm text-neutral-700")}
+              </div>
               <div className="flex items-center gap-16 pt-8">
                 <Button
                   variant="primary"
@@ -331,15 +336,19 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
           ) : (
             <>
               <p className="text-sm font-bold text-neutral-900">
-                {t("admin-harvesters:detail.pendingOwnerTitle")}
+                {pageContent.pendingOwnerCard!.title}
               </p>
-              <p className="text-sm text-neutral-700">
-                {t("admin-harvesters:detail.pendingOwnerDescription")}
-              </p>
+              <div className="text-sm text-neutral-700">
+                {formatHtmlParagraphs(pageContent.pendingOwnerCard!.description, "text-sm text-neutral-700")}
+              </div>
             </>
           )}
         </div>
-      )}
+      ) : null}
+
+      {validationState === "accepted" && pageContent.acceptedStatusInfo?.description ? (
+        <HarvestersAcceptedStatusInfoCard content={pageContent.acceptedStatusInfo} />
+      ) : null}
 
 
       {/* Tabs */}
@@ -420,6 +429,7 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
               )}
               canEdit={can(source, "edit")}
               canDelete={can(source, "delete")}
+              auxiliaryItems={pageContent.editAuxiliaryItems}
             />
           </TabBody>
         </Tab>
