@@ -28,21 +28,17 @@ export function sortDataservices(
     if (sortField === "title") {
       return collator.compare(a.title ?? "", b.title ?? "") * dir;
     }
-    const aValue = sortField === "created_at" ? a.created_at : a.last_modified;
-    const bValue = sortField === "created_at" ? b.created_at : b.last_modified;
+    const aValue =
+      sortField === "created_at" ? a.created_at : a.metadata_modified_at || a.last_modified;
+    const bValue =
+      sortField === "created_at" ? b.created_at : b.metadata_modified_at || b.last_modified;
     const aTime = aValue ? Date.parse(aValue) : 0;
     const bTime = bValue ? Date.parse(bValue) : 0;
     return (aTime - bTime) * dir;
   });
 }
 
-interface DataserviceColumnsOptions {
-  ownerMetaStyle?: "dot" | "by";
-}
-
-export function createDataserviceColumns({
-  ownerMetaStyle = "dot",
-}: DataserviceColumnsOptions = {}): AdminListColumn<Dataservice, DataserviceSortField>[] {
+export function createDataserviceColumns(): AdminListColumn<Dataservice, DataserviceSortField>[] {
   return [
     {
       id: "title",
@@ -69,21 +65,22 @@ export function createDataserviceColumns({
       header: "Modificado em",
       sortField: "last_modified",
       sortType: "date",
-      renderCell: (api) => (
-        <>
-          {formatDateToDMY(api.last_modified)}
-          {api.owner && (
-            <>
-              <br />
-              <span className="text-sm text-neutral-500">
-                {ownerMetaStyle === "by" ? "por" : "sobre"}{" "}
-                {ownerMetaStyle === "dot" ? <span className="text-success-600">●</span> : null}{" "}
-                {api.owner.first_name} {api.owner.last_name}
-              </span>
-            </>
-          )}
-        </>
-      ),
+      renderCell: (api) => {
+        const author = api.owner
+          ? `${api.owner.first_name} ${api.owner.last_name}`
+          : api.organization?.name;
+        return (
+          <>
+            {formatDateToDMY(api.metadata_modified_at || api.last_modified)}
+            {author && (
+              <>
+                <br />
+                <span className="text-sm text-neutral-500">por {author}</span>
+              </>
+            )}
+          </>
+        );
+      },
     },
     createTableActionsColumn<Dataservice>({
       viewAction: (api) => ({
