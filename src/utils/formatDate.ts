@@ -14,7 +14,7 @@ export function formatDateToTimeAgo(
     : unknown;
 }
 
-export function formatDateToDMY(dateStr: string | null | undefined, fallback = "-") {
+export function formatDateToDMY(dateStr: string | null | undefined, fallback: string = "—") {
   if (!dateStr) return fallback;
   const date = new Date(dateStr);
   if (Number.isNaN(date.getTime())) return fallback;

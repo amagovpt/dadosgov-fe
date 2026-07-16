@@ -39,13 +39,7 @@ export function sortDataservices(
   });
 }
 
-interface DataserviceColumnsOptions {
-  ownerMetaStyle?: "dot" | "by";
-}
-
-export function createDataserviceColumns({
-  ownerMetaStyle = "dot",
-}: DataserviceColumnsOptions = {}): AdminListColumn<Dataservice, DataserviceSortField>[] {
+export function createDataserviceColumns(): AdminListColumn<Dataservice, DataserviceSortField>[] {
   return [
     {
       id: "title",
@@ -72,21 +66,22 @@ export function createDataserviceColumns({
       header: "Modificado em",
       sortField: "last_modified",
       sortType: "date",
-      renderCell: (api) => (
-        <>
-          {formatDateToDMY(getDataserviceModifiedAt(api))}
-          {api.owner && (
-            <>
-              <br />
-              <span className="text-sm text-neutral-500">
-                {ownerMetaStyle === "by" ? "por" : "sobre"}{" "}
-                {ownerMetaStyle === "dot" ? <span className="text-success-600">●</span> : null}{" "}
-                {api.owner.first_name} {api.owner.last_name}
-              </span>
-            </>
-          )}
-        </>
-      ),
+      renderCell: (api) => {
+        const author = api.owner
+          ? `${api.owner.first_name} ${api.owner.last_name}`
+          : api.organization?.name;
+        return (
+          <>
+            {formatDateToDMY(getDataserviceModifiedAt(api))}
+            {author && (
+              <>
+                <br />
+                <span className="text-sm text-neutral-500">por {author}</span>
+              </>
+            )}
+          </>
+        );
+      },
     },
     createTableActionsColumn<Dataservice>({
       viewAction: (api) => ({

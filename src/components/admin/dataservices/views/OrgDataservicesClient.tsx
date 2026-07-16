@@ -54,7 +54,7 @@ export default function OrgDataservicesClient() {
     [sortedApis, currentPage, pageSize]
   );
   const columns = useMemo(
-    () => createDataserviceColumns({ ownerMetaStyle: "dot" }),
+    () => createDataserviceColumns(),
     []
   );
 
