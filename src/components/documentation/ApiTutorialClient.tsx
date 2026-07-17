@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Breadcrumb } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 
 declare global {
   interface Window {
