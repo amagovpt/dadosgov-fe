@@ -92,11 +92,6 @@ export default function ReusesEditMetadataTab({
   const canDelete = can(reuse, "delete");
   const auxiliarItems = getEditReuseAuxiliarItems({
     items: auxiliaryItems,
-    title: !!formErrors.title,
-    link: !!formErrors.url,
-    type: !!formErrors.type,
-    topic: !!formErrors.topic,
-    description: !!formErrors.description,
   });
 
   return (

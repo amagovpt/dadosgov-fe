@@ -361,9 +361,6 @@ export default function CommunityResourceEditClient({
   );
 
   const auxiliarItems = getEditCommunityResourceAuxiliaryItems({
-    hasUrlError: hasError("url"),
-    hasTitleError: hasError("title"),
-    hasTypeError: hasError("type"),
     items: pageContent.editAuxiliaryItems,
   });
 

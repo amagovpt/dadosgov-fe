@@ -165,8 +165,6 @@ export function HarvesterConfigForm({
   );
 
   const auxiliarItems = getEditHarvesterAuxiliaryItems({
-    hasHarvesterNameError: !!formErrors.harvesterName,
-    hasHarvesterUrlError: !!formErrors.harvesterUrl,
     items: auxiliaryItems,
   });
 

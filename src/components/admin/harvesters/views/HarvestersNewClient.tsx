@@ -157,8 +157,6 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
   };
 
   const auxiliaryItems = getCreateHarvesterAuxiliaryItems({
-    hasHarvesterNameError: hasError("harvesterName"),
-    hasHarvesterUrlError: hasError("harvesterUrl"),
     items: pageContent.createAuxiliaryItems,
   });
 

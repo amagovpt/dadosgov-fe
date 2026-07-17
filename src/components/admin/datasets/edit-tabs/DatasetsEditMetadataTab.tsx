@@ -123,8 +123,6 @@ export default function DatasetsEditMetadataTab({
   const canDelete = can(dataset, "delete");
   const auxiliarItems = getEditDatasetAuxiliarItems({
     items: auxiliaryItems,
-    title: !!formErrors.title,
-    description: !!formErrors.description,
   });
 
   return (

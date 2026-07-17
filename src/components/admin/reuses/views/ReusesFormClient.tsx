@@ -308,11 +308,6 @@ export default function ReusesFormClient({
 
   const auxiliarItems = getReuseAuxiliarItems({
     items: pageContent.createAuxiliaryItems,
-    title: hasError("reuseName"),
-    link: hasError("reuseLink"),
-    type: hasError("reuseType"),
-    topic: hasError("reuseTopic"),
-    description: hasError("reuseDescription") || hasError("reuseDescriptionLength"),
   });
 
   const producerOptions = useMemo(() => {

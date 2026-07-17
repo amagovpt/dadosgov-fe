@@ -7,8 +7,6 @@ import TextLink from "@/components/Primitives/TextLink";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface HarvesterAuxiliaryContentParams {
-  hasHarvesterNameError: boolean;
-  hasHarvesterUrlError: boolean;
   items?: AdminAuxiliaryItem[];
 }
 
@@ -27,34 +25,23 @@ function renderAuxiliaryItemContent(item: AdminAuxiliaryItem) {
   );
 }
 
-function mapHarvesterAuxiliaryItems(
-  items: AdminAuxiliaryItem[] | undefined,
-  hasHarvesterNameError: boolean,
-  hasHarvesterUrlError: boolean
-): AuxiliarItem[] {
+function mapHarvesterAuxiliaryItems(items: AdminAuxiliaryItem[] | undefined): AuxiliarItem[] {
   return (
     items?.filter((item) => item.enabled !== false).map((item) => ({
       title: item.title,
       content: renderAuxiliaryItemContent(item),
-      hasError:
-        (item.title === "Dar um nome" && hasHarvesterNameError) ||
-        (item.title === "Adicionar o URL" && hasHarvesterUrlError),
     })) ?? []
   );
 }
 
 export function getCreateHarvesterAuxiliaryItems({
-  hasHarvesterNameError,
-  hasHarvesterUrlError,
   items,
 }: HarvesterAuxiliaryContentParams): AuxiliarItem[] {
-  return mapHarvesterAuxiliaryItems(items, hasHarvesterNameError, hasHarvesterUrlError);
+  return mapHarvesterAuxiliaryItems(items);
 }
 
 export function getEditHarvesterAuxiliaryItems({
-  hasHarvesterNameError,
-  hasHarvesterUrlError,
   items,
 }: HarvesterAuxiliaryContentParams): AuxiliarItem[] {
-  return mapHarvesterAuxiliaryItems(items, hasHarvesterNameError, hasHarvesterUrlError);
+  return mapHarvesterAuxiliaryItems(items);
 }

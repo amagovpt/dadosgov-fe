@@ -452,8 +452,6 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
   };
 
   const auxiliarItems = getEditDataserviceAuxiliaryItems({
-    hasApiNameError: !!formErrors.title,
-    hasApiDescriptionError: !!formErrors.description,
     items: pageContent.editAuxiliaryItems,
   });
   const archiveInfoCard = findArchiveInfoCard(

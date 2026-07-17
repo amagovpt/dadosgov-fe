@@ -2,43 +2,29 @@ import { AuxiliarItem } from "@/components/admin/AuxiliarList";
 import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-interface ReuseAuxiliarErrors {
-  title?: boolean;
-  link?: boolean;
-  type?: boolean;
-  topic?: boolean;
-  description?: boolean;
+interface ReuseAuxiliarOptions {
   items?: AdminAuxiliaryItem[];
 }
 
-function mapReuseAuxiliarItems(
-  items: AdminAuxiliaryItem[] | undefined,
-  errors: ReuseAuxiliarErrors
-): AuxiliarItem[] {
+function mapReuseAuxiliarItems(items: AdminAuxiliaryItem[] | undefined): AuxiliarItem[] {
   return (
-    items?.filter((item) => item.enabled !== false).map((item, index) => ({
+    items?.filter((item) => item.enabled !== false).map((item) => ({
       title: item.title,
       content: formatHtmlParagraphs(item.description, "auxiliar-list__content !p-0"),
-      hasError:
-        (index === 0 && !!errors.title) ||
-        (index === 1 && !!errors.link) ||
-        (index === 2 && !!errors.type) ||
-        (index === 3 && !!errors.topic) ||
-        (index === 4 && !!errors.description),
     })) ?? []
   );
 }
 
 export function getCreateReuseAuxiliarItems(
-  errors: ReuseAuxiliarErrors = {}
+  options: ReuseAuxiliarOptions = {}
 ): AuxiliarItem[] {
-  return mapReuseAuxiliarItems(errors.items, errors);
+  return mapReuseAuxiliarItems(options.items);
 }
 
-export function getEditReuseAuxiliarItems(errors: ReuseAuxiliarErrors = {}): AuxiliarItem[] {
-  return mapReuseAuxiliarItems(errors.items, errors);
+export function getEditReuseAuxiliarItems(options: ReuseAuxiliarOptions = {}): AuxiliarItem[] {
+  return mapReuseAuxiliarItems(options.items);
 }
 
-export function getReuseAuxiliarItems(errors: ReuseAuxiliarErrors = {}): AuxiliarItem[] {
-  return getCreateReuseAuxiliarItems(errors);
+export function getReuseAuxiliarItems(options: ReuseAuxiliarOptions = {}): AuxiliarItem[] {
+  return getCreateReuseAuxiliarItems(options);
 }

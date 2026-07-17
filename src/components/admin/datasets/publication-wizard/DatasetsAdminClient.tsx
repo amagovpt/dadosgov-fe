@@ -586,9 +586,6 @@ export default function DatasetsAdminClient({
 
   const auxiliarItemsStep2 = getDatasetAuxiliarItems({
     items: pageContent.createAuxiliaryItems,
-    title: !!formErrors.datasetTitle || !!formErrors.datasetTitleTooLong,
-    description: !!formErrors.datasetDescription,
-    frequency: !!formErrors.datasetFrequency,
   });
 
   const auxiliarItemsStep3 = getResourceDatasetAuxiliarItems(pageContent.resourceAuxiliaryItems);

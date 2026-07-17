@@ -290,10 +290,7 @@ export default function ApiRegistrationClient({
     }
   };
 
-  const auxiliarItems = getDataserviceAuxiliarItems({
-    name: !!formErrors.apiName,
-    description: !!formErrors.apiDescription,
-  });
+  const auxiliarItems = getDataserviceAuxiliarItems();
 
   return (
     <>

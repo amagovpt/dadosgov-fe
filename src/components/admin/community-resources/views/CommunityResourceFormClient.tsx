@@ -238,9 +238,6 @@ export default function CommunityResourceFormClient({
   };
 
   const auxiliarItems = getCreateCommunityResourceAuxiliaryItems({
-    hasResourceUrlError: hasError("resourceUrl"),
-    hasTitleError: hasError("title"),
-    hasTypeError: hasError("type"),
     items: pageContent.createAuxiliaryItems,
   });
 

@@ -131,8 +131,6 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
   };
 
   const auxiliaryItems = getOrganizationAuxiliaryItems({
-    hasNameError: hasError("orgName"),
-    hasDescriptionError: hasError("orgDescription"),
     items: pageContent.createAuxiliaryItems,
   });
 

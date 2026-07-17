@@ -5,14 +5,10 @@ import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface OrganizationAuxiliaryContentParams {
-  hasNameError: boolean;
-  hasDescriptionError: boolean;
   items?: AdminAuxiliaryItem[];
 }
 
 export function getOrganizationAuxiliaryItems({
-  hasNameError,
-  hasDescriptionError,
   items,
 }: OrganizationAuxiliaryContentParams): AuxiliarItem[] {
   /* {
@@ -38,12 +34,9 @@ export function getOrganizationAuxiliaryItems({
     }, */
 
   return (
-    items?.filter((item) => item.enabled !== false).map((item, index) => ({
+    items?.filter((item) => item.enabled !== false).map((item) => ({
       title: item.title,
       content: formatHtmlParagraphs(item.description, "auxiliar-list__content !p-0"),
-      hasError:
-        (index === 0 && hasNameError) ||
-        (index === 2 && hasDescriptionError),
     })) ?? []
   );
 }

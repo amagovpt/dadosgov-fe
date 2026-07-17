@@ -141,8 +141,6 @@ export default function ApiRegistrationClient({
   }
 
   const auxiliaryItems = getCreateDataserviceAuxiliaryItems({
-    hasApiNameError: hasError("apiName"),
-    hasApiDescriptionError: hasError("apiDescription"),
     items: pageContent.createAuxiliaryItems,
   });
 

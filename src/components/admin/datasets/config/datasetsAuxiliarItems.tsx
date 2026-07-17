@@ -2,40 +2,31 @@ import { AuxiliarItem } from "@/components/admin/AuxiliarList";
 import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
-interface DatasetAuxiliarErrors {
-  title?: boolean;
-  description?: boolean;
-  frequency?: boolean;
+interface DatasetAuxiliarOptions {
   items?: AdminAuxiliaryItem[];
 }
 
 function mapDatasetAuxiliarItems(
-  items: AdminAuxiliaryItem[] | undefined,
-  errors: DatasetAuxiliarErrors
+  items: AdminAuxiliaryItem[] | undefined
 ): AuxiliarItem[] {
   return (
-    items?.filter((item) => item.enabled !== false).map((item, index) => ({
+    items?.filter((item) => item.enabled !== false).map((item) => ({
       title: item.title,
       content: formatHtmlParagraphs(item.description, "auxiliar-list__content !p-0"),
-      hidden: index === 3,
-      hasError:
-        (index === 0 && !!errors.title) ||
-        (index === 2 && !!errors.description) ||
-        (index === 6 && !!errors.frequency),
     })) ?? []
   );
 }
 
 export function getCreateDatasetAuxiliarItems(
-  errors: DatasetAuxiliarErrors = {}
+  options: DatasetAuxiliarOptions = {}
 ): AuxiliarItem[] {
-  return mapDatasetAuxiliarItems(errors.items, errors);
+  return mapDatasetAuxiliarItems(options.items);
 }
 
 export function getEditDatasetAuxiliarItems(
-  errors: DatasetAuxiliarErrors = {}
+  options: DatasetAuxiliarOptions = {}
 ): AuxiliarItem[] {
-  return mapDatasetAuxiliarItems(errors.items, errors);
+  return mapDatasetAuxiliarItems(options.items);
 }
 
 export function getResourceDatasetAuxiliarItems(
@@ -49,6 +40,6 @@ export function getResourceDatasetAuxiliarItems(
   );
 }
 
-export function getDatasetAuxiliarItems(errors: DatasetAuxiliarErrors = {}): AuxiliarItem[] {
-  return getCreateDatasetAuxiliarItems(errors);
+export function getDatasetAuxiliarItems(options: DatasetAuxiliarOptions = {}): AuxiliarItem[] {
+  return getCreateDatasetAuxiliarItems(options);
 }
