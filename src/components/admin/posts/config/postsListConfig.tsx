@@ -74,7 +74,7 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
       headerLabel: labels.title,
       sortField: "name",
       sortType: "string",
-      renderCell: (post) => <TextLink href={`/posts/${post.slug}`}>{post.name}</TextLink>,
+      renderCell: (post) => <TextLink href={`/noticias/${post.slug}`}>{post.name}</TextLink>,
     },
     {
       id: "type",
@@ -108,7 +108,7 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
       header: labels.action,
       headerLabel: labels.action,
       viewAction: (post) => ({
-        href: `/posts/${post.slug}`,
+        href: `/noticias/${post.slug}`,
       }),
       editAction: (post) => ({
         href: `/admin/posts/${post.id}`,

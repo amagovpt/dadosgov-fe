@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
-import { Breadcrumb } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 interface BreadcrumbItem {
   label: string;
   url: string;
@@ -18,18 +18,18 @@ interface GitHubArticlePageProps {
   initialContent?: string;
 }
 
-const markdownComponents = {
-  h1: ({ children }: any) => (
+const markdownComponents: Components = {
+  h1: ({ children }) => (
     <h1 className="mb-16 text-2xl-medium leading-tight text-[#021C51]">{children}</h1>
   ),
-  h2: ({ children }: any) => (
+  h2: ({ children }) => (
     <h2 className="my-16 text-m-regular font-bold leading-7 text-[#021c51]">{children}</h2>
   ),
-  h3: ({ children }: any) => (
+  h3: ({ children }) => (
     <h3 className="mb-16 text-m-regular font-bold leading-7 text-[#021c51]">{children}</h3>
   ),
-  p: ({ children }: any) => <p className="mb-16 text-m-regular leading-7">{children}</p>,
-  a: ({ href, children }: any) => {
+  p: ({ children }) => <p className="mb-16 text-m-regular leading-7">{children}</p>,
+  a: ({ href, children }) => {
     const linkOverrides: Record<string, { href: string; text?: string }> = {
       "/docapi/": { href: "/recursos/desenvolvimento/referencia-api" },
       "http://www.mejoratuescuela.org": {
@@ -50,7 +50,7 @@ const markdownComponents = {
       "/faqs/licenses/": { href: "/" },
     };
     const normalizedHref = href?.trim().replace(/^\/pt/, "");
-    const override = linkOverrides[href] ?? linkOverrides[normalizedHref];
+    const override = linkOverrides[href ?? ""] ?? linkOverrides[normalizedHref ?? ""];
     const resolvedHref = override?.href ?? href;
     const resolvedChildren = override?.text ?? children;
     const isExternal = resolvedHref?.startsWith("http");
@@ -65,18 +65,18 @@ const markdownComponents = {
       </Link>
     );
   },
-  ul: ({ children }: any) => (
+  ul: ({ children }) => (
     <ul className="mb-24 list-disc space-y-12 pl-48 text-m-regular leading-7">{children}</ul>
   ),
-  ol: ({ children }: any) => (
+  ol: ({ children }) => (
     <ol className="mb-24 list-decimal space-y-12 pl-48 text-m-regular leading-7">{children}</ol>
   ),
-  blockquote: ({ children }: any) => (
+  blockquote: ({ children }) => (
     <blockquote className="mb-16 border-l-4 border-[#034AD8] pl-16 text-m-regular italic leading-7">
       {children}
     </blockquote>
   ),
-  code: ({ children, className }: any) => {
+  code: ({ children, className }) => {
     const isBlock = className?.includes("language-");
     return isBlock ? (
       <pre className="rounded mb-16 overflow-x-auto bg-[#e1e4ea] p-16">
@@ -86,11 +86,11 @@ const markdownComponents = {
       <code className="rounded bg-[#e1e4ea] px-[4px] py-[2px] text-[14px]">{children}</code>
     );
   },
-  img: ({ src, alt }: any) => (
+  img: ({ src, alt }) => (
     <img src={src} alt={alt ?? ""} className="rounded mb-[16px] h-auto max-w-full" />
   ),
-  strong: ({ children }: any) => <strong>{children}</strong>,
-  em: ({ children }: any) => <em>{children}</em>,
+  strong: ({ children }) => <strong>{children}</strong>,
+  em: ({ children }) => <em>{children}</em>,
   br: () => null,
 };
 

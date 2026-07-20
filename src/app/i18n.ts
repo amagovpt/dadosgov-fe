@@ -45,6 +45,11 @@ export default async function initTranslations(
     preload: resources ? [] : i18nConfig.locales,
   });
 
+  instance.services.formatter?.add("number", (value: number, lng, options) => {
+    const parts = new Intl.NumberFormat(lng, options).formatToParts(value);
+    return parts.map((part) => (part.type === "group" ? " " : part.value)).join("");
+  });
+
   return {
     i18n: instance,
     resources: { [locale]: instance.services.resourceStore.data[locale] },

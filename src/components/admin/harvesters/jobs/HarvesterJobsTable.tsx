@@ -32,7 +32,11 @@ function extractDatasetId(errors: HarvestItem["errors"]): string | null {
 
 function JobLogsPanel({ job }: { job: HarvestJob }) {
   const { t } = useTranslation("admin-harvesters");
-  const itemsWithErrors = (job.items || []).filter((i) => i.errors?.length > 0);
+  // The list endpoint sends only the failed items in `error_items`; the detail
+  // endpoint sends the full `items` array. Support both.
+  const itemsWithErrors = (job.error_items ?? job.items ?? []).filter(
+    (i) => i.errors?.length > 0
+  );
   const jobErrors = job.errors || [];
 
   const hasContent = jobErrors.length > 0 || itemsWithErrors.length > 0;
@@ -220,11 +224,16 @@ export function HarvesterJobsTable({
       </TableHeader>
       <TableBody>
         {jobs.map((job) => {
+          // Prefer the server-computed counts (jobs list); fall back to deriving
+          // them from `items` when present (job detail shape).
           const items = job.items || [];
-          const doneCount = items.filter((i) => i.status === "done").length;
-          const skippedCount = items.filter((i) => i.status === "skipped").length;
-          const archivedCount = items.filter((i) => i.status === "archived").length;
-          const failedCount = items.filter((i) => i.status === "failed").length;
+          const counts = job.item_counts;
+          const totalCount = counts?.total ?? items.length;
+          const doneCount = counts?.done ?? items.filter((i) => i.status === "done").length;
+          const skippedCount = counts?.skipped ?? items.filter((i) => i.status === "skipped").length;
+          const archivedCount =
+            counts?.archived ?? items.filter((i) => i.status === "archived").length;
+          const failedCount = counts?.failed ?? items.filter((i) => i.status === "failed").length;
           const failed = isJobFailed(job);
           const expanded = expandedJobs.has(job.id);
 
@@ -274,7 +283,7 @@ export function HarvesterJobsTable({
                       })
                     : "—"}
                 </TableCell>
-                <TableCell headerLabel={t("columns.datasets")}>{items.length}</TableCell>
+                <TableCell headerLabel={t("columns.datasets")}>{totalCount}</TableCell>
                 <TableCell headerLabel={t("columns.api")}>{job.errors?.length || 0}</TableCell>
                 <TableCell headerLabel={t("jobDetail.table.completed")}>{doneCount}</TableCell>
                 <TableCell headerLabel={t("jobDetail.table.skipped")}>{skippedCount}</TableCell>

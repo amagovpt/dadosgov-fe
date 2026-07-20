@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@ama-pt/agora-design-system";
 import { fetchOrganizations } from "@/service/api/organizations";
-import { suggestTags } from "@/service/api/search";
 import { Organization } from "@/service/types/identity";
 import {
   AdvancedFilterGroup,
@@ -20,11 +19,6 @@ import {
   uniqueStrings,
   writeQueryParamValues,
 } from "@/utils/filterUtils";
-
-interface FilterOption {
-  id: string;
-  name: string;
-}
 
 const DATASERVICE_TOGGLE_FILTERS = {
   atualizacao: {
@@ -94,7 +88,6 @@ export const DataservicesFilters = () => {
   const paramsRef = useRef(queryString);
 
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
-  const [tagOptions, setTagOptions] = useState<FilterOption[]>([]);
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -158,25 +151,10 @@ export const DataservicesFilters = () => {
     [getWorkingParams, navigateWithParams]
   );
 
-  const handleTagSearch = useCallback(async (query: string) => {
-    if (query.length < 2) {
-      setTagOptions([]);
-      return;
-    }
-    try {
-      const results = await suggestTags(query);
-      setTagOptions(results.map((tag) => ({ id: tag.text, name: tag.text })));
-    } catch {
-      setTagOptions([]);
-    }
-  }, []);
-
   const handleFilterChange = useCallback(
     (paramName: string, value: string) => {
       const current = getWorkingParams();
-      const currentValues = readQueryParamValues(current, paramName, {
-        splitComma: paramName === "tag",
-      });
+      const currentValues = readQueryParamValues(current, paramName);
       const nextValues = uniqueStrings(toggleSelection(currentValues, value));
       writeQueryParamValues(current, paramName, nextValues);
       navigateWithParams(current);
@@ -184,18 +162,14 @@ export const DataservicesFilters = () => {
     [getWorkingParams, navigateWithParams]
   );
 
-  const handleSearchChange = useCallback(
-    (groupName: string, value: string) => {
-      setSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-      if (groupName === "Palavras-chave") handleTagSearch(value);
-    },
-    [handleTagSearch]
-  );
+  const handleSearchChange = useCallback((groupName: string, value: string) => {
+    setSearchQueries((prev) => ({ ...prev, [groupName]: value }));
+  }, []);
 
   const getActiveValues = useCallback(
     (paramName: string) => {
       const current = new URLSearchParams(Array.from(searchParams.entries()));
-      return readQueryParamValues(current, paramName, { splitComma: paramName === "tag" });
+      return readQueryParamValues(current, paramName);
     },
     [searchParams]
   );
@@ -224,18 +198,8 @@ export const DataservicesFilters = () => {
         })),
         searchable: true,
       },
-      {
-        name: "Palavras-chave",
-        param: "tag",
-        data: tagOptions,
-        searchable: true,
-        suggest: true,
-        searchPlaceholder: "Escreva para pesquisar...",
-        minCharsMessage: "Escreva pelo menos 2 caracteres...",
-        emptyMessage: "Nenhum resultado encontrado.",
-      },
     ],
-    [allOrganizations, tagOptions]
+    [allOrganizations]
   );
 
   return (

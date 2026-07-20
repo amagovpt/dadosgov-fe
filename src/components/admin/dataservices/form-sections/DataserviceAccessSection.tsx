@@ -72,7 +72,7 @@ export default function DataserviceAccessSection({
 
       <div className="admin-page__fields-group">
         <div className="flex flex-col gap-8">
-          <span className="text-primary-900 text-base font-medium leading-7">
+          <span className="text-base font-medium leading-7 text-primary-900">
             {t("fields.accessType")}
           </span>
           <div className="flex flex-row gap-4">

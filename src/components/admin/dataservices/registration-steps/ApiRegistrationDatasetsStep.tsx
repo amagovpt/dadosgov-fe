@@ -2,17 +2,32 @@
 
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { StatusCard } from "@ama-pt/agora-design-system";
+import {
+  Button,
+  DropdownOption,
+  DropdownSection,
+  InputSelect,
+  InputText,
+  StatusCard,
+  Tag,
+} from "@ama-pt/agora-design-system";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
-import DataserviceDatasetLinksSection from "@/components/admin/dataservices/form-sections/DataserviceDatasetLinksSection";
 import type { AdminHelpBlock } from "@/service/types/admin/common";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import type { Dataset } from "@/service/types/dataset";
 
 interface ApiRegistrationDatasetsStepProps {
-  datasetLinks: { url: string }[];
-  datasetLinkErrors: Record<number, string>;
-  onDatasetUrlChange: (index: number, value: string) => void;
-  onRemoveDatasetLink: (index: number) => void;
+  availableDatasets: Dataset[];
+  selectedDatasets: Dataset[];
+  dropdownDatasets: Dataset[];
+  datasetLinkUrl: string;
+  datasetLinkError: string | null;
+  isResolvingLink: boolean;
+  isLinking: boolean;
+  onSearchInputChange: (value: string) => void;
+  onDropdownChange: (ids: string[]) => void;
+  onRemoveDataset: (id: string) => void;
+  onDatasetLinkUrlChange: (value: string) => void;
   onAddDatasetLink: () => void;
   onPreviousStep: () => void;
   onNextStep: () => void;
@@ -20,10 +35,17 @@ interface ApiRegistrationDatasetsStepProps {
 }
 
 export default function ApiRegistrationDatasetsStep({
-  datasetLinks,
-  datasetLinkErrors,
-  onDatasetUrlChange,
-  onRemoveDatasetLink,
+  availableDatasets,
+  selectedDatasets,
+  dropdownDatasets,
+  datasetLinkUrl,
+  datasetLinkError,
+  isResolvingLink,
+  isLinking,
+  onSearchInputChange,
+  onDropdownChange,
+  onRemoveDataset,
+  onDatasetLinkUrlChange,
   onAddDatasetLink,
   onPreviousStep,
   onNextStep,
@@ -53,18 +75,90 @@ export default function ApiRegistrationDatasetsStep({
 
       <form
         className="admin-page__form"
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
           onNextStep();
         }}
       >
-        <DataserviceDatasetLinksSection
-          datasetLinks={datasetLinks}
-          datasetLinkErrors={datasetLinkErrors}
-          onDatasetUrlChange={onDatasetUrlChange}
-          onRemoveDatasetLink={onRemoveDatasetLink}
-          onAddDatasetLink={onAddDatasetLink}
-        />
+        <InputSelect
+          label={t("datasetLinks.searchLabel")}
+          placeholder={t("edit.datasetSelectPlaceholder")}
+          id="api-registration-datasets"
+          type="checkbox"
+          searchable
+          searchInputPlaceholder={t("edit.datasetSearchPlaceholder")}
+          searchNoResultsText={t("edit.noDatasetResults")}
+          onSearchInputChange={onSearchInputChange}
+          onChange={(options) => onDropdownChange(options.map((o) => String(o.value)))}
+        >
+          <DropdownSection name="datasets">
+            {availableDatasets.map((dataset) => (
+              <DropdownOption
+                key={dataset.id}
+                value={dataset.id}
+                selected={dropdownDatasets.some((s) => s.id === dataset.id)}
+              >
+                {dataset.title}
+              </DropdownOption>
+            ))}
+          </DropdownSection>
+        </InputSelect>
+
+        {selectedDatasets.length > 0 && (
+          <div className="mt-16 flex flex-wrap gap-8">
+            {selectedDatasets.map((dataset) => (
+              <Tag
+                key={dataset.id}
+                aria-label={t("edit.removeDataset", { title: dataset.title })}
+                onClick={() => onRemoveDataset(dataset.id)}
+              >
+                {dataset.title}
+              </Tag>
+            ))}
+          </div>
+        )}
+
+        <div className="admin-page__divider-or">
+          <span className="admin-page__divider-or-text">{t("edit.or")}</span>
+        </div>
+
+        <div className="flex flex-col gap-8">
+          <InputText
+            label={t("datasetLinks.linkLabel")}
+            placeholder="https://..."
+            id="api-registration-dataset-link-url"
+            required={false}
+            value={datasetLinkUrl}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onDatasetLinkUrlChange(e.target.value)
+            }
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                onAddDatasetLink();
+              }
+            }}
+            hasError={!!datasetLinkError}
+          />
+          {datasetLinkError && (
+            <span className="text-sm text-danger-600">{datasetLinkError}</span>
+          )}
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              appearance="outline"
+              variant="primary"
+              hasIcon
+              leadingIcon="agora-line-plus-circle"
+              leadingIconHover="agora-solid-plus-circle"
+              onClick={onAddDatasetLink}
+              disabled={isResolvingLink || !datasetLinkUrl.trim()}
+            >
+              {t("datasetLinks.add")}
+            </Button>
+          </div>
+        </div>
 
         <AdminStepActions
           previousAction={{
@@ -74,11 +168,12 @@ export default function ApiRegistrationDatasetsStep({
             onClick: onPreviousStep,
           }}
           primaryAction={{
-            label: t("form.next"),
+            label: isLinking ? t("form.linking") : t("form.next"),
             type: "submit",
             hasIcon: true,
             trailingIcon: "agora-line-arrow-right-circle",
             trailingIconHover: "agora-solid-arrow-right-circle",
+            disabled: isLinking,
           }}
         />
       </form>

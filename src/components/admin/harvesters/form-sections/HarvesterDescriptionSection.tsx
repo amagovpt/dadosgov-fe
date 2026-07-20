@@ -14,6 +14,9 @@ interface HarvesterDescriptionSectionProps {
   descriptionLabel?: string;
   descriptionPlaceholder?: string;
   urlPlaceholder?: string;
+  nameDisabled?: boolean;
+  descriptionDisabled?: boolean;
+  urlDisabled?: boolean;
   onHarvesterNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onHarvesterDescriptionChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onHarvesterUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -29,6 +32,9 @@ export default function HarvesterDescriptionSection({
   descriptionLabel,
   descriptionPlaceholder,
   urlPlaceholder,
+  nameDisabled = false,
+  descriptionDisabled = false,
+  urlDisabled = false,
   onHarvesterNameChange,
   onHarvesterDescriptionChange,
   onHarvesterUrlChange,
@@ -56,6 +62,7 @@ export default function HarvesterDescriptionSection({
           feedbackState="danger"
           errorFeedbackText={t("admin-common:forms.requiredField")}
           required
+          disabled={nameDisabled}
         />
 
         <InputTextArea
@@ -65,6 +72,7 @@ export default function HarvesterDescriptionSection({
           rows={6}
           value={harvesterDescription}
           onChange={onHarvesterDescriptionChange}
+          disabled={descriptionDisabled}
         />
 
         <InputText
@@ -78,6 +86,7 @@ export default function HarvesterDescriptionSection({
           feedbackState="danger"
           errorFeedbackText={t("admin-common:forms.requiredField")}
           required
+          disabled={urlDisabled}
         />
       </div>
     </>

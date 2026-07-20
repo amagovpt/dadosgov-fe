@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Breadcrumb } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+
+declare global {
+  interface Window {
+    SwaggerUIBundle?: (config: Record<string, unknown>) => void;
+  }
+}
 
 const SWAGGER_JSON_URL = "/api/1/swagger.json";
 const SWAGGER_CSS_ID = "swagger-ui-css";
@@ -25,7 +31,7 @@ export default function ApiTutorialClient() {
 
     async function initSwagger() {
       if (cancelled || !swaggerRef.current) return;
-      if (!(window as any).SwaggerUIBundle) return;
+      if (!window.SwaggerUIBundle) return;
 
       // Fetch the spec and strip the absolute `host` so that requests go to
       // the current origin (via the Next.js /api proxy in dev, same-origin in
@@ -48,7 +54,7 @@ export default function ApiTutorialClient() {
 
       if (cancelled || !swaggerRef.current) return;
 
-      (window as any).SwaggerUIBundle({
+      window.SwaggerUIBundle({
         ...(spec ? { spec } : { url: SWAGGER_JSON_URL }),
         domNode: swaggerRef.current,
         docExpansion: "none",

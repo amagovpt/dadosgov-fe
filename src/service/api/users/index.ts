@@ -11,12 +11,17 @@ import { API_AUTH_URL, API_BASE_URL, translateUploadErrorPayload } from "@/servi
 
 
 /**
- * Fetch the public profile of any user by ID or slug
+ * Fetch the profile of any user by ID or slug.
+ *
+ * The `/users/<id>/` endpoint requires authentication (LEDG-2113 / VULN-2092),
+ * so the request must carry the session cookie. Anonymous callers get a 401;
+ * the profile page gates them to login before this runs.
  */
 export async function fetchUserProfile(userId: string): Promise<UserPublic | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/users/${userId}/`, {
       cache: "no-store",
+      credentials: "include",
     });
 
     if (res.status === 404) {

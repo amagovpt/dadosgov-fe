@@ -23,7 +23,7 @@ test.describe("Backoffice - Integration smoke tests", () => {
     if ((await datasetsLink.count()) === 0) return;
 
     await datasetsLink.click();
-    await page.waitForURL(/\/pages\/admin\/system\/datasets/, {
+    await page.waitForURL(/admin\/system\/datasets/, {
       timeout: 10000,
     });
     expect(page.url()).toContain("/admin/system/datasets");

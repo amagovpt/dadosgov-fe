@@ -11,7 +11,7 @@ interface DataserviceDescriptionSectionProps {
   baseApiUrl: string;
   machineDocUrl: string;
   technicalDocUrl: string;
-  rateLimiting: string;
+  rateLimiting?: string;
   availability: string;
   hasApiNameError: boolean;
   hasApiDescriptionError: boolean;
@@ -23,7 +23,7 @@ interface DataserviceDescriptionSectionProps {
   onBaseApiUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onMachineDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onTechnicalDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onRateLimitingChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onRateLimitingChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onAvailabilityChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -34,7 +34,7 @@ export default function DataserviceDescriptionSection({
   baseApiUrl,
   machineDocUrl,
   technicalDocUrl,
-  rateLimiting,
+  rateLimiting = "",
   availability,
   hasApiNameError,
   hasApiDescriptionError,
@@ -114,7 +114,7 @@ export default function DataserviceDescriptionSection({
             placeholder={t("admin-dataservices:fields.shortPlaceholder")}
             id={`${idPrefix}-rate-limit`}
             value={rateLimiting}
-            onChange={onRateLimitingChange}
+            onChange={onRateLimitingChange ?? (() => {})}
           />
         )}
         <InputText

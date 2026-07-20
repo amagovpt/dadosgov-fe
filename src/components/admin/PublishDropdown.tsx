@@ -11,7 +11,10 @@ interface PublishDropdownProps {
   outline?: boolean;
 }
 
-export default function PublishDropdown({ darkMode = false, outline = true }: PublishDropdownProps) {
+export default function PublishDropdown({
+  darkMode = false,
+  outline = true,
+}: PublishDropdownProps) {
   const { t } = useTranslation("admin-common");
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -76,24 +79,27 @@ export default function PublishDropdown({ darkMode = false, outline = true }: Pu
         </span>
       </Button>
       {showDropdown && (
-        <div className="absolute left-0 mt-8 bg-white border-1 rounded-4 shadow-lg py-8 z-10 max-w-256">
+        <div className="shadow-lg absolute left-0 z-10 mt-8 max-w-256 rounded-4 border-1 bg-white py-8">
           {publishItems.map((item, index) => (
             <button
               key={index}
-              className="flex items-center gap-8 w-full text-left text-nowrap p-16 border-b-2 border-b-neutral-200 last-of-type:border-none hover:bg-primary-50"
+              className="flex w-full items-center gap-8 text-nowrap border-b-2 border-b-neutral-200 p-16 text-left last-of-type:border-none hover:bg-primary-50"
               onClick={() => {
                 setShowDropdown(false);
                 router.push(item.href);
               }}
             >
               {item.icon ? (
-                <AppIcon name={item.icon} className="w-24 h-24 text-primary-600" />
+                <AppIcon name={item.icon} className="h-24 w-24 text-primary-600" />
               ) : (
                 <img
                   src={item.customIcon!}
                   alt=""
-                  className="w-24 h-24"
-                  style={{ filter: "invert(22%) sepia(93%) saturate(2500%) hue-rotate(215deg) brightness(95%) contrast(105%)" }}
+                  className="h-24 w-24"
+                  style={{
+                    filter:
+                      "invert(22%) sepia(93%) saturate(2500%) hue-rotate(215deg) brightness(95%) contrast(105%)",
+                  }}
                   aria-hidden="true"
                 />
               )}

@@ -36,6 +36,13 @@ import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 interface HarvesterDetailClientProps {
   slug: string;
   pageContent: BoHarvestersPage;
+  // When set, the harvester is viewed inside an organization's back-office
+  // (route /admin/org/{orgId}/harvesters/{id}). This scopes the breadcrumb to
+  // the organization and restricts the "Configuracao" tab so an org-admin may
+  // only edit the basic fields (name, description, filters) - the advanced
+  // fields (URL, implementation type, schedule, toggles) stay editable to
+  // portal administrators only.
+  orgId?: string;
 }
 
 function CopyUrlButton({ url }: { url: string }) {
@@ -91,7 +98,11 @@ function DeleteHarvesterPopupContent({
   );
 }
 
-export default function HarvesterDetailClient({ slug, pageContent }: HarvesterDetailClientProps) {
+export default function HarvesterDetailClient({
+  slug,
+  pageContent,
+  orgId,
+}: HarvesterDetailClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const router = useRouter();
   const pathname = usePathname();
@@ -254,11 +265,26 @@ export default function HarvesterDetailClient({ slug, pageContent }: HarvesterDe
   };
   const validationInfo = validationLabels[validationState] || validationLabels.pending;
 
+  // In the organization context an org-admin may edit only the basic fields; the
+  // advanced fields (URL, implementation type, schedule, toggles) are reserved
+  // for portal administrators. In the system context, whoever can edit can edit
+  // everything.
+  const canEditSource = can(source, "edit");
+  const canEditAdvanced = orgId ? isAdmin : canEditSource;
+
+  const breadcrumbItems = orgId
+    ? [
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-harvesters:title"), url: `/admin/org/${orgId}/harvesters` },
+        { label: source.name, url: "#" },
+      ]
+    : [
+        { label: t("admin-common:breadcrumbs.system"), url: "/admin/system/harvesters" },
+        { label: source.name, url: "#" },
+      ];
+
   return (
-    <AdminLayout breadcrumbItems={[
-      { label: t("admin-common:breadcrumbs.system"), url: "/admin/system/harvesters" },
-      { label: source.name, url: "#" },
-    ]}
+    <AdminLayout breadcrumbItems={breadcrumbItems}
       title={source.name}
     >
       {/* Metadata info */}
@@ -272,7 +298,8 @@ export default function HarvesterDetailClient({ slug, pageContent }: HarvesterDe
         <div className="flex items-center gap-8">
           <Icon name="agora-line-buildings" className="w-16 h-16" />
           <span>
-            <strong>Produtor:</strong> {source.organization?.name || "—"}
+            <strong>{t("admin-harvesters:fields.producer")}:</strong>{" "}
+            {source.organization?.name || "—"}
           </span>
         </div>
         <div className="flex items-center gap-8">
@@ -427,7 +454,8 @@ export default function HarvesterDetailClient({ slug, pageContent }: HarvesterDe
                   dimensions: "m",
                 }
               )}
-              canEdit={can(source, "edit")}
+              canEdit={canEditSource}
+              canEditAdvanced={canEditAdvanced}
               canDelete={can(source, "delete")}
               auxiliaryItems={pageContent.editAuxiliaryItems}
             />

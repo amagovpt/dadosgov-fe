@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Breadcrumb } from '@ama-pt/agora-design-system';
+import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
 import { twJoin } from 'tailwind-merge';
 
 interface HeroGeneralProps {

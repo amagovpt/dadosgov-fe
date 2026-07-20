@@ -12,8 +12,8 @@
   "seeAllDataStories": "See all Data Stories",
   "seeAllNews": "See all news",
   "seeAllOrganizations": "See all organisations",
-  "404Articles": "No articles found.",
   "usedDiaryBy": "Used daily by:",
+  "404Articles": "No articles found.",
   "404Organizations": "No organisations found.",
   "404News": "No news found.",
   "404Datastory": "No Data Stories found.",
@@ -30,22 +30,59 @@
   "articleNotFoundDescription": "The article you are looking for does not exist or has been removed.",
   "backToArticles": "Back to articles",
   "loading": "Loading...",
-  "results_one": "{{count}} result",
-  "results_other": "{{count}} results",
+  "results_one": "{{count, number}} result",
+  "results_other": "{{count, number}} results",
   "datastories": "Data Stories",
   "pagination": {
     "pagination": "Pagination",
     "previous": "Previous page",
     "next": "Next page"
   },
+  "search": {
+    "label": "Search",
+    "placeholder": "Search...",
+    "noResults": "No results found.",
+    "minCharsMessage": "Type at least 2 characters..."
+  },
   "filters": {
     "filters": "Filters",
     "hideFilters": "Hide filters",
-    "openFilters": "Open filters"
+    "openFilters": "Open filters",
+    "advanced": {
+      "label": "Advanced filters",
+      "organization": "Organisations",
+      "tag": "Keywords",
+      "format": "Formats",
+      "license": "Licences",
+      "frequency": "Frequency",
+      "geozone": "Spatial coverage",
+      "granularity": "Spatial granularity",
+      "search": {
+        "placeholder": "Type to search...",
+        "minCharsMessage": "Type at least 2 characters...",
+        "noResults": "No results found."
+      }
+    }
   },
-  "results": "Results",
   "publishedTimeAgo": "Published {{timeAgo}} ago",
   "recursos": "Resources",
   "como-usar-o-portal": "How to use the portal",
-  "como-reutilizar-dados": "How to reuse data"
+  "como-reutilizar-dados": "How to reuse data",
+  "como-publicar-dados": "How to publish data",
+  "close": "Close",
+  "cancel": "Cancel",
+  "publish": "Publish",
+  "publishSelection": {
+    "dataset": "A dataset",
+    "api": "An API",
+    "reuse": "A reuse",
+    "harvester": "A harvester",
+    "organization": "An organisation"
+  },
+  "listingError": {
+    "title": "Unable to load",
+    "subtitle": "An error occurred while contacting the server. Please try again in a few moments."
+  },
+  "retry": "Try again",
+  "auth": "Authentication"
 }

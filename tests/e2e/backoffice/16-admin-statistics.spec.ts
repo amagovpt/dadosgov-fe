@@ -30,7 +30,7 @@ test.describe("Backoffice - Statistics", () => {
 
     // With seeded org the page renders /admin/org/statistics; without it the
     // user is redirected to /admin/me/*. Either is acceptable.
-    expect(page.url()).toMatch(/\/pages\/admin\//);
+    expect(page.url()).toMatch(/admin\//);
   });
 
   test("ST-03: Global statistics page loads for admin", async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe("Backoffice - Statistics", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    expect(page.url()).toMatch(/\/pages\/(login|admin)/);
+    expect(page.url()).toMatch(/(login|admin)/);
     await context.close();
   });
 });

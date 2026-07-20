@@ -13,6 +13,10 @@ interface ApiRegistrationPublishStepProps {
   apiName: string;
   apiDescription: string;
   createdCard?: AdminCard;
+  apiError?: string | null;
+  isPublishing: boolean;
+  onPublish: () => void;
+  onSaveDraft: () => void;
 }
 
 export default function ApiRegistrationPublishStep({
@@ -20,6 +24,10 @@ export default function ApiRegistrationPublishStep({
   apiName,
   apiDescription,
   createdCard,
+  apiError,
+  isPublishing,
+  onPublish,
+  onSaveDraft,
 }: ApiRegistrationPublishStepProps) {
   const { t } = useTranslation("admin-dataservices");
 
@@ -38,6 +46,8 @@ export default function ApiRegistrationPublishStep({
           }
         />
       ) : null}
+
+      {apiError && <StatusCard variant="danger" showIcon description={apiError} />}
 
       <CardGeneral
         variant="white-outline"
@@ -58,10 +68,17 @@ export default function ApiRegistrationPublishStep({
       <PublicationFeedbackButton />
 
       <div className="admin-page__actions flex justify-end gap-[18px]">
-        <Button appearance="outline" variant="neutral">
+        <Button
+          appearance="outline"
+          variant="neutral"
+          onClick={onSaveDraft}
+          disabled={isPublishing}
+        >
           {t("form.saveDraft")}
         </Button>
-        <Button variant="primary">{t("form.publishApi")}</Button>
+        <Button variant="primary" onClick={onPublish} disabled={isPublishing || !createdDataservice}>
+          {isPublishing ? t("form.publishing") : t("form.publishApi")}
+        </Button>
       </div>
     </>
   );

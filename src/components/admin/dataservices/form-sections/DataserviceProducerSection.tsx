@@ -16,12 +16,16 @@ interface DataserviceProducerSectionProps {
   displayName: string;
   organizations: UserOrganization[];
   helper?: AdminHelpBlock;
+  initialValue?: string;
+  onValueChange?: (value: string) => void;
 }
 
 export default function DataserviceProducerSection({
   displayName,
   organizations,
   helper,
+  initialValue,
+  onValueChange,
 }: DataserviceProducerSectionProps) {
   const producerOptions = useMemo(
     () =>
@@ -37,7 +41,11 @@ export default function DataserviceProducerSection({
   return (
     <ProducerIdentitySection
       producerOptions={producerOptions}
-      helperDescription={helper ? stripHtmlTags(helper.description) : undefined}
+      initialValue={initialValue}
+      onValueChange={onValueChange}
+      helperDescription={
+        helper ? stripHtmlTags(helper.description) : undefined
+      }
     />
   );
 }

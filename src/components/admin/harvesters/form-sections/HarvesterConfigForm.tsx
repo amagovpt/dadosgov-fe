@@ -83,6 +83,12 @@ interface HarvesterConfigFormProps {
   canEdit?: boolean;
   canDelete?: boolean;
   auxiliaryItems?: AdminAuxiliaryItem[];
+  // Whether the "advanced" fields (URL, implementation type, schedule, toggles)
+  // may be edited. In the organization context an org-admin may only edit the
+  // basic fields (name, description, filters), so `canEditAdvanced` is false for
+  // them while `canEdit` stays true. Defaults to `canEdit` (system context: an
+  // editor with edit rights may change everything).
+  canEditAdvanced?: boolean;
 }
 
 export function HarvesterConfigForm({
@@ -120,6 +126,7 @@ export function HarvesterConfigForm({
   canEdit = true,
   canDelete = true,
   auxiliaryItems,
+  canEditAdvanced,
 }: HarvesterConfigFormProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [scheduleError, setScheduleError] = React.useState<string | null>(null);
@@ -128,6 +135,12 @@ export function HarvesterConfigForm({
     const key = FILTER_KEY_LABELS[label];
     return key ? t(`admin-harvesters:form.filterLabels.${key}`) : label;
   };
+
+  // Basic fields (name, description, filters) follow `canEdit`; advanced fields
+  // (URL, implementation type, schedule, toggles) follow `canEditAdvanced`,
+  // which defaults to `canEdit` when not provided.
+  const basicDisabled = !canEdit;
+  const advancedDisabled = !(canEditAdvanced ?? canEdit);
 
   const handleScheduleChange = (value: string) => {
     setHarvesterSchedule(value);
@@ -196,6 +209,9 @@ export function HarvesterConfigForm({
             descriptionLabel={t("admin-harvesters:fields.descriptionRequired")}
             descriptionPlaceholder=""
             urlPlaceholder=""
+            nameDisabled={basicDisabled}
+            descriptionDisabled={basicDisabled}
+            urlDisabled={advancedDisabled}
             onHarvesterNameChange={(e) => {
               setHarvesterName(e.target.value);
               if (e.target.value.trim()) clearError("harvesterName");
@@ -218,6 +234,7 @@ export function HarvesterConfigForm({
               placeholder=""
               id="harvester-type"
               defaultValue={selectedBackend}
+              disabled={advancedDisabled}
               searchable
               searchInputPlaceholder={t("admin-harvesters:form.searchInputPlaceholder")}
               searchNoResultsText={t("admin-harvesters:form.noResults")}
@@ -250,6 +267,7 @@ export function HarvesterConfigForm({
                             placeholder=""
                             id={`filter-mode-${index}`}
                             defaultValue={filter.mode}
+                            disabled={basicDisabled}
                             onChange={(opts) => {
                               if (opts.length > 0)
                                 updateFilter(index, "mode", opts[0].value as string);
@@ -270,6 +288,7 @@ export function HarvesterConfigForm({
                             placeholder={t("admin-harvesters:form.filterKeyPlaceholder")}
                             id={`filter-type-${index}`}
                             defaultValue={filter.type}
+                            disabled={basicDisabled}
                             onChange={(opts) => {
                               if (opts.length > 0)
                                 updateFilter(index, "type", opts[0].value as string);
@@ -297,6 +316,7 @@ export function HarvesterConfigForm({
                               placeholder=""
                               id={`filter-value-${index}`}
                               defaultValue={filter.value}
+                              disabled={basicDisabled}
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 updateFilter(index, "value", e.target.value)
                               }
@@ -307,11 +327,12 @@ export function HarvesterConfigForm({
                             variant="danger"
                             hasIcon
                             iconOnly
-                            leadingIcon="agora-line-trash"
-                            leadingIconHover="agora-solid-trash"
-                            onClick={() => removeFilter(index)}
-                            aria-label={t("admin-harvesters:form.removeFilter")}
-                          >
+                          leadingIcon="agora-line-trash"
+                          leadingIconHover="agora-solid-trash"
+                          onClick={() => removeFilter(index)}
+                          aria-label={t("admin-harvesters:form.removeFilter")}
+                          disabled={basicDisabled}
+                        >
                             {" "}
                           </Button>
                         </div>
@@ -328,6 +349,7 @@ export function HarvesterConfigForm({
                     leadingIcon="agora-line-plus-circle"
                     leadingIconHover="agora-solid-plus-circle"
                     onClick={addFilter}
+                    disabled={basicDisabled}
                   >
                     {t("admin-harvesters:form.addFilter")}
                   </Button>
@@ -361,6 +383,7 @@ export function HarvesterConfigForm({
                           leadingIconHover="agora-solid-trash"
                           onClick={() => removeFilter(filter.index)}
                           aria-label={t("admin-harvesters:form.removeUnsupportedFilter")}
+                          disabled={basicDisabled}
                         >
                           {" "}
                         </Button>
@@ -376,11 +399,13 @@ export function HarvesterConfigForm({
                 label={t("admin-harvesters:form.enabled")}
                 checked={isEnabled}
                 onChange={() => setIsEnabled((v) => !v)}
+                disabled={advancedDisabled}
               />
               <Switch
                 label={t("admin-harvesters:form.autoArchive")}
                 checked={isAutoArchive}
                 onChange={() => setIsAutoArchive((v) => !v)}
+                disabled={advancedDisabled}
               />
             </div>
           </div>
@@ -396,6 +421,7 @@ export function HarvesterConfigForm({
               id="harvester-schedule"
               defaultValue={loadedSchedule}
               maxLength={SCHEDULE_MAX_LENGTH}
+              disabled={advancedDisabled}
               onChange={handleScheduleChange}
               hasError={!!scheduleError}
               hasFeedback={!!scheduleError}

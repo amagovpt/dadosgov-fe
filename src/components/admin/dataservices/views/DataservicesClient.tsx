@@ -12,7 +12,11 @@ import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
-import { createDataserviceColumns, DataserviceSortField, sortDataservices } from "../config/dataservicesListConfig";
+import {
+  createDataserviceColumns,
+  DataserviceSortField,
+  sortDataservices,
+} from "../config/dataservicesListConfig";
 
 export default function DataservicesClient() {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);

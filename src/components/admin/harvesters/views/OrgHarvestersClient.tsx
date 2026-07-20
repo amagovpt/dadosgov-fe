@@ -91,7 +91,7 @@ export default function OrgHarvestersClient() {
   const columns = useMemo(
     () =>
       createOrgHarvesterColumns({
-        editHref: (harvester) => `/admin/org/harvesters/${harvester.id}`,
+        editHref: (harvester) => `/admin/org/${orgId}/harvesters/${harvester.id}`,
         labels: {
           name: t("admin-harvesters:columns.name"),
           status: t("admin-harvesters:columns.status"),
@@ -119,7 +119,7 @@ export default function OrgHarvestersClient() {
           noExecution: t("admin-harvesters:status.noExecution"),
         },
       }),
-    [t]
+    [orgId, t]
   );
 
   if (!isOrgLoading && !orgId) {
@@ -137,7 +137,7 @@ export default function OrgHarvestersClient() {
       breadcrumbItems={[
         { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
-        { label: t("admin-harvesters:title"), url: "/admin/org/harvesters" },
+        { label: t("admin-harvesters:title"), url: `/admin/org/${orgId}/harvesters` },
       ]}
       title={t("admin-harvesters:title")}
       isLoading={isLoading}

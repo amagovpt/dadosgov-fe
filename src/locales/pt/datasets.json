@@ -1,0 +1,45 @@
+{
+  "theDatasets": "os conjuntos de dados",
+  "sort": {
+    "label": "`Ordenar por {{label}}`",
+    "relevancia": "Relevância",
+    "criacao": "Mais recente",
+    "antigo": "Mais antigo",
+    "subscritores": "Subscritores"
+  },
+  "delete": {
+    "delete": "Eliminar",
+    "irreversible": "Esta ação é irreversível.",
+    "confirmation": "Tem a certeza que quer eliminar este conjunto de dados?",
+    "modal": "Elimine o conjunto de dados"
+  },
+  "filters": {
+    "all": "Todos",
+    "format": {
+      "label": "Formato dos recursos",
+      "options": {
+        "all": "Todos",
+        "tabular": "Tabular",
+        "structured": "Estruturado",
+        "geographic": "Geográfico",
+        "documents": "Documentos",
+        "other": "Outro"
+      }
+    },
+    "update": {
+      "label": "Data da atualização",
+      "options": {
+        "30_days": "Os últimos 30 dias",
+        "12_months": "Os últimos 12 meses",
+        "3_years": "Os últimos 3 anos"
+      }
+    },
+    "type": {
+      "label": "Tipo de dados",
+      "options": {
+        "all": "Todos",
+        "high_value": "Conjuntos de dados de Elevado Valor"
+      }
+    }
+  }
+}

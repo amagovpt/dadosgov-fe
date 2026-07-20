@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ChangeEvent, MutableRefObject, ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -159,10 +160,10 @@ export default function ReusesFormDetailsStep({
             <p className="admin-page__org-card-description">
               {t("form.noOrganizationDescription")}
             </p>
-            <a href="/admin/organizations/new" className="admin-page__org-card-link">
+            <Link href="/admin/organizations/new" className="admin-page__org-card-link">
               {t("form.organizationLink")}
               <AppIcon name="agora-line-arrow-right-circle" className="h-24 w-24" />
-            </a>
+            </Link>
           </div>
         )}
 

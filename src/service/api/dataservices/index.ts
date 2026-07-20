@@ -5,6 +5,27 @@ import type {
 } from "@/service/types/dataservice";
 import type { APIResponse } from "@/service/types/shared";
 import { API_AUTH_URL, API_BASE_URL, authFetch } from "@/service/utils/API";
+import { parseOpenApi, type ParsedSwagger } from "@/utils/parseOpenApi";
+
+/**
+ * Fetch and parse a dataservice's OpenAPI/Swagger spec through the SSRF-guarded
+ * same-origin proxy. Returns null when the URL is missing/unreachable or the
+ * document is not recognisable JSON spec (e.g. a YAML spec).
+ */
+export async function fetchSwaggerSpec(
+  machineDocumentationUrl: string
+): Promise<ParsedSwagger | null> {
+  try {
+    const res = await fetch(
+      `/internal-api/proxy-swagger?url=${encodeURIComponent(machineDocumentationUrl)}`
+    );
+    if (!res.ok) return null;
+    return parseOpenApi(await res.json());
+  } catch (error) {
+    console.error("Error fetching Swagger spec:", error);
+    return null;
+  }
+}
 
 
 /**
@@ -58,7 +79,6 @@ export async function fetchMyDataservices(
 export interface DataserviceListFilters {
   q?: string;
   sort?: string;
-  tag?: string | string[];
   organization?: string | string[];
   access_type?: string;
   organization_badge?: string;
@@ -82,11 +102,10 @@ export async function fetchDataservices(
     if (filters?.modified_since) params.set("modified_since", filters.modified_since);
     if (filters?.dataset) params.set("dataset", filters.dataset);
     // Multi-value filters
-    for (const key of ["tag", "organization"] as const) {
-      const value = filters?.[key];
-      if (!value) continue;
-      for (const item of Array.isArray(value) ? value : [value]) {
-        if (item) params.append(key, item);
+    const organization = filters?.organization;
+    if (organization) {
+      for (const item of Array.isArray(organization) ? organization : [organization]) {
+        if (item) params.append("organization", item);
       }
     }
 

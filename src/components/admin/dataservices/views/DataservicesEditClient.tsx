@@ -31,11 +31,7 @@ import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getEditDataserviceAuxiliaryItems } from "@/components/admin/dataservices/config/dataserviceAuxiliaryContent";
 import AppIcon from "@/components/Primitives/AppIcon";
 import TextLink from "@/components/Primitives/TextLink";
-import {
-  fetchDataservice,
-  updateDataservice,
-  deleteDataservice,
-} from "@/service/api/dataservices";
+import { fetchDataservice, updateDataservice, deleteDataservice } from "@/service/api/dataservices";
 import { fetchDataset, fetchDatasets, fetchMyDatasets } from "@/service/api/datasets";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { searchDatasets } from "@/service/api/search";
@@ -168,8 +164,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
 
   // Preload the dataset pool (user's own + their organizations' datasets).
   useEffect(() => {
-    const dedupe = (items: Dataset[]) =>
-      Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const dedupe = (items: Dataset[]) => Array.from(new Map(items.map((d) => [d.id, d])).values());
     const personal = fetchMyDatasets(1, 100);
     const orgs = (user?.organizations || []).map((org) => fetchOrgDatasets(org.id, 1, 100));
     Promise.all([personal, ...orgs])
@@ -482,9 +477,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
           variant="primary"
           appearance="outline"
           disabled={!!(dataservice?.archived_at || dataservice?.deleted_at)}
-          onClick={() =>
-            dataservice && window.open(`/dataservices/${dataservice.slug}`, "_blank")
-          }
+          onClick={() => dataservice && window.open(`/dataservices/${dataservice.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="h-16 w-16" />
@@ -654,8 +647,8 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                           placeholder={t("admin-dataservices:fields.shortPlaceholder")}
                           id="edit-api-rate-limit"
                           value={rateLimiting}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setRateLimiting(e.target.value)
+                          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                            setRateLimiting(event.target.value)
                           }
                         />
                         <InputText
@@ -663,13 +656,13 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                           placeholder="https://..."
                           id="edit-api-rate-limit-url"
                           value={rateLimitingUrl}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setRateLimitingUrl(e.target.value)
+                          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                            setRateLimitingUrl(event.target.value)
                           }
                         />
                       </div>
 
-                      <div className="admin-page__actions flex justify-end mt-24">
+                      <div className="admin-page__actions mt-24 flex justify-end">
                         <Button
                           variant="primary"
                           hasIcon
@@ -780,7 +773,11 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                     />
                   ) : null}
 
-                  <form className="admin-page__form" onSubmit={(e) => e.preventDefault()}>
+                  <form
+                    className="admin-page__form"
+                    noValidate
+                    onSubmit={(e) => e.preventDefault()}
+                  >
                     <InputSelect
                       label={t("admin-dataservices:datasetLinks.searchLabel")}
                       placeholder={t("admin-dataservices:edit.datasetSelectPlaceholder")}
@@ -792,9 +789,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                       onSearchInputChange={setDatasetSearch}
                       onChange={(options) => {
                         const ids = options.map((o) => String(o.value));
-                        setDropdownDatasets(
-                          availableDatasets.filter((d) => ids.includes(d.id))
-                        );
+                        setDropdownDatasets(availableDatasets.filter((d) => ids.includes(d.id)));
                       }}
                     >
                       <DropdownSection name="datasets">
@@ -837,9 +832,10 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                         label={t("admin-dataservices:datasetLinks.linkLabel")}
                         placeholder="https://..."
                         id="edit-dataset-link-url"
+                        required={false}
                         value={datasetLinkUrl}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          setDatasetLinkUrl(e.target.value);
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                          setDatasetLinkUrl(event.target.value);
                           if (datasetLinkError) setDatasetLinkError(null);
                         }}
                         onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -855,6 +851,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                       )}
                       <div className="flex justify-end">
                         <Button
+                          type="button"
                           appearance="outline"
                           variant="primary"
                           hasIcon
@@ -868,7 +865,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                       </div>
                     </div>
 
-                    <div className="admin-page__actions flex justify-end mt-24">
+                    <div className="admin-page__actions mt-24 flex justify-end">
                       <Button
                         variant="primary"
                         hasIcon

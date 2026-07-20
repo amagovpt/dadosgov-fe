@@ -1,8 +1,5 @@
-import {
-  Datastories,
-  DataStoriesHero,
-  DataStoriesPage,
-} from "@/service/types/datastories/datastories";
+import { Datastories, DataStoriesPage } from "@/service/types/datastories/datastories";
+import { FoListPageHero } from "@/service/types/shared";
 import apolloClient from "@/service/utils/apollo-client";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
@@ -34,7 +31,7 @@ export async function getDataStoriesMetadata(locale: string = "pt") {
     throw new Error("Failed to fetch datastories information");
   }
 
-  return flattenData(data).findDataStoriesPageSingleton as DataStoriesHero;
+  return flattenData(data).findDataStoriesPageSingleton as FoListPageHero;
 }
 
 export async function getDataStories(locale: string = "pt") {

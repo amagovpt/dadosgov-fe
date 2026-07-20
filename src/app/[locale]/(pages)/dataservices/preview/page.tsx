@@ -2,7 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Button, Breadcrumb, Pill } from "@ama-pt/agora-design-system";
+import { Button, Pill } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 
 function DataservicePreviewContent() {
   const searchParams = useSearchParams();

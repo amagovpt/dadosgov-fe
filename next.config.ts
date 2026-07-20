@@ -71,6 +71,12 @@ const nextConfig: NextConfig = {
   },
   images: {
     deviceSizes: [320, 576, 768, 992, 1248],
+    // Keep optimized image variants on disk for 30 days before re-optimizing.
+    // The optimizer writes each variant to `.next/cache/images` and only
+    // refreshes an entry when it is requested again after the TTL expires; a
+    // short TTL means the same images are re-generated (and re-written)
+    // constantly, bloating the cache dir. A long TTL curbs that churn.
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       {
         protocol: "http",
@@ -81,10 +87,43 @@ const nextConfig: NextConfig = {
         hostname: "localhost:7000/static",
       },
       {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+      },
+      {
         protocol: urlAPI.protocol.slice(0, -1) as "http" | "https", // remove trailing colon
         hostname: urlAPI.hostname || "",
       },
     ],
+  },
+  // Legacy URL scheme: public routes used to live under `/pages/*`
+  // (old `src/app/pages/...` structure, before the `[locale]/(pages)` route
+  // group). Links in already-sent emails, bookmarks and search-engine indexes
+  // still carry the prefix, so strip it permanently. Renamed routes get an
+  // explicit mapping before the catch-all; the locale-prefixed variants cover
+  // links that were minted after i18n routing but before the prefix removal.
+  async redirects() {
+    const legacyRenames = [
+      { legacy: "posts/:slug", current: "noticias/:slug" },
+      { legacy: "support", current: "ajuda-e-contactos" },
+      { legacy: "resources/publications", current: "recursos/publicacoes" },
+    ];
+    return [
+      ...legacyRenames.flatMap(({ legacy, current }) => [
+        { source: `/pages/${legacy}`, destination: `/${current}`, permanent: true },
+        {
+          source: `/:locale(pt|en)/pages/${legacy}`,
+          destination: `/:locale/${current}`,
+          permanent: true,
+        },
+      ]),
+      { source: "/pages/:path*", destination: "/:path*", permanent: true },
+      {
+        source: "/:locale(pt|en)/pages/:path*",
+        destination: "/:locale/:path*",
+        permanent: true,
+      },
+    ];
   },
   async rewrites() {
     return {

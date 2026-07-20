@@ -34,11 +34,19 @@ import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
 
 export default function PublicProfileClient() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const params = useParams();
   const router = useRouter();
   const slug = params?.slug as string;
   const isOwnProfile = user?.slug === slug;
+
+  // User profile endpoints now require authentication (LEDG-2113 / VULN-2092).
+  // Gate anonymous visitors to login, preserving the profile as the return URL.
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push(`/login?next=${encodeURIComponent(`/users/${slug}`)}`);
+    }
+  }, [isAuthLoading, user, slug, router]);
 
   const [profileUser, setProfileUser] = useState<UserPublic | null>(null);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
@@ -56,6 +64,9 @@ export default function PublicProfileClient() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
+    // Wait for auth to resolve; anonymous visitors are redirected to login by
+    // the gate effect above, so don't attempt the (now authenticated) fetches.
+    if (isAuthLoading || !user) return;
     async function loadData() {
       try {
         if (isOwnProfile) {
@@ -85,7 +96,7 @@ export default function PublicProfileClient() {
       }
     }
     loadData();
-  }, [slug, isOwnProfile, user]);
+  }, [slug, isOwnProfile, user, isAuthLoading]);
 
   const displayUser = isOwnProfile ? user : profileUser;
 

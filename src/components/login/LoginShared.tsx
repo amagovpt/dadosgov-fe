@@ -3,9 +3,12 @@
 import React, { useState } from "react";
 import { Checkbox, Icon, StatusCard } from "@ama-pt/agora-design-system";
 import TextLink from "@/components/Primitives/TextLink";
-import { TERMS_CHECKBOX_TEXT } from "./constants";
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import { Typograph } from "../Shared/Generics/Typograph";
 
 export function CloseButton({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation("login");
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -16,7 +19,7 @@ export function CloseButton({ onClick }: { onClick: () => void }) {
         onMouseLeave={() => setHovered(false)}
         className="text-sm flex items-center gap-8 text-neutral-900 hover:text-neutral-700"
       >
-        Fechar
+        {t("common.close")}
         <Icon
           name={hovered ? "agora-solid-x" : "agora-line-x"}
           className="h-20 w-20"
@@ -67,31 +70,37 @@ export function TermsSection({
   checked: boolean;
   onChange: (checked: boolean) => void;
 }) {
+  const { t } = useTranslation("login");
+
   return (
     <div className="mt-8 flex flex-col gap-8">
-      <h3 className="text-l-bold text-brand-blue-dark">Termos e condições</h3>
-      <p className="text-sm">
-        Deve ler atentamente os{" "}
+      <Typograph tag="h3" className="text-l-bold text-brand-blue-dark">
+        {t("terms.title")}
+      </Typograph>
+      <Typograph tag="p" className="text-sm">
+        {t("terms.readCarefully")}{" "}
         <TextLink
           href="/termos-de-utilizacao"
           className="hover:text-primary-800 active:decoration-dashed"
         >
-          Termos e condições para o tratamento dos seus dados
+          {t("terms.link")}
         </TextLink>
-      </p>
+      </Typograph>
       <Checkbox
         id={id}
         className="text-sm leading-relaxed text-neutral-700"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       >
-        {TERMS_CHECKBOX_TEXT}
+        {t("terms.checkbox")}
       </Checkbox>
     </div>
   );
 }
 
 export function SupportStatusCard() {
+  const { t } = useTranslation("login");
+
   return (
     <div className="mt-32 grid gap-32 xl:grid-cols-12">
       <div className="xl:col-span-3" />
@@ -101,20 +110,22 @@ export function SupportStatusCard() {
           showIcon
           description={
             <div className="flex flex-col gap-8">
-              <p className="text-sm font-bold">Tem dúvidas?</p>
-              <p className="text-sm">
-                Se precisar de ajuda, fale connosco através do nosso formulário.
-              </p>
-              <a
+              <Typograph tag="p" className="text-sm font-bold">
+                {t("help.title")}
+              </Typograph>
+              <Typograph tag="p" className="text-sm">
+                {t("help.description")}
+              </Typograph>
+              <Link
                 href="/ajuda-e-contactos"
                 className="text-sm flex items-center gap-8 text-informative-600"
               >
-                Formulário de contacto
+                {t("help.link")}
                 <Icon
                   name="agora-line-arrow-right-circle"
                   className="h-16 w-16 text-informative-600"
                 />
-              </a>
+              </Link>
             </div>
           }
         />

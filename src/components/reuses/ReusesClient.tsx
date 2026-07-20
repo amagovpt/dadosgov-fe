@@ -24,6 +24,7 @@ import { REUSE_SORT_LABELS } from "@/utils/reusesListingQuery";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { twJoin } from "tailwind-merge";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
+import { useTranslation } from "react-i18next";
 
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
@@ -38,7 +39,10 @@ export default function ReusesClient({
   filterCounts = {},
   allOrganizations = [],
 }: ReusesClientProps) {
+  const { t } = useTranslation("common");
+
   const router = useRouter();
+
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const {
@@ -103,7 +107,7 @@ export default function ReusesClient({
               {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total.toLocaleString("pt-PT")} Resultados
+              {t("results", { count: total })}
             </span>
           </div>
           <div className="flex w-full items-center xl:justify-end">
