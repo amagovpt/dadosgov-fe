@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -19,7 +19,7 @@ import { TabPagination } from "@/components/Shared/TabPagination";
 import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
 import { Dataset } from "@/service/types/dataset";
 import { Reuse } from "@/service/types/reuse";
-import { followEntity, unfollowEntity, isFollowing } from "@/service/api/followers";
+import { followEntity, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
@@ -36,9 +36,14 @@ import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 interface ReuseDetailClientProps {
   reuse: Reuse;
   initialDatasets: Dataset[];
+  initialIsFavorite: boolean;
 }
 
-export default function ReuseDetailClient({ reuse, initialDatasets }: ReuseDetailClientProps) {
+export default function ReuseDetailClient({
+  reuse,
+  initialDatasets,
+  initialIsFavorite,
+}: ReuseDetailClientProps) {
   const { t } = useTranslation("common");
   const { t: tr } = useTranslation("reuses");
   const router = useRouter();
@@ -46,12 +51,8 @@ export default function ReuseDetailClient({ reuse, initialDatasets }: ReuseDetai
   const tabParam = searchParams.get("tab");
   const { user } = useAuth();
 
-  // Authorization is decided by the backend (the single source of truth).
-  // The SSR fetchReuse carries the user's session, so reuse.permissions reflects
-  // what this user may do — no need to re-derive owner/org/role rules on the client.
   const canEdit = reuse.permissions?.edit ?? false;
-
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   const descMeasureRef = useRef<HTMLDivElement>(null);
@@ -59,15 +60,6 @@ export default function ReuseDetailClient({ reuse, initialDatasets }: ReuseDetai
   const descSidebarRef = useRef<HTMLDivElement>(null);
 
   const reuseTags = reuse.tags ?? [];
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    isFollowing("reuses", reuse.id, user.id)
-      .then((following) => { if (!cancelled) setIsFavorite(following); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [user?.id, reuse.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
