@@ -137,6 +137,13 @@ body {
   text-decoration-thickness: 2px !important;
 }
 
+.agora-breadcrumb-desktop ol li span:hover {
+  color: var(--color-neutral-900);
+}
+.agora-breadcrumb-desktop.dark-mode ol li span:hover {
+  color: rgb(255 255 255);
+}
+
 /* Hide languages selector (temporarily) */
 header.sticky .languages-panel-menu {
   display: none !important;
