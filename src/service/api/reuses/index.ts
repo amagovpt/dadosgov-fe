@@ -114,11 +114,15 @@ export async function fetchReuses(
   }
 }
 
-export async function fetchReuse(rid: string): Promise<Reuse> {
+export async function fetchReuse(
+  rid: string,
+  forwarded?: Record<string, string>
+): Promise<Reuse> {
   try {
     const res = await fetch(`${API_BASE_URL}/reuses/${rid}/`, {
       cache: "no-store",
       credentials: "include",
+      headers: forwarded,
     });
 
     if (!res.ok) {

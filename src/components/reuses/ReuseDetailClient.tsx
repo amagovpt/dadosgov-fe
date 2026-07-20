@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -19,9 +19,7 @@ import { TabPagination } from "@/components/Shared/TabPagination";
 import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
 import { Dataset } from "@/service/types/dataset";
 import { Reuse } from "@/service/types/reuse";
-import { fetchDataset } from "@/service/api/datasets";
 import { followEntity, unfollowEntity, isFollowing } from "@/service/api/followers";
-import { fetchReuse } from "@/service/api/reuses";
 import { useAuth } from "@/context/AuthContext";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
@@ -32,27 +30,27 @@ import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 
 interface ReuseDetailClientProps {
-  slug: string;
+  reuse: Reuse;
+  initialDatasets: Dataset[];
 }
 
-export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
+export default function ReuseDetailClient({ reuse, initialDatasets }: ReuseDetailClientProps) {
+  const { t } = useTranslation("common");
+  const { t: tr } = useTranslation("reuses");
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
   const { user } = useAuth();
-  const [reuse, setReuse] = useState<Reuse | null>(null);
 
   // Authorization is decided by the backend (the single source of truth).
-  // fetchReuse carries the user's session, so reuse.permissions reflects what
-  // this user may do — no need to re-derive owner/org/role rules on the client.
-  const canEdit = reuse?.permissions?.edit ?? false;
+  // The SSR fetchReuse carries the user's session, so reuse.permissions reflects
+  // what this user may do — no need to re-derive owner/org/role rules on the client.
+  const canEdit = reuse.permissions?.edit ?? false;
 
-  const [isLoadingReuse, setIsLoadingReuse] = useState(true);
-  const [fullDatasets, setFullDatasets] = useState<Dataset[]>([]);
-  const [isLoadingDatasets, setIsLoadingDatasets] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
@@ -60,40 +58,23 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const descTitleRef = useRef<HTMLDivElement>(null);
   const descSidebarRef = useRef<HTMLDivElement>(null);
 
-  const reuseTags = reuse?.tags ?? [];
-
-
-  useEffect(() => {
-    let cancelled = false;
-    async function loadReuse() {
-      try {
-        const data = await fetchReuse(slug);
-        if (!cancelled) setReuse(data);
-      } catch (error) {
-        console.error("Error loading reuse:", error);
-      } finally {
-        if (!cancelled) setIsLoadingReuse(false);
-      }
-    }
-    loadReuse();
-    return () => { cancelled = true; };
-  }, [slug]);
+  const reuseTags = reuse.tags ?? [];
 
   useEffect(() => {
-    if (!user || !reuse) return;
+    if (!user) return;
     let cancelled = false;
     isFollowing("reuses", reuse.id, user.id)
       .then((following) => { if (!cancelled) setIsFavorite(following); })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, [user?.id, reuse?.id]);
+  }, [user?.id, reuse.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
       router.push("/login");
       return;
     }
-    if (!reuse || isTogglingFavorite) return;
+    if (isTogglingFavorite) return;
     setIsTogglingFavorite(true);
     try {
       if (isFavorite) {
@@ -112,40 +93,15 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
   const [datasetsPage, setDatasetsPage] = useState(1);
   const datasetsPageSize = 6;
 
-  const datasetRefs = reuse?.datasets || [];
+  const datasetRefs = reuse.datasets || [];
   // LEDG-1748: external dataset URLs persisted as `extras.remote_datasets`.
   // Until now this list was written from the admin form but never rendered
   // anywhere, so admins had no way to verify what was saved and the public
   // page silently hid the data.
-  const remoteDatasets = normalizeRemoteDatasets(reuse?.extras);
+  const remoteDatasets = normalizeRemoteDatasets(reuse.extras);
 
-  useEffect(() => {
-    if (!reuse || datasetRefs.length === 0) {
-      return;
-    }
-
-    async function loadDatasets() {
-      try {
-        const slugs = datasetRefs.map((d) => d.uri.split("/").filter(Boolean).pop() || d.id);
-        const results = await Promise.all(slugs.map((s) => fetchDataset(s).catch(() => null)));
-        setFullDatasets(results.filter((d): d is Dataset => d !== null));
-      } catch {
-        setFullDatasets([]);
-      } finally {
-        setIsLoadingDatasets(false);
-      }
-    }
-
-    loadDatasets();
-  }, [reuse]);
-
-  if (isLoadingReuse) {
-    return <p className="p-32 text-base text-neutral-900">A carregar...</p>;
-  }
-
-  if (!reuse) {
-    return <p className="p-32 text-base text-neutral-900">Reutilização não encontrada.</p>;
-  }
+  // Associated datasets are hydrated on the server (see reuses/[rid]/page.tsx).
+  const fullDatasets = initialDatasets;
 
   const formatDate = (dateString: string) => {
     try {
@@ -171,8 +127,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
               <Breadcrumb
                 darkMode={false}
                 items={[
-                  { label: "Início", url: "/" },
-                  { label: "Reutilizações", url: "/reuses" },
+                  { label: t("home"), url: "/" },
+                  { label: t("reuses"), url: "/reuses" },
                   {
                     label: reuse.title,
                     url: `/reuses/${reuse.slug || reuse.id}`,
@@ -191,7 +147,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   onClick={handleToggleFavorite}
                   disabled={isTogglingFavorite}
                 >
-                  {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                  {isFavorite ? tr("detail.removeFavorite") : tr("detail.addFavorite")}
                 </Button>
                 <Button
                   variant="primary"
@@ -200,7 +156,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   trailingIconHover="agora-line-external-link"
                   onClick={() => window.open(reuse.url, "_blank")}
                 >
-                  Veja reutilização
+                  {tr("detail.viewReuse")}
                 </Button>
                 {canEdit && (
                   <Link href={`/admin/me/reuses/edit?id=${reuse.id}`}>
@@ -210,7 +166,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       leadingIcon="agora-line-edit"
                       leadingIconHover="agora-solid-edit"
                     >
-                      Editar
+                      {tr("detail.edit")}
                     </Button>
                   </Link>
                 )}
@@ -222,7 +178,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
           {reuse.private && (
             <div className="mt-16">
               <Pill variant="warning" appearance="solid">
-                RASCUNHO
+                {tr("detail.draft")}
               </Pill>
             </div>
           )}
@@ -231,7 +187,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
           {reuse.owner && (
             <p className="admin-edit-info__activity">
               <Icon name="agora-line-user" className="admin-edit-info__clock-icon" />
-              {" Criado por: "}
+              {` ${tr("detail.createdBy")} `}
               <TextLink href={`/users/${reuse.owner.slug}`}>
                 {reuse.owner.first_name} {reuse.owner.last_name}
               </TextLink>
@@ -265,7 +221,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                       </div>
                     ) : (
                       <div className="text-xs shadow-sm flex h-56 w-[160px] items-center justify-center rounded-8 border border-dashed border-neutral-300 bg-white font-bold uppercase tracking-wider text-neutral-400">
-                        {reuse.organization?.name || "Sem organização"}
+                        {reuse.organization?.name || tr("detail.noOrganization")}
                       </div>
                     )}
                     {reuse.organization && (
@@ -282,7 +238,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 <div className="flex h-full flex-col gap-24">
                   <div className="flex flex-wrap items-center gap-16 text-[15px]">
                     <span className="font-semibold text-neutral-900">
-                      {localizeReuseTypeId(reuse.type) || "Aplicação"}
+                      {localizeReuseTypeId(reuse.type) || tr("detail.defaultType")}
                     </span>
                     <div className="flex items-center gap-8">
                       <Icon
@@ -312,7 +268,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
       <section className="w-full">
         <Tabs>
           <Tab>
-            <TabHeader>Descrição</TabHeader>
+            <TabHeader>{tr("detail.description")}</TabHeader>
             <TabBodyWrapper bleedClassName="bg-neutral-50">
               <div className="mt-6 grid gap-32 xl:grid-cols-12">
                 {/* Main Content */}
@@ -320,7 +276,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                   <div className="prose prose-lg relative max-w-none leading-relaxed text-neutral-700">
                     <div ref={descTitleRef}>
                       <h2 className="mb-32 text-base font-medium uppercase text-neutral-900">
-                        Descrição
+                        {tr("detail.description")}
                       </h2>
                     </div>
                     <ExpandableMarkdownDescription
@@ -344,21 +300,25 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     <div className="min-w-0 rounded-4 bg-white p-32">
                       <TagsCollapse
                         tags={reuseTags}
-                        title="Etiquetas"
+                        title={tr("detail.tags")}
                         titleClassName="text-sm font-bold tracking-wider mb-8"
                       />
                     </div>
                   )}
 
                   <div className="rounded-4 bg-white p-32">
-                    <h3 className="text-sm mb-8 font-bold tracking-wider">Última atualização</h3>
+                    <h3 className="text-sm mb-8 font-bold tracking-wider">
+                      {tr("detail.lastUpdate")}
+                    </h3>
                     <p className="font-medium text-neutral-900">
                       {formatDate(reuse.last_modified)}
                     </p>
                   </div>
 
                   <div className="rounded-4 bg-white p-32">
-                    <h3 className="text-sm mb-8 font-bold tracking-wider">Data de criação</h3>
+                    <h3 className="text-sm mb-8 font-bold tracking-wider">
+                      {tr("detail.creationDate")}
+                    </h3>
                     <p className="font-medium text-neutral-900">{formatDate(reuse.created_at)}</p>
                   </div>
                 </aside>
@@ -366,7 +326,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
             </TabBodyWrapper>
           </Tab>
           <Tab active={tabParam === "discussions" || undefined}>
-            <TabHeader>Discussões</TabHeader>
+            <TabHeader>{tr("detail.discussions")}</TabHeader>
             <TabBodyWrapper bleedClassName="bg-neutral-50">
               <div>
                 <div className="mb-24">
@@ -375,8 +335,8 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                     showIcon
                     description={
                       <span>
-                        A sua questão não é sobre a reutilização?{" "}
-                        <TextLink href="/">Visite o nosso fórum.</TextLink>
+                        {tr("detail.discussionQuestion")}{" "}
+                        <TextLink href="/">{tr("detail.visitForum")}</TextLink>
                       </span>
                     }
                   />
@@ -393,10 +353,9 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
         <section className="w-full py-64">
           <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
             <h2 className="text-xl mb-32 font-bold text-[#000032]">
-              {datasetRefs.length} conjunto{datasetRefs.length !== 1 ? "s" : ""} de dados associado
-              {datasetRefs.length !== 1 ? "s" : ""}
+              {tr("detail.associatedDatasets", { count: datasetRefs.length })}
             </h2>
-            {!isLoadingDatasets && fullDatasets.length > 0 ? (
+            {fullDatasets.length > 0 ? (
               <>
                 <div
                   className="gap-32"
@@ -423,9 +382,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
                 />
               </>
             ) : (
-              <div className="text-neutral-900">
-                Não foi possível carregar os conjuntos de dados associados.
-              </div>
+              <div className="text-neutral-900">{tr("detail.datasetsLoadError")}</div>
             )}
           </div>
         </section>
@@ -438,8 +395,7 @@ export default function ReuseDetailClient({ slug }: ReuseDetailClientProps) {
         <section className="w-full py-64">
           <div className="container mx-auto bg-white md:gap-32 xl:gap-64">
             <h2 className="text-xl mb-32 font-bold text-[#000032]">
-              {remoteDatasets.length} conjunto{remoteDatasets.length !== 1 ? "s" : ""} de dados
-              externo{remoteDatasets.length !== 1 ? "s" : ""}
+              {tr("detail.externalDatasets", { count: remoteDatasets.length })}
             </h2>
             <ul className="flex flex-col gap-16">
               {remoteDatasets.map((entry, index) => (

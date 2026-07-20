@@ -14,7 +14,6 @@
     "modal": "Delete dataset"
   },
   "filters": {
-    "all": "All",
     "format": {
       "label": "Resource format",
       "options": {
@@ -24,14 +23,6 @@
         "geographic": "Geographic",
         "documents": "Documents",
         "other": "Other"
-      }
-    },
-    "update": {
-      "label": "Update date",
-      "options": {
-        "30_days": "Last 30 days",
-        "12_months": "Last 12 months",
-        "3_years": "Last 3 years"
       }
     },
     "type": {
