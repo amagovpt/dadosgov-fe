@@ -51,8 +51,8 @@ test.describe("Reuses Listing", () => {
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     await firstCard.click();
-    await page.waitForURL(/\/pages\/reuses\/.+/, { timeout: 15000 });
-    await expect(page).toHaveURL(/\/pages\/reuses\/.+/);
+    await page.waitForURL(/reuses\/.+/, { timeout: 15000 });
+    await expect(page).toHaveURL(/reuses\/.+/);
   });
 
   test("RL-04: Search filters by name", async ({ page }) => {

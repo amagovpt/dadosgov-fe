@@ -6,6 +6,22 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(routing): retire the legacy `/pages` URL segment for good** [#483](https://github.com/amagovpt/dadosgov-fe/pull/483)
+  - Public routes moved from `src/app/pages/...` to the `[locale]/(pages)`
+    route group a while ago, so URLs no longer carry `/pages` — but old links
+    (sent emails, bookmarks, indexed pages) still do. `next.config.ts` now
+    issues permanent redirects stripping the prefix, with explicit mappings
+    for renamed routes (`/pages/posts/*` → `/noticias/*`, `/pages/support` →
+    `/ajuda-e-contactos`, `/pages/resources/publications` →
+    `/recursos/publicacoes`), in both bare and locale-prefixed forms.
+  - Admin post links now open the real public route (`/noticias/<slug>`
+    instead of the nonexistent `/posts/<slug>`).
+  - E2E specs updated to the prefix-free URLs (homepage post links assert
+    `/noticias/`, the header "Publicações" card asserts the CMS link by path
+    instead of a hardcoded environment host).
+  - Pairs with the backend change that stops generating `/pages/...` links in
+    mails, model `self_web_url` and SAML redirects.
+
 - **feat(dataservices): add a Swagger section to the API detail page** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - Mirrors data.gouv.fr: when an API exposes a `machine_documentation_url`,
     the detail page now shows a "Swagger" button in the technical box and a

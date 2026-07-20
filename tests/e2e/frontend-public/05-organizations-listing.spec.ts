@@ -63,8 +63,8 @@ test.describe("Organizations Listing", () => {
     await expect(firstLink).toBeVisible({ timeout: 15000 });
 
     await firstLink.click();
-    await page.waitForURL(/\/pages\/organizations\/.+/, { timeout: 15000 });
-    await expect(page).toHaveURL(/\/pages\/organizations\/.+/);
+    await page.waitForURL(/organizations\/.+/, { timeout: 15000 });
+    await expect(page).toHaveURL(/organizations\/.+/);
   });
 
   test("OL-04: Search filters by name", async ({ page }) => {

@@ -50,8 +50,8 @@ test.describe("Backoffice - User Moderation", () => {
     }
 
     await profileLink.click();
-    await page.waitForURL(/\/pages\/admin\/users\/.+\/profile/, { timeout: 15000 });
-    await expect(page).toHaveURL(/\/pages\/admin\/users\/.+\/profile/);
+    await page.waitForURL(/admin\/users\/.+\/profile/, { timeout: 15000 });
+    await expect(page).toHaveURL(/admin\/users\/.+\/profile/);
   });
 
   test("UM-04: User profile page exposes role/deactivate/delete affordances", async ({
@@ -105,7 +105,7 @@ test.describe("Backoffice - User Moderation", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    expect(page.url()).toMatch(/\/pages\/(login|admin)/);
+    expect(page.url()).toMatch(/(login|admin)/);
     await context.close();
   });
 });

@@ -18,7 +18,7 @@ test.describe("Backoffice - Data Services CRUD", () => {
     await page.waitForTimeout(2000);
 
     const url = page.url();
-    expect(url).toMatch(/\/pages\/admin\//);
+    expect(url).toMatch(/admin\//);
   });
 
   test("API-02: Wizard step 1 exposes the required name + description fields", async ({
