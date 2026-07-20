@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import OrgReusesClient from "@/components/admin/reuses/views/OrgReusesClient";
 import initTranslations from "@/app/i18n";
+import { getBoReuses } from "@/service/queries/admin/reuses";
 
 export async function generateMetadata({
   params,
@@ -22,8 +23,10 @@ export async function generateMetadata({
 export default async function OrgReusesPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <OrgReusesClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoReuses(locale);
+
+  return <OrgReusesClient orgId={orgId} pageContent={pageContent} />;
 }

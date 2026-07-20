@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchDataservices } from "@/service/api/dataservices";
@@ -17,8 +16,14 @@ import {
   createDataserviceColumns,
   dataserviceSortFieldMap,
 } from "@/components/admin/dataservices/config/dataservicesListConfig";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
-export default function SystemDataservicesClient() {
+interface SystemDataservicesClientProps {
+  pageContent: BoDataservicesPage;
+}
+
+export default function SystemDataservicesClient({ pageContent }: SystemDataservicesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const [apis, setApis] = useState<Dataservice[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -111,8 +116,9 @@ export default function SystemDataservicesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-dataservices:search.placeholder"),
-        ariaLabel: t("admin-dataservices:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
       filters={
@@ -124,15 +130,7 @@ export default function SystemDataservicesClient() {
           }}
         />
       }
-      emptyState={
-        <CardNoResults
-          position="center"
-          icon={<Icon name="agora-line-code" className="icon-xl h-12 w-12 text-primary-500" />}
-          title={t("admin-dataservices:empty.title")}
-          description={t("admin-dataservices:empty.description")}
-          hasAnchor={false}
-        />
-      }
+      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={filteredApis}

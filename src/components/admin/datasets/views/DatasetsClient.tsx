@@ -17,9 +17,14 @@ import {
   DatasetSortField,
   sortDatasets,
 } from "@/components/admin/datasets/config/datasetsListConfig";
-import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
-export default function DatasetsClient() {
+interface DatasetsClientProps {
+  pageContent: BoDatasetsPage;
+}
+
+export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const { displayName } = useCurrentUser();
   const searchParams = useSearchParams();
@@ -122,8 +127,9 @@ export default function DatasetsClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-datasets:list.searchPlaceholder"),
-        ariaLabel: t("admin-datasets:list.searchAriaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: (value) => {
           setSearchQuery(value);
           setCurrentPage(1);
@@ -140,10 +146,8 @@ export default function DatasetsClient() {
         />
       }
       emptyState={
-        <AdminEmptyState
-          icon="agora-line-edit"
-          title={t("admin-datasets:list.emptyMineTitle")}
-          description={t("admin-datasets:list.emptyMineDescription")}
+        <AdminSquidexEmptyState
+          noResults={pageContent.myNoResults}
           createUrl="/admin/datasets/new"
         />
       }

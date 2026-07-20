@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchAllCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
@@ -127,17 +127,7 @@ export default function SystemCommunityResourcesClient({
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
-      emptyState={
-        <CardNoResults
-          position="center"
-          icon={
-            <Icon name="agora-line-user-group" className="icon-xl h-12 w-12 text-primary-500" />
-          }
-          title={t("admin-community-resources:empty.title")}
-          description={t("admin-community-resources:empty.description")}
-          hasAnchor={false}
-        />
-      }
+      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={paginatedResources}

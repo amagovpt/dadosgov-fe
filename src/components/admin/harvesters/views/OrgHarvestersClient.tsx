@@ -13,6 +13,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   createOrgHarvesterColumns,
@@ -20,8 +21,14 @@ import {
   sortHarvesters,
   type HarvesterSortField,
 } from "@/components/admin/harvesters/config/harvestersListConfig";
+import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 
-export default function OrgHarvestersClient() {
+interface OrgHarvestersClientProps {
+  orgId?: string;
+  pageContent: BoHarvestersPage;
+}
+
+export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const params = useParams();
   const orgIdFromUrl = params?.orgId as string | undefined;
@@ -146,8 +153,9 @@ export default function OrgHarvestersClient() {
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
       search={{
-        placeholder: t("admin-harvesters:search.placeholder"),
-        ariaLabel: t("admin-harvesters:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       filters={
         <StatusFilterSelect
@@ -156,11 +164,7 @@ export default function OrgHarvestersClient() {
         />
       }
       emptyState={
-        <AdminEmptyState
-          icon="agora-line-buildings"
-          title={t("admin-harvesters:empty.title")}
-          description={t("admin-harvesters:empty.orgDescription")}
-        />
+        <AdminSquidexEmptyState noResults={pageContent.orgNoResults} />
       }
     >
       <AdminListTable

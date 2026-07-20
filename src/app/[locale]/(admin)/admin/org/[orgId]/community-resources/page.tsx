@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import OrgCommunityResourcesClient from "@/components/admin/community-resources/views/OrgCommunityResourcesClient";
 import initTranslations from "@/app/i18n";
+import { getBoCommunityResources } from "@/service/queries/admin/community-resources";
 
 export async function generateMetadata({
   params,
@@ -22,8 +23,10 @@ export async function generateMetadata({
 export default async function OrgCommunityResourcesPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <OrgCommunityResourcesClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoCommunityResources(locale);
+
+  return <OrgCommunityResourcesClient orgId={orgId} pageContent={pageContent} />;
 }

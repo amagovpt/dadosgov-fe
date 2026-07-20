@@ -12,7 +12,8 @@ import AdminPaginatedTable from "./AdminPaginatedTable";
 type SearchConfig = {
   label?: string;
   placeholder: string;
-  ariaLabel: string;
+  ariaLabel?: string;
+  hint?: string;
   onChange?: (value: string) => void;
 };
 
@@ -76,7 +77,7 @@ export default function AdminListPage({
                 hasVoiceActionButton={false}
                 label={search.label ?? t("search.label")}
                 placeholder={search.placeholder}
-                aria-label={search.ariaLabel}
+                aria-label={search.ariaLabel ?? search.label ?? search.placeholder}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   search.onChange?.(e.target.value);
                 }}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SystemDataservicesClient from "@/components/admin/dataservices/views/SystemDataservicesClient";
 import initTranslations from "@/app/i18n";
+import { getBoDataservices } from "@/service/queries/admin/dataservices";
 
 export async function generateMetadata({
   params,
@@ -19,6 +20,13 @@ export async function generateMetadata({
   };
 }
 
-export default function SystemDataservicesPage() {
-  return <SystemDataservicesClient />;
+export default async function SystemDataservicesPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoDataservices(locale);
+
+  return <SystemDataservicesClient pageContent={pageContent} />;
 }

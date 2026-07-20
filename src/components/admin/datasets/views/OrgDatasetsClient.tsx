@@ -17,7 +17,8 @@ import {
   createDatasetColumns,
   OrgDatasetSortField,
 } from "@/components/admin/datasets/config/datasetsListConfig";
-import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
 const ORG_DATASET_SORT_MAP: Record<OrgDatasetSortField, string> = {
   title: "title",
@@ -27,9 +28,10 @@ const ORG_DATASET_SORT_MAP: Record<OrgDatasetSortField, string> = {
 
 interface OrgDatasetsClientProps {
   orgId: string;
+  pageContent: BoDatasetsPage;
 }
 
-export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
+export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const { user } = useAuth();
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
@@ -150,8 +152,9 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: t("admin-datasets:list.searchPlaceholder"),
-        ariaLabel: t("admin-datasets:list.searchAriaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
       filters={
@@ -177,10 +180,8 @@ export default function OrgDatasetsClient({ orgId }: OrgDatasetsClientProps) {
         </a>
       }
       emptyState={
-        <AdminEmptyState
-          icon="agora-line-edit"
-          title={t("admin-datasets:list.emptyOrgTitle")}
-          description={t("admin-datasets:list.emptyOrgDescription")}
+        <AdminSquidexEmptyState
+          noResults={pageContent.orgNoResults}
           createUrl="/admin/datasets/new"
         />
       }

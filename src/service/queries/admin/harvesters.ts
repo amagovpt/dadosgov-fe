@@ -57,6 +57,29 @@ export async function getBoHarvesters(
               description
             }
           }
+          search {
+            ${locale} {
+              label
+              placeholder
+              hint
+            }
+          }
+          orgNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
+          systemNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
           steps {
             ${locale} {
               title

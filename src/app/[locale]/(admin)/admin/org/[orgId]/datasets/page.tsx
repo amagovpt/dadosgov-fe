@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import OrgDatasetsClient from "@/components/admin/datasets/views/OrgDatasetsClient";
 import initTranslations from "@/app/i18n";
+import { getBoDatasets } from "@/service/queries/admin/datasets";
 
 export async function generateMetadata({
   params,
@@ -22,8 +23,10 @@ export async function generateMetadata({
 export default async function OrgDatasetsPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <OrgDatasetsClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoDatasets(locale);
+
+  return <OrgDatasetsClient orgId={orgId} pageContent={pageContent} />;
 }

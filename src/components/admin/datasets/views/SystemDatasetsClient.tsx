@@ -15,9 +15,14 @@ import {
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
-import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
-export default function SystemDatasetsClient() {
+interface SystemDatasetsClientProps {
+  pageContent: BoDatasetsPage;
+}
+
+export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -138,8 +143,9 @@ export default function SystemDatasetsClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-datasets:list.searchPlaceholder"),
-        ariaLabel: t("admin-datasets:list.searchAriaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
       filters={
@@ -151,13 +157,7 @@ export default function SystemDatasetsClient() {
           }}
         />
       }
-      emptyState={
-        <AdminEmptyState
-          icon="agora-line-edit"
-          title={t("admin-datasets:list.emptySystemTitle")}
-          description={t("admin-datasets:list.emptySystemDescription")}
-        />
-      }
+      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={datasets}

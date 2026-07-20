@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SystemOrganizationsClient from "@/components/admin/organizations/SystemOrganizationsClient";
 import initTranslations from "@/app/i18n";
+import { getBoOrganizations } from "@/service/queries/admin/organizations";
 
 export async function generateMetadata({
   params,
@@ -19,6 +20,13 @@ export async function generateMetadata({
   };
 }
 
-export default function SystemOrganizationsPage() {
-  return <SystemOrganizationsClient />;
+export default async function SystemOrganizationsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoOrganizations(locale);
+
+  return <SystemOrganizationsClient pageContent={pageContent} />;
 }

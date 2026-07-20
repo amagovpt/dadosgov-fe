@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import OrgHarvestersClient from "@/components/admin/harvesters/views/OrgHarvestersClient";
 import initTranslations from "@/app/i18n";
+import { getBoHarvesters } from "@/service/queries/admin/harvesters";
 
 export async function generateMetadata({
   params,
@@ -22,8 +23,10 @@ export async function generateMetadata({
 export default async function OrgHarvestersPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <OrgHarvestersClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoHarvesters(locale);
+
+  return <OrgHarvestersClient orgId={orgId} pageContent={pageContent} />;
 }

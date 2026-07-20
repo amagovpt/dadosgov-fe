@@ -14,9 +14,14 @@ import {
   createCommunityResourceColumns,
   sortCommunityResources,
 } from "@/components/admin/community-resources/config/communityResourcesListConfig";
-import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
-export default function CommunityResourcesClient() {
+interface CommunityResourcesClientProps {
+  pageContent: BoCommunityResourcesPage;
+}
+
+export default function CommunityResourcesClient({ pageContent }: CommunityResourcesClientProps) {
   const { displayName } = useCurrentUser();
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
 
@@ -114,17 +119,17 @@ export default function CommunityResourcesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-community-resources:search.placeholder"),
-        ariaLabel: t("admin-community-resources:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: (value) => {
           setSearchQuery(value);
           setCurrentPage(1);
         },
       }}
       emptyState={
-        <AdminEmptyState
-          icon="agora-line-user-group"
-          description={t("admin-community-resources:empty.myDescription")}
+        <AdminSquidexEmptyState
+          noResults={pageContent.myNoResults}
           createUrl="/admin/community-resources/new"
         />
       }

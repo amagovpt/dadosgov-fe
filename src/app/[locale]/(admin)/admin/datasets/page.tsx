@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import DatasetsClient from "@/components/admin/datasets/views/DatasetsClient";
 import initTranslations from "@/app/i18n";
+import { getBoDatasets } from "@/service/queries/admin/datasets";
 
 export async function generateMetadata({
   params,
@@ -19,6 +20,13 @@ export async function generateMetadata({
   };
 }
 
-export default function DatasetsPage() {
-  return <DatasetsClient />;
+export default async function DatasetsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoDatasets(locale);
+
+  return <DatasetsClient pageContent={pageContent} />;
 }

@@ -6,12 +6,17 @@ import {
   AdminMetadata,
   AdminStep,
 } from "@/service/types/admin/common";
+import type { FoListPageNoResults, FoListPageSearch } from "@/service/types/shared";
 
 export type BoDataservicesMetadata = AdminMetadata;
 
 export type BoDataservicesPage = {
   metadata?: AdminMetadata;
   hero?: AdminHero;
+  search?: FoListPageSearch;
+  myNoResults?: FoListPageNoResults;
+  orgNoResults?: FoListPageNoResults;
+  systemNoResults?: FoListPageNoResults;
   steps?: AdminStep[];
   introduction?: AdminHelpBlock;
   producerHelper?: AdminHelpBlock;

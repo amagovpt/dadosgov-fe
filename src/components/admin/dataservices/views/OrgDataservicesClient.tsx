@@ -19,9 +19,15 @@ import {
   createDataserviceColumns,
   sortDataservices,
 } from "@/components/admin/dataservices/config/dataservicesListConfig";
-import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
-export default function OrgDataservicesClient() {
+interface OrgDataservicesClientProps {
+  orgId?: string;
+  pageContent: BoDataservicesPage;
+}
+
+export default function OrgDataservicesClient({ pageContent }: OrgDataservicesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const params = useParams();
   const routeOrgId = params?.orgId as string | undefined;
@@ -103,8 +109,9 @@ export default function OrgDataservicesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-dataservices:search.placeholder"),
-        ariaLabel: t("admin-dataservices:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       filters={
         <StatusFilterSelect
@@ -116,10 +123,8 @@ export default function OrgDataservicesClient() {
         />
       }
       emptyState={
-        <AdminEmptyState
-          icon="agora-line-edit"
-          title={t("admin-dataservices:empty.publicationsTitle")}
-          description={t("admin-dataservices:empty.orgDescription")}
+        <AdminSquidexEmptyState
+          noResults={pageContent.orgNoResults}
           createUrl="/admin/dataservices/new"
         />
       }

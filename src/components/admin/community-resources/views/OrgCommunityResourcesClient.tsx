@@ -18,8 +18,15 @@ import {
   sortCommunityResources,
 } from "@/components/admin/community-resources/config/communityResourcesListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
-export default function OrgCommunityResourcesClient() {
+interface OrgCommunityResourcesClientProps {
+  orgId?: string;
+  pageContent: BoCommunityResourcesPage;
+}
+
+export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunityResourcesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-community-resources"]);
   const params = useParams();
   const routeOrgId = params?.orgId as string | undefined;
@@ -115,15 +122,12 @@ export default function OrgCommunityResourcesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: t("admin-community-resources:search.placeholder"),
-        ariaLabel: t("admin-community-resources:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       emptyState={
-        <AdminEmptyState
-          icon="agora-line-buildings"
-          title={t("admin-community-resources:empty.title")}
-          description={t("admin-community-resources:empty.orgDescription")}
-        />
+        <AdminSquidexEmptyState noResults={pageContent.orgNoResults} />
       }
     >
       <AdminListTable

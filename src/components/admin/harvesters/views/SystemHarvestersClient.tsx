@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CardNoResults, Icon, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
+import { StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
@@ -17,8 +18,13 @@ import {
   createSystemHarvesterColumns,
   filterHarvestersByStatus,
 } from "@/components/admin/harvesters/config/harvestersListConfig";
+import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 
-export default function SystemHarvestersClient() {
+interface SystemHarvestersClientProps {
+  pageContent: BoHarvestersPage;
+}
+
+export default function SystemHarvestersClient({ pageContent }: SystemHarvestersClientProps) {
   const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const [harvesters, setHarvesters] = useState<HarvestSource[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -223,8 +229,9 @@ export default function SystemHarvestersClient() {
       setCurrentPage={handlePageChange}
       setPageSize={handlePageSizeChange}
       search={{
-        placeholder: t("admin-harvesters:search.placeholder"),
-        ariaLabel: t("admin-harvesters:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
       filters={
@@ -248,15 +255,7 @@ export default function SystemHarvestersClient() {
           </div>
         ) : undefined
       }
-      emptyState={
-        <CardNoResults
-          position="center"
-          icon={<Icon name="agora-line-download" className="icon-xl h-12 w-12 text-primary-500" />}
-          title={t("admin-harvesters:empty.title")}
-          description={t("admin-harvesters:empty.description")}
-          hasAnchor={false}
-        />
-      }
+      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={filteredHarvesters}

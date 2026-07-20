@@ -12,11 +12,16 @@ import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
-import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function ReusesClient() {
+interface ReusesClientProps {
+  pageContent: BoReusesPage;
+}
+
+export default function ReusesClient({ pageContent }: ReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const { displayName } = useCurrentUser();
   const searchParams = useSearchParams();
@@ -122,8 +127,9 @@ export default function ReusesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: t("admin-reuses:search.placeholder"),
-        ariaLabel: t("admin-reuses:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
       filters={
@@ -137,10 +143,8 @@ export default function ReusesClient() {
         />
       }
       emptyState={
-        <AdminEmptyState
-          icon="bar_chart"
-          title={t("admin-reuses:empty.title")}
-          description={t("admin-reuses:empty.myDescription")}
+        <AdminSquidexEmptyState
+          noResults={pageContent.myNoResults}
           createUrl="/admin/reuses/new"
         />
       }

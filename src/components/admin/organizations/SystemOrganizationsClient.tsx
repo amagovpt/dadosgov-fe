@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, CardNoResults, Icon, usePopupContext } from "@ama-pt/agora-design-system";
+import { Button, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import {
   createOrganizationColumns,
@@ -13,6 +14,7 @@ import {
 } from "./organizationsListConfig";
 import { fetchOrganizations, deleteOrganization } from "@/service/api/organizations";
 import { Organization } from "@/service/types/identity";
+import type { BoOrganizationsPage } from "@/service/types/admin/organizations";
 
 function DeleteOrgPopupContent({
   labels,
@@ -48,7 +50,11 @@ function DeleteOrgPopupContent({
   );
 }
 
-export default function SystemOrganizationsClient() {
+interface SystemOrganizationsClientProps {
+  pageContent: BoOrganizationsPage;
+}
+
+export default function SystemOrganizationsClient({ pageContent }: SystemOrganizationsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-organizations"]);
   const { show, hide } = usePopupContext();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -184,19 +190,12 @@ export default function SystemOrganizationsClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-organizations:search.placeholder"),
-        ariaLabel: t("admin-organizations:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
-      emptyState={
-        <CardNoResults
-          position="center"
-          icon={<Icon name="agora-line-building" className="icon-xl h-12 w-12 text-primary-500" />}
-          title={t("admin-organizations:empty.title")}
-          description={t("admin-organizations:empty.description")}
-          hasAnchor={false}
-        />
-      }
+      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={organizations}

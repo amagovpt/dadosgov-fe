@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
@@ -17,8 +16,14 @@ import {
   createReuseColumns,
   systemReuseSortFieldMap,
 } from "@/components/admin/reuses/config/reusesListConfig";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function SystemReusesClient() {
+interface SystemReusesClientProps {
+  pageContent: BoReusesPage;
+}
+
+export default function SystemReusesClient({ pageContent }: SystemReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -113,8 +118,9 @@ export default function SystemReusesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-reuses:search.placeholder"),
-        ariaLabel: t("admin-reuses:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
       filters={
@@ -126,15 +132,7 @@ export default function SystemReusesClient() {
           }}
         />
       }
-      emptyState={
-        <CardNoResults
-          position="center"
-          icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-          title={t("admin-reuses:empty.title")}
-          description={t("admin-reuses:empty.description")}
-          hasAnchor={false}
-        />
-      }
+      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={filteredReuses}

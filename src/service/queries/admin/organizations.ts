@@ -57,6 +57,21 @@ export async function getBoOrganizations(
               description
             }
           }
+          search {
+            ${locale} {
+              label
+              placeholder
+              hint
+            }
+          }
+          systemNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
           steps {
             ${locale} {
               title

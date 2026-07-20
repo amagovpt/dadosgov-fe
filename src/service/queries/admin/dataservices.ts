@@ -57,6 +57,37 @@ export async function getBoDataservices(
               description
             }
           }
+          search {
+            ${locale} {
+              label
+              placeholder
+              hint
+            }
+          }
+          myNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
+          orgNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
+          systemNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
           steps {
             ${locale} {
               title

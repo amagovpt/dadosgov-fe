@@ -11,14 +11,19 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
-import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import {
   createDataserviceColumns,
   DataserviceSortField,
   sortDataservices,
 } from "../config/dataservicesListConfig";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
-export default function DataservicesClient() {
+interface DataservicesClientProps {
+  pageContent: BoDataservicesPage;
+}
+
+export default function DataservicesClient({ pageContent }: DataservicesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const { displayName } = useCurrentUser();
 
@@ -94,8 +99,9 @@ export default function DataservicesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-dataservices:search.placeholder"),
-        ariaLabel: t("admin-dataservices:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       filters={
         <StatusFilterSelect
@@ -106,7 +112,12 @@ export default function DataservicesClient() {
           }}
         />
       }
-      emptyState={<AdminEmptyState icon="agora-line-edit" createUrl="/admin/dataservices/new" />}
+      emptyState={
+        <AdminSquidexEmptyState
+          noResults={pageContent.myNoResults}
+          createUrl="/admin/dataservices/new"
+        />
+      }
     >
       <AdminListTable
         items={paginatedApis}

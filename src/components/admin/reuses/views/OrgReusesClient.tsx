@@ -14,10 +14,17 @@ import { filterByStatus } from "@/utils/filterByStatus";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function OrgReusesClient() {
+interface OrgReusesClientProps {
+  orgId?: string;
+  pageContent: BoReusesPage;
+}
+
+export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
   const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const params = useParams();
   const routeOrgId = (params?.orgId as string | undefined) ?? undefined;
@@ -119,8 +126,9 @@ export default function OrgReusesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: t("admin-reuses:search.placeholder"),
-        ariaLabel: t("admin-reuses:search.ariaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       filters={
         <StatusFilterSelect
@@ -132,10 +140,8 @@ export default function OrgReusesClient() {
         />
       }
       emptyState={
-        <AdminEmptyState
-          icon="agora-line-edit"
-          title={t("admin-reuses:empty.publicationsTitle")}
-          description={t("admin-reuses:empty.orgDescription")}
+        <AdminSquidexEmptyState
+          noResults={pageContent.orgNoResults}
           createUrl="/admin/reuses/new"
         />
       }
