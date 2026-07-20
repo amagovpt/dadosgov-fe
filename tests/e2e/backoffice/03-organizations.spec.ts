@@ -92,7 +92,7 @@ test.describe("Backoffice - Organizations", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    expect(page.url()).toMatch(/\/pages\/(login|admin)/);
+    expect(page.url()).toMatch(/(login|admin)/);
     await context.close();
   });
 

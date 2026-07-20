@@ -82,7 +82,7 @@ test.describe("Header and Footer", () => {
     const authLink = page.locator('header a[href="/login"]').first();
     await expect(authLink).toBeVisible({ timeout: 10000 });
     await authLink.click();
-    await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
+    await page.waitForURL(/login/, { timeout: 10000 });
     expect(page.url()).toContain("/login");
   });
 
@@ -201,9 +201,10 @@ test.describe("Header and Footer", () => {
       .first();
     await expect(publicacoesCard).toBeVisible({ timeout: 10000 });
 
-    const link = publicacoesCard.locator(
-      'a[href="https://10.55.37.38/pages/resources/publications"]'
-    );
+    // The href comes from CMS (Squidex) content; assert on the current
+    // path only — the legacy /pages prefix is gone and the host varies
+    // per environment.
+    const link = publicacoesCard.locator('a[href*="/recursos/publicacoes"]');
     await expect(link.first()).toHaveCount(1);
   });
 

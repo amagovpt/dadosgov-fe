@@ -30,7 +30,7 @@ test.describe("Articles (Posts) Page", () => {
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     const href = await firstCard.getAttribute("href");
-    expect(href).toMatch(/^\/pages\/posts\/[a-z0-9-]+/);
+    expect(href).toMatch(/posts\/[a-z0-9-]+/);
   });
 
   test("NT-03: Search field accepts input", async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe("Articles (Posts) Page", () => {
     const firstLink = page.locator("a[href^='/posts/']").first();
     await expect(firstLink).toBeVisible({ timeout: 15000 });
     await firstLink.click();
-    await page.waitForURL(/\/pages\/posts\/.+/, { timeout: 15000 });
+    await page.waitForURL(/posts\/.+/, { timeout: 15000 });
 
     const heading = page.locator("main h1").first();
     await expect(heading).toBeVisible({ timeout: 10000 });
@@ -67,7 +67,7 @@ test.describe("Articles (Posts) Page", () => {
   test("NT-06: Article detail renders body content", async ({ page }) => {
     const firstLink = page.locator("a[href^='/posts/']").first();
     await firstLink.click();
-    await page.waitForURL(/\/pages\/posts\/.+/, { timeout: 15000 });
+    await page.waitForURL(/posts\/.+/, { timeout: 15000 });
 
     const main = page.locator("main");
     const text = (await main.textContent()) ?? "";

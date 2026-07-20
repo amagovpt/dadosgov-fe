@@ -6,20 +6,23 @@
 
 ## 🗺️ Rotas (Páginas)
 
-As rotas estão localizadas em `src/app/pages/`.
+As rotas estão localizadas em `src/app/[locale]/(pages)/` (route group — **não**
+adiciona segmento à URL; as URLs públicas não têm `/pages`).
 
 | Rota | Descrição | Componente Principal |
 | :--- | :--- | :--- |
-| `/` | Homepage | `src/app/page.tsx` |
-| `/pages/datasets` | Listagem de Datasets | `DatasetsClient` |
-| `/pages/datasets/[id]` | Detalhe de Dataset | `DatasetDetailClient` |
-| `/pages/reuses` | Listagem de Reutilizações | `ReusesClient` |
-| `/pages/reuses/[id]` | Detalhe de Reutilização | `ReuseDetailClient` |
-| `/pages/organizations` | Listagem de Organizações | `OrganizationsClient` |
-| `/pages/mini-courses` | Minicursos | `MiniCoursesClient` |
-| `/pages/login` | Login | `LoginClient` |
-| `/pages/register` | Registo | `RegisterClient` |
-| `/pages/support` | Suporte/Contacto | `SupportPage` |
+| `/` | Homepage | `src/app/[locale]/page.tsx` |
+| `/datasets` | Listagem de Datasets | `DatasetsClient` |
+| `/datasets/[id]` | Detalhe de Dataset | `DatasetDetailClient` |
+| `/reuses` | Listagem de Reutilizações | `ReusesClient` |
+| `/reuses/[id]` | Detalhe de Reutilização | `ReuseDetailClient` |
+| `/organizations` | Listagem de Organizações | `OrganizationsClient` |
+| `/login` | Login | `LoginClient` |
+| `/register` | Registo | `RegisterClient` |
+| `/ajuda-e-contactos` | Suporte/Contacto | `SupportPageContent` |
+| `/noticias` / `/noticias/[rid]` | Notícias (posts) | Server Components |
+
+> URLs antigas `/pages/*` são redirecionadas permanentemente (ver `redirects()` em `next.config.ts`).
 
 ---
 

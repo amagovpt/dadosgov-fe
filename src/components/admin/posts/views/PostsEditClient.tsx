@@ -329,7 +329,7 @@ export default function PostsEditClient() {
         <Button
           variant="primary"
           appearance="outline"
-          onClick={() => window.open(`/posts/${post.slug}`, "_blank")}
+          onClick={() => window.open(`/noticias/${post.slug}`, "_blank")}
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="w-16 h-16" />
