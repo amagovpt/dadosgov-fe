@@ -81,7 +81,7 @@
     "public": "Público"
   },
   "danger": {
-    "irreversible": "Atenção, esta ação é irreversível."
+    "irreversible": "Atenção esta ação é irreversível."
   },
   "pagination": {
     "itemsPerPage": "Linhas por página",
