@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Button, InputText, InputPassword, Icon, Breadcrumb } from "@ama-pt/agora-design-system";
+import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { fetchMigrationPending, searchMigrationAccount, sendMigrationCode, confirmMigration, skipMigration } from "@/service/api/migration";
 import AppIcon from "../Primitives/AppIcon";
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { Breadcrumb, StatusCard } from "@ama-pt/agora-design-system";
+import { StatusCard } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 
 export default function ApiDocumentationClient() {
   return (
