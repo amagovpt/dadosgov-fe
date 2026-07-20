@@ -57,6 +57,11 @@ export async function getBoOrganizations(
               description
             }
           }
+          steps {
+            ${locale} {
+              title
+            }
+          }
           selectionIntroduction {
             ${locale} {
               title

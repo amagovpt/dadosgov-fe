@@ -8,6 +8,10 @@ export type AdminMetadata = {
   description: string;
 };
 
+export type AdminStep = {
+  title: string;
+};
+
 export type AdminAnchor = {
   children: string;
   href: string;

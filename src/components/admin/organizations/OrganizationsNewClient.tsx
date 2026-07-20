@@ -125,11 +125,7 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
     }
   }
 
-  const stepTitles: Record<number, string> = {
-    1: t("admin-organizations:form.steps.select"),
-    2: t("admin-organizations:form.steps.describe"),
-    3: t("admin-organizations:form.steps.finish"),
-  };
+  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
 
   const auxiliaryItems = getOrganizationAuxiliaryItems({
     items: pageContent.createAuxiliaryItems,
@@ -152,7 +148,7 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
         totalSteps={totalSteps}
         labelWord={t("admin-common:stepper.step")}
         labelFormat="slash"
-        stepTitle={stepTitles[currentStep] || ""}
+        stepTitle={stepTitle}
       />
 
       <div className="admin-page__body">

@@ -26,11 +26,7 @@ export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientPr
   const currentStep = Number(searchParams.get("step")) || 1;
   const pageTitle = pageContent.hero?.title ?? "";
 
-  const stepTitles: Record<number, string> = {
-    1: t("admin-reuses:form.steps.describe"),
-    2: t("admin-reuses:form.steps.datasetsAndApis"),
-    3: t("admin-reuses:form.steps.publish"),
-  };
+  const stepTitle = pageContent.orgSteps?.[currentStep - 1]?.title ?? "";
 
   return (
     <AdminLayout breadcrumbItems={[
@@ -47,7 +43,7 @@ export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientPr
         totalSteps={totalSteps}
         labelWord={t("admin-common:stepper.step")}
         labelFormat="slash"
-        stepTitle={stepTitles[currentStep] || ""}
+        stepTitle={stepTitle}
       />
 
       <ReusesFormClient

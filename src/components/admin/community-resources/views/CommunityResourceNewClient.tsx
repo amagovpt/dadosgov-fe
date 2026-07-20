@@ -26,11 +26,7 @@ export default function CommunityResourceNewClient({
   const currentStep = Number(searchParams.get("step")) || 1;
   const [publicPageUrl, setPublicPageUrl] = useState<string | null>(null);
   const pageTitle = pageContent.hero?.title ?? "";
-
-  const stepTitles: Record<number, string> = {
-    1: t("admin-community-resources:form.steps.describe"),
-    2: t("admin-community-resources:form.steps.publish"),
-  };
+  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
 
   return (
     <AdminLayout
@@ -62,7 +58,7 @@ export default function CommunityResourceNewClient({
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
-        stepTitle={stepTitles[currentStep]}
+        stepTitle={stepTitle}
         labelWord="Etapa"
         labelFormat="de"
       />

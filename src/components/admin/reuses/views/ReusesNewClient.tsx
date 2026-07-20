@@ -22,11 +22,7 @@ export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
   const currentStep = Number(searchParams.get("step")) || 1;
   const pageTitle = pageContent.hero?.title ?? "";
 
-  const stepTitles: Record<number, string> = {
-    1: t("admin-reuses:form.steps.describe"),
-    2: t("admin-reuses:form.steps.datasets"),
-    3: t("admin-reuses:form.steps.publish"),
-  };
+  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
 
   return (
     <AdminLayout
@@ -42,7 +38,7 @@ export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
         totalSteps={totalSteps}
         labelWord={t("admin-common:stepper.step")}
         labelFormat="slash"
-        stepTitle={stepTitles[currentStep] || ""}
+        stepTitle={stepTitle}
       />
 
       <ReusesFormClient

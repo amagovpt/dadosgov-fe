@@ -52,6 +52,11 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
               description
             }
           }
+          steps {
+            ${locale} {
+              title
+            }
+          }
           publicationEntry {
             ${locale} {
               title

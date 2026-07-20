@@ -4,6 +4,7 @@ import {
   AdminHelpBlock,
   AdminHero,
   AdminMetadata,
+  AdminStep,
 } from "@/service/types/admin/common";
 
 export type BoHarvestersMetadata = AdminMetadata;
@@ -11,6 +12,7 @@ export type BoHarvestersMetadata = AdminMetadata;
 export type BoHarvestersPage = {
   metadata?: AdminMetadata;
   hero?: AdminHero;
+  steps?: AdminStep[];
   introduction?: AdminHelpBlock;
   acceptedStatusInfo?: AdminHelpBlock;
   pendingAdminCard?: AdminCard;

@@ -50,6 +50,16 @@ export async function getBoReuses(locale: string = "pt"): Promise<BoReusesPage> 
               description
             }
           }
+          steps {
+            ${locale} {
+              title
+            }
+          }
+          orgSteps {
+            ${locale} {
+              title
+            }
+          }
           introduction {
             ${locale} {
               title

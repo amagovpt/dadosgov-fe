@@ -151,11 +151,7 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
     }
   }
 
-  const stepTitles: Record<number, string> = {
-    1: t("admin-harvesters:form.steps.describe"),
-    2: t("admin-harvesters:form.steps.preview"),
-    3: t("admin-harvesters:form.steps.publish"),
-  };
+  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
 
   const auxiliaryItems = getCreateHarvesterAuxiliaryItems({
     items: pageContent.createAuxiliaryItems,
@@ -178,7 +174,7 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
         totalSteps={totalSteps}
         labelWord={t("admin-common:stepper.step")}
         labelFormat="slash"
-        stepTitle={stepTitles[currentStep] || ""}
+        stepTitle={stepTitle}
       />
 
       <div className="admin-page__body">

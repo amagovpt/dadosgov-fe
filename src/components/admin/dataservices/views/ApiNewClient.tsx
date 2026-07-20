@@ -21,11 +21,7 @@ export default function ApiNewClient({ pageContent }: ApiNewClientProps) {
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
   const pageTitle = pageContent.hero?.title ?? "";
-  const stepTitles: Record<number, string> = {
-    1: t("admin-dataservices:form.steps.describe"),
-    2: t("admin-dataservices:form.steps.datasets"),
-    3: t("admin-dataservices:form.steps.publish"),
-  };
+  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
 
   return (
     <AdminLayout
@@ -40,7 +36,7 @@ export default function ApiNewClient({ pageContent }: ApiNewClientProps) {
         currentStep={currentStep}
         totalSteps={totalSteps}
         labelWord={t("admin-common:stepper.step")}
-        stepTitle={stepTitles[currentStep]}
+        stepTitle={stepTitle}
       />
 
       <ApiRegistrationClient

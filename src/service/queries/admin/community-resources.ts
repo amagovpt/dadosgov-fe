@@ -58,6 +58,11 @@ export async function getBoCommunityResources(
               description
             }
           }
+          steps {
+            ${locale} {
+              title
+            }
+          }
           introduction {
             ${locale} {
               title

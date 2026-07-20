@@ -39,12 +39,7 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
     return `/admin/org/datasets/new?step=${step}`;
   };
 
-  const stepTitles: Record<number, string> = {
-    1: t("admin-datasets:form.steps.start"),
-    2: t("admin-datasets:form.steps.describe"),
-    3: t("admin-datasets:form.steps.files"),
-    4: t("admin-datasets:form.steps.publish"),
-  };
+  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
   const [startEntry, adminAutomationEntry, catalogEntry] = pageContent.publicationEntry ?? [];
 
   return (
@@ -66,7 +61,7 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
           totalSteps={totalSteps}
           labelWord={t("admin-common:stepper.step")}
           labelFormat="slash"
-          stepTitle={stepTitles[currentStep] || ""}
+          stepTitle={stepTitle}
         />
 
         {currentStep === 1 && (

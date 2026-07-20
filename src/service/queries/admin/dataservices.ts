@@ -57,6 +57,11 @@ export async function getBoDataservices(
               description
             }
           }
+          steps {
+            ${locale} {
+              title
+            }
+          }
           introduction {
             ${locale} {
               title
