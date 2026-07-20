@@ -112,7 +112,7 @@
     "unarchiveSuccess": "API desarquivada com sucesso.",
     "archiveError": "Erro ao arquivar a API. Tente novamente.",
     "unarchiveError": "Erro ao desarquivar a API. Tente novamente.",
-    "deleteTitle": "Elimine a API",
+    "deleteTitle": "Eliminar a API",
     "archiveInfoArchived": "Esta API está arquivada. Pode desarquivar para voltar a indexá-la no portal.",
     "archiveInfoActive": "Uma API arquivada deixa de estar indexada no portal, mas permanece acessível através de um link direto.",
     "archive": "Arquivar a API",

@@ -727,7 +727,7 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                                 onClick={handleOpenDeletePopup}
                                 disabled={isSaving}
                               >
-                                {t("admin-common:actions.delete")}
+                                {t("admin-dataservices:edit.deleteTitle")}
                               </Button>
                             </>
                           }
