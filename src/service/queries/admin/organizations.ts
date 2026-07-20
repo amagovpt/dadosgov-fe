@@ -100,19 +100,6 @@ export async function getBoOrganizations(
               }
             }
           }
-          editAuxiliaryItems {
-            ${locale} {
-              enabled
-              title
-              description {
-                html
-              }
-              anchor {
-                href
-                children
-              }
-            }
-          }
         }
       }
     }

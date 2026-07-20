@@ -13,5 +13,4 @@ export type BoOrganizationsPage = {
   detailsIntroduction?: AdminHelpBlock;
   createdCard?: AdminCard;
   createAuxiliaryItems?: AdminAuxiliaryItem[];
-  editAuxiliaryItems?: AdminAuxiliaryItem[];
 };
