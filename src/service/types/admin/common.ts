@@ -3,6 +3,11 @@ export type AdminHero = {
   description: string;
 };
 
+export type AdminMetadata = {
+  title: string;
+  description: string;
+};
+
 export type AdminAnchor = {
   children: string;
   href: string;

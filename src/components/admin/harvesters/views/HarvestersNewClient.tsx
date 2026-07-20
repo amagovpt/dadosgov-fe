@@ -38,6 +38,7 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
   const router = useRouter();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
+  const pageTitle = pageContent.hero?.title ?? "";
 
   const [harvesterName, setHarvesterName] = useState("");
   const [harvesterDescription, setHarvesterDescription] = useState("");
@@ -166,11 +167,11 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
         { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
         {
-          label: t("admin-harvesters:publicationFormTitle"),
+          label: pageTitle,
           url: "/admin/harvesters/new",
         },
       ]}
-      title={t("admin-harvesters:publicationFormTitle")}
+      title={pageTitle}
     >
       <AdminStepper
         currentStep={currentStep}

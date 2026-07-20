@@ -24,6 +24,7 @@ export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientPr
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
+  const pageTitle = pageContent.hero?.title ?? "";
 
   const stepTitles: Record<number, string> = {
     1: t("admin-reuses:form.steps.describe"),
@@ -37,7 +38,7 @@ export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientPr
       { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
       { label: t("admin-reuses:title"), url: orgId ? `/admin/org/${orgId}/reuses` : "#" }
     ]}
-      title={t("admin-reuses:form.registrationTitle")}
+      title={pageTitle}
     >
 
       {/* Stepper */}

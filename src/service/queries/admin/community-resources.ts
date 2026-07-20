@@ -13,7 +13,7 @@ export async function getBoCommunityResourcesMetadata(
     query getBoCommunityResourcesMetadata {
       findBoCommunityResourcesSingleton {
         data {
-          hero {
+          metadata {
             ${locale} {
               title
               description
@@ -46,6 +46,12 @@ export async function getBoCommunityResources(
     query getBoCommunityResources {
       findBoCommunityResourcesSingleton {
         data {
+          metadata {
+            ${locale} {
+              title
+              description
+            }
+          }
           hero {
             ${locale} {
               title

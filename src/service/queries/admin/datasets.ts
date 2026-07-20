@@ -10,7 +10,7 @@ export async function getBoDatasetsMetadata(
     query getBoDatasetsMetadata {
       findBoDatasetsSingleton {
         data {
-          hero {
+          metadata {
             ${locale} {
               title
               description
@@ -40,6 +40,12 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
     query getBoDatasets {
       findBoDatasetsSingleton {
         data {
+          metadata {
+            ${locale} {
+              title
+              description
+            }
+          }
           hero {
             ${locale} {
               title

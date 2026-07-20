@@ -3,11 +3,13 @@ import {
   AdminCard,
   AdminHelpBlock,
   AdminHero,
+  AdminMetadata,
 } from "@/service/types/admin/common";
 
-export type BoCommunityResourcesMetadata = AdminHero;
+export type BoCommunityResourcesMetadata = AdminMetadata;
 
 export type BoCommunityResourcesPage = {
+  metadata?: AdminMetadata;
   hero?: AdminHero;
   introduction?: AdminHelpBlock;
   producerHelper?: AdminHelpBlock;

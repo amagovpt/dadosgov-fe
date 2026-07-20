@@ -13,7 +13,7 @@ export async function getBoOrganizationsMetadata(
     query getBoOrganizationsMetadata {
       findBoOrganizationsSingleton {
         data {
-          hero {
+          metadata {
             ${locale} {
               title
               description
@@ -45,6 +45,12 @@ export async function getBoOrganizations(
     query getBoOrganizations {
       findBoOrganizationsSingleton {
         data {
+          metadata {
+            ${locale} {
+              title
+              description
+            }
+          }
           hero {
             ${locale} {
               title

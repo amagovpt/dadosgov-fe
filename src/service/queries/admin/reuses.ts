@@ -8,7 +8,7 @@ export async function getBoReusesMetadata(locale: string = "pt"): Promise<BoReus
     query getBoReusesMetadata {
       findBoReusesSingleton {
         data {
-          hero {
+          metadata {
             ${locale} {
               title
               description
@@ -38,6 +38,12 @@ export async function getBoReuses(locale: string = "pt"): Promise<BoReusesPage> 
     query getBoReuses {
       findBoReusesSingleton {
         data {
+          metadata {
+            ${locale} {
+              title
+              description
+            }
+          }
           hero {
             ${locale} {
               title

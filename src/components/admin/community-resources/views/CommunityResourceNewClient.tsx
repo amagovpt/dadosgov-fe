@@ -25,6 +25,7 @@ export default function CommunityResourceNewClient({
   const totalSteps = 2;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [publicPageUrl, setPublicPageUrl] = useState<string | null>(null);
+  const pageTitle = pageContent.hero?.title ?? "";
 
   const stepTitles: Record<number, string> = {
     1: t("admin-community-resources:form.steps.describe"),
@@ -41,7 +42,7 @@ export default function CommunityResourceNewClient({
           url: "/admin/me/community-resources",
         },
       ]}
-      title={t("admin-community-resources:form.registrationTitle")}
+      title={pageTitle}
     >
       {currentStep === 2 && publicPageUrl && (
         <div className="flex justify-end mb-16">

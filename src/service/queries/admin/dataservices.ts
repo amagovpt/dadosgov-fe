@@ -13,7 +13,7 @@ export async function getBoDataservicesMetadata(
     query getBoDataservicesMetadata {
       findBoDataservicesSingleton {
         data {
-          hero {
+          metadata {
             ${locale} {
               title
               description
@@ -45,6 +45,12 @@ export async function getBoDataservices(
     query getBoDataservices {
       findBoDataservicesSingleton {
         data {
+          metadata {
+            ${locale} {
+              title
+              description
+            }
+          }
           hero {
             ${locale} {
               title

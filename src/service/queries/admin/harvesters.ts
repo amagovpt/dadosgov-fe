@@ -13,7 +13,7 @@ export async function getBoHarvestersMetadata(
     query getBoHarvestersMetadata {
       findBoHarvestersSingleton {
         data {
-          hero {
+          metadata {
             ${locale} {
               title
               description
@@ -45,6 +45,12 @@ export async function getBoHarvesters(
     query getBoHarvesters {
       findBoHarvestersSingleton {
         data {
+          metadata {
+            ${locale} {
+              title
+              description
+            }
+          }
           hero {
             ${locale} {
               title

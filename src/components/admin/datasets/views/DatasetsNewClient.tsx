@@ -27,6 +27,7 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
     searchParams.get("datasetId"),
   );
   const [sessionKey, setSessionKey] = useState(0);
+  const pageTitle = pageContent.hero?.title ?? "";
 
   const buildStepUrl = (step: number, id?: string | null) => {
     const base = `/admin/datasets/new?step=${step}`;
@@ -48,7 +49,7 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
         { label: displayName || "...", url: "#" },
         { label: t("admin-datasets:form.breadcrumbs.datasets"), url: "/admin/me/datasets" },
       ]}
-      title={t("admin-datasets:form.registrationTitle")}
+      title={pageTitle}
     >
       {/* Stepper*/}
       <AdminStepper

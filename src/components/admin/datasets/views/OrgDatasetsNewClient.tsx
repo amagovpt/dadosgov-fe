@@ -31,6 +31,7 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
+  const pageTitle = pageContent.hero?.title ?? "";
 
   const orgBase = activeOrg ? `/admin/org/${activeOrg.id}` : "/admin/org";
 
@@ -56,7 +57,7 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
           url: resolvedOrgId ? `/admin/org/${resolvedOrgId}/datasets` : "#",
         },
       ]}
-      title={t("admin-datasets:form.registrationTitle")}
+      title={pageTitle}
     >
       <>
         {/* Stepper */}

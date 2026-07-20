@@ -28,6 +28,7 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
   const router = useRouter();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
+  const pageTitle = pageContent.hero?.title ?? "";
 
   const [orgName, setOrgName] = useState("");
   const [orgAcronym, setOrgAcronym] = useState("");
@@ -140,11 +141,11 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
         { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-organizations:title"), url: "/admin/system/organizations" },
         {
-          label: t("admin-organizations:form.registrationTitle"),
+          label: pageTitle,
           url: "/admin/organizations/new",
         },
       ]}
-      title={t("admin-organizations:form.registrationTitle")}
+      title={pageTitle}
     >
       <AdminStepper
         currentStep={currentStep}

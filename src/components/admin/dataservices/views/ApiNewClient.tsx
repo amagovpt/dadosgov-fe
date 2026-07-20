@@ -20,6 +20,7 @@ export default function ApiNewClient({ pageContent }: ApiNewClientProps) {
   const { displayName } = useCurrentUser();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
+  const pageTitle = pageContent.hero?.title ?? "";
   const stepTitles: Record<number, string> = {
     1: t("admin-dataservices:form.steps.describe"),
     2: t("admin-dataservices:form.steps.datasets"),
@@ -33,7 +34,7 @@ export default function ApiNewClient({ pageContent }: ApiNewClientProps) {
         { label: displayName || "...", url: "#" },
         { label: t("admin-dataservices:title"), url: "/admin/dataservices" },
       ]}
-      title={t("admin-dataservices:form.registrationTitle")}
+      title={pageTitle}
     >
       <AdminStepper
         currentStep={currentStep}

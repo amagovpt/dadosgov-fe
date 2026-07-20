@@ -20,6 +20,7 @@ export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
   const { displayName } = useCurrentUser();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
+  const pageTitle = pageContent.hero?.title ?? "";
 
   const stepTitles: Record<number, string> = {
     1: t("admin-reuses:form.steps.describe"),
@@ -34,7 +35,7 @@ export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
         { label: displayName || "...", url: "#" },
         { label: t("admin-reuses:title"), url: "/admin/me/reuses" },
       ]}
-      title={t("admin-reuses:form.registrationTitle")}
+      title={pageTitle}
     >
       <AdminStepper
         currentStep={currentStep}
