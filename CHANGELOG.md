@@ -6,6 +6,21 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(harvesters): create the organization harvester detail/config page and gate editing by role** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - On the org harvesters list, clicking the name or the edit pencil navigated
+    to `/admin/org/harvesters/{id}` — a route that never existed (the link was
+    also missing the `{orgId}` segment) — returning a 404. Added the route
+    `admin/org/[orgId]/harvesters/[slug]` reusing `HarvesterDetailClient`, and
+    fixed the list link/breadcrumb to `/admin/org/{orgId}/harvesters/{id}` (the
+    edit pencil opens the Configuração tab).
+  - The Configuração tab now enforces role-based editing in the organization
+    context: an org **editor** (backend `permissions.edit = false`) sees the
+    whole form read-only; an org **admin** may edit only Nome, Descrição and
+    Filtros, while the advanced fields (URL, Tipo/Implementação, Planeamento,
+    switches) stay editable to portal administrators only. Implemented via a
+    new `canEditAdvanced` prop on `HarvesterConfigForm` and per-field `disabled`
+    wiring (basic vs advanced).
+
 - **feat(dataservices): add a Swagger section to the API detail page** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - Mirrors data.gouv.fr: when an API exposes a `machine_documentation_url`,
     the detail page now shows a "Swagger" button in the technical box and a
