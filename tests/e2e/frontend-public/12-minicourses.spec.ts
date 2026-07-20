@@ -1,6 +1,6 @@
 import { test, expect } from "playwright/test";
 
-const MINICOURSES_URL = "/mini-courses";
+const MINICOURSES_URL = "/recursos/aprender/minicursos";
 
 test.describe("Mini-Courses Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -14,7 +14,7 @@ test.describe("Mini-Courses Page", () => {
     const heading = page.getByRole("heading", { name: /Minicursos/i, level: 1 });
     await expect(heading).toBeVisible({ timeout: 10000 });
 
-    const cards = page.locator("a[href^='/mini-courses/']");
+    const cards = page.locator("a[href^='/recursos/aprender/minicursos/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
   });
 
@@ -36,18 +36,18 @@ test.describe("Mini-Courses Page", () => {
   test("MC-04: Cards expose href slugs", async ({ page }) => {
     // Card links wrap image-only content; the surrounding article carries the
     // textual content. Validate the href slug instead of inner text.
-    const firstCard = page.locator("a[href^='/mini-courses/']").first();
+    const firstCard = page.locator("a[href^='/recursos/aprender/minicursos/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     const href = await firstCard.getAttribute("href");
-    expect(href).toMatch(/^\/pages\/mini-courses\/[a-z0-9-]+$/);
+    expect(href).toMatch(/^\/recursos\/aprender\/minicursos\/[a-zA-Z0-9-]+$/);
   });
 
   test("MC-05: Click card opens course detail", async ({ page }) => {
-    const firstLink = page.locator("a[href^='/mini-courses/']").first();
+    const firstLink = page.locator("a[href^='/recursos/aprender/minicursos/']").first();
     await expect(firstLink).toBeVisible({ timeout: 15000 });
     await firstLink.click();
-    await page.waitForURL(/\/pages\/mini-courses\/.+/, { timeout: 15000 });
+    await page.waitForURL(/\/recursos\/aprender\/minicursos\/.+/, { timeout: 15000 });
 
     const heading = page.locator("main h1").first();
     await expect(heading).toBeVisible({ timeout: 10000 });
@@ -55,9 +55,9 @@ test.describe("Mini-Courses Page", () => {
   });
 
   test("MC-06: Course detail exposes objectives toggle", async ({ page }) => {
-    const firstLink = page.locator("a[href^='/mini-courses/']").first();
+    const firstLink = page.locator("a[href^='/recursos/aprender/minicursos/']").first();
     await firstLink.click();
-    await page.waitForURL(/\/pages\/mini-courses\/.+/, { timeout: 15000 });
+    await page.waitForURL(/\/recursos\/aprender\/minicursos\/.+/, { timeout: 15000 });
 
     const objectivesBtn = page.getByRole("button", { name: /Ver objetivos/i });
     await expect(objectivesBtn).toBeVisible({ timeout: 10000 });
@@ -73,7 +73,7 @@ test.describe("Mini-Courses Page", () => {
   });
 
   test("MC-08: Listing renders multiple minicourses", async ({ page }) => {
-    const cards = page.locator("a[href^='/mini-courses/']");
+    const cards = page.locator("a[href^='/recursos/aprender/minicursos/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
     const count = await cards.count();
     expect(count).toBeGreaterThan(1);
