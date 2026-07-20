@@ -10,6 +10,8 @@ interface DataserviceDescriptionSectionProps {
   baseApiUrl: string;
   machineDocUrl: string;
   technicalDocUrl: string;
+  rateLimiting: string;
+  rateLimitingUrl: string;
   availability: string;
   hasApiNameError: boolean;
   hasApiDescriptionError: boolean;
@@ -19,6 +21,8 @@ interface DataserviceDescriptionSectionProps {
   onBaseApiUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onMachineDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onTechnicalDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onRateLimitingChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onRateLimitingUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onAvailabilityChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -29,6 +33,8 @@ export default function DataserviceDescriptionSection({
   baseApiUrl,
   machineDocUrl,
   technicalDocUrl,
+  rateLimiting,
+  rateLimitingUrl,
   availability,
   hasApiNameError,
   hasApiDescriptionError,
@@ -38,6 +44,8 @@ export default function DataserviceDescriptionSection({
   onBaseApiUrlChange,
   onMachineDocUrlChange,
   onTechnicalDocUrlChange,
+  onRateLimitingChange,
+  onRateLimitingUrlChange,
   onAvailabilityChange,
 }: DataserviceDescriptionSectionProps) {
   return (
@@ -96,6 +104,20 @@ export default function DataserviceDescriptionSection({
           id="api-doc-technical"
           value={technicalDocUrl}
           onChange={onTechnicalDocUrlChange}
+        />
+        <InputText
+          label="Limite de chamadas"
+          placeholder="Insira aqui"
+          id="api-rate-limit"
+          value={rateLimiting}
+          onChange={onRateLimitingChange}
+        />
+        <InputText
+          label="Link para a documentação sobre limites de chamadas"
+          placeholder="Insira o URL aqui"
+          id="api-rate-limit-url"
+          value={rateLimitingUrl}
+          onChange={onRateLimitingUrlChange}
         />
         <InputText
           label="Disponibilidade"

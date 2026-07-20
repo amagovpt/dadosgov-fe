@@ -30,7 +30,11 @@ import AuxiliarList from "@/components/admin/AuxiliarList";
 import { getDataserviceAuxiliarItems } from "@/components/admin/dataservices/dataservicesAuxiliarItems";
 import AppIcon from "@/components/Primitives/AppIcon";
 import TextLink from "@/components/Primitives/TextLink";
-import { fetchDataservice, updateDataservice, deleteDataservice } from "@/service/api/dataservices";
+import {
+  fetchDataservice,
+  updateDataservice,
+  deleteDataservice,
+} from "@/service/api/dataservices";
 import { fetchDataset, fetchDatasets, fetchMyDatasets } from "@/service/api/datasets";
 import { fetchOrgDatasets } from "@/service/api/organizations";
 import { searchDatasets } from "@/service/api/search";
@@ -150,7 +154,8 @@ export default function DataservicesEditClient() {
 
   // Preload the dataset pool (user's own + their organizations' datasets).
   useEffect(() => {
-    const dedupe = (items: Dataset[]) => Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const dedupe = (items: Dataset[]) =>
+      Array.from(new Map(items.map((d) => [d.id, d])).values());
     const personal = fetchMyDatasets(1, 100);
     const orgs = (user?.organizations || []).map((org) => fetchOrgDatasets(org.id, 1, 100));
     Promise.all([personal, ...orgs])
@@ -456,7 +461,9 @@ export default function DataservicesEditClient() {
           variant="primary"
           appearance="outline"
           disabled={!!(dataservice?.archived_at || dataservice?.deleted_at)}
-          onClick={() => dataservice && window.open(`/dataservices/${dataservice.slug}`, "_blank")}
+          onClick={() =>
+            dataservice && window.open(`/dataservices/${dataservice.slug}`, "_blank")
+          }
         >
           <span className="admin-edit-info__btn-content">
             <Icon name="agora-line-eye" className="h-16 w-16" />
@@ -532,9 +539,9 @@ export default function DataservicesEditClient() {
                             <>
                               <strong>Modifique a visibilidade da API.</strong>
                               <br />
-                              Esta API encontra-se atualmente em <strong>modo rascunho</strong>.
-                              Apenas o produtor e os membros da organização a podem visualizar e
-                              editar.
+                              Esta API encontra-se atualmente em{" "}
+                              <strong>modo rascunho</strong>. Apenas o produtor e os membros
+                              da organização a podem visualizar e editar.
                             </>
                           }
                         />
@@ -556,7 +563,7 @@ export default function DataservicesEditClient() {
                       noValidate
                       onSubmit={(e) => e.preventDefault()}
                     >
-                      <p className="text-base leading-7 text-neutral-900">
+                      <p className="text-neutral-900 text-base leading-7">
                         Os campos marcados com um asterisco ( * ) são obrigatórios.
                       </p>
 
@@ -632,7 +639,7 @@ export default function DataservicesEditClient() {
                       <h2 className="admin-page__section-title">Acesso</h2>
                       <div className="admin-page__fields-group">
                         <div className="flex flex-col gap-8">
-                          <span className="text-base font-medium leading-7 text-primary-900">
+                          <span className="text-primary-900 text-base font-medium leading-7">
                             Tipo de acesso
                           </span>
                           <div className="flex flex-row gap-4">
@@ -662,7 +669,7 @@ export default function DataservicesEditClient() {
 
                         {accessType === "restricted" && (
                           <>
-                            <div className="grid grid-cols-1 items-end gap-8 md:grid-cols-3">
+                            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                               {AUDIENCE_ROLES.map((role) => (
                                 <InputSelect
                                   key={role.role}
@@ -758,7 +765,7 @@ export default function DataservicesEditClient() {
                         />
                       </div>
 
-                      <div className="admin-page__actions mt-24 flex justify-end">
+                      <div className="admin-page__actions flex justify-end mt-24">
                         <Button
                           variant="primary"
                           hasIcon
@@ -825,7 +832,7 @@ export default function DataservicesEditClient() {
                   <aside className="admin-page__auxiliar">
                     <div className="admin-page__auxiliar-inner">
                       <div className="admin-page__auxiliar-header">
-                        <AppIcon name="agora-line-question-mark" className="h-24 w-24" />
+                        <AppIcon name="agora-line-question-mark" className="w-24 h-24" />
                         <h2 className="admin-page__auxiliar-title">Auxiliar</h2>
                       </div>
                       <AuxiliarList items={auxiliarItems} />
@@ -839,7 +846,7 @@ export default function DataservicesEditClient() {
             <Tab>
               <TabHeader>Conjuntos de dados associados ({selectedDatasets.length})</TabHeader>
               <TabBody>
-                <div className="admin-page__form-area mt-24">
+                <div className="mt-24 admin-page__form-area">
                   <StatusCard
                     variant="informative"
                     showIcon
@@ -862,7 +869,9 @@ export default function DataservicesEditClient() {
                       onSearchInputChange={setDatasetSearch}
                       onChange={(options) => {
                         const ids = options.map((o) => String(o.value));
-                        setDropdownDatasets(availableDatasets.filter((d) => ids.includes(d.id)));
+                        setDropdownDatasets(
+                          availableDatasets.filter((d) => ids.includes(d.id))
+                        );
                       }}
                     >
                       <DropdownSection name="datasets">
@@ -934,7 +943,7 @@ export default function DataservicesEditClient() {
                       </div>
                     </div>
 
-                    <div className="admin-page__actions mt-24 flex justify-end">
+                    <div className="admin-page__actions flex justify-end mt-24">
                       <Button
                         variant="primary"
                         hasIcon
