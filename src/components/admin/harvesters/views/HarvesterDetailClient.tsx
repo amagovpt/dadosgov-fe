@@ -31,6 +31,13 @@ import { type HarvesterFormField } from "@/components/admin/harvesters/form-stat
 
 interface HarvesterDetailClientProps {
   slug: string;
+  // When set, the harvester is viewed inside an organization's back-office
+  // (route /admin/org/{orgId}/harvesters/{id}). This scopes the breadcrumb to
+  // the organization and restricts the "Configuração" tab so an org-admin may
+  // only edit the basic fields (name, description, filters) — the advanced
+  // fields (URL, implementation type, schedule, toggles) stay editable to
+  // portal administrators only.
+  orgId?: string;
 }
 
 function CopyUrlButton({ url }: { url: string }) {
@@ -89,7 +96,7 @@ function DeleteHarvesterPopupContent({
   );
 }
 
-export default function HarvesterDetailClient({ slug }: HarvesterDetailClientProps) {
+export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -238,11 +245,26 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
   const validationState = source.validation?.state || "pending";
   const validationInfo = VALIDATION_LABELS[validationState] || VALIDATION_LABELS.pending;
 
+  // In the organization context an org-admin may edit only the basic fields; the
+  // advanced fields (URL, implementation type, schedule, toggles) are reserved
+  // for portal administrators. In the system context, whoever can edit can edit
+  // everything.
+  const canEditSource = can(source, "edit");
+  const canEditAdvanced = orgId ? isAdmin : canEditSource;
+
+  const breadcrumbItems = orgId
+    ? [
+        { label: "Administração", url: "/admin" },
+        { label: "Harvesters", url: `/admin/org/${orgId}/harvesters` },
+        { label: source.name, url: "#" },
+      ]
+    : [
+        { label: "Sistema", url: "/admin/system/harvesters" },
+        { label: source.name, url: "#" },
+      ];
+
   return (
-    <AdminLayout breadcrumbItems={[
-      { label: "Sistema", url: "/admin/system/harvesters" },
-      { label: source.name, url: "#" },
-    ]}
+    <AdminLayout breadcrumbItems={breadcrumbItems}
       title={source.name}
     >
       {/* Metadata info */}
@@ -402,7 +424,8 @@ export default function HarvesterDetailClient({ slug }: HarvesterDetailClientPro
                 <DeleteHarvesterPopupContent onClose={hide} onConfirm={handleDeleteHarvester} />,
                 { title: "Eliminar o harvester", closeAriaLabel: "Fechar", dimensions: "m" }
               )}
-              canEdit={can(source, "edit")}
+              canEdit={canEditSource}
+              canEditAdvanced={canEditAdvanced}
               canDelete={can(source, "delete")}
             />
           </TabBody>
