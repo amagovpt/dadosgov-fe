@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { Breadcrumb, Button } from '@ama-pt/agora-design-system';
+import { Button } from '@ama-pt/agora-design-system';
+import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';

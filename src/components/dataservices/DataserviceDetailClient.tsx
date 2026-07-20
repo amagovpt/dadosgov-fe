@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button, Icon, Breadcrumb, Pill } from "@ama-pt/agora-design-system";
+import { Button, Icon, Pill } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import { Dataservice } from "@/service/types/dataservice";
 import { fetchDataservice, fetchSwaggerSpec } from "@/service/api/dataservices";
 import { DataserviceSwagger } from "@/components/dataservices/DataserviceSwagger";

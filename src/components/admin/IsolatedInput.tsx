@@ -28,6 +28,7 @@ interface IsolatedInputProps {
   errorFeedbackText?: string;
   required?: boolean;
   maxLength?: number;
+  disabled?: boolean;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   onChange?: (value: string) => void;
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
@@ -44,6 +45,7 @@ const IsolatedInput = React.memo(function IsolatedInput({
   errorFeedbackText,
   required,
   maxLength,
+  disabled,
   inputMode,
   onChange,
   onKeyDown,
@@ -85,6 +87,7 @@ const IsolatedInput = React.memo(function IsolatedInput({
       errorFeedbackText={errorFeedbackText}
       required={required}
       maxLength={maxLength}
+      disabled={disabled}
       inputMode={inputMode}
     />
   );

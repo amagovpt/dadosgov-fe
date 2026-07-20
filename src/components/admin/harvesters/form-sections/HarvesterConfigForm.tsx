@@ -85,6 +85,12 @@ interface HarvesterConfigFormProps {
   // only preview. Default true for the create flow (no source yet).
   canEdit?: boolean;
   canDelete?: boolean;
+  // Whether the "advanced" fields (URL, implementation type, schedule, toggles)
+  // may be edited. In the organization context an org-admin may only edit the
+  // basic fields (name, description, filters), so `canEditAdvanced` is false for
+  // them while `canEdit` stays true. Defaults to `canEdit` (system context: an
+  // editor with edit rights may change everything).
+  canEditAdvanced?: boolean;
 }
 
 export function HarvesterConfigForm({
@@ -121,8 +127,15 @@ export function HarvesterConfigForm({
   onDelete,
   canEdit = true,
   canDelete = true,
+  canEditAdvanced,
 }: HarvesterConfigFormProps) {
   const [scheduleError, setScheduleError] = React.useState<string | null>(null);
+
+  // Basic fields (name, description, filters) follow `canEdit`; advanced fields
+  // (URL, implementation type, schedule, toggles) follow `canEditAdvanced`,
+  // which defaults to `canEdit` when not provided.
+  const basicDisabled = !canEdit;
+  const advancedDisabled = !(canEditAdvanced ?? canEdit);
 
   const handleScheduleChange = (value: string) => {
     setHarvesterSchedule(value);
@@ -210,6 +223,9 @@ export function HarvesterConfigForm({
             descriptionLabel="Descrição *"
             descriptionPlaceholder=""
             urlPlaceholder=""
+            nameDisabled={basicDisabled}
+            descriptionDisabled={basicDisabled}
+            urlDisabled={advancedDisabled}
             onHarvesterNameChange={(e) => {
               setHarvesterName(e.target.value);
               if (e.target.value.trim()) clearError("harvesterName");
@@ -230,6 +246,7 @@ export function HarvesterConfigForm({
               placeholder=""
               id="harvester-type"
               defaultValue={selectedBackend}
+              disabled={advancedDisabled}
               searchable
               searchInputPlaceholder="Escreva para pesquisar..."
               searchNoResultsText="Nenhum resultado encontrado"
@@ -260,6 +277,7 @@ export function HarvesterConfigForm({
                             placeholder=""
                             id={`filter-mode-${index}`}
                             defaultValue={filter.mode}
+                            disabled={basicDisabled}
                             onChange={(opts) => {
                               if (opts.length > 0)
                                 updateFilter(index, "mode", opts[0].value as string);
@@ -280,6 +298,7 @@ export function HarvesterConfigForm({
                             placeholder="Selecione uma chave"
                             id={`filter-type-${index}`}
                             defaultValue={filter.type}
+                            disabled={basicDisabled}
                             onChange={(opts) => {
                               if (opts.length > 0)
                                 updateFilter(index, "type", opts[0].value as string);
@@ -307,6 +326,7 @@ export function HarvesterConfigForm({
                               placeholder=""
                               id={`filter-value-${index}`}
                               defaultValue={filter.value}
+                              disabled={basicDisabled}
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 updateFilter(index, "value", e.target.value)
                               }
@@ -320,6 +340,7 @@ export function HarvesterConfigForm({
                             leadingIcon="agora-line-trash"
                             leadingIconHover="agora-solid-trash"
                             onClick={() => removeFilter(index)}
+                            disabled={basicDisabled}
                             aria-label="Excluir filtro"
                           >
                             {" "}
@@ -338,6 +359,7 @@ export function HarvesterConfigForm({
                     leadingIcon="agora-line-plus-circle"
                     leadingIconHover="agora-solid-plus-circle"
                     onClick={addFilter}
+                    disabled={basicDisabled}
                   >
                     Adicionar um filtro
                   </Button>
@@ -368,6 +390,7 @@ export function HarvesterConfigForm({
                           leadingIcon="agora-line-trash"
                           leadingIconHover="agora-solid-trash"
                           onClick={() => removeFilter(filter.index)}
+                          disabled={basicDisabled}
                           aria-label="Remover filtro não suportado"
                         >
                           {" "}
@@ -384,11 +407,13 @@ export function HarvesterConfigForm({
                 label="Ativado"
                 checked={isEnabled}
                 onChange={() => setIsEnabled((v) => !v)}
+                disabled={advancedDisabled}
               />
               <Switch
                 label="Arquivamento automático"
                 checked={isAutoArchive}
                 onChange={() => setIsAutoArchive((v) => !v)}
+                disabled={advancedDisabled}
               />
             </div>
           </div>
@@ -402,6 +427,7 @@ export function HarvesterConfigForm({
               id="harvester-schedule"
               defaultValue={loadedSchedule}
               maxLength={SCHEDULE_MAX_LENGTH}
+              disabled={advancedDisabled}
               onChange={handleScheduleChange}
               hasError={!!scheduleError}
               hasFeedback={!!scheduleError}
