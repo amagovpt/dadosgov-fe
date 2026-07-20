@@ -49,9 +49,7 @@ export default function DataserviceAccessSection({
 
       <div className="admin-page__fields-group">
         <div className="flex flex-col gap-8">
-          <span className="text-primary-900 text-base font-medium leading-7">
-            Tipo de acesso
-          </span>
+          <span className="text-base font-medium leading-7 text-primary-900">Tipo de acesso</span>
           <div className="flex flex-row gap-4">
             <RadioButton
               label="Aberto"
@@ -79,7 +77,7 @@ export default function DataserviceAccessSection({
 
         {accessType === "restricted" && (
           <>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div className="grid grid-cols-1 items-end gap-8 md:grid-cols-3">
               {AUDIENCE_ROLES.map((role) => (
                 <InputSelect
                   key={role.role}
@@ -109,9 +107,7 @@ export default function DataserviceAccessSection({
               label="Motivo da restrição"
               placeholder="Selecione uma opção"
               id="access-reason-category"
-              onChange={(options) =>
-                onReasonCategoryChange((options[0]?.value as string) || "")
-              }
+              onChange={(options) => onReasonCategoryChange((options[0]?.value as string) || "")}
             >
               <DropdownSection name="reason-category">
                 {RESTRICTION_REASONS.map((reason) => (
