@@ -3,7 +3,7 @@ import { test, expect, type Page } from "playwright/test";
 const DATASERVICES_URL = "/dataservices";
 
 // Dataservice cards use Agora's <CardLinks> with blockedLink=true (mirroring
-// the reuses listing), so the only real <a href="/pages/dataservices/{slug}">
+// the reuses listing), so the only real <a href="/dataservices/{slug}">
 // is suppressed and navigation happens via onClick on a `.cursor-pointer` div.
 // Tests rely on this affordance rather than href matching.
 const CARD_SELECTOR = "div.cursor-pointer";
@@ -48,8 +48,8 @@ test.describe("Dataservices (APIs) Listing", () => {
     const firstCard = page.locator(CARD_SELECTOR).first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
     await firstCard.click();
-    await page.waitForURL(/\/pages\/dataservices\/.+/, { timeout: 15000 });
-    await expect(page).toHaveURL(/\/pages\/dataservices\/.+/);
+    await page.waitForURL(/dataservices\/.+/, { timeout: 15000 });
+    await expect(page).toHaveURL(/dataservices\/.+/);
   });
 
   test("API-04: Search field filters results and persists in URL", async ({ page }) => {
@@ -136,7 +136,7 @@ test.describe("Dataservices (APIs) Listing", () => {
     const firstCard = page.locator(CARD_SELECTOR).first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
     await firstCard.click();
-    await page.waitForURL(/\/pages\/dataservices\/.+/, { timeout: 15000 });
+    await page.waitForURL(/dataservices\/.+/, { timeout: 15000 });
 
     await expect(page.getByText("Informações", { exact: true }).first()).toBeVisible({
       timeout: 15000,

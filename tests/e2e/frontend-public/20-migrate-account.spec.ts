@@ -22,7 +22,7 @@ test.describe("Migrate Account Page", () => {
     // No pending migration → redirect to /login.
     // With pending migration → search/confirm step rendered.
     const url = page.url();
-    expect(url).toMatch(/\/pages\/(login|migrate-account)/);
+    expect(url).toMatch(/(login|migrate-account)/);
   });
 
   test("MA-02: Breadcrumb shows Home › Migrar conta when migration is pending", async ({

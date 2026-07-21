@@ -10,7 +10,7 @@ interface DataserviceDescriptionSectionProps {
   baseApiUrl: string;
   machineDocUrl: string;
   technicalDocUrl: string;
-  rateLimiting: string;
+  availability: string;
   hasApiNameError: boolean;
   hasApiDescriptionError: boolean;
   onApiNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -19,7 +19,7 @@ interface DataserviceDescriptionSectionProps {
   onBaseApiUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onMachineDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onTechnicalDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onRateLimitingChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onAvailabilityChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function DataserviceDescriptionSection({
@@ -29,7 +29,7 @@ export default function DataserviceDescriptionSection({
   baseApiUrl,
   machineDocUrl,
   technicalDocUrl,
-  rateLimiting,
+  availability,
   hasApiNameError,
   hasApiDescriptionError,
   onApiNameChange,
@@ -38,7 +38,7 @@ export default function DataserviceDescriptionSection({
   onBaseApiUrlChange,
   onMachineDocUrlChange,
   onTechnicalDocUrlChange,
-  onRateLimitingChange,
+  onAvailabilityChange,
 }: DataserviceDescriptionSectionProps) {
   return (
     <>
@@ -98,11 +98,11 @@ export default function DataserviceDescriptionSection({
           onChange={onTechnicalDocUrlChange}
         />
         <InputText
-          label="Limite de chamadas"
-          placeholder="Insira aqui"
-          id="api-rate-limit"
-          value={rateLimiting}
-          onChange={onRateLimitingChange}
+          label="Disponibilidade"
+          placeholder="99,9"
+          id="api-availability"
+          value={availability}
+          onChange={onAvailabilityChange}
         />
       </div>
     </>

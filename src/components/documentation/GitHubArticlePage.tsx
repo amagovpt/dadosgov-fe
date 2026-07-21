@@ -5,7 +5,7 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
-import { Breadcrumb } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 interface BreadcrumbItem {
   label: string;
   url: string;
