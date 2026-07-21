@@ -6,6 +6,17 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(breadcrumb): add a dynamic breadcrumb derived from the current route** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+  - New `BreadcrumbDynamic` client component + pure `buildBreadcrumbItems` helper
+    derive the crumbs from `usePathname()` / `stripLocale` instead of hand-built
+    arrays, translating each segment via the `common` namespace with a slug
+    "prettify" fallback (`prettifySegment`) and per-segment `overrides` (for
+    dynamic id segments such as a dataset id → its title).
+  - Reuses the existing `Breadcrumb` primitive (pageless-URL sanitization) and
+    widens `HeroGeneral`'s `breadcrumbItems` label to `ReactNode` to match it.
+  - Migrated the datasets listing hero to derive its breadcrumb from the route
+    instead of a hardcoded `[home, datasets]` array.
+
 - **refactor(i18n): make the `formatDate` date helpers locale-aware** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - `formatDateToTimeAgo` now selects the date-fns locale from the passed
     `locale` (`pt` → `pt`, `en` → `en-GB`, previously silently `en-US`) and
