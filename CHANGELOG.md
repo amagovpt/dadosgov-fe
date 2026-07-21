@@ -6,6 +6,21 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **refactor(i18n): make the `formatDate` date helpers locale-aware** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - `formatDateToTimeAgo` now selects the date-fns locale from the passed
+    `locale` (`pt` → `pt`, `en` → `en-GB`, previously silently `en-US`) and
+    strips both the Portuguese and English fuzzy prefixes (`cerca de`,
+    `about`, `almost`, …) so the distance reads cleanly in either language.
+  - `formatDateLong` gained a `locale` argument mapping to the `pt-PT` /
+    `en-GB` Intl locale instead of the hardcoded `pt-PT`, plus an
+    invalid-date guard so it falls back to the original string (matching the
+    old inline `try/catch` behaviour).
+  - `pt` stays the default on both, so existing call sites are unchanged;
+    callers opt into `en` by passing the active locale (`i18n.language`).
+  - Removed three duplicated inline `formatDate` copies (`DatasetInfo`,
+    `ReuseDetailClient`, `PublicProfileClient`) — all now consume the shared
+    `formatDateLong(dateStr, i18n.language)`, so the long date follows the
+    active locale instead of being hardcoded to Portuguese.
 - **fix(routing): retire the legacy `/pages` URL segment for good** [#483](https://github.com/amagovpt/dadosgov-fe/pull/483)
   - Public routes moved from `src/app/pages/...` to the `[locale]/(pages)`
     route group a while ago, so URLs no longer carry `/pages` — but old links

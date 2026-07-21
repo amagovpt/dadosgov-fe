@@ -30,10 +30,12 @@ import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
 import AppIcon from "../Primitives/AppIcon";
 import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
-import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { formatDateToTimeAgo, formatDateLong } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import { useTranslation } from "react-i18next";
 
 export default function PublicProfileClient() {
+  const { i18n } = useTranslation("common");
   const { user, isLoading: isAuthLoading } = useAuth();
   const params = useParams();
   const router = useRouter();
@@ -171,14 +173,6 @@ export default function PublicProfileClient() {
   const handleItemsPerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
     setCurrentPage(1);
-  };
-
-  const formatDate = (dateStr: string) => {
-    try {
-      return format(new Date(dateStr), "d 'de' MMMM 'de' yyyy", { locale: pt });
-    } catch {
-      return dateStr;
-    }
   };
 
   const formatShortDate = (dateStr: string) => {
@@ -657,7 +651,11 @@ export default function PublicProfileClient() {
                   }
                   date={
                     <span className="font-[300]">
-                      Atualizado {formatDate(reuse.last_modified || reuse.created_at)}
+                      Atualizado{" "}
+                      {formatDateLong(
+                        reuse.last_modified || reuse.created_at,
+                        i18n.language as "pt" | "en"
+                      )}
                     </span>
                   }
                   links={[

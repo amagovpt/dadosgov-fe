@@ -41,8 +41,10 @@ export default function ReusesClient({
   allOrganizations = [],
   dataCms,
 }: ReusesClientProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const { t: tr } = useTranslation("reuses");
+
+  const { language } = i18n;
 
   const REUSE_SORT_LABELS: Record<string, string> = {
     relevancia: tr("sort.relevancia"),
@@ -76,7 +78,7 @@ export default function ReusesClient({
           { label: t("home"), url: "/" },
           { label: t("reuses"), url: "/reuses" },
         ]}
-        subtitle={<p className="max-w-[592px] text-primary-100">{ dataCms?.hero.subtitle ?? tr("hero.subtitle")}</p>}
+        subtitle={<p className="max-w-[592px] text-primary-100">{dataCms?.hero.subtitle ?? tr("hero.subtitle")}</p>}
       >
         <PublishDropdown darkMode={true} outline={false} />
       </HeroGeneral>
@@ -159,7 +161,7 @@ export default function ReusesClient({
                   />
                 ) : reuses.length > 0 ? (
                   reuses.map((reuse) => {
-                    const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at);
+                    const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at, language as "pt" | "en");
                     return (
                       <div key={reuse.id} className="h-full">
                         <CardLinks
