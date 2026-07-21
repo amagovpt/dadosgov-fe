@@ -107,7 +107,7 @@ export const DatasetsFilters = ({
       formato: {
         title: tds("filters.format.label"),
         options: [
-          { id: "all", label: tds("filters.all"), description: undefined as string | undefined },
+          { id: "all", label: t("filters.all"), description: undefined as string | undefined },
           {
             id: "tabular",
             label: tds("filters.format.options.tabular"),
@@ -136,22 +136,22 @@ export const DatasetsFilters = ({
         ],
       },
       atualizacao: {
-        title: tds("filters.update.label"),
+        title: t("filters.update.label"),
         options: [
-          { id: "all", label: tds("filters.all"), description: undefined as string | undefined },
+          { id: "all", label: t("filters.all"), description: undefined as string | undefined },
           {
             id: "30_days",
-            label: tds("filters.update.options.30_days"),
+            label: t("filters.update.options.30_days"),
             description: undefined as string | undefined,
           },
           {
             id: "12_months",
-            label: tds("filters.update.options.12_months"),
+            label: t("filters.update.options.12_months"),
             description: undefined as string | undefined,
           },
           {
             id: "3_years",
-            label: tds("filters.update.options.3_years"),
+            label: t("filters.update.options.3_years"),
             description: undefined as string | undefined,
           },
         ],
@@ -159,7 +159,7 @@ export const DatasetsFilters = ({
       rotulo: {
         title: tds("filters.type.label"),
         options: [
-          { id: "all", label: tds("filters.all"), description: undefined as string | undefined },
+          { id: "all", label: t("filters.all"), description: undefined as string | undefined },
           {
             id: "high_value",
             label: tds("filters.type.options.high_value"),
@@ -168,7 +168,7 @@ export const DatasetsFilters = ({
         ],
       },
     }),
-    [tds]
+    [tds, t]
   );
 
   type ToggleFilterKey = keyof typeof DATASET_TOGGLE_FILTERS;
@@ -465,7 +465,7 @@ export const DatasetsFilters = ({
             router.replace("/datasets", { scroll: false });
           }}
         >
-          Limpar filtros
+          {t("filters.clear")}
         </Button>
       </div>
     </div>

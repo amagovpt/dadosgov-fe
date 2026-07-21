@@ -1,0 +1,47 @@
+{
+  "hero": {
+    "subtitle": "Discover studies, visualisations and applications useful to society, which reuse public data available on this portal."
+  },
+  "search": {
+    "placeholder": "Search reuses..."
+  },
+  "sort": {
+    "relevancia": "Relevance",
+    "recentes": "Most recent",
+    "antigos": "Oldest",
+    "subscritores": "Subscribers",
+    "ariaLabel": "Sort by {{label}}"
+  },
+  "card": {
+    "category": "Reuse",
+    "updatedAgo": "Updated {{timeAgo}} ago",
+    "views": "Views",
+    "datasets": "Datasets",
+    "favorites": "Favorites",
+    "datasetsCount": "{{count}} datasets"
+  },
+  "theReuses": "the reuses",
+  "detail": {
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
+    "viewReuse": "View reuse",
+    "edit": "Edit",
+    "draft": "DRAFT",
+    "createdBy": "Created by:",
+    "noOrganization": "No organisation",
+    "defaultType": "Application",
+    "description": "Description",
+    "discussions": "Discussions",
+    "tags": "Tags",
+    "lastUpdate": "Last update",
+    "creationDate": "Creation date",
+    "discussionQuestion": "Is your question not about this reuse?",
+    "visitForum": "Visit our forum.",
+    "notFound": "Reuse not found.",
+    "datasetsLoadError": "Could not load the associated datasets.",
+    "associatedDatasets_one": "{{count}} associated dataset",
+    "associatedDatasets_other": "{{count}} associated datasets",
+    "externalDatasets_one": "{{count}} external dataset",
+    "externalDatasets_other": "{{count}} external datasets"
+  }
+}
