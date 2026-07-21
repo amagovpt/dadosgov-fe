@@ -6,7 +6,7 @@ import { twJoin } from 'tailwind-merge';
 
 interface HeroGeneralProps {
   title: React.ReactNode;
-  breadcrumbItems?: { label: string; url: string }[];
+  breadcrumbItems?: { label: React.ReactNode; url: string }[];
   subtitle?: React.ReactNode;
   children?: React.ReactNode;
   variant?: 'dark' | 'light';
