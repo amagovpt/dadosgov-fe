@@ -96,6 +96,35 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Legacy URL scheme: public routes used to live under `/pages/*`
+  // (old `src/app/pages/...` structure, before the `[locale]/(pages)` route
+  // group). Links in already-sent emails, bookmarks and search-engine indexes
+  // still carry the prefix, so strip it permanently. Renamed routes get an
+  // explicit mapping before the catch-all; the locale-prefixed variants cover
+  // links that were minted after i18n routing but before the prefix removal.
+  async redirects() {
+    const legacyRenames = [
+      { legacy: "posts/:slug", current: "noticias/:slug" },
+      { legacy: "support", current: "ajuda-e-contactos" },
+      { legacy: "resources/publications", current: "recursos/publicacoes" },
+    ];
+    return [
+      ...legacyRenames.flatMap(({ legacy, current }) => [
+        { source: `/pages/${legacy}`, destination: `/${current}`, permanent: true },
+        {
+          source: `/:locale(pt|en)/pages/${legacy}`,
+          destination: `/:locale/${current}`,
+          permanent: true,
+        },
+      ]),
+      { source: "/pages/:path*", destination: "/:path*", permanent: true },
+      {
+        source: "/:locale(pt|en)/pages/:path*",
+        destination: "/:locale/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [

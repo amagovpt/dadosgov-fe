@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Breadcrumb } from "@ama-pt/agora-design-system";
+import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";

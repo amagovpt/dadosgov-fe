@@ -310,7 +310,7 @@ export default function ApiRegistrationClient({
                 baseApiUrl={baseApiUrl}
                 machineDocUrl={machineDocUrl}
                 technicalDocUrl={technicalDocUrl}
-                rateLimiting={rateLimiting}
+                availability={availability}
                 hasApiNameError={hasError("apiName")}
                 hasApiDescriptionError={hasError("apiDescription")}
                 onApiNameChange={(event) => {
@@ -329,7 +329,7 @@ export default function ApiRegistrationClient({
                 onBaseApiUrlChange={(event) => setBaseApiUrl(event.target.value)}
                 onMachineDocUrlChange={(event) => setMachineDocUrl(event.target.value)}
                 onTechnicalDocUrlChange={(event) => setTechnicalDocUrl(event.target.value)}
-                onRateLimitingChange={(event) => setRateLimiting(event.target.value)}
+                onAvailabilityChange={(event) => setAvailability(event.target.value)}
               />
 
               <DataserviceAccessSection
@@ -350,10 +350,10 @@ export default function ApiRegistrationClient({
               />
 
               <DataserviceTermsSection
+                rateLimiting={rateLimiting}
                 rateLimitingUrl={rateLimitingUrl}
-                availability={availability}
+                onRateLimitingChange={(event) => setRateLimiting(event.target.value)}
                 onRateLimitingUrlChange={(event) => setRateLimitingUrl(event.target.value)}
-                onAvailabilityChange={(event) => setAvailability(event.target.value)}
               />
 
               <AdminStepActions

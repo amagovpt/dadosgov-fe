@@ -21,7 +21,7 @@ test.describe("Backoffice - Admin Discussions", () => {
     // With the seeded org membership the page renders /admin/org/discussions;
     // without it the user is redirected to /admin/me/*. Either is acceptable —
     // a backoffice route must resolve.
-    expect(url).toMatch(/\/pages\/admin\//);
+    expect(url).toMatch(/admin\//);
   });
 
   test.skip(
@@ -69,7 +69,7 @@ test.describe("Backoffice - Admin Discussions", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    expect(page.url()).toMatch(/\/pages\/(login|admin)/);
+    expect(page.url()).toMatch(/(login|admin)/);
     await context.close();
   });
 });

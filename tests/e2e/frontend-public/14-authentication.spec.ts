@@ -24,7 +24,7 @@ test.describe("Authentication Page", () => {
     const authLink = page.locator('header a[href="/login"]').first();
     await expect(authLink).toBeVisible({ timeout: 10000 });
     await authLink.click();
-    await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
+    await page.waitForURL(/login/, { timeout: 10000 });
     expect(page.url()).toContain("/login");
   });
 
@@ -131,7 +131,7 @@ test.describe("Authentication Page", () => {
 
   test("AU-11: Register page redirects to login", async ({ page }) => {
     await page.goto("/register");
-    await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
+    await page.waitForURL(/login/, { timeout: 10000 });
     expect(page.url()).toContain("/login");
   });
 
@@ -143,7 +143,7 @@ test.describe("Authentication Page", () => {
     page,
   }) => {
     await page.goto("/loginregister");
-    await page.waitForURL(/\/pages\/login/, { timeout: 10000 });
+    await page.waitForURL(/login/, { timeout: 10000 });
     expect(page.url()).toContain("/login");
   });
 
@@ -153,10 +153,10 @@ test.describe("Authentication Page", () => {
     await page.goto("/migrate-account");
     await page.waitForLoadState("networkidle");
     // MigrateAccountClient routes to /login when no migration is pending.
-    await page.waitForURL(/\/pages\/(login|migrate-account)/, {
+    await page.waitForURL(/(login|migrate-account)/, {
       timeout: 10000,
     });
-    expect(page.url()).toMatch(/\/pages\/(login|migrate-account)/);
+    expect(page.url()).toMatch(/(login|migrate-account)/);
   });
 });
 
