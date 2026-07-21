@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
+import { getBoReuses, getBoReusesMetadata } from "@/service/queries/admin/reuses";
 import OrgReusesClient from "@/components/admin/reuses/views/OrgReusesClient";
-import initTranslations from "@/app/i18n";
-import { getBoReuses } from "@/service/queries/admin/reuses";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; orgId: string }>;
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-reuses"],
-  });
+  const metadata = await getBoReusesMetadata(locale, "orgMetadata");
 
   return {
-    title: t("metadata.orgTitle", { ns: "admin-reuses" }),
-    description: t("metadata.orgDescription", { ns: "admin-reuses" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

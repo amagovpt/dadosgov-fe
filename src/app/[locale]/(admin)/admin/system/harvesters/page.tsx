@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
+import { getBoHarvesters, getBoHarvestersMetadata } from "@/service/queries/admin/harvesters";
 import SystemHarvestersClient from "@/components/admin/harvesters/views/SystemHarvestersClient";
-import initTranslations from "@/app/i18n";
-import { getBoHarvesters } from "@/service/queries/admin/harvesters";
 
 export async function generateMetadata({
   params,
@@ -9,14 +8,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-harvesters"],
-  });
+  const metadata = await getBoHarvestersMetadata(locale, "systemMetadata");
 
   return {
-    title: t("metadata.systemTitle", { ns: "admin-harvesters" }),
-    description: t("metadata.systemDescription", { ns: "admin-harvesters" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

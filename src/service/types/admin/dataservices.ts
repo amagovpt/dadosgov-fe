@@ -9,9 +9,23 @@ import {
 import type { FoListPageNoResults, FoListPageSearch } from "@/service/types/shared";
 
 export type BoDataservicesMetadata = AdminMetadata;
+export type BoDataservicesMetadataField =
+  | "metadata"
+  | "listMetadata"
+  | "myListMetadata"
+  | "editMetadata"
+  | "orgRedirectMetadata"
+  | "orgMetadata"
+  | "systemMetadata";
 
 export type BoDataservicesPage = {
   metadata?: AdminMetadata;
+  listMetadata?: AdminMetadata;
+  myListMetadata?: AdminMetadata;
+  editMetadata?: AdminMetadata;
+  orgRedirectMetadata?: AdminMetadata;
+  orgMetadata?: AdminMetadata;
+  systemMetadata?: AdminMetadata;
   hero?: AdminHero;
   search?: FoListPageSearch;
   myNoResults?: FoListPageNoResults;

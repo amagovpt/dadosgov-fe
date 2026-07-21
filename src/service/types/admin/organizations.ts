@@ -9,9 +9,11 @@ import {
 import type { FoListPageNoResults, FoListPageSearch } from "@/service/types/shared";
 
 export type BoOrganizationsMetadata = AdminMetadata;
+export type BoOrganizationsMetadataField = "metadata" | "systemMetadata";
 
 export type BoOrganizationsPage = {
   metadata?: AdminMetadata;
+  systemMetadata?: AdminMetadata;
   hero?: AdminHero;
   search?: FoListPageSearch;
   systemNoResults?: FoListPageNoResults;

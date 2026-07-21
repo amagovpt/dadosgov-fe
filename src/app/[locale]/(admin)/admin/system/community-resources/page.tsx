@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
+import { getBoCommunityResources, getBoCommunityResourcesMetadata } from "@/service/queries/admin/community-resources";
 import SystemCommunityResourcesClient from "@/components/admin/community-resources/views/SystemCommunityResourcesClient";
-import initTranslations from "@/app/i18n";
-import { getBoCommunityResources } from "@/service/queries/admin/community-resources";
 
 export async function generateMetadata({
   params,
@@ -9,14 +8,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-community-resources"],
-  });
+  const metadata = await getBoCommunityResourcesMetadata(locale, "systemMetadata");
 
   return {
-    title: t("metadata.systemTitle", { ns: "admin-community-resources" }),
-    description: t("metadata.systemDescription", { ns: "admin-community-resources" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
+import { getBoDataservices, getBoDataservicesMetadata } from "@/service/queries/admin/dataservices";
 import DataservicesEditClient from "@/components/admin/dataservices/views/DataservicesEditClient";
-import initTranslations from "@/app/i18n";
-import { getBoDataservices } from "@/service/queries/admin/dataservices";
 
 export async function generateMetadata({
   params,
@@ -9,14 +8,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-dataservices"],
-  });
+  const metadata = await getBoDataservicesMetadata(locale, "editMetadata");
 
   return {
-    title: t("metadata.editTitle", { ns: "admin-dataservices" }),
-    description: t("metadata.editDescription", { ns: "admin-dataservices" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

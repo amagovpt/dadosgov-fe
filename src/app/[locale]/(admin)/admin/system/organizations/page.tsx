@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
+import { getBoOrganizations, getBoOrganizationsMetadata } from "@/service/queries/admin/organizations";
 import SystemOrganizationsClient from "@/components/admin/organizations/SystemOrganizationsClient";
-import initTranslations from "@/app/i18n";
-import { getBoOrganizations } from "@/service/queries/admin/organizations";
 
 export async function generateMetadata({
   params,
@@ -9,14 +8,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-organizations"],
-  });
+  const metadata = await getBoOrganizationsMetadata(locale, "systemMetadata");
 
   return {
-    title: t("metadata.systemTitle", { ns: "admin-organizations" }),
-    description: t("metadata.systemDescription", { ns: "admin-organizations" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

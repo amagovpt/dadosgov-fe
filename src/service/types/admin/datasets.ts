@@ -9,9 +9,25 @@ import {
 import type { FoListPageNoResults, FoListPageSearch } from "@/service/types/shared";
 
 export type BoDatasetsMetadata = AdminMetadata;
+export type BoDatasetsMetadataField =
+  | "metadata"
+  | "listMetadata"
+  | "myListMetadata"
+  | "editMetadata"
+  | "myEditMetadata"
+  | "orgListMetadata"
+  | "orgEditMetadata"
+  | "systemMetadata";
 
 export type BoDatasetsPage = {
   metadata?: AdminMetadata;
+  listMetadata?: AdminMetadata;
+  myListMetadata?: AdminMetadata;
+  editMetadata?: AdminMetadata;
+  myEditMetadata?: AdminMetadata;
+  orgListMetadata?: AdminMetadata;
+  orgEditMetadata?: AdminMetadata;
+  systemMetadata?: AdminMetadata;
   hero?: AdminHero;
   search?: FoListPageSearch;
   myNoResults?: FoListPageNoResults;

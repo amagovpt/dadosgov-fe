@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
+import { getBoHarvesters, getBoHarvestersMetadata } from "@/service/queries/admin/harvesters";
 import OrgHarvestersClient from "@/components/admin/harvesters/views/OrgHarvestersClient";
-import initTranslations from "@/app/i18n";
-import { getBoHarvesters } from "@/service/queries/admin/harvesters";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; orgId: string }>;
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-harvesters"],
-  });
+  const metadata = await getBoHarvestersMetadata(locale, "orgMetadata");
 
   return {
-    title: t("metadata.orgTitle", { ns: "admin-harvesters" }),
-    description: t("metadata.orgDescription", { ns: "admin-harvesters" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

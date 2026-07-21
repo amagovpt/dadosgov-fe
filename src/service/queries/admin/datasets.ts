@@ -1,16 +1,21 @@
-import { BoDatasetsMetadata, BoDatasetsPage } from "@/service/types/admin/datasets";
+import {
+  BoDatasetsMetadata,
+  BoDatasetsMetadataField,
+  BoDatasetsPage,
+} from "@/service/types/admin/datasets";
 import apolloClient from "@/service/utils/apollo-client";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 
 export async function getBoDatasetsMetadata(
-  locale: string = "pt"
+  locale: string = "pt",
+  field: BoDatasetsMetadataField = "metadata"
 ): Promise<BoDatasetsMetadata> {
   const query = gql(/* GraphQL */ `
     query getBoDatasetsMetadata {
       findBoDatasetsSingleton {
         data {
-          metadata {
+          ${field} {
             ${locale} {
               title
               description

@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
+import { getBoHarvestersMetadata } from "@/service/queries/admin/harvesters";
 import HarvesterJobDetailClient from "@/components/admin/harvesters/views/HarvesterJobDetailClient";
-import initTranslations from "@/app/i18n";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; slug: string; jobId: string }>;
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-harvesters"],
-  });
+  const metadata = await getBoHarvestersMetadata(locale, "jobDetailMetadata");
 
   return {
-    title: t("metadata.jobDetailTitle", { ns: "admin-harvesters" }),
-    description: t("metadata.jobDetailDescription", { ns: "admin-harvesters" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

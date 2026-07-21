@@ -1,5 +1,6 @@
 import {
   BoCommunityResourcesMetadata,
+  BoCommunityResourcesMetadataField,
   BoCommunityResourcesPage,
 } from "@/service/types/admin/community-resources";
 import apolloClient from "@/service/utils/apollo-client";
@@ -7,13 +8,14 @@ import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 
 export async function getBoCommunityResourcesMetadata(
-  locale: string = "pt"
+  locale: string = "pt",
+  field: BoCommunityResourcesMetadataField = "metadata"
 ): Promise<BoCommunityResourcesMetadata> {
   const query = gql(/* GraphQL */ `
     query getBoCommunityResourcesMetadata {
       findBoCommunityResourcesSingleton {
         data {
-          metadata {
+          ${field} {
             ${locale} {
               title
               description

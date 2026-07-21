@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { getBoDataservicesMetadata } from "@/service/queries/admin/dataservices";
 import AdminOrgRedirect from "@/components/admin/AdminOrgRedirect";
-import initTranslations from "@/app/i18n";
 
 export async function generateMetadata({
   params,
@@ -8,14 +8,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-dataservices"],
-  });
+  const metadata = await getBoDataservicesMetadata(locale, "orgRedirectMetadata");
 
   return {
-    title: t("metadata.orgRedirectTitle", { ns: "admin-dataservices" }),
-    description: t("metadata.orgRedirectDescription", { ns: "admin-dataservices" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

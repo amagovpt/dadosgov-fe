@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
+import { getBoCommunityResources, getBoCommunityResourcesMetadata } from "@/service/queries/admin/community-resources";
 import OrgCommunityResourcesClient from "@/components/admin/community-resources/views/OrgCommunityResourcesClient";
-import initTranslations from "@/app/i18n";
-import { getBoCommunityResources } from "@/service/queries/admin/community-resources";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; orgId: string }>;
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-community-resources"],
-  });
+  const metadata = await getBoCommunityResourcesMetadata(locale, "orgMetadata");
 
   return {
-    title: t("metadata.orgTitle", { ns: "admin-community-resources" }),
-    description: t("metadata.orgDescription", { ns: "admin-community-resources" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 

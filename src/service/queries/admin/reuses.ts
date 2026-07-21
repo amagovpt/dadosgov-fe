@@ -1,14 +1,21 @@
-import { BoReusesMetadata, BoReusesPage } from "@/service/types/admin/reuses";
+import {
+  BoReusesMetadata,
+  BoReusesMetadataField,
+  BoReusesPage,
+} from "@/service/types/admin/reuses";
 import apolloClient from "@/service/utils/apollo-client";
 import { flattenData } from "@/utils/flattenObject";
 import { gql } from "@apollo/client";
 
-export async function getBoReusesMetadata(locale: string = "pt"): Promise<BoReusesMetadata> {
+export async function getBoReusesMetadata(
+  locale: string = "pt",
+  field: BoReusesMetadataField = "metadata"
+): Promise<BoReusesMetadata> {
   const query = gql(/* GraphQL */ `
     query getBoReusesMetadata {
       findBoReusesSingleton {
         data {
-          metadata {
+          ${field} {
             ${locale} {
               title
               description

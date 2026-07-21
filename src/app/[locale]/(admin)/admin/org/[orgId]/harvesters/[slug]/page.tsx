@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
+import { getBoHarvesters, getBoHarvestersMetadata } from "@/service/queries/admin/harvesters";
 import { Suspense } from "react";
 import HarvesterDetailClient from "@/components/admin/harvesters/views/HarvesterDetailClient";
-import { getBoHarvesters } from "@/service/queries/admin/harvesters";
 
-export const metadata: Metadata = {
-  title: "Detalhe do harvester - Admin - dados.gov.pt",
-  description: "Detalhe de um harvester da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoHarvestersMetadata(locale, "orgDetailMetadata");
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
 
 export default async function OrgHarvesterDetailPage({
   params,
