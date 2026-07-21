@@ -27,7 +27,7 @@ export function DatasetWizardStep4(props: DatasetWizardStep4Props) {
     if (value >= 1_000) return (value / 1_000).toFixed(0) + " mil";
     return String(value);
   };
-  const timeAgo = formatDateToTimeAgo(createdDataset?.last_modified, "agora");
+  const timeAgo = formatDateToTimeAgo(createdDataset?.last_modified || createdDataset?.created_at);
   const href = createdDataset
     ? `/datasets/${createdDataset.slug}`
     : `/datasets/preview?title=${encodeURIComponent(datasetTitle)}&description=${encodeURIComponent(datasetDescription)}`;
