@@ -7,6 +7,7 @@ import ApiRegistrationClient from "@/components/admin/dataservices/views/ApiRegi
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
 interface ApiNewClientProps {
@@ -21,7 +22,7 @@ export default function ApiNewClient({ pageContent }: ApiNewClientProps) {
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
   const pageTitle = pageContent.createHero?.title ?? "";
-  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
 
   return (
     <AdminLayout

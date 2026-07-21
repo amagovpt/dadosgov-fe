@@ -8,6 +8,7 @@ import CommunityResourceFormClient from "@/components/admin/community-resources/
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
 interface CommunityResourceNewClientProps {
@@ -26,7 +27,7 @@ export default function CommunityResourceNewClient({
   const currentStep = Number(searchParams.get("step")) || 1;
   const [publicPageUrl, setPublicPageUrl] = useState<string | null>(null);
   const pageTitle = pageContent.createHero?.title ?? "";
-  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
 
   return (
     <AdminLayout

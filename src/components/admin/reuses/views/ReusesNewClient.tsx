@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import ReusesFormClient from "@/components/admin/reuses/views/ReusesFormClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { BoReusesPage } from "@/service/types/admin/reuses";
 
@@ -22,7 +23,7 @@ export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
   const currentStep = Number(searchParams.get("step")) || 1;
   const pageTitle = pageContent.createHero?.title ?? "";
 
-  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
 
   return (
     <AdminLayout

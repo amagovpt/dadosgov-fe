@@ -8,6 +8,7 @@ import DatasetsAdminClient from "@/components/admin/datasets/publication-wizard/
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { stripHtmlTags } from "@/utils/htmlToParagraphs";
@@ -34,7 +35,7 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
     return id ? `${base}&datasetId=${id}` : base;
   };
 
-  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
   const [startEntry, adminAutomationEntry, catalogEntry] = pageContent.publicationEntry ?? [];
 
   return (

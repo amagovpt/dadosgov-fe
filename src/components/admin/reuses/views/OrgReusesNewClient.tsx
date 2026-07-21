@@ -6,6 +6,7 @@ import ReusesFormClient from "@/components/admin/reuses/views/ReusesFormClient";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { BoReusesPage } from "@/service/types/admin/reuses";
 
@@ -26,7 +27,7 @@ export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientPr
   const currentStep = Number(searchParams.get("step")) || 1;
   const pageTitle = pageContent.createHero?.title ?? "";
 
-  const stepTitle = pageContent.orgSteps?.[currentStep - 1]?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.orgSteps?.[currentStep - 1]);
 
   return (
     <AdminLayout breadcrumbItems={[

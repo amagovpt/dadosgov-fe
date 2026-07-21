@@ -18,6 +18,7 @@ import HarvesterPreviewSection from "@/components/admin/harvesters/form-sections
 import HarvesterPublishStep from "@/components/admin/harvesters/form-steps/HarvesterPublishStep";
 import { getCreateHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
@@ -151,7 +152,7 @@ export default function HarvestersNewClient({ pageContent }: HarvestersNewClient
     }
   }
 
-  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
 
   const auxiliaryItems = getCreateHarvesterAuxiliaryItems({
     items: pageContent.createAuxiliaryItems,

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { createPost, publishPost, uploadPostImage } from "@/service/api/posts";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import PostsNewContentStep from "@/components/admin/posts/form-steps/PostsNewContentStep";
 import PostsNewMetadataStep from "@/components/admin/posts/form-steps/PostsNewMetadataStep";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
@@ -141,8 +142,8 @@ export default function PostsNewClient({ pageContent }: PostsNewClientProps) {
   }
 
   const stepTitles: Record<number, string> = {
-    1: pageContent.steps?.[0]?.title ?? "",
-    2: pageContent.steps?.[1]?.title ?? "",
+    1: getAdminStepTitle(pageContent.steps?.[0]),
+    2: getAdminStepTitle(pageContent.steps?.[1]),
   };
 
   return (

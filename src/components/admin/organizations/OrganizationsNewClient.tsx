@@ -9,6 +9,7 @@ import type { OrganizationSuggestion } from "@/service/types/identity";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { normalizeApiError } from "@/service/utils/normalizeApiError";
@@ -125,7 +126,7 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
     }
   }
 
-  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
 
   const auxiliaryItems = getOrganizationAuxiliaryItems({
     items: pageContent.createAuxiliaryItems,

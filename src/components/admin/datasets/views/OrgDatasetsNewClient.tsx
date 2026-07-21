@@ -9,6 +9,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
@@ -39,7 +40,7 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
     return `/admin/org/datasets/new?step=${step}`;
   };
 
-  const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
   const [startEntry, adminAutomationEntry, catalogEntry] = pageContent.publicationEntry ?? [];
 
   return (
