@@ -51,7 +51,7 @@ export async function getBoReuses(locale: string = "pt"): Promise<BoReusesPage> 
               description
             }
           }
-          hero {
+          createHero {
             ${locale} {
               title
               description

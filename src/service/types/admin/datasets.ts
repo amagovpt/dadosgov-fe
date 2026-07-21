@@ -28,7 +28,7 @@ export type BoDatasetsPage = {
   orgListMetadata?: AdminMetadata;
   orgEditMetadata?: AdminMetadata;
   systemMetadata?: AdminMetadata;
-  hero?: AdminHero;
+  createHero?: AdminHero;
   search?: FoListPageSearch;
   myNoResults?: FoListPageNoResults;
   orgNoResults?: FoListPageNoResults;

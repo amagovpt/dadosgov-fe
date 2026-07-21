@@ -65,7 +65,7 @@ function DeleteOrgPopupContent({
   );
 }
 
-export default function OrgProfileClient() {
+export default function OrgProfileClient({ pageTitle }: { pageTitle: string }) {
   const { t } = useTranslation(["admin-common", "admin-profile"]);
   const params = useParams();
   const router = useRouter();
@@ -244,7 +244,7 @@ export default function OrgProfileClient() {
         },
         { label: t("admin-profile:breadcrumbs.profile") },
       ]}
-      title={t("admin-profile:organization.title")}
+      title={pageTitle}
       headerAction={null}
     >
       {org && <OrganizationProfileHeaderCard organization={org} logoPreview={logoPreview} />}

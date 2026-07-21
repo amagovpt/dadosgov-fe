@@ -26,7 +26,7 @@ export type BoCommunityResourcesPage = {
   orgRedirectMetadata?: AdminMetadata;
   orgMetadata?: AdminMetadata;
   systemMetadata?: AdminMetadata;
-  hero?: AdminHero;
+  createHero?: AdminHero;
   search?: FoListPageSearch;
   myNoResults?: FoListPageNoResults;
   orgNoResults?: FoListPageNoResults;

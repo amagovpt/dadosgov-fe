@@ -54,7 +54,7 @@ export async function getBoCommunityResources(
               description
             }
           }
-          hero {
+          createHero {
             ${locale} {
               title
               description

@@ -31,7 +31,7 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
   const totalSteps = 4;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [createdDatasetId, setCreatedDatasetId] = useState<string | null>(null);
-  const pageTitle = pageContent.hero?.title ?? "";
+  const pageTitle = pageContent.createHero?.title ?? "";
 
   const orgBase = activeOrg ? `/admin/org/${activeOrg.id}` : "/admin/org";
 

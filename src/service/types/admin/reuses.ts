@@ -32,7 +32,7 @@ export type BoReusesPage = {
   orgEditMetadata?: AdminMetadata;
   orgMemberEditMetadata?: AdminMetadata;
   systemMetadata?: AdminMetadata;
-  hero?: AdminHero;
+  createHero?: AdminHero;
   search?: FoListPageSearch;
   myNoResults?: FoListPageNoResults;
   orgNoResults?: FoListPageNoResults;

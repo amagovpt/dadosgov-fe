@@ -27,7 +27,7 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
     searchParams.get("datasetId"),
   );
   const [sessionKey, setSessionKey] = useState(0);
-  const pageTitle = pageContent.hero?.title ?? "";
+  const pageTitle = pageContent.createHero?.title ?? "";
 
   const buildStepUrl = (step: number, id?: string | null) => {
     const base = `/admin/datasets/new?step=${step}`;

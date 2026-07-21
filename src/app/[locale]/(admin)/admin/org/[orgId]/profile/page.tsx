@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import OrgProfileClient from "@/components/admin/profile/organization/OrgProfileClient";
-import initTranslations from "@/app/i18n";
+import { getBoOrganizations, getBoOrganizationsMetadata } from "@/service/queries/admin/organizations";
 
 export async function generateMetadata({
   params,
@@ -8,17 +8,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-profile"],
-  });
+  const metadata = await getBoOrganizationsMetadata(locale, "orgProfileMetadata");
 
   return {
-    title: t("organization.metadata.pageTitle", { ns: "admin-profile" }),
-    description: t("organization.metadata.pageDescription", { ns: "admin-profile" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
-export default function OrgProfilePage() {
-  return <OrgProfileClient />;
+export default async function OrgProfilePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoOrganizations(locale);
+
+  return <OrgProfileClient pageTitle={pageContent.orgProfileHero?.title ?? ""} />;
 }

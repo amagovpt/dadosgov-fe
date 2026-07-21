@@ -51,7 +51,7 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
               description
             }
           }
-          hero {
+          createHero {
             ${locale} {
               title
               description

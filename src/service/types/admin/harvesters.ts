@@ -26,7 +26,7 @@ export type BoHarvestersPage = {
   orgMetadata?: AdminMetadata;
   orgDetailMetadata?: AdminMetadata;
   systemMetadata?: AdminMetadata;
-  hero?: AdminHero;
+  createHero?: AdminHero;
   search?: FoListPageSearch;
   orgNoResults?: FoListPageNoResults;
   systemNoResults?: FoListPageNoResults;

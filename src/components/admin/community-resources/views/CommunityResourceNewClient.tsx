@@ -25,7 +25,7 @@ export default function CommunityResourceNewClient({
   const totalSteps = 2;
   const currentStep = Number(searchParams.get("step")) || 1;
   const [publicPageUrl, setPublicPageUrl] = useState<string | null>(null);
-  const pageTitle = pageContent.hero?.title ?? "";
+  const pageTitle = pageContent.createHero?.title ?? "";
   const stepTitle = pageContent.steps?.[currentStep - 1]?.title ?? "";
 
   return (

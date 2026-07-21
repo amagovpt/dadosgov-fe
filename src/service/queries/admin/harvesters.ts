@@ -53,7 +53,7 @@ export async function getBoHarvesters(
               description
             }
           }
-          hero {
+          createHero {
             ${locale} {
               title
               description

@@ -24,7 +24,7 @@ export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientPr
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
-  const pageTitle = pageContent.hero?.title ?? "";
+  const pageTitle = pageContent.createHero?.title ?? "";
 
   const stepTitle = pageContent.orgSteps?.[currentStep - 1]?.title ?? "";
 

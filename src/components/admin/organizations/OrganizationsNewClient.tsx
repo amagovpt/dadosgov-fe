@@ -28,7 +28,7 @@ export default function OrganizationsNewClient({ pageContent }: OrganizationsNew
   const router = useRouter();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
-  const pageTitle = pageContent.hero?.title ?? "";
+  const pageTitle = pageContent.createHero?.title ?? "";
 
   const [orgName, setOrgName] = useState("");
   const [orgAcronym, setOrgAcronym] = useState("");

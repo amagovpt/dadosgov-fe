@@ -53,7 +53,7 @@ export async function getBoDataservices(
               description
             }
           }
-          hero {
+          createHero {
             ${locale} {
               title
               description

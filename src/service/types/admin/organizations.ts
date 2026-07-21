@@ -9,12 +9,19 @@ import {
 import type { FoListPageNoResults, FoListPageSearch } from "@/service/types/shared";
 
 export type BoOrganizationsMetadata = AdminMetadata;
-export type BoOrganizationsMetadataField = "createMetadata" | "systemMetadata";
+export type BoOrganizationsMetadataField =
+  | "createMetadata"
+  | "orgProfileRedirectMetadata"
+  | "orgProfileMetadata"
+  | "systemMetadata";
 
 export type BoOrganizationsPage = {
   createMetadata?: AdminMetadata;
+  orgProfileRedirectMetadata?: AdminMetadata;
+  orgProfileMetadata?: AdminMetadata;
   systemMetadata?: AdminMetadata;
-  hero?: AdminHero;
+  createHero?: AdminHero;
+  orgProfileHero?: AdminHero;
   search?: FoListPageSearch;
   systemNoResults?: FoListPageNoResults;
   steps?: AdminStep[];

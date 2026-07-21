@@ -53,7 +53,13 @@ export async function getBoOrganizations(
               description
             }
           }
-          hero {
+          createHero {
+            ${locale} {
+              title
+              description
+            }
+          }
+          orgProfileHero {
             ${locale} {
               title
               description
