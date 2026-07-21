@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import PostsEditClient from "@/components/admin/posts/views/PostsEditClient";
-import initTranslations from "@/app/i18n";
+import { getBoPosts, getBoPostsMetadata } from "@/service/queries/admin/posts";
 
 export async function generateMetadata({
   params,
@@ -9,21 +9,25 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-posts"],
-  });
+  const metadata = await getBoPostsMetadata(locale, "editMetadata");
 
   return {
-    title: t("metadata.editTitle", { ns: "admin-posts" }),
-    description: t("metadata.editDescription", { ns: "admin-posts" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
-export default function PostEditPage() {
+export default async function PostEditPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoPosts(locale);
+
   return (
     <Suspense>
-      <PostsEditClient />
+      <PostsEditClient pageContent={pageContent} />
     </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import MembersClient from "@/components/admin/members/MembersClient";
-import initTranslations from "@/app/i18n";
+import { getBoMembers, getBoMembersMetadata } from "@/service/queries/admin/members";
 
 export async function generateMetadata({
   params,
@@ -8,22 +8,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string; orgId: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-members"],
-  });
+  const metadata = await getBoMembersMetadata(locale, "orgMetadata");
 
   return {
-    title: t("metadata.pageTitle", { ns: "admin-members" }),
-    description: t("metadata.pageDescription", { ns: "admin-members" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
 export default async function MembersPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <MembersClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoMembers(locale);
+
+  return <MembersClient orgId={orgId} pageContent={pageContent} />;
 }

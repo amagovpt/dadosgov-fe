@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import UserProfileClient from "@/components/admin/users/UserProfileClient";
-import initTranslations from "@/app/i18n";
+import { getBoUsers, getBoUsersMetadata } from "@/service/queries/admin/users";
 
 export async function generateMetadata({
   params,
@@ -8,17 +8,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-users"],
-  });
+  const metadata = await getBoUsersMetadata(locale, "profileMetadata");
 
   return {
-    title: t("metadata.profileTitle", { ns: "admin-users" }),
-    description: t("metadata.profileDescription", { ns: "admin-users" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
-export default function UserProfilePage() {
-  return <UserProfileClient />;
+export default async function UserProfilePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoUsers(locale);
+
+  return <UserProfileClient pageContent={pageContent} />;
 }

@@ -160,7 +160,7 @@ export default function DatasetsAdminClient({
   const producerOptions = useMemo(() => {
     const options = [
       <DropdownOption key="user" value="user" selected={producerDefaultValue === "user"}>
-        {user ? `${user.first_name} ${user.last_name}` : "Eu próprio"}
+        {user ? `${user.first_name} ${user.last_name}` : t("admin-datasets:form.producerSelf")}
       </DropdownOption>,
       ...(user?.organizations || []).map((org) => (
         <DropdownOption key={org.id} value={org.id} selected={producerDefaultValue === org.id}>

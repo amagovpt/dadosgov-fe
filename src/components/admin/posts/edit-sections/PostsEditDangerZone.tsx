@@ -3,10 +3,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
+import type { AdminCard } from "@/service/types/admin/common";
 
 interface PostsEditDangerZoneProps {
   isPublished: boolean;
   isSaving: boolean;
+  unpublishCard?: AdminCard;
+  deleteCard?: AdminCard;
   onUnpublish: () => void;
   onRepublish: () => void;
   onOpenDeletePopup: () => void;
@@ -15,6 +18,8 @@ interface PostsEditDangerZoneProps {
 export default function PostsEditDangerZone({
   isPublished,
   isSaving,
+  unpublishCard,
+  deleteCard,
   onUnpublish,
   onRepublish,
   onOpenDeletePopup,
@@ -32,13 +37,16 @@ export default function PostsEditDangerZone({
   return (
     <AdminDangerActions
       primaryVariant={isPublished ? "warning" : "informative"}
-      primaryHeading={isPublished ? t("danger.unpublishHeading") : t("danger.unpublishedHeading")}
+      primaryHeading={
+        isPublished ? (unpublishCard?.title ?? "") : t("danger.unpublishedHeading")
+      }
       primaryDescription={
-        isPublished ? t("danger.unpublishDescription") : t("danger.unpublishedDescription")
+        isPublished ? (unpublishCard?.description ?? "") : t("danger.unpublishedDescription")
       }
       primaryActionLabel={primaryActionLabel}
       onPrimaryAction={() => (isPublished ? onUnpublish() : onRepublish())}
-      dangerHeading={t("danger.deleteHeading")}
+      dangerHeading={deleteCard?.title ?? ""}
+      dangerDescription={deleteCard?.description}
       dangerActionLabel={t("danger.deleteAction")}
       onDangerAction={() => onOpenDeletePopup()}
       disabled={isSaving}

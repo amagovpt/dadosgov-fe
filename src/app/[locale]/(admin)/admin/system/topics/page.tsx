@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SystemTopicsClient from "@/components/admin/topics/SystemTopicsClient";
-import initTranslations from "@/app/i18n";
+import { getBoTopics, getBoTopicsMetadata } from "@/service/queries/admin/topics";
 
 export async function generateMetadata({
   params,
@@ -8,17 +8,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-topics"],
-  });
+  const metadata = await getBoTopicsMetadata(locale);
 
   return {
-    title: t("metadata.title", { ns: "admin-topics" }),
-    description: t("metadata.description", { ns: "admin-topics" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
-export default function SystemTopicsPage() {
-  return <SystemTopicsClient />;
+export default async function SystemTopicsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoTopics(locale);
+
+  return <SystemTopicsClient pageContent={pageContent} />;
 }

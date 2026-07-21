@@ -36,6 +36,7 @@ import {
   validatePostContent,
   validatePostMetadata,
 } from "@/components/admin/posts/form-state/postFormModel";
+import type { BoPostsPage } from "@/service/types/admin/posts";
 
 function DeletePostPopupContent({
   labels,
@@ -71,7 +72,11 @@ function DeletePostPopupContent({
   );
 }
 
-export default function PostsEditClient() {
+interface PostsEditClientProps {
+  pageContent: BoPostsPage;
+}
+
+export default function PostsEditClient({ pageContent }: PostsEditClientProps) {
   const { t } = useTranslation(["admin-common", "admin-posts"]);
   const params = useParams();
   const router = useRouter();
@@ -377,6 +382,8 @@ export default function PostsEditClient() {
               hasTitleError={hasError("articleTitle")}
               hasHeaderError={false}
               isSaving={isSaving}
+              unpublishCard={pageContent.unpublishCard}
+              deleteCard={pageContent.deleteCard}
               onTitleChange={(event) => {
                 setArticleTitle(event.target.value);
                 if (event.target.value.trim()) {

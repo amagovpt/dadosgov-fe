@@ -17,8 +17,13 @@ import {
   validatePostContent,
   validatePostMetadata,
 } from "@/components/admin/posts/form-state/postFormModel";
+import type { BoPostsPage } from "@/service/types/admin/posts";
 
-export default function PostsNewClient() {
+interface PostsNewClientProps {
+  pageContent: BoPostsPage;
+}
+
+export default function PostsNewClient({ pageContent }: PostsNewClientProps) {
   const { t } = useTranslation("admin-posts");
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -136,8 +141,8 @@ export default function PostsNewClient() {
   }
 
   const stepTitles: Record<number, string> = {
-    1: t("new.stepCreate"),
-    2: t("new.stepContent"),
+    1: pageContent.steps?.[0]?.title ?? "",
+    2: pageContent.steps?.[1]?.title ?? "",
   };
 
   return (
@@ -145,9 +150,9 @@ export default function PostsNewClient() {
       breadcrumbItems={[
         { label: t("new.breadcrumbsHome"), url: "/admin" },
         { label: t("title"), url: "/admin/system/posts" },
-        { label: t("new.publicationForm"), url: "/admin/system/posts/new" },
+        { label: pageContent.createHero?.title ?? "", url: "/admin/system/posts/new" },
       ]}
-      title={t("new.publicationForm")}
+      title={pageContent.createHero?.title ?? ""}
     >
       <AdminStepper
         currentStep={currentStep}

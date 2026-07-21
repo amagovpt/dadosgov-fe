@@ -16,8 +16,13 @@ import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import { createUserColumns, userSortFieldMap, type UserSortField } from "./usersListConfig";
 import { fetchUsers } from "@/service/api/users";
 import { UserAdmin } from "@/service/types/identity";
+import type { BoUsersPage } from "@/service/types/admin/users";
 
-export default function SystemUsersClient() {
+interface SystemUsersClientProps {
+  pageContent: BoUsersPage;
+}
+
+export default function SystemUsersClient({ pageContent }: SystemUsersClientProps) {
   const { t } = useTranslation(["admin-common", "admin-users"]);
   const [users, setUsers] = useState<UserAdmin[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -117,7 +122,7 @@ export default function SystemUsersClient() {
         { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-users:title"), url: "/admin/system/users" },
       ]}
-      title={t("admin-users:title")}
+      title={pageContent.systemHero?.title ?? ""}
       isLoading={isLoading}
       count={totalItems}
       hasItems={users.length > 0}
@@ -126,8 +131,9 @@ export default function SystemUsersClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-users:list.searchPlaceholder"),
-        ariaLabel: t("admin-users:list.searchAriaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        ariaLabel: pageContent.search?.label,
         onChange: handleSearch,
       }}
       filters={
@@ -157,8 +163,8 @@ export default function SystemUsersClient() {
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-user" className="icon-xl h-12 w-12 text-primary-500" />}
-          title={t("admin-users:list.emptyTitle")}
-          description={t("admin-users:list.emptyDescription")}
+          title={pageContent.systemNoResults?.title ?? ""}
+          description={pageContent.systemNoResults?.description ?? ""}
           hasAnchor={false}
         />
       }

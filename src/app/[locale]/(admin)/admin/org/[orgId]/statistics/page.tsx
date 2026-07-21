@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import OrgStatisticsClient from "@/components/admin/statistics/OrgStatisticsClient";
-import initTranslations from "@/app/i18n";
+import { getBoStatistics, getBoStatisticsMetadata } from "@/service/queries/admin/statistics";
 
 export async function generateMetadata({
   params,
@@ -8,22 +8,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string; orgId: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-statistics"],
-  });
+  const metadata = await getBoStatisticsMetadata(locale, "orgMetadata");
 
   return {
-    title: t("metadata.organizationTitle", { ns: "admin-statistics" }),
-    description: t("metadata.organizationDescription", { ns: "admin-statistics" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
 export default async function OrgStatisticsPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <OrgStatisticsClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoStatistics(locale);
+
+  return <OrgStatisticsClient orgId={orgId} pageContent={pageContent} />;
 }

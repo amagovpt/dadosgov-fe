@@ -19,8 +19,13 @@ import type {
   FeaturedReusesData,
 } from "./editorial-blocks";
 import { EditorialBlockList } from "./EditorialBlockUI";
+import type { BoEditorialPage } from "@/service/types/admin/editorial";
 
-export default function SystemEditorialClient() {
+interface SystemEditorialClientProps {
+  pageContent: BoEditorialPage;
+}
+
+export default function SystemEditorialClient({ pageContent }: SystemEditorialClientProps) {
   const { t } = useTranslation(["admin-common", "admin-editorial"]);
   const [isLoading, setIsLoading] = useState(true);
   const [datasetBlocks, setDatasetBlocks] = useState<ContentBlock[]>([]);
@@ -172,7 +177,7 @@ export default function SystemEditorialClient() {
           { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
           { label: t("admin-editorial:title"), url: "/admin/system/editorial" },
         ]}
-        title={t("admin-editorial:title")}
+        title={pageContent.hero?.title ?? ""}
         headerAction={
           <div className="flex items-center gap-8">
             <Button
@@ -208,7 +213,7 @@ export default function SystemEditorialClient() {
         { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-editorial:title"), url: "/admin/system/editorial" },
       ]}
-      title={t("admin-editorial:title")}
+      title={pageContent.hero?.title ?? ""}
       headerAction={
         <div className="flex items-center gap-8">
           <a href="/" target="_blank" rel="noopener noreferrer">

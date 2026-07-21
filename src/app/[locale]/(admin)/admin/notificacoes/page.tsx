@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import NotificationsClient from "@/components/admin/notifications/NotificationsClient";
-import initTranslations from "@/app/i18n";
+import {
+  getBoNotifications,
+  getBoNotificationsMetadata,
+} from "@/service/queries/admin/notifications";
 
 export async function generateMetadata({
   params,
@@ -8,17 +11,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-notifications"],
-  });
+  const metadata = await getBoNotificationsMetadata(locale);
 
   return {
-    title: t("metadata.title", { ns: "admin-notifications" }),
-    description: t("metadata.description", { ns: "admin-notifications" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
-export default function NotificationsPage() {
-  return <NotificationsClient />;
+export default async function NotificationsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoNotifications(locale);
+
+  return <NotificationsClient pageContent={pageContent} />;
 }

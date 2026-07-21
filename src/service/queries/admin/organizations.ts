@@ -80,6 +80,14 @@ export async function getBoOrganizations(
               description
             }
           }
+          orgProfileNoResults {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+            }
+          }
           steps {
             ${locale} {
               title

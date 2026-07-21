@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import PostsNewClient from "@/components/admin/posts/views/PostsNewClient";
-import initTranslations from "@/app/i18n";
+import { getBoPosts, getBoPostsMetadata } from "@/service/queries/admin/posts";
 
 export async function generateMetadata({
   params,
@@ -8,17 +8,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-posts"],
-  });
+  const metadata = await getBoPostsMetadata(locale, "createMetadata");
 
   return {
-    title: t("metadata.newTitle", { ns: "admin-posts" }),
-    description: t("metadata.newDescription", { ns: "admin-posts" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
-export default function PostsNewPage() {
-  return <PostsNewClient />;
+export default async function PostsNewPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoPosts(locale);
+
+  return <PostsNewClient pageContent={pageContent} />;
 }

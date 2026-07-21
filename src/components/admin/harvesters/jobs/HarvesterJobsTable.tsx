@@ -100,12 +100,16 @@ function JobLogsPanel({ job }: { job: HarvestJob }) {
                   </div>
                   <div className="mb-8 flex flex-wrap gap-16 rounded border border-red-100 bg-white px-10 py-6 text-[11px] font-mono">
                     <span>
-                      <span className="font-sans text-neutral-400 mr-4">ID Remoto:</span>
+                      <span className="font-sans text-neutral-400 mr-4">
+                        {t("jobDetail.table.remoteId")}:
+                      </span>
                       <span className="text-neutral-700">{item.remote_id}</span>
                     </span>
                     {internalId && (
                       <span>
-                        <span className="font-sans text-neutral-400 mr-4">ID dados.gov:</span>
+                        <span className="font-sans text-neutral-400 mr-4">
+                          {t("jobDetail.table.dadosGovId")}:
+                        </span>
                         <span className="text-neutral-700">{internalId}</span>
                       </span>
                     )}

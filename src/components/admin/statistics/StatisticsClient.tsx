@@ -20,12 +20,18 @@ import type { Dataset } from "@/service/types/dataset";
 import type { Reuse } from "@/service/types/reuse";
 import { DatasetMetricsTable } from "./DatasetMetricsTable";
 import { ReuseMetricsTable } from "./ReuseMetricsTable";
+import type { BoStatisticsPage } from "@/service/types/admin/statistics";
 
 const PAGE_SIZE = 10;
 
-export default function StatisticsClient() {
+interface StatisticsClientProps {
+  pageContent: BoStatisticsPage;
+}
+
+export default function StatisticsClient({ pageContent }: StatisticsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-statistics"]);
   const { displayName } = useCurrentUser();
+  const userCards = pageContent.userSummaryCards ?? [];
 
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [datasetsTotal, setDatasetsTotal] = useState(0);
@@ -78,7 +84,7 @@ export default function StatisticsClient() {
         { label: displayName || "...", url: "#" },
         { label: t("admin-statistics:breadcrumbs.user"), url: "/admin/me/statistics" },
       ]}
-      title={t("admin-statistics:title")}
+      title={pageContent.userHero?.title ?? ""}
       headerAction={null}
     >
       <Tabs>
@@ -88,12 +94,12 @@ export default function StatisticsClient() {
             <div className="mt-48 flex gap-24">
               <div className="flex-1">
                 <CardFrame label={isDatasetsLoading ? "..." : String(datasetsTotal)}>
-                  <p className="text-base text-neutral-700">{t("admin-statistics:cards.datasets")}</p>
+                  <p className="text-base text-neutral-700">{userCards[0]?.title ?? ""}</p>
                 </CardFrame>
               </div>
               <div className="flex-1">
                 <CardFrame label={isReusesLoading ? "..." : String(reusesTotal)}>
-                  <p className="text-base text-neutral-700">{t("admin-statistics:cards.reuses")}</p>
+                  <p className="text-base text-neutral-700">{userCards[1]?.title ?? ""}</p>
                 </CardFrame>
               </div>
             </div>
@@ -108,9 +114,9 @@ export default function StatisticsClient() {
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
-                    label={t("admin-statistics:search.label")}
-                    placeholder={t("admin-statistics:search.datasetsPlaceholder")}
-                    aria-label={t("admin-statistics:search.datasetsAriaLabel")}
+                    label={pageContent.datasetsSearch?.label ?? ""}
+                    placeholder={pageContent.datasetsSearch?.placeholder ?? ""}
+                    aria-label={pageContent.datasetsSearch?.label ?? ""}
                   />
                 </div>
               </div>
@@ -123,8 +129,8 @@ export default function StatisticsClient() {
                   icon={
                     <img src="/Icons/reduce.svg" alt="" className="h-40 w-40" />
                   }
-                  title={t("admin-statistics:states.noPublications")}
-                  description={t("admin-statistics:states.noDatasetsDescription")}
+                  title={pageContent.datasetsNoResults?.title ?? ""}
+                  description={pageContent.datasetsNoResults?.description ?? ""}
                   hasAnchor={false}
                   extraDescription={
                     <div className="mt-24">
@@ -168,8 +174,8 @@ export default function StatisticsClient() {
                     icon={
                       <img src="/Icons/bar_chart.svg" alt="" className="h-40 w-40" />
                     }
-                    title={t("admin-statistics:states.noPublications")}
-                    description={t("admin-statistics:states.noReusesDescription")}
+                    title={pageContent.reusesNoResults?.title ?? ""}
+                    description={pageContent.reusesNoResults?.description ?? ""}
                     hasAnchor={false}
                     extraDescription={
                       <div className="mt-24">

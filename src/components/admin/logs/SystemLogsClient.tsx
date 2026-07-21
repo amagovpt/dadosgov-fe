@@ -15,6 +15,8 @@ import {
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { fetchSystemLogContent, fetchSystemLogs } from "@/service/api/system";
 import { SystemLogContent, SystemLogFile } from "@/service/types/transfer-system";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import type { BoLogsPage } from "@/service/types/admin/logs";
 
 const AUTO_REFRESH_MS = 10_000;
 
@@ -46,7 +48,11 @@ const lineSeverity = (line: string): "error" | "warn" | "info" | null => {
   return null;
 };
 
-export default function SystemLogsClient() {
+interface SystemLogsClientProps {
+  pageContent: BoLogsPage;
+}
+
+export default function SystemLogsClient({ pageContent }: SystemLogsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-logs"]);
   const [files, setFiles] = useState<SystemLogFile[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -171,7 +177,7 @@ export default function SystemLogsClient() {
         { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-logs:title"), url: "/admin/system/logs" },
       ]}
-      title={t("admin-logs:title")}
+      title={pageContent.hero?.title ?? ""}
       headerAction={
         <div className="flex items-center gap-8">
           <Button
@@ -191,7 +197,9 @@ export default function SystemLogsClient() {
         </div>
       }
     >
-      <p className="text-neutral-700 text-sm mb-16">{t("admin-logs:intro")}</p>
+      <div className="text-neutral-700 text-sm mb-16">
+        {formatHtmlParagraphs(pageContent.intro?.description ?? "")}
+      </div>
 
       {isLoadingFiles && files.length === 0 ? (
         <p className="text-neutral-700 text-sm">{t("admin-logs:loadingFiles")}</p>
@@ -201,8 +209,8 @@ export default function SystemLogsClient() {
           icon={
             <Icon name="agora-line-monitor" className="w-12 h-12 text-primary-500 icon-xl" />
           }
-          title={t("admin-logs:empty.title")}
-          description={t("admin-logs:empty.description")}
+          title={pageContent.noResults?.title ?? ""}
+          description={pageContent.noResults?.description ?? ""}
           hasAnchor={false}
         />
       ) : (

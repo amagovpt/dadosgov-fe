@@ -10,6 +10,7 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import UserAdminProfileDangerZone from "@/components/admin/users/UserAdminProfileDangerZone";
+import type { AdminCard } from "@/service/types/admin/common";
 
 type UserAdminProfileTabProps = {
   isAdmin: boolean;
@@ -33,6 +34,8 @@ type UserAdminProfileTabProps = {
   onSave: () => void;
   onToggleActive: (event: React.MouseEvent) => void;
   onOpenDeletePopup: (event: React.MouseEvent) => void;
+  deactivateCard?: AdminCard;
+  deleteCard?: AdminCard;
 };
 
 export default function UserAdminProfileTab({
@@ -57,6 +60,8 @@ export default function UserAdminProfileTab({
   onSave,
   onToggleActive,
   onOpenDeletePopup,
+  deactivateCard,
+  deleteCard,
 }: UserAdminProfileTabProps) {
   const { t } = useTranslation(["admin-common", "admin-users"]);
 
@@ -221,6 +226,8 @@ export default function UserAdminProfileTab({
           isDeleting={isDeleting}
           onToggleActive={onToggleActive}
           onOpenDeletePopup={onOpenDeletePopup}
+          deactivateCard={deactivateCard}
+          deleteCard={deleteCard}
         />
       )}
     </form>

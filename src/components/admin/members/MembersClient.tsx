@@ -20,12 +20,14 @@ import { AddMemberPopupContent } from "./popups/AddMemberPopupContent";
 import { EditRolePopupContent } from "./popups/EditRolePopupContent";
 import { RemoveMemberPopupContent } from "./popups/RemoveMemberPopupContent";
 import { RefuseMembershipPopupContent } from "./popups/RefuseMembershipPopupContent";
+import type { BoMembersPage } from "@/service/types/admin/members";
 
 interface MembersClientProps {
   orgId?: string;
+  pageContent: BoMembersPage;
 }
 
-export default function MembersClient({ orgId }: MembersClientProps = {}) {
+export default function MembersClient({ orgId, pageContent }: MembersClientProps) {
   const { t } = useTranslation(["admin-common", "admin-members"]);
   const { show } = usePopupContext();
   const { user } = useAuth();
@@ -177,7 +179,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
         },
         { label: t("admin-members:breadcrumbs.members") },
       ]}
-      title={t("admin-members:title")}
+      title={pageContent.orgHero?.title ?? ""}
     >
       {isOrgAdmin && pendingRequests.length > 0 && (
         <PendingRequestsTable

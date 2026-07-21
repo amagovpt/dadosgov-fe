@@ -19,8 +19,13 @@ import {
   sortPosts,
   type PostSortField,
 } from "@/components/admin/posts/config/postsListConfig";
+import type { BoPostsPage } from "@/service/types/admin/posts";
 
-export default function SystemPostsClient() {
+interface SystemPostsClientProps {
+  pageContent: BoPostsPage;
+}
+
+export default function SystemPostsClient({ pageContent }: SystemPostsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-posts"]);
   const fetchPageSize = 100;
   const router = useRouter();
@@ -120,7 +125,7 @@ export default function SystemPostsClient() {
         { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-posts:title"), url: "/admin/system/posts" },
       ]}
-      title={t("admin-posts:title")}
+      title={pageContent.systemHero?.title ?? ""}
       isLoading={isLoading}
       count={sortedPosts.length}
       hasItems={paginatedPosts.length > 0}
@@ -129,8 +134,9 @@ export default function SystemPostsClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: t("admin-posts:list.searchPlaceholder"),
-        ariaLabel: t("admin-posts:list.searchAriaLabel"),
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        ariaLabel: pageContent.search?.label,
         onChange: handleSearch,
       }}
       filters={
@@ -183,8 +189,8 @@ export default function SystemPostsClient() {
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-          title={t("admin-posts:list.emptyTitle")}
-          description={t("admin-posts:list.emptyDescription")}
+          title={pageContent.systemNoResults?.title ?? ""}
+          description={pageContent.systemNoResults?.description ?? ""}
           hasAnchor={false}
         />
       }

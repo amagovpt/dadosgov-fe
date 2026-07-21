@@ -34,8 +34,13 @@ import { ProfileCard } from "./ProfileCard";
 import { ProfileFormTab } from "./ProfileFormTab";
 import { SubscriptionsTab } from "./SubscriptionsTab";
 import { ActivitiesTab } from "./ActivitiesTab";
+import type { BoProfilePage } from "@/service/types/admin/profile";
 
-export default function ProfileClient() {
+interface ProfileClientProps {
+  pageContent: BoProfilePage;
+}
+
+export default function ProfileClient({ pageContent }: ProfileClientProps) {
   const { t } = useTranslation(["admin-common", "admin-profile"]);
   const router = useRouter();
   const { displayName } = useCurrentUser();
@@ -306,7 +311,7 @@ export default function ProfileClient() {
         { label: displayName || "...", url: "#" },
         { label: t("admin-profile:breadcrumbs.profile"), url: "/admin/me/profile" },
       ]}
-      title={t("admin-profile:title")}
+      title={pageContent.hero?.title ?? ""}
       headerAction={null}
     >
       <ProfileCard
@@ -386,8 +391,8 @@ export default function ProfileClient() {
                   icon={
                     <Icon name="agora-line-star" className="icon-xl h-12 w-12 text-primary-500" />
                   }
-                  title={t("admin-profile:followings.emptyTitle")}
-                  description={t("admin-profile:followings.emptyDescription")}
+                  title={pageContent.followingsNoResults?.title ?? ""}
+                  description={pageContent.followingsNoResults?.description ?? ""}
                   hasAnchor={false}
                 />
               </div>

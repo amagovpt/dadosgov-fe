@@ -74,7 +74,7 @@ export default function DatasetsEditResourcesTab({
 
       {isSubmitting && (
         <div className="mb-16 flex items-center justify-center">
-          <LoaderDialog title="A carregar ficheiro(s)..." />
+          <LoaderDialog title={t("edit.resourcesLoading")} />
         </div>
       )}
 

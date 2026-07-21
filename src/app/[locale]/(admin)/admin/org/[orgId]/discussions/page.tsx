@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import OrgDiscussionsClient from "@/components/admin/discussions/OrgDiscussionsClient";
-import initTranslations from "@/app/i18n";
+import {
+  getBoDiscussions,
+  getBoDiscussionsMetadata,
+} from "@/service/queries/admin/discussions";
 
 export async function generateMetadata({
   params,
@@ -8,22 +11,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string; orgId: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-discussions"],
-  });
+  const metadata = await getBoDiscussionsMetadata(locale, "orgMetadata");
 
   return {
-    title: t("metadata.orgTitle", { ns: "admin-discussions" }),
-    description: t("metadata.orgDescription", { ns: "admin-discussions" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
 export default async function OrgDiscussionsPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <OrgDiscussionsClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoDiscussions(locale);
+
+  return <OrgDiscussionsClient orgId={orgId} pageContent={pageContent} />;
 }

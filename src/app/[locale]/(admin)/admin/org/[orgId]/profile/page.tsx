@@ -24,5 +24,5 @@ export default async function OrgProfilePage({
   const { locale } = await params;
   const pageContent = await getBoOrganizations(locale);
 
-  return <OrgProfileClient pageTitle={pageContent.orgProfileHero?.title ?? ""} />;
+  return <OrgProfileClient pageContent={pageContent} />;
 }

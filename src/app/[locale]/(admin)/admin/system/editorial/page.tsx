@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SystemEditorialClient from "@/components/admin/editorial/SystemEditorialClient";
-import initTranslations from "@/app/i18n";
+import { getBoEditorial, getBoEditorialMetadata } from "@/service/queries/admin/editorial";
 
 export async function generateMetadata({
   params,
@@ -8,17 +8,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-editorial"],
-  });
+  const metadata = await getBoEditorialMetadata(locale);
 
   return {
-    title: t("metadata.title", { ns: "admin-editorial" }),
-    description: t("metadata.description", { ns: "admin-editorial" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
-export default function SystemEditorialPage() {
-  return <SystemEditorialClient />;
+export default async function SystemEditorialPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoEditorial(locale);
+
+  return <SystemEditorialClient pageContent={pageContent} />;
 }

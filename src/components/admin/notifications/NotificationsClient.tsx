@@ -13,6 +13,8 @@ import {
   isHarvesterValidation,
 } from "@/components/admin/notifications/notification-helpers";
 import AppIcon from "@/components/Primitives/AppIcon";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import type { BoNotificationsPage } from "@/service/types/admin/notifications";
 
 const statusKeyMap: Record<ValidateHarvesterNotificationDetails["status"], string> = {
   pending: "pending",
@@ -20,7 +22,11 @@ const statusKeyMap: Record<ValidateHarvesterNotificationDetails["status"], strin
   refused: "refused",
 };
 
-export default function NotificationsClient() {
+interface NotificationsClientProps {
+  pageContent: BoNotificationsPage;
+}
+
+export default function NotificationsClient({ pageContent }: NotificationsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-notifications"]);
   const [items, setItems] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,17 +75,21 @@ export default function NotificationsClient() {
         { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: t("admin-notifications:title"), url: "/admin/notificacoes" },
       ]}
-      title={t("admin-notifications:title")}
+      title={pageContent.hero?.title ?? ""}
       headerAction={null}
     >
-      <p className="mb-32 text-base text-neutral-700">{t("admin-notifications:intro")}</p>
+      <div className="mb-32 text-base text-neutral-700">
+        {formatHtmlParagraphs(pageContent.intro?.description ?? "")}
+      </div>
 
       {isLoading ? (
         <p className="text-neutral-700">{t("admin-common:loading")}</p>
       ) : items.length === 0 ? (
-        <CardNoResults>
-          <p>{t("admin-notifications:empty")}</p>
-        </CardNoResults>
+        <CardNoResults
+          title={pageContent.noResults?.title ?? ""}
+          description={pageContent.noResults?.description ?? ""}
+          hasAnchor={false}
+        />
       ) : (
         <ul className="flex flex-col gap-16">
           {items.map((n) => (

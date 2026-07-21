@@ -25,6 +25,7 @@ import {
   Tab,
   TabHeader,
   TabBody,
+  type IconName,
   usePopupContext,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
@@ -33,6 +34,7 @@ import UserAdminProfileTab from "@/components/admin/users/UserAdminProfileTab";
 import UserAdminActivitiesTab from "@/components/admin/users/UserAdminActivitiesTab";
 import UserAdminSubscriptionsTab from "@/components/admin/users/UserAdminSubscriptionsTab";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
+import type { BoUsersPage } from "@/service/types/admin/users";
 
 function DeleteUserPopupContent({
   labels,
@@ -68,7 +70,7 @@ function DeleteUserPopupContent({
   );
 }
 
-export default function UserProfileClient() {
+export default function UserProfileClient({ pageContent }: { pageContent: BoUsersPage }) {
   const { t } = useTranslation(["admin-common", "admin-users"]);
   const params = useParams();
   const router = useRouter();
@@ -237,7 +239,7 @@ export default function UserProfileClient() {
         { label: t("admin-users:breadcrumbs.users"), url: "/admin/system/users" },
         { label: displayName || "..." },
       ]}
-      title={t("admin-users:profileTitle")}
+      title={pageContent.profileHero?.title ?? ""}
       headerAction={null}
     >
       <UserAdminHeaderCard
@@ -297,6 +299,8 @@ export default function UserProfileClient() {
                     }
                   );
                 }}
+                deactivateCard={pageContent.deactivateCard}
+                deleteCard={pageContent.deleteCard}
               />
             </TabBody>
           </Tab>
@@ -308,6 +312,7 @@ export default function UserProfileClient() {
                 isLoading={isLoadingActivities}
                 activityPage={activityPage}
                 totalActivityPages={totalActivityPages}
+                noResults={pageContent.activitiesNoResults}
                 onPreviousPage={() => setActivityPage((page) => Math.max(1, page - 1))}
                 onNextPage={() =>
                   setActivityPage((page) => Math.min(totalActivityPages, page + 1))
@@ -321,6 +326,7 @@ export default function UserProfileClient() {
               <UserAdminSubscriptionsTab
                 subscriptions={subscriptions}
                 isLoading={isLoadingSubscriptions}
+                noResults={pageContent.subscriptionsNoResults}
               />
             </TabBody>
           </Tab>
@@ -331,9 +337,14 @@ export default function UserProfileClient() {
                 <CardNoResults
                   className="admin-page__empty"
                   position="center"
-                  icon={<Icon name="agora-line-star" className="w-12 h-12 text-primary-500 icon-xl" />}
-                  title={t("admin-users:followings.emptyTitle")}
-                  description={t("admin-users:followings.emptyDescription")}
+                  icon={
+                    <Icon
+                      name={(pageContent.followingsNoResults?.icon || "agora-line-star") as IconName}
+                      className="w-12 h-12 text-primary-500 icon-xl"
+                    />
+                  }
+                  title={pageContent.followingsNoResults?.title ?? ""}
+                  description={pageContent.followingsNoResults?.description ?? ""}
                   hasAnchor={false}
                 />
               </div>

@@ -7,7 +7,10 @@ import KeywordSelectField from "@/components/admin/forms/KeywordSelectField";
 
 const RichTextEditor = dynamic(() => import("@/components/admin/posts/form-ui/RichTextEditor"), {
   ssr: false,
-  loading: () => <p>A carregar editor...</p>,
+  loading: function EditorLoading() {
+    const { t } = useTranslation("admin-datasets");
+    return <p>{t("edit.editorLoading")}</p>;
+  },
 });
 
 type DatasetsEditDescriptionSectionProps = {

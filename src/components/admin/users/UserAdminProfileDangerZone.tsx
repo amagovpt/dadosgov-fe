@@ -3,12 +3,15 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
+import type { AdminCard } from "@/service/types/admin/common";
 
 type UserAdminProfileDangerZoneProps = {
   userActive: boolean;
   isDeleting: boolean;
   onToggleActive: (event: React.MouseEvent) => void;
   onOpenDeletePopup: (event: React.MouseEvent) => void;
+  deactivateCard?: AdminCard;
+  deleteCard?: AdminCard;
 };
 
 export default function UserAdminProfileDangerZone({
@@ -16,6 +19,8 @@ export default function UserAdminProfileDangerZone({
   isDeleting,
   onToggleActive,
   onOpenDeletePopup,
+  deactivateCard,
+  deleteCard,
 }: UserAdminProfileDangerZoneProps) {
   const { t } = useTranslation("admin-users");
 
@@ -28,10 +33,16 @@ export default function UserAdminProfileDangerZone({
           <>
             <strong>
               {userActive
-                ? t("dangerZone.deactivateDescription")
+                ? deactivateCard?.title || deactivateCard?.description || ""
                 : t("dangerZone.inactiveDescription")}
             </strong>
             <br />
+            {userActive && deactivateCard?.title && deactivateCard.description ? (
+              <>
+                {deactivateCard.description}
+                <br />
+              </>
+            ) : null}
             <Button
               type="button"
               appearance="link"
@@ -41,7 +52,9 @@ export default function UserAdminProfileDangerZone({
               trailingIconHover="agora-solid-arrow-right-circle"
               onClick={onToggleActive}
             >
-              {userActive ? t("dangerZone.deactivateAction") : t("dangerZone.activateAction")}
+              {userActive
+                ? deactivateCard?.anchor?.children || t("dangerZone.deactivateAction")
+                : t("dangerZone.activateAction")}
             </Button>
           </>
         }
@@ -51,7 +64,13 @@ export default function UserAdminProfileDangerZone({
         showIcon
         description={
           <>
-            <strong>{t("dangerZone.deleteWarning")}</strong>
+            <strong>{deleteCard?.title ?? ""}</strong>
+            {deleteCard?.description ? (
+              <>
+                <br />
+                {deleteCard.description}
+              </>
+            ) : null}
             <br />
             <Button
               type="button"
@@ -63,7 +82,7 @@ export default function UserAdminProfileDangerZone({
               onClick={onOpenDeletePopup}
               disabled={isDeleting}
             >
-              {t("dangerZone.deleteAction")}
+              {deleteCard?.anchor?.children || t("dangerZone.deleteAction")}
             </Button>
           </>
         }

@@ -30,15 +30,18 @@ import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
 import { DatasetMetricsTable } from "./DatasetMetricsTable";
 import { ReuseMetricsTable } from "./ReuseMetricsTable";
+import type { BoStatisticsPage } from "@/service/types/admin/statistics";
 
 interface OrgStatisticsClientProps {
   orgId: string;
+  pageContent: BoStatisticsPage;
 }
 
 const PAGE_SIZE = 10;
 
-export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps) {
+export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatisticsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-statistics"]);
+  const orgCards = pageContent.orgSummaryCards ?? [];
   const [org, setOrg] = useState<Organization | null>(null);
   const [metrics, setMetrics] = useState<OrganizationMetrics | null>(null);
   const [isOrgLoading, setIsOrgLoading] = useState(true);
@@ -135,8 +138,8 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
     return (
       <AdminEmptyState
         icon="agora-line-buildings"
-        title={t("admin-statistics:states.noOrganizations")}
-        description={t("admin-statistics:states.noOrganizationDescription")}
+        title={pageContent.noOrganizations?.title ?? ""}
+        description={pageContent.noOrganizations?.description ?? ""}
       />
     );
   }
@@ -148,7 +151,7 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
         { label: org?.name || t("admin-statistics:tabs.organization"), url: "#" },
         { label: t("admin-statistics:breadcrumbs.organization"), url: "/admin/org/statistics" },
       ]}
-      title={t("admin-statistics:title")}
+      title={pageContent.orgHero?.title ?? ""}
     >
       <Tabs>
         <Tab active>
@@ -169,39 +172,39 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
               <div className="mb-24 flex gap-24">
                 <div className="flex-1">
                   <CardFrame label={isDatasetsLoading ? "..." : String(datasetsTotal)}>
-                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.datasets")}</p>
+                    <p className="text-base text-neutral-700">{orgCards[0]?.title ?? ""}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={isDataservicesLoading ? "..." : String(dataservicesTotal)}>
-                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.dataservices")}</p>
+                    <p className="text-base text-neutral-700">{orgCards[1]?.title ?? ""}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={isReusesLoading ? "..." : String(reuses.length)}>
-                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.reuses")}</p>
+                    <p className="text-base text-neutral-700">{orgCards[2]?.title ?? ""}</p>
                   </CardFrame>
                 </div>
               </div>
               <div className="flex gap-24">
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.views ?? 0)}>
-                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.datasetViews")}</p>
+                    <p className="text-base text-neutral-700">{orgCards[3]?.title ?? ""}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.resource_downloads ?? 0)}>
-                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.resourceDownloads")}</p>
+                    <p className="text-base text-neutral-700">{orgCards[4]?.title ?? ""}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.dataservice_views ?? 0)}>
-                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.dataserviceViews")}</p>
+                    <p className="text-base text-neutral-700">{orgCards[5]?.title ?? ""}</p>
                   </CardFrame>
                 </div>
                 <div className="flex-1">
                   <CardFrame label={String(metrics?.reuse_views ?? 0)}>
-                    <p className="text-base text-neutral-700">{t("admin-statistics:cards.reuseViews")}</p>
+                    <p className="text-base text-neutral-700">{orgCards[6]?.title ?? ""}</p>
                   </CardFrame>
                 </div>
               </div>
@@ -217,9 +220,9 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
-                    label={t("admin-statistics:search.label")}
-                    placeholder={t("admin-statistics:search.datasetsPlaceholder")}
-                    aria-label={t("admin-statistics:search.datasetsAriaLabel")}
+                    label={pageContent.datasetsSearch?.label ?? ""}
+                    placeholder={pageContent.datasetsSearch?.placeholder ?? ""}
+                    aria-label={pageContent.datasetsSearch?.label ?? ""}
                   />
                 </div>
                 <Button
@@ -250,8 +253,8 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   icon={
                     <Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />
                   }
-                  title={t("admin-statistics:states.noPublications")}
-                  description={t("admin-statistics:states.noDatasetsDescription")}
+                  title={pageContent.datasetsNoResults?.title ?? ""}
+                  description={pageContent.datasetsNoResults?.description ?? ""}
                   hasAnchor={false}
                   extraDescription={
                     <div className="mt-24">
@@ -287,9 +290,9 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
-                    label={t("admin-statistics:search.label")}
-                    placeholder={t("admin-statistics:search.dataservicesPlaceholder")}
-                    aria-label={t("admin-statistics:search.dataservicesAriaLabel")}
+                    label={pageContent.dataservicesSearch?.label ?? ""}
+                    placeholder={pageContent.dataservicesSearch?.placeholder ?? ""}
+                    aria-label={pageContent.dataservicesSearch?.label ?? ""}
                   />
                 </div>
                 <Button
@@ -311,8 +314,8 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   icon={
                     <Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />
                   }
-                  title={t("admin-statistics:states.noPublications")}
-                  description={t("admin-statistics:states.noDataservicesDescription")}
+                  title={pageContent.dataservicesNoResults?.title ?? ""}
+                  description={pageContent.dataservicesNoResults?.description ?? ""}
                   hasAnchor={false}
                   extraDescription={
                     <div className="mt-24">
@@ -382,9 +385,9 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                 <div className="admin-search-wrapper">
                   <InputSearchBar
                     hasVoiceActionButton={false}
-                    label={t("admin-statistics:search.label")}
-                    placeholder={t("admin-statistics:search.reusesPlaceholder")}
-                    aria-label={t("admin-statistics:search.reusesAriaLabel")}
+                    label={pageContent.reusesSearch?.label ?? ""}
+                    placeholder={pageContent.reusesSearch?.placeholder ?? ""}
+                    aria-label={pageContent.reusesSearch?.label ?? ""}
                   />
                 </div>
               </div>
@@ -397,8 +400,8 @@ export default function OrgStatisticsClient({ orgId }: OrgStatisticsClientProps)
                   icon={
                     <Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />
                   }
-                  title={t("admin-statistics:states.noPublications")}
-                  description={t("admin-statistics:states.noReusesDescription")}
+                  title={pageContent.reusesNoResults?.title ?? ""}
+                  description={pageContent.reusesNoResults?.description ?? ""}
                   hasAnchor={false}
                   extraDescription={
                     <div className="mt-24">

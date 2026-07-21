@@ -6,6 +6,7 @@ import { Button } from "@ama-pt/agora-design-system";
 import type { Post } from "@/service/types/posts";
 import PostsEditDangerZone from "@/components/admin/posts/edit-sections/PostsEditDangerZone";
 import PostMetadataSection from "@/components/admin/posts/form-sections/PostMetadataSection";
+import type { AdminCard } from "@/service/types/admin/common";
 
 interface PostsEditMetadataTabProps {
   post: Post;
@@ -20,6 +21,8 @@ interface PostsEditMetadataTabProps {
   hasTitleError?: boolean;
   hasHeaderError?: boolean;
   isSaving: boolean;
+  unpublishCard?: AdminCard;
+  deleteCard?: AdminCard;
   onTitleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onHeaderChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onArticleTypeChange: (value: string) => void;
@@ -48,6 +51,8 @@ export default function PostsEditMetadataTab({
   hasTitleError = false,
   hasHeaderError = false,
   isSaving,
+  unpublishCard,
+  deleteCard,
   onTitleChange,
   onHeaderChange,
   onArticleTypeChange,
@@ -125,6 +130,8 @@ export default function PostsEditMetadataTab({
         <PostsEditDangerZone
           isPublished={!!post.published}
           isSaving={isSaving}
+          unpublishCard={unpublishCard}
+          deleteCard={deleteCard}
           onUnpublish={onUnpublish}
           onRepublish={onRepublish}
           onOpenDeletePopup={onOpenDeletePopup}

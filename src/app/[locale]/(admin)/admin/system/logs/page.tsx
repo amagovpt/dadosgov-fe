@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SystemLogsClient from "@/components/admin/logs/SystemLogsClient";
-import initTranslations from "@/app/i18n";
+import { getBoLogs, getBoLogsMetadata } from "@/service/queries/admin/logs";
 
 export async function generateMetadata({
   params,
@@ -8,17 +8,21 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const { t } = await initTranslations({
-    locale,
-    namespaces: ["admin-logs"],
-  });
+  const metadata = await getBoLogsMetadata(locale);
 
   return {
-    title: t("metadata.title", { ns: "admin-logs" }),
-    description: t("metadata.description", { ns: "admin-logs" }),
+    title: metadata.title,
+    description: metadata.description,
   };
 }
 
-export default function SystemLogsPage() {
-  return <SystemLogsClient />;
+export default async function SystemLogsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoLogs(locale);
+
+  return <SystemLogsClient pageContent={pageContent} />;
 }

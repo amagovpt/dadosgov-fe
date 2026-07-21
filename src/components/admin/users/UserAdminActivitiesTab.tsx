@@ -2,16 +2,18 @@
 
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
+import { Button, CardNoResults, Icon, type IconName } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import type { Activity } from "@/service/types/catalog";
+import type { FoListPageNoResults } from "@/service/types/shared";
 
 type UserAdminActivitiesTabProps = {
   activities: Activity[];
   isLoading: boolean;
   activityPage: number;
   totalActivityPages: number;
+  noResults?: FoListPageNoResults;
   onPreviousPage: () => void;
   onNextPage: () => void;
 };
@@ -31,6 +33,7 @@ export default function UserAdminActivitiesTab({
   isLoading,
   activityPage,
   totalActivityPages,
+  noResults,
   onPreviousPage,
   onNextPage,
 }: UserAdminActivitiesTabProps) {
@@ -44,9 +47,14 @@ export default function UserAdminActivitiesTab({
         <CardNoResults
           className="admin-page__empty"
           position="center"
-          icon={<Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />}
-          title={t("activities.emptyTitle")}
-          description={t("activities.emptyDescription")}
+          icon={
+            <Icon
+              name={(noResults?.icon || "agora-line-edit") as IconName}
+              className="w-12 h-12 text-primary-500 icon-xl"
+            />
+          }
+          title={noResults?.title ?? ""}
+          description={noResults?.description ?? ""}
           hasAnchor={false}
         />
       ) : (

@@ -23,6 +23,7 @@ import {
   createOrgDiscussionColumns,
   type DiscussionSortField,
 } from "./discussionsListConfig";
+import type { BoDiscussionsPage } from "@/service/types/admin/discussions";
 
 const formatDate = (dateStr: string) => {
   try {
@@ -34,9 +35,10 @@ const formatDate = (dateStr: string) => {
 
 interface OrgDiscussionsClientProps {
   orgId: string;
+  pageContent: BoDiscussionsPage;
 }
 
-export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProps) {
+export default function OrgDiscussionsClient({ orgId, pageContent }: OrgDiscussionsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-discussions"]);
   const { user } = useAuth();
   const { show } = usePopupContext();
@@ -130,7 +132,7 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
         { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
         { label: t("admin-discussions:title") },
       ]}
-      title={t("admin-discussions:title")}
+      title={pageContent.orgHero?.title ?? ""}
       isLoading={isLoading}
       count={discussions.length}
       currentPage={currentPage}
@@ -140,8 +142,8 @@ export default function OrgDiscussionsClient({ orgId }: OrgDiscussionsClientProp
       emptyState={
         <AdminEmptyState
           icon="agora-line-chat"
-          title={t("admin-discussions:empty.title")}
-          description={t("admin-discussions:empty.descriptionOrganization")}
+          title={pageContent.orgNoResults?.title ?? ""}
+          description={pageContent.orgNoResults?.description ?? ""}
         />
       }
     >

@@ -9,8 +9,13 @@ import { useAdminListController } from "@/hooks/admin-lists/useAdminListControll
 import { createTopicColumns } from "./topicsListConfig";
 import { fetchTopics } from "@/service/api/discussions-topics";
 import { Topic } from "@/service/types/topic";
+import type { BoTopicsPage } from "@/service/types/admin/topics";
 
-export default function SystemTopicsClient() {
+interface SystemTopicsClientProps {
+  pageContent: BoTopicsPage;
+}
+
+export default function SystemTopicsClient({ pageContent }: SystemTopicsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-topics"]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -63,7 +68,7 @@ export default function SystemTopicsClient() {
         { label: t("admin-common:breadcrumbs.system"), url: "#" },
         { label: t("admin-topics:title"), url: "/admin/system/topics" },
       ]}
-      title={t("admin-topics:title")}
+      title={pageContent.systemHero?.title ?? ""}
       isLoading={isLoading}
       count={totalItems}
       hasItems={topics.length > 0}
@@ -75,8 +80,8 @@ export default function SystemTopicsClient() {
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-tag" className="icon-xl h-12 w-12 text-primary-500" />}
-          title={t("admin-topics:empty.title")}
-          description={t("admin-topics:empty.description")}
+          title={pageContent.systemNoResults?.title ?? ""}
+          description={pageContent.systemNoResults?.description ?? ""}
           hasAnchor={false}
         />
       }

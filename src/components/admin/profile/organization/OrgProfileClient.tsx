@@ -20,10 +20,11 @@ import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
-import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import OrganizationProfileHeaderCard from "@/components/admin/profile/organization/OrganizationProfileHeaderCard";
 import OrganizationProfileFormSection from "@/components/admin/profile/organization/OrganizationProfileFormSection";
 import OrganizationDangerZone from "@/components/admin/profile/organization/OrganizationDangerZone";
+import type { BoOrganizationsPage } from "@/service/types/admin/organizations";
 
 function badgeKindsFromOrg(badges: Organization["badges"] | undefined): string[] {
   return (badges ?? [])
@@ -65,7 +66,7 @@ function DeleteOrgPopupContent({
   );
 }
 
-export default function OrgProfileClient({ pageTitle }: { pageTitle: string }) {
+export default function OrgProfileClient({ pageContent }: { pageContent: BoOrganizationsPage }) {
   const { t } = useTranslation(["admin-common", "admin-profile"]);
   const params = useParams();
   const router = useRouter();
@@ -225,13 +226,7 @@ export default function OrgProfileClient({ pageTitle }: { pageTitle: string }) {
   };
 
   if (!isOrgLoading && !orgId) {
-    return (
-      <AdminEmptyState
-        icon="agora-line-user-buildings"
-        title={t("admin-profile:organization.emptyStateTitle")}
-        description={t("admin-profile:organization.emptyStateDescription")}
-      />
-    );
+    return <AdminSquidexEmptyState noResults={pageContent.orgProfileNoResults} />;
   }
 
   return (
@@ -244,7 +239,7 @@ export default function OrgProfileClient({ pageTitle }: { pageTitle: string }) {
         },
         { label: t("admin-profile:breadcrumbs.profile") },
       ]}
-      title={pageTitle}
+      title={pageContent.orgProfileHero?.title ?? ""}
       headerAction={null}
     >
       {org && <OrganizationProfileHeaderCard organization={org} logoPreview={logoPreview} />}
