@@ -10,7 +10,7 @@ import type { FoListPageNoResults, FoListPageSearch } from "@/service/types/shar
 
 export type BoHarvestersMetadata = AdminMetadata;
 export type BoHarvestersMetadataField =
-  | "metadata"
+  | "createMetadata"
   | "detailMetadata"
   | "jobDetailMetadata"
   | "orgRedirectMetadata"
@@ -19,7 +19,7 @@ export type BoHarvestersMetadataField =
   | "systemMetadata";
 
 export type BoHarvestersPage = {
-  metadata?: AdminMetadata;
+  createMetadata?: AdminMetadata;
   detailMetadata?: AdminMetadata;
   jobDetailMetadata?: AdminMetadata;
   orgRedirectMetadata?: AdminMetadata;

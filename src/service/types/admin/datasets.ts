@@ -10,7 +10,7 @@ import type { FoListPageNoResults, FoListPageSearch } from "@/service/types/shar
 
 export type BoDatasetsMetadata = AdminMetadata;
 export type BoDatasetsMetadataField =
-  | "metadata"
+  | "createMetadata"
   | "listMetadata"
   | "myListMetadata"
   | "editMetadata"
@@ -20,7 +20,7 @@ export type BoDatasetsMetadataField =
   | "systemMetadata";
 
 export type BoDatasetsPage = {
-  metadata?: AdminMetadata;
+  createMetadata?: AdminMetadata;
   listMetadata?: AdminMetadata;
   myListMetadata?: AdminMetadata;
   editMetadata?: AdminMetadata;

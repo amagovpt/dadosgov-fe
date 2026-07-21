@@ -9,7 +9,7 @@ import { gql } from "@apollo/client";
 
 export async function getBoDatasetsMetadata(
   locale: string = "pt",
-  field: BoDatasetsMetadataField = "metadata"
+  field: BoDatasetsMetadataField = "createMetadata"
 ): Promise<BoDatasetsMetadata> {
   const query = gql(/* GraphQL */ `
     query getBoDatasetsMetadata {
@@ -45,7 +45,7 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
     query getBoDatasets {
       findBoDatasetsSingleton {
         data {
-          metadata {
+          createMetadata {
             ${locale} {
               title
               description
