@@ -26,10 +26,8 @@ import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 import { localizeReuseTypeId } from "@/lib/reuse-labels";
 import { normalizeRemoteDatasets } from "@/lib/reuse-remote-datasets";
 import TextLink from "@/components/Primitives/TextLink";
-import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { formatDateToTimeAgo, formatDateLong } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 
@@ -44,7 +42,7 @@ export default function ReuseDetailClient({
   initialDatasets,
   initialIsFavorite,
 }: ReuseDetailClientProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const { t: tr } = useTranslation("reuses");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -94,14 +92,6 @@ export default function ReuseDetailClient({
 
   // Associated datasets are hydrated on the server (see reuses/[rid]/page.tsx).
   const fullDatasets = initialDatasets;
-
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), "d 'de' MMMM 'de' yyyy", { locale: pt });
-    } catch {
-      return dateString;
-    }
-  };
 
   const paginatedDatasets = fullDatasets.slice(
     (datasetsPage - 1) * datasetsPageSize,
@@ -303,7 +293,7 @@ export default function ReuseDetailClient({
                       {tr("detail.lastUpdate")}
                     </h3>
                     <p className="font-medium text-neutral-900">
-                      {formatDate(reuse.last_modified)}
+                      {formatDateLong(reuse.last_modified, i18n.language as "pt" | "en")}
                     </p>
                   </div>
 
@@ -311,7 +301,9 @@ export default function ReuseDetailClient({
                     <h3 className="text-sm mb-8 font-bold tracking-wider">
                       {tr("detail.creationDate")}
                     </h3>
-                    <p className="font-medium text-neutral-900">{formatDate(reuse.created_at)}</p>
+                    <p className="font-medium text-neutral-900">
+                      {formatDateLong(reuse.created_at, i18n.language as "pt" | "en")}
+                    </p>
                   </div>
                 </aside>
               </div>
