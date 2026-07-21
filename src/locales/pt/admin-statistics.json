@@ -1,13 +1,5 @@
 {
   "title": "Estatísticas",
-  "metadata": {
-    "userTitle": "Estatísticas - Admin - dados.gov.pt",
-    "userDescription": "Estatísticas do utilizador no portal dados.gov.pt.",
-    "organizationRedirectTitle": "Estatísticas da organização - Admin - dados.gov.pt",
-    "organizationRedirectDescription": "Consulta de estatísticas da organização no portal dados.gov.pt.",
-    "organizationTitle": "Estatísticas - Organização - Admin - dados.gov.pt",
-    "organizationDescription": "Estatísticas da organização no portal dados.gov.pt."
-  },
   "breadcrumbs": {
     "user": "Estatísticas",
     "organization": "Estatísticas"
@@ -19,24 +11,6 @@
     "dataservices": "API",
     "reuses": "Reutilizações"
   },
-  "cards": {
-    "datasets": "Conjuntos de dados",
-    "dataservices": "API",
-    "reuses": "Reutilizações",
-    "datasetViews": "Visitas ao conjunto de dados",
-    "resourceDownloads": "Downloads de dados",
-    "dataserviceViews": "Visitas à API",
-    "reuseViews": "Visitas a reutilizações"
-  },
-  "search": {
-    "label": "Pesquisar",
-    "datasetsPlaceholder": "Pesquise o nome do conjunto de dados",
-    "datasetsAriaLabel": "Pesquisar conjuntos de dados",
-    "dataservicesPlaceholder": "Pesquise o nome da API",
-    "dataservicesAriaLabel": "Pesquisar APIs",
-    "reusesPlaceholder": "Pesquise o nome da reutilização",
-    "reusesAriaLabel": "Pesquisar reutilizações"
-  },
   "actions": {
     "publishOnPortal": "Publique no portal",
     "report": "Relatório",
@@ -45,12 +19,6 @@
   },
   "states": {
     "loading": "A carregar...",
-    "noPublications": "Sem publicações",
-    "noOrganizations": "Sem organizações",
-    "noOrganizationDescription": "Não pertence a nenhuma organização.",
-    "noDatasetsDescription": "Ainda não publicou um conjunto de dados.",
-    "noDataservicesDescription": "Ainda não publicou uma API.",
-    "noReusesDescription": "Ainda não publicou uma reutilização.",
     "results_zero": "{{count}} resultado",
     "results_one": "{{count}} resultado",
     "results_other": "{{count}} resultados"

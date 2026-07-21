@@ -1,9 +1,5 @@
 {
   "title": "Perfil",
-  "metadata": {
-    "title": "Perfil - Admin - dados.gov.pt",
-    "description": "Perfil do utilizador no portal dados.gov.pt."
-  },
   "breadcrumbs": {
     "profile": "Perfil"
   },
@@ -21,10 +17,6 @@
     "uploadAvatarError": "Erro ao carregar a foto de perfil. Tente novamente.",
     "emailChangeError": "Erro ao solicitar a alteração de e-mail. Verifique o endereço e tente novamente.",
     "avatarMaxSize": "O ficheiro excede o tamanho máximo de 4 MB."
-  },
-  "followings": {
-    "emptyTitle": "Sem acompanhamentos",
-    "emptyDescription": "Não tem seguidores"
   },
   "header": {
     "memberSince": "Membro desde:",
@@ -122,16 +114,7 @@
     "irreversible": "Atenção esta ação é irreversível."
   },
   "organization": {
-    "metadata": {
-      "redirectTitle": "Perfil da organização - Admin - dados.gov.pt",
-      "redirectDescription": "Gestão do perfil da organização no portal dados.gov.pt.",
-      "pageTitle": "Perfil - Organização - Admin - dados.gov.pt",
-      "pageDescription": "Edição do perfil da organização no portal dados.gov.pt."
-    },
-    "emptyStateTitle": "Sem organizações",
-    "emptyStateDescription": "Não pertence a nenhuma organização.",
     "organizationFallback": "Organização",
-    "title": "Perfil da organização",
     "deletePopupTitle": "Tem a certeza que quer eliminar esta organização?",
     "deleteError": "Ocorreu um erro ao eliminar a organização. Por favor, tente novamente.",
     "logoMaxSize": "O ficheiro excede o tamanho máximo de 500 KB.",

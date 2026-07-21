@@ -1,11 +1,5 @@
 {
   "title": "Discussions",
-  "metadata": {
-    "orgRedirectTitle": "Organization discussions - Admin - dados.gov.pt",
-    "orgRedirectDescription": "Organization discussion management on the dados.gov.pt portal.",
-    "orgTitle": "Discussions - Organization - Admin - dados.gov.pt",
-    "orgDescription": "Organization discussion management on the dados.gov.pt portal."
-  },
   "popup": {
     "title": "Discussion"
   },

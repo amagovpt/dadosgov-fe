@@ -1,41 +1,5 @@
 {
   "title": "Reuses",
-  "metadata": {
-    "listTitle": "Reuses - Admin - dados.gov.pt",
-    "listDescription": "Reuse management on the dados.gov.pt portal.",
-    "newTitle": "Describe your reuse - Admin - dados.gov.pt",
-    "newDescription": "Registration form for new reuses on the dados.gov.pt portal.",
-    "editTitle": "Edit reuse - Admin - dados.gov.pt",
-    "editDescription": "Reuse editing on the dados.gov.pt portal.",
-    "myEditDescription": "Editing my reuses on the dados.gov.pt portal.",
-    "orgTitle": "Reuses - Organization - Admin - dados.gov.pt",
-    "orgDescription": "Organization reuse management on the dados.gov.pt portal.",
-    "orgRedirectTitle": "Organization reuses - Admin - dados.gov.pt",
-    "orgRedirectDescription": "Organization reuse management on the dados.gov.pt portal.",
-    "orgNewTitle": "New organization reuse - Admin - dados.gov.pt",
-    "orgNewDescription": "Creating organization reuses on the dados.gov.pt portal.",
-    "orgMemberNewTitle": "New reuse - Organization - Admin - dados.gov.pt",
-    "orgMemberNewDescription": "Publish a new organization reuse on the dados.gov.pt portal.",
-    "orgEditTitle": "Edit organization reuse - Admin - dados.gov.pt",
-    "orgEditDescription": "Editing organization reuses on the dados.gov.pt portal.",
-    "orgMemberEditTitle": "Edit reuse - Organization - Admin - dados.gov.pt",
-    "orgMemberEditDescription": "Edit organization reuse on the dados.gov.pt portal.",
-    "systemTitle": "Reuses - System - Admin - dados.gov.pt",
-    "systemDescription": "System reuse management on the dados.gov.pt portal."
-  },
-  "search": {
-    "placeholder": "Search by reuse name",
-    "ariaLabel": "Search reuses"
-  },
-  "empty": {
-    "title": "No reuses",
-    "description": "No reuse found.",
-    "myDescription": "You have not published reuses",
-    "orgDescription": "The organization has not published a reuse yet.",
-    "noOrganizationTitle": "No organizations",
-    "noOrganizationDescription": "You do not belong to any organization.",
-    "publicationsTitle": "No publications"
-  },
   "columns": {
     "title": "Reuse title",
     "titleShort": "Title",
@@ -44,15 +8,6 @@
     "datasets": "Datasets"
   },
   "form": {
-    "registrationTitle": "Reuse publication form",
-    "steps": {
-      "describe": "Describe your reuse",
-      "datasets": "Associate datasets",
-      "datasetsAndApis": "Connect datasets and APIs",
-      "publish": "Finish publishing your reuse"
-    },
-    "whatIsReuseTitle": "What is a reuse?",
-    "whatIsReuseDescription": "A reuse shows how public data can be used. By publishing your reuse, you increase the visibility of your work and can establish direct contact with the entity that produces the dataset.",
     "requiredFields": "Fields marked with an asterisk ( * ) are required.",
     "producerSectionTitle": "Producer",
     "producerLabel": "Confirm the identity you want to use for publication.",
@@ -80,8 +35,7 @@
     "creating": "Creating...",
     "linkInvalid": "Invalid URL",
     "linkInvalidDescription": "The entered URL is invalid. Please enter a valid address (e.g. https://example.com).",
-    "datasetInfo": "It is important to associate all datasets, as this helps understand cross-references and improves the visibility of your reuse. Choose one way to associate datasets: either datasets published on this portal, or links to datasets published on other portals.",
-    "datasetMutualExclusion": "You can associate datasets from this portal or provide links to external datasets, but not both in the same reuse.",
+    "datasetMutualExclusion": "You can associate datasets from this portal or provide links to external datasets, but not both options in the same reuse.",
     "datasetSearchLabel": "Search for a dataset",
     "datasetSearchPlaceholder": "Select datasets...",
     "datasetSearchInputPlaceholder": "Type to search across all datasets...",
@@ -90,8 +44,6 @@
     "or": "or",
     "addDatasetLink": "Add",
     "associating": "Associating...",
-    "publishSuccessTitle": "Your reuse was created!",
-    "publishSuccessDescription": "It was automatically saved as a draft. You can publish it now or later from the reuses list.",
     "updatedToday": "Updated {{date}}",
     "untitled": "Untitled",
     "reuseCategory": "Reuse",

@@ -1,21 +1,12 @@
 {
   "title": "Logs",
-  "metadata": {
-    "title": "Logs - System - Admin - dados.gov.pt",
-    "description": "Server log viewer on the dados.gov.pt portal."
-  },
   "actions": {
     "stopAutoRefresh": "Stop auto-refresh",
     "autoRefresh": "Auto-refresh (10s)",
     "refresh": "Refresh",
     "download": "Download"
   },
-  "intro": "View the contents of server log files. For large files, only the end is shown (up to 1 MB).",
   "loadingFiles": "Loading log files...",
-  "empty": {
-    "title": "No logs available",
-    "description": "Could not find log files on the server."
-  },
   "select": {
     "label": "Log file",
     "placeholder": "Select file"

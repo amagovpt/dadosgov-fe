@@ -1,36 +1,9 @@
 {
   "title": "Recursos comunitários",
-  "metadata": {
-    "listTitle": "Recursos comunitários - Admin - dados.gov.pt",
-    "listDescription": "Gestão de recursos comunitários no portal dados.gov.pt.",
-    "newTitle": "Novo recurso comunitário - Admin - dados.gov.pt",
-    "newDescription": "Formulário de criação de recurso comunitário no portal dados.gov.pt.",
-    "editTitle": "Editar recurso comunitário - Admin - dados.gov.pt",
-    "editDescription": "Editar um recurso comunitário no portal dados.gov.pt.",
-    "orgTitle": "Recursos comunitários - Organização - Admin - dados.gov.pt",
-    "orgDescription": "Gestão de recursos comunitários da organização no portal dados.gov.pt.",
-    "orgRedirectTitle": "Recursos da comunidade da organização - Admin - dados.gov.pt",
-    "orgRedirectDescription": "Gestão de recursos da comunidade da organização no portal dados.gov.pt.",
-    "systemTitle": "Recursos comunitários - Sistema - Admin - dados.gov.pt",
-    "systemDescription": "Gestão de recursos comunitários do sistema no portal dados.gov.pt."
-  },
-  "search": {
-    "placeholder": "Pesquisar recursos comunitários",
-    "ariaLabel": "Pesquisar recursos comunitários"
-  },
   "empty": {
-    "title": "Sem recursos comunitários",
-    "description": "Nenhum recurso comunitário encontrado.",
-    "myDescription": "Ainda não publicou um recurso comunitário.",
-    "orgDescription": "A organização ainda não tem recursos comunitários.",
     "noOrganization": "Não pertence a nenhuma organização."
   },
   "form": {
-    "registrationTitle": "Formulário de inscrição",
-    "steps": {
-      "describe": "Descreva o recurso da sua comunidade.",
-      "publish": "Finalizar a publicação"
-    },
     "viewPublicPage": "Veja a página pública",
     "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
     "previous": "Anterior",
@@ -40,15 +13,11 @@
     "loadError": "Erro ao carregar recurso comunitário.",
     "updateSuccess": "Recurso comunitário atualizado com sucesso.",
     "deleteError": "Erro ao eliminar recurso comunitário.",
-    "introTitle": "O que é um recurso comunitário?",
-    "introDescription": "Um recurso comunitário é um conteúdo adicionado por um usuário, como dados de referência cruzada, para enriquecer ou complementar um recurso comunitário público.",
     "createError": "Erro ao criar recurso comunitário.",
     "updateError": "Erro ao atualizar recurso comunitário.",
     "sessionExpired": "Sessão expirada. Faça login novamente.",
     "fileTooLarge": "O ficheiro excede o tamanho máximo de 800 MB.",
     "selectDataset": "Selecione um conjunto de dados antes de continuar.",
-    "createdTitle": "O seu recurso comunitário foi criado!",
-    "createdDescription": "Veja na página pública.",
     "resourceCategory": "Recurso",
     "updatedToday": "Atualizado hoje",
     "location": "Localização",
@@ -94,7 +63,6 @@
     "checksumValueField": "Valor de checksum *",
     "checksumValuePlaceholder": "Introduza o valor do hash",
     "producerSelf": "Eu próprio",
-    "producerHelper": "Quando o conjunto de dados for produzido no contexto de atividade profissional, é recomendável que seja publicado em nome da organização responsável.",
     "dataSchema": "Esquema de dados",
     "schemaPlan": "Plano",
     "schemaSearchPlaceholder": "Procure um esquema referenciado em dados.gov.pt...",

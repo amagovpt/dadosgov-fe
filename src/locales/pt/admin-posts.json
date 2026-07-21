@@ -1,25 +1,13 @@
 {
   "title": "Artigos",
-  "metadata": {
-    "systemTitle": "Artigos - Sistema - Admin - dados.gov.pt",
-    "systemDescription": "Gestão de artigos do sistema no portal dados.gov.pt.",
-    "newTitle": "Criar artigo - Admin - dados.gov.pt",
-    "newDescription": "Criação de um novo artigo no portal dados.gov.pt.",
-    "editTitle": "Editar artigo - Admin - dados.gov.pt",
-    "editDescription": "Edição de artigos no portal dados.gov.pt."
-  },
   "list": {
-    "searchPlaceholder": "Pesquise o título do artigo",
-    "searchAriaLabel": "Pesquisar artigos",
     "typePlaceholder": "Filtrar por tipo",
     "all": "Todos",
     "news": "Notícias",
     "page": "Página",
     "published": "Publicado",
     "unpublished": "Despublicado",
-    "create": "Criar um artigo",
-    "emptyTitle": "Sem artigos",
-    "emptyDescription": "Nenhum artigo encontrado."
+    "create": "Criar um artigo"
   },
   "columns": {
     "title": "Título",
@@ -31,9 +19,6 @@
   },
   "new": {
     "breadcrumbsHome": "Bem-vindo",
-    "publicationForm": "Formulário de publicação de um artigo",
-    "stepCreate": "Crie o seu artigo",
-    "stepContent": "Conteúdo",
     "imageMaxSize": "O ficheiro excede o tamanho máximo de 4 MB.",
     "saveAuthError": "Erro ao guardar o artigo. Verifique a autenticação.",
     "saveError": "Erro ao guardar o artigo."

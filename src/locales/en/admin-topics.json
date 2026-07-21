@@ -1,13 +1,5 @@
 {
   "title": "Topics",
-  "metadata": {
-    "title": "Topics - System - Admin - dados.gov.pt",
-    "description": "System topic management on the dados.gov.pt portal."
-  },
-  "empty": {
-    "title": "No topics",
-    "description": "No topics found."
-  },
   "columns": {
     "name": "Name",
     "createdAt": "Created on",

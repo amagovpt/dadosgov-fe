@@ -1,12 +1,5 @@
 {
   "title": "Utilizadores",
-  "profileTitle": "Perfil",
-  "metadata": {
-    "systemUsersTitle": "Utilizadores - Sistema - Admin - dados.gov.pt",
-    "systemUsersDescription": "Gestão de utilizadores do sistema no portal dados.gov.pt.",
-    "profileTitle": "Perfil do Utilizador - Admin - dados.gov.pt",
-    "profileDescription": "Editar perfil de utilizador no portal dados.gov.pt."
-  },
   "breadcrumbs": {
     "users": "Utilizadores"
   },
@@ -23,10 +16,6 @@
   "messages": {
     "loading": "A carregar...",
     "saveError": "Erro ao guardar o perfil. Tente novamente."
-  },
-  "followings": {
-    "emptyTitle": "Sem acompanhamentos",
-    "emptyDescription": "Não tem seguidores"
   },
   "profileTab": {
     "sectionTitle": "EDITAR PERFIL",
@@ -53,11 +42,9 @@
     "saveLoading": "A guardar..."
   },
   "dangerZone": {
-    "deactivateDescription": "Uma conta desativada impede o utilizador de iniciar sessão no portal, mas os seus dados permanecem acessíveis.",
     "inactiveDescription": "Esta conta está desativada. O utilizador não consegue iniciar sessão no portal.",
     "deactivateAction": "Desativar conta",
     "activateAction": "Ativar conta",
-    "deleteWarning": "Atenção esta ação é irreversível.",
     "deleteAction": "Eliminar o perfil"
   },
   "headerCard": {
@@ -66,26 +53,18 @@
   },
   "activities": {
     "loading": "A carregar atividades...",
-    "emptyTitle": "Sem atividades",
-    "emptyDescription": "Nenhuma atividade registada.",
     "previous": "Anterior",
     "page": "Página {{page}} de {{total}}",
     "next": "Seguinte"
   },
   "subscriptions": {
-    "loading": "A carregar subscrições...",
-    "emptyTitle": "Sem subscrições",
-    "emptyDescription": "Não segue conteúdos"
+    "loading": "A carregar subscrições..."
   },
   "list": {
-    "searchPlaceholder": "Pesquise o nome do utilizador",
-    "searchAriaLabel": "Pesquisar utilizadores",
     "filterPlaceholder": "Filtrar por perfil",
     "filterAll": "Todos",
     "filterAdmin": "Admin",
-    "filterEditor": "Editor",
-    "emptyTitle": "Sem utilizadores",
-    "emptyDescription": "Nenhum utilizador encontrado."
+    "filterEditor": "Editor"
   },
   "columns": {
     "name": "Nome",

@@ -1,9 +1,5 @@
 {
   "title": "Editorial",
-  "metadata": {
-    "title": "Editorial - System - Admin - dados.gov.pt",
-    "description": "System editorial management on the dados.gov.pt portal."
-  },
   "actions": {
     "viewPublicPage": "View public page",
     "editOnPublicPage": "Edit on public page",

@@ -1,25 +1,13 @@
 {
   "title": "Posts",
-  "metadata": {
-    "systemTitle": "Posts - System - Admin - dados.gov.pt",
-    "systemDescription": "System post management on the dados.gov.pt portal.",
-    "newTitle": "Create post - Admin - dados.gov.pt",
-    "newDescription": "Creation of a new post on the dados.gov.pt portal.",
-    "editTitle": "Edit post - Admin - dados.gov.pt",
-    "editDescription": "Editing posts on the dados.gov.pt portal."
-  },
   "list": {
-    "searchPlaceholder": "Search the post title",
-    "searchAriaLabel": "Search posts",
     "typePlaceholder": "Filter by type",
     "all": "All",
     "news": "News",
     "page": "Page",
     "published": "Published",
     "unpublished": "Unpublished",
-    "create": "Create a post",
-    "emptyTitle": "No posts",
-    "emptyDescription": "No posts found."
+    "create": "Create a post"
   },
   "columns": {
     "title": "Title",
@@ -31,9 +19,6 @@
   },
   "new": {
     "breadcrumbsHome": "Welcome",
-    "publicationForm": "Post publication form",
-    "stepCreate": "Create your post",
-    "stepContent": "Content",
     "imageMaxSize": "The file exceeds the maximum size of 4 MB.",
     "saveAuthError": "Error saving the post. Check authentication.",
     "saveError": "Error saving the post."

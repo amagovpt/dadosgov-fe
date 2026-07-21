@@ -1,11 +1,5 @@
 {
   "title": "Notificações",
-  "metadata": {
-    "title": "Notificações - Admin - dados.gov.pt",
-    "description": "Notificações de administração no portal dados.gov.pt."
-  },
-  "intro": "Pedidos de validação de harvesters e outras notificações dirigidas à equipa de administração.",
-  "empty": "Sem notificações de momento.",
   "read": "lida",
   "markAsRead": "Marcar como lida",
   "statuses": {

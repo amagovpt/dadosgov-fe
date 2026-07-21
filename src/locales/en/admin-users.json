@@ -1,12 +1,5 @@
 {
   "title": "Users",
-  "profileTitle": "Profile",
-  "metadata": {
-    "systemUsersTitle": "Users - System - Admin - dados.gov.pt",
-    "systemUsersDescription": "System user management on the dados.gov.pt portal.",
-    "profileTitle": "User Profile - Admin - dados.gov.pt",
-    "profileDescription": "Edit a user profile on the dados.gov.pt portal."
-  },
   "breadcrumbs": {
     "users": "Users"
   },
@@ -23,10 +16,6 @@
   "messages": {
     "loading": "Loading...",
     "saveError": "Error saving the profile. Please try again."
-  },
-  "followings": {
-    "emptyTitle": "No followers",
-    "emptyDescription": "This user has no followers"
   },
   "profileTab": {
     "sectionTitle": "EDIT PROFILE",
@@ -53,11 +42,9 @@
     "saveLoading": "Saving..."
   },
   "dangerZone": {
-    "deactivateDescription": "A disabled account prevents the user from signing in to the portal, but their data remains accessible.",
     "inactiveDescription": "This account is disabled. The user cannot sign in to the portal.",
     "deactivateAction": "Disable account",
     "activateAction": "Enable account",
-    "deleteWarning": "Warning: this action is irreversible.",
     "deleteAction": "Delete profile"
   },
   "headerCard": {
@@ -66,26 +53,18 @@
   },
   "activities": {
     "loading": "Loading activities...",
-    "emptyTitle": "No activities",
-    "emptyDescription": "No recorded activities.",
     "previous": "Previous",
     "page": "Page {{page}} of {{total}}",
     "next": "Next"
   },
   "subscriptions": {
-    "loading": "Loading subscriptions...",
-    "emptyTitle": "No subscriptions",
-    "emptyDescription": "This user is not following any content"
+    "loading": "Loading subscriptions..."
   },
   "list": {
-    "searchPlaceholder": "Search the user's name",
-    "searchAriaLabel": "Search users",
     "filterPlaceholder": "Filter by profile",
     "filterAll": "All",
     "filterAdmin": "Admin",
-    "filterEditor": "Editor",
-    "emptyTitle": "No users",
-    "emptyDescription": "No users found."
+    "filterEditor": "Editor"
   },
   "columns": {
     "name": "Name",

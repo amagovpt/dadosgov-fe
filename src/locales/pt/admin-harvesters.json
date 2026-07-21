@@ -1,30 +1,8 @@
 {
   "title": "Harvesters",
-  "metadata": {
-    "newTitle": "Criar harvester - Admin - dados.gov.pt",
-    "newDescription": "Criação de um novo harvester no portal dados.gov.pt.",
-    "detailTitle": "Detalhe do harvester - Admin - dados.gov.pt",
-    "detailDescription": "Detalhe de um harvester no portal dados.gov.pt.",
-    "jobDetailTitle": "Detalhe do trabalho - Admin - dados.gov.pt",
-    "jobDetailDescription": "Detalhe de um trabalho de harvesting no portal dados.gov.pt.",
-    "orgRedirectTitle": "Harvesters da organização - Admin - dados.gov.pt",
-    "orgRedirectDescription": "Gestão de harvesters da organização no portal dados.gov.pt.",
-    "orgTitle": "Harvesters - Organização - Admin - dados.gov.pt",
-    "orgDescription": "Gestão de harvesters da organização no portal dados.gov.pt.",
-    "systemTitle": "Harvesters - Sistema - Admin - dados.gov.pt",
-    "systemDescription": "Gestão de harvesters do sistema no portal dados.gov.pt."
-  },
-  "publicationFormTitle": "Formulário de publicação de um harvester",
-  "search": {
-    "placeholder": "Pesquise o nome do harvester",
-    "ariaLabel": "Pesquisar harvesters"
-  },
   "empty": {
     "noOrganizationsTitle": "Sem organizações",
     "noOrganizationsDescription": "Não pertence a nenhuma organização.",
-    "title": "Sem harvesters",
-    "description": "Nenhum harvester encontrado.",
-    "orgDescription": "A organização ainda não tem harvesters.",
     "notFound": "Harvester não encontrado."
   },
   "feedback": {
@@ -86,11 +64,7 @@
       "status": "Estado"
     },
     "notApplicable": "Não aplicável",
-    "deleteConfirm": "Esta ação é irreversível. Tem a certeza que quer eliminar este harvester?",
-    "pendingAdminTitle": "Este harvester aguarda validação da equipa de administração.",
-    "pendingAdminDescription": "Aprove para o agendar e iniciar a primeira execução, ou rejeite indicando o motivo. O proprietário será notificado.",
-    "pendingOwnerTitle": "O seu harvester foi criado e está a aguardar validação da equipa de administração do portal.",
-    "pendingOwnerDescription": "A equipa de administração foi notificada automaticamente. Será notificado da aprovação ou rejeição quando esta for decidida."
+    "deleteConfirm": "Esta ação é irreversível. Tem a certeza que quer eliminar este harvester?"
   },
   "filters": {
     "options": {
@@ -126,13 +100,6 @@
     "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
     "requiredFieldsRichPrefix": "Os campos marcados com um asterisco (",
     "requiredFieldsRichSuffix": ") são obrigatórios.",
-    "whatIsHarvesterTitle": "O que é um harvester?",
-    "whatIsHarvesterDescription": "Um harvester é um mecanismo para recolher metadados a partir de um catálogo e armazená-los noutra plataforma, garantindo o acesso aos dados.",
-    "steps": {
-      "describe": "Descreva o seu harvester",
-      "preview": "Visualize o seu harvester",
-      "publish": "Finalize a publicação do seu harvester"
-    },
     "next": "Seguinte",
     "createError": "Erro ao criar o harvester.",
     "previewError": "Erro ao pré-visualizar o harvester.",
@@ -168,8 +135,6 @@
     "viewInAdmin": "Ver na administração",
     "requestValidation": "Solicitar validação do harvester",
     "createErrorTitle": "Erro ao criar o harvester",
-    "createdPendingTitle": "O seu harvester foi criado e está a aguardar validação pela equipa de administração.",
-    "createdPendingDescription": "Informe-nos através do formulário de contacto abaixo se deseja que validemos o seu harvester. Será notificado da aprovação (ou rejeição).",
     "validationErrors": {
       "producer": "Selecione uma organização produtora.",
       "name": "Indique o nome do harvester.",
@@ -177,16 +142,6 @@
     },
     "saveErrorRetry": "Tente novamente.",
     "saveError": "Erro ao guardar ({{status}}) - {{message}}",
-    "auxiliary": {
-      "nameTitle": "Dar um nome",
-      "nameContent": "Dê um nome ao seu harvester. Esta é uma referência interna que o ajudará a identificá-lo caso crie vários harvesters. O nome do seu harvester não será público.",
-      "descriptionTitle": "Descrever o seu harvester",
-      "descriptionContent": "Adicione detalhes no campo de descrição para seu uso interno. A descrição é opcional.",
-      "urlTitle": "Adicionar o URL",
-      "urlContent": "Insira aqui o URL do portal que deseja recolher. Normalmente, trata-se do URL da página inicial do seu portal de dados abertos. O URL permite que o harvester navegue e recupere todos os seus conjuntos de dados.",
-      "implementationTitle": "Identificar o tipo de implementação",
-      "implementationContent": "Escolha o formato dos metadados (por exemplo, DCAT, CKAN, etc.). Esse formato permite que o harvester saiba como ler e interpretar os seus metadados, para que possam ser transcritos corretamente em dados.gov.pt."
-    },
     "filterLabels": {
       "organization": "Organização",
       "tag": "Marcação",

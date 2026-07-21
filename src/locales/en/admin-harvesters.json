@@ -1,30 +1,8 @@
 {
   "title": "Harvesters",
-  "metadata": {
-    "newTitle": "Create harvester - Admin - dados.gov.pt",
-    "newDescription": "Creation of a new harvester on the dados.gov.pt portal.",
-    "detailTitle": "Harvester detail - Admin - dados.gov.pt",
-    "detailDescription": "Detail of a harvester on the dados.gov.pt portal.",
-    "jobDetailTitle": "Job detail - Admin - dados.gov.pt",
-    "jobDetailDescription": "Detail of a harvesting job on the dados.gov.pt portal.",
-    "orgRedirectTitle": "Organization harvesters - Admin - dados.gov.pt",
-    "orgRedirectDescription": "Organization harvester management on the dados.gov.pt portal.",
-    "orgTitle": "Harvesters - Organization - Admin - dados.gov.pt",
-    "orgDescription": "Organization harvester management on the dados.gov.pt portal.",
-    "systemTitle": "Harvesters - System - Admin - dados.gov.pt",
-    "systemDescription": "System harvester management on the dados.gov.pt portal."
-  },
-  "publicationFormTitle": "Harvester publication form",
-  "search": {
-    "placeholder": "Search by harvester name",
-    "ariaLabel": "Search harvesters"
-  },
   "empty": {
     "noOrganizationsTitle": "No organizations",
     "noOrganizationsDescription": "You do not belong to any organization.",
-    "title": "No harvesters",
-    "description": "No harvester found.",
-    "orgDescription": "The organization does not have harvesters yet.",
     "notFound": "Harvester not found."
   },
   "feedback": {
@@ -86,11 +64,7 @@
       "status": "Status"
     },
     "notApplicable": "Not applicable",
-    "deleteConfirm": "This action is irreversible. Are you sure you want to delete this harvester?",
-    "pendingAdminTitle": "This harvester is waiting for validation by the administration team.",
-    "pendingAdminDescription": "Approve it to schedule and start the first execution, or reject it with a reason. The owner will be notified.",
-    "pendingOwnerTitle": "Your harvester was created and is waiting for validation by the portal administration team.",
-    "pendingOwnerDescription": "The administration team was notified automatically. You will be notified when approval or rejection is decided."
+    "deleteConfirm": "This action is irreversible. Are you sure you want to delete this harvester?"
   },
   "filters": {
     "options": {
@@ -126,13 +100,6 @@
     "requiredFields": "Fields marked with an asterisk ( * ) are required.",
     "requiredFieldsRichPrefix": "Fields marked with an asterisk (",
     "requiredFieldsRichSuffix": ") are required.",
-    "whatIsHarvesterTitle": "What is a harvester?",
-    "whatIsHarvesterDescription": "A harvester is a mechanism for collecting metadata from a catalog and storing it on another platform, ensuring access to the data.",
-    "steps": {
-      "describe": "Describe your harvester",
-      "preview": "Preview your harvester",
-      "publish": "Finish publishing your harvester"
-    },
     "next": "Next",
     "createError": "Error creating the harvester.",
     "previewError": "Error previewing the harvester.",
@@ -168,8 +135,6 @@
     "viewInAdmin": "View in administration",
     "requestValidation": "Request harvester validation",
     "createErrorTitle": "Error creating the harvester",
-    "createdPendingTitle": "Your harvester was created and is waiting for validation by the administration team.",
-    "createdPendingDescription": "Let us know through the contact form below if you want us to validate your harvester. You will be notified of approval or rejection.",
     "validationErrors": {
       "producer": "Select a producer organization.",
       "name": "Enter the harvester name.",
@@ -177,16 +142,6 @@
     },
     "saveErrorRetry": "Try again.",
     "saveError": "Error saving ({{status}}) - {{message}}",
-    "auxiliary": {
-      "nameTitle": "Choose a name",
-      "nameContent": "Give your harvester a name. This is an internal reference that will help you identify it if you create several harvesters. Your harvester name will not be public.",
-      "descriptionTitle": "Describe your harvester",
-      "descriptionContent": "Add details in the description field for your internal use. The description is optional.",
-      "urlTitle": "Add the URL",
-      "urlContent": "Enter here the URL of the portal you want to harvest. Usually, this is the homepage URL of your open data portal. The URL allows the harvester to browse and retrieve all your datasets.",
-      "implementationTitle": "Identify the implementation type",
-      "implementationContent": "Choose the metadata format (for example, DCAT, CKAN, etc.). This format allows the harvester to know how to read and interpret your metadata so they can be correctly transcribed into dados.gov.pt."
-    },
     "filterLabels": {
       "organization": "Organization",
       "tag": "Tag",

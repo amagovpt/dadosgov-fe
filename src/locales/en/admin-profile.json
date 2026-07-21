@@ -1,9 +1,5 @@
 {
   "title": "Profile",
-  "metadata": {
-    "title": "Profile - Admin - dados.gov.pt",
-    "description": "User profile on the dados.gov.pt portal."
-  },
   "breadcrumbs": {
     "profile": "Profile"
   },
@@ -21,10 +17,6 @@
     "uploadAvatarError": "Error uploading the profile picture. Please try again.",
     "emailChangeError": "Error requesting the email change. Check the address and try again.",
     "avatarMaxSize": "The file exceeds the maximum size of 4 MB."
-  },
-  "followings": {
-    "emptyTitle": "No followers",
-    "emptyDescription": "This user has no followers"
   },
   "header": {
     "memberSince": "Member since:",
@@ -122,16 +114,7 @@
     "irreversible": "Warning: this action is irreversible."
   },
   "organization": {
-    "metadata": {
-      "redirectTitle": "Organization Profile - Admin - dados.gov.pt",
-      "redirectDescription": "Organization profile management on the dados.gov.pt portal.",
-      "pageTitle": "Profile - Organization - Admin - dados.gov.pt",
-      "pageDescription": "Editing the organization profile on the dados.gov.pt portal."
-    },
-    "emptyStateTitle": "No organizations",
-    "emptyStateDescription": "You do not belong to any organization.",
     "organizationFallback": "Organization",
-    "title": "Organization profile",
     "deletePopupTitle": "Are you sure you want to delete this organization?",
     "deleteError": "An error occurred while deleting the organization. Please try again.",
     "logoMaxSize": "The file exceeds the maximum size of 500 KB.",

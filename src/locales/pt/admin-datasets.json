@@ -1,50 +1,15 @@
 {
   "title": "Conjuntos de dados",
-  "metadata": {
-    "listTitle": "Conjuntos de dados - Admin - dados.gov.pt",
-    "listDescription": "Gestão de conjuntos de dados no portal dados.gov.pt.",
-    "newTitle": "Publique em dados.gov.pt - Admin - dados.gov.pt",
-    "newDescription": "Escolha como publicar os seus dados no portal dados.gov.pt.",
-    "editTitle": "Editar conjunto de dados - Admin - dados.gov.pt",
-    "editDescription": "Edição de conjuntos de dados no portal dados.gov.pt.",
-    "myEditDescription": "Edição dos meus conjuntos de dados no portal dados.gov.pt.",
-    "orgListTitle": "Conjuntos de dados da organização - Admin - dados.gov.pt",
-    "orgListDescription": "Gestão de conjuntos de dados da organização no portal dados.gov.pt.",
-    "orgNewTitle": "Publicar conjuntos de dados da organização - Admin - dados.gov.pt",
-    "orgNewDescription": "Publicação de conjuntos de dados da organização no portal dados.gov.pt.",
-    "orgEditTitle": "Editar conjunto de dados da organização - Admin - dados.gov.pt",
-    "orgEditDescription": "Edição de conjuntos de dados da organização no portal dados.gov.pt.",
-    "systemTitle": "Conjuntos de dados do sistema - Admin - dados.gov.pt",
-    "systemDescription": "Gestão de conjuntos de dados do sistema no portal dados.gov.pt.",
-    "wizardTitle": "Publicação assistida de conjuntos de dados - Admin - dados.gov.pt",
-    "wizardDescription": "Publicação assistida de conjuntos de dados no portal dados.gov.pt."
-  },
   "form": {
-    "registrationTitle": "Formulário de publicação de um conjunto de dados",
     "breadcrumbs": {
       "datasets": "Conjuntos de dados"
     },
-    "steps": {
-      "start": "Inicie a publicação do seu conjunto de dados",
-      "describe": "Descreva o seu conjunto de dados",
-      "files": "Adicione os ficheiros",
-      "publish": "Finalize a publicação do seu conjunto de dados"
-    },
     "publicationTypeTitle": "Tipo de publicação",
     "demoInfo": "Se desejar realizar testes, utilize demo.dados.gov.pt",
-    "startCardTitle": "Publique um conjunto de dados",
-    "startCardDescription": "Seja uma entidade da administração pública ou uma empresa pública, todos podem publicar em dados.gov.pt!",
-    "startCardAction": "Comece a publicação",
-    "adminAutomationTitle": "É administrador e deseja automatizar a publicação dos seus dados?",
-    "adminAutomationDescription": "Pode automatizar a publicação através da API ou ligando o seu portal ao dados.gov.pt através de um harvester de dados.",
     "apiDocsAction": "Consulte a documentação da API",
     "harvesterAction": "Saiba mais sobre o harvester.",
     "contactAction": "Contacte-nos",
-    "catalogTitle": "É administrador e deseja catalogar os seus dados?",
-    "catalogDescription": "Pode utilizar o serviço de catalogação e publicação do dados.gov.pt, que permite aos organismos da Administração Pública Central organizarem e disponibilizarem o seu catálogo de dados abertos.",
     "catalogAction": "Aceda à área de catálogo.",
-    "whatIsDatasetTitle": "O que é um conjunto de dados?",
-    "whatIsDatasetDescription": "Em dados.gov.pt, um conjunto de dados é um conjunto de ficheiros.",
     "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
     "producerSectionTitle": "Produtor",
     "producerHelper": "Confirme a identidade que pretende utilizar na publicação.",
@@ -104,11 +69,7 @@
     "previousAction": "Anterior",
     "nextAction": "Seguinte",
     "creating": "A criar...",
-    "whatIsFileTitle": "O que é um ficheiro?",
-    "whatIsFileDescription": "Um conjunto de dados pode conter vários tipos de ficheiros (atualizações, histórico, documentação, código-fonte, API, links, etc.).",
     "loadingNext": "A carregar...",
-    "publishSuccessTitle": "O seu conjunto de dados foi criado!",
-    "publishSuccessDescription": "Agora pode publicar ou guardar como rascunho.",
     "organizationFallback": "Organização",
     "withoutOrganization": "Sem Organização",
     "untitledFallback": "Sem título",
@@ -133,8 +94,6 @@
   },
   "list": {
     "title": "Conjuntos de dados",
-    "searchPlaceholder": "Pesquise o nome, código ou sigla da entidade",
-    "searchAriaLabel": "Pesquisar conjuntos de dados",
     "columns": {
       "title": "Título do conjunto de dados",
       "titleShort": "Título",
@@ -145,12 +104,6 @@
       "quality": "Pontuação",
       "actions": "Ações"
     },
-    "emptyMineTitle": "Sem conjuntos de dados",
-    "emptyMineDescription": "Não publicou conjuntos de dados.",
-    "emptyOrgTitle": "Sem publicações",
-    "emptyOrgDescription": "A organização ainda não publicou conjuntos de dados.",
-    "emptySystemTitle": "Sem publicações",
-    "emptySystemDescription": "Nenhum conjunto de dados encontrado.",
     "catalogDownload": "Catálogo"
   },
   "edit": {

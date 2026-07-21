@@ -1,13 +1,5 @@
 {
   "title": "Statistics",
-  "metadata": {
-    "userTitle": "Statistics - Admin - dados.gov.pt",
-    "userDescription": "User statistics on the dados.gov.pt portal.",
-    "organizationRedirectTitle": "Organization statistics - Admin - dados.gov.pt",
-    "organizationRedirectDescription": "Organization statistics overview on the dados.gov.pt portal.",
-    "organizationTitle": "Statistics - Organization - Admin - dados.gov.pt",
-    "organizationDescription": "Organization statistics on the dados.gov.pt portal."
-  },
   "breadcrumbs": {
     "user": "Statistics",
     "organization": "Statistics"
@@ -19,24 +11,6 @@
     "dataservices": "API",
     "reuses": "Reuses"
   },
-  "cards": {
-    "datasets": "Datasets",
-    "dataservices": "API",
-    "reuses": "Reuses",
-    "datasetViews": "Dataset views",
-    "resourceDownloads": "Data downloads",
-    "dataserviceViews": "API views",
-    "reuseViews": "Reuse views"
-  },
-  "search": {
-    "label": "Search",
-    "datasetsPlaceholder": "Search dataset name",
-    "datasetsAriaLabel": "Search datasets",
-    "dataservicesPlaceholder": "Search API name",
-    "dataservicesAriaLabel": "Search APIs",
-    "reusesPlaceholder": "Search reuse name",
-    "reusesAriaLabel": "Search reuses"
-  },
   "actions": {
     "publishOnPortal": "Publish on the portal",
     "report": "Report",
@@ -45,12 +19,6 @@
   },
   "states": {
     "loading": "Loading...",
-    "noPublications": "No publications",
-    "noOrganizations": "No organizations",
-    "noOrganizationDescription": "You do not belong to any organization.",
-    "noDatasetsDescription": "You have not published any dataset yet.",
-    "noDataservicesDescription": "You have not published any API yet.",
-    "noReusesDescription": "You have not published any reuse yet.",
     "results_zero": "{{count}} results",
     "results_one": "{{count}} result",
     "results_other": "{{count}} results"

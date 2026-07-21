@@ -1,11 +1,5 @@
 {
   "title": "Members",
-  "metadata": {
-    "redirectTitle": "Organization Members - Admin - dados.gov.pt",
-    "redirectDescription": "Organization member management on the dados.gov.pt portal.",
-    "pageTitle": "Members - Admin - dados.gov.pt",
-    "pageDescription": "Organization member management on the dados.gov.pt portal."
-  },
   "breadcrumbs": {
     "members": "Members"
   },
