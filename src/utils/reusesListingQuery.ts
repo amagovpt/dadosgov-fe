@@ -7,13 +7,6 @@ export const REUSE_SORT_OPTIONS: Record<string, string> = {
   subscritores: "-followers",
 };
 
-export const REUSE_SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  recentes: "Mais recente",
-  antigos: "Mais antigo",
-  subscritores: "Subscritores",
-};
-
 const REUSE_SORT_REVERSE_MAP: Record<string, string> = {
   "-last_modified": "recentes",
   last_modified: "antigos",

@@ -163,12 +163,13 @@ export async function unfollowEntity(
 export async function isFollowing(
   entityType: FollowableEntityType,
   id: string,
-  userId: string
+  userId: string,
+  forwarded?: Record<string, string>
 ): Promise<boolean> {
   try {
     const res = await fetch(
-      `${API_AUTH_URL}/${entityType}/${id}/followers/?user=${userId}&page_size=1`,
-      { cache: "no-store", credentials: "include" }
+      `${API_BASE_URL}/${entityType}/${id}/followers/?user=${userId}&page_size=1`,
+      { cache: "no-store", credentials: "include", headers: forwarded }
     );
     if (!res.ok) return false;
     const data = await res.json();

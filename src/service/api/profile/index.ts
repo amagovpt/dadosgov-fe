@@ -1,5 +1,5 @@
 import type { ApiToken, ApiTokenCreated, UserMetrics, UserPublic } from "@/service/types/identity";
-import { API_AUTH_URL, translateUploadErrorPayload } from "@/service/utils/API";
+import { API_AUTH_URL, API_BASE_URL, translateUploadErrorPayload } from "@/service/utils/API";
 
 
 export async function uploadAvatar(file: File): Promise<{ image: string }> {
@@ -29,10 +29,13 @@ export async function deleteAvatar(): Promise<void> {
 }
 
 
-export async function fetchFullProfile(): Promise<UserPublic> {
-  const res = await fetch(`${API_AUTH_URL}/me/`, {
+export async function fetchFullProfile(
+  forwarded?: Record<string, string>
+): Promise<UserPublic> {
+  const res = await fetch(`${API_BASE_URL}/me/`, {
     cache: "no-store",
     credentials: "include",
+    headers: forwarded,
   });
   if (!res.ok) throw new Error(`Failed to fetch profile: ${res.statusText}`);
   return await res.json();

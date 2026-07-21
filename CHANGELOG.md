@@ -111,6 +111,22 @@ This project has no version tags, so entries are grouped by month (newest first)
     wiring; the remaining filters (access type, update date, organization
     type, organizations) now match the upstream set. Backend untouched.
 
+- **refactor(reuses,datasets): fetch the detail pages server-side with the visitor's session** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+  - The reuse and dataset detail pages fetched their entity (and, for reuses,
+    each associated dataset) in a client `useEffect`, so the content was absent
+    from the initial server HTML and flashed a loading state. The `[rid]` /
+    `[slug]` Server Components now call `fetchReuse` / `fetchDataset` directly and
+    pass the entity down as a prop; the client components keep only the
+    interactive islands (favorite toggle, tabs, discussions, pagination).
+  - The SSR fetch is authenticated: a new `serverAuthHeaders()` relays the
+    request `Cookie` (alongside the existing `X-Forwarded-*` IP headers) to the
+    direct backend, so per-user `permissions.edit` and private-draft
+    (`Rascunho`) visibility render correctly server-side. A missing entity now
+    resolves to a real `notFound()` (404) instead of a client-side message.
+  - `fetchDataset` was switched from the always-relative `API_AUTH_URL` to
+    `API_BASE_URL` so it is callable from Server Components (client callers are
+    unaffected).
+
 - **chore(images): set `minimumCacheTTL` to 30 days to curb `.next/cache` growth** [#447](https://github.com/amagovpt/dadosgov-fe/pull/447)
   - The Next.js image optimizer writes every optimized variant to
     `.next/cache/images` and, with the default short TTL, keeps
@@ -125,6 +141,17 @@ This project has no version tags, so entries are grouped by month (newest first)
     `node server.js` failed to start and the reverse proxy returned 502.
     Dropped the source mount and kept only `./logs:/logs` and
     `./.next/cache:/app/.next/cache`, so the image serves its own built `/app`.
+
+- **feat(analytics): add Google Analytics (GA4) tag to the shared layout** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - Loads `gtag.js` for measurement ID `G-6EQQ3VB8JY` from the root
+    `[locale]/layout.tsx` (common to every page) via `next/script`
+    (`afterInteractive`). Both the loader and the `gtag('config', ...)` init
+    script carry the per-request CSP nonce (`x-nonce` header minted in
+    `src/proxy.ts`), so they pass the strict `script-src` without
+    `'unsafe-inline'`. The CSP was extended to allow the GA endpoints:
+    `www.googletagmanager.com` in `script-src`/`img-src`/`connect-src` and
+    `www.google-analytics.com` (+ `*.google-analytics.com`,
+    `*.analytics.google.com`) in `img-src`/`connect-src`.
 
 - **perf(harvesters): read job list counts from the lightweight API shape** [#427](https://github.com/amagovpt/dadosgov-fe/pull/427)
   - The harvester detail page showed no jobs for large sources (e.g. INE,

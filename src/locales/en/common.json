@@ -48,6 +48,17 @@
     "filters": "Filters",
     "hideFilters": "Hide filters",
     "openFilters": "Open filters",
+    "clear": "Clear filters",
+    "all": "All",
+    "update": {
+      "label": "Update date",
+      "options": {
+        "30_days": "Last 30 days",
+        "12_months": "Last 12 months",
+        "3_years": "Last 3 years"
+      }
+    },
+    "reset": "Reset filters",
     "advanced": {
       "label": "Advanced filters",
       "organization": "Organisations",
@@ -84,5 +95,33 @@
     "subtitle": "An error occurred while contacting the server. Please try again in a few moments."
   },
   "retry": "Try again",
-  "auth": "Authentication"
+  "auth": "Authentication",
+  "discussions": {
+    "count_one": "{{count}} DISCUSSION",
+    "count_other": "{{count}} DISCUSSIONS",
+    "searchAria": "Search discussions",
+    "newDiscussion": "New discussion",
+    "requiredFieldsBefore": "Fields marked with an asterisk (",
+    "requiredFieldsAfter": ") are required.",
+    "identityLabel": "Choose the identity you want to publish this message with",
+    "identitySearchPlaceholder": "Type to search...",
+    "noResults": "No results",
+    "userIdentitySuffix": "(user)",
+    "titleLabel": "Title",
+    "yourMessage": "Your message",
+    "messagePlaceholder": "Please remain courteous and constructive. Avoid sharing personal information.",
+    "sending": "Sending...",
+    "submit": "Submit",
+    "reply": "Reply",
+    "postedOn": "Posted on",
+    "editDiscussion": "Edit discussion",
+    "deleteDiscussion": "Delete discussion",
+    "editComment": "Edit comment",
+    "deleteComment": "Delete comment",
+    "editMessage": "Edit message",
+    "deleteDiscussionConfirm": "Are you sure you want to delete this discussion?",
+    "deleteMessageConfirm": "Are you sure you want to delete this message?",
+    "noDiscussionsTitle": "No discussions",
+    "noDiscussionsDescription": "There are no discussions yet."
+  }
 }
