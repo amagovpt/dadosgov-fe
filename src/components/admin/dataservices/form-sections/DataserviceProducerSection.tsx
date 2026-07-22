@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { StatusCard } from "@ama-pt/agora-design-system";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
-import ProducerIdentitySection from "@/components/admin/forms/ProducerIdentitySection";
-import { buildProducerItems, renderDropdownSection } from "@/components/admin/community-resources/config/dropdownOptions";
+import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
+import { renderDropdownSection } from "@/components/admin/community-resources/config/dropdownOptions";
 
 interface UserOrganization {
   id: string;
@@ -11,40 +12,66 @@ interface UserOrganization {
 }
 
 interface DataserviceProducerSectionProps {
-  displayName: string;
+  /** Only organizations eligible to publish an API (public-service badge). */
   organizations: UserOrganization[];
   initialValue?: string;
   onValueChange?: (value: string) => void;
 }
 
 export default function DataserviceProducerSection({
-  displayName,
   organizations,
   initialValue,
   onValueChange,
 }: DataserviceProducerSectionProps) {
   const producerOptions = useMemo(
     () =>
+      // No personal ("Eu próprio") option: an API can only be published in the
+      // name of an organization with the "Serviço público" badge.
       renderDropdownSection(
         "identity",
-        buildProducerItems(displayName, organizations),
+        organizations.map((organization) => ({
+          value: organization.id,
+          label: organization.name,
+        })),
       ) as
         | React.ReactElement<DropdownSectionProps>
         | React.ReactElement<DropdownSectionProps>[],
-    [displayName, organizations],
+    [organizations],
   );
 
   return (
-    <ProducerIdentitySection
-      producerOptions={producerOptions}
-      initialValue={initialValue}
-      onValueChange={onValueChange}
-      helperDescription={
+    <>
+      <h2 className="admin-page__section-title">Produtor</h2>
+
+      {organizations.length === 0 ? (
+        <StatusCard
+          variant="warning"
+          showIcon
+          description={
+            <>
+              Só é possível publicar uma API em nome de uma organização com o emblema
+              &quot;Serviço público&quot;. A sua conta não pertence a nenhuma organização
+              elegível, por isso não pode criar uma API.
+            </>
+          }
+        />
+      ) : (
         <>
-          Recomendamos que publique em nome de uma organização se se tratar de uma atividade
-          profissional.
+          <AdminSelectAdapter
+            label="Organização em nome da qual a API será publicada."
+            placeholder="Selecione a organização..."
+            id="producer-identity"
+            initialValue={initialValue}
+            onValueChange={onValueChange}
+          >
+            {producerOptions}
+          </AdminSelectAdapter>
+          <p className="admin-page__field-helper mt-8 text-sm text-neutral-700">
+            As APIs só podem ser publicadas em nome de uma organização com o emblema
+            &quot;Serviço público&quot;.
+          </p>
         </>
-      }
-    />
+      )}
+    </>
   );
 }

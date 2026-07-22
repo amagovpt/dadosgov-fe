@@ -6,7 +6,14 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
-- **feat(breadcrumb): add a dynamic breadcrumb derived from the current route** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+- **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The "nova API" producer step no longer offers personal ("Eu próprio")
+    publishing and lists only the user's organizations carrying the
+    "Serviço público" badge. When the user belongs to no eligible
+    organization, the producer section shows a blocking message and the step
+    cannot be submitted. A valid organization is preselected so the created
+    API is always org-owned. Mirrors the backend enforcement (LEDG-2190),
+    which is the source of truth (also covers direct API calls).
   - New `BreadcrumbDynamic` client component + pure `buildBreadcrumbItems` helper
     derive the crumbs from `usePathname()` / `stripLocale` instead of hand-built
     arrays, translating each segment via the `common` namespace with a slug
