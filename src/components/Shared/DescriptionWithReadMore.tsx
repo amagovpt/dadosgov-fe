@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Icon } from "@ama-pt/agora-design-system";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -25,6 +26,7 @@ export function DescriptionWithReadMore({
   className,
   extraContent,
 }: DescriptionWithReadMoreProps) {
+  const { t } = useTranslation("common");
   const [expanded, setExpanded] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [availableHeight, setAvailableHeight] = useState<number | undefined>(undefined);
@@ -96,7 +98,7 @@ export function DescriptionWithReadMore({
           onClick={() => setExpanded(!expanded)}
           className="mt-8 flex cursor-pointer items-center gap-8 text-primary-600 hover:underline"
         >
-          {expanded ? "Ler menos" : "Ler mais"}
+          {expanded ? t("readLess") : t("readMore")}
           {expanded ? (
             <Icon name="agora-line-arrow-up-circle" className="h-24 w-24" />
           ) : (
