@@ -36,6 +36,7 @@ const namespaces = [
   "datastories",
   "datasets",
   "login",
+  "reuses",
   "admin-common",
   "admin-harvesters",
   "admin-dataservices",

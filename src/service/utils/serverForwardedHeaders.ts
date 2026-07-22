@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 /**
  * Build the `X-Forwarded-*` headers an SSR (Server Component) fetch must relay
@@ -38,6 +38,37 @@ export async function serverForwardedHeaders(): Promise<Record<string, string>> 
   const host = store.get("x-forwarded-host") || store.get("host");
   if (host) {
     forwarded["X-Forwarded-Host"] = host;
+  }
+
+  return forwarded;
+}
+
+/**
+ * Same as `serverForwardedHeaders()` but also relays the visitor's session
+ * `Cookie` so an SSR fetch to the DIRECT backend (`API_BASE_URL`) is
+ * authenticated as the user.
+ *
+ * On the server `API_BASE_URL` bypasses the Next.js proxy that normally
+ * forwards cookies for client-side authenticated calls, so a Server Component
+ * fetch would otherwise be anonymous — losing per-user `permissions` and the
+ * visibility of private/unpublished (draft) entities to their owner. Rebuilding
+ * the `Cookie` header from `next/headers` `cookies()` restores the session.
+ *
+ * SERVER COMPONENTS ONLY: reads the request `cookies()`/`headers()` stores from
+ * `next/headers`, which also marks the route dynamic (correct for a per-user
+ * page). Pass the result into a fetcher's `forwarded` param (e.g.
+ * `fetchReuse(rid, forwarded)`); client-side callers simply omit it.
+ */
+export async function serverAuthHeaders(): Promise<Record<string, string>> {
+  const forwarded = await serverForwardedHeaders();
+
+  const cookieStore = await cookies();
+  const cookie = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+  if (cookie) {
+    forwarded["Cookie"] = cookie;
   }
 
   return forwarded;

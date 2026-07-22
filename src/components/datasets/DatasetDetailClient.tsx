@@ -6,13 +6,12 @@ import { useRouter } from "next/navigation";
 import {
   Button,
   Icon,
-  Breadcrumb,
   Pill,
   ProgressBar,
   CardExpandable,
 } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { Dataset } from "@/service/types/dataset";
-import { fetchDataset } from "@/service/api/datasets";
 import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
@@ -23,7 +22,7 @@ import TextLink from "@/components/Primitives/TextLink";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 
 interface DatasetDetailClientProps {
-  slug: string;
+  dataset: Dataset;
 }
 
 const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
@@ -62,12 +61,10 @@ const CONTACT_ROLE_LABELS: Record<string, string> = {
   user: "Utilizador",
 };
 
-export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) {
+export default function DatasetDetailClient({ dataset }: DatasetDetailClientProps) {
   const { user, isAdmin } = useAuth();
   const { organizations } = useActiveOrganization();
   const router = useRouter();
-  const [dataset, setDataset] = useState<Dataset | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const [qualityExpanded, setQualityExpanded] = useState(false);
@@ -75,36 +72,20 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
   const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    async function loadDataset() {
-      try {
-        const data = await fetchDataset(slug);
-        if (!cancelled) setDataset(data);
-      } catch (error) {
-        console.error("Error loading dataset:", error);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-    loadDataset();
-    return () => { cancelled = true; };
-  }, [slug]);
-
-  useEffect(() => {
-    if (!user || !dataset) return;
+    if (!user) return;
     let cancelled = false;
     isFollowing("datasets", dataset.id, user.id)
       .then((following) => { if (!cancelled) setIsFavorite(following); })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, [user?.id, dataset?.id]);
+  }, [user?.id, dataset.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
       router.push("/login");
       return;
     }
-    if (!dataset || isTogglingFavorite) return;
+    if (isTogglingFavorite) return;
     setIsTogglingFavorite(true);
     try {
       if (isFavorite) {
@@ -121,18 +102,6 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
     }
   };
 
-  if (isLoading) {
-    return null;
-  }
-
-  if (!dataset) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-neutral-500">Conjunto de dados não encontrado.</p>
-      </div>
-    );
-  }
-
   const ownerFullName = dataset.owner
     ? `${dataset.owner.first_name} ${dataset.owner.last_name}`.trim()
     : null;
@@ -145,12 +114,9 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
     <main className="flex w-full flex-col items-center justify-center gap-64">
       {/* Breadcrumb */}
       <div className="container flex items-center justify-between py-64">
-        <Breadcrumb
-          items={[
-            { label: "Início", url: "/" },
-            { label: "Conjuntos de dados", url: "/datasets" },
-            { label: dataset.title, url: `/datasets/${dataset.slug}` },
-          ]}
+        <BreadcrumbDynamic
+          darkMode={false}
+          overrides={{ [dataset.slug]: dataset.title }}
         />
       </div>
 
