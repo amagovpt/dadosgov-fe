@@ -3,20 +3,30 @@ import ReusesClient from '@/components/reuses/ReusesClient';
 import { ReuseFilters } from "@/service/types/reuse";
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 import { Metadata } from 'next';
+import { getFrontOfficeMetadata, getFrontOfficePage } from "@/service/queries/common";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
-// The page is already dynamic (it reads searchParams); we intentionally do NOT
-// force-dynamic so the listing fetch can use the Next.js Data Cache
-// (revalidate: 60) — repeated page/query loads are served from cache and don't
-// hit the backend rate-limit (per-IP, collapsed site-wide by the F5).
 
-export const metadata: Metadata = {
-    title: 'Reutilizações - dados.gov.pt',
-    description: 'Conheça estudos, visualizações e aplicações úteis para a sociedade, que reutilizam dados públicos disponíveis neste portal.',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  const metadata = await getFrontOfficeMetadata("reuses",locale);
+
+  return {
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
+  };
+}
+
 
 export default async function ReusesPage({
     searchParams,
 }: {
+    params: Promise<{ locale: string }>;
     searchParams: Promise<{
         page?: string;
         q?: string;
@@ -49,12 +59,15 @@ export default async function ReusesPage({
     const forwarded = await serverForwardedHeaders();
     const data = await fetchReusesListing(page, 12, apiFilters, forwarded);
 
+    const dataCms = await getFrontOfficePage("reuses","pt");
+
     return (
         <ReusesClient
             initialData={data.listing}
             currentPage={page}
             filterCounts={data.filter_counts}
             allOrganizations={data.organizations}
+            dataCms={dataCms}
         />
     );
 }

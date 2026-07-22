@@ -61,7 +61,7 @@ test.describe("Backoffice - Permissions", () => {
       // org/datasets (editor with org membership). Some runs render the
       // /admin/ shell first and let the client redirect — accept any
       // /admin/ URL.
-      expect(page.url()).toMatch(/\/pages\/admin/);
+      expect(page.url()).toMatch(/admin/);
     });
 
     test("PM-05: Editor can see their personal datasets listing", async ({
@@ -89,7 +89,7 @@ test.describe("Backoffice - Permissions", () => {
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
 
-      expect(page.url()).toMatch(/\/pages\/(login|admin)/);
+      expect(page.url()).toMatch(/(login|admin)/);
       await context.close();
     });
   });

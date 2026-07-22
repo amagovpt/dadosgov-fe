@@ -6,6 +6,67 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The "nova API" producer step no longer offers personal ("Eu próprio")
+    publishing and lists only the user's organizations carrying the
+    "Serviço público" badge. When the user belongs to no eligible
+    organization, the producer section shows a blocking message and the step
+    cannot be submitted. A valid organization is preselected so the created
+    API is always org-owned. Mirrors the backend enforcement (LEDG-2190),
+    which is the source of truth (also covers direct API calls).
+
+- **fix(dataservices): show the real associated-datasets count on the API listing cards** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The card read `datasets.length`, but the API serializes a dataservice's
+    `datasets` as a paginated subsection reference (`{ rel, href, total, type }`),
+    not an array — so the count always rendered `0`. Use `datasets.total` (fixed
+    the TS type accordingly) so an API with N associated datasets shows "N
+    datasets". Also fixed the same access on the (create publish step) card.
+  - Added the intro subtitle on the APIs listing hero: "Explore as APIs
+    partilhadas por organizações que prestam serviço público, e integre dados
+    abertos, de forma automatizada, nos seus serviços e aplicações."
+
+- **feat(breadcrumb): add a dynamic breadcrumb derived from the current route** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+  - New `BreadcrumbDynamic` client component + pure `buildBreadcrumbItems` helper
+    derive the crumbs from `usePathname()` / `stripLocale` instead of hand-built
+    arrays, translating each segment via the `common` namespace with a slug
+    "prettify" fallback (`prettifySegment`) and per-segment `overrides` (for
+    dynamic id segments such as a dataset id → its title).
+  - Reuses the existing `Breadcrumb` primitive (pageless-URL sanitization) and
+    widens `HeroGeneral`'s `breadcrumbItems` label to `ReactNode` to match it.
+  - Migrated the datasets listing hero to derive its breadcrumb from the route
+    instead of a hardcoded `[home, datasets]` array.
+
+- **refactor(i18n): make the `formatDate` date helpers locale-aware** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - `formatDateToTimeAgo` now selects the date-fns locale from the passed
+    `locale` (`pt` → `pt`, `en` → `en-GB`, previously silently `en-US`) and
+    strips both the Portuguese and English fuzzy prefixes (`cerca de`,
+    `about`, `almost`, …) so the distance reads cleanly in either language.
+  - `formatDateLong` gained a `locale` argument mapping to the `pt-PT` /
+    `en-GB` Intl locale instead of the hardcoded `pt-PT`, plus an
+    invalid-date guard so it falls back to the original string (matching the
+    old inline `try/catch` behaviour).
+  - `pt` stays the default on both, so existing call sites are unchanged;
+    callers opt into `en` by passing the active locale (`i18n.language`).
+  - Removed three duplicated inline `formatDate` copies (`DatasetInfo`,
+    `ReuseDetailClient`, `PublicProfileClient`) — all now consume the shared
+    `formatDateLong(dateStr, i18n.language)`, so the long date follows the
+    active locale instead of being hardcoded to Portuguese.
+- **fix(routing): retire the legacy `/pages` URL segment for good** [#483](https://github.com/amagovpt/dadosgov-fe/pull/483)
+  - Public routes moved from `src/app/pages/...` to the `[locale]/(pages)`
+    route group a while ago, so URLs no longer carry `/pages` — but old links
+    (sent emails, bookmarks, indexed pages) still do. `next.config.ts` now
+    issues permanent redirects stripping the prefix, with explicit mappings
+    for renamed routes (`/pages/posts/*` → `/noticias/*`, `/pages/support` →
+    `/ajuda-e-contactos`, `/pages/resources/publications` →
+    `/recursos/publicacoes`), in both bare and locale-prefixed forms.
+  - Admin post links now open the real public route (`/noticias/<slug>`
+    instead of the nonexistent `/posts/<slug>`).
+  - E2E specs updated to the prefix-free URLs (homepage post links assert
+    `/noticias/`, the header "Publicações" card asserts the CMS link by path
+    instead of a hardcoded environment host).
+  - Pairs with the backend change that stops generating `/pages/...` links in
+    mails, model `self_web_url` and SAML redirects.
+
 - **fix(harvesters): create the organization harvester detail/config page and gate editing by role** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - On the org harvesters list, clicking the name or the edit pencil navigated
     to `/admin/org/harvesters/{id}` — a route that never existed (the link was
@@ -95,6 +156,22 @@ This project has no version tags, so entries are grouped by month (newest first)
     wiring; the remaining filters (access type, update date, organization
     type, organizations) now match the upstream set. Backend untouched.
 
+- **refactor(reuses,datasets): fetch the detail pages server-side with the visitor's session** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+  - The reuse and dataset detail pages fetched their entity (and, for reuses,
+    each associated dataset) in a client `useEffect`, so the content was absent
+    from the initial server HTML and flashed a loading state. The `[rid]` /
+    `[slug]` Server Components now call `fetchReuse` / `fetchDataset` directly and
+    pass the entity down as a prop; the client components keep only the
+    interactive islands (favorite toggle, tabs, discussions, pagination).
+  - The SSR fetch is authenticated: a new `serverAuthHeaders()` relays the
+    request `Cookie` (alongside the existing `X-Forwarded-*` IP headers) to the
+    direct backend, so per-user `permissions.edit` and private-draft
+    (`Rascunho`) visibility render correctly server-side. A missing entity now
+    resolves to a real `notFound()` (404) instead of a client-side message.
+  - `fetchDataset` was switched from the always-relative `API_AUTH_URL` to
+    `API_BASE_URL` so it is callable from Server Components (client callers are
+    unaffected).
+
 - **chore(images): set `minimumCacheTTL` to 30 days to curb `.next/cache` growth** [#447](https://github.com/amagovpt/dadosgov-fe/pull/447)
   - The Next.js image optimizer writes every optimized variant to
     `.next/cache/images` and, with the default short TTL, keeps
@@ -109,6 +186,17 @@ This project has no version tags, so entries are grouped by month (newest first)
     `node server.js` failed to start and the reverse proxy returned 502.
     Dropped the source mount and kept only `./logs:/logs` and
     `./.next/cache:/app/.next/cache`, so the image serves its own built `/app`.
+
+- **feat(analytics): add Google Analytics (GA4) tag to the shared layout** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - Loads `gtag.js` for measurement ID `G-6EQQ3VB8JY` from the root
+    `[locale]/layout.tsx` (common to every page) via `next/script`
+    (`afterInteractive`). Both the loader and the `gtag('config', ...)` init
+    script carry the per-request CSP nonce (`x-nonce` header minted in
+    `src/proxy.ts`), so they pass the strict `script-src` without
+    `'unsafe-inline'`. The CSP was extended to allow the GA endpoints:
+    `www.googletagmanager.com` in `script-src`/`img-src`/`connect-src` and
+    `www.google-analytics.com` (+ `*.google-analytics.com`,
+    `*.analytics.google.com`) in `img-src`/`connect-src`.
 
 - **perf(harvesters): read job list counts from the lightweight API shape** [#427](https://github.com/amagovpt/dadosgov-fe/pull/427)
   - The harvester detail page showed no jobs for large sources (e.g. INE,

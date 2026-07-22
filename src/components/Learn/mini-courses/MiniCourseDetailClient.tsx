@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Breadcrumb } from '@ama-pt/agora-design-system';
+import { Button } from '@ama-pt/agora-design-system';
+import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
 import { getMiniCourseBySlug } from '@/data/miniCoursesData';
 import Image from 'next/image';
 

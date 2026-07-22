@@ -27,6 +27,7 @@ export default function AdminLayout({
             <div className="w-full flex flex-col gap-64 pb-32">
                 <div className="w-full">
                     <Breadcrumb
+                        validateUrls={false}
                         items={breadcrumbItems.map((item) => ({ ...item, url: item.url ?? "#" }))}
                     />
                 </div>

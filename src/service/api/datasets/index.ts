@@ -246,11 +246,20 @@ export async function fetchAdminDatasets(
   }
 }
 
-export async function fetchDataset(slug: string): Promise<Dataset> {
+export async function fetchDataset(
+  slug: string,
+  forwarded?: Record<string, string>
+): Promise<Dataset> {
   try {
-    const res = await fetch(`${API_AUTH_URL}/datasets/${slug}/`, {
+    // API_BASE_URL (not API_AUTH_URL) so this is callable from Server Components:
+    // API_AUTH_URL is always the relative "/api/1", which Node's fetch cannot
+    // resolve. On the client API_BASE_URL still resolves to "/api/1" via the
+    // Next proxy, so existing client callers are unaffected. `forwarded` relays
+    // the session cookie + client IP on SSR (omitted client-side).
+    const res = await fetch(`${API_BASE_URL}/datasets/${slug}/`, {
       cache: "no-store",
       credentials: "include",
+      headers: forwarded,
     });
 
     if (!res.ok) {

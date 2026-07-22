@@ -114,7 +114,7 @@ test.describe("Homepage", () => {
     await datasetLink.click();
     await page.waitForLoadState("networkidle");
 
-    await expect(page).toHaveURL(/\/pages\/datasets\/.+/, { timeout: 10000 });
+    await expect(page).toHaveURL(/datasets\/.+/, { timeout: 10000 });
   });
 
   test("HP-09: Ver todos os conjuntos de dados link navigates to datasets listing", async ({
@@ -128,7 +128,7 @@ test.describe("Homepage", () => {
     await viewAllLink.click();
     await page.waitForLoadState("networkidle");
 
-    await expect(page).toHaveURL(/\/pages\/datasets/, { timeout: 10000 });
+    await expect(page).toHaveURL(/datasets/, { timeout: 10000 });
   });
 
   test("HP-10: Partners section shows logos", async ({ page }) => {
@@ -162,7 +162,7 @@ test.describe("Homepage", () => {
     const newsHeading = page.getByRole("heading", { name: /Últimas novidades/i });
     await expect(newsHeading).toBeVisible({ timeout: 10000 });
 
-    const postLinks = page.locator("a[href^='/posts/']");
+    const postLinks = page.locator("a[href^='/noticias/']");
     await expect(postLinks.first()).toBeVisible({ timeout: 15000 });
 
     const count = await postLinks.count();
@@ -174,7 +174,7 @@ test.describe("Homepage", () => {
     await expect(newsHeading).toBeVisible({ timeout: 10000 });
 
     const postLink = page
-      .locator("a[href^='/posts/']")
+      .locator("a[href^='/noticias/']")
       .filter({ hasNotText: "" })
       .first();
     await expect(postLink).toBeVisible({ timeout: 15000 });
@@ -182,7 +182,7 @@ test.describe("Homepage", () => {
     await postLink.click();
     await page.waitForLoadState("networkidle");
 
-    await expect(page).toHaveURL(/\/pages\/posts\/.+/, { timeout: 10000 });
+    await expect(page).toHaveURL(/noticias\/.+/, { timeout: 10000 });
   });
 
   test("HP-14: Featured dataset cards render an img element with a non-empty src", async ({

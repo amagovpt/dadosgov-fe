@@ -49,8 +49,8 @@ test.describe("Datasets Listing", () => {
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     await firstCard.click();
-    await page.waitForURL(/\/pages\/datasets\/.+/, { timeout: 15000 });
-    await expect(page).toHaveURL(/\/pages\/datasets\/.+/);
+    await page.waitForURL(/datasets\/.+/, { timeout: 15000 });
+    await expect(page).toHaveURL(/datasets\/.+/);
   });
 
   test("DL-04: Search field filters results", async ({ page }) => {
