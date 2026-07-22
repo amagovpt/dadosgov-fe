@@ -8,6 +8,7 @@
   "organizations": "Organisations",
   "publishedAt": "Published on {{date}}",
   "readMore": "Read more",
+  "readLess": "Read less",
   "seeAllDatasets": "See all datasets",
   "seeAllDataStories": "See all Data Stories",
   "seeAllNews": "See all news",
