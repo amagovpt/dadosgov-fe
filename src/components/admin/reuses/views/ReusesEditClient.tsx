@@ -196,9 +196,12 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
 
   useEffect(() => {
     if (!reuse || !reuse.datasets || reuse.datasets.length === 0) return;
+    const currentReuse = reuse;
     async function loadAssociatedDatasets() {
       try {
-        const slugs = reuse.datasets.map((d) => d.uri.split("/").filter(Boolean).pop() || d.id);
+        const slugs = currentReuse.datasets.map(
+          (d) => d.uri.split("/").filter(Boolean).pop() || d.id,
+        );
         const results = await Promise.all(slugs.map((s) => fetchDataset(s).catch(() => null)));
         setAssociatedDatasets(results.filter((d): d is Dataset => d !== null));
       } catch {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getBoHarvestersMetadata } from "@/service/queries/admin/harvesters";
-import HarvesterJobDetailClient from "@/components/admin/harvesters/views/HarvesterJobDetailClient";
+import HarvestJobDetailClient from "@/components/admin/harvesters/views/HarvestJobDetailClient";
 
 export async function generateMetadata({
   params,
@@ -22,5 +22,5 @@ export default async function HarvesterJobDetailPage({
   params: Promise<{ slug: string; jobId: string }>;
 }) {
   const { slug, jobId } = await params;
-  return <HarvesterJobDetailClient slug={slug} jobId={jobId} />;
+  return <HarvestJobDetailClient slug={slug} jobId={jobId} />;
 }
