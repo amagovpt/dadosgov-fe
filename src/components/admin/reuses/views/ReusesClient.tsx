@@ -9,6 +9,7 @@ import { fetchMyReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -114,11 +115,11 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        { label: t("admin-reuses:title"), url: "/admin/me/reuses" },
-      ]}
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-reuses:title"),
+      })}
       title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={filteredReuses.length}

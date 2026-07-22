@@ -8,6 +8,7 @@ import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchMyCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
   CommunityResourceSortField,
@@ -103,14 +104,11 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        {
-          label: t("admin-community-resources:title"),
-          url: "/admin/me/community-resources",
-        },
-      ]}
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-community-resources:title"),
+      })}
       title={t("admin-community-resources:title")}
       isLoading={isLoading}
       count={sortedResources.length}

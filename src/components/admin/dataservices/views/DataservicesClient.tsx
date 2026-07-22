@@ -9,6 +9,7 @@ import { fetchMyDataservices } from "@/service/api/dataservices";
 import { Dataservice } from "@/service/types/dataservice";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
@@ -86,11 +87,11 @@ export default function DataservicesClient({ pageContent }: DataservicesClientPr
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        { label: t("admin-dataservices:title"), url: "/admin/dataservices" },
-      ]}
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-dataservices:title"),
+      })}
       title={t("admin-dataservices:title")}
       isLoading={isLoading}
       count={filteredApis.length}

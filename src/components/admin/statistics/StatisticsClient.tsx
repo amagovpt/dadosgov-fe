@@ -14,6 +14,7 @@ import {
 } from "@ama-pt/agora-design-system";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { fetchMyDatasets } from "@/service/api/datasets";
 import { fetchMyReuses } from "@/service/api/reuses";
 import type { Dataset } from "@/service/types/dataset";
@@ -79,11 +80,11 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
 
   return (
     <AdminLayout
-      breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        { label: t("admin-statistics:breadcrumbs.user"), url: "/admin/me/statistics" },
-      ]}
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-statistics:breadcrumbs.user"),
+      })}
       title={pageContent.userHero?.title ?? ""}
       headerAction={null}
     >

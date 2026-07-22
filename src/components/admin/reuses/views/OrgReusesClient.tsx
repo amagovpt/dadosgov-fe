@@ -11,6 +11,7 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
+import { buildOrganizationAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
@@ -113,11 +114,11 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
-        { label: t("admin-reuses:title"), url: "#" },
-      ]}
+      breadcrumbItems={buildOrganizationAdminBreadcrumbItems({
+        t,
+        organizationLabel: orgName,
+        sectionLabel: t("admin-reuses:title"),
+      })}
       title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={filteredReuses.length}

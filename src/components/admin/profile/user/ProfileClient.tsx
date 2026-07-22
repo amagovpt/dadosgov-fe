@@ -28,6 +28,7 @@ import {
   TabBody,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { toProxiedUrl } from "@/components/admin/profile/shared/profileUtils";
 import { ProfileCard } from "./ProfileCard";
@@ -306,11 +307,11 @@ export default function ProfileClient({ pageContent }: ProfileClientProps) {
 
   return (
     <AdminLayout
-      breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        { label: t("admin-profile:breadcrumbs.profile"), url: "/admin/me/profile" },
-      ]}
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-profile:breadcrumbs.profile"),
+      })}
       title={pageContent.hero?.title ?? ""}
       headerAction={null}
     >

@@ -11,6 +11,7 @@ import { fetchMyDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
   createDatasetColumns,
@@ -114,11 +115,11 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        { label: t("admin-datasets:list.title"), url: "/admin/me/datasets" },
-      ]}
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-datasets:list.title"),
+      })}
       title={t("admin-datasets:list.title")}
       isLoading={isLoading}
       count={sortedDatasets.length}
