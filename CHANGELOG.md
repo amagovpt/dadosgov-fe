@@ -6,6 +6,36 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The "nova API" producer step no longer offers personal ("Eu próprio")
+    publishing and lists only the user's organizations carrying the
+    "Serviço público" badge. When the user belongs to no eligible
+    organization, the producer section shows a blocking message and the step
+    cannot be submitted. A valid organization is preselected so the created
+    API is always org-owned. Mirrors the backend enforcement (LEDG-2190),
+    which is the source of truth (also covers direct API calls).
+
+- **fix(dataservices): show the real associated-datasets count on the API listing cards** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The card read `datasets.length`, but the API serializes a dataservice's
+    `datasets` as a paginated subsection reference (`{ rel, href, total, type }`),
+    not an array — so the count always rendered `0`. Use `datasets.total` (fixed
+    the TS type accordingly) so an API with N associated datasets shows "N
+    datasets". Also fixed the same access on the (create publish step) card.
+  - Added the intro subtitle on the APIs listing hero: "Explore as APIs
+    partilhadas por organizações que prestam serviço público, e integre dados
+    abertos, de forma automatizada, nos seus serviços e aplicações."
+
+- **feat(breadcrumb): add a dynamic breadcrumb derived from the current route** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+  - New `BreadcrumbDynamic` client component + pure `buildBreadcrumbItems` helper
+    derive the crumbs from `usePathname()` / `stripLocale` instead of hand-built
+    arrays, translating each segment via the `common` namespace with a slug
+    "prettify" fallback (`prettifySegment`) and per-segment `overrides` (for
+    dynamic id segments such as a dataset id → its title).
+  - Reuses the existing `Breadcrumb` primitive (pageless-URL sanitization) and
+    widens `HeroGeneral`'s `breadcrumbItems` label to `ReactNode` to match it.
+  - Migrated the datasets listing hero to derive its breadcrumb from the route
+    instead of a hardcoded `[home, datasets]` array.
+
 - **refactor(i18n): make the `formatDate` date helpers locale-aware** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - `formatDateToTimeAgo` now selects the date-fns locale from the passed
     `locale` (`pt` → `pt`, `en` → `en-GB`, previously silently `en-US`) and

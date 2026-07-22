@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { ToggleGroup, Toggle, usePopupContext } from "@ama-pt/agora-design-system";
 import { deleteDataset } from "@/service/api/datasets";
 import { Pagination } from "@/components/Pagination";
@@ -23,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import FoNoResults from "../common/FoNoResults";
 import { DatasetsPage } from "@/service/types/datasets/datasets";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { buildBreadcrumbItems } from "@/utils/breadcrumbs";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -47,6 +49,7 @@ export default function DatasetsClient({
 }: DatasetsClientProps) {
   const { t } = useTranslation("common");
   const { t: tds } = useTranslation("datasets");
+  const pathname = usePathname();
 
   const DATASET_SORT_LABELS: Record<string, string> = {
     relevancia: tds("sort.relevancia"),
@@ -109,10 +112,7 @@ export default function DatasetsClient({
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        breadcrumbItems={[
-          { label: t("home"), url: "/" },
-          { label: t("datasets"), url: "/datasets" },
-        ]}
+        breadcrumbItems={buildBreadcrumbItems({ path: pathname, t })}
         title={pageContent.hero.title}
         subtitle={formatHtmlParagraphs(pageContent.hero.description) as string[]}
       >

@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import {
   Button,
   Icon,
-  Breadcrumb,
   Pill,
   ProgressBar,
   CardExpandable,
 } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { Dataset } from "@/service/types/dataset";
 import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
@@ -114,12 +114,9 @@ export default function DatasetDetailClient({ dataset }: DatasetDetailClientProp
     <main className="flex w-full flex-col items-center justify-center gap-64">
       {/* Breadcrumb */}
       <div className="container flex items-center justify-between py-64">
-        <Breadcrumb
-          items={[
-            { label: "Início", url: "/" },
-            { label: "Conjuntos de dados", url: "/datasets" },
-            { label: dataset.title, url: `/datasets/${dataset.slug}` },
-          ]}
+        <BreadcrumbDynamic
+          darkMode={false}
+          overrides={{ [dataset.slug]: dataset.title }}
         />
       </div>
 
