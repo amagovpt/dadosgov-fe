@@ -799,7 +799,7 @@ export default function ApiRegistrationClient({
                       trailingIcon: "",
                       trailingIconHover: "",
                       trailingIconActive: "",
-                      children: `${createdDataservice?.datasets?.length || 0} datasets`,
+                      children: `${createdDataservice?.datasets?.total ?? 0} datasets`,
                       title: "Datasets",
                       onClick: (e: React.MouseEvent) => e.preventDefault(),
                       className: "text-[#034AD8]",
