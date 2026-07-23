@@ -5,10 +5,7 @@
     "ariaLabel": "Search APIs"
   },
   "empty": {
-    "title": "No APIs",
-    "description": "No API found.",
-    "publicationsTitle": "No publications",
-    "orgDescription": "The organization has not published an API yet."
+    "description": "No API found."
   },
   "columns": {
     "title": "API title",
@@ -21,14 +18,6 @@
     "actions": "Actions"
   },
   "form": {
-    "registrationTitle": "Registration form",
-    "steps": {
-      "describe": "Describe your API",
-      "datasets": "Link datasets",
-      "publish": "Finish publication"
-    },
-    "whatIsApiTitle": "What is an API?",
-    "whatIsApiDescription": "An API (Application Programming Interface) is a computing tool/solution that enables automatic and structured access to data between systems, acting as a bridge or translator that allows two different applications to communicate with each other.",
     "requiredFields": "Fields marked with an asterisk ( * ) are required.",
     "createError": "Error creating the API. Try again.",
     "creating": "Creating...",
@@ -37,8 +26,6 @@
     "previous": "Previous",
     "next": "Next",
     "me": "Myself",
-    "producerIdentityLabel": "Check the identity you want to use for publication.",
-    "producerIdentityPlaceholder": "Search...",
     "noOrganizationTitle": "You do not belong to any organization.",
     "organizationLink": "Create or join an organization on dados.gov.pt",
     "validationErrors": {
@@ -46,16 +33,9 @@
       "description": "Describe the API."
     },
     "producerHelper": "We recommend publishing on behalf of an organization if this is a professional activity.",
-    "datasetLinksInfo": "It is important to link all datasets used, as this helps understand the required cross-references and improve the visibility of your reuse.",
-    "publishSuccessTitle": "Your API was created!",
-    "publishSuccessDescription": "You can now publish it or save it as a draft.",
     "untitled": "Untitled",
     "noDescription": "No description",
     "updatedAgo": "Updated {{time}} ago",
-    "viewsLabel": "Views",
-    "datasetsLabel": "Datasets",
-    "datasetsCount": "{{count}} datasets",
-    "favoritesLabel": "Favorites",
     "saveDraft": "Save draft",
     "publishApi": "Publish API"
   },
@@ -85,9 +65,6 @@
     "discussionsTab": "Discussions ({{count}})",
     "activitiesTab": "Activities",
     "visibilityTitle": "Change API visibility.",
-    "visibilityDescriptionPrefix": "This API is currently in",
-    "draftMode": "draft mode",
-    "visibilityDescriptionSuffix": "Only the producer and organization members can view and edit it.",
     "updateSuccess": "API updated successfully.",
     "saveError": "Error saving. Try again.",
     "datasetAssociationSuccess": "Datasets associated successfully.",

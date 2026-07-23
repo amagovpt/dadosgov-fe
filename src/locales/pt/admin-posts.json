@@ -87,11 +87,8 @@
     "republishing": "A publicar...",
     "unpublish": "Retirar",
     "republish": "Publicar novamente",
-    "unpublishHeading": "Retirar o artigo",
     "unpublishedHeading": "Artigo despublicado",
-    "unpublishDescription": "Por favor, note que o item não será mais visível.",
     "unpublishedDescription": "Este artigo não está visível para o público.",
-    "deleteHeading": "Atenção, esta ação não pode ser corrigida.",
     "deleteAction": "Eliminar o artigo"
   },
   "editor": {

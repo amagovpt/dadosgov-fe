@@ -144,9 +144,7 @@
     "saveError": "Error saving ({{status}}) - {{message}}",
     "filterLabels": {
       "organization": "Organization",
-      "tag": "Tag",
-      "publisher": "Publisher",
-      "remoteId": "Remote ID"
+      "tag": "Tag"
     }
   },
   "fields": {

@@ -119,7 +119,6 @@
     "statusFeatured": "DESTAQUE",
     "statisticsCount": "{{count}} estatísticas",
     "metadataCount": "{{count}} metadados",
-    "qualityScoreLabel": "Pontuação",
     "latestActivityPrefix": "Atividade mais recente:",
     "latestActivityFallback": "editou o conjunto de dados",
     "tabs": {

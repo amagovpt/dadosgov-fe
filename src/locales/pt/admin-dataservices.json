@@ -5,10 +5,7 @@
     "ariaLabel": "Pesquisar APIs"
   },
   "empty": {
-    "title": "Sem APIs",
-    "description": "Nenhuma API encontrada.",
-    "publicationsTitle": "Sem publicações",
-    "orgDescription": "A organização ainda não publicou uma API."
+    "description": "Nenhuma API encontrada."
   },
   "columns": {
     "title": "Título da API",
@@ -21,14 +18,6 @@
     "actions": "Ações"
   },
   "form": {
-    "registrationTitle": "Formulário de inscrição",
-    "steps": {
-      "describe": "Descreva a sua API",
-      "datasets": "Vincular conjuntos de dados",
-      "publish": "Finalizar a publicação"
-    },
-    "whatIsApiTitle": "O que é uma API?",
-    "whatIsApiDescription": "Uma API (Application Programming Interface) é uma ferramenta/solução informática que permite o acesso automático e estruturado aos dados entre sistemas, ou seja, funciona como uma ponte ou um tradutor que permite que dois aplicativos diferentes comuniquem entre si.",
     "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
     "createError": "Erro ao criar a API. Tente novamente.",
     "creating": "A criar...",
@@ -37,8 +26,6 @@
     "previous": "Anterior",
     "next": "Seguinte",
     "me": "Eu próprio",
-    "producerIdentityLabel": "Verifique a identidade que deseja usar na publicação.",
-    "producerIdentityPlaceholder": "Para pesquisar...",
     "noOrganizationTitle": "Não pertence a nenhuma organização.",
     "organizationLink": "Crie ou integre uma organização em dados.gov.pt",
     "validationErrors": {
@@ -46,16 +33,9 @@
       "description": "Descreva a API."
     },
     "producerHelper": "Recomendamos que publique em nome de uma organização se se tratar de uma atividade profissional.",
-    "datasetLinksInfo": "É importante vincular todos os conjuntos de dados utilizados, pois isso ajuda a compreender as referências cruzadas necessárias e a melhorar a visibilidade da sua reutilização.",
-    "publishSuccessTitle": "A sua API foi criada!",
-    "publishSuccessDescription": "Agora pode publicar ou guardar como rascunho.",
     "untitled": "Sem título",
     "noDescription": "Sem descrição",
     "updatedAgo": "Atualizado há {{time}}",
-    "viewsLabel": "Visualizações",
-    "datasetsLabel": "Datasets",
-    "datasetsCount": "{{count}} datasets",
-    "favoritesLabel": "Favoritos",
     "saveDraft": "Salvar rascunho",
     "publishApi": "Publicar API"
   },
@@ -85,9 +65,6 @@
     "discussionsTab": "Discussões ({{count}})",
     "activitiesTab": "Atividades",
     "visibilityTitle": "Modifique a visibilidade da API.",
-    "visibilityDescriptionPrefix": "Esta API encontra-se atualmente em",
-    "draftMode": "modo rascunho",
-    "visibilityDescriptionSuffix": "Apenas o produtor e os membros da organização a podem visualizar e editar.",
     "updateSuccess": "API atualizada com sucesso.",
     "saveError": "Erro ao guardar. Tente novamente.",
     "datasetAssociationSuccess": "Conjuntos de dados associados com sucesso.",

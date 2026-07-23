@@ -2,11 +2,6 @@
   "title": "Notifications",
   "read": "read",
   "markAsRead": "Mark as read",
-  "statuses": {
-    "pending": "Pending",
-    "accepted": "Validated",
-    "refused": "Refused"
-  },
   "harvesterValidation": {
     "title": "Harvester validation — {{status}}",
     "sourceUnavailable": "Source unavailable (it may have been deleted).",

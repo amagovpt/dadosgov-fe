@@ -144,9 +144,7 @@
     "saveError": "Erro ao guardar ({{status}}) - {{message}}",
     "filterLabels": {
       "organization": "Organização",
-      "tag": "Marcação",
-      "publisher": "Editor",
-      "remoteId": "ID Remoto"
+      "tag": "Marcação"
     }
   },
   "fields": {

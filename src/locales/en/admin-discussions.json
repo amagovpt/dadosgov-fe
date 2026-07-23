@@ -17,7 +17,6 @@
     "closed": "CLOSED"
   },
   "empty": {
-    "title": "No discussions",
     "descriptionOrganization": "There are no discussions about this organization yet."
   },
   "organizationFallback": "Organization",

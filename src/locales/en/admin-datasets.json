@@ -119,7 +119,6 @@
     "statusFeatured": "FEATURED",
     "statisticsCount": "{{count}} statistics",
     "metadataCount": "{{count}} metadata",
-    "qualityScoreLabel": "Score",
     "latestActivityPrefix": "Most recent activity:",
     "latestActivityFallback": "edited the dataset",
     "tabs": {

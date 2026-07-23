@@ -87,11 +87,8 @@
     "republishing": "Publishing...",
     "unpublish": "Unpublish",
     "republish": "Publish again",
-    "unpublishHeading": "Unpublish the post",
     "unpublishedHeading": "Post unpublished",
-    "unpublishDescription": "Please note that the item will no longer be visible.",
     "unpublishedDescription": "This post is not visible to the public.",
-    "deleteHeading": "Warning, this action cannot be undone.",
     "deleteAction": "Delete the post"
   },
   "editor": {
