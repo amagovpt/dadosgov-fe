@@ -9,10 +9,6 @@ export default function ThemesPage() {
     <main className="flex-grow bg-white">
       <HeroGeneral
         title="Dados relacionados à cultura"
-        breadcrumbItems={[
-          { label: "Início", url: "/" },
-          { label: 'Dados relacionados à cultura', url: '#' }
-        ]}
       >
         <div className="subtitle">
           <p className="text-primary-100 mb-8 max-w-4xl text-lg leading-relaxed">

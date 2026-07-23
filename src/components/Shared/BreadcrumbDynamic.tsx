@@ -14,6 +14,12 @@ interface BreadcrumbDynamicProps {
    * its title) for routes whose slug is a dynamic id.
    */
   overrides?: Record<string, React.ReactNode>;
+  /**
+   * Label for the last crumb, whatever the segment turns out to be. Prefer this
+   * over `overrides` on detail routes: the URL may carry a slug or an id, so a
+   * value-keyed override silently misses.
+   */
+  currentLabel?: React.ReactNode;
   /** Prepend the Home crumb. Default `true`. */
   includeHome?: boolean;
   /** i18n namespace used to resolve segment labels. Default `"common"`. */
@@ -28,6 +34,7 @@ interface BreadcrumbDynamicProps {
 export default function BreadcrumbDynamic({
   path,
   overrides,
+  currentLabel,
   includeHome = true,
   namespace = "common",
   darkMode = true,
@@ -41,6 +48,7 @@ export default function BreadcrumbDynamic({
     path: path ?? pathname ?? "/",
     t,
     overrides,
+    currentLabel,
     includeHome,
   });
 

@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { fetchPost } from "@/service/api/posts";
 import { formatPostDate } from "@/utils/articlesListing";
 import initTranslations from "@/app/i18n";
@@ -53,13 +53,7 @@ export default async function ArticleDetailPage({
       <div className="container mx-auto pt-32">
         {/* Breadcrumb */}
         <div>
-          <Breadcrumb
-            items={[
-              { label: t("home"), url: "/" },
-              { label: t("news"), url: "/noticias" },
-              { label: post.name, url: "#" },
-            ]}
-          />
+          <BreadcrumbDynamic darkMode={false} currentLabel={post.name} />
         </div>
 
         {/* Title Section */}

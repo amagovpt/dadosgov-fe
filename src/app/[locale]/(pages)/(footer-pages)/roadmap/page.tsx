@@ -34,10 +34,6 @@ export default async function page() {
             <Hero
                 title={hero.title}
                 description={parseHtmlToParagraphs(hero.description)}
-                breadcrumbItems={[
-                    { label: "Início", url: "/" },
-                    { label: 'Roteiro para dados.gov.pt', url: '#' },
-                ]}
             />
             <div className="container grid grid-cols-12 gap-32 py-64 roadmap-page">
                 <div className="md:col-span-3 hidden md:block">
