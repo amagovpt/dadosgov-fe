@@ -116,7 +116,7 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
     <AdminListPage
       breadcrumbItems={buildOrganizationAdminBreadcrumbItems({
         t,
-        organizationLabel: orgName,
+        organizationLabel: orgName ?? undefined,
         sectionLabel: t("admin-reuses:title"),
       })}
       title={t("admin-reuses:title")}
