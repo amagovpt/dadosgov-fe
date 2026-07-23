@@ -78,6 +78,15 @@ export default function ApiRegistrationClient({
     "apiName" | "apiDescription"
   >();
 
+  const eligibleOrgs = useMemo(
+    () =>
+      (user?.organizations || []).filter((org) =>
+        org.badges?.some((badge) => badge.kind === "public-service"),
+      ),
+    [user?.organizations],
+  );
+  const effectiveProducer = producer || eligibleOrgs[0]?.id || "";
+
   useEffect(() => {
     const dedupe = (items: Dataset[]) => Array.from(new Map(items.map((d) => [d.id, d])).values());
     const personal = fetchMyDatasets(1, 100);
@@ -136,6 +145,11 @@ export default function ApiRegistrationClient({
       return;
     }
 
+    if (!effectiveProducer) {
+      setApiError(t("admin-dataservices:form.publicServiceRequiredError"));
+      return;
+    }
+
     resetErrors();
     setApiError(null);
     setIsSubmitting(true);
@@ -152,7 +166,7 @@ export default function ApiRegistrationClient({
     try {
       const dataservice = await createDataservice({
         title: apiName.trim(),
-        organization: producer && producer !== "user" ? producer : undefined,
+        organization: effectiveProducer || undefined,
         description: apiDescription.trim(),
         acronym: apiAcronym.trim() || undefined,
         base_api_url: baseApiUrl.trim() || undefined,
@@ -297,15 +311,12 @@ export default function ApiRegistrationClient({
               </p>
 
               <DataserviceProducerSection
-                displayName={
-                  user ? `${user.first_name} ${user.last_name}` : t("admin-dataservices:form.me")
-                }
-                organizations={(user?.organizations || []).map((organization) => ({
+                organizations={eligibleOrgs.map((organization) => ({
                   id: organization.id,
                   name: organization.name,
                 }))}
                 helper={pageContent.producerHelper}
-                initialValue={producer}
+                initialValue={effectiveProducer}
                 onValueChange={setProducer}
               />
 

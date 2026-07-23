@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { StatusCard } from "@ama-pt/agora-design-system";
 import type { DropdownSectionProps } from "@ama-pt/agora-design-system";
-import ProducerIdentitySection from "@/components/admin/forms/ProducerIdentitySection";
-import { buildProducerItems, renderDropdownSection } from "@/components/admin/community-resources/config/dropdownOptions";
+import AdminSelectAdapter from "@/components/admin/AdminSelectAdapter";
+import { renderDropdownSection } from "@/components/admin/community-resources/config/dropdownOptions";
 import type { AdminHelpBlock } from "@/service/types/admin/common";
-import { stripHtmlTags } from "@/utils/htmlToParagraphs";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface UserOrganization {
   id: string;
@@ -13,7 +15,7 @@ interface UserOrganization {
 }
 
 interface DataserviceProducerSectionProps {
-  displayName: string;
+  /** Only organizations eligible to publish an API (public-service badge). */
   organizations: UserOrganization[];
   helper?: AdminHelpBlock;
   initialValue?: string;
@@ -21,31 +23,56 @@ interface DataserviceProducerSectionProps {
 }
 
 export default function DataserviceProducerSection({
-  displayName,
   organizations,
   helper,
   initialValue,
   onValueChange,
 }: DataserviceProducerSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const producerOptions = useMemo(
     () =>
+      // No personal option: an API can only be published in the name of an
+      // organization with the "public-service" badge.
       renderDropdownSection(
         "identity",
-        buildProducerItems(displayName, organizations),
+        organizations.map((organization) => ({
+          value: organization.id,
+          label: organization.name,
+        })),
       ) as
         | React.ReactElement<DropdownSectionProps>
         | React.ReactElement<DropdownSectionProps>[],
-    [displayName, organizations],
+    [organizations],
   );
 
   return (
-    <ProducerIdentitySection
-      producerOptions={producerOptions}
-      initialValue={initialValue}
-      onValueChange={onValueChange}
-      helperDescription={
-        helper ? stripHtmlTags(helper.description) : undefined
-      }
-    />
+    <>
+      <h2 className="admin-page__section-title">{t("admin-common:forms.producerTitle")}</h2>
+
+      {organizations.length === 0 ? (
+        <StatusCard
+          variant="warning"
+          showIcon
+          description={t("admin-dataservices:form.noEligibleOrganizationWarning")}
+        />
+      ) : (
+        <>
+          <AdminSelectAdapter
+            label={t("admin-dataservices:form.producerOrganizationLabel")}
+            placeholder={t("admin-dataservices:form.producerOrganizationPlaceholder")}
+            id="producer-identity"
+            initialValue={initialValue}
+            onValueChange={onValueChange}
+          >
+            {producerOptions}
+          </AdminSelectAdapter>
+          <div className="admin-page__field-helper mt-8 text-sm text-neutral-700">
+            {helper
+              ? formatHtmlParagraphs(helper.description)
+              : t("admin-dataservices:form.publicServiceProducerHelper")}
+          </div>
+        </>
+      )}
+    </>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CommunityResource } from "@/service/types/community-resource";
 import { Resource } from "@/service/types/dataset";
 import { ResourceCard } from "./ResourceCard";
@@ -10,6 +11,7 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
   resources,
   communityResources,
 }) => {
+  const { t: tds } = useTranslation("datasets");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const documentationFiles = resources.filter((r) => r.type === "documentation");
@@ -43,8 +45,7 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
       {principalFiles.length > 0 && (
         <div className="space-y-16">
           <h3 className="font-medium text-neutral-900 text-base">
-            {principalFiles.length}{" "}
-            {principalFiles.length === 1 ? "FICHEIRO PRINCIPAL" : "FICHEIROS PRINCIPAIS"}
+            {tds("resources.mainFiles", { count: principalFiles.length })}
           </h3>
           <div className="flex flex-col">
             {principalFiles.map((resource) => (
@@ -62,7 +63,7 @@ export const DatasetResourcesTable: React.FC<DatasetResourcesTableProps> = ({
       {documentationFiles.length > 0 && (
         <div className="space-y-16 mt-16 mb-16">
           <h3 className="font-medium text-neutral-900 text-base">
-            {documentationFiles.length} DOCUMENTAÇÃO
+            {tds("resources.documentation", { count: documentationFiles.length })}
           </h3>
           <div className="flex flex-col">
             {documentationFiles.map((resource) => (

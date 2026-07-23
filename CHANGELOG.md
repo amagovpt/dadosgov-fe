@@ -6,6 +6,63 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The "nova API" producer step no longer offers personal ("Eu próprio")
+    publishing and lists only the user's organizations carrying the
+    "Serviço público" badge. When the user belongs to no eligible
+    organization, the producer section shows a blocking message and the step
+    cannot be submitted. A valid organization is preselected so the created
+    API is always org-owned. Mirrors the backend enforcement (LEDG-2190),
+    which is the source of truth (also covers direct API calls).
+
+- **fix(dataservices): show the real associated-datasets count on the API listing cards** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The card read `datasets.length`, but the API serializes a dataservice's
+    `datasets` as a paginated subsection reference (`{ rel, href, total, type }`),
+    not an array — so the count always rendered `0`. Use `datasets.total` (fixed
+    the TS type accordingly) so an API with N associated datasets shows "N
+    datasets". Also fixed the same access on the (create publish step) card.
+  - Added the intro subtitle on the APIs listing hero: "Explore as APIs
+    partilhadas por organizações que prestam serviço público, e integre dados
+    abertos, de forma automatizada, nos seus serviços e aplicações."
+
+- **feat(datasets): translate the public datasets area, mirroring the `reuses` i18n pattern** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
+  - The listing and its filters already used the `datasets` namespace, but the
+    whole detail page (`DatasetDetailClient`, `DatasetTabs`, `DatasetInfo`,
+    `DatasetResourcesTable/*`) was hardcoded PT, so `/en/datasets/<slug>`
+    rendered almost entirely in Portuguese. Those components now follow the
+    same shape as reuses: `useTranslation("common")` for shared strings plus
+    `useTranslation("datasets")` for feature strings, plurals via `_one`/`_other`,
+    and interpolation for counts, dates and aria-labels.
+  - Label maps that fed the public UI moved into the namespace: contact-point
+    roles, metadata-quality criteria, licenses, resource types and resource
+    `extras` keys. Namespaced ids (`pt:distrito`, `check:headers:content-type`)
+    are stored with `_` instead of `:`, since i18next reads `:` as its
+    namespace separator.
+  - `frequencyLabels` / `granularityLabels` gained an optional `t` argument: the
+    public page passes it and gets the active locale, while the backoffice call
+    sites keep the existing PT map and stay untouched.
+  - Consolidated the duplicated `QUALITY_CRITERIA` copies onto the shared
+    `utils/datasetQuality` (now keys-only, labels come from i18n), which also
+    grew `getQualityDetails` / `getQualityMissing`.
+  - Dates and byte sizes on the dataset pages now follow the locale: dropped the
+    local `formatDate`/`toLocaleDateString("pt-PT")` copies in favour of the
+    shared `formatDateLong(date, i18n.language)`, and `formatBytes` takes the
+    locale (`INTL_LOCALES` is now exported from `utils/formatDate`).
+  - Fixes on the listing: the sort toggles' `aria-label` interpolated `key` into
+    a `{{label}}` placeholder (and the PT string was stored wrapped in
+    backticks), and the card's "updated N ago" was always rendered in Portuguese
+    and had no `created_at` fallback.
+  - The CMS stays the source of truth for hero/search/no-results, with the
+    namespace as the fallback (`pageContent?.x ?? tds("x")`), and the listing no
+    longer 500s when Squidex is unreachable — both CMS calls fall back instead
+    of throwing. Also fixed two bugs there: `generateMetadata` was asking the CMS
+    for the **reuses** page, and the search placeholder was cast
+    (`search as unknown as string`) from an object, so it rendered
+    `[object Object]` instead of `search.placeholder`.
+  - `"Ler mais"`/`"Ler menos"` in the shared `DescriptionWithReadMore` and
+    `ExpandableMarkdownDescription` now use `common:readMore`/`readLess` (new),
+    which also fixes organizations, dataservices and the reuse detail page.
+
 - **feat(breadcrumb): add a dynamic breadcrumb derived from the current route** [#NNN](https://github.com/amagovpt/dadosgov-fe/pull/NNN)
   - New `BreadcrumbDynamic` client component + pure `buildBreadcrumbItems` helper
     derive the crumbs from `usePathname()` / `stripLocale` instead of hand-built
@@ -32,6 +89,7 @@ This project has no version tags, so entries are grouped by month (newest first)
     `ReuseDetailClient`, `PublicProfileClient`) — all now consume the shared
     `formatDateLong(dateStr, i18n.language)`, so the long date follows the
     active locale instead of being hardcoded to Portuguese.
+    
 - **fix(routing): retire the legacy `/pages` URL segment for good** [#483](https://github.com/amagovpt/dadosgov-fe/pull/483)
   - Public routes moved from `src/app/pages/...` to the `[locale]/(pages)`
     route group a while ago, so URLs no longer carry `/pages` — but old links
