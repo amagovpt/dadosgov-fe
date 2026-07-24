@@ -81,7 +81,7 @@
     "public": "Public"
   },
   "danger": {
-    "irreversible": "Warning, this action is irreversible."
+    "irreversible": "Warning this action is irreversible."
   },
   "pagination": {
     "itemsPerPage": "Rows per page",

@@ -57,6 +57,7 @@ interface ReuseColumnLabels {
   status: string;
   createdAt: string;
   datasets: string;
+  actions: string;
 }
 
 export function createReuseColumns<TSortableDatasets extends boolean = true>({
@@ -126,6 +127,8 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
       renderCell: (reuse) => reuse.datasets?.length ?? 0,
     },
     createTableActionsColumn<Reuse>({
+      header: labels.actions,
+      headerLabel: labels.actions,
       viewAction: (reuse) => ({
         href: `/reuses/${reuse.slug}`,
       }),

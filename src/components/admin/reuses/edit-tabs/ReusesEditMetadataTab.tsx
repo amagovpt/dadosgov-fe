@@ -1,5 +1,5 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Button, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
@@ -103,7 +103,11 @@ export default function ReusesEditMetadataTab({
               <>
                 <strong>{t("edit.visibilityTitle")}</strong>
                 <br />
-                {t("edit.visibilityDescription")}
+                <Trans
+                  i18nKey="edit.visibilityDescription"
+                  ns="admin-reuses"
+                  components={{ strong: <strong /> }}
+                />
               </>
             }
             actionLabel={t("edit.publishAction")}

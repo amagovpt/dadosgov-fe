@@ -108,6 +108,7 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
           status: t("admin-reuses:columns.status"),
           createdAt: t("admin-reuses:columns.createdAt"),
           datasets: t("admin-reuses:columns.datasets"),
+          actions: t("admin-reuses:columns.actions"),
         },
       }),
     [t]

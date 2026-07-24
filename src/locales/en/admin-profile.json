@@ -111,7 +111,7 @@
     "date": "Date"
   },
   "danger": {
-    "irreversible": "Warning: this action is irreversible."
+    "irreversible": "Warning this action is irreversible."
   },
   "organization": {
     "organizationFallback": "Organization",

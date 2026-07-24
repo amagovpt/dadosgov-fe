@@ -110,7 +110,7 @@
       "activities": "Activities"
     },
     "visibilityTitle": "Change the reuse visibility.",
-    "visibilityDescription": "This reuse is currently in draft mode. Only the producer and organization members can view and edit it.",
+    "visibilityDescription": "This reuse is currently in <strong>draft mode</strong>. Only the producer and organization members can view and edit it.",
     "publishAction": "Publish reuse",
     "save": "Save",
     "saving": "Saving...",
