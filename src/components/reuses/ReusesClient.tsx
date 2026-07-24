@@ -74,10 +74,6 @@ export default function ReusesClient({
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
         title={pageContent?.hero.title ?? t("reuses")}
-        breadcrumbItems={[
-          { label: t("home"), url: "/" },
-          { label: t("reuses"), url: "/reuses" },
-        ]}
         subtitle={<p className="max-w-[592px] text-primary-100">{pageContent?.hero.subtitle ?? tr("hero.subtitle")}</p>}
       >
         <PublishDropdown darkMode={true} outline={false} />

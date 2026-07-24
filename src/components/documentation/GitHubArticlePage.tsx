@@ -5,16 +5,11 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
-interface BreadcrumbItem {
-  label: string;
-  url: string;
-}
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 
 interface GitHubArticlePageProps {
   slug: string;
   title?: string;
-  breadcrumbItems: BreadcrumbItem[];
   initialContent?: string;
 }
 
@@ -115,7 +110,6 @@ function sanitizeMarkdown(content: string): string {
 
 export function GitHubArticlePage({
   slug,
-  breadcrumbItems,
   initialContent = "",
 }: GitHubArticlePageProps) {
   const cleanContent = sanitizeMarkdown(initialContent);
@@ -126,7 +120,7 @@ export function GitHubArticlePage({
         <div className="container mx-auto px-4">
           {/* Breadcrumbs */}
           <div className="mb-[64px] pt-[32px]">
-            <Breadcrumb items={breadcrumbItems} />
+            <BreadcrumbDynamic darkMode={false} />
           </div>
         </div>
 

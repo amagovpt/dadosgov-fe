@@ -1,9 +1,8 @@
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { getFaqs } from "@/service/queries/faqs/faqs";
 
 import { Metadata } from "next";
 import MarkDownRender from "@/components/Shared/MarkDownRender";
-import initTranslations from "@/app/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -21,22 +20,13 @@ export async function generateMetadata(
   };
 }
 
-export default async function TermsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
+export default async function TermsPage() {
   const { title, body } = await getFaqs("termos-de-utilizacao", "pt");
-  const { t } = await initTranslations({ locale, namespaces: ["common"], });
 
   return (
     <main className="flex flex-col pt-32 pb-64 bg-white gap-64 justify-center items-center w-full h-full">
       <div className="container ">
-        <Breadcrumb items={[
-          { label: t("home"), url: "/" },
-          { label: title, url: "/termos-de-utilizacao" },
-        ]} />
+        <BreadcrumbDynamic darkMode={false} currentLabel={title} />
       </div>
 
       <div className="bg-neutral-100 flex flex-col items-center justify-center py-64 w-full h-full">

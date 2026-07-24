@@ -31,15 +31,7 @@ export default async function page() {
 
     return (
         <div className="w-full h-full flex flex-col items-center justify-center">
-            <HeroGeneral breadcrumbItems={[{
-                label: "Home",
-                url: "/"
-            }, {
-                label: hero.title,
-                url: "/areas-tematicas"
-            }]}
-                title={hero.title}
-            >
+            <HeroGeneral title={hero.title}>
                 <div className="text-white">
                     {parseHtmlToParagraphs(hero.description)}
                 </div>

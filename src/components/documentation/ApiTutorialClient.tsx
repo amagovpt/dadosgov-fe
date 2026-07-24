@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 
 declare global {
   interface Window {
@@ -86,14 +86,7 @@ export default function ApiTutorialClient() {
       <main className="flex-grow pb-64 pt-32">
         <div className="container mx-auto px-4">
           <div className="mb-64 pt-32">
-            <Breadcrumb
-              items={[
-                { label: "Início", url: "/" },
-                { label: "Recursos", url: "/recursos" },
-                { label: "Desenvolvimento", url: "/recursos/desenvolvimento" },
-                { label: "Referência API", url: "/recursos/desenvolvimento/referencia-api" },
-              ]}
-            />
+            <BreadcrumbDynamic darkMode={false} />
           </div>
 
           <h1 className="mb-32 max-w-[800px] text-2xl-medium leading-tight text-[#021C51]">

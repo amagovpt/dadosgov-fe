@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Icon, Pill } from "@ama-pt/agora-design-system";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { Dataservice } from "@/service/types/dataservice";
 import { fetchDataservice, fetchSwaggerSpec } from "@/service/api/dataservices";
 import { DataserviceSwagger } from "@/components/dataservices/DataserviceSwagger";
@@ -178,13 +178,7 @@ export default function DataserviceDetailClient({ slug }: DataserviceDetailClien
     <main className="flex w-full flex-col items-center justify-center gap-64">
       {/* Breadcrumb */}
       <div className="container flex items-center justify-between py-64">
-        <Breadcrumb
-          items={[
-            { label: "Home", url: "/" },
-            { label: "APIs", url: "/dataservices" },
-            { label: dataservice.title, url: `/dataservices/${dataservice.slug}` },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} currentLabel={dataservice.title} />
       </div>
 
       {/* Actions */}

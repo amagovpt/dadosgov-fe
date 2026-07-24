@@ -58,10 +58,6 @@ export default async function ArticleListPage({
       <HeroGeneral
         title={hero.title}
         backgroundImageUrl="/Banner/hero-bg.png"
-        breadcrumbItems={[
-          { label: t("home"), url: "/" },
-          { label: t("news"), url: "/noticias" },
-        ]}
       >
         <ArticlesSearchBar
           initialQuery={query ?? ""}

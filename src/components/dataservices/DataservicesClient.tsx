@@ -50,10 +50,6 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
         title="APIs"
-        breadcrumbItems={[
-          { label: "Início", url: "/" },
-          { label: "APIs", url: "/dataservices" },
-        ]}
         subtitle={
           <div className="max-w-[592px] text-primary-100">
             <p>

@@ -86,6 +86,7 @@ export default function HomeClient({
       <div className="w-full ">
         <div className="w-full">
           <HeroGeneral
+            hasBreadcrumb={false}
             title={
               <h1 className="text-white flex flex-col items-start leading-tight">
                 {highlightText(HomeHero.title, HomeHero.highlight, {
