@@ -7,13 +7,6 @@ export const ORGANIZATION_SORT_OPTIONS: Record<string, string> = {
   subscritores: "-followers",
 };
 
-export const ORGANIZATION_SORT_LABELS: Record<string, string> = {
-  relevancia: "Relevância",
-  mais_dados: "Mais dados",
-  mais_reutilizacoes: "Mais reutilizações",
-  subscritores: "Subscritores",
-};
-
 export function parseOrganizationsFilters(params: URLSearchParams): OrganizationFilters {
   const badges = params.getAll("badge");
   const organizations = params.getAll("organization");
