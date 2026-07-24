@@ -31,6 +31,7 @@ import AdminEmptyState from "../AdminEmptyState";
 import { DatasetMetricsTable } from "./DatasetMetricsTable";
 import { ReuseMetricsTable } from "./ReuseMetricsTable";
 import type { BoStatisticsPage } from "@/service/types/admin/statistics";
+import type { AdminCard } from "@/service/types/admin/common";
 
 interface OrgStatisticsClientProps {
   orgId: string;
@@ -38,6 +39,16 @@ interface OrgStatisticsClientProps {
 }
 
 const PAGE_SIZE = 10;
+
+type SummaryCardValue = {
+  isLoading?: boolean;
+  value: number | string;
+};
+
+function getSummaryCardLabel(card: AdminCard, value?: SummaryCardValue) {
+  if (value) return value.isLoading ? "..." : String(value.value);
+  return card.bignumber?.number ?? card.subtitle ?? "0";
+}
 
 export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatisticsClientProps) {
   const { t } = useTranslation(["admin-common", "admin-statistics"]);
@@ -133,6 +144,15 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
     (reusesPage - 1) * reusesPageSize,
     reusesPage * reusesPageSize
   );
+  const orgSummaryCardValues = [
+    { isLoading: isDatasetsLoading, value: datasetsTotal },
+    { isLoading: isDataservicesLoading, value: dataservicesTotal },
+    { isLoading: isReusesLoading, value: reuses.length },
+    { value: metrics?.views ?? 0 },
+    { value: metrics?.resource_downloads ?? 0 },
+    { value: metrics?.dataservice_views ?? 0 },
+    { value: metrics?.reuse_views ?? 0 },
+  ];
 
   if (!isOrgLoading && !org) {
     return (
@@ -169,44 +189,14 @@ export default function OrgStatisticsClient({ orgId, pageContent }: OrgStatistic
                   {t("admin-statistics:actions.aggregatedStatistics")}
                 </Button>
               </div>
-              <div className="mb-24 flex gap-24">
-                <div className="flex-1">
-                  <CardFrame label={isDatasetsLoading ? "..." : String(datasetsTotal)}>
-                    <p className="text-base text-neutral-700">{orgCards[0]?.title ?? ""}</p>
-                  </CardFrame>
-                </div>
-                <div className="flex-1">
-                  <CardFrame label={isDataservicesLoading ? "..." : String(dataservicesTotal)}>
-                    <p className="text-base text-neutral-700">{orgCards[1]?.title ?? ""}</p>
-                  </CardFrame>
-                </div>
-                <div className="flex-1">
-                  <CardFrame label={isReusesLoading ? "..." : String(reuses.length)}>
-                    <p className="text-base text-neutral-700">{orgCards[2]?.title ?? ""}</p>
-                  </CardFrame>
-                </div>
-              </div>
-              <div className="flex gap-24">
-                <div className="flex-1">
-                  <CardFrame label={String(metrics?.views ?? 0)}>
-                    <p className="text-base text-neutral-700">{orgCards[3]?.title ?? ""}</p>
-                  </CardFrame>
-                </div>
-                <div className="flex-1">
-                  <CardFrame label={String(metrics?.resource_downloads ?? 0)}>
-                    <p className="text-base text-neutral-700">{orgCards[4]?.title ?? ""}</p>
-                  </CardFrame>
-                </div>
-                <div className="flex-1">
-                  <CardFrame label={String(metrics?.dataservice_views ?? 0)}>
-                    <p className="text-base text-neutral-700">{orgCards[5]?.title ?? ""}</p>
-                  </CardFrame>
-                </div>
-                <div className="flex-1">
-                  <CardFrame label={String(metrics?.reuse_views ?? 0)}>
-                    <p className="text-base text-neutral-700">{orgCards[6]?.title ?? ""}</p>
-                  </CardFrame>
-                </div>
+              <div className="flex flex-wrap gap-24">
+                {orgCards.map((card, index) => (
+                  <div key={`${card.title}-${index}`} className="min-w-[220px] flex-1">
+                    <CardFrame label={getSummaryCardLabel(card, orgSummaryCardValues[index])}>
+                      <p className="text-base text-neutral-700">{card.title}</p>
+                    </CardFrame>
+                  </div>
+                ))}
               </div>
             </div>
           </TabBody>

@@ -15,6 +15,7 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
+import { fetchMyDataservices } from "@/service/api/dataservices";
 import { fetchMyDatasets } from "@/service/api/datasets";
 import { fetchMyReuses } from "@/service/api/reuses";
 import type { Dataset } from "@/service/types/dataset";
@@ -22,8 +23,19 @@ import type { Reuse } from "@/service/types/reuse";
 import { DatasetMetricsTable } from "./DatasetMetricsTable";
 import { ReuseMetricsTable } from "./ReuseMetricsTable";
 import type { BoStatisticsPage } from "@/service/types/admin/statistics";
+import type { AdminCard } from "@/service/types/admin/common";
 
 const PAGE_SIZE = 10;
+
+type SummaryCardValue = {
+  isLoading?: boolean;
+  value: number | string;
+};
+
+function getSummaryCardLabel(card: AdminCard, value?: SummaryCardValue) {
+  if (value) return value.isLoading ? "..." : String(value.value);
+  return card.bignumber?.number ?? card.subtitle ?? "0";
+}
 
 interface StatisticsClientProps {
   pageContent: BoStatisticsPage;
@@ -40,43 +52,50 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
   const [datasetsPageSize, setDatasetsPageSize] = useState(PAGE_SIZE);
   const [isDatasetsLoading, setIsDatasetsLoading] = useState(true);
 
+  const [dataservicesTotal, setDataservicesTotal] = useState(0);
+  const [isDataservicesLoading, setIsDataservicesLoading] = useState(true);
+
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [reusesTotal, setReusesTotal] = useState(0);
   const [reusesPage, setReusesPage] = useState(1);
   const [reusesPageSize, setReusesPageSize] = useState(PAGE_SIZE);
   const [isReusesLoading, setIsReusesLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadDatasets() {
-      setIsDatasetsLoading(true);
-      try {
-        const res = await fetchMyDatasets(datasetsPage, datasetsPageSize);
-        setDatasets(res.data);
-        setDatasetsTotal(res.total);
-      } catch (error) {
-        console.error("Error loading datasets:", error);
-      } finally {
-        setIsDatasetsLoading(false);
-      }
-    }
-    loadDatasets();
-  }, [datasetsPage, datasetsPageSize]);
+  const userSummaryCardValues = [
+    { isLoading: isDatasetsLoading, value: datasetsTotal },
+    { isLoading: isDataservicesLoading, value: dataservicesTotal },
+    { isLoading: isReusesLoading, value: reusesTotal },
+  ];
 
   useEffect(() => {
-    async function loadReuses() {
+    async function loadStatistics() {
+      setIsDatasetsLoading(true);
+      setIsDataservicesLoading(true);
       setIsReusesLoading(true);
+
       try {
-        const res = await fetchMyReuses(reusesPage, reusesPageSize);
-        setReuses(res.data);
-        setReusesTotal(res.total);
+        const [datasetsRes, dataservicesRes, reusesRes] = await Promise.all([
+          fetchMyDatasets(datasetsPage, datasetsPageSize),
+          fetchMyDataservices(1, 1),
+          fetchMyReuses(reusesPage, reusesPageSize),
+        ]);
+
+        setDatasets(datasetsRes.data);
+        setDatasetsTotal(datasetsRes.total);
+        setDataservicesTotal(dataservicesRes.total);
+        setReuses(reusesRes.data);
+        setReusesTotal(reusesRes.total);
       } catch (error) {
-        console.error("Error loading reuses:", error);
+        console.error("Error loading statistics:", error);
       } finally {
+        setIsDatasetsLoading(false);
+        setIsDataservicesLoading(false);
         setIsReusesLoading(false);
       }
     }
-    loadReuses();
-  }, [reusesPage, reusesPageSize]);
+
+    loadStatistics();
+  }, [datasetsPage, datasetsPageSize, reusesPage, reusesPageSize]);
 
   return (
     <AdminLayout
@@ -92,17 +111,14 @@ export default function StatisticsClient({ pageContent }: StatisticsClientProps)
         <Tab active>
           <TabHeader>{t("admin-statistics:tabs.user")}</TabHeader>
           <TabBody>
-            <div className="mt-48 flex gap-24">
-              <div className="flex-1">
-                <CardFrame label={isDatasetsLoading ? "..." : String(datasetsTotal)}>
-                  <p className="text-base text-neutral-700">{userCards[0]?.title ?? ""}</p>
-                </CardFrame>
-              </div>
-              <div className="flex-1">
-                <CardFrame label={isReusesLoading ? "..." : String(reusesTotal)}>
-                  <p className="text-base text-neutral-700">{userCards[1]?.title ?? ""}</p>
-                </CardFrame>
-              </div>
+            <div className="mt-48 flex flex-wrap gap-24">
+              {userCards.map((card, index) => (
+                <div key={`${card.title}-${index}`} className="min-w-[220px] flex-1">
+                  <CardFrame label={getSummaryCardLabel(card, userSummaryCardValues[index])}>
+                    <p className="text-base text-neutral-700">{card.title}</p>
+                  </CardFrame>
+                </div>
+              ))}
             </div>
           </TabBody>
         </Tab>
