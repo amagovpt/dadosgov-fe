@@ -7,6 +7,7 @@ type DatasetsEditDangerZoneProps = {
   // Backend-computed authorization. Archiving is an edit; deleting needs delete.
   canEdit?: boolean;
   canDelete?: boolean;
+  onOpenTransferPopup: (event: React.MouseEvent) => void;
   onToggleArchive: (event: React.MouseEvent) => void | Promise<void>;
   onOpenDeletePopup: (event: React.MouseEvent) => void;
 };
@@ -16,11 +17,15 @@ export default function DatasetsEditDangerZone({
   isSubmitting,
   canEdit = true,
   canDelete = true,
+  onOpenTransferPopup,
   onToggleArchive,
   onOpenDeletePopup,
 }: DatasetsEditDangerZoneProps) {
   return (
     <AdminDangerActions
+      leadingHeading={canEdit ? "Atenção esta ação é irreversível." : undefined}
+      leadingActionLabel={canEdit ? "Transferir o conjunto de dados" : undefined}
+      onLeadingAction={canEdit ? onOpenTransferPopup : undefined}
       primaryHeading={
         canEdit
           ? "Um conjunto de dados arquivado deixa de estar indexado no portal, mas permanece acessível através de um link direto."

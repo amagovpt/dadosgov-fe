@@ -4,6 +4,11 @@ import { Button, StatusCard } from "@ama-pt/agora-design-system";
 type ActionCardVariant = "warning" | "informative" | "danger";
 
 type AdminDangerActionsProps = {
+  leadingVariant?: ActionCardVariant;
+  leadingHeading?: React.ReactNode;
+  leadingDescription?: React.ReactNode;
+  leadingActionLabel?: React.ReactNode;
+  onLeadingAction?: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
   primaryVariant?: ActionCardVariant;
   primaryHeading?: React.ReactNode;
   primaryDescription?: React.ReactNode;
@@ -64,6 +69,11 @@ function ActionCard({
 }
 
 export default function AdminDangerActions({
+  leadingVariant = "informative",
+  leadingHeading,
+  leadingDescription,
+  leadingActionLabel,
+  onLeadingAction,
   primaryVariant = "warning",
   primaryHeading,
   primaryDescription,
@@ -75,18 +85,30 @@ export default function AdminDangerActions({
   onDangerAction,
   disabled = false,
 }: AdminDangerActionsProps) {
+  const showLeading = Boolean(leadingHeading && leadingActionLabel && onLeadingAction);
   const showPrimary = Boolean(primaryHeading && primaryActionLabel && onPrimaryAction);
   const showDanger = Boolean(dangerActionLabel && onDangerAction);
 
   // Each card is gated by the backend permission upstream (the caller only
   // passes the action when allowed). When the user can do neither, render
   // nothing instead of an empty danger zone.
-  if (!showPrimary && !showDanger) {
+  if (!showLeading && !showPrimary && !showDanger) {
     return null;
   }
 
   return (
     <div className="dataset-edit-danger-actions">
+      {showLeading ? (
+        <ActionCard
+          variant={leadingVariant}
+          heading={leadingHeading}
+          description={leadingDescription}
+          actionLabel={leadingActionLabel}
+          onAction={onLeadingAction!}
+          disabled={disabled}
+        />
+      ) : null}
+
       {showPrimary ? (
         <ActionCard
           variant={primaryVariant}
