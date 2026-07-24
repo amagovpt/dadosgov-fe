@@ -31,7 +31,7 @@ export default function OrganizationProfileHeaderCard({
             leadingIconHover="agora-solid-eye"
             onClick={() => router.push(`/organizations/${organization.slug}`)}
           >
-            {t("viewPublicProfile")}
+            {t("header.viewPublicProfile")}
           </Button>
         </div>
       )}
