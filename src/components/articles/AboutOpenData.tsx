@@ -12,12 +12,6 @@ const AboutOpenData = ({ initialContent }: { initialContent?: string }) => {
     <GitHubArticlePage
       slug="pages/faqs/about_opendata"
       initialContent={processedContent}
-      breadcrumbItems={[
-        { label: "Início", url: "/" },
-        { label: "Recursos", url: "/recursos" },
-        { label: "Como usar o portal", url: "/recursos/como-usar-o-portal" },
-        { label: "Sobre dados abertos", url: "/recursos/como-usar-o-portal/sobre-dados-abertos" },
-      ]}
     />
   );
 };

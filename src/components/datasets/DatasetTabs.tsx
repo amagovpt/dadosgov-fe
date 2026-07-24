@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { Tabs, Tab, TabHeader, CardNoResults, Icon, StatusCard, Button } from '@ama-pt/agora-design-system';
 import { TabBodyWrapper } from '@/components/Shared/Wrappers/TabBodyWrapper';
 import { ReuseCardLinks } from '@/components/Shared/ReuseCardLinks';
@@ -23,6 +24,7 @@ interface DatasetTabsProps {
 }
 
 export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
+    const { t: tds } = useTranslation('datasets');
     const searchParams = useSearchParams();
     const tabParam = searchParams.get('tab');
     const [reuses, setReuses] = useState<Reuse[]>([]);
@@ -56,18 +58,20 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
         <div className="w-full">
             <Tabs>
                 <Tab>
-                    <TabHeader>Ficheiros ({dataset.resources.length})</TabHeader>
+                    <TabHeader>{tds('tabs.files', { count: dataset.resources.length })}</TabHeader>
                     <TabBodyWrapper>
                         <DatasetResourcesTable resources={dataset.resources} />
                     </TabBodyWrapper>
                 </Tab>
                 <Tab>
-                    <TabHeader>Reutilizações e APIs ({reuseCount + dataserviceCount})</TabHeader>
+                    <TabHeader>
+                        {tds('tabs.reusesAndApis', { count: reuseCount + dataserviceCount })}
+                    </TabHeader>
                     <TabBodyWrapper>
                         {dataserviceCount > 0 && (
                             <div className="mb-40">
                                 <h3 className="font-medium text-neutral-900 text-base mb-16">
-                                    {dataserviceCount} {dataserviceCount === 1 ? "API" : "APIS"}
+                                    {tds('tabs.apisCount', { count: dataserviceCount })}
                                 </h3>
                                 <div className="grid grid-cols-2 agora-card-links-datasets-px0 gap-32">
                                     {dataservices.map((ds) => (
@@ -78,7 +82,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                         )}
                         <div>
                             <h3 className="font-medium text-neutral-900 text-base mb-16">
-                                {reuseCount} {reuseCount === 1 ? "REUTILIZAÇÃO" : "REUTILIZAÇÕES"}
+                                {tds('tabs.reusesCount', { count: reuseCount })}
                             </h3>
                             {reuseCount === 0 ? (
                                 <CardNoResults
@@ -86,8 +90,8 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                     icon={
                                         <Icon name="agora-line-file" className="w-40 h-40 text-primary-500 icon-xl" />
                                     }
-                                    title="Sem reutilizações"
-                                    description="Ainda não existem reutilizações associadas a este conjunto de dados."
+                                    title={tds('tabs.noReuses.title')}
+                                    description={tds('tabs.noReuses.description')}
                                     hasAnchor={false}
                                     extraDescription={
                                         <div className="mt-24">
@@ -99,7 +103,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                                     leadingIcon="agora-line-plus-circle"
                                                     leadingIconHover="agora-solid-plus-circle"
                                                 >
-                                                    Adicione
+                                                    {tds('tabs.noReuses.cta')}
                                                 </Button>
                                             </Link>
                                         </div>
@@ -116,24 +120,26 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                     </TabBodyWrapper>
                 </Tab>
                 <Tab active={tabParam === 'discussions' || undefined}>
-                    <TabHeader>Discussões ({dataset.metrics.discussions || 0})</TabHeader>
+                    <TabHeader>
+                        {tds('tabs.discussions', { count: dataset.metrics.discussions || 0 })}
+                    </TabHeader>
                     <TabBodyWrapper>
                         <DiscussionSection entityId={dataset.id} entityClass="Dataset" />
                     </TabBodyWrapper>
                 </Tab>
                 <Tab>
                     <TabHeader>
-                        Recursos comunitários ({communityCount})
+                        {tds('tabs.communityResources', { count: communityCount })}
                     </TabHeader>
                     <TabBodyWrapper>
                         {communityCount === 0 ? (
                             <div className="bg-white rounded-8 py-64 px-32 flex flex-col items-center text-center">
                                 <Icon name="agora-line-user-group" className="w-40 h-40 text-primary-500 icon-xl mb-16" />
                                 <h3 className="text-primary-600 text-[2rem] leading-[3rem] mb-16" style={{ fontWeight: 300 }}>
-                                    Sem recursos comunitários
+                                    {tds('tabs.noCommunity.title')}
                                 </h3>
                                 <p className="text-neutral-900 text-base font-normal mb-8">
-                                    Atualmente, não existem recursos comunitários disponíveis para este conjunto de dados.
+                                    {tds('tabs.noCommunity.description')}
                                 </p>
                                 <div className="flex justify-center mt-32">
                                     <Link href={`/admin/community-resources/new?dataset_id=${dataset.id}`}>
@@ -144,7 +150,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                             leadingIcon="agora-line-plane"
                                             leadingIconHover="agora-solid-plane"
                                         >
-                                            Partilhe
+                                            {tds('tabs.noCommunity.cta')}
                                         </Button>
                                     </Link>
                                 </div>
@@ -155,12 +161,12 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                                     <StatusCard
                                         variant="informative"
                                         showIcon
-                                        description="Estes recursos são publicados pela comunidade e não são da responsabilidade do produtor dos dados."
+                                        description={tds('tabs.communityDisclaimer')}
                                     />
                                 </div>
                                 <div className="flex items-center justify-between mb-16">
                                     <h3 className="font-medium text-neutral-900 text-base">
-                                        {communityCount} {communityCount === 1 ? "RECURSO COMUNITÁRIO" : "RECURSOS COMUNITÁRIOS"}
+                                        {tds('tabs.communityCount', { count: communityCount })}
                                     </h3>
                                     <Link href={`/admin/community-resources/new?dataset_id=${dataset.id}`}>
                                         <Button
@@ -180,7 +186,7 @@ export const DatasetTabs: React.FC<DatasetTabsProps> = ({ dataset }) => {
                     </TabBodyWrapper>
                 </Tab>
                 <Tab>
-                    <TabHeader>Informação</TabHeader>
+                    <TabHeader>{tds('tabs.info')}</TabHeader>
                     <TabBodyWrapper>
                         <DatasetInfo dataset={dataset} />
                     </TabBodyWrapper>

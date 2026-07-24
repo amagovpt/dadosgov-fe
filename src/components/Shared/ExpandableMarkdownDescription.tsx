@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -39,6 +40,7 @@ type SidebarAlignProps = {
 export type ExpandableMarkdownDescriptionProps = FixedClampProps | SidebarAlignProps;
 
 export function ExpandableMarkdownDescription(props: ExpandableMarkdownDescriptionProps) {
+  const { t } = useTranslation("common");
   const [expanded, setExpanded] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
   const [availableHeight, setAvailableHeight] = useState<number | undefined>(undefined);
@@ -136,7 +138,7 @@ export function ExpandableMarkdownDescription(props: ExpandableMarkdownDescripti
       onClick={() => setExpanded(!expanded)}
       className="mt-8 flex cursor-pointer items-center gap-8 text-primary-600 hover:underline"
     >
-      {expanded ? "Ler menos" : "Ler mais"}
+      {expanded ? t("readLess") : t("readMore")}
       {expanded ? (
         <Icon name="agora-line-arrow-up-circle" className="h-24 w-24" />
       ) : (

@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
 import { ToggleGroup, Toggle, usePopupContext } from "@ama-pt/agora-design-system";
 import { deleteDataset } from "@/service/api/datasets";
 import { Pagination } from "@/components/Pagination";
@@ -22,9 +21,8 @@ import { twJoin } from "tailwind-merge";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { useTranslation } from "react-i18next";
 import FoNoResults from "../common/FoNoResults";
-import { DatasetsPage } from "@/service/types/datasets/datasets";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
-import { buildBreadcrumbItems } from "@/utils/breadcrumbs";
+import { FrontOfficePage } from "@/service/types/shared/common";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -34,7 +32,8 @@ interface DatasetsClientProps {
   allLicenses?: License[];
   allFrequencies?: Frequency[];
   allGranularities?: Granularity[];
-  pageContent: DatasetsPage;
+  /** Optional: the CMS is the source of truth, the `datasets` namespace is the fallback. */
+  pageContent?: FrontOfficePage;
 }
 
 export default function DatasetsClient({
@@ -47,9 +46,9 @@ export default function DatasetsClient({
   allGranularities = [],
   pageContent,
 }: DatasetsClientProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const { t: tds } = useTranslation("datasets");
-  const pathname = usePathname();
+  const { language } = i18n;
 
   const DATASET_SORT_LABELS: Record<string, string> = {
     relevancia: tds("sort.relevancia"),
@@ -112,9 +111,12 @@ export default function DatasetsClient({
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        breadcrumbItems={buildBreadcrumbItems({ path: pathname, t })}
-        title={pageContent.hero.title}
-        subtitle={formatHtmlParagraphs(pageContent.hero.description) as string[]}
+        title={pageContent?.hero?.title ?? tds("hero.title")}
+        subtitle={
+          formatHtmlParagraphs(
+            pageContent?.hero?.description ?? tds("hero.subtitle")
+          ) as string[]
+        }
       >
         <PublishDropdown darkMode={true} outline={false} />
       </HeroGeneral>
@@ -122,7 +124,7 @@ export default function DatasetsClient({
       {/* Search Filter */}
       <SearchFilter
         id="datasets-search"
-        placeholder={pageContent.search as unknown as string}
+        placeholder={pageContent?.search?.placeholder ?? tds("search.placeholder")}
         value={searchQuery}
         onChange={setSearchQuery}
         onSearch={handleSearch}
@@ -165,7 +167,7 @@ export default function DatasetsClient({
               }}
             >
               {Object.entries(DATASET_SORT_LABELS).map(([key, label]) => (
-                <Toggle key={key} value={key} aria-label={tds("sort.label", { key })}>
+                <Toggle key={key} value={key} aria-label={tds("sort.ariaLabel", { label })}>
                   {label}
                 </Toggle>
               ))}
@@ -205,7 +207,10 @@ export default function DatasetsClient({
                   />
                 ) : datasets.length > 0 ? (
                   datasets.map((dataset) => {
-                    const timeAgo = formatDateToTimeAgo(dataset.last_modified);
+                    const timeAgo = formatDateToTimeAgo(
+                      dataset.last_modified || dataset.created_at,
+                      language as "pt" | "en"
+                    );
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
@@ -216,10 +221,12 @@ export default function DatasetsClient({
                 ) : (
                   <div className="col-span-full">
                     <FoNoResults
-                      icon={pageContent.noResults.icon}
-                      title={pageContent.noResults.title}
-                      subtitle={pageContent.noResults.subtitle}
-                      description={pageContent.noResults.description}
+                      icon={pageContent?.noResults?.icon ?? "agora-line-search"}
+                      title={pageContent?.noResults?.title ?? tds("noResults.title")}
+                      subtitle={pageContent?.noResults?.subtitle ?? tds("noResults.subtitle")}
+                      description={
+                        pageContent?.noResults?.description ?? tds("noResults.description")
+                      }
                     />
                   </div>
                 )}

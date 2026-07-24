@@ -58,10 +58,6 @@ export default function OrganizationsClient({
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
         title="Organizações"
-        breadcrumbItems={[
-          { label: "Início", url: "/" },
-          { label: "Organizações", url: "/organizations" },
-        ]}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
             Conheça as organizações que partilham dados abertos connosco e explore os recursos que

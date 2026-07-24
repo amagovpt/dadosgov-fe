@@ -16,6 +16,11 @@ function DataservicePreviewContent() {
     <div className="flex flex-col justify-center items-center">
       <main className="container flex flex-col gap-24">
         <div className="flex justify-between items-center">
+          {/*
+            Kept static on purpose: this preview is reached from the backoffice,
+            so the trail walks back to /admin/dataservices rather than mirroring
+            the public /dataservices/preview URL.
+          */}
           <Breadcrumb
             items={[
               { label: "Início", url: "/" },

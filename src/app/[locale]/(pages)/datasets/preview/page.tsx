@@ -2,11 +2,13 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import DatasetDetailClient from "@/components/datasets/DatasetDetailClient";
 import { fetchDataset } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
 
 function DatasetPreviewContent() {
+  const { t: tds } = useTranslation("datasets");
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug") || "preview";
 
@@ -41,7 +43,7 @@ function DatasetPreviewContent() {
   if (!dataset) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-neutral-500">Conjunto de dados não encontrado.</p>
+        <p className="text-neutral-500">{tds("notFound")}</p>
       </div>
     );
   }

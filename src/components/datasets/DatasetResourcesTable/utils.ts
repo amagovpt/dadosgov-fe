@@ -1,35 +1,37 @@
 import { Resource } from "@/service/types/dataset";
-import { API_BASE_URL, EXTRAS_KEY_LABELS, MAX_SAMPLE_ROWS } from "./constants";
+import { INTL_LOCALES } from "@/utils/formatDate";
+import { API_BASE_URL, MAX_SAMPLE_ROWS } from "./constants";
 import { ColumnInfo, TabularData } from "./types";
+
+/** `t` bound to the `datasets` namespace. */
+type Translate = (key: string, options?: { defaultValue?: string }) => string;
 
 export function downloadUrl(resource: Resource): string {
   return `${API_BASE_URL}/datasets/r/${resource.id}/`;
 }
 
-export const formatBytes = (bytes?: number) => {
+export const formatBytes = (bytes?: number, locale: "pt" | "en" = "pt") => {
   if (typeof bytes !== "number") return "";
   if (bytes === 0) return "0 B";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2)).toLocaleString("pt-PT")} ${sizes[i]}`;
+  const value = parseFloat((bytes / Math.pow(k, i)).toFixed(2));
+  return `${value.toLocaleString(INTL_LOCALES[locale])} ${sizes[i]}`;
 };
 
-export const formatDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("pt-PT", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+/**
+ * Resource `extras` keys are namespaced with `:` (`check:headers:content-type`),
+ * which i18next reads as its namespace separator — the labels are stored under
+ * the same key with `_` instead.
+ */
+export const translateExtrasKey = (t: Translate, key: string): string =>
+  t(`resources.extrasKeys.${key.replace(/:/g, "_")}`, { defaultValue: key });
 
-export const translateExtrasKey = (key: string): string => {
-  return EXTRAS_KEY_LABELS[key] || key;
-};
-
-export const translateExtrasValue = (value: unknown): string => {
-  if (value === true) return "verdadeiro";
-  if (value === false) return "falso";
-  if (value === null || value === undefined) return "—";
+export const translateExtrasValue = (t: Translate, value: unknown): string => {
+  if (value === true) return t("resources.extrasValues.true");
+  if (value === false) return t("resources.extrasValues.false");
+  if (value === null || value === undefined) return t("resources.extrasValues.empty");
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
 };

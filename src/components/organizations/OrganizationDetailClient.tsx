@@ -7,12 +7,12 @@ import { pt } from "date-fns/locale";
 import {
   Button,
   Icon,
-  Breadcrumb,
   Pill,
   CardArticle,
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { Organization } from "@/service/types/identity";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
@@ -123,13 +123,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
     <main className="flex w-full flex-col items-center justify-center gap-24">
       {/* Breadcrumb & Action Section */}
       <div className="container flex items-center justify-between">
-        <Breadcrumb
-          items={[
-            { label: "Início", url: "/" },
-            { label: "Organizações", url: "/organizations" },
-            { label: organization.name, url: `/organizations/${organization.slug}` },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} currentLabel={organization.name} />
       </div>
 
       <div className="container flex justify-end gap-12">

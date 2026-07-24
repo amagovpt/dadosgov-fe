@@ -38,7 +38,8 @@ export function formatDateToDMY(dateStr: string | null | undefined, fallback: st
   return `${d}/${m}/${y}`;
 }
 
-const INTL_LOCALES: Record<"pt" | "en", string> = { pt: "pt-PT", en: "en-GB" };
+/** BCP-47 tag for each supported UI locale, for `Intl` / `toLocaleString`. */
+export const INTL_LOCALES: Record<"pt" | "en", string> = { pt: "pt-PT", en: "en-GB" };
 
 export function formatDateLong(dateStr: string, locale: "pt" | "en" = "pt") {
   const date = new Date(dateStr);

@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@ama-pt/agora-design-system';
-import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
+import BreadcrumbDynamic from '@/components/Shared/BreadcrumbDynamic';
 import { getMiniCourseBySlug } from '@/data/miniCoursesData';
 import Image from 'next/image';
 
@@ -26,15 +26,7 @@ export default function MiniCourseDetailClient({ slug }: Props) {
   return (
     <main className="flex justify-center items-center w-full bg-primary-100 py-64">
       <div className="container flex flex-col gap-64">
-        <Breadcrumb
-          items={[
-            { label: "Início", url: "/" },
-            { label: 'Recursos', url: '/recursos/' },
-            { label: 'Aprender', url: '/recursos/aprender/' },
-            { label: 'Minicursos', url: '/recursos/aprender/minicursos/' },
-            { label: course.title, url: '#' },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} currentLabel={course.title} />
         <div className="flex">
           <div className="w-full flex flex-col gap-64">
             <h1 className="text-3xl-bold text-primary-600 ">
