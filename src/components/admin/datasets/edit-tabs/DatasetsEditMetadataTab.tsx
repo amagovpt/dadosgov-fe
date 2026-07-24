@@ -64,6 +64,7 @@ type DatasetsEditMetadataTabProps = {
   onSpatialSearch: (query: string) => void;
   onRemoveSpatialZone: (zoneId: string) => void;
   onSaveMetadata: () => void | Promise<void>;
+  onOpenTransferPopup: (e: React.MouseEvent) => void;
   onToggleArchive: (e: React.MouseEvent) => void | Promise<void>;
   onOpenDeletePopup: (e: React.MouseEvent) => void;
 };
@@ -111,6 +112,7 @@ export default function DatasetsEditMetadataTab({
   onSpatialSearch,
   onRemoveSpatialZone,
   onSaveMetadata,
+  onOpenTransferPopup,
   onToggleArchive,
   onOpenDeletePopup,
 }: DatasetsEditMetadataTabProps) {
@@ -224,6 +226,7 @@ export default function DatasetsEditMetadataTab({
             isSubmitting={isSubmitting}
             canEdit={canEdit}
             canDelete={canDelete}
+            onOpenTransferPopup={onOpenTransferPopup}
             onToggleArchive={onToggleArchive}
             onOpenDeletePopup={onOpenDeletePopup}
           />
