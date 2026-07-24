@@ -1,5 +1,5 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Button, type DropdownSectionProps, Switch } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import { getEditDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
@@ -134,7 +134,11 @@ export default function DatasetsEditMetadataTab({
               <>
                 <strong>{t("edit.visibilityTitle")}</strong>
                 <br />
-                {t("edit.visibilityDescription")}
+                <Trans
+                  i18nKey="edit.visibilityDescription"
+                  ns="admin-datasets"
+                  components={{ strong: <strong /> }}
+                />
               </>
             }
             actionLabel={t("edit.publishAction")}

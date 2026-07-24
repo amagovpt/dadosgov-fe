@@ -128,7 +128,7 @@
       "activities": "Atividades"
     },
     "visibilityTitle": "Modifique a visibilidade do conjunto de dados.",
-    "visibilityDescription": "Este conjunto de dados encontra-se atualmente em modo privado. Apenas os membros da organização o podem visualizar e editar.",
+    "visibilityDescription": "Este conjunto de dados encontra-se atualmente em <strong>modo privado</strong>. Apenas os membros da organização o podem visualizar e editar.",
     "publishAction": "Publicar o conjunto de dados",
     "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
     "featuredSectionTitle": "Destaque",
