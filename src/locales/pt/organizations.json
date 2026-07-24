@@ -1,0 +1,98 @@
+{
+  "theOrganizations": "as organizações",
+  "hero": {
+    "title": "Organizações",
+    "subtitle": "Conheça as organizações que partilham dados abertos connosco e explore os recursos que disponibilizam."
+  },
+  "search": {
+    "placeholder": "Pesquisar organizações..."
+  },
+  "sort": {
+    "ariaLabel": "Ordenar por {{label}}",
+    "relevancia": "Relevância",
+    "mais_dados": "Mais dados",
+    "mais_reutilizacoes": "Mais reutilizações",
+    "subscritores": "Subscritores"
+  },
+  "noResults": {
+    "title": "Nenhuma organização encontrada",
+    "subtitle": "Não existem organizações que correspondam aos filtros aplicados.",
+    "description": "Experimente remover filtros ou usar outros termos de pesquisa."
+  },
+  "filters": {
+    "orgType": {
+      "title": "Tipo de organização",
+      "options": {
+        "publicService": "Serviço público",
+        "localAuthority": "Autoridade local",
+        "company": "Empresas",
+        "association": "Associação"
+      }
+    },
+    "badges": {
+      "association": "Associação",
+      "certified": "Certificado",
+      "company": "Empresa",
+      "local-authority": "Autoridade Local",
+      "public-service": "Serviço Público"
+    },
+    "advanced": {
+      "orgTypeGroup": "Tipo de Organização",
+      "orgsEmpty": "Nenhuma organização encontrada.",
+      "badgeEmpty": "Nenhum badge encontrado."
+    }
+  },
+  "detail": {
+    "requestMembership": "Pedir adesão",
+    "requestMembershipTitle": "Pedir adesão a {{name}}",
+    "commentLabel": "Comentário (opcional)",
+    "commentPlaceholder": "Explique por que pretende aderir a esta organização...",
+    "sending": "A enviar...",
+    "sendRequest": "Enviar pedido",
+    "requestSuccess": "Pedido de adesão enviado com sucesso. O administrador da organização irá analisar o seu pedido.",
+    "requestError": "Erro ao enviar o pedido de adesão.",
+    "addFavorite": "Adicionar aos favoritos",
+    "removeFavorite": "Remover dos favoritos",
+    "edit": "Editar",
+    "preliminaryNotes": "Observações preliminares",
+    "preliminaryNotesText": "Informações adicionais sobre o papel desta organização na gestão e publicação de dados abertos.",
+    "about": "Sobre a organização",
+    "aboutText": "{{name}} é um publicador ativo no Portal de Dados Abertos, contribuindo para a transparência e reutilização de informação pública em Portugal.",
+    "organizationLabel": "Organização",
+    "views": "Visualizações",
+    "followers": "Seguidores",
+    "totalSuffix": "total",
+    "since": "desde {{date}}"
+  },
+  "tabs": {
+    "description": "Descrição",
+    "noDescription": "Esta organização não possui descrição.",
+    "createdAt": "Data de criação",
+    "datasets": "Conjuntos de dados",
+    "datasetsWithCount": "Conjuntos de dados ({{count}})",
+    "datasetsNoun_one": "CONJUNTO DE DADOS",
+    "datasetsNoun_other": "CONJUNTOS DE DADOS",
+    "noDatasetsTitle": "Sem conjuntos de dados",
+    "noDatasetsDesc": "Esta organização não possui conjuntos de dados publicados.",
+    "reusesAndApis": "Reutilizações e APIs ({{count}})",
+    "apisNoun_one": "API",
+    "apisNoun_other": "APIS",
+    "reusesNoun_one": "REUTILIZAÇÃO",
+    "reusesNoun_other": "REUTILIZAÇÕES",
+    "noReusesTitle": "Sem reutilizações",
+    "noReusesDesc": "Nenhuma reutilização associada a esta organização.",
+    "discussions": "Discussões",
+    "info": "Informações",
+    "statistics": "Estatísticas",
+    "reuses": "Reutilizações",
+    "followers": "Seguidores",
+    "members": "Membros",
+    "roleAdmin": "Administrador",
+    "roleEditor": "Editor",
+    "technicalInfo": "Informações técnicas",
+    "metadataUpdate": "Atualização dos metadados",
+    "identifier": "Identificador",
+    "website": "Website",
+    "taxId": "NIF / Identificação fiscal"
+  }
+}

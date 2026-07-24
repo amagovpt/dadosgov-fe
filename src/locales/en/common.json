@@ -33,6 +33,20 @@
   "loading": "Loading...",
   "results_one": "{{count, number}} result",
   "results_other": "{{count, number}} results",
+  "card": {
+    "views": "Views",
+    "downloads": "Downloads",
+    "reuses": "Reuses",
+    "favorites": "Favorites",
+    "datasets": "Datasets",
+    "datasetsCount": "{{count}} datasets",
+    "updated": "Updated {{date}}",
+    "updatedAgo": "Updated {{date}} ago",
+    "dateUnavailable": "Date unavailable",
+    "reuse": "Reuse",
+    "api": "API",
+    "organization": "Organization"
+  },
   "datastories": "Data Stories",
   "pagination": {
     "pagination": "Pagination",
