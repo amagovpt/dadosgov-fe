@@ -8,7 +8,7 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface AdminEmptyStateI {
-  icon: IconName;
+  icon?: IconName;
   title?: string;
   description?: string;
   createUrl?: string;
@@ -16,7 +16,7 @@ export interface AdminEmptyStateI {
 }
 
 export default function AdminEmptyState({
-  icon,
+  icon = "agora-line-search",
   title,
   description,
   createUrl,

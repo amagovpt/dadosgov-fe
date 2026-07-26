@@ -19,7 +19,7 @@ export default function AdminSquidexEmptyState({
 
   return (
     <AdminEmptyState
-      icon={noResults.icon as IconName}
+      icon={(noResults.icon || undefined) as IconName | undefined}
       title={noResults.title}
       description={noResults.description}
       createUrl={createUrl}
