@@ -3,7 +3,7 @@
 import React from 'react'
 import Breadcrumb from '../Primitives/Breadcrumb/Breadcrumb'
 import PublishDropdown from '../admin/PublishDropdown'
-
+import { normalizeAdminBreadcrumbItems } from '@/utils/adminBreadcrumbs'
 
 export type AdminLayoutProps = {
     title: string
@@ -27,8 +27,7 @@ export default function AdminLayout({
             <div className="w-full flex flex-col gap-64 pb-32">
                 <div className="w-full">
                     <Breadcrumb
-                        validateUrls={false}
-                        items={breadcrumbItems.map((item) => ({ ...item, url: item.url ?? "#" }))}
+                        items={normalizeAdminBreadcrumbItems(breadcrumbItems)}
                     />
                 </div>
 
