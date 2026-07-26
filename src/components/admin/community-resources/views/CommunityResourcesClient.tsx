@@ -15,7 +15,7 @@ import {
   createCommunityResourceColumns,
   sortCommunityResources,
 } from "@/components/admin/community-resources/config/communityResourcesListConfig";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
 interface CommunityResourcesClientProps {
@@ -126,7 +126,7 @@ export default function CommunityResourcesClient({ pageContent }: CommunityResou
         },
       }}
       emptyState={
-        <AdminSquidexEmptyState
+        <AdminEmptyState
           noResults={pageContent.myNoResults}
           createUrl="/admin/community-resources/new"
         />

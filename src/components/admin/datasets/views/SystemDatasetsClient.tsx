@@ -15,7 +15,7 @@ import {
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
 interface SystemDatasetsClientProps {
@@ -157,7 +157,7 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
           }}
         />
       }
-      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
+      emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={datasets}

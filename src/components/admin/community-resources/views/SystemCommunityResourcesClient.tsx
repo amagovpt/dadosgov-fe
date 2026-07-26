@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { fetchAllCommunityResources } from "@/service/api/community-resources";
 import { CommunityResource } from "@/service/types/community-resource";
@@ -127,7 +127,7 @@ export default function SystemCommunityResourcesClient({
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
-      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
+      emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={paginatedResources}

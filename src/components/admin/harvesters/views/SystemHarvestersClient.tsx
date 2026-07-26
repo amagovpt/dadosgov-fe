@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchHarvesters, rejectHarvestSource, validateHarvestSource } from "@/service/api/harvesters";
 import type { HarvestSource } from "@/service/types/harvester";
@@ -255,7 +255,7 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
           </div>
         ) : undefined
       }
-      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
+      emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={filteredHarvesters}

@@ -20,7 +20,7 @@ import { useOrganizationName } from "@/hooks/useOrganizationName";
 import { useAuth } from "@/context/AuthContext";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import OrganizationProfileHeaderCard from "@/components/admin/profile/organization/OrganizationProfileHeaderCard";
 import OrganizationProfileFormSection from "@/components/admin/profile/organization/OrganizationProfileFormSection";
 import OrganizationDangerZone from "@/components/admin/profile/organization/OrganizationDangerZone";
@@ -226,7 +226,7 @@ export default function OrgProfileClient({ pageContent }: { pageContent: BoOrgan
   };
 
   if (!isOrgLoading && !orgId) {
-    return <AdminSquidexEmptyState noResults={pageContent.orgProfileNoResults} />;
+    return <AdminEmptyState noResults={pageContent.orgProfileNoResults} />;
   }
 
   return (

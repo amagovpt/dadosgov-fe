@@ -17,7 +17,7 @@ import {
   createDatasetColumns,
   OrgDatasetSortField,
 } from "@/components/admin/datasets/config/datasetsListConfig";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
 const ORG_DATASET_SORT_MAP: Record<OrgDatasetSortField, string> = {
@@ -180,7 +180,7 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
         </a>
       }
       emptyState={
-        <AdminSquidexEmptyState
+        <AdminEmptyState
           noResults={pageContent.orgNoResults}
           createUrl="/admin/datasets/new"
         />

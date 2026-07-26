@@ -13,7 +13,6 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   createOrgHarvesterColumns,
@@ -164,7 +163,7 @@ export default function OrgHarvestersClient({ pageContent }: OrgHarvestersClient
         />
       }
       emptyState={
-        <AdminSquidexEmptyState noResults={pageContent.orgNoResults} />
+        <AdminEmptyState noResults={pageContent.orgNoResults} />
       }
     >
       <AdminListTable

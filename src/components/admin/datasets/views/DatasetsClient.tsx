@@ -18,7 +18,7 @@ import {
   DatasetSortField,
   sortDatasets,
 } from "@/components/admin/datasets/config/datasetsListConfig";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
 interface DatasetsClientProps {
@@ -147,7 +147,7 @@ export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
         />
       }
       emptyState={
-        <AdminSquidexEmptyState
+        <AdminEmptyState
           noResults={pageContent.myNoResults}
           createUrl="/admin/datasets/new"
         />

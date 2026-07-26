@@ -18,7 +18,6 @@ import {
   sortCommunityResources,
 } from "@/components/admin/community-resources/config/communityResourcesListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import type { BoCommunityResourcesPage } from "@/service/types/admin/community-resources";
 
 interface OrgCommunityResourcesClientProps {
@@ -127,7 +126,7 @@ export default function OrgCommunityResourcesClient({ pageContent }: OrgCommunit
         hint: pageContent.search?.hint,
       }}
       emptyState={
-        <AdminSquidexEmptyState noResults={pageContent.orgNoResults} />
+        <AdminEmptyState noResults={pageContent.orgNoResults} />
       }
     >
       <AdminListTable

@@ -16,7 +16,7 @@ import {
   createReuseColumns,
   systemReuseSortFieldMap,
 } from "@/components/admin/reuses/config/reusesListConfig";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoReusesPage } from "@/service/types/admin/reuses";
 
 interface SystemReusesClientProps {
@@ -133,7 +133,7 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
           }}
         />
       }
-      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
+      emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={filteredReuses}

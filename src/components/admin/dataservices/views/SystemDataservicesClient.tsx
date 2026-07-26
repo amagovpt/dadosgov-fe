@@ -16,7 +16,7 @@ import {
   createDataserviceColumns,
   dataserviceSortFieldMap,
 } from "@/components/admin/dataservices/config/dataservicesListConfig";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
 interface SystemDataservicesClientProps {
@@ -130,7 +130,7 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
           }}
         />
       }
-      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
+      emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={filteredApis}

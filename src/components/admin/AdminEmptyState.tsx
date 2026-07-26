@@ -6,31 +6,31 @@ import Button from "../Primitives/Button";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import type { FoListPageNoResults } from "@/service/types/shared";
 
 export interface AdminEmptyStateI {
   icon?: IconName;
   title?: string;
   description?: string;
+  noResults?: FoListPageNoResults;
   createUrl?: string;
   createTitle?: string;
 }
 
-export default function AdminEmptyState({
-  icon = "agora-line-search",
-  title,
-  description,
-  createUrl,
-  createTitle,
-}: AdminEmptyStateI) {
+export default function AdminEmptyState(props: AdminEmptyStateI) {
+  const { icon, title, description, noResults, createUrl, createTitle } = props;
   const { t } = useTranslation("admin-common");
   const routerNav = useRouter();
-  const emptyTitle = title ?? t("emptyState.title");
-  const emptyDescription = description ?? t("emptyState.description");
-  const actionTitle = createTitle ?? t("emptyState.create");
-
   const handleNavigation = useCallback(() => {
     if (createUrl) routerNav.push(createUrl);
   }, [createUrl, routerNav]);
+
+  if ("noResults" in props && !noResults) return null;
+
+  const emptyIcon = (noResults?.icon || icon || "agora-line-search") as IconName;
+  const emptyTitle = noResults?.title ?? title ?? t("emptyState.title");
+  const emptyDescription = noResults?.description ?? description ?? t("emptyState.description");
+  const actionTitle = createTitle ?? t("emptyState.create");
 
   return (
     <>
@@ -39,7 +39,7 @@ export default function AdminEmptyState({
           <CardNoResults
             className="admin-page__empty"
             position="center"
-            icon={<AppIcon name={icon} className="icon-xl h-12 w-12 text-primary-500" />}
+            icon={<AppIcon name={emptyIcon} className="icon-xl h-12 w-12 text-primary-500" />}
             title={emptyTitle}
             description={emptyDescription}
             hasAnchor={false}

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button, usePopupContext } from "@ama-pt/agora-design-system";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import {
   createOrganizationColumns,
@@ -195,7 +195,7 @@ export default function SystemOrganizationsClient({ pageContent }: SystemOrganiz
         hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
-      emptyState={<AdminSquidexEmptyState noResults={pageContent.systemNoResults} />}
+      emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={organizations}

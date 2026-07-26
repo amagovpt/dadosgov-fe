@@ -13,7 +13,7 @@ import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
 import type { BoReusesPage } from "@/service/types/admin/reuses";
@@ -145,7 +145,7 @@ export default function ReusesClient({ pageContent }: ReusesClientProps) {
         />
       }
       emptyState={
-        <AdminSquidexEmptyState
+        <AdminEmptyState
           noResults={pageContent.myNoResults}
           createUrl="/admin/reuses/new"
         />

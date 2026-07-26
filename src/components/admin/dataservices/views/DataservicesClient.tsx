@@ -12,7 +12,7 @@ import { filterByStatus } from "@/utils/filterByStatus";
 import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import {
   createDataserviceColumns,
   DataserviceSortField,
@@ -114,7 +114,7 @@ export default function DataservicesClient({ pageContent }: DataservicesClientPr
         />
       }
       emptyState={
-        <AdminSquidexEmptyState
+        <AdminEmptyState
           noResults={pageContent.myNoResults}
           createUrl="/admin/dataservices/new"
         />

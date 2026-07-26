@@ -15,7 +15,6 @@ import { buildOrganizationAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs"
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
 import type { BoReusesPage } from "@/service/types/admin/reuses";
@@ -142,7 +141,7 @@ export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
         />
       }
       emptyState={
-        <AdminSquidexEmptyState
+        <AdminEmptyState
           noResults={pageContent.orgNoResults}
           createUrl="/admin/reuses/new"
         />

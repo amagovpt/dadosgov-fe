@@ -19,7 +19,7 @@ import {
   createDataserviceColumns,
   sortDataservices,
 } from "@/components/admin/dataservices/config/dataservicesListConfig";
-import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
 interface OrgDataservicesClientProps {
@@ -123,7 +123,7 @@ export default function OrgDataservicesClient({ pageContent }: OrgDataservicesCl
         />
       }
       emptyState={
-        <AdminSquidexEmptyState
+        <AdminEmptyState
           noResults={pageContent.orgNoResults}
           createUrl="/admin/dataservices/new"
         />
