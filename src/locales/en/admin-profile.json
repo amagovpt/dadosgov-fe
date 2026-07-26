@@ -109,9 +109,6 @@
     "action": "Action",
     "date": "Date"
   },
-  "danger": {
-    "irreversible": "Warning this action is irreversible."
-  },
   "organization": {
     "organizationFallback": "Organization",
     "deletePopupTitle": "Are you sure you want to delete this organization?",

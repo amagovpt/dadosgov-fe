@@ -1,12 +1,5 @@
 {
   "title": "API",
-  "search": {
-    "placeholder": "Search by API name",
-    "ariaLabel": "Search APIs"
-  },
-  "empty": {
-    "description": "No API found."
-  },
   "columns": {
     "title": "API title",
     "titleShort": "Title",
@@ -14,8 +7,7 @@
     "createdAt": "Created at",
     "modifiedAt": "Modified at",
     "by": "by",
-    "about": "about",
-    "actions": "Actions"
+    "about": "about"
   },
   "form": {
     "requiredFields": "Fields marked with an asterisk ( * ) are required.",
@@ -36,7 +28,6 @@
     },
     "untitled": "Untitled",
     "noDescription": "No description",
-    "updatedAgo": "Updated {{time}} ago",
     "saveDraft": "Save draft",
     "publishApi": "Publish API"
   },
@@ -98,7 +89,6 @@
     "activitiesCount_other": "{{count}} ACTIVITIES"
   },
   "fields": {
-    "producer": "Producer",
     "description": "Description",
     "apiName": "API name *",
     "namePlaceholder": "Enter the name here",

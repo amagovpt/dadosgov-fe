@@ -109,9 +109,6 @@
     "action": "Ação",
     "date": "Data"
   },
-  "danger": {
-    "irreversible": "Atenção esta ação é irreversível."
-  },
   "organization": {
     "organizationFallback": "Organização",
     "deletePopupTitle": "Tem a certeza que quer eliminar esta organização?",

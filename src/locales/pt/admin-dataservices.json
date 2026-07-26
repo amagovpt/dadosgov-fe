@@ -1,12 +1,5 @@
 {
   "title": "API",
-  "search": {
-    "placeholder": "Pesquise o nome da API",
-    "ariaLabel": "Pesquisar APIs"
-  },
-  "empty": {
-    "description": "Nenhuma API encontrada."
-  },
   "columns": {
     "title": "Título da API",
     "titleShort": "Título",
@@ -14,8 +7,7 @@
     "createdAt": "Criado em",
     "modifiedAt": "Modificado em",
     "by": "por",
-    "about": "sobre",
-    "actions": "Ações"
+    "about": "sobre"
   },
   "form": {
     "requiredFields": "Os campos marcados com um asterisco ( * ) são obrigatórios.",
@@ -36,7 +28,6 @@
     },
     "untitled": "Sem título",
     "noDescription": "Sem descrição",
-    "updatedAgo": "Atualizado há {{time}}",
     "saveDraft": "Salvar rascunho",
     "publishApi": "Publicar API"
   },
@@ -98,7 +89,6 @@
     "activitiesCount_other": "{{count}} ATIVIDADES"
   },
   "fields": {
-    "producer": "Produtor",
     "description": "Descrição",
     "apiName": "Nome da API *",
     "namePlaceholder": "Insira o nome aqui",
