@@ -6,7 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   CardLinks,
   CardNoResults,
@@ -18,6 +17,7 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { Dataset } from "@/service/types/dataset";
 import { Follow, UserFollowing, UserPublic } from "@/service/types/identity";
 import { Reuse } from "@/service/types/reuse";
@@ -193,12 +193,7 @@ export default function PublicProfileClient() {
   return (
     <div className="container mx-auto mb-64">
       <div className="pb-64">
-        <Breadcrumb
-          items={[
-            { label: "Início", url: "/" },
-            { label: userName || "Perfil", url: "#" },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} currentLabel={userName || "Perfil"} />
       </div>
 
       <h1 className="text-2xl-bold text-brand-blue-secondary mt-64 mb-32 max-w-[696px]">Perfil</h1>

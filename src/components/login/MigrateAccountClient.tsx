@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { fetchMigrationPending, searchMigrationAccount, sendMigrationCode, confirmMigration, skipMigration } from "@/service/api/migration";
 import AppIcon from "../Primitives/AppIcon";
 
@@ -42,11 +42,6 @@ export default function MigrateAccountClient() {
   // Default account login (email + password)
   const [loginEmail, setLoginEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const breadcrumbItems = [
-    { label: "Início", url: "/" },
-    { label: "Migrar conta", url: "#" },
-  ];
 
   // Check pending migration on mount
   useEffect(() => {
@@ -212,7 +207,7 @@ export default function MigrateAccountClient() {
     <main className="min-h-screen flex-grow bg-white">
       <div className="container mx-auto max-w-7xl px-16 pb-64 pt-32">
         <div>
-          <Breadcrumb items={breadcrumbItems} />
+          <BreadcrumbDynamic darkMode={false} />
         </div>
 
         <div className="mt-64 max-w-[560px]">

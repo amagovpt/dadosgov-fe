@@ -55,12 +55,6 @@ export default async function Page({
           updatedAt: hero.updatedAt ?? "2025-09-30T12:00",
           title: hero.title,
           description: hero.description,
-          breadcrumbItems: [
-            { label: "Início", url: "/" },
-            { label: "Recursos", url: "/recursos/" },
-            { label: 'Aprender', url: '/recursos/aprender/' },
-            { label: 'Minicursos', url: '/recursos/aprender/minicursos/' }
-          ]
         }}
       />
 

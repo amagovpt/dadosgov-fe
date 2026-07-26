@@ -37,6 +37,7 @@ const namespaces = [
   "datasets",
   "login",
   "reuses",
+  "organizations",
   "admin-common",
   "admin-harvesters",
   "admin-dataservices",
@@ -53,7 +54,7 @@ const namespaces = [
   "admin-topics",
   "admin-logs",
   "admin-editorial",
-  "admin-statistics",
+  "admin-statistics"
 ];
 
 export async function generateMetadata({

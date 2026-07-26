@@ -50,3 +50,15 @@ export function formatDateLong(dateStr: string, locale: "pt" | "en" = "pt") {
     day: "numeric",
   });
 }
+
+/** Locale-aware "month year" (e.g. "julho de 2024" / "July 2024"). */
+export function formatMonthYear(
+  dateStr: string | null | undefined,
+  locale: "pt" | "en" = "pt",
+  fallback = "—"
+) {
+  if (!dateStr) return fallback;
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return fallback;
+  return date.toLocaleDateString(INTL_LOCALES[locale], { month: "long", year: "numeric" });
+}

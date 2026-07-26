@@ -412,10 +412,6 @@ export default function SearchClient() {
         <HeroGeneral
           title={titleMap[activeTab]}
           backgroundImageUrl="/Banner/hero-bg.png"
-          breadcrumbItems={[
-            { label: "Início", url: "/" },
-            { label: "Pesquisa", url: "/pesquisa" },
-          ]}
         >
           <InputSearchBar
             label="Pesquisa avançada"

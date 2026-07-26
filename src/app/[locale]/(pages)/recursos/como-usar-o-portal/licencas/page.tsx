@@ -1,7 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { getFaqs } from "@/service/queries/faqs/faqs";
-import Breadcrumb from "@/components/Primitives/Breadcrumb/Breadcrumb";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import Anchor from "@/components/Shared/Anchor";
 import { Metadata } from "next";
 
@@ -27,14 +27,7 @@ export default async function page() {
   return (
     <main className="flex h-full w-full flex-col items-center justify-center">
       <div className="container flex flex-col py-32">
-        <Breadcrumb
-          items={[
-            { label: "Home", url: "/" },
-            { label: "Recursos", url: "/recursos" },
-            { label: "Como usar o portal", url: "/recursos/como-usar-o-portal" },
-            { label: title, url: "/recursos/como-usar-o-portal/licencas" },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} currentLabel={title} />
       </div>
       <div className="container flex flex-col gap-16 py-32 font-sans text-primary-900">
         <ReactMarkdown

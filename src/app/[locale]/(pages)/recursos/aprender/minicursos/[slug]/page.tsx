@@ -1,4 +1,4 @@
-import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
+import BreadcrumbDynamic from '@/components/Shared/BreadcrumbDynamic';
 import ButtonNavigate from '@/components/Primitives/ButtonNavigate';
 import { getMiniCourseIntroductionPage } from '@/service/queries/courses/minicourses';
 import { formatHtmlParagraphs } from '@/utils/formatHtmlParagraphs';
@@ -25,15 +25,7 @@ export default async function Page({
     return (
         <main className="flex justify-center items-center w-full bg-primary-100 py-64">
             <div className="container flex flex-col gap-64">
-                <Breadcrumb
-                    items={[
-                        { label: 'Início', url: '/' },
-                        { label: "Recursos", url: "/recursos/" },
-                        { label: 'Aprender', url: '/recursos/aprender/' },
-                        { label: 'Minicursos', url: '/recursos/aprender/minicursos/' },
-                        { label: title, url: '#' },
-                    ]}
-                />
+                <BreadcrumbDynamic darkMode={false} currentLabel={title} />
                 <div className="flex">
                     <div className="w-full flex flex-col gap-64">
                         <h1 className="text-3xl-bold text-primary-600 ">

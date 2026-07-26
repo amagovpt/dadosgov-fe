@@ -11,6 +11,7 @@ type DatasetsEditDangerZoneProps = {
   archiveCard?: AdminCard;
   unarchiveCard?: AdminCard;
   deleteCard?: AdminCard;
+  onOpenTransferPopup: (event: React.MouseEvent) => void;
   onToggleArchive: (event: React.MouseEvent) => void | Promise<void>;
   onOpenDeletePopup: (event: React.MouseEvent) => void;
 };
@@ -23,6 +24,7 @@ export default function DatasetsEditDangerZone({
   archiveCard,
   unarchiveCard,
   deleteCard,
+  onOpenTransferPopup,
   onToggleArchive,
   onOpenDeletePopup,
 }: DatasetsEditDangerZoneProps) {
@@ -34,6 +36,9 @@ export default function DatasetsEditDangerZone({
       primaryDescription={
         canEdit ? formatHtmlParagraphs(primaryCard?.description) : undefined
       }
+      leadingHeading={canEdit ? "Atenção esta ação é irreversível." : undefined}
+      leadingActionLabel={canEdit ? "Transferir o conjunto de dados" : undefined}
+      onLeadingAction={canEdit ? onOpenTransferPopup : undefined}
       primaryActionLabel={canEdit ? primaryCard?.anchor?.children : undefined}
       onPrimaryAction={canEdit && primaryCard ? onToggleArchive : undefined}
       dangerHeading={canDelete ? (deleteCard?.title ?? "") : undefined}

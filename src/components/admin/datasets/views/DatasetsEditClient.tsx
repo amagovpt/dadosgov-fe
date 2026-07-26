@@ -35,6 +35,7 @@ import type { License, Frequency, Granularity, SpatialZone, Activity, ResourceTy
 import type { Dataset } from "@/service/types/dataset";
 import type { Discussion } from "@/service/types/discussion";
 import DatasetsEditDeletePopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditDeletePopup";
+import DatasetsEditTransferPopup from "@/components/admin/datasets/edit-dialogs/DatasetsEditTransferPopup";
 import DatasetsEditMetadataTab from "@/components/admin/datasets/edit-tabs/DatasetsEditMetadataTab";
 import DatasetsEditResourcesTab from "@/components/admin/datasets/edit-tabs/DatasetsEditResourcesTab";
 import DatasetsEditDiscussionsTab from "@/components/admin/datasets/edit-tabs/DatasetsEditDiscussionsTab";
@@ -654,6 +655,21 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
                   setSpatialZones((prev) => prev.filter((z) => z.id !== zoneId));
                 }}
                 onSaveMetadata={handleSaveMetadata}
+                onOpenTransferPopup={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  show(
+                    <DatasetsEditTransferPopup
+                      datasetTitle={dataset.title}
+                      onConfirm={handleTransferDataset}
+                    />,
+                    {
+                      title: "Transfira o conjunto de dados",
+                      closeAriaLabel: "Fechar",
+                      dimensions: "m",
+                    },
+                  );
+                }}
                 onToggleArchive={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

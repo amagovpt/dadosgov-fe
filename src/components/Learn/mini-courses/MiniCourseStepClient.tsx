@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { Button } from '@ama-pt/agora-design-system';
-import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
+import BreadcrumbDynamic from '@/components/Shared/BreadcrumbDynamic';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
@@ -94,14 +94,11 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
   return (
     <main className="w-full flex flex-col justify-center items-center bg-primary-100 gap-64 py-64">
       <div className='container '>
-        <Breadcrumb
-          items={[
-            { label: "Início", url: "/" },
-            { label: "Recursos", url: "/recursos/" },
-            { label: 'Aprender', url: '/recursos/aprender/' },
-            { label: 'Minicursos', url: '/recursos/aprender/minicursos/' },
-            { label: title, url: '#' },
-          ]}
+        {/* The step number is not part of the trail: the course is the deepest crumb. */}
+        <BreadcrumbDynamic
+          darkMode={false}
+          path={`/recursos/aprender/minicursos/${slug}`}
+          currentLabel={title}
         />
       </div>
       {/* Dark blue background area */}

@@ -14,10 +14,6 @@ export function SupportHero() {
           <span className="text-32 font-[500] text-white">portal dados.gov.pt</span>
         </>
       }
-      breadcrumbItems={[
-        { label: "Início", url: "/" },
-        { label: "Ajuda e contactos", url: "#" },
-      ]}
       backgroundImageUrl="/Banner/hero-bg.png"
       subtitle={
         <>
