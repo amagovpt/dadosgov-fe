@@ -34,6 +34,8 @@ function ActionCard({
   onAction: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
   disabled?: boolean;
 }) {
+  const hasDescription = React.Children.count(description) > 0;
+
   return (
     <StatusCard
       variant={variant}
@@ -41,7 +43,7 @@ function ActionCard({
       description={
         <>
           {heading ? <strong>{heading}</strong> : null}
-          {description ? (
+          {hasDescription ? (
             <>
               {heading ? <br /> : null}
               {description}
