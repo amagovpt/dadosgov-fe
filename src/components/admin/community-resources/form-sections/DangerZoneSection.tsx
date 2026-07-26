@@ -20,8 +20,13 @@ export default function DangerZoneSection({
 
   return (
     <AdminDangerActions
-      dangerActionLabel={canDelete ? t("form.deleteResource") : undefined}
-      onDangerAction={canDelete ? () => onDelete() : undefined}
+      actions={[
+        {
+          variant: "danger",
+          actionLabel: canDelete ? t("form.deleteResource") : undefined,
+          onAction: canDelete ? () => onDelete() : undefined,
+        },
+      ]}
       disabled={isSubmitting}
     />
   );

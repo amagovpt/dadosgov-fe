@@ -28,25 +28,34 @@ export default function PostsEditDangerZone({
   onOpenDeletePopup,
 }: PostsEditDangerZoneProps) {
   const { t } = useTranslation("admin-posts");
-  const primaryCard = isPublished ? unpublishCard : republishCard;
+  const publicationActionCard = isPublished ? unpublishCard : republishCard;
 
-  const primaryActionLabel = isSaving
+  const publicationActionLabel = isSaving
     ? isPublished
       ? t("danger.unpublishing")
       : t("danger.republishing")
-    : primaryCard?.anchor?.children;
+    : publicationActionCard?.anchor?.children;
 
   return (
     <AdminDangerActions
-      primaryVariant={isPublished ? "warning" : "informative"}
-      primaryHeading={primaryCard?.title}
-      primaryDescription={formatHtmlParagraphs(primaryCard?.description)}
-      primaryActionLabel={primaryActionLabel}
-      onPrimaryAction={primaryCard ? () => (isPublished ? onUnpublish() : onRepublish()) : undefined}
-      dangerHeading={deleteCard?.title ?? ""}
-      dangerDescription={formatHtmlParagraphs(deleteCard?.description)}
-      dangerActionLabel={deleteCard?.anchor?.children}
-      onDangerAction={() => onOpenDeletePopup()}
+      actions={[
+        {
+          variant: isPublished ? "warning" : "informative",
+          heading: publicationActionCard?.title,
+          description: formatHtmlParagraphs(publicationActionCard?.description),
+          actionLabel: publicationActionLabel,
+          onAction: publicationActionCard
+            ? () => (isPublished ? onUnpublish() : onRepublish())
+            : undefined,
+        },
+        {
+          variant: "danger",
+          heading: deleteCard?.title ?? "",
+          description: formatHtmlParagraphs(deleteCard?.description),
+          actionLabel: deleteCard?.anchor?.children,
+          onAction: () => onOpenDeletePopup(),
+        },
+      ]}
       disabled={isSaving}
     />
   );

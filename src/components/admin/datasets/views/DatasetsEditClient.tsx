@@ -576,6 +576,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
               <DatasetsEditMetadataTab
                 auxiliaryItems={pageContent.editAuxiliaryItems}
                 visibilityCard={pageContent.visibilityCard}
+                transferCard={pageContent.transferCard}
                 archiveCard={pageContent.archiveCard}
                 unarchiveCard={pageContent.unarchiveCard}
                 deleteCard={pageContent.deleteCard}
@@ -664,8 +665,8 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
                       onConfirm={handleTransferDataset}
                     />,
                     {
-                      title: "Transfira o conjunto de dados",
-                      closeAriaLabel: "Fechar",
+                      title: t("edit.transferTitle"),
+                      closeAriaLabel: t("edit.closeAriaLabel"),
                       dimensions: "m",
                     },
                   );

@@ -28,24 +28,29 @@ export default function ReusesEditMetadataDangerZone({
   onUnarchiveReuse,
   onOpenDeletePopup,
 }: ReusesEditMetadataDangerZoneProps) {
-  const primaryCard = archived ? unarchiveCard : archiveCard;
+  const archiveActionCard = archived ? unarchiveCard : archiveCard;
 
   return (
     <AdminDangerActions
-      primaryHeading={canEdit ? primaryCard?.title : undefined}
-      primaryDescription={
-        canEdit ? formatHtmlParagraphs(primaryCard?.description) : undefined
-      }
-      primaryActionLabel={canEdit ? primaryCard?.anchor?.children : undefined}
-      onPrimaryAction={
-        canEdit && primaryCard
-          ? () => (archived ? onUnarchiveReuse() : onArchiveReuse())
-          : undefined
-      }
-      dangerHeading={canDelete ? (deleteCard?.title ?? "") : undefined}
-      dangerDescription={canDelete ? formatHtmlParagraphs(deleteCard?.description) : undefined}
-      dangerActionLabel={canDelete ? deleteCard?.anchor?.children : undefined}
-      onDangerAction={canDelete ? () => onOpenDeletePopup() : undefined}
+      actions={[
+        {
+          variant: "warning",
+          heading: canEdit ? archiveActionCard?.title : undefined,
+          description: canEdit ? formatHtmlParagraphs(archiveActionCard?.description) : undefined,
+          actionLabel: canEdit ? archiveActionCard?.anchor?.children : undefined,
+          onAction:
+            canEdit && archiveActionCard
+              ? () => (archived ? onUnarchiveReuse() : onArchiveReuse())
+              : undefined,
+        },
+        {
+          variant: "danger",
+          heading: canDelete ? (deleteCard?.title ?? "") : undefined,
+          description: canDelete ? formatHtmlParagraphs(deleteCard?.description) : undefined,
+          actionLabel: canDelete ? deleteCard?.anchor?.children : undefined,
+          onAction: canDelete ? () => onOpenDeletePopup() : undefined,
+        },
+      ]}
       disabled={isSubmitting}
     />
   );

@@ -38,6 +38,7 @@ export type BoDatasetsPage = {
   publicationIntroduction?: AdminHelpBlock;
   resourceIntroduction?: AdminHelpBlock;
   publishStepCard?: AdminCard;
+  transferCard?: AdminCard;
   archiveCard?: AdminCard;
   unarchiveCard?: AdminCard;
   deleteCard?: AdminCard;

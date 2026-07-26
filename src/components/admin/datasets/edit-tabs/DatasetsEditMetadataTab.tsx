@@ -17,6 +17,7 @@ import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 type DatasetsEditMetadataTabProps = {
   auxiliaryItems?: AdminAuxiliaryItem[];
   visibilityCard?: AdminCard;
+  transferCard?: AdminCard;
   archiveCard?: AdminCard;
   unarchiveCard?: AdminCard;
   deleteCard?: AdminCard;
@@ -80,6 +81,7 @@ type DatasetsEditMetadataTabProps = {
 export default function DatasetsEditMetadataTab({
   auxiliaryItems,
   visibilityCard,
+  transferCard,
   archiveCard,
   unarchiveCard,
   deleteCard,
@@ -244,6 +246,7 @@ export default function DatasetsEditMetadataTab({
             isSubmitting={isSubmitting}
             canEdit={canEdit}
             canDelete={canDelete}
+            transferCard={transferCard}
             archiveCard={archiveCard}
             unarchiveCard={unarchiveCard}
             deleteCard={deleteCard}

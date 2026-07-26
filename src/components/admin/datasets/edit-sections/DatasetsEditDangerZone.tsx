@@ -8,6 +8,7 @@ type DatasetsEditDangerZoneProps = {
   isSubmitting: boolean;
   canEdit?: boolean;
   canDelete?: boolean;
+  transferCard?: AdminCard;
   archiveCard?: AdminCard;
   unarchiveCard?: AdminCard;
   deleteCard?: AdminCard;
@@ -21,6 +22,7 @@ export default function DatasetsEditDangerZone({
   isSubmitting,
   canEdit = true,
   canDelete = true,
+  transferCard,
   archiveCard,
   unarchiveCard,
   deleteCard,
@@ -28,23 +30,33 @@ export default function DatasetsEditDangerZone({
   onToggleArchive,
   onOpenDeletePopup,
 }: DatasetsEditDangerZoneProps) {
-  const primaryCard = datasetArchived ? unarchiveCard : archiveCard;
+  const archiveActionCard = datasetArchived ? unarchiveCard : archiveCard;
 
   return (
     <AdminDangerActions
-      primaryHeading={canEdit ? primaryCard?.title : undefined}
-      primaryDescription={
-        canEdit ? formatHtmlParagraphs(primaryCard?.description) : undefined
-      }
-      leadingHeading={canEdit ? "Atenção esta ação é irreversível." : undefined}
-      leadingActionLabel={canEdit ? "Transferir o conjunto de dados" : undefined}
-      onLeadingAction={canEdit ? onOpenTransferPopup : undefined}
-      primaryActionLabel={canEdit ? primaryCard?.anchor?.children : undefined}
-      onPrimaryAction={canEdit && primaryCard ? onToggleArchive : undefined}
-      dangerHeading={canDelete ? (deleteCard?.title ?? "") : undefined}
-      dangerDescription={canDelete ? formatHtmlParagraphs(deleteCard?.description) : undefined}
-      dangerActionLabel={canDelete ? deleteCard?.anchor?.children : undefined}
-      onDangerAction={canDelete ? onOpenDeletePopup : undefined}
+      actions={[
+        {
+          variant: "informative",
+          heading: canEdit ? transferCard?.title : undefined,
+          description: canEdit ? formatHtmlParagraphs(transferCard?.description) : undefined,
+          actionLabel: canEdit ? transferCard?.anchor?.children : undefined,
+          onAction: canEdit && transferCard ? onOpenTransferPopup : undefined,
+        },
+        {
+          variant: "warning",
+          heading: canEdit ? archiveActionCard?.title : undefined,
+          description: canEdit ? formatHtmlParagraphs(archiveActionCard?.description) : undefined,
+          actionLabel: canEdit ? archiveActionCard?.anchor?.children : undefined,
+          onAction: canEdit && archiveActionCard ? onToggleArchive : undefined,
+        },
+        {
+          variant: "danger",
+          heading: canDelete ? (deleteCard?.title ?? "") : undefined,
+          description: canDelete ? formatHtmlParagraphs(deleteCard?.description) : undefined,
+          actionLabel: canDelete ? deleteCard?.anchor?.children : undefined,
+          onAction: canDelete ? onOpenDeletePopup : undefined,
+        },
+      ]}
       disabled={isSubmitting}
     />
   );

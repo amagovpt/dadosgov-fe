@@ -141,6 +141,18 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
               }
             }
           }
+          transferCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
           archiveCard {
             ${locale} {
               icon

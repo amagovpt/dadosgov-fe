@@ -477,16 +477,19 @@ export function HarvesterConfigForm({
         </form>
 
         <AdminDangerActions
-          dangerActionLabel={canDelete ? t("admin-harvesters:actions.deleteHarvester") : undefined}
-          onDangerAction={
-            canDelete
-              ? (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onDelete();
-                }
-              : undefined
-          }
+          actions={[
+            {
+              variant: "danger",
+              actionLabel: canDelete ? t("admin-harvesters:actions.deleteHarvester") : undefined,
+              onAction: canDelete
+                ? (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete();
+                  }
+                : undefined,
+            },
+          ]}
         />
       </div>
 
