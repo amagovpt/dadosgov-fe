@@ -37,7 +37,6 @@
     "changePasswordButton": "Change password",
     "changePasswordTitle": "Change your password",
     "deleteAvatarTitle": "Delete profile picture",
-    "deleteAvatarButton": "Delete profile picture",
     "deleteAvatarLoading": "Deleting..."
   },
   "avatar": {
@@ -142,9 +141,6 @@
       "logoUploaderLabel": "File",
       "logoExtensions": "Maximum size: 500 KB. Accepted formats: JPG, JPEG, PNG.",
       "logoMaxSizeExceeded": "The file exceeds the maximum size of 500 KB."
-    },
-    "danger": {
-      "deleteAction": "Delete organization"
     }
   }
 }

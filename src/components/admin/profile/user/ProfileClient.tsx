@@ -344,6 +344,7 @@ export default function ProfileClient({ pageContent }: ProfileClientProps) {
                 avatarError={avatarError}
                 avatarUploaderKey={avatarUploaderKey}
                 isDeletingAvatar={isDeletingAvatar}
+                deleteAvatarCard={pageContent.deleteAvatarCard}
                 onAvatarChange={handleAvatarChange}
                 onDeleteAvatar={handleDeleteAvatar}
                 onAvatarSecurityError={() => setAvatarError(POISONED_FILE_WARNING)}

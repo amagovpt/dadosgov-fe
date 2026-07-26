@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
-import { useTranslation } from "react-i18next";
 
 type ActionCardVariant = "warning" | "informative" | "danger";
 
@@ -72,14 +71,7 @@ export default function AdminDangerActions({
   actions,
   disabled = false,
 }: AdminDangerActionsProps) {
-  const { t } = useTranslation("admin-common");
-  const visibleActions = actions
-    .filter((action) => Boolean(action.actionLabel && action.onAction))
-    .map((action) => ({
-      ...action,
-      heading:
-        action.heading ?? (action.variant === "danger" ? t("danger.irreversible") : undefined),
-    }));
+  const visibleActions = actions.filter((action) => Boolean(action.actionLabel && action.onAction));
 
   // Each card is gated by the backend permission upstream (the caller only
   // passes the action when allowed). When the user can do neither, render

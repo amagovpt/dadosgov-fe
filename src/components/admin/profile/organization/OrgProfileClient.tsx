@@ -281,6 +281,7 @@ export default function OrgProfileClient({ pageContent }: { pageContent: BoOrgan
             canDelete={canDelete}
             isDeleting={isDeleting}
             deleteError={deleteError}
+            deleteCard={pageContent.orgProfileDeleteCard}
             onDeleteClick={(event) => {
               event.preventDefault();
               event.stopPropagation();

@@ -14,6 +14,7 @@ export type BoUsersPage = {
   followingsNoResults?: FoListPageNoResults;
   subscriptionsNoResults?: FoListPageNoResults;
   activitiesNoResults?: FoListPageNoResults;
+  activateCard?: AdminCard;
   deactivateCard?: AdminCard;
   deleteCard?: AdminCard;
 };

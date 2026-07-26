@@ -2,12 +2,16 @@
 
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button, StatusCard } from "@ama-pt/agora-design-system";
+import { StatusCard } from "@ama-pt/agora-design-system";
+import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface OrganizationDangerZoneProps {
   canDelete: boolean;
   isDeleting: boolean;
   deleteError: boolean;
+  deleteCard?: AdminCard;
   onDeleteClick: (event: React.MouseEvent) => void;
 }
 
@@ -15,6 +19,7 @@ export default function OrganizationDangerZone({
   canDelete,
   isDeleting,
   deleteError,
+  deleteCard,
   onDeleteClick,
 }: OrganizationDangerZoneProps) {
   const { t } = useTranslation("admin-profile");
@@ -24,7 +29,7 @@ export default function OrganizationDangerZone({
   }
 
   return (
-    <div className="dataset-edit-danger-actions">
+    <>
       {deleteError && (
         <StatusCard
           variant="danger"
@@ -32,27 +37,18 @@ export default function OrganizationDangerZone({
           description={t("organization.deleteError")}
         />
       )}
-      <StatusCard
-        variant="danger"
-        showIcon
-        description={
-          <>
-            <strong>{t("danger.irreversible")}</strong>
-            <br />
-            <Button
-              appearance="link"
-              variant="primary"
-              hasIcon
-              trailingIcon="agora-line-arrow-right-circle"
-              trailingIconHover="agora-solid-arrow-right-circle"
-              onClick={onDeleteClick}
-              disabled={isDeleting}
-            >
-              {t("organization.danger.deleteAction")}
-            </Button>
-          </>
-        }
+      <AdminDangerActions
+        actions={[
+          {
+            variant: "danger",
+            heading: deleteCard?.title,
+            description: formatHtmlParagraphs(deleteCard?.description),
+            actionLabel: deleteCard?.anchor?.children,
+            onAction: onDeleteClick,
+          },
+        ]}
+        disabled={isDeleting}
       />
-    </div>
+    </>
   );
 }

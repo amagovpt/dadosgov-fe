@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button, InputText, InputTextArea, StatusCard } from "@ama-pt/agora-design-system";
 import ImageUploadField from "@/components/admin/forms/ImageUploadField";
 import UserProfileAvatarDangerZone from "@/components/admin/profile/user/UserProfileAvatarDangerZone";
+import type { AdminCard } from "@/service/types/admin/common";
 import type { ApiToken } from "@/service/types/identity";
 
 interface UserProfileMainTabProps {
@@ -32,6 +33,7 @@ interface UserProfileMainTabProps {
   saveError: string;
   isDeletingAvatar: boolean;
   hasAvatar: boolean;
+  deleteAvatarCard?: AdminCard;
   onFirstNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onLastNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onAboutChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -78,6 +80,7 @@ export default function UserProfileMainTab({
   saveError,
   isDeletingAvatar,
   hasAvatar,
+  deleteAvatarCard,
   onFirstNameChange,
   onLastNameChange,
   onAboutChange,
@@ -404,6 +407,7 @@ export default function UserProfileMainTab({
       {hasAvatar && (
         <UserProfileAvatarDangerZone
           isDeletingAvatar={isDeletingAvatar}
+          deleteAvatarCard={deleteAvatarCard}
           onDeleteAvatar={onDeleteAvatar}
         />
       )}

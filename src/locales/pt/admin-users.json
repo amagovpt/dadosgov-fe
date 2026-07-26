@@ -41,12 +41,6 @@
     "emailPlaceholder": "Insira o endereço de e-mail aqui",
     "saveLoading": "A guardar..."
   },
-  "dangerZone": {
-    "inactiveDescription": "Esta conta está desativada. O utilizador não consegue iniciar sessão no portal.",
-    "deactivateAction": "Desativar conta",
-    "activateAction": "Ativar conta",
-    "deleteAction": "Eliminar o perfil"
-  },
   "headerCard": {
     "memberSince": "Membro desde:",
     "viewPublicProfile": "Ver perfil público"

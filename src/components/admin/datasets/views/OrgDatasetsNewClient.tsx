@@ -85,7 +85,7 @@ export default function OrgDatasetsNewClient({ pageContent }: OrgDatasetsNewClie
                   descriptionText={stripHtmlTags(startEntry.description)}
                   icon={{ name: "agora-line-edit" }}
                   button={{
-                    children: startEntry.anchor?.children || "",
+                    children: startEntry.anchor?.children,
                     variant: "primary",
                     appearance: "outline",
                     onClick: () => router.push(buildStepUrl(2)),

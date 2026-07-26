@@ -3,6 +3,9 @@
 import { useTranslation } from "react-i18next";
 import { Button, InputText, InputTextArea, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import { ApiToken, UserPublic } from "@/service/types/identity";
+import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { AvatarSection } from "./AvatarSection";
 import { ApiKeysSection } from "./ApiKeysSection";
 import { EmailSection } from "./EmailSection";
@@ -27,6 +30,7 @@ interface ProfileFormTabProps {
   avatarError: string | null;
   avatarUploaderKey: number;
   isDeletingAvatar: boolean;
+  deleteAvatarCard?: AdminCard;
   onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDeleteAvatar: () => Promise<void>;
   onAvatarSecurityError: () => void;
@@ -70,6 +74,7 @@ export function ProfileFormTab({
   avatarError,
   avatarUploaderKey,
   isDeletingAvatar,
+  deleteAvatarCard,
   onAvatarChange,
   onDeleteAvatar,
   onAvatarSecurityError,
@@ -233,35 +238,25 @@ export function ProfileFormTab({
       </div>
 
       {profile?.avatar_thumbnail && (
-        <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
-          <StatusCard
-            variant="danger"
-            showIcon
-            description={
-              <>
-                <strong>{t("admin-profile:danger.irreversible")}</strong>
-                <br />
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={() =>
-                    show(<DeleteAvatarPopupContent onConfirm={onDeleteAvatar} />, {
-                      title: t("admin-profile:form.deleteAvatarTitle"),
-                      closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
-                      dimensions: "s",
-                    })
-                  }
-                  disabled={isDeletingAvatar}
-                >
-                  {isDeletingAvatar
-                    ? t("admin-profile:form.deleteAvatarLoading")
-                    : t("admin-profile:form.deleteAvatarButton")}
-                </Button>
-              </>
-            }
+        <div style={{ marginTop: 16 }}>
+          <AdminDangerActions
+            actions={[
+              {
+                variant: "danger",
+                heading: deleteAvatarCard?.title,
+                description: formatHtmlParagraphs(deleteAvatarCard?.description),
+                actionLabel: isDeletingAvatar
+                  ? t("admin-profile:form.deleteAvatarLoading")
+                  : deleteAvatarCard?.anchor?.children,
+                onAction: () =>
+                  show(<DeleteAvatarPopupContent onConfirm={onDeleteAvatar} />, {
+                    title: t("admin-profile:form.deleteAvatarTitle"),
+                    closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
+                    dimensions: "s",
+                  }),
+              },
+            ]}
+            disabled={isDeletingAvatar}
           />
         </div>
       )}

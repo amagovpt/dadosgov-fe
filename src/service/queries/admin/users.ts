@@ -106,6 +106,18 @@ export async function getBoUsers(locale: string = "pt"): Promise<BoUsersPage> {
               description
             }
           }
+          activateCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
           deactivateCard {
             ${locale} {
               icon

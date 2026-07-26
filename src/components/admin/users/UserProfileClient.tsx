@@ -299,6 +299,7 @@ export default function UserProfileClient({ pageContent }: { pageContent: BoUser
                     }
                   );
                 }}
+                activateCard={pageContent.activateCard}
                 deactivateCard={pageContent.deactivateCard}
                 deleteCard={pageContent.deleteCard}
               />

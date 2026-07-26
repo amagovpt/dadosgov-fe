@@ -25,6 +25,7 @@ export type BoOrganizationsPage = {
   search?: FoListPageSearch;
   systemNoResults?: FoListPageNoResults;
   orgProfileNoResults?: FoListPageNoResults;
+  orgProfileDeleteCard?: AdminCard;
   steps?: AdminStep[];
   selectionIntroduction?: AdminHelpBlock;
   detailsIntroduction?: AdminHelpBlock;

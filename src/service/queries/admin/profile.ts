@@ -56,6 +56,18 @@ export async function getBoProfile(locale: string = "pt"): Promise<BoProfilePage
               description
             }
           }
+          deleteAvatarCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
         }
       }
     }

@@ -88,6 +88,18 @@ export async function getBoOrganizations(
               description
             }
           }
+          orgProfileDeleteCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
           steps {
             ${locale} {
               title

@@ -66,7 +66,7 @@ export default function DatasetsNewClient({ pageContent }: DatasetsNewClientProp
                 descriptionText={stripHtmlTags(startEntry.description)}
                 icon={{ name: "agora-line-edit" }}
                 button={{
-                  children: startEntry.anchor?.children || "",
+                  children: startEntry.anchor?.children,
                   variant: "primary",
                   appearance: "outline",
                   onClick: () => {

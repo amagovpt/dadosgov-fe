@@ -41,12 +41,6 @@
     "emailPlaceholder": "Enter the email address here",
     "saveLoading": "Saving..."
   },
-  "dangerZone": {
-    "inactiveDescription": "This account is disabled. The user cannot sign in to the portal.",
-    "deactivateAction": "Disable account",
-    "activateAction": "Enable account",
-    "deleteAction": "Delete profile"
-  },
   "headerCard": {
     "memberSince": "Member since:",
     "viewPublicProfile": "View public profile"

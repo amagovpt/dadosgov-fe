@@ -34,6 +34,7 @@ type UserAdminProfileTabProps = {
   onSave: () => void;
   onToggleActive: (event: React.MouseEvent) => void;
   onOpenDeletePopup: (event: React.MouseEvent) => void;
+  activateCard?: AdminCard;
   deactivateCard?: AdminCard;
   deleteCard?: AdminCard;
 };
@@ -60,6 +61,7 @@ export default function UserAdminProfileTab({
   onSave,
   onToggleActive,
   onOpenDeletePopup,
+  activateCard,
   deactivateCard,
   deleteCard,
 }: UserAdminProfileTabProps) {
@@ -226,6 +228,7 @@ export default function UserAdminProfileTab({
           isDeleting={isDeleting}
           onToggleActive={onToggleActive}
           onOpenDeletePopup={onOpenDeletePopup}
+          activateCard={activateCard}
           deactivateCard={deactivateCard}
           deleteCard={deleteCard}
         />
