@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Button, CardNoResults, Icon, InputSelect } from "@ama-pt/agora-design-system";
+import { Button, InputSelect } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
+import AdminSquidexEmptyState from "@/components/admin/lists/AdminSquidexEmptyState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchAdminPosts } from "@/service/api/posts";
@@ -186,12 +187,8 @@ export default function SystemPostsClient({ pageContent }: SystemPostsClientProp
         </Button>
       }
       emptyState={
-        <CardNoResults
-          position="center"
-          icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-          title={pageContent.systemNoResults?.title ?? ""}
-          description={pageContent.systemNoResults?.description ?? ""}
-          hasAnchor={false}
+        <AdminSquidexEmptyState
+          noResults={pageContent.systemNoResults}
         />
       }
     >
