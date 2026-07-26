@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react'
-import { Icon } from "@ama-pt/agora-design-system"
+import Breadcrumb from '../Primitives/Breadcrumb/Breadcrumb'
 import PublishDropdown from '../admin/PublishDropdown'
 
 export type AdminLayoutProps = {
@@ -14,33 +14,12 @@ export type AdminLayoutProps = {
     children: React.ReactNode
 }
 
-function AdminBreadcrumb({ items }: { items: AdminLayoutProps["breadcrumbItems"] }) {
-    return (
-        <nav aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-12 text-base text-neutral-900">
-                {items.map((item, index) => {
-                    const isLast = index === items.length - 1
-
-                    return (
-                        <React.Fragment key={`${item.label}-${index}`}>
-                            <li>
-                                <span className={isLast ? undefined : "border-b-2 border-neutral-900 pb-8"}>
-                                    {item.label}
-                                </span>
-                            </li>
-                            {!isLast && (
-                                <li aria-hidden="true" className="flex items-center">
-                                    <Icon name="agora-line-chevron-right" className="h-16 w-16" />
-                                </li>
-                            )}
-                        </React.Fragment>
-                    )
-                })}
-            </ol>
-        </nav>
-    )
+function buildStaticAdminBreadcrumbItems(items: AdminLayoutProps["breadcrumbItems"]) {
+    return items.map((item, index) => ({
+        ...item,
+        url: index === items.length - 1 ? "" : item.url || "#",
+    }))
 }
-
 
 export default function AdminLayout({
     title,
@@ -52,7 +31,12 @@ export default function AdminLayout({
         <div className="w-full flex flex-col gap-32 px-104 pt-32 pb-64 admin-page">
             <div className="w-full flex flex-col gap-64 pb-32">
                 <div className="w-full">
-                    <AdminBreadcrumb items={breadcrumbItems} />
+                    <Breadcrumb
+                        className="admin-breadcrumb-static"
+                        items={buildStaticAdminBreadcrumbItems(breadcrumbItems)}
+                        validateUrls={false}
+                        onClickCapture={(event) => event.preventDefault()}
+                    />
                 </div>
 
                 <div className="flex items-center justify-between">
