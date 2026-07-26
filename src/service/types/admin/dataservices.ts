@@ -38,6 +38,7 @@ export type BoDataservicesPage = {
   draftVisibilityCard?: AdminCard;
   createdCard?: AdminCard;
   archiveInfoCard?: AdminCard[];
+  deleteCard?: AdminCard;
   createAuxiliaryItems?: AdminAuxiliaryItem[];
   editAuxiliaryItems?: AdminAuxiliaryItem[];
 };

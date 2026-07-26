@@ -1,5 +1,5 @@
 import React from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { Button, type DropdownSectionProps, Switch } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import { getEditDatasetAuxiliarItems } from "@/components/admin/datasets/config/datasetsAuxiliarItems";
@@ -11,10 +11,15 @@ import DatasetsEditAccessTimeSection from "@/components/admin/datasets/edit-sect
 import DatasetsEditSpaceSection from "@/components/admin/datasets/edit-sections/DatasetsEditSpaceSection";
 import DatasetsEditDangerZone from "@/components/admin/datasets/edit-sections/DatasetsEditDangerZone";
 import { can } from "@/utils/permissions";
-import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
+import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 type DatasetsEditMetadataTabProps = {
   auxiliaryItems?: AdminAuxiliaryItem[];
+  visibilityCard?: AdminCard;
+  archiveCard?: AdminCard;
+  unarchiveCard?: AdminCard;
+  deleteCard?: AdminCard;
   dataset: Dataset;
   featured: boolean;
   isSubmitting: boolean;
@@ -73,6 +78,10 @@ type DatasetsEditMetadataTabProps = {
 
 export default function DatasetsEditMetadataTab({
   auxiliaryItems,
+  visibilityCard,
+  archiveCard,
+  unarchiveCard,
+  deleteCard,
   dataset,
   featured,
   isSubmitting,
@@ -128,20 +137,20 @@ export default function DatasetsEditMetadataTab({
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
-        {dataset.private && canEdit && (
+        {dataset.private && canEdit && visibilityCard && (
           <AdminVisibilityBanner
             description={
               <>
-                <strong>{t("edit.visibilityTitle")}</strong>
-                <br />
-                <Trans
-                  i18nKey="edit.visibilityDescription"
-                  ns="admin-datasets"
-                  components={{ strong: <strong /> }}
-                />
+                <strong>{visibilityCard.title}</strong>
+                {visibilityCard.description && (
+                  <>
+                    <br />
+                    {formatHtmlParagraphs(visibilityCard.description)}
+                  </>
+                )}
               </>
             }
-            actionLabel={t("edit.publishAction")}
+            actionLabel={visibilityCard.anchor?.children ?? ""}
             disabled={isSubmitting}
             onAction={onPublishDataset}
           />
@@ -233,6 +242,9 @@ export default function DatasetsEditMetadataTab({
             isSubmitting={isSubmitting}
             canEdit={canEdit}
             canDelete={canDelete}
+            archiveCard={archiveCard}
+            unarchiveCard={unarchiveCard}
+            deleteCard={deleteCard}
             onToggleArchive={onToggleArchive}
             onOpenDeletePopup={onOpenDeletePopup}
           />

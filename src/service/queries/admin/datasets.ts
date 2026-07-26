@@ -141,6 +141,54 @@ export async function getBoDatasets(locale: string = "pt"): Promise<BoDatasetsPa
               }
             }
           }
+          archiveCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          unarchiveCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          deleteCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          visibilityCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
           createAuxiliaryItems {
             ${locale} {
               enabled

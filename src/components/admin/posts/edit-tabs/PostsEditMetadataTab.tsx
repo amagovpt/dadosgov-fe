@@ -22,6 +22,7 @@ interface PostsEditMetadataTabProps {
   hasHeaderError?: boolean;
   isSaving: boolean;
   unpublishCard?: AdminCard;
+  republishCard?: AdminCard;
   deleteCard?: AdminCard;
   onTitleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onHeaderChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -52,6 +53,7 @@ export default function PostsEditMetadataTab({
   hasHeaderError = false,
   isSaving,
   unpublishCard,
+  republishCard,
   deleteCard,
   onTitleChange,
   onHeaderChange,
@@ -131,6 +133,7 @@ export default function PostsEditMetadataTab({
           isPublished={!!post.published}
           isSaving={isSaving}
           unpublishCard={unpublishCard}
+          republishCard={republishCard}
           deleteCard={deleteCard}
           onUnpublish={onUnpublish}
           onRepublish={onRepublish}

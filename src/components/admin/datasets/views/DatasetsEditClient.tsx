@@ -574,6 +574,10 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
             <TabBody>
               <DatasetsEditMetadataTab
                 auxiliaryItems={pageContent.editAuxiliaryItems}
+                visibilityCard={pageContent.visibilityCard}
+                archiveCard={pageContent.archiveCard}
+                unarchiveCard={pageContent.unarchiveCard}
+                deleteCard={pageContent.deleteCard}
                 dataset={dataset}
                 featured={featured}
                 isSubmitting={isSubmitting}

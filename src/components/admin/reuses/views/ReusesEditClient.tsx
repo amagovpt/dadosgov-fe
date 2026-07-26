@@ -552,6 +552,10 @@ export default function ReusesEditClient({ pageContent }: ReusesEditClientProps)
           <TabBody>
             <ReusesEditMetadataTab
               auxiliaryItems={pageContent.editAuxiliaryItems}
+              visibilityCard={pageContent.visibilityCard}
+              archiveCard={pageContent.archiveCard}
+              unarchiveCard={pageContent.unarchiveCard}
+              deleteCard={pageContent.deleteCard}
               reuse={reuse}
               isSubmitting={isSubmitting}
               featured={featured}

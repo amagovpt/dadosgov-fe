@@ -383,6 +383,7 @@ export default function PostsEditClient({ pageContent }: PostsEditClientProps) {
               hasHeaderError={false}
               isSaving={isSaving}
               unpublishCard={pageContent.unpublishCard}
+              republishCard={pageContent.republishCard}
               deleteCard={pageContent.deleteCard}
               onTitleChange={(event) => {
                 setArticleTitle(event.target.value);

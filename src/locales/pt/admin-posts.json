@@ -84,12 +84,7 @@
   },
   "danger": {
     "unpublishing": "A retirar...",
-    "republishing": "A publicar...",
-    "unpublish": "Retirar",
-    "republish": "Publicar novamente",
-    "unpublishedHeading": "Artigo despublicado",
-    "unpublishedDescription": "Este artigo não está visível para o público.",
-    "deleteAction": "Eliminar o artigo"
+    "republishing": "A publicar..."
   },
   "editor": {
     "undo": "Desfazer",

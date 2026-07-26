@@ -14,5 +14,6 @@ export type BoPostsPage = {
   systemNoResults?: FoListPageNoResults;
   steps?: AdminStep[];
   unpublishCard?: AdminCard;
+  republishCard?: AdminCard;
   deleteCard?: AdminCard;
 };

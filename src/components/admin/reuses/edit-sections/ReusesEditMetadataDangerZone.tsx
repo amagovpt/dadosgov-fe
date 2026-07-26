@@ -1,12 +1,16 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
 import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface ReusesEditMetadataDangerZoneProps {
   archived: boolean;
   isSubmitting: boolean;
   canEdit?: boolean;
   canDelete?: boolean;
+  archiveCard?: AdminCard;
+  unarchiveCard?: AdminCard;
+  deleteCard?: AdminCard;
   onArchiveReuse: () => void | Promise<void>;
   onUnarchiveReuse: () => void | Promise<void>;
   onOpenDeletePopup: () => void;
@@ -17,32 +21,30 @@ export default function ReusesEditMetadataDangerZone({
   isSubmitting,
   canEdit = true,
   canDelete = true,
+  archiveCard,
+  unarchiveCard,
+  deleteCard,
   onArchiveReuse,
   onUnarchiveReuse,
   onOpenDeletePopup,
 }: ReusesEditMetadataDangerZoneProps) {
-  const { t } = useTranslation("admin-reuses");
+  const primaryCard = archived ? unarchiveCard : archiveCard;
 
   return (
     <AdminDangerActions
-      primaryHeading={
-        !canEdit
-          ? undefined
-          : archived
-            ? t("edit.archiveInfoArchived")
-            : t("edit.archiveInfoActive")
+      primaryHeading={canEdit ? primaryCard?.title : undefined}
+      primaryDescription={
+        canEdit ? formatHtmlParagraphs(primaryCard?.description) : undefined
       }
-      primaryActionLabel={
-        canEdit
-          ? archived
-            ? t("edit.unarchiveAction")
-            : t("edit.archiveAction")
+      primaryActionLabel={canEdit ? primaryCard?.anchor?.children : undefined}
+      onPrimaryAction={
+        canEdit && primaryCard
+          ? () => (archived ? onUnarchiveReuse() : onArchiveReuse())
           : undefined
       }
-      onPrimaryAction={
-        canEdit ? () => (archived ? onUnarchiveReuse() : onArchiveReuse()) : undefined
-      }
-      dangerActionLabel={canDelete ? t("edit.deleteAction") : undefined}
+      dangerHeading={canDelete ? (deleteCard?.title ?? "") : undefined}
+      dangerDescription={canDelete ? formatHtmlParagraphs(deleteCard?.description) : undefined}
+      dangerActionLabel={canDelete ? deleteCard?.anchor?.children : undefined}
       onDangerAction={canDelete ? () => onOpenDeletePopup() : undefined}
       disabled={isSubmitting}
     />

@@ -1,5 +1,5 @@
 import React from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { Button, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
 import AdminVisibilityBanner from "@/components/admin/forms/AdminVisibilityBanner";
@@ -8,10 +8,15 @@ import { can } from "@/utils/permissions";
 import ReusesEditMetadataDetailsSection from "@/components/admin/reuses/edit-sections/ReusesEditMetadataDetailsSection";
 import { getEditReuseAuxiliarItems } from "@/components/admin/reuses/config/reusesAuxiliarItems";
 import type { Reuse, ReuseTopic, ReuseType } from "@/service/types/reuse";
-import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
+import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 type ReusesEditMetadataTabProps = {
   auxiliaryItems?: AdminAuxiliaryItem[];
+  visibilityCard?: AdminCard;
+  archiveCard?: AdminCard;
+  unarchiveCard?: AdminCard;
+  deleteCard?: AdminCard;
   reuse: Reuse;
   isSubmitting: boolean;
   featured: boolean;
@@ -52,6 +57,10 @@ type ReusesEditMetadataTabProps = {
 
 export default function ReusesEditMetadataTab({
   auxiliaryItems,
+  visibilityCard,
+  archiveCard,
+  unarchiveCard,
+  deleteCard,
   reuse,
   isSubmitting,
   featured,
@@ -97,20 +106,20 @@ export default function ReusesEditMetadataTab({
   return (
     <div className="admin-page__body">
       <div className="admin-page__form-area">
-        {reuse.private && canEdit && (
+        {reuse.private && canEdit && visibilityCard && (
           <AdminVisibilityBanner
             description={
               <>
-                <strong>{t("edit.visibilityTitle")}</strong>
-                <br />
-                <Trans
-                  i18nKey="edit.visibilityDescription"
-                  ns="admin-reuses"
-                  components={{ strong: <strong /> }}
-                />
+                <strong>{visibilityCard.title}</strong>
+                {visibilityCard.description && (
+                  <>
+                    <br />
+                    {formatHtmlParagraphs(visibilityCard.description)}
+                  </>
+                )}
               </>
             }
-            actionLabel={t("edit.publishAction")}
+            actionLabel={visibilityCard.anchor?.children ?? ""}
             disabled={isSubmitting}
             onAction={onPublishReuse}
           />
@@ -175,6 +184,9 @@ export default function ReusesEditMetadataTab({
             isSubmitting={isSubmitting}
             canEdit={canEdit}
             canDelete={canDelete}
+            archiveCard={archiveCard}
+            unarchiveCard={unarchiveCard}
+            deleteCard={deleteCard}
             onArchiveReuse={onArchiveReuse}
             onUnarchiveReuse={onUnarchiveReuse}
             onOpenDeletePopup={onOpenDeletePopup}

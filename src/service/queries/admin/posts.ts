@@ -107,6 +107,18 @@ export async function getBoPosts(locale: string = "pt"): Promise<BoPostsPage> {
               }
             }
           }
+          republishCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
           deleteCard {
             ${locale} {
               icon

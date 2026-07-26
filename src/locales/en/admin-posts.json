@@ -84,12 +84,7 @@
   },
   "danger": {
     "unpublishing": "Unpublishing...",
-    "republishing": "Publishing...",
-    "unpublish": "Unpublish",
-    "republish": "Publish again",
-    "unpublishedHeading": "Post unpublished",
-    "unpublishedDescription": "This post is not visible to the public.",
-    "deleteAction": "Delete the post"
+    "republishing": "Publishing..."
   },
   "editor": {
     "undo": "Undo",

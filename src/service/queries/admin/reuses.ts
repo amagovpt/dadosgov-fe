@@ -146,6 +146,54 @@ export async function getBoReuses(locale: string = "pt"): Promise<BoReusesPage> 
               }
             }
           }
+          archiveCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          unarchiveCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          deleteCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
+          visibilityCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
           createAuxiliaryItems {
             ${locale} {
               enabled

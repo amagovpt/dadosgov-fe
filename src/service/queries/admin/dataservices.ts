@@ -167,6 +167,18 @@ export async function getBoDataservices(
               }
             }
           }
+          deleteCard {
+            ${locale} {
+              icon
+              title
+              subtitle
+              description
+              anchor {
+                href
+                children
+              }
+            }
+          }
           createAuxiliaryItems {
             ${locale} {
               enabled

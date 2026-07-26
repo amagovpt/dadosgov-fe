@@ -693,38 +693,43 @@ export default function DataservicesEditClient({ pageContent }: DataservicesEdit
                                   hasIcon
                                   trailingIcon="agora-line-arrow-right-circle"
                                   trailingIconHover="agora-solid-arrow-right-circle"
-                                  onClick={handleArchive}
+                                onClick={handleArchive}
+                                disabled={isSaving}
+                              >
+                                  {archiveInfoCard.anchor?.children}
+                              </Button>
+                              </>
+                            }
+                          />
+                        ) : null}
+                        {pageContent.deleteCard ? (
+                          <StatusCard
+                            variant="danger"
+                            showIcon
+                            description={
+                              <>
+                                {pageContent.deleteCard.title ? (
+                                  <>
+                                    <strong>{pageContent.deleteCard.title}</strong>
+                                    <br />
+                                  </>
+                                ) : null}
+                                {formatHtmlParagraphs(pageContent.deleteCard.description)}
+                                <Button
+                                  appearance="link"
+                                  variant="primary"
+                                  hasIcon
+                                  trailingIcon="agora-line-arrow-right-circle"
+                                  trailingIconHover="agora-solid-arrow-right-circle"
+                                  onClick={handleOpenDeletePopup}
                                   disabled={isSaving}
                                 >
-                                  {dataservice.archived_at
-                                    ? t("admin-dataservices:edit.unarchive")
-                                    : t("admin-dataservices:edit.archive")}
+                                  {pageContent.deleteCard.anchor?.children}
                                 </Button>
                               </>
                             }
                           />
                         ) : null}
-                        <StatusCard
-                          variant="danger"
-                          showIcon
-                          description={
-                            <>
-                              <strong>{t("admin-common:danger.irreversible")}</strong>
-                              <br />
-                              <Button
-                                appearance="link"
-                                variant="primary"
-                                hasIcon
-                                trailingIcon="agora-line-arrow-right-circle"
-                                trailingIconHover="agora-solid-arrow-right-circle"
-                                onClick={handleOpenDeletePopup}
-                                disabled={isSaving}
-                              >
-                                {t("admin-dataservices:edit.deleteTitle")}
-                              </Button>
-                            </>
-                          }
-                        />
                       </div>
                     </form>
                   </div>
