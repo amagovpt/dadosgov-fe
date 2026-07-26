@@ -3,21 +3,7 @@ export type AdminBreadcrumbItem = {
   url?: string;
 };
 
-export type NormalizedAdminBreadcrumbItem = {
-  label: string;
-  url: string;
-};
-
 type AdminBreadcrumbT = (key: string) => string;
-
-export function normalizeAdminBreadcrumbItems(
-  items: AdminBreadcrumbItem[]
-): NormalizedAdminBreadcrumbItem[] {
-  return items.map((item) => ({
-    ...item,
-    url: item.url === "#" ? "" : item.url ?? "",
-  }));
-}
 
 function buildScopedAdminBreadcrumbItems({
   t,
