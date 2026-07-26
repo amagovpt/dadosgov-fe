@@ -75,7 +75,7 @@ export default function AdminListPage({
             <div className="admin-search-wrapper">
               <InputSearchBar
                 hasVoiceActionButton={false}
-                label={search.label ?? t("search.label")}
+                label={search.label}
                 placeholder={search.placeholder}
                 aria-label={search.ariaLabel ?? search.label ?? search.placeholder}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
