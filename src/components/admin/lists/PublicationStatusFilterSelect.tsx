@@ -1,4 +1,7 @@
+"use client";
+
 import { DropdownOption, DropdownSection, InputSelect } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 interface PublicationStatusFilterSelectProps {
   statusFilter: string;
@@ -12,14 +15,17 @@ export default function PublicationStatusFilterSelect({
   statusFilter,
   onChange,
   id = "filter-status",
-  placeholder = "Filtrar por estado",
+  placeholder,
   defaultValue,
 }: PublicationStatusFilterSelectProps) {
+  const { t } = useTranslation("admin-common");
+  const resolvedPlaceholder = placeholder ?? t("filters.statusPlaceholder");
+
   return (
     <InputSelect
       label=""
       hideLabel
-      placeholder={placeholder}
+      placeholder={resolvedPlaceholder}
       id={id}
       defaultValue={defaultValue}
       onChange={(options) => {
@@ -28,19 +34,19 @@ export default function PublicationStatusFilterSelect({
     >
       <DropdownSection name="status">
         <DropdownOption value="" selected={statusFilter === ""}>
-          Todos
+          {t("filters.all")}
         </DropdownOption>
         <DropdownOption value="public" selected={statusFilter === "public"}>
-          Público
+          {t("status.public")}
         </DropdownOption>
         <DropdownOption value="archived" selected={statusFilter === "archived"}>
-          Arquivado
+          {t("status.archived")}
         </DropdownOption>
         <DropdownOption value="draft" selected={statusFilter === "draft"}>
-          Rascunho
+          {t("status.draft")}
         </DropdownOption>
         <DropdownOption value="deleted" selected={statusFilter === "deleted"}>
-          Excluído
+          {t("status.deleted")}
         </DropdownOption>
       </DropdownSection>
     </InputSelect>

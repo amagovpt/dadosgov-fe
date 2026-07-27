@@ -2,20 +2,28 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchMyReuses } from "@/service/api/reuses";
 import { Reuse } from "@/service/types/reuse";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function ReusesClient() {
+interface ReusesClientProps {
+  pageContent: BoReusesPage;
+}
+
+export default function ReusesClient({ pageContent }: ReusesClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const { displayName } = useCurrentUser();
   const searchParams = useSearchParams();
 
@@ -94,18 +102,26 @@ export default function ReusesClient() {
         showOwner: true,
         linkStyle: "textLink",
         editHref: (reuse) => `/admin/me/reuses/edit?id=${reuse.id}`,
+        labels: {
+          title: t("admin-reuses:columns.title"),
+          titleShort: t("admin-reuses:columns.titleShort"),
+          status: t("admin-reuses:columns.status"),
+          createdAt: t("admin-reuses:columns.createdAt"),
+          datasets: t("admin-reuses:columns.datasets"),
+          actions: t("admin-reuses:columns.actions"),
+        },
       }),
-    []
+    [t]
   );
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        { label: "Reutilizações", url: "/admin/me/reuses" },
-      ]}
-      title="Reutilizações"
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-reuses:title"),
+      })}
+      title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={filteredReuses.length}
       currentPage={currentPage}
@@ -113,8 +129,9 @@ export default function ReusesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: "Pesquise o nome da reutilização",
-        ariaLabel: "Pesquisar reutilizações",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
       filters={
@@ -129,9 +146,7 @@ export default function ReusesClient() {
       }
       emptyState={
         <AdminEmptyState
-          icon="bar_chart"
-          title="Sem reutilizações"
-          description="Não publicou reutilizações"
+          noResults={pageContent.myNoResults}
           createUrl="/admin/reuses/new"
         />
       }

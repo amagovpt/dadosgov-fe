@@ -12,6 +12,17 @@ import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 export type DatasetSortField = "title" | "created_at" | "last_modified" | "resources";
 export type OrgDatasetSortField = "title" | "created" | "last_update";
 
+export interface DatasetColumnLabels {
+  title: string;
+  titleShort: string;
+  status: string;
+  createdAt: string;
+  lastModified: string;
+  resources: string;
+  quality: string;
+  actions: string;
+}
+
 export const systemDatasetSortFieldMap: Record<DatasetSortField, string | null> = {
   title: "title",
   created_at: "created",
@@ -22,7 +33,7 @@ export const systemDatasetSortFieldMap: Record<DatasetSortField, string | null> 
 export function sortDatasets(
   items: Dataset[],
   sortField: DatasetSortField | null,
-  sortOrder: SortOrder
+  sortOrder: SortOrder,
 ): Dataset[] {
   if (sortOrder === "none") return items;
 
@@ -70,6 +81,7 @@ interface DatasetColumnsOptions<TVariant extends DatasetSortVariant = "system"> 
   showResourceCount?: boolean;
   showQualityScore?: boolean;
   sortVariant?: TVariant;
+  labels: DatasetColumnLabels;
 }
 
 export function createDatasetColumns<TVariant extends DatasetSortVariant = "system">({
@@ -79,8 +91,11 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
   showResourceCount = false,
   showQualityScore = false,
   sortVariant = "system" as TVariant,
+  labels,
 }: DatasetColumnsOptions<TVariant>): AdminListColumn<Dataset, DatasetColumnField<TVariant>>[] {
-  const createdSortField = (sortVariant === "org" ? "created" : "created_at") as DatasetColumnField<TVariant>;
+  const createdSortField = (
+    sortVariant === "org" ? "created" : "created_at"
+  ) as DatasetColumnField<TVariant>;
   const lastModifiedSortField = (
     sortVariant === "org" ? "last_update" : "last_modified"
   ) as DatasetColumnField<TVariant>;
@@ -88,8 +103,8 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
   const columns: AdminListColumn<Dataset, DatasetColumnField<TVariant>>[] = [
     {
       id: "title",
-      header: "Título do conjunto de dados",
-      headerLabel: "Título",
+      header: labels.title,
+      headerLabel: labels.titleShort,
       sortField: "title" as DatasetColumnField<TVariant>,
       sortType: "date",
       renderCell: (dataset) => (
@@ -98,19 +113,19 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
       renderCell: (dataset) => <ResourceStatusBadge item={dataset} />,
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: createdSortField,
       sortType: "date",
       renderCell: (dataset) => formatDatasetDate(dataset.created_at),
     },
     {
       id: "last_modified",
-      header: "Última modificação",
+      header: labels.lastModified,
       sortField: lastModifiedSortField,
       sortType: "date",
       renderCell: (dataset) => (
@@ -134,8 +149,8 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
   if (showResourceCount) {
     columns.push({
       id: "resources",
-      header: "Ficheiros",
-      headerLabel: "Ficheiros",
+      header: labels.resources,
+      headerLabel: labels.resources,
       sortField: "resources" as DatasetColumnField<TVariant>,
       sortType: "date",
       renderCell: (dataset) => dataset.resources?.length || 0,
@@ -145,15 +160,19 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
   if (showQualityScore) {
     columns.push({
       id: "quality",
-      header: "Pontuação",
-      headerLabel: "Pontuação",
+      header: labels.quality,
+      headerLabel: labels.quality,
       renderCell: (dataset) => {
         const score = calculateQualityScore(QUALITY_CRITERIA, dataset.quality);
         return (
           <>
             <div
               className={
-                score <= 45 ? "quality-progress-warning" : score > 50 ? "quality-progress-success" : ""
+                score <= 45
+                  ? "quality-progress-warning"
+                  : score > 50
+                    ? "quality-progress-success"
+                    : ""
               }
             >
               <ProgressBar value={score} max={100} hidePercentageValue={true} />
@@ -167,8 +186,8 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
 
   columns.push({
     id: "actions",
-    header: "Ações",
-    headerLabel: "Ações",
+    header: labels.actions,
+    headerLabel: labels.actions,
     renderCell: (dataset) => (
       <TableActionsCell
         viewAction={{ href: `/datasets/${dataset.slug}` }}
@@ -179,4 +198,3 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
 
   return columns;
 }
-

@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
+import { getBoHarvesters, getBoHarvestersMetadata } from "@/service/queries/admin/harvesters";
 import SystemHarvestersClient from "@/components/admin/harvesters/views/SystemHarvestersClient";
 
-export const metadata: Metadata = {
-  title: "Harvesters - Sistema - Admin - dados.gov.pt",
-  description: "Gestão de harvesters do sistema no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoHarvestersMetadata(locale, "systemMetadata");
 
-export default function SystemHarvestersPage() {
-  return <SystemHarvestersClient />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function SystemHarvestersPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoHarvesters(locale);
+
+  return <SystemHarvestersClient pageContent={pageContent} />;
 }

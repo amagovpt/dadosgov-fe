@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Icon, usePopupContext } from "@ama-pt/agora-design-system";
 import { ResourceType } from "@/service/types/catalog";
 import { DeleteConfirmContent } from "./DeleteConfirmContent";
@@ -31,6 +32,7 @@ export function ResourceItem({
   onReplace,
   onRemove,
 }: ResourceItemProps) {
+  const { t } = useTranslation("admin-common");
   const { show, hide } = usePopupContext();
   const fileExt = getFileExtension(name, isUrl);
   const baseDisplayName = currentMeta.title || name;
@@ -51,14 +53,14 @@ export function ResourceItem({
         onSave={onSaveMeta}
         onReplaceFile={onReplace}
       />,
-      { title: displayName, closeAriaLabel: "Fechar", dimensions: "l" }
+      { title: displayName, closeAriaLabel: t("fileUpload.popup.close"), dimensions: "l" }
     );
   };
 
   const handleRemove = () => {
     show(<DeleteConfirmContent name={displayName} onConfirm={onRemove} />, {
-      title: "Eliminar ficheiro",
-      closeAriaLabel: "Fechar",
+      title: t("fileUpload.actions.deleteFile"),
+      closeAriaLabel: t("fileUpload.popup.close"),
       dimensions: "s",
     });
   };
@@ -83,7 +85,7 @@ export function ResourceItem({
         }}
         onClose={hide}
       />,
-      { title: displayName, closeAriaLabel: "Fechar", dimensions: "l" }
+      { title: displayName, closeAriaLabel: t("fileUpload.popup.close"), dimensions: "l" }
     );
   };
 
@@ -91,25 +93,25 @@ export function ResourceItem({
     <>
       <button
         className="text-primary-500 hover:text-primary-700"
-        title="Ver detalhes"
+        title={t("fileUpload.actions.viewDetails")}
         onClick={handleView}
-        aria-label={`Ver ${displayName}`}
+        aria-label={t("fileUpload.actions.viewNamed", { name: displayName })}
       >
         <Icon name="agora-line-eye" className="h-[20px] w-[20px]" />
       </button>
       <button
         className="text-primary-500 hover:text-primary-700"
-        title="Editar"
+        title={t("fileUpload.actions.edit")}
         onClick={handleEdit}
-        aria-label={`Editar ${displayName}`}
+        aria-label={t("fileUpload.actions.editNamed", { name: displayName })}
       >
         <Icon name="agora-line-edit" className="h-[20px] w-[20px]" />
       </button>
       <button
         className="text-danger-500 hover:text-danger-700"
-        title="Eliminar"
+        title={t("actions.delete")}
         onClick={handleRemove}
-        aria-label={`Eliminar ${displayName}`}
+        aria-label={t("fileUpload.actions.deleteNamed", { name: displayName })}
       >
         <Icon name="agora-line-trash" className="h-[20px] w-[20px]" />
       </button>

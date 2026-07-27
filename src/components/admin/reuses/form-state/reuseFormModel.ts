@@ -20,6 +20,7 @@ export interface ReuseDetailsValues {
   type: string;
   topic: string;
   description: string;
+  messages?: Partial<Record<ReuseDetailsField, string>>;
 }
 
 interface BuildReusePayloadValues extends ReuseDetailsValues {
@@ -45,17 +46,24 @@ export function validateReuseDetails(
   values: ReuseDetailsValues,
 ): FormErrors<ReuseDetailsField> {
   const errors: FormErrors<ReuseDetailsField> = {};
+  const messages = values.messages || {};
 
-  if (!values.name.trim()) errors.reuseName = "Indique o nome da reutilização.";
-  if (!values.url.trim()) {
-    errors.reuseLink = "Indique o URL da reutilização.";
-  } else if (!normalizeReuseUrl(values.url)) {
-    errors.reuseLink = "Indique um URL válido.";
+  if (!values.name.trim()) {
+    errors.reuseName = messages.reuseName || "";
   }
-  if (!values.type) errors.reuseType = "Selecione o tipo de reutilização.";
-  if (!values.topic) errors.reuseTopic = "Selecione o tema da reutilização.";
+  if (!values.url.trim()) {
+    errors.reuseLink = messages.reuseLink || "";
+  } else if (!normalizeReuseUrl(values.url)) {
+    errors.reuseLink = messages.reuseLink || "";
+  }
+  if (!values.type) {
+    errors.reuseType = messages.reuseType || "";
+  }
+  if (!values.topic) {
+    errors.reuseTopic = messages.reuseTopic || "";
+  }
   if (!values.description.trim()) {
-    errors.reuseDescription = "Descreva a reutilização.";
+    errors.reuseDescription = messages.reuseDescription || "";
   }
 
   return errors;
@@ -97,19 +105,20 @@ export function buildRemoteDatasetEntries(
 
     const title = entry.title?.trim();
     const description = entry.description?.trim();
-    return [{
-      url,
-      title: title || undefined,
-      description: description || undefined,
-    }];
+    return [
+      {
+        url,
+        title: title || undefined,
+        description: description || undefined,
+      },
+    ];
   });
 }
 
 export function validateReuseDatasetSelection(
   localDatasetCount: number,
   remoteDatasets: RemoteDatasetEntry[],
+  errorMessage?: string,
 ): string | null {
-  return localDatasetCount > 0 && remoteDatasets.length > 0
-    ? "Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
-    : null;
+  return localDatasetCount > 0 && remoteDatasets.length > 0 ? errorMessage || "" : null;
 }

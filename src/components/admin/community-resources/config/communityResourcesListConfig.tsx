@@ -47,7 +47,22 @@ interface CommunityResourceColumnsOptions {
   showDatasetLink?: boolean;
   useSystemStatusDot?: boolean;
   showOwnerOnLastModified?: boolean;
+  labels: CommunityResourceColumnLabels;
   editHref: (resource: CommunityResource) => string;
+}
+
+interface CommunityResourceColumnLabels {
+  title: string;
+  status: string;
+  format: string;
+  createdAt: string;
+  modifiedAt: string;
+  lastModified: string;
+  action: string;
+  actions: string;
+  deleted: string;
+  archived: string;
+  published: string;
 }
 
 type CommunityResourceColumnField<TIncludeFormat extends boolean> = TIncludeFormat extends true
@@ -61,11 +76,12 @@ type CommunityResourceColumnsOptionsByFormat<TIncludeFormat extends boolean> =
 
 export function createCommunityResourceColumns<TIncludeFormat extends boolean = false>({
   includeFormat = false as TIncludeFormat,
-  titleHeader = "Título",
+  titleHeader,
   titleCellStyle = "neutral",
   showDatasetLink = false,
   useSystemStatusDot = false,
   showOwnerOnLastModified = false,
+  labels,
   editHref,
 }: CommunityResourceColumnsOptionsByFormat<TIncludeFormat>): AdminListColumn<
   CommunityResource,
@@ -77,8 +93,8 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
   >[] = [
     {
       id: "title",
-      header: titleHeader,
-      headerLabel: "Título",
+      header: titleHeader ?? labels.title,
+      headerLabel: labels.title,
       sortField: "title" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) => (
@@ -100,13 +116,17 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
       renderCell: (resource) =>
         useSystemStatusDot ? (
           <StatusDot
             variant={resource.deleted ? "danger" : resource.archived ? "warning" : "success"}
           >
-            {resource.deleted ? "Eliminado" : resource.archived ? "Arquivado" : "Publicado"}
+            {resource.deleted
+              ? labels.deleted
+              : resource.archived
+                ? labels.archived
+                : labels.published}
           </StatusDot>
         ) : (
           <ResourceStatusBadge item={resource} />
@@ -117,8 +137,8 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
   if (includeFormat) {
     columns.push({
       id: "format",
-      header: "Formato",
-      headerLabel: "Formato",
+      header: labels.format,
+      headerLabel: labels.format,
       sortField: "format" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) =>
@@ -129,16 +149,16 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
   columns.push(
     {
       id: "created_at",
-      header: "Criado em",
-      headerLabel: "Criado em",
+      header: labels.createdAt,
+      headerLabel: labels.createdAt,
       sortField: "created_at" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) => formatDateToDMY(resource.created_at),
     },
     {
       id: "last_modified",
-      header: useSystemStatusDot ? "Modificado em" : "Última modificação",
-      headerLabel: useSystemStatusDot ? "Modificado em" : "Última modificação",
+      header: useSystemStatusDot ? labels.modifiedAt : labels.lastModified,
+      headerLabel: useSystemStatusDot ? labels.modifiedAt : labels.lastModified,
       sortField: "last_modified" as CommunityResourceColumnField<TIncludeFormat>,
       sortType: "date",
       renderCell: (resource) =>
@@ -160,8 +180,8 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
     },
     {
       id: "actions",
-      header: useSystemStatusDot ? "Ação" : "Ações",
-      headerLabel: useSystemStatusDot ? "Ação" : "Ações",
+      header: useSystemStatusDot ? labels.action : labels.actions,
+      headerLabel: useSystemStatusDot ? labels.action : labels.actions,
       renderCell: (resource) => (
         <TableActionsCell
           editAction={can(resource, "edit") ? { href: editHref(resource) } : undefined}

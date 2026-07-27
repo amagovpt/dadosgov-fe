@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   CardNoResults,
@@ -14,6 +15,8 @@ import {
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { fetchSystemLogContent, fetchSystemLogs } from "@/service/api/system";
 import { SystemLogContent, SystemLogFile } from "@/service/types/transfer-system";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import type { BoLogsPage } from "@/service/types/admin/logs";
 
 const AUTO_REFRESH_MS = 10_000;
 
@@ -45,7 +48,12 @@ const lineSeverity = (line: string): "error" | "warn" | "info" | null => {
   return null;
 };
 
-export default function SystemLogsClient() {
+interface SystemLogsClientProps {
+  pageContent: BoLogsPage;
+}
+
+export default function SystemLogsClient({ pageContent }: SystemLogsClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-logs"]);
   const [files, setFiles] = useState<SystemLogFile[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [content, setContent] = useState<SystemLogContent | null>(null);
@@ -76,7 +84,7 @@ export default function SystemLogsClient() {
     try {
       const data = await fetchSystemLogContent(filename);
       if (!data) {
-        setError("Não foi possível carregar o conteúdo do ficheiro.");
+        setError(t("admin-logs:errors.contentLoad"));
         setContent(null);
         return;
       }
@@ -85,7 +93,7 @@ export default function SystemLogsClient() {
     } finally {
       setIsLoadingContent(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -165,11 +173,11 @@ export default function SystemLogsClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Logs", url: "/admin/system/logs" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-logs:title"), url: "/admin/system/logs" },
       ]}
-      title="Logs"
+      title={pageContent.hero?.title ?? ""}
       headerAction={
         <div className="flex items-center gap-8">
           <Button
@@ -177,34 +185,32 @@ export default function SystemLogsClient() {
             appearance="outline"
             onClick={() => setAutoRefresh((v) => !v)}
           >
-            {autoRefresh ? "Parar auto-atualizar" : "Auto-atualizar (10s)"}
+            {autoRefresh ? t("admin-logs:actions.stopAutoRefresh") : t("admin-logs:actions.autoRefresh")}
           </Button>
           <Button
             variant="primary"
             onClick={handleManualRefresh}
             disabled={isLoadingFiles || isLoadingContent}
           >
-            Atualizar
+            {t("admin-logs:actions.refresh")}
           </Button>
         </div>
       }
     >
-
-      <p className="text-neutral-700 text-sm mb-16">
-        Visualização do conteúdo dos ficheiros de log do servidor. Para ficheiros grandes, é
-        apresentado apenas o final (até 1&nbsp;MB).
-      </p>
+      <div className="text-neutral-700 text-sm mb-16">
+        {formatHtmlParagraphs(pageContent.intro?.description ?? "")}
+      </div>
 
       {isLoadingFiles && files.length === 0 ? (
-        <p className="text-neutral-700 text-sm">A carregar ficheiros de log...</p>
+        <p className="text-neutral-700 text-sm">{t("admin-logs:loadingFiles")}</p>
       ) : files.length === 0 ? (
         <CardNoResults
           position="center"
           icon={
             <Icon name="agora-line-monitor" className="w-12 h-12 text-primary-500 icon-xl" />
           }
-          title="Sem logs disponíveis"
-          description="Não foi possível encontrar ficheiros de log no servidor."
+          title={pageContent.noResults?.title ?? ""}
+          description={pageContent.noResults?.description ?? ""}
           hasAnchor={false}
         />
       ) : (
@@ -213,8 +219,8 @@ export default function SystemLogsClient() {
             <div className="admin-search-wrapper">
               <InputSelect
                 id="log-file-select"
-                label="Ficheiro de log"
-                placeholder="Selecionar ficheiro"
+                label={t("admin-logs:select.label")}
+                placeholder={t("admin-logs:select.placeholder")}
                 onChange={(options) => {
                   const value = options[0]?.value as string | undefined;
                   setSelected(value || null);
@@ -243,7 +249,7 @@ export default function SystemLogsClient() {
               onClick={handleDownload}
               disabled={!content}
             >
-              Descarregar
+              {t("admin-logs:actions.download")}
             </Button>
           </div>
 
@@ -254,7 +260,7 @@ export default function SystemLogsClient() {
                   name="agora-line-file"
                   className="w-16 h-16 text-brand-blue-primary"
                 />
-                <span className="text-neutral-700 font-medium">Ficheiro:</span>
+                <span className="text-neutral-700 font-medium">{t("admin-logs:summary.file")}</span>
                 <span className="font-semibold break-all">{content.name}</span>
               </span>
               <span
@@ -266,7 +272,7 @@ export default function SystemLogsClient() {
                   name="agora-line-document"
                   className="w-16 h-16 text-brand-blue-primary"
                 />
-                <span className="text-neutral-700 font-medium">Tamanho:</span>
+                <span className="text-neutral-700 font-medium">{t("admin-logs:summary.size")}</span>
                 <span className="font-semibold">{formatBytes(content.size)}</span>
               </span>
               <span
@@ -278,15 +284,17 @@ export default function SystemLogsClient() {
                   name="agora-line-clock"
                   className="w-16 h-16 text-brand-blue-primary"
                 />
-                <span className="text-neutral-700 font-medium">Modificado:</span>
+                <span className="text-neutral-700 font-medium">{t("admin-logs:summary.modified")}</span>
                 <span className="font-semibold">{formatDateTime(content.modified)}</span>
               </span>
               {content.truncated && (
-                <Pill variant="warning">A mostrar apenas o final do ficheiro</Pill>
+                <Pill variant="warning">{t("admin-logs:summary.truncated")}</Pill>
               )}
               {lastRefresh && (
                 <span className="ml-auto text-neutral-600 text-xs italic">
-                  Atualizado às {formatDateTime(lastRefresh.toISOString())}
+                  {t("admin-logs:summary.updatedAt", {
+                    time: formatDateTime(lastRefresh.toISOString()),
+                  })}
                 </span>
               )}
             </div>
@@ -300,16 +308,16 @@ export default function SystemLogsClient() {
 
           <pre
             ref={viewerRef}
-            aria-label="Conteúdo do ficheiro de log"
+            aria-label={t("admin-logs:viewer.ariaLabel")}
             tabIndex={0}
             className="block w-full min-h-[320px] max-h-[calc(100vh-360px)] overflow-auto py-16 rounded-8 border border-neutral-300 bg-brand-blue-secondary text-neutral-100 font-mono text-[12.5px] leading-[1.55] whitespace-pre"
           >
             {isLoadingContent && !content ? (
               <span className="block px-16 italic text-neutral-400">
-                A carregar conteúdo...
+                {t("admin-logs:viewer.loading")}
               </span>
             ) : !content || lines.length === 0 ? (
-              <span className="block px-16 italic text-neutral-400">Ficheiro vazio.</span>
+              <span className="block px-16 italic text-neutral-400">{t("admin-logs:viewer.empty")}</span>
             ) : (
               lines.map((line, idx) => {
                 const severity = lineSeverity(line);

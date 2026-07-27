@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   DropdownOption,
@@ -9,12 +10,15 @@ import {
   StatusCard,
 } from "@ama-pt/agora-design-system";
 import type { OrganizationSuggestion } from "@/service/types/identity";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface OrganizationSelectionStepProps {
   orgSuggestions: OrganizationSuggestion[];
   onSearchChange: (value: string) => void;
   onSelectOrganization: (organizationId: string) => void;
   onCreateOrganization: () => void;
+  introduction?: AdminHelpBlock;
 }
 
 export default function OrganizationSelectionStep({
@@ -22,30 +26,34 @@ export default function OrganizationSelectionStep({
   onSearchChange,
   onSelectOrganization,
   onCreateOrganization,
+  introduction,
 }: OrganizationSelectionStepProps) {
+  const { t } = useTranslation("admin-organizations");
+
   return (
     <div className="admin-page__form">
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={
-          <>
-            <strong>Inscreva-se numa organização</strong>
-            <br />
-            Uma organização é uma entidade na qual os utilizadores podem colaborar. Conjuntos de
-            dados publicados dentro de uma organização podem ser editados pelos seus membros.
-          </>
-        }
-      />
+      {introduction ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            <>
+              <strong>{introduction.title}</strong>
+              <br />
+              {formatHtmlParagraphs(introduction.description)}
+            </>
+          }
+        />
+      ) : null}
 
       <div>
         <InputSelect
-          label="Organização"
-          placeholder="Pesquisar uma organização em dados.gov.pt..."
+          label={t("form.organizationLabel")}
+          placeholder={t("form.organizationPlaceholder")}
           id="search-organization"
           searchable
-          searchInputPlaceholder="Escreva para pesquisar..."
-          searchNoResultsText="Nenhum resultado encontrado"
+          searchInputPlaceholder={t("form.searchInputPlaceholder")}
+          searchNoResultsText={t("form.noResults")}
           onSearchInputChange={onSearchChange}
           onChange={(options: { value?: string }[]) => {
             const selectedId = options?.[0]?.value;
@@ -64,12 +72,12 @@ export default function OrganizationSelectionStep({
         </InputSelect>
 
         <div className="admin-page__divider-or">
-          <span className="admin-page__divider-or-text">ou</span>
+          <span className="admin-page__divider-or-text">{t("form.or")}</span>
         </div>
 
         <div className="mt-16 flex justify-center">
           <Button variant="primary" onClick={onCreateOrganization}>
-            Criar uma organização
+            {t("form.createOrganization")}
           </Button>
         </div>
       </div>

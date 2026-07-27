@@ -13,6 +13,64 @@ export function formatHtmlParagraphs(
   const paragraphStyle = twMerge("text-m-regular w-full", className);
   const $ = cheerio.load(`<div>${html}</div>`);
   const elements: React.ReactNode[] = [];
+  const processInlineNode = (
+    child: AnyNode,
+    key: string
+  ): React.ReactNode | null => {
+    if (child.type === "text") return $(child).text();
+    if (child.type !== "tag") return null;
+
+    const tag = child.tagName;
+    const children = $(child)
+      .contents()
+      .toArray()
+      .map((nestedChild, childIndex) =>
+        processInlineNode(nestedChild, `${key}-${childIndex}`)
+      )
+      .filter((node): node is React.ReactNode => node !== null);
+
+    if (tag === "br") return <br key={key} />;
+    if (tag === "a") {
+      const href = $(child).attr("href") || "#";
+      return (
+        <a
+          key={key}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
+          {children}
+        </a>
+      );
+    }
+    if (tag === "u")
+      return (
+        <u key={key} className="underline">
+          {children}
+        </u>
+      );
+    if (tag === "strong")
+      return (
+        <strong key={key} className="font-bold">
+          {children}
+        </strong>
+      );
+    if (tag === "b")
+      return (
+        <b key={key} className="font-bold">
+          {children}
+        </b>
+      );
+    if (tag === "em" || tag === "i")
+      return (
+        <i key={key}>
+          {children}
+        </i>
+      );
+
+    return children.length > 0 ? <React.Fragment key={key}>{children}</React.Fragment> : null;
+  };
 
   $("div")
     .contents()
@@ -23,50 +81,6 @@ export function formatHtmlParagraphs(
       } else if (el.type === "tag") {
         // handle paragraphs
         if (el.tagName === "p") {
-          const processNode = (
-            child: AnyNode,
-            key: string
-          ): React.ReactNode | null => {
-            if (child.type === "text") return $(child).text();
-            if (child.type !== "tag") return null;
-            const tag = child.tagName;
-            if (tag === "br") return <br key={key} />;
-            if (tag === "a") {
-              const href = $(child).attr("href") || "#";
-              const linkText = $(child).text();
-              return (
-                <a
-                  key={key}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  {linkText}
-                </a>
-              );
-            }
-            if (tag === "u")
-              return (
-                <u key={key} className="underline">
-                  {$(child).text()}
-                </u>
-              );
-            if (tag === "strong")
-              return (
-                <strong key={key} className="font-bold">
-                  {$(child).text()}
-                </strong>
-              );
-            if (tag === "b")
-              return (
-                <b key={key} className="font-bold">
-                  {$(child).text()}
-                </b>
-              );
-            return null;
-          };
-
           const childNodes = $(el).contents().toArray();
 
           // Split on 3+ consecutive <br> into separate paragraphs
@@ -94,7 +108,7 @@ export function formatHtmlParagraphs(
           segments.forEach((segment, segIdx) => {
             const children: React.ReactNode[] = segment
               .map((child, childIdx) =>
-                processNode(child, `node-${i}-${segIdx}-${childIdx}`)
+                processInlineNode(child, `node-${i}-${segIdx}-${childIdx}`)
               )
               .filter((n): n is React.ReactNode => n !== null);
 
@@ -117,10 +131,18 @@ export function formatHtmlParagraphs(
           // handle ordered lists
           const listItems: React.ReactNode[] = [];
           $(el)
-            .find("li")
+            .children("li")
             .each((liIndex, li) => {
+              const children = $(li)
+                .contents()
+                .toArray()
+                .map((child, childIndex) =>
+                  processInlineNode(child, `li-${i}-${liIndex}-${childIndex}`)
+                )
+                .filter((node): node is React.ReactNode => node !== null);
+
               listItems.push(
-                <li key={`li-${i}-${liIndex}`}>{$(li).text().trim()}</li>
+                <li key={`li-${i}-${liIndex}`}>{children}</li>
               );
             });
           elements.push(
@@ -136,10 +158,18 @@ export function formatHtmlParagraphs(
           // handle unordered lists
           const listItems: React.ReactNode[] = [];
           $(el)
-            .find("li")
+            .children("li")
             .each((liIndex, li) => {
+              const children = $(li)
+                .contents()
+                .toArray()
+                .map((child, childIndex) =>
+                  processInlineNode(child, `li-${i}-${liIndex}-${childIndex}`)
+                )
+                .filter((node): node is React.ReactNode => node !== null);
+
               listItems.push(
-                <li key={`li-${i}-${liIndex}`}>{$(li).text().trim()}</li>
+                <li key={`li-${i}-${liIndex}`}>{children}</li>
               );
             });
           elements.push(

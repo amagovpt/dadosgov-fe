@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Icon,
@@ -28,19 +29,24 @@ import { can } from "@/utils/permissions";
 import { useFormErrors } from "@/hooks/forms/useFormErrors";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
 import { type HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
+import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
+import HarvestersAcceptedStatusInfoCard from "@/components/admin/harvesters/form-ui/HarvestersAcceptedStatusInfoCard";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface HarvesterDetailClientProps {
   slug: string;
+  pageContent: BoHarvestersPage;
   // When set, the harvester is viewed inside an organization's back-office
   // (route /admin/org/{orgId}/harvesters/{id}). This scopes the breadcrumb to
-  // the organization and restricts the "Configuração" tab so an org-admin may
-  // only edit the basic fields (name, description, filters) — the advanced
+  // the organization and restricts the "Configuracao" tab so an org-admin may
+  // only edit the basic fields (name, description, filters) - the advanced
   // fields (URL, implementation type, schedule, toggles) stay editable to
   // portal administrators only.
   orgId?: string;
 }
 
 function CopyUrlButton({ url }: { url: string }) {
+  const { t } = useTranslation("admin-harvesters");
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -54,19 +60,13 @@ function CopyUrlButton({ url }: { url: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      title={copied ? "Copiado!" : "Copiar URL"}
+      title={copied ? t("actions.copied") : t("actions.copyUrl")}
       className="flex items-center text-neutral-500 hover:text-primary-600 transition-colors"
     >
       <Icon name={copied ? "agora-solid-copy" : "agora-line-copy"} className="w-16 h-16" />
     </button>
   );
 }
-
-const VALIDATION_LABELS: Record<string, { label: string; variant: "warning" | "success" | "danger" }> = {
-  pending: { label: "VALIDAÇÃO PENDENTE", variant: "warning" },
-  accepted: { label: "VALIDADO", variant: "success" },
-  refused: { label: "RECUSADO", variant: "danger" },
-};
 
 function DeleteHarvesterPopupContent({
   onClose,
@@ -75,12 +75,14 @@ function DeleteHarvesterPopupContent({
   onClose: () => void;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
+
   return (
     <div className="flex flex-col gap-16">
-      <p>Esta ação é irreversível. Tem a certeza que quer eliminar este harvester?</p>
+      <p>{t("admin-harvesters:detail.deleteConfirm")}</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Cancelar
+          {t("admin-common:actions.cancel")}
         </Button>
         <Button
           variant="danger"
@@ -89,14 +91,19 @@ function DeleteHarvesterPopupContent({
           leadingIcon="agora-line-trash"
           leadingIconHover="agora-solid-trash"
         >
-          Eliminar
+          {t("admin-common:actions.delete")}
         </Button>
       </div>
     </div>
   );
 }
 
-export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailClientProps) {
+export default function HarvesterDetailClient({
+  slug,
+  pageContent,
+  orgId,
+}: HarvesterDetailClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -210,7 +217,11 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
         onClose={hide}
         onConfirm={handleApproveSource}
       />,
-      { title: "Aprovar harvester", closeAriaLabel: "Fechar", dimensions: "m" }
+      {
+        title: t("admin-harvesters:validation.popup.approveTitle"),
+        closeAriaLabel: t("admin-harvesters:validation.popup.closeAriaLabel"),
+        dimensions: "m",
+      }
     );
   };
 
@@ -222,14 +233,18 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
         onClose={hide}
         onConfirm={handleRejectSource}
       />,
-      { title: "Rejeitar harvester", closeAriaLabel: "Fechar", dimensions: "m" }
+      {
+        title: t("admin-harvesters:validation.popup.rejectTitle"),
+        closeAriaLabel: t("admin-harvesters:validation.popup.closeAriaLabel"),
+        dimensions: "m",
+      }
     );
   };
 
   if (isLoading) {
     return (
       <div className="admin-page">
-        <p className="text-neutral-700">A carregar...</p>
+        <p className="text-neutral-700">{t("admin-common:loading")}</p>
       </div>
     );
   }
@@ -237,13 +252,18 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
   if (!source) {
     return (
       <div className="admin-page">
-        <StatusCard variant="danger" showIcon description="Harvester não encontrado." />
+        <StatusCard variant="danger" showIcon description={t("admin-harvesters:empty.notFound")} />
       </div>
     );
   }
 
   const validationState = source.validation?.state || "pending";
-  const validationInfo = VALIDATION_LABELS[validationState] || VALIDATION_LABELS.pending;
+  const validationLabels: Record<string, { label: string; variant: "warning" | "success" | "danger" }> = {
+    pending: { label: t("admin-harvesters:validation.labels.pending"), variant: "warning" },
+    accepted: { label: t("admin-harvesters:validation.labels.accepted"), variant: "success" },
+    refused: { label: t("admin-harvesters:validation.labels.refused"), variant: "danger" },
+  };
+  const validationInfo = validationLabels[validationState] || validationLabels.pending;
 
   // In the organization context an org-admin may edit only the basic fields; the
   // advanced fields (URL, implementation type, schedule, toggles) are reserved
@@ -254,12 +274,12 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
 
   const breadcrumbItems = orgId
     ? [
-        { label: "Administração", url: "/admin" },
-        { label: "Harvesters", url: `/admin/org/${orgId}/harvesters` },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-harvesters:title"), url: `/admin/org/${orgId}/harvesters` },
         { label: source.name, url: "#" },
       ]
     : [
-        { label: "Sistema", url: "/admin/system/harvesters" },
+        { label: t("admin-common:breadcrumbs.system"), url: "/admin/system/harvesters" },
         { label: source.name, url: "#" },
       ];
 
@@ -272,19 +292,20 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
         <div className="flex items-center gap-8">
           <Icon name="agora-line-info-mark" className="w-16 h-16" />
           <span>
-            <strong>Implementação:</strong> {source.backend}
+            <strong>{t("admin-harvesters:detail.fields.implementation")}:</strong> {source.backend}
           </span>
         </div>
         <div className="flex items-center gap-8">
           <Icon name="agora-line-buildings" className="w-16 h-16" />
           <span>
-            <strong>Produtor:</strong> {source.organization?.name || "—"}
+            <strong>{t("admin-harvesters:fields.producer")}:</strong>{" "}
+            {source.organization?.name || "—"}
           </span>
         </div>
         <div className="flex items-center gap-8">
           <Icon name="agora-line-globe" className="w-16 h-16" />
           <span>
-            <strong>URL:</strong>{" "}
+            <strong>{t("admin-harvesters:detail.fields.url")}:</strong>{" "}
             <code className="text-xs" title={source.url}>{source.url.length > 100 ? `${source.url.slice(0, 100)}...` : source.url}</code>
           </span>
           <CopyUrlButton url={source.url} />
@@ -292,29 +313,31 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
         <div className="flex items-center gap-8">
           <Icon name="agora-line-calendar" className="w-16 h-16" />
           <span>
-            <strong>Planeamento:</strong> {source.schedule || "Não aplicável"}
+            <strong>{t("admin-harvesters:detail.fields.schedule")}:</strong>{" "}
+            {source.schedule || t("admin-harvesters:detail.notApplicable")}
           </span>
         </div>
         <div className="flex items-center gap-8">
           <Icon name="agora-line-check-circle" className="w-16 h-16" />
           <span>
-            <strong>Estado :</strong>{" "}
+            <strong>{t("admin-harvesters:detail.fields.status")}:</strong>{" "}
             <Pill variant={validationInfo.variant}>{validationInfo.label}</Pill>
           </span>
         </div>
       </div>
 
       {/* Validation pending banner */}
-      {validationState === "pending" && (
+      {validationState === "pending" &&
+      ((isAdmin && pageContent.pendingAdminCard) || (!isAdmin && pageContent.pendingOwnerCard)) ? (
         <div className="bg-neutral-100 rounded p-24 flex flex-col gap-8 mb-24" style={{ maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))" }}>
           {isAdmin ? (
             <>
               <p className="text-sm font-bold text-neutral-900">
-                Este harvester aguarda validação da equipa de administração.
+                {pageContent.pendingAdminCard!.title}
               </p>
-              <p className="text-sm text-neutral-700">
-                Aprove para o agendar e iniciar a primeira execução, ou rejeite indicando o motivo. O proprietário será notificado.
-              </p>
+              <div className="text-sm text-neutral-700">
+                {formatHtmlParagraphs(pageContent.pendingAdminCard!.description, "text-sm text-neutral-700")}
+              </div>
               <div className="flex items-center gap-16 pt-8">
                 <Button
                   variant="primary"
@@ -323,7 +346,7 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
                   leadingIcon="agora-line-check-circle"
                   leadingIconHover="agora-solid-check-circle"
                 >
-                  Aprovar harvester
+                  {t("admin-harvesters:actions.approveHarvester")}
                 </Button>
                 <Button
                   appearance="outline"
@@ -333,23 +356,26 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
                   leadingIcon="agora-line-x-circle"
                   leadingIconHover="agora-solid-x-circle"
                 >
-                  Rejeitar harvester
+                  {t("admin-harvesters:actions.rejectHarvester")}
                 </Button>
               </div>
             </>
           ) : (
             <>
               <p className="text-sm font-bold text-neutral-900">
-                O seu harvester foi criado e está a aguardar validação da equipa de administração do portal.
+                {pageContent.pendingOwnerCard!.title}
               </p>
-              <p className="text-sm text-neutral-700">
-                A equipa de administração foi notificada automaticamente. Será
-                notificado da aprovação ou rejeição quando esta for decidida.
-              </p>
+              <div className="text-sm text-neutral-700">
+                {formatHtmlParagraphs(pageContent.pendingOwnerCard!.description, "text-sm text-neutral-700")}
+              </div>
             </>
           )}
         </div>
-      )}
+      ) : null}
+
+      {validationState === "accepted" && pageContent.acceptedStatusInfo?.description ? (
+        <HarvestersAcceptedStatusInfoCard content={pageContent.acceptedStatusInfo} />
+      ) : null}
 
 
       {/* Tabs */}
@@ -358,7 +384,7 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
           // Keep the URL in sync with the active tab so that parent re-renders
           // (e.g. typing in the Planeamento/schedule field) don't snap the active
           // tab back to whatever the URL-derived `active` prop says. Index 1 is
-          // the "Configuração" tab; index 0 is "Trabalhos".
+          // the configuration tab; index 0 is jobs.
           const params = new URLSearchParams(searchParams.toString());
           if (index === 1) {
             params.set("tab", "config");
@@ -373,7 +399,7 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
         }}
       >
         <Tab active={!isConfigTab}>
-          <TabHeader>Trabalhos</TabHeader>
+          <TabHeader>{t("admin-harvesters:detail.tabs.jobs")}</TabHeader>
           <TabBody>
             <HarvesterJobsTable
               jobs={jobs}
@@ -387,7 +413,7 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
           </TabBody>
         </Tab>
         <Tab active={isConfigTab}>
-          <TabHeader>Configuração</TabHeader>
+          <TabHeader>{t("admin-harvesters:detail.tabs.configuration")}</TabHeader>
           <TabBody>
             <HarvesterConfigForm
               harvesterName={harvesterName}
@@ -422,11 +448,17 @@ export default function HarvesterDetailClient({ slug, orgId }: HarvesterDetailCl
               onPreview={handlePreviewHarvester}
               onDelete={() => show(
                 <DeleteHarvesterPopupContent onClose={hide} onConfirm={handleDeleteHarvester} />,
-                { title: "Eliminar o harvester", closeAriaLabel: "Fechar", dimensions: "m" }
+                {
+                  title: t("admin-harvesters:actions.deleteHarvester"),
+                  closeAriaLabel: t("admin-harvesters:validation.popup.closeAriaLabel"),
+                  dimensions: "m",
+                }
               )}
               canEdit={canEditSource}
               canEditAdvanced={canEditAdvanced}
               canDelete={can(source, "delete")}
+              deleteCard={pageContent.deleteCard}
+              auxiliaryItems={pageContent.editAuxiliaryItems}
             />
           </TabBody>
         </Tab>

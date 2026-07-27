@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import {
   Table,
   TableBody,
@@ -34,6 +35,7 @@ export function PendingResourceTable({
   resourceMetadata,
   onEditMeta,
 }: PendingResourceTableProps) {
+  const { t } = useTranslation("admin-common");
   const items: PendingResourceItem[] = [];
 
   files.forEach((file, i) => {
@@ -58,11 +60,11 @@ export function PendingResourceTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHeaderCell>Nome do ficheiro</TableHeaderCell>
-          <TableHeaderCell>Tipo</TableHeaderCell>
-          <TableHeaderCell>Formato</TableHeaderCell>
-          <TableHeaderCell>Tamanho</TableHeaderCell>
-          <TableHeaderCell>Ação</TableHeaderCell>
+          <TableHeaderCell>{t("fileUpload.table.fileName")}</TableHeaderCell>
+          <TableHeaderCell>{t("fileUpload.table.type")}</TableHeaderCell>
+          <TableHeaderCell>{t("fileUpload.table.format")}</TableHeaderCell>
+          <TableHeaderCell>{t("fileUpload.table.size")}</TableHeaderCell>
+          <TableHeaderCell>{t("fileUpload.table.action")}</TableHeaderCell>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -86,13 +88,13 @@ export function PendingResourceTable({
 
           return (
             <TableRow key={item.key}>
-              <TableCell headerLabel="Nome do ficheiro">
+              <TableCell headerLabel={t("fileUpload.table.fileName")}>
                 <span className="break-all">{displayName}</span>
               </TableCell>
-              <TableCell headerLabel="Tipo">{typeLabel}</TableCell>
-              <TableCell headerLabel="Formato">{formatLabel}</TableCell>
-              <TableCell headerLabel="Tamanho">{item.size ?? "-"}</TableCell>
-              <TableCell headerLabel="Ação">
+              <TableCell headerLabel={t("fileUpload.table.type")}>{typeLabel}</TableCell>
+              <TableCell headerLabel={t("fileUpload.table.format")}>{formatLabel}</TableCell>
+              <TableCell headerLabel={t("fileUpload.table.size")}>{item.size ?? "-"}</TableCell>
+              <TableCell headerLabel={t("fileUpload.table.action")}>
                 <div className="flex items-center gap-8">
                   <ResourceItem
                     name={item.name}

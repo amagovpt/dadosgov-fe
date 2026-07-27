@@ -13,6 +13,19 @@ import type { Post } from "@/service/types/posts";
 
 export type PostSortField = "name" | "created_at" | "last_modified";
 
+export interface PostColumnLabels {
+  title: string;
+  type: string;
+  news: string;
+  page: string;
+  status: string;
+  published: string;
+  unpublished: string;
+  createdAt: string;
+  updatedAt: string;
+  action: string;
+}
+
 export function filterPosts(
   posts: Post[],
   searchQuery: string,
@@ -53,47 +66,47 @@ export function sortPosts(posts: Post[], sortField: PostSortField | null, sortOr
   });
 }
 
-export function createPostColumns(): AdminListColumn<Post, PostSortField>[] {
+export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Post, PostSortField>[] {
   return [
     {
       id: "name",
-      header: "Título",
-      headerLabel: "Título",
+      header: labels.title,
+      headerLabel: labels.title,
       sortField: "name",
       sortType: "string",
       renderCell: (post) => <TextLink href={`/noticias/${post.slug}`}>{post.name}</TextLink>,
     },
     {
       id: "type",
-      header: "Tipo",
-      renderCell: (post) => (post.kind === "page" ? "Página" : "Notícias"),
+      header: labels.type,
+      renderCell: (post) => (post.kind === "page" ? labels.page : labels.news),
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
       renderCell: (post) => (
         <StatusDot variant={post.published ? "success" : "warning"}>
-          {post.published ? "Publicado" : "Despublicado"}
+          {post.published ? labels.published : labels.unpublished}
         </StatusDot>
       ),
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created_at",
       sortType: "date",
       renderCell: (post) => formatDateToDMY(post.created_at),
     },
     {
       id: "last_modified",
-      header: "Atualizado em",
+      header: labels.updatedAt,
       sortField: "last_modified",
       sortType: "date",
       renderCell: (post) => formatDateToDMY(post.last_modified),
     },
     createTableActionsColumn<Post>({
-      header: "Ação",
-      headerLabel: "Ação",
+      header: labels.action,
+      headerLabel: labels.action,
       viewAction: (post) => ({
         href: `/noticias/${post.slug}`,
       }),
@@ -103,4 +116,3 @@ export function createPostColumns(): AdminListColumn<Post, PostSortField>[] {
     }),
   ];
 }
-

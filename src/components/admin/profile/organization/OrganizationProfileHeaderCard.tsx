@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Avatar, Button, Icon } from "@ama-pt/agora-design-system";
 import type { Organization } from "@/service/types/identity";
 
@@ -14,6 +15,7 @@ export default function OrganizationProfileHeaderCard({
   organization,
   logoPreview,
 }: OrganizationProfileHeaderCardProps) {
+  const { t } = useTranslation("admin-profile");
   const router = useRouter();
 
   return (
@@ -29,7 +31,7 @@ export default function OrganizationProfileHeaderCard({
             leadingIconHover="agora-solid-eye"
             onClick={() => router.push(`/organizations/${organization.slug}`)}
           >
-            Ver perfil público
+            {t("header.viewPublicProfile")}
           </Button>
         </div>
       )}
@@ -59,11 +61,11 @@ export default function OrganizationProfileHeaderCard({
           <div className="flex items-center gap-16 text-sm text-neutral-900">
             <span className="flex items-center gap-4">
               <Icon name="agora-line-user-group" className="h-16 w-16" />
-              {organization.metrics.members} membros
+              {t("organization.header.members", { count: organization.metrics.members })}
             </span>
             <span className="flex items-center gap-4">
               <Icon name="agora-line-layers-menu" className="h-16 w-16" />
-              {organization.metrics.datasets} conjuntos de dados
+              {t("organization.header.datasets", { count: organization.metrics.datasets })}
             </span>
             <span className="flex items-center gap-4">
               <svg
@@ -80,7 +82,7 @@ export default function OrganizationProfileHeaderCard({
                   fill="currentColor"
                 />
               </svg>
-              {organization.metrics.reuses} reutilizações
+              {t("organization.header.reuses", { count: organization.metrics.reuses })}
             </span>
           </div>
         </div>

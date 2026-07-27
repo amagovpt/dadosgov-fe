@@ -1,16 +1,28 @@
 import type { Metadata } from "next";
 import MembersClient from "@/components/admin/members/MembersClient";
+import { getBoMembers, getBoMembersMetadata } from "@/service/queries/admin/members";
 
-export const metadata: Metadata = {
-  title: "Membros - Admin - dados.gov.pt",
-  description: "Gestão de membros da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoMembersMetadata(locale, "orgMetadata");
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
 
 export default async function MembersPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <MembersClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoMembers(locale);
+
+  return <MembersClient orgId={orgId} pageContent={pageContent} />;
 }

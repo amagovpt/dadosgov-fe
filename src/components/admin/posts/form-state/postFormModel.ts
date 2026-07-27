@@ -25,23 +25,31 @@ interface PostMetadataUpdateValues {
   tags: string[];
 }
 
+interface PostValidationMessages {
+  titleRequired: string;
+  headerRequired: string;
+  contentRequired: string;
+}
+
 export function validatePostMetadata(
   values: PostMetadataValues,
+  messages: Pick<PostValidationMessages, "titleRequired" | "headerRequired">
 ): FormErrors<PostFormField> {
   const errors: FormErrors<PostFormField> = {};
 
-  if (!values.title.trim()) errors.articleTitle = "Indique o título do artigo.";
+  if (!values.title.trim()) errors.articleTitle = messages.titleRequired;
   if (values.requireHeader && !values.header.trim()) {
-    errors.articleHeader = "Indique o cabeçalho do artigo.";
+    errors.articleHeader = messages.headerRequired;
   }
 
   return errors;
 }
 
-export function validatePostContent(content: string): FormErrors<PostFormField> {
-  return content.trim()
-    ? {}
-    : { articleContent: "Adicione o conteúdo do artigo." };
+export function validatePostContent(
+  content: string,
+  messages: Pick<PostValidationMessages, "contentRequired">
+): FormErrors<PostFormField> {
+  return content.trim() ? {} : { articleContent: messages.contentRequired };
 }
 
 export function buildPostCreatePayload(values: PostCreateValues): PostCreatePayload {

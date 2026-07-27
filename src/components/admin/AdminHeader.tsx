@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Header,
   GeneralBar,
@@ -20,19 +21,16 @@ import { logout } from "@/service/api/auth";
 
 
 function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation("admin-common");
+
   return (
     <div className="flex flex-col gap-16">
-      <p className="font-bold">Esta ação é irreversível.</p>
-      <p>
-        Todo o conteúdo publicado em seu nome permanecerá online, nos mesmos URLs, mas de forma
-        anónima, ou seja, sem estar associado a um produtor de dados.
-      </p>
-      <p>
-        Se também pretender eliminar o conteúdo que publicou, apague-o antes de eliminar a conta.
-      </p>
+      <p className="font-bold">{t("deleteAccount.irreversible")}</p>
+      <p>{t("deleteAccount.contentRemains")}</p>
+      <p>{t("deleteAccount.deletePublishedContentFirst")}</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Cancelar
+          {t("actions.cancel")}
         </Button>
         <Button
           appearance="solid"
@@ -42,7 +40,7 @@ function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {
           leadingIconHover="agora-solid-trash"
           onClick={onClose}
         >
-          Eliminar
+          {t("actions.delete")}
         </Button>
       </div>
     </div>
@@ -52,6 +50,7 @@ function DeleteAccountPopupContent({ onClose }: { onClose: () => void }) {
 export function AdminHeader() {
   const { user, samlLogin } = useAuth();
   const { show, hide } = usePopupContext();
+  const { t } = useTranslation("admin-common");
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const initials = user
@@ -67,7 +66,7 @@ export function AdminHeader() {
       const btn = target.closest(".footer-action");
       if (!btn) return;
       const text = btn.textContent?.trim();
-      if (text === "Eliminar conta") {
+      if (text === t("header.deleteAccount")) {
         // Close the Authenticated panel before opening the popup
         const closeBtn = wrapper.querySelector<HTMLButtonElement>(
           ".authenticated-header .close",
@@ -76,8 +75,8 @@ export function AdminHeader() {
 
         setTimeout(() => {
           show(<DeleteAccountPopupContent onClose={hide} />, {
-            title: "Tem a certeza que deseja eliminar esta conta?",
-            closeAriaLabel: "Fechar",
+            title: t("deleteAccount.title"),
+            closeAriaLabel: t("deleteAccount.closeAriaLabel"),
             dimensions: "m",
           });
         }, 150);
@@ -86,7 +85,7 @@ export function AdminHeader() {
 
     wrapper.addEventListener("click", handleClick);
     return () => wrapper.removeEventListener("click", handleClick);
-  }, [show, hide]);
+  }, [show, hide, t]);
 
   return (
     <div ref={wrapperRef} className="admin-header">
@@ -94,11 +93,11 @@ export function AdminHeader() {
         <div className="admin-header__search-left">
           <SearchDropdown
             id="admin-header-search"
-            placeholder="Pesquisar"
-            label="Pesquisar"
+            placeholder={t("header.search")}
+            label={t("header.search")}
           />
         </div>
-        <GeneralBar aria-label="Barra de opções do administrador">
+        <GeneralBar aria-label={t("header.adminOptions")}>
           {/* Idioma oculto temporariamente */}
           <Authenticated
             avatarType={user?.avatar_thumbnail ? "image" : (initials ? "initials" : "icon")}
@@ -119,14 +118,14 @@ export function AdminHeader() {
                 leadingIcon="agora-line-user"
                 leadingIconHover="agora-solid-user"
               >
-                <Link href={`/users/${user?.slug || ''}`}>O meu perfil</Link>
+                <Link href={`/users/${user?.slug || ""}`}>{t("header.profile")}</Link>
               </AuthenticatedBodyLink>
               <AuthenticatedBodyLink
                 hasIcon
                 leadingIcon="agora-line-mega-phone"
                 leadingIconHover="agora-solid-mega-phone"
               >
-                <Link href="/admin/notificacoes">Notificações</Link>
+                <Link href="/admin/notificacoes">{t("header.notifications")}</Link>
               </AuthenticatedBodyLink>
               {/* "As minhas definições" continua oculto até a página existir. */}
             </AuthenticatedBody>
@@ -138,7 +137,7 @@ export function AdminHeader() {
                 variant="danger"
                 appearance="link"
               >
-                Eliminar conta
+                {t("header.deleteAccount")}
               </AuthenticatedFooterAction>
               <AuthenticatedFooterAction
                 hasIcon
@@ -158,7 +157,7 @@ export function AdminHeader() {
                   window.location.href = "/";
                 }}
               >
-                Terminar sessão
+                {t("header.logout")}
               </AuthenticatedFooterAction>
             </AuthenticatedFooter>
           </Authenticated>

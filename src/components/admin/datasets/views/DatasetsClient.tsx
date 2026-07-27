@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
@@ -10,6 +11,7 @@ import { fetchMyDatasets } from "@/service/api/datasets";
 import { Dataset } from "@/service/types/dataset";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { filterByStatus } from "@/utils/filterByStatus";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import {
   createDatasetColumns,
@@ -17,8 +19,14 @@ import {
   sortDatasets,
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
-export default function DatasetsClient() {
+interface DatasetsClientProps {
+  pageContent: BoDatasetsPage;
+}
+
+export default function DatasetsClient({ pageContent }: DatasetsClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-datasets"]);
   const { displayName } = useCurrentUser();
   const searchParams = useSearchParams();
 
@@ -52,17 +60,17 @@ export default function DatasetsClient() {
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       result = result.filter(
-        (d) =>
-          d.title.toLowerCase().includes(q) ||
-          (d.acronym && d.acronym.toLowerCase().includes(q)) ||
-          d.slug.toLowerCase().includes(q)
+        (dataset) =>
+          dataset.title.toLowerCase().includes(q) ||
+          (dataset.acronym && dataset.acronym.toLowerCase().includes(q)) ||
+          dataset.slug.toLowerCase().includes(q),
       );
     }
 
     if (statusFilter) {
       result = filterByStatus(result, statusFilter);
     } else {
-      result = result.filter((d) => !d.deleted);
+      result = result.filter((dataset) => !dataset.deleted);
     }
 
     return result;
@@ -70,11 +78,11 @@ export default function DatasetsClient() {
 
   const sortedDatasets = useMemo(
     () => sortDatasets(filteredDatasets, sortField, sortOrder),
-    [filteredDatasets, sortField, sortOrder]
+    [filteredDatasets, sortField, sortOrder],
   );
   const datasets = useMemo(
     () => paginateItems(sortedDatasets, currentPage, pageSize),
-    [sortedDatasets, currentPage, pageSize]
+    [sortedDatasets, currentPage, pageSize],
   );
   const columns = useMemo(
     () =>
@@ -83,8 +91,18 @@ export default function DatasetsClient() {
         showOwner: true,
         showResourceCount: true,
         showQualityScore: true,
+        labels: {
+          title: t("admin-datasets:list.columns.title"),
+          titleShort: t("admin-datasets:list.columns.titleShort"),
+          status: t("admin-datasets:list.columns.status"),
+          createdAt: t("admin-datasets:list.columns.createdAt"),
+          lastModified: t("admin-datasets:list.columns.lastModified"),
+          resources: t("admin-datasets:list.columns.resources"),
+          quality: t("admin-datasets:list.columns.quality"),
+          actions: t("admin-datasets:list.columns.actions"),
+        },
       }),
-    []
+    [t],
   );
 
   const { handleSort, getSortOrder } = useSortControls(
@@ -92,17 +110,17 @@ export default function DatasetsClient() {
     sortOrder,
     setSortField,
     setSortOrder,
-    setCurrentPage
+    setCurrentPage,
   );
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        { label: "Conjuntos de dados", url: "/admin/me/datasets" },
-      ]}
-      title="Conjuntos de Dados"
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-datasets:list.title"),
+      })}
+      title={t("admin-datasets:list.title")}
       isLoading={isLoading}
       count={sortedDatasets.length}
       currentPage={currentPage}
@@ -110,8 +128,9 @@ export default function DatasetsClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome, código ou sigla da entidade",
-        ariaLabel: "Pesquisar conjuntos de dados",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: (value) => {
           setSearchQuery(value);
           setCurrentPage(1);
@@ -129,9 +148,7 @@ export default function DatasetsClient() {
       }
       emptyState={
         <AdminEmptyState
-          icon="agora-line-edit"
-          title="Sem conjuntos de dados"
-          description="Não publicou conjuntos de dados."
+          noResults={pageContent.myNoResults}
           createUrl="/admin/datasets/new"
         />
       }
@@ -146,4 +163,3 @@ export default function DatasetsClient() {
     </AdminListPage>
   );
 }
-

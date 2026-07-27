@@ -1,13 +1,17 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, StatusCard } from "@ama-pt/agora-design-system";
 import FileUploadModal from "@/components/admin/FileUploadModal";
 import { PendingResourceTable } from "@/components/admin/FileUploadModal/PendingResourceTable";
 import type { PendingResourceMeta } from "@/components/admin/FileUploadModal/types";
 import type { ResourceType } from "@/service/types/catalog";
+import type { AdminHelpBlock } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 export interface DatasetWizardStep3Props {
+  introduction?: AdminHelpBlock;
   uploadedFiles: File[];
   setUploadedFiles: Dispatch<SetStateAction<File[]>>;
   resourceUrls: string[];
@@ -24,8 +28,10 @@ export interface DatasetWizardStep3Props {
 }
 
 export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
+  const { t } = useTranslation("admin-datasets");
   const {
     uploadedFiles,
+    introduction,
     setUploadedFiles,
     resourceUrls,
     setResourceUrls,
@@ -42,18 +48,23 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
 
   return (
     <>
-      <StatusCard
-        variant="informative"
-        showIcon
-        description={
-          <>
-            <strong>O que é um ficheiro?</strong>
-            <br />
-            Um conjunto de dados pode conter vários tipos de ficheiros (atualizações, histórico,
-            documentação, código-fonte, API, links, etc.).
-          </>
-        }
-      />
+      {introduction ? (
+        <StatusCard
+          variant="informative"
+          showIcon
+          description={
+            introduction.title ? (
+              <>
+                <strong>{introduction.title}</strong>
+                <br />
+                {formatHtmlParagraphs(introduction.description)}
+              </>
+            ) : (
+              formatHtmlParagraphs(introduction.description)
+            )
+          }
+        />
+      ) : null}
 
       <div className="admin-page__form">
         <FileUploadModal
@@ -100,7 +111,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
             onClick={onPreviousStep}
             disabled={isSubmitting}
           >
-            Anterior
+            {t("form.previousAction")}
           </Button>
           <Button
             variant="primary"
@@ -110,7 +121,7 @@ export function DatasetWizardStep3(props: DatasetWizardStep3Props) {
             onClick={onStep3Next}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "A carregar..." : "Seguinte"}
+            {isSubmitting ? t("form.loadingNext") : t("form.nextAction")}
           </Button>
         </div>
       </div>

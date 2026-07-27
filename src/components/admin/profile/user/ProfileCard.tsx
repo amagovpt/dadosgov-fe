@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Avatar, Button } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -10,6 +11,7 @@ interface ProfileCardProps {
 }
 
 export function ProfileCard({ profile, avatarPreview, onViewPublic }: ProfileCardProps) {
+  const { t } = useTranslation("admin-profile");
   const lastModified = profile?.since
     ? format(new Date(profile.since), "d 'de' MMMM 'de' yyyy", { locale: pt })
     : "";
@@ -48,7 +50,7 @@ export function ProfileCard({ profile, avatarPreview, onViewPublic }: ProfileCar
           </p>
           {lastModified && (
             <p className="text-base leading-7 text-neutral-900">
-              <span className="font-semibold">Membro desde:</span> {lastModified}
+              <span className="font-semibold">{t("header.memberSince")}</span> {lastModified}
             </p>
           )}
         </div>
@@ -63,7 +65,7 @@ export function ProfileCard({ profile, avatarPreview, onViewPublic }: ProfileCar
             leadingIconHover="agora-solid-eye"
             onClick={onViewPublic}
           >
-            Ver perfil público
+            {t("header.viewPublicProfile")}
           </Button>
         </div>
       </div>

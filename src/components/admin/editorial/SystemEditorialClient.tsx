@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, Tabs, Tab, TabHeader, TabBody } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
@@ -18,8 +19,14 @@ import type {
   FeaturedReusesData,
 } from "./editorial-blocks";
 import { EditorialBlockList } from "./EditorialBlockUI";
+import type { BoEditorialPage } from "@/service/types/admin/editorial";
 
-export default function SystemEditorialClient() {
+interface SystemEditorialClientProps {
+  pageContent: BoEditorialPage;
+}
+
+export default function SystemEditorialClient({ pageContent }: SystemEditorialClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-editorial"]);
   const [isLoading, setIsLoading] = useState(true);
   const [datasetBlocks, setDatasetBlocks] = useState<ContentBlock[]>([]);
   const [reuseBlocks, setReuseBlocks] = useState<ContentBlock[]>([]);
@@ -115,10 +122,10 @@ export default function SystemEditorialClient() {
       ]);
 
       setHasChanges(false);
-      showSaveMessage({ type: "success", text: "Alterações guardadas." });
+      showSaveMessage({ type: "success", text: t("admin-editorial:messages.saved") });
     } catch (error) {
       console.error("Error saving:", error);
-      showSaveMessage({ type: "error", text: "Erro ao guardar alterações." });
+      showSaveMessage({ type: "error", text: t("admin-editorial:messages.saveError") });
     } finally {
       setIsSaving(false);
     }
@@ -167,10 +174,10 @@ export default function SystemEditorialClient() {
     return (
       <AdminLayout
         breadcrumbItems={[
-          { label: "Administração", url: "/admin" },
-          { label: "Editorial", url: "/admin/system/editorial" },
+          { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+          { label: t("admin-editorial:title"), url: "/admin/system/editorial" },
         ]}
-        title="Editorial"
+        title={pageContent.hero?.title ?? ""}
         headerAction={
           <div className="flex items-center gap-8">
             <Button
@@ -181,7 +188,7 @@ export default function SystemEditorialClient() {
               leadingIconHover="agora-solid-eye"
               disabled
             >
-              Veja a página pública
+              {t("admin-editorial:actions.viewPublicPage")}
             </Button>
             <Button
               variant="primary"
@@ -190,12 +197,12 @@ export default function SystemEditorialClient() {
               leadingIconHover="agora-solid-edit"
               disabled
             >
-              Editar na página pública
+              {t("admin-editorial:actions.editOnPublicPage")}
             </Button>
           </div>
         }
       >
-        <p className="text-neutral-500">A carregar...</p>
+        <p className="text-neutral-500">{t("admin-editorial:messages.loading")}</p>
       </AdminLayout>
     );
   }
@@ -203,10 +210,10 @@ export default function SystemEditorialClient() {
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Editorial", url: "/admin/system/editorial" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-editorial:title"), url: "/admin/system/editorial" },
       ]}
-      title="Editorial"
+      title={pageContent.hero?.title ?? ""}
       headerAction={
         <div className="flex items-center gap-8">
           <a href="/" target="_blank" rel="noopener noreferrer">
@@ -217,7 +224,7 @@ export default function SystemEditorialClient() {
               leadingIcon="agora-line-eye"
               leadingIconHover="agora-solid-eye"
             >
-              Veja a página pública
+              {t("admin-editorial:actions.viewPublicPage")}
             </Button>
           </a>
           <a href="/" target="_blank" rel="noopener noreferrer">
@@ -227,7 +234,7 @@ export default function SystemEditorialClient() {
               leadingIcon="agora-line-edit"
               leadingIconHover="agora-solid-edit"
             >
-              Editar na página pública
+              {t("admin-editorial:actions.editOnPublicPage")}
             </Button>
           </a>
         </div>
@@ -247,7 +254,7 @@ export default function SystemEditorialClient() {
 
       <Tabs>
         <Tab active>
-          <TabHeader>Conjuntos de dados</TabHeader>
+          <TabHeader>{t("admin-editorial:tabs.datasets")}</TabHeader>
           <TabBody>
             <div className="py-24">
               <EditorialBlockList
@@ -262,7 +269,7 @@ export default function SystemEditorialClient() {
               {datasetBlocks.length > 0 && (
                 <div className="mt-16 flex justify-end gap-8 pt-16">
                   <Button appearance="outline" variant="primary" onClick={handleCancel}>
-                    Cancelar
+                    {t("admin-editorial:actions.cancel")}
                   </Button>
                   <Button
                     variant="primary"
@@ -272,7 +279,7 @@ export default function SystemEditorialClient() {
                     onClick={handleSave}
                     disabled={isSaving}
                   >
-                    {isSaving ? "A guardar..." : "Guardar"}
+                    {isSaving ? t("admin-editorial:actions.saving") : t("admin-editorial:actions.save")}
                   </Button>
                 </div>
               )}
@@ -280,7 +287,7 @@ export default function SystemEditorialClient() {
           </TabBody>
         </Tab>
         <Tab>
-          <TabHeader>Reutilizar</TabHeader>
+          <TabHeader>{t("admin-editorial:tabs.reuses")}</TabHeader>
           <TabBody>
             <div className="py-24">
               <EditorialBlockList
@@ -295,7 +302,7 @@ export default function SystemEditorialClient() {
               {reuseBlocks.length > 0 && (
                 <div className="mt-16 flex justify-end gap-8 pt-16">
                   <Button appearance="outline" variant="primary" onClick={handleCancel}>
-                    Cancelar
+                    {t("admin-editorial:actions.cancel")}
                   </Button>
                   <Button
                     variant="primary"
@@ -305,7 +312,7 @@ export default function SystemEditorialClient() {
                     onClick={handleSave}
                     disabled={isSaving}
                   >
-                    {isSaving ? "A guardar..." : "Guardar"}
+                    {isSaving ? t("admin-editorial:actions.saving") : t("admin-editorial:actions.save")}
                   </Button>
                 </div>
               )}

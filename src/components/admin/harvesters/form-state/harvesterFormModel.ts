@@ -20,6 +20,7 @@ interface HarvesterDetailsValues {
   url: string;
   producer?: string;
   requireOrganizationProducer?: boolean;
+  messages?: Partial<Record<HarvesterFormField, string>>;
 }
 
 interface HarvesterCreateValues extends HarvesterDetailsValues {
@@ -58,10 +59,14 @@ export function validateHarvesterDetails(
     values.requireOrganizationProducer &&
     (!values.producer || values.producer === "user")
   ) {
-    errors.harvesterProducer = "Selecione uma organização produtora.";
+    errors.harvesterProducer = values.messages?.harvesterProducer ?? "";
   }
-  if (!values.name.trim()) errors.harvesterName = "Indique o nome do harvester.";
-  if (!values.url.trim()) errors.harvesterUrl = "Indique o URL do harvester.";
+  if (!values.name.trim()) {
+    errors.harvesterName = values.messages?.harvesterName ?? "";
+  }
+  if (!values.url.trim()) {
+    errors.harvesterUrl = values.messages?.harvesterUrl ?? "";
+  }
 
   return errors;
 }

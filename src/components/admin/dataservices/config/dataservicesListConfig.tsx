@@ -39,49 +39,70 @@ export function sortDataservices(
   });
 }
 
-export function createDataserviceColumns(): AdminListColumn<Dataservice, DataserviceSortField>[] {
+interface DataserviceColumnsOptions {
+  ownerMetaStyle?: "dot" | "by";
+  labels: DataserviceColumnLabels;
+}
+
+interface DataserviceColumnLabels {
+  title: string;
+  titleShort: string;
+  status: string;
+  createdAt: string;
+  modifiedAt: string;
+  by: string;
+  about: string;
+}
+
+export function createDataserviceColumns({
+  ownerMetaStyle = "dot",
+  labels,
+}: DataserviceColumnsOptions): AdminListColumn<Dataservice, DataserviceSortField>[] {
   return [
     {
       id: "title",
-      header: "Título da API",
-      headerLabel: "Título",
+      header: labels.title,
+      headerLabel: labels.titleShort,
       sortField: "title",
       sortType: "numeric",
       renderCell: (api) => <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>,
     },
     {
       id: "status",
-      header: "Estado",
+      header: labels.status,
       renderCell: (api) => <ResourceStatusBadge item={api} />,
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created_at",
       sortType: "date",
       renderCell: (api) => formatDateToDMY(api.created_at),
     },
     {
       id: "last_modified",
-      header: "Modificado em",
+      header: labels.modifiedAt,
       sortField: "last_modified",
       sortType: "date",
-      renderCell: (api) => {
-        const author = api.owner
-          ? `${api.owner.first_name} ${api.owner.last_name}`
-          : api.organization?.name;
-        return (
-          <>
-            {formatDateToDMY(getDataserviceModifiedAt(api))}
-            {author && (
-              <>
-                <br />
-                <span className="text-sm text-neutral-500">por {author}</span>
-              </>
-            )}
-          </>
-        );
-      },
+      renderCell: (api) => (
+        <>
+          {formatDateToDMY(getDataserviceModifiedAt(api))}
+          {(api.owner || api.organization) && (
+            <>
+              <br />
+              <span className="text-sm text-neutral-500">
+                {ownerMetaStyle === "by" ? labels.by : labels.about}{" "}
+                {ownerMetaStyle === "dot" ? (
+                  <span className="text-success-600">{"\u25cf"}</span>
+                ) : null}{" "}
+                {api.owner
+                  ? `${api.owner.first_name} ${api.owner.last_name}`
+                  : api.organization?.name}
+              </span>
+            </>
+          )}
+        </>
+      ),
     },
     createTableActionsColumn<Dataservice>({
       viewAction: (api) => ({

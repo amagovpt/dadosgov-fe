@@ -1,39 +1,39 @@
 "use client";
 
 import React from "react";
-import { Button, StatusCard } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
+import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface UserProfileAvatarDangerZoneProps {
   isDeletingAvatar: boolean;
+  deleteAvatarCard?: AdminCard;
   onDeleteAvatar: () => void;
 }
 
 export default function UserProfileAvatarDangerZone({
   isDeletingAvatar,
+  deleteAvatarCard,
   onDeleteAvatar,
 }: UserProfileAvatarDangerZoneProps) {
+  const { t } = useTranslation("admin-profile");
+
   return (
-    <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
-      <StatusCard
-        variant="danger"
-        showIcon
-        description={
-          <>
-            <strong>Atenção esta ação é irreversível.</strong>
-            <br />
-            <Button
-              appearance="link"
-              variant="primary"
-              hasIcon
-              trailingIcon="agora-line-arrow-right-circle"
-              trailingIconHover="agora-solid-arrow-right-circle"
-              onClick={onDeleteAvatar}
-              disabled={isDeletingAvatar}
-            >
-              {isDeletingAvatar ? "A eliminar..." : "Eliminar foto de perfil"}
-            </Button>
-          </>
-        }
+    <div style={{ marginTop: 16 }}>
+      <AdminDangerActions
+        actions={[
+          {
+            variant: "danger",
+            heading: deleteAvatarCard?.title,
+            description: formatHtmlParagraphs(deleteAvatarCard?.description),
+            actionLabel: isDeletingAvatar
+              ? t("form.deleteAvatarLoading")
+              : deleteAvatarCard?.anchor?.children,
+            onAction: onDeleteAvatar,
+          },
+        ]}
+        disabled={isDeletingAvatar}
       />
     </div>
   );

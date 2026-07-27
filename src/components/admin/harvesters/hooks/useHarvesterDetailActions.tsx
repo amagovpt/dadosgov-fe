@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import {
   deleteHarvester,
   previewHarvestSource,
@@ -81,6 +82,7 @@ export function useHarvesterDetailActions({
   hide,
   push,
 }: UseHarvesterDetailActionsParams) {
+  const { t } = useTranslation("admin-harvesters");
   const activeBackendFilters = useMemo(
     () => backends.find((backend) => backend.id === selectedBackend)?.filters ?? [],
     [backends, selectedBackend],
@@ -112,6 +114,10 @@ export function useHarvesterDetailActions({
     const errors = validateHarvesterDetails({
       name: harvesterName,
       url: harvesterUrl,
+      messages: {
+        harvesterName: t("form.validationErrors.name"),
+        harvesterUrl: t("form.validationErrors.url"),
+      },
     });
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -159,8 +165,10 @@ export function useHarvesterDetailActions({
       const err = error as { status?: number; data?: unknown };
       console.error("Error saving harvester:", err.status, err.data ?? error);
       const message =
-        typeof err.data === "object" && err.data !== null ? JSON.stringify(err.data) : "Tente novamente.";
-      setSaveError(`Erro ao guardar (${err.status ?? "?"}) — ${message}`);
+        typeof err.data === "object" && err.data !== null
+          ? JSON.stringify(err.data)
+          : t("form.saveErrorRetry");
+      setSaveError(t("form.saveError", { status: err.status ?? "?", message }));
     } finally {
       setIsSaving(false);
     }
@@ -191,7 +199,7 @@ export function useHarvesterDetailActions({
     } catch (error: unknown) {
       const err = error as { data?: { message?: string }; message?: string };
       setPreviewError(
-        err?.data?.message || err?.message || "Erro ao pré-visualizar o harvester.",
+        err?.data?.message || err?.message || t("form.previewError"),
       );
     } finally {
       setIsPreviewing(false);

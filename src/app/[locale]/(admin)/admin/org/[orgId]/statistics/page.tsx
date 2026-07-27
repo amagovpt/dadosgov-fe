@@ -1,16 +1,28 @@
 import type { Metadata } from "next";
 import OrgStatisticsClient from "@/components/admin/statistics/OrgStatisticsClient";
+import { getBoStatistics, getBoStatisticsMetadata } from "@/service/queries/admin/statistics";
 
-export const metadata: Metadata = {
-  title: "Estatísticas - Organização - Admin - dados.gov.pt",
-  description: "Estatísticas da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoStatisticsMetadata(locale, "orgMetadata");
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
 
 export default async function OrgStatisticsPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <OrgStatisticsClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoStatistics(locale);
+
+  return <OrgStatisticsClient orgId={orgId} pageContent={pageContent} />;
 }

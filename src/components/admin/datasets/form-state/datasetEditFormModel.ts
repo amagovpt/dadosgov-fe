@@ -10,6 +10,12 @@ interface DatasetEditValidationValues {
   temporalEnd: string;
 }
 
+interface DatasetEditValidationMessages {
+  titleRequired: string;
+  descriptionRequired: string;
+  invalidRange: string;
+}
+
 interface DatasetEditPayloadValues {
   title: string;
   description: string;
@@ -39,19 +45,20 @@ function toPortugueseDateIso(value: string): string {
 
 export function validateDatasetEditMetadata(
   values: DatasetEditValidationValues,
+  messages: DatasetEditValidationMessages,
 ): FormErrors<DatasetEditField> {
   const errors: FormErrors<DatasetEditField> = {};
 
-  if (!values.title.trim()) errors.title = "Indique o título do conjunto de dados.";
+  if (!values.title.trim()) errors.title = messages.titleRequired;
   if (!values.description.trim()) {
-    errors.description = "Descreva o conjunto de dados.";
+    errors.description = messages.descriptionRequired;
   }
 
   if (values.temporalStart && values.temporalEnd) {
     const startDate = parsePortugueseDate(values.temporalStart);
     const endDate = parsePortugueseDate(values.temporalEnd);
     if (endDate <= startDate) {
-      errors.temporalEnd = "A data final deve ser posterior à data inicial.";
+      errors.temporalEnd = messages.invalidRange;
     }
   }
 

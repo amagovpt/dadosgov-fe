@@ -15,16 +15,29 @@ export const userSortFieldMap: Record<UserSortField, string> = {
   followers: "followers",
 };
 
-const getUserProfile = (user: UserAdmin): string => {
-  if (user.roles?.includes("admin")) return "Admin";
-  return "Editor";
+export interface UserColumnLabels {
+  name: string;
+  createdAt: string;
+  datasets: string;
+  reuses: string;
+  followers: string;
+  profile: string;
+  profileAdmin: string;
+  profileEditor: string;
+}
+
+const getUserProfile = (user: UserAdmin, labels: UserColumnLabels): string => {
+  if (user.roles?.includes("admin")) return labels.profileAdmin;
+  return labels.profileEditor;
 };
 
-export function createUserColumns(): AdminListColumn<UserAdmin, UserSortField>[] {
+export function createUserColumns(
+  labels: UserColumnLabels
+): AdminListColumn<UserAdmin, UserSortField>[] {
   return [
     {
       id: "name",
-      header: "Nome",
+      header: labels.name,
       sortField: "name",
       sortType: "string",
       renderCell: (user) => (
@@ -43,36 +56,36 @@ export function createUserColumns(): AdminListColumn<UserAdmin, UserSortField>[]
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created_at",
       sortType: "date",
       renderCell: (user) => formatDateToDMY(user.since),
     },
     {
       id: "datasets",
-      header: "Conjuntos de dados",
+      header: labels.datasets,
       sortField: "datasets",
       sortType: "numeric",
       renderCell: (user) => user.datasets_count ?? 0,
     },
     {
       id: "reuses",
-      header: "Reutilizações",
+      header: labels.reuses,
       sortField: "reuses",
       sortType: "numeric",
       renderCell: (user) => user.reuses_count ?? 0,
     },
     {
       id: "followers",
-      header: "Seguidores",
+      header: labels.followers,
       sortField: "followers",
       sortType: "numeric",
       renderCell: (user) => user.metrics?.followers ?? 0,
     },
     {
       id: "profile",
-      header: "Perfis",
-      renderCell: (user) => getUserProfile(user),
+      header: labels.profile,
+      renderCell: (user) => getUserProfile(user, labels),
     },
     createTableActionsColumn<UserAdmin>({
       viewAction: (user) => ({
@@ -84,4 +97,3 @@ export function createUserColumns(): AdminListColumn<UserAdmin, UserSortField>[]
     }),
   ];
 }
-

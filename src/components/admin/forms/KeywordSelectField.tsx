@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Tag, type DropdownSectionProps } from "@ama-pt/agora-design-system";
 import IsolatedSelect from "@/components/admin/IsolatedSelect";
 
@@ -31,6 +32,8 @@ export default function KeywordSelectField({
   hideSectionNames = false,
   sortSelectedKeywords = false,
 }: KeywordSelectFieldProps) {
+  const { t } = useTranslation("admin-common");
+
   const visibleKeywords = useMemo(() => {
     if (!sortSelectedKeywords) {
       return selectedKeywords;
@@ -41,14 +44,14 @@ export default function KeywordSelectField({
   return (
     <>
       <IsolatedSelect
-        label="Palavras-chave"
-        placeholder="Pesquise ou insira palavras-chave..."
+        label={t("forms.keywords.label")}
+        placeholder={t("forms.keywords.placeholder")}
         id={id}
         type="checkbox"
         hideSectionNames={hideSectionNames}
         searchable
-        searchInputPlaceholder="Escreva para pesquisar ou criar..."
-        searchNoResultsText="Nenhum resultado encontrado"
+        searchInputPlaceholder={t("forms.keywords.searchPlaceholder")}
+        searchNoResultsText={t("forms.keywords.noResults")}
         defaultValue={defaultValue}
         onChangeRef={selectedKeywordsRef}
         onSearchCallback={onSearchChange}
@@ -62,7 +65,7 @@ export default function KeywordSelectField({
           {visibleKeywords.map((keyword) => (
             <Tag
               key={keyword}
-              aria-label={`Remover ${keyword}`}
+              aria-label={t("forms.keywords.remove", { keyword })}
               onClick={() => onRemoveKeyword(keyword)}
             >
               {keyword}

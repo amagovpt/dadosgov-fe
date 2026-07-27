@@ -1,13 +1,21 @@
 "use client";
 
 import { useSearchParams, useRouter, useParams, usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import ReusesFormClient from "@/components/admin/reuses/views/ReusesFormClient";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function OrgReusesNewClient() {
+interface OrgReusesNewClientProps {
+  pageContent: BoReusesPage;
+}
+
+export default function OrgReusesNewClient({ pageContent }: OrgReusesNewClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -17,32 +25,30 @@ export default function OrgReusesNewClient() {
   const orgName = useViewedOrganizationName(orgId, user?.organizations);
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
+  const pageTitle = pageContent.createHero?.title ?? "";
 
-  const stepTitles: Record<number, string> = {
-    1: "Descreva a sua reutilização",
-    2: "Conectar conjuntos de dados e APIs",
-    3: "Finalizar a publicação",
-  };
+  const stepTitle = getAdminStepTitle(pageContent.orgSteps?.[currentStep - 1]);
 
   return (
     <AdminLayout breadcrumbItems={[
-      { label: "Administração", url: "/admin" },
-      { label: orgName || "Organização", url: "#" },
-      { label: "Reutilizações", url: orgId ? `/admin/org/${orgId}/reuses` : "#" }
+      { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+      { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
+      { label: t("admin-reuses:title"), url: orgId ? `/admin/org/${orgId}/reuses` : "#" }
     ]}
-      title="Formulário de reutilização"
+      title={pageTitle}
     >
 
       {/* Stepper */}
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
-        labelWord="Passo"
+        labelWord={t("admin-common:stepper.step")}
         labelFormat="slash"
-        stepTitle={stepTitles[currentStep] || ""}
+        stepTitle={stepTitle}
       />
 
       <ReusesFormClient
+        pageContent={pageContent}
         currentStep={currentStep}
         onNextStep={() => router.push(`${pathname}?step=${currentStep + 1}`)}
         onPreviousStep={() => router.push(`${pathname}?step=${currentStep - 1}`)}
