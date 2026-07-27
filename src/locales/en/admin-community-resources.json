@@ -9,7 +9,6 @@
     "previous": "Previous",
     "next": "Next",
     "creating": "Creating...",
-    "deleteResource": "Delete community resource",
     "loadError": "Error loading community resource.",
     "updateSuccess": "Community resource updated successfully.",
     "deleteError": "Error deleting community resource.",

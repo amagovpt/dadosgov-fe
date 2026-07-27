@@ -457,6 +457,7 @@ export default function HarvesterDetailClient({
               canEdit={canEditSource}
               canEditAdvanced={canEditAdvanced}
               canDelete={can(source, "delete")}
+              deleteCard={pageContent.deleteCard}
               auxiliaryItems={pageContent.editAuxiliaryItems}
             />
           </TabBody>

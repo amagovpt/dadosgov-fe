@@ -18,8 +18,9 @@ import IsolatedInput from "@/components/admin/IsolatedInput";
 import HarvesterPreviewResult from "@/components/admin/harvesters/form-ui/HarvesterPreviewResult";
 import type { HarvestBackend, HarvestPreviewJob } from "@/service/types/harvester";
 import type { HarvesterFormField } from "@/components/admin/harvesters/form-state/harvesterFormModel";
-import type { AdminAuxiliaryItem } from "@/service/types/admin/common";
+import type { AdminAuxiliaryItem, AdminCard } from "@/service/types/admin/common";
 import { getEditHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 const FILTER_KEY_LABELS: Record<string, string> = {
   Organization: "organization",
@@ -82,6 +83,7 @@ interface HarvesterConfigFormProps {
   // only preview. Default true for the create flow (no source yet).
   canEdit?: boolean;
   canDelete?: boolean;
+  deleteCard?: AdminCard;
   auxiliaryItems?: AdminAuxiliaryItem[];
   // Whether the "advanced" fields (URL, implementation type, schedule, toggles)
   // may be edited. In the organization context an org-admin may only edit the
@@ -125,6 +127,7 @@ export function HarvesterConfigForm({
   onDelete,
   canEdit = true,
   canDelete = true,
+  deleteCard,
   auxiliaryItems,
   canEditAdvanced,
 }: HarvesterConfigFormProps) {
@@ -480,8 +483,10 @@ export function HarvesterConfigForm({
           actions={[
             {
               variant: "danger",
-              actionLabel: canDelete ? t("admin-harvesters:actions.deleteHarvester") : undefined,
-              onAction: canDelete
+              heading: canDelete ? (deleteCard?.title ?? "") : undefined,
+              description: canDelete ? formatHtmlParagraphs(deleteCard?.description) : undefined,
+              actionLabel: canDelete ? deleteCard?.anchor?.children : undefined,
+              onAction: canDelete && deleteCard
                 ? (e) => {
                     e.preventDefault();
                     e.stopPropagation();

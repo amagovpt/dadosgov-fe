@@ -36,6 +36,7 @@ export type BoHarvestersPage = {
   pendingAdminCard?: AdminCard;
   pendingOwnerCard?: AdminCard;
   createdPendingCard?: AdminCard;
+  deleteCard?: AdminCard;
   createAuxiliaryItems?: AdminAuxiliaryItem[];
   editAuxiliaryItems?: AdminAuxiliaryItem[];
 };

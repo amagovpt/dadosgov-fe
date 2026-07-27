@@ -35,6 +35,7 @@ export type BoCommunityResourcesPage = {
   introduction?: AdminHelpBlock;
   producerHelper?: AdminHelpBlock;
   createdCard?: AdminCard;
+  deleteCard?: AdminCard;
   createAuxiliaryItems?: AdminAuxiliaryItem[];
   editAuxiliaryItems?: AdminAuxiliaryItem[];
 };

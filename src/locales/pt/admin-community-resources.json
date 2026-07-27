@@ -9,7 +9,6 @@
     "previous": "Anterior",
     "next": "Seguinte",
     "creating": "A criar...",
-    "deleteResource": "Eliminar o recurso comunitário",
     "loadError": "Erro ao carregar recurso comunitário.",
     "updateSuccess": "Recurso comunitário atualizado com sucesso.",
     "deleteError": "Erro ao eliminar recurso comunitário.",

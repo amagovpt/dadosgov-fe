@@ -1,30 +1,33 @@
 "use client";
 
 import React from "react";
-import { useTranslation } from "react-i18next";
 import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 
 interface DangerZoneSectionProps {
   isSubmitting: boolean;
   // Backend-computed authorization (single source of truth).
   canDelete?: boolean;
+  deleteCard?: AdminCard;
   onDelete: () => void;
 }
 
 export default function DangerZoneSection({
   isSubmitting,
   canDelete = true,
+  deleteCard,
   onDelete,
 }: DangerZoneSectionProps) {
-  const { t } = useTranslation("admin-community-resources");
-
   return (
     <AdminDangerActions
       actions={[
         {
           variant: "danger",
-          actionLabel: canDelete ? t("form.deleteResource") : undefined,
-          onAction: canDelete ? () => onDelete() : undefined,
+          heading: canDelete ? (deleteCard?.title ?? "") : undefined,
+          description: canDelete ? formatHtmlParagraphs(deleteCard?.description) : undefined,
+          actionLabel: canDelete ? deleteCard?.anchor?.children : undefined,
+          onAction: canDelete && deleteCard ? () => onDelete() : undefined,
         },
       ]}
       disabled={isSubmitting}

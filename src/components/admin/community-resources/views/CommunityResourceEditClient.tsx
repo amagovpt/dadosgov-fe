@@ -494,6 +494,7 @@ export default function CommunityResourceEditClient({
             <DangerZoneSection
               isSubmitting={isSubmitting}
               canDelete={can(resource, "delete")}
+              deleteCard={pageContent.deleteCard}
               onDelete={handleDelete}
             />
           </form>
