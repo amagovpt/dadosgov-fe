@@ -1,7 +1,7 @@
 {
   "loading": "Loading...",
-  "results_one": "{{count}} result",
-  "results_other": "{{count}} results",
+  "results_one": "{{formattedCount}} result",
+  "results_other": "{{formattedCount}} results",
   "search": {
     "label": "Search"
   },
