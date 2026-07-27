@@ -270,7 +270,7 @@ export function FeaturedDatasetsEditor({
                   >
                     <span className="font-medium text-neutral-800">{d.title}</span>
                     {d.organization?.name && (
-                      <span className="ml-8 text-neutral-400"> - {d.organization.name}</span>
+                      <span className="ml-8 text-neutral-400">— {d.organization.name}</span>
                     )}
                   </button>
                 </li>

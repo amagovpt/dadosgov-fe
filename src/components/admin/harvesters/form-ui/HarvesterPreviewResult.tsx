@@ -88,7 +88,7 @@ export default function HarvesterPreviewResult({
           showIcon
           description={
             <>
-              <strong>{t("preview.error")}</strong> - {previewError}
+              <strong>{t("preview.error")}</strong> — {previewError}
             </>
           }
         />

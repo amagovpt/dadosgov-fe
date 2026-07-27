@@ -53,7 +53,7 @@
   },
   "apiKeys": {
     "title": "API keys",
-    "description": "Generate a key to authenticate API requests. For security reasons, the full key is shown only once at creation time and should be stored in a safe place.",
+    "description": "Generate a key to authenticate API requests. For security reasons, the full key is shown only once at creation time — store it in a safe place.",
     "newKeyNameLabel": "New key name (optional)",
     "newKeyNamePlaceholder": "Ex.: Backup script, Integration X...",
     "generate": "Generate new key",
@@ -77,7 +77,7 @@
     "emailLabel": "Email address",
     "emailPlaceholder": "Enter the email here",
     "changeButton": "Change email",
-    "pendingConfirmation": "Waiting for email confirmation; until then, the active email is {{email}}.",
+    "pendingConfirmation": "Waiting for email confirmation — until then, the active email is {{email}}.",
     "confirm": "Confirm",
     "sending": "Sending..."
   },

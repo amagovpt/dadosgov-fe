@@ -78,7 +78,7 @@ export default function ReusesEditApiTab({
             searchNoResultsText={t("form.noResults")}
           >
             <DropdownSection name="apis">
-              <DropdownOption value="">-</DropdownOption>
+              <DropdownOption value="">—</DropdownOption>
             </DropdownSection>
           </InputSelect>
 

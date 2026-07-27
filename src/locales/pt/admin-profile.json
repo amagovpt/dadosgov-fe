@@ -53,7 +53,7 @@
   },
   "apiKeys": {
     "title": "Chaves da API",
-    "description": "Gere uma chave para autenticar pedidos à API. Por motivos de segurança, a chave completa só é apresentada uma vez no momento da criação e deve ser guardada num local seguro.",
+    "description": "Gere uma chave para autenticar pedidos à API. Por motivos de segurança, a chave completa só é apresentada uma vez no momento da criação — guarde-a num local seguro.",
     "newKeyNameLabel": "Nome da nova chave (opcional)",
     "newKeyNamePlaceholder": "Ex.: Script backup, Integração X...",
     "generate": "Gerar nova chave",
@@ -77,7 +77,7 @@
     "emailLabel": "Endereço de e-mail",
     "emailPlaceholder": "Insira o e-mail aqui",
     "changeButton": "Alterar e-mail",
-    "pendingConfirmation": "Aguarda confirmação por e-mail; até confirmar, o e-mail ativo é {{email}}.",
+    "pendingConfirmation": "Aguarda confirmação por e-mail — até confirmar, o e-mail ativo é {{email}}.",
     "confirm": "Confirmar",
     "sending": "A enviar..."
   },

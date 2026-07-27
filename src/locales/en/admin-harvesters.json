@@ -75,7 +75,7 @@
       "done": "Finished",
       "failed": "Failed"
     },
-    "acceptedInfo": "The 'Validated' status refers to the harvester approval process and is independent from the last execution - the list may include harvesters whose last execution is 'Finished' or 'Failed'."
+    "acceptedInfo": "The 'Validated' status refers to the harvester approval process and is independent from the last execution — the list may include harvesters whose last execution is 'Finished' or 'Failed'."
   },
   "validation": {
     "popup": {
@@ -141,7 +141,7 @@
       "url": "Enter the harvester URL."
     },
     "saveErrorRetry": "Try again.",
-    "saveError": "Error saving ({{status}}) - {{message}}",
+    "saveError": "Error saving ({{status}}) — {{message}}",
     "filterLabels": {
       "organization": "Organization",
       "tag": "Tag"

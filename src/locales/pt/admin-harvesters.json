@@ -75,7 +75,7 @@
       "done": "Terminado",
       "failed": "Falhado"
     },
-    "acceptedInfo": "O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução - a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
+    "acceptedInfo": "O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução — a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
   },
   "validation": {
     "popup": {
@@ -141,7 +141,7 @@
       "url": "Indique o URL do harvester."
     },
     "saveErrorRetry": "Tente novamente.",
-    "saveError": "Erro ao guardar ({{status}}) - {{message}}",
+    "saveError": "Erro ao guardar ({{status}}) — {{message}}",
     "filterLabels": {
       "organization": "Organização",
       "tag": "Marcação"

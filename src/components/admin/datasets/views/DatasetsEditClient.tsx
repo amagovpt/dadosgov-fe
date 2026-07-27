@@ -307,7 +307,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
     if (options.length === 0) {
       options.push(
         <Dropdown.Option key="empty" value="">
-          -
+          —
         </Dropdown.Option>,
       );
     }
@@ -317,7 +317,7 @@ export default function DatasetsEditClient({ pageContent }: DatasetsEditClientPr
   const spatialGranularityOptions = useMemo(() => {
     const options = [
       <Dropdown.Option key="empty" value="">
-        -
+        —
       </Dropdown.Option>,
       ...granularities.map((g) => (
         <Dropdown.Option key={g.id} value={g.id} selected={g.id === loadedSpatialGranularity}>

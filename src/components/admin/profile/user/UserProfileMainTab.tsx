@@ -258,7 +258,7 @@ export default function UserProfileMainTab({
                           {token.token_prefix}...
                         </code>
                         {token.name && (
-                          <span className="text-sm text-neutral-700">{token.name}</span>
+                          <span className="text-sm text-neutral-700">— {token.name}</span>
                         )}
                       </div>
                       <p className="mt-4 text-xs text-neutral-700">

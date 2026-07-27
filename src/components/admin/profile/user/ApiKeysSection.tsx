@@ -108,7 +108,7 @@ export function ApiKeysSection({
                       {token.token_prefix}...
                     </code>
                     {token.name && (
-                      <span className="text-sm text-neutral-700"> - {token.name}</span>
+                      <span className="text-sm text-neutral-700">— {token.name}</span>
                     )}
                   </div>
                   <p className="text-xs mt-4 text-neutral-700">
