@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { CopyField } from "@/components/datasets/DatasetResourcesTable/CopyField";
 import { Accordion } from "@/components/Shared/Accordion";
 import type { ParsedSwagger } from "@/utils/parseOpenApi";
@@ -29,6 +30,7 @@ export const DataserviceSwagger = ({
   open,
   onOpenChange,
 }: DataserviceSwaggerProps) => {
+  const { t: tDs } = useTranslation("dataservices");
   const swaggerUiUrl = `${SWAGGER_UI_VIEWER}?url=${encodeURIComponent(machineDocumentationUrl)}`;
 
   return (
@@ -46,7 +48,8 @@ export const DataserviceSwagger = ({
             <div className="flex flex-wrap items-center justify-between gap-16">
               {swagger.version && (
                 <span className="text-sm text-neutral-700">
-                  Versão <strong className="text-neutral-900">{swagger.version}</strong>
+                  {tDs("swagger.versionLabel")}{" "}
+                  <strong className="text-neutral-900">{swagger.version}</strong>
                 </span>
               )}
               <a
@@ -55,11 +58,11 @@ export const DataserviceSwagger = ({
                 rel="noreferrer"
                 className="text-sm text-primary-600 underline hover:text-primary-800"
               >
-                Abrir no Swagger UI ↗
+                {tDs("swagger.openInSwaggerUi")}
               </a>
             </div>
 
-            {swagger.baseUrl && <CopyField label="Base URL" value={swagger.baseUrl} />}
+            {swagger.baseUrl && <CopyField label={tDs("swagger.baseUrl")} value={swagger.baseUrl} />}
 
             {swagger.groups.map((group) => (
               <div key={group.tag} className="flex flex-col gap-8">
@@ -95,7 +98,7 @@ export const DataserviceSwagger = ({
             {swagger.models.length > 0 && (
               <div className="flex flex-col gap-8">
                 <h3 className="text-base font-medium text-neutral-900">
-                  Modelos{" "}
+                  {tDs("swagger.models")}{" "}
                   <span className="text-sm font-normal text-neutral-500">
                     {swagger.models.length}
                   </span>

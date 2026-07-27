@@ -38,6 +38,7 @@ const namespaces = [
   "login",
   "reuses",
   "organizations",
+  "dataservices",
 ];
 
 export async function generateMetadata({
