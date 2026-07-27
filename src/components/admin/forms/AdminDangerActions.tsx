@@ -44,11 +44,10 @@ function ActionCard({
           {heading ? <strong>{heading}</strong> : null}
           {hasDescription ? (
             <>
-              {heading ? <br /> : null}
               {description}
             </>
           ) : null}
-          <br />
+
           <Button
             type="button"
             appearance="link"
