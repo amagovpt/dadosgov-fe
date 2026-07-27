@@ -16,14 +16,17 @@ import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
   createDatasetColumns,
   OrgDatasetSortField,
+  sortDatasets,
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDatasetsPage } from "@/service/types/admin/datasets";
 
-const ORG_DATASET_SORT_MAP: Record<OrgDatasetSortField, string> = {
+const ORG_DATASET_SORT_MAP: Record<OrgDatasetSortField, string | null> = {
   title: "title",
+  status: null,
   created: "created",
   last_update: "last_update",
+  quality: null,
 };
 
 interface OrgDatasetsClientProps {
@@ -44,6 +47,11 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<OrgDatasetSortField | null>("created");
   const [sortOrder, setSortOrder] = useState<SortOrder>("descending");
+  const usesLocalSort = sortField === "status" || sortField === "quality";
+  const sortParam = useMemo(
+    () => (usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, ORG_DATASET_SORT_MAP)),
+    [sortField, sortOrder, usesLocalSort],
+  );
 
   const columns = useMemo(
     () =>
@@ -67,7 +75,13 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
   );
 
   const loadDatasets = useCallback(
-    async (page: number, pageSize: number, q: string, status: string, sort?: string) => {
+    async (
+      page: number,
+      pageSize: number,
+      q: string,
+      status: string,
+      sort?: string,
+    ) => {
       setIsLoading(true);
       try {
         const filters: {
@@ -109,11 +123,16 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
 
   useEffect(() => {
     let isCancelled = false;
-    const sort = buildApiSortParam(sortField, sortOrder, ORG_DATASET_SORT_MAP);
 
     const loadCurrentDatasets = async () => {
       if (isCancelled) return;
-      await loadDatasets(currentPage, itemsPerPage, searchQuery, statusFilter, sort);
+      await loadDatasets(
+        currentPage,
+        itemsPerPage,
+        searchQuery,
+        statusFilter,
+        sortParam,
+      );
     };
 
     void loadCurrentDatasets();
@@ -121,7 +140,7 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
     return () => {
       isCancelled = true;
     };
-  }, [currentPage, itemsPerPage, searchQuery, statusFilter, sortField, sortOrder, loadDatasets]);
+  }, [currentPage, itemsPerPage, searchQuery, statusFilter, sortParam, loadDatasets]);
 
   const handleSearch = useDebouncedSearch((value: string) => {
     setSearchQuery(value);
@@ -135,6 +154,13 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
     setSortOrder,
     setCurrentPage,
   );
+  const visibleDatasets = useMemo(
+    () =>
+      sortField === "status" || sortField === "quality"
+        ? sortDatasets(datasets, sortField, sortOrder)
+        : datasets,
+    [datasets, sortField, sortOrder],
+  );
 
   return (
     <AdminListPage
@@ -146,7 +172,7 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
       title={t("admin-datasets:list.title")}
       isLoading={isLoading}
       count={total}
-      hasItems={datasets.length > 0}
+      hasItems={visibleDatasets.length > 0}
       currentPage={currentPage}
       pageSize={itemsPerPage}
       setCurrentPage={setCurrentPage}
@@ -187,7 +213,7 @@ export default function OrgDatasetsClient({ orgId, pageContent }: OrgDatasetsCli
       }
     >
       <AdminListTable
-        items={datasets}
+        items={visibleDatasets}
         columns={columns}
         getSortOrder={getSortOrder}
         handleSort={handleSort}

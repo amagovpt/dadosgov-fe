@@ -4,12 +4,18 @@ import TextLink from "@/components/Primitives/TextLink";
 import TableActionsCell from "@/components/admin/TableActionsCell";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { can } from "@/utils/permissions";
+import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
 import type { CommunityResource } from "@/service/types/community-resource";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 
-export type CommunityResourceSortField = "title" | "format" | "created_at" | "last_modified";
-export type OrgCommunityResourceSortField = "title" | "created_at" | "last_modified";
+export type CommunityResourceSortField =
+  | "title"
+  | "status"
+  | "format"
+  | "created_at"
+  | "last_modified";
+export type OrgCommunityResourceSortField = "title" | "status" | "created_at" | "last_modified";
 
 export function sortCommunityResources<T extends CommunityResource>(
   items: T[],
@@ -23,6 +29,9 @@ export function sortCommunityResources<T extends CommunityResource>(
     switch (sortField) {
       case "title":
         comparison = (a.title || "").localeCompare(b.title || "");
+        break;
+      case "status":
+        comparison = getResourceStatusSortValue(a) - getResourceStatusSortValue(b);
         break;
       case "format":
         comparison = (a.format || "").localeCompare(b.format || "");
@@ -117,6 +126,8 @@ export function createCommunityResourceColumns<TIncludeFormat extends boolean = 
     {
       id: "status",
       header: labels.status,
+      sortField: "status" as CommunityResourceColumnField<TIncludeFormat>,
+      sortType: "string",
       renderCell: (resource) =>
         useSystemStatusDot ? (
           <StatusDot

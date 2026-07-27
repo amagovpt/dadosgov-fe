@@ -4,14 +4,16 @@ import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { can } from "@/utils/permissions";
+import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
 import type { Reuse } from "@/service/types/reuse";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
-export type ReuseSortField = "title" | "created_at" | "datasets";
-export type SystemReuseSortField = "title" | "created_at";
+export type ReuseSortField = "title" | "status" | "created_at" | "datasets";
+export type SystemReuseSortField = "title" | "status" | "created_at";
 
-export const systemReuseSortFieldMap: Record<SystemReuseSortField, string> = {
+export const systemReuseSortFieldMap: Record<SystemReuseSortField, string | null> = {
   title: "title",
+  status: null,
   created_at: "created",
 };
 
@@ -27,6 +29,9 @@ export function sortReuses(
   return [...items].sort((a, b) => {
     if (sortField === "title") {
       return collator.compare(a.title ?? "", b.title ?? "") * direction;
+    }
+    if (sortField === "status") {
+      return (getResourceStatusSortValue(a) - getResourceStatusSortValue(b)) * direction;
     }
     if (sortField === "created_at") {
       const aTime = a.created_at ? Date.parse(a.created_at) : 0;
@@ -89,6 +94,8 @@ export function createReuseColumns<TSortableDatasets extends boolean = true>({
     {
       id: "status",
       header: labels.status,
+      sortField: "status" as ReuseSortFieldByDatasets<TSortableDatasets>,
+      sortType: "string",
       renderCell: (reuse) => <ResourceStatusBadge item={reuse} />,
     },
     {
