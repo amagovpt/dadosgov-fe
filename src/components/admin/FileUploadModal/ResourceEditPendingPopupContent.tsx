@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   DropdownOption,
@@ -33,14 +34,15 @@ export function ResourceEditPendingPopupContent({
   onSave,
   onReplaceFile,
 }: ResourceEditPendingPopupContentProps) {
+  const { t } = useTranslation("admin-common");
   const { hide } = usePopupContext();
   const replaceFileInputRef = useRef<HTMLInputElement>(null);
   const defaultType = initialMeta.resourceType || (resourceTypes[0]?.id ?? "main");
   const fileExt = getFileExtension(name, isUrl);
   const baseName = fileExt ? name.slice(0, -fileExt.length) : name;
   const [title, setTitle] = useState(() => {
-    const t = initialMeta.title || name;
-    return !isUrl && fileExt && t === name ? baseName : t;
+    const currentTitle = initialMeta.title || name;
+    return !isUrl && fileExt && currentTitle === name ? baseName : currentTitle;
   });
   const resourceTypeRef = useRef(defaultType);
   const [description, setDescription] = useState(initialMeta.description || "");
@@ -53,9 +55,9 @@ export function ResourceEditPendingPopupContent({
   const [urlError, setUrlError] = useState<string | null>(null);
 
   useEffect(() => {
-    const t = initialMeta.title || name;
+    const currentTitle = initialMeta.title || name;
     const frameId = requestAnimationFrame(() => {
-      setTitle(!isUrl && fileExt && t === name ? baseName : t);
+      setTitle(!isUrl && fileExt && currentTitle === name ? baseName : currentTitle);
       setDescription(initialMeta.description || "");
       setUrl(isUrl ? name : "");
       setFilesize(initialMeta.filesize ?? (file ? String(file.size) : ""));
@@ -68,17 +70,19 @@ export function ResourceEditPendingPopupContent({
     return () => cancelAnimationFrame(frameId);
   }, [name, isUrl, initialMeta, file, fileExt, baseName, defaultType]);
 
+  const invalidUrlMessage = t("fileUpload.url.invalid");
+
   const handleSave = () => {
     if (isUrl) {
       const trimmedUrl = url.trim();
       try {
         const parsed = new URL(trimmedUrl);
         if (!trimmedUrl || parsed.protocol !== "https:") {
-          setUrlError("Insira um URL válido, começando com https://");
+          setUrlError(invalidUrlMessage);
           return;
         }
       } catch {
-        setUrlError("Insira um URL válido, começando com https://");
+        setUrlError(invalidUrlMessage);
         return;
       }
     }
@@ -97,8 +101,8 @@ export function ResourceEditPendingPopupContent({
   };
 
   const handleReplaceFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f || !onReplaceFile) return;
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile || !onReplaceFile) return;
     onSave({
       title: title.trim() || name,
       resourceType: resourceTypeRef.current,
@@ -107,7 +111,7 @@ export function ResourceEditPendingPopupContent({
       format: format.trim() || undefined,
       mime: mime.trim() || undefined,
     });
-    onReplaceFile(f);
+    onReplaceFile(selectedFile);
     hide();
   };
 
@@ -117,23 +121,23 @@ export function ResourceEditPendingPopupContent({
         <div className="flex items-end gap-2">
           <div className="min-w-0 flex-1">
             <InputText
-              label="Título *"
-              placeholder="Título do recurso"
+              label={t("fileUpload.resourceEdit.titleLabel")}
+              placeholder={t("fileUpload.resourceEdit.titlePlaceholder")}
               id="pending-res-title"
               value={title}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
             />
           </div>
           {!isUrl && fileExt && (
-            <span className="text-sm shrink-0 pb-[13px] font-medium text-neutral-900">
+            <span className="shrink-0 pb-[13px] text-sm font-medium text-neutral-900">
               {fileExt.toUpperCase()}
             </span>
           )}
         </div>
 
         <IsolatedSelect
-          label="Tipo *"
-          placeholder="Selecione um tipo..."
+          label={t("fileUpload.resourceEdit.typeLabel")}
+          placeholder={t("fileUpload.resourceEdit.typePlaceholder")}
           id="pending-res-type"
           defaultValue={defaultType}
           onChangeRef={resourceTypeRef}
@@ -148,8 +152,8 @@ export function ResourceEditPendingPopupContent({
         </IsolatedSelect>
 
         <InputTextArea
-          label="Descrição"
-          placeholder="Descrição do recurso"
+          label={t("fileUpload.resourceEdit.descriptionLabel")}
+          placeholder={t("fileUpload.resourceEdit.descriptionPlaceholder")}
           id="pending-res-description"
           rows={4}
           value={description}
@@ -157,7 +161,7 @@ export function ResourceEditPendingPopupContent({
         />
 
         <InputText
-          label="URL *"
+          label={t("fileUpload.resourceEdit.urlLabel")}
           placeholder="https://"
           id="pending-res-url"
           value={url}
@@ -175,16 +179,16 @@ export function ResourceEditPendingPopupContent({
           <>
             <div className="grid grid-cols-2 gap-16">
               <InputText
-                label="Tamanho"
-                placeholder="Tamanho em bytes"
+                label={t("fileUpload.resourceEdit.sizeLabel")}
+                placeholder={t("fileUpload.resourceEdit.sizePlaceholder")}
                 id="pending-res-filesize"
                 value={filesize}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilesize(e.target.value)}
                 disabled
               />
               <InputText
-                label="Formato"
-                placeholder="csv, json, xlsx..."
+                label={t("fileUpload.resourceEdit.formatLabel")}
+                placeholder={t("fileUpload.resourceEdit.formatPlaceholder")}
                 id="pending-res-format"
                 value={format}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormat(e.target.value)}
@@ -193,8 +197,8 @@ export function ResourceEditPendingPopupContent({
             </div>
 
             <InputText
-              label="Mime Type"
-              placeholder="application/json, text/csv..."
+              label={t("fileUpload.resourceEdit.mimeTypeLabel")}
+              placeholder={t("fileUpload.resourceEdit.mimeTypePlaceholder")}
               id="pending-res-mime"
               value={mime}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMime(e.target.value)}
@@ -206,7 +210,7 @@ export function ResourceEditPendingPopupContent({
 
       <div className="flex justify-between pt-8">
         <Button appearance="outline" variant="primary" onClick={hide}>
-          Cancelar
+          {t("actions.cancel")}
         </Button>
         <div className="flex gap-8">
           {!isUrl && onReplaceFile && (
@@ -222,7 +226,7 @@ export function ResourceEditPendingPopupContent({
                 variant="primary"
                 onClick={() => replaceFileInputRef.current?.click()}
               >
-                Substituir o ficheiro
+                {t("fileUpload.actions.replaceFile")}
               </Button>
             </>
           )}
@@ -233,7 +237,7 @@ export function ResourceEditPendingPopupContent({
             trailingIconHover="agora-solid-check-circle"
             onClick={handleSave}
           >
-            Guardar
+            {t("actions.save")}
           </Button>
         </div>
       </div>

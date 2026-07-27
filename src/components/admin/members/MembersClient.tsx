@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, usePopupContext } from "@ama-pt/agora-design-system";
 import { acceptMembership } from "@/service/api/organizations";
 import type { MembershipRequest, OrganizationMember } from "@/service/types/identity";
@@ -12,23 +13,22 @@ import AdminPaginatedTable from "@/components/admin/lists/AdminPaginatedTable";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
-import {
-  createMemberColumns,
-  sortMembers,
-  type MemberSortField,
-} from "./membersListConfig";
+import { createMemberColumns, sortMembers, type MemberSortField } from "./membersListConfig";
 import { useMembersData } from "./hooks/useMembersData";
 import { PendingRequestsTable } from "./PendingRequestsTable";
 import { AddMemberPopupContent } from "./popups/AddMemberPopupContent";
 import { EditRolePopupContent } from "./popups/EditRolePopupContent";
 import { RemoveMemberPopupContent } from "./popups/RemoveMemberPopupContent";
 import { RefuseMembershipPopupContent } from "./popups/RefuseMembershipPopupContent";
+import type { BoMembersPage } from "@/service/types/admin/members";
 
 interface MembersClientProps {
   orgId?: string;
+  pageContent: BoMembersPage;
 }
 
-export default function MembersClient({ orgId }: MembersClientProps = {}) {
+export default function MembersClient({ orgId, pageContent }: MembersClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-members"]);
   const { show } = usePopupContext();
   const { user } = useAuth();
   const { activeOrg } = useActiveOrganization();
@@ -61,7 +61,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     } catch (error) {
       console.error("Error accepting membership:", error);
       const message = error instanceof Error ? error.message : null;
-      setRequestError(message || "Ocorreu um erro ao aceitar o pedido. Tente novamente.");
+      setRequestError(message || t("admin-members:requestError"));
     } finally {
       setRequestAction(null);
     }
@@ -76,13 +76,13 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
           onRefused={reload}
         />,
         {
-          title: "Recusar pedido de adesão",
-          closeAriaLabel: "Fechar",
+          title: t("admin-members:popups.refuseTitle"),
+          closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
           dimensions: "m",
         }
       );
     },
-    [reload, resolvedOrgId, show]
+    [reload, resolvedOrgId, show, t]
   );
 
   const handleRemoveMember = useCallback(
@@ -94,13 +94,13 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
           onMemberRemoved={reload}
         />,
         {
-          title: "Eliminar membro",
-          closeAriaLabel: "Fechar",
+          title: t("admin-members:popups.removeTitle"),
+          closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
           dimensions: "m",
         }
       );
     },
-    [reload, resolvedOrgId, show]
+    [reload, resolvedOrgId, show, t]
   );
 
   const handleEditRole = useCallback(
@@ -115,13 +115,13 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
           openKey={nextKey}
         />,
         {
-          title: "Editar papel do membro",
-          closeAriaLabel: "Fechar",
+          title: t("admin-members:popups.editRoleTitle"),
+          closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
           dimensions: "m",
         }
       );
     },
-    [editMemberOpenKey, reload, resolvedOrgId, show]
+    [editMemberOpenKey, reload, resolvedOrgId, show, t]
   );
 
   const handleOpenAddMember = useCallback(() => {
@@ -130,12 +130,12 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     show(
       <AddMemberPopupContent orgId={resolvedOrgId!} onMemberAdded={reload} openKey={nextKey} />,
       {
-        title: "Adicionar um membro à organização",
-        closeAriaLabel: "Fechar",
+        title: t("admin-members:popups.addTitle"),
+        closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
         dimensions: "m",
       }
     );
-  }, [addMemberOpenKey, reload, resolvedOrgId, show]);
+  }, [addMemberOpenKey, reload, resolvedOrgId, show, t]);
 
   const isOrgAdmin = useMemo(() => viewedOrg?.permissions?.members ?? false, [viewedOrg]);
 
@@ -153,20 +153,33 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
     () =>
       createMemberColumns({
         isOrgAdmin,
+        labels: {
+          member: t("admin-members:columns.member"),
+          role: t("admin-members:columns.role"),
+          since: t("admin-members:columns.since"),
+          actions: t("admin-members:columns.actions"),
+          editRole: t("admin-members:columns.editRole"),
+          removeMember: t("admin-members:columns.removeMember"),
+          adminRole: t("admin-members:roles.admin"),
+          editorRole: t("admin-members:roles.editor"),
+        },
         onEditRole: handleEditRole,
         onRemoveMember: handleRemoveMember,
       }),
-    [handleEditRole, handleRemoveMember, isOrgAdmin]
+    [handleEditRole, handleRemoveMember, isOrgAdmin, t]
   );
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: cachedOrgName || viewedOrg?.name || "Organização", url: "#" },
-        { label: "Membros" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        {
+          label: cachedOrgName || viewedOrg?.name || t("admin-members:organizationFallback"),
+          url: "#",
+        },
+        { label: t("admin-members:breadcrumbs.members") },
       ]}
-      title="Membros"
+      title={pageContent.orgHero?.title ?? ""}
     >
       {isOrgAdmin && pendingRequests.length > 0 && (
         <PendingRequestsTable
@@ -180,7 +193,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
 
       <div className="mb-24 flex items-center justify-between">
         <p className="text-sm font-semibold uppercase text-neutral-700">
-          {members.length} {members.length === 1 ? "membro" : "membros"}
+          {t("admin-members:count", { count: members.length })}
         </p>
         {isOrgAdmin && (
           <Button
@@ -191,7 +204,7 @@ export default function MembersClient({ orgId }: MembersClientProps = {}) {
             leadingIconHover="agora-solid-plus-circle"
             onClick={handleOpenAddMember}
           >
-            Adicionar um membro
+            {t("admin-members:addMember")}
           </Button>
         )}
       </div>

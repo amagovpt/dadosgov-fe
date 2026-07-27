@@ -67,6 +67,25 @@ interface UseDatasetWizardSubmissionActionsParams {
   onComplete?: () => void;
   navigateToStep: (nextStep: number, nextDatasetId: string) => void;
   finishWizard: () => void;
+  validationMessages: {
+    producerRequired: string;
+    titleRequired: string;
+    titleTooLong: string;
+    descriptionRequired: string;
+    frequencyRequired: string;
+    invalidDate: string;
+    invalidRange: string;
+    contactDraftRequired: string;
+  };
+  restoreErrors: {
+    missingDataset: string;
+    loadDataset: string;
+    saveDataset: string;
+    saveResource: string;
+    saveResourceRetry: string;
+    publish: string;
+    saveDraft: string;
+  };
 }
 
 function flattenApiError(errorData: Record<string, unknown>): string {
@@ -121,19 +140,24 @@ export function useDatasetWizardSubmissionActions({
   onComplete,
   navigateToStep,
   finishWizard,
+  validationMessages,
+  restoreErrors,
 }: UseDatasetWizardSubmissionActionsParams) {
   async function handleStep2Next(e?: React.MouseEvent<HTMLButtonElement>) {
-    const { errors, draftErrors } = validateDatasetDetails({
-      producer: selectedProducerRef.current,
-      title: datasetTitle,
-      description: datasetDescription,
-      frequency: selectedFrequencyRef.current,
-      temporalStart,
-      temporalEnd,
-      selectedProducer,
-      selectedContactPointIds,
-      draftContacts,
-    });
+    const { errors, draftErrors } = validateDatasetDetails(
+      {
+        producer: selectedProducerRef.current,
+        title: datasetTitle,
+        description: datasetDescription,
+        frequency: selectedFrequencyRef.current,
+        temporalStart,
+        temporalEnd,
+        selectedProducer,
+        selectedContactPointIds,
+        draftContacts,
+      },
+      validationMessages,
+    );
 
     if (errors.contactDrafts) {
       setDraftContacts((previousDrafts) =>
@@ -239,7 +263,7 @@ export function useDatasetWizardSubmissionActions({
       if (err.data && typeof err.data === "object") {
         setApiError(flattenApiError(err.data));
       } else {
-        setApiError("Erro ao guardar o conjunto de dados. Tente novamente.");
+        setApiError(restoreErrors.saveDataset);
       }
     } finally {
       setIsSubmitting(false);
@@ -250,7 +274,9 @@ export function useDatasetWizardSubmissionActions({
     if (newUrl !== undefined && key.startsWith("url-")) {
       const oldUrl = key.slice(4);
       if (oldUrl !== newUrl) {
-        setResourceUrls((previousUrls) => previousUrls.map((url) => (url === oldUrl ? newUrl : url)));
+        setResourceUrls((previousUrls) =>
+          previousUrls.map((url) => (url === oldUrl ? newUrl : url)),
+        );
         setResourceMetadata((previousMetadata) => {
           const updated = { ...previousMetadata, [`url-${newUrl}`]: meta };
           delete updated[key];
@@ -279,9 +305,7 @@ export function useDatasetWizardSubmissionActions({
     let dataset = createdDataset;
     if (!dataset) {
       if (!datasetId) {
-        setApiError(
-          "Erro: o conjunto de dados não foi criado. Volte ao passo anterior e preencha o formulário.",
-        );
+        setApiError(restoreErrors.missingDataset);
         setIsSubmitting(false);
         return;
       }
@@ -289,7 +313,7 @@ export function useDatasetWizardSubmissionActions({
         dataset = await fetchDataset(datasetId);
         setCreatedDataset(dataset);
       } catch {
-        setApiError("Erro ao carregar o conjunto de dados. Tente novamente.");
+        setApiError(restoreErrors.loadDataset);
         setIsSubmitting(false);
         return;
       }
@@ -331,17 +355,20 @@ export function useDatasetWizardSubmissionActions({
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error uploading resources:", error.message, error.stack);
-        setApiError(`Erro ao guardar recurso: ${translateUploadError(error.message)}`);
+        setApiError(
+          restoreErrors.saveResource.replace("{{message}}", translateUploadError(error.message)),
+        );
       } else {
         const err = error as { status?: number; data?: Record<string, unknown> };
         console.error("Error uploading resources:", err.status, err.data);
         if (err.data && typeof err.data === "object" && Object.keys(err.data).length > 0) {
-          const message =
-            (err.data.message as string) || flattenApiError(err.data);
-          setApiError(`Erro ao guardar recurso: ${translateUploadError(message)}`);
+          const message = (err.data.message as string) || flattenApiError(err.data);
+          setApiError(
+            restoreErrors.saveResource.replace("{{message}}", translateUploadError(message)),
+          );
         } else {
           const statusHint = err.status ? ` (${err.status})` : "";
-          setApiError(`Erro ao guardar recurso${statusHint}. Tente novamente.`);
+          setApiError(restoreErrors.saveResourceRetry.replace("{{statusHint}}", statusHint));
         }
       }
     } finally {
@@ -378,7 +405,7 @@ export function useDatasetWizardSubmissionActions({
       else finishWizard();
     } catch (error) {
       console.error("Error publishing dataset:", error);
-      setApiError("Erro ao publicar o conjunto de dados. Tente novamente.");
+      setApiError(restoreErrors.publish);
     } finally {
       setIsSubmitting(false);
     }
@@ -436,7 +463,7 @@ export function useDatasetWizardSubmissionActions({
       else finishWizard();
     } catch (error) {
       console.error("Error saving draft dataset:", error);
-      setApiError("Erro ao guardar o rascunho. Tente novamente.");
+      setApiError(restoreErrors.saveDraft);
     } finally {
       setIsSubmitting(false);
     }

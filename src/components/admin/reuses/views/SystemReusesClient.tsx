@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CardNoResults, Icon } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
@@ -16,8 +16,15 @@ import {
   createReuseColumns,
   systemReuseSortFieldMap,
 } from "@/components/admin/reuses/config/reusesListConfig";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function SystemReusesClient() {
+interface SystemReusesClientProps {
+  pageContent: BoReusesPage;
+}
+
+export default function SystemReusesClient({ pageContent }: SystemReusesClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const [reuses, setReuses] = useState<Reuse[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,8 +44,16 @@ export default function SystemReusesClient() {
       createReuseColumns({
         sortableDatasets: false,
         editHref: (reuse) => `/admin/reuses/${reuse.id}`,
+        labels: {
+          title: t("admin-reuses:columns.title"),
+          titleShort: t("admin-reuses:columns.titleShort"),
+          status: t("admin-reuses:columns.status"),
+          createdAt: t("admin-reuses:columns.createdAt"),
+          datasets: t("admin-reuses:columns.datasets"),
+          actions: t("admin-reuses:columns.actions"),
+        },
       }),
-    []
+    [t]
   );
 
   const { handleSort, getSortOrder } = useSortControls(
@@ -91,11 +106,11 @@ export default function SystemReusesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Reutilizações", url: "/admin/system/reuses" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-reuses:title"), url: "/admin/system/reuses" },
       ]}
-      title="Reutilizações"
+      title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={totalItems}
       hasItems={filteredReuses.length > 0}
@@ -104,8 +119,9 @@ export default function SystemReusesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome da reutilização",
-        ariaLabel: "Pesquisar reutilizações",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
         onChange: handleSearch,
       }}
       filters={
@@ -117,15 +133,7 @@ export default function SystemReusesClient() {
           }}
         />
       }
-      emptyState={
-        <CardNoResults
-          position="center"
-          icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem reutilizações"
-          description="Nenhuma reutilização encontrada."
-          hasAnchor={false}
-        />
-      }
+      emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
         items={filteredReuses}

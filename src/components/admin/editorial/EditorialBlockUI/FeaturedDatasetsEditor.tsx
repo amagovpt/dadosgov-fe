@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { CardGeneral, Icon, ProgressBar, usePopupContext } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 import { searchDatasets } from "@/service/api/search";
 import type { Dataset } from "@/service/types/dataset";
-import { formatMetricValue } from "@/utils/formatNumber";
 import type { FeaturedDatasetsData } from "../editorial-blocks";
 import { DeleteBlockPopupContent } from "./DeleteBlockPopupContent";
-import { getTimeAgoLabel } from "./utils";
+import { formatCompactMetric, getTimeAgoLabel } from "./utils";
 
 export function FeaturedDatasetsEditor({
   data,
@@ -18,6 +18,7 @@ export function FeaturedDatasetsEditor({
   nameMap?: Record<string, Dataset>;
   onNameMapUpdate?: (dataset: Dataset) => void;
 }) {
+  const { t, i18n } = useTranslation(["admin-common", "admin-editorial"]);
   const { show, hide } = usePopupContext();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,9 +35,13 @@ export function FeaturedDatasetsEditor({
           hide();
           onChange({ ...data, datasetIds: data.datasetIds.filter((_, i) => i !== index) });
         }}
-        message="Essa ação é irreversível. Tem a certeza que quer remover este conjunto de dados?"
+        message={t("admin-editorial:featuredDatasets.removeMessage")}
       />,
-      { title: "Remover conjunto de dados", closeAriaLabel: "Fechar", dimensions: "m" }
+      {
+        title: t("admin-editorial:featuredDatasets.removeTitle"),
+        closeAriaLabel: t("admin-common:fileUpload.popup.close"),
+        dimensions: "m",
+      }
     );
   };
 
@@ -91,14 +96,14 @@ export function FeaturedDatasetsEditor({
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
-        placeholder="Os meus conjuntos de dados"
+        placeholder={t("admin-editorial:featuredDatasets.titlePlaceholder")}
         className="text-xl mb-4 w-full border-none font-bold text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
       <input
         type="text"
         value={data.legend}
         onChange={(e) => onChange({ ...data, legend: e.target.value })}
-        placeholder="Adicionar legenda"
+        placeholder={t("admin-editorial:featuredDatasets.legendPlaceholder")}
         className="text-sm mb-[20px] w-full border-none text-neutral-900 outline-none placeholder:text-neutral-900 placeholder:opacity-100"
       />
 
@@ -107,7 +112,7 @@ export function FeaturedDatasetsEditor({
           const dataset = nameMap?.[id];
           const qualityScore =
             dataset?.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0;
-          const timeAgo = getTimeAgoLabel(dataset?.last_modified);
+          const timeAgo = getTimeAgoLabel(dataset?.last_modified, i18n.resolvedLanguage);
 
           return (
             <div key={id} className="relative">
@@ -116,7 +121,7 @@ export function FeaturedDatasetsEditor({
                   variant="white"
                   image={{
                     src: dataset?.organization?.logo || "/images/placeholders/organization.png",
-                    alt: dataset?.organization?.name || "Organização",
+                    alt: dataset?.organization?.name || t("admin-editorial:featuredDatasets.organizationFallback"),
                     height: "56px",
                     className: "bg-primary-100 !object-contain !h-[56px]",
                   }}
@@ -130,7 +135,7 @@ export function FeaturedDatasetsEditor({
                           style={{ fontSize: "16px", fontWeight: 300 }}
                           className="mt-4 text-neutral-900"
                         >
-                          {dataset?.organization?.name || "Sem Organização"}
+                          {dataset?.organization?.name || t("admin-editorial:featuredDatasets.noOrganization")}
                         </span>
                       </div>
                     ) as unknown as string
@@ -152,19 +157,19 @@ export function FeaturedDatasetsEditor({
                             hidePercentageValue={true}
                           />
                           <span className="mt-4 block text-s-regular text-neutral-900">
-                            {qualityScore}% Qualidade dos metadados
+                            {qualityScore}% {t("admin-editorial:featuredDatasets.metadataQuality")}
                           </span>
                           <div className="text-xs mt-12 flex flex-wrap items-center gap-8 text-neutral-700">
-                            <div className="flex items-center gap-8" title="Visualizações">
+                            <div className="flex items-center gap-8" title={t("admin-editorial:featuredDatasets.views")}>
                               <Icon
                                 name="agora-solid-eye"
                                 dimensions="xs"
                                 className="fill-neutral-700"
                                 aria-hidden="true"
                               />
-                              <span>{formatMetricValue(dataset?.metrics?.views, 1, 0)}</span>
+                              <span>{formatCompactMetric(dataset?.metrics?.views, i18n.resolvedLanguage)}</span>
                             </div>
-                            <div className="flex items-center gap-8" title="Downloads">
+                            <div className="flex items-center gap-8" title={t("admin-editorial:featuredDatasets.downloads")}>
                               <Icon
                                 name="agora-solid-download"
                                 dimensions="xs"
@@ -172,10 +177,10 @@ export function FeaturedDatasetsEditor({
                                 aria-hidden="true"
                               />
                               <span>
-                                {formatMetricValue(dataset?.metrics?.resources_downloads, 1, 0)}
+                                {formatCompactMetric(dataset?.metrics?.resources_downloads, i18n.resolvedLanguage)}
                               </span>
                             </div>
-                            <div className="flex items-center gap-8" title="Reutilizações">
+                            <div className="flex items-center gap-8" title={t("admin-editorial:featuredDatasets.reuses")}>
                               <svg
                                 width="16"
                                 height="16"
@@ -187,14 +192,14 @@ export function FeaturedDatasetsEditor({
                               </svg>
                               <span>{dataset?.metrics?.reuses || 0}</span>
                             </div>
-                            <div className="flex items-center gap-8" title="Favoritos">
+                            <div className="flex items-center gap-8" title={t("admin-editorial:featuredDatasets.favorites")}>
                               <Icon
                                 name="agora-solid-star"
                                 dimensions="xs"
                                 className="fill-neutral-700"
                                 aria-hidden="true"
                               />
-                              <span>{formatMetricValue(dataset?.metrics?.followers, 1, 0)}</span>
+                              <span>{formatCompactMetric(dataset?.metrics?.followers, i18n.resolvedLanguage)}</span>
                             </div>
                           </div>
                           <div className="mt-16 flex items-center gap-8 text-primary-600">
@@ -216,7 +221,7 @@ export function FeaturedDatasetsEditor({
                 type="button"
                 onClick={() => handleRemoveDataset(index)}
                 className="rounded group absolute right-8 top-8 z-10 p-4"
-                title="Remover"
+                title={t("admin-editorial:blockActions.remove")}
               >
                 <Icon
                   name="agora-line-trash"
@@ -239,7 +244,7 @@ export function FeaturedDatasetsEditor({
           className="mt-16 flex w-full items-center justify-center gap-8 rounded-8 border-2 border-dashed border-neutral-300 py-16 text-neutral-900 transition-colors hover:border-neutral-400"
         >
           <Icon name="agora-line-plus-circle" className="h-[20px] w-[20px]" />
-          <span className="text-xs">Adicionar um conjunto de dados</span>
+          <span className="text-xs">{t("admin-editorial:featuredDatasets.add")}</span>
         </button>
       )}
 
@@ -249,11 +254,11 @@ export function FeaturedDatasetsEditor({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Pesquisar conjunto de dados..."
+            placeholder={t("admin-editorial:featuredDatasets.searchPlaceholder")}
             className="text-sm w-full rounded-8 border border-neutral-300 px-12 py-[10px] outline-none focus:border-primary-500"
             autoFocus
           />
-          {isSearching && <p className="text-xs mt-4 text-neutral-400">A pesquisar...</p>}
+          {isSearching && <p className="text-xs mt-4 text-neutral-400">{t("admin-editorial:featuredDatasets.searching")}</p>}
           {searchResults.length > 0 && (
             <ul className="shadow-lg absolute z-10 mt-4 max-h-[240px] w-full overflow-y-auto rounded-8 border border-neutral-200 bg-white">
               {searchResults.map((d) => (
@@ -273,7 +278,7 @@ export function FeaturedDatasetsEditor({
             </ul>
           )}
           {searchQuery.length >= 2 && !isSearching && searchResults.length === 0 && (
-            <p className="text-xs mt-4 text-neutral-400">Nenhum resultado encontrado</p>
+            <p className="text-xs mt-4 text-neutral-400">{t("admin-editorial:featuredDatasets.noResults")}</p>
           )}
           <button
             type="button"
@@ -284,7 +289,7 @@ export function FeaturedDatasetsEditor({
             }}
             className="text-xs mt-4 text-neutral-400 hover:text-neutral-600"
           >
-            Cancelar
+            {t("admin-common:actions.cancel")}
           </button>
         </div>
       )}

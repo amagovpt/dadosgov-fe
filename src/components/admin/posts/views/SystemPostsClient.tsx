@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, CardNoResults, Icon, InputSelect } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
+import { Button, InputSelect } from "@ama-pt/agora-design-system";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchAdminPosts } from "@/service/api/posts";
@@ -18,8 +20,14 @@ import {
   sortPosts,
   type PostSortField,
 } from "@/components/admin/posts/config/postsListConfig";
+import type { BoPostsPage } from "@/service/types/admin/posts";
 
-export default function SystemPostsClient() {
+interface SystemPostsClientProps {
+  pageContent: BoPostsPage;
+}
+
+export default function SystemPostsClient({ pageContent }: SystemPostsClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-posts"]);
   const fetchPageSize = 100;
   const router = useRouter();
   const [allPosts, setAllPosts] = useState<Post[]>([]);
@@ -94,16 +102,31 @@ export default function SystemPostsClient() {
     [sortedPosts, currentPage, pageSize]
   );
 
-  const columns = useMemo(() => createPostColumns(), []);
+  const columns = useMemo(
+    () =>
+      createPostColumns({
+        title: t("admin-posts:columns.title"),
+        type: t("admin-posts:columns.type"),
+        news: t("admin-posts:list.news"),
+        page: t("admin-posts:list.page"),
+        status: t("admin-posts:columns.status"),
+        published: t("admin-posts:list.published"),
+        unpublished: t("admin-posts:list.unpublished"),
+        createdAt: t("admin-posts:columns.createdAt"),
+        updatedAt: t("admin-posts:columns.updatedAt"),
+        action: t("admin-posts:columns.action"),
+      }),
+    [t]
+  );
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Sistema", url: "#" },
-        { label: "Artigos", url: "/admin/system/posts" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-common:breadcrumbs.system"), url: "#" },
+        { label: t("admin-posts:title"), url: "/admin/system/posts" },
       ]}
-      title="Artigos"
+      title={pageContent.systemHero?.title ?? ""}
       isLoading={isLoading}
       count={sortedPosts.length}
       hasItems={paginatedPosts.length > 0}
@@ -112,8 +135,9 @@ export default function SystemPostsClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o título do artigo",
-        ariaLabel: "Pesquisar artigos",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        ariaLabel: pageContent.search?.label,
         onChange: handleSearch,
       }}
       filters={
@@ -121,7 +145,7 @@ export default function SystemPostsClient() {
           <InputSelect
             label=""
             hideLabel
-            placeholder="Filtrar por tipo"
+            placeholder={t("admin-posts:list.typePlaceholder")}
             id="filter-type"
             onChange={(options) => {
               updateFilter("typeFilter", options.length > 0 ? (options[0].value as string) : "");
@@ -129,13 +153,13 @@ export default function SystemPostsClient() {
           >
             <DropdownSection name="type">
               <DropdownOption value="" selected={filters.typeFilter === ""}>
-                Todos
+                {t("admin-posts:list.all")}
               </DropdownOption>
               <DropdownOption value="news" selected={filters.typeFilter === "news"}>
-                Notícias
+                {t("admin-posts:list.news")}
               </DropdownOption>
               <DropdownOption value="page" selected={filters.typeFilter === "page"}>
-                Página
+                {t("admin-posts:list.page")}
               </DropdownOption>
             </DropdownSection>
           </InputSelect>
@@ -143,9 +167,9 @@ export default function SystemPostsClient() {
             value={filters.statusFilter}
             onChange={(value) => updateFilter("statusFilter", value)}
             options={[
-              { value: "", label: "Todos" },
-              { value: "published", label: "Publicado" },
-              { value: "draft", label: "Despublicado" },
+              { value: "", label: t("admin-posts:list.all") },
+              { value: "published", label: t("admin-posts:list.published") },
+              { value: "draft", label: t("admin-posts:list.unpublished") },
             ]}
           />
         </>
@@ -159,16 +183,12 @@ export default function SystemPostsClient() {
           leadingIconHover="agora-solid-plus-circle"
           onClick={() => router.push("/admin/system/posts/new")}
         >
-          Criar um artigo
+          {t("admin-posts:list.create")}
         </Button>
       }
       emptyState={
-        <CardNoResults
-          position="center"
-          icon={<Icon name="agora-line-edit" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem artigos"
-          description="Nenhum artigo encontrado."
-          hasAnchor={false}
+        <AdminEmptyState
+          noResults={pageContent.systemNoResults}
         />
       }
     >
@@ -182,4 +202,3 @@ export default function SystemPostsClient() {
     </AdminListPage>
   );
 }
-

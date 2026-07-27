@@ -29,7 +29,34 @@ const notoSansMono = Noto_Sans_Mono({
   subsets: ["latin"],
 });
 
-const namespaces = ["common", "footer", "home", "datastories", "datasets", "login", "reuses"];
+const namespaces = [
+  "common",
+  "footer",
+  "home",
+  "datastories",
+  "datasets",
+  "login",
+  "reuses",
+  "organizations",
+  "dataservices",
+  "admin-common",
+  "admin-harvesters",
+  "admin-dataservices",
+  "admin-datasets",
+  "admin-community-resources",
+  "admin-organizations",
+  "admin-reuses",
+  "admin-discussions",
+  "admin-notifications",
+  "admin-users",
+  "admin-members",
+  "admin-profile",
+  "admin-posts",
+  "admin-topics",
+  "admin-logs",
+  "admin-editorial",
+  "admin-statistics"
+];
 
 export async function generateMetadata({
   params,

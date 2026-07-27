@@ -1,0 +1,106 @@
+{
+  "title": "Artigos",
+  "list": {
+    "typePlaceholder": "Filtrar por tipo",
+    "all": "Todos",
+    "news": "Notícias",
+    "page": "Página",
+    "published": "Publicado",
+    "unpublished": "Despublicado",
+    "create": "Criar um artigo"
+  },
+  "columns": {
+    "title": "Título",
+    "type": "Tipo",
+    "status": "Estado",
+    "createdAt": "Criado em",
+    "updatedAt": "Atualizado em",
+    "action": "Ação"
+  },
+  "new": {
+    "breadcrumbsHome": "Bem-vindo",
+    "imageMaxSize": "O ficheiro excede o tamanho máximo de 4 MB.",
+    "saveAuthError": "Erro ao guardar o artigo. Verifique a autenticação.",
+    "saveError": "Erro ao guardar o artigo."
+  },
+  "edit": {
+    "loadingEditor": "A carregar editor...",
+    "deletePopupTitle": "Tem a certeza que quer eliminar este artigo?",
+    "deletePopupDescription": "Essa ação não pode ser desfeita.",
+    "loading": "A carregar...",
+    "notFound": "Artigo não encontrado.",
+    "viewPage": "Veja a página do artigo",
+    "metadataTab": "Metadados",
+    "contentTab": "Conteúdo",
+    "metadataSaved": "Metadados guardados com sucesso.",
+    "contentSaved": "Conteúdo guardado com sucesso.",
+    "unpublishedSuccess": "Artigo despublicado com sucesso.",
+    "publishedSuccess": "Artigo publicado com sucesso.",
+    "saveAuthError": "Erro ao guardar. Verifique a autenticação.",
+    "saveMetadataError": "Erro ao guardar os metadados.",
+    "saveContentError": "Erro ao guardar o conteúdo.",
+    "unpublishAuthError": "Erro ao retirar. Verifique a autenticação.",
+    "unpublishError": "Erro ao retirar o artigo.",
+    "publishAuthError": "Erro ao publicar. Verifique a autenticação.",
+    "publishError": "Erro ao publicar o artigo.",
+    "deleteAuthError": "Erro ao eliminar. Verifique a autenticação.",
+    "deleteError": "Erro ao eliminar o artigo.",
+    "imageMaxSize": "O ficheiro excede o tamanho máximo de 4 MB.",
+    "imageUploaded": "Imagem carregada com sucesso.",
+    "imageUploadError": "Erro ao carregar a imagem."
+  },
+  "metadataForm": {
+    "requiredInfo": "Os campos marcados com um asterisco (*) são obrigatórios.",
+    "requiredInfoAlt": "Campos precedidos por uma estrela (*) são obrigatórios.",
+    "sectionTitle": "Descrição",
+    "sectionTitleUpper": "DESCRIÇÃO",
+    "articleTitle": "Título do artigo *",
+    "articleTitlePlaceholder": "Insira o título aqui",
+    "header": "Cabeçalho *",
+    "headerPlaceholder": "Insira o cabeçalho aqui",
+    "headerPlaceholderShort": "Insira aqui",
+    "articleType": "Tipo de artigo",
+    "itemType": "Tipo de Item",
+    "contentType": "Tipo de conteúdo",
+    "blocks": "Blocos",
+    "previewAlt": "Cobertura do artigo"
+  },
+  "contentForm": {
+    "label": "Conteúdo *",
+    "placeholder": "Insira aqui"
+  },
+  "validation": {
+    "titleRequired": "Indique o título do artigo.",
+    "headerRequired": "Indique o cabeçalho do artigo.",
+    "contentRequired": "Adicione o conteúdo do artigo."
+  },
+  "steps": {
+    "next": "Seguinte",
+    "previous": "Anterior",
+    "saveDraft": "Guardar como rascunho",
+    "savingDraft": "A guardar...",
+    "publishArticle": "Publicar artigo",
+    "publishingArticle": "A publicar..."
+  },
+  "danger": {
+    "unpublishing": "A retirar...",
+    "republishing": "A publicar..."
+  },
+  "editor": {
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "bold": "Negrito",
+    "italic": "Itálico",
+    "heading2": "Título H2",
+    "heading3": "Título H3",
+    "table": "Tabela",
+    "link": "Link",
+    "image": "Imagem",
+    "bulletList": "Lista não ordenada",
+    "orderedList": "Lista ordenada",
+    "codeBlock": "Bloco de código",
+    "blockquote": "Citação",
+    "linkPrompt": "URL do link:",
+    "imagePrompt": "URL da imagem:"
+  }
+}

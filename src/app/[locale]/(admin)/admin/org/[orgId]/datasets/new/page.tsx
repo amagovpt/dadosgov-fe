@@ -1,16 +1,28 @@
-"use client";
+import type { Metadata } from "next";
+import AdminOrgRedirect from "@/components/admin/AdminOrgRedirect";
+import { getBoDatasetsMetadata } from "@/service/queries/admin/datasets";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoDatasetsMetadata(locale);
+
+  return {
+    title: metadata.title,
+    description: stripHtmlTags(metadata.description),
+  };
+}
 
 export default function OrgDatasetsNewRedirect() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const params = searchParams.toString();
-    router.replace(`/admin/org/datasets/new${params ? `?${params}` : ""}`);
-  }, [router, searchParams]);
-
-  return null;
+  return (
+    <AdminOrgRedirect
+      targetPath="/admin/org/datasets/new"
+      preserveSearchParams
+      requireActiveOrganization={false}
+    />
+  );
 }

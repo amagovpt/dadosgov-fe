@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { StatusCard } from "@ama-pt/agora-design-system";
 import { useAuth } from "@/context/AuthContext";
 import AdminAuxiliarySidebar from "@/components/admin/AdminAuxiliarySidebar";
@@ -15,21 +16,30 @@ import HarvesterDescriptionSection from "@/components/admin/harvesters/form-sect
 import HarvesterImplementationSection from "@/components/admin/harvesters/form-sections/HarvesterImplementationSection";
 import HarvesterPreviewSection from "@/components/admin/harvesters/form-sections/HarvesterPreviewSection";
 import HarvesterPublishStep from "@/components/admin/harvesters/form-steps/HarvesterPublishStep";
-import { getHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
+import { getCreateHarvesterAuxiliaryItems } from "@/components/admin/harvesters/config/harvesterAuxiliaryContent";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import {
   buildHarvesterCreatePayload,
   type HarvesterFormField,
   validateHarvesterDetails,
 } from "@/components/admin/harvesters/form-state/harvesterFormModel";
 
-export default function HarvestersNewClient() {
+interface HarvestersNewClientProps {
+  pageContent: BoHarvestersPage;
+}
+
+export default function HarvestersNewClient({ pageContent }: HarvestersNewClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
+  const pageTitle = pageContent.createHero?.title ?? "";
 
   const [harvesterName, setHarvesterName] = useState("");
   const [harvesterDescription, setHarvesterDescription] = useState("");
@@ -99,7 +109,7 @@ export default function HarvestersNewClient() {
       sessionStorage.setItem("createdHarvesterId", created.id);
       router.push(`/admin/harvesters/new?step=3&id=${created.id}`);
     } catch (error: unknown) {
-      setCreateError(normalizeApiError(error, "Erro ao criar o harvester.").message);
+      setCreateError(normalizeApiError(error, t("admin-harvesters:form.createError")).message);
     } finally {
       setIsCreating(false);
     }
@@ -113,6 +123,11 @@ export default function HarvestersNewClient() {
       name: harvesterName,
       url: harvesterUrl,
       requireOrganizationProducer: true,
+      messages: {
+        harvesterProducer: t("admin-harvesters:form.validationErrors.producer"),
+        harvesterName: t("admin-harvesters:form.validationErrors.name"),
+        harvesterUrl: t("admin-harvesters:form.validationErrors.url"),
+      },
     });
 
     if (Object.keys(errors).length > 0) {
@@ -131,59 +146,55 @@ export default function HarvestersNewClient() {
       const job = await previewHarvestSource(buildPayload());
       setPreviewJob(job);
     } catch (error: unknown) {
-      setPreviewError(normalizeApiError(error, "Erro ao pré-visualizar o harvester.").message);
+      setPreviewError(normalizeApiError(error, t("admin-harvesters:form.previewError")).message);
     } finally {
       setIsPreviewing(false);
     }
   }
 
-  const stepTitles: Record<number, string> = {
-    1: "Descreva o seu harvester",
-    2: "Visualize o seu harvester",
-    3: "Finalize a publicação do seu harvester",
-  };
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
 
-  const auxiliaryItems = getHarvesterAuxiliaryItems({
-    hasHarvesterNameError: hasError("harvesterName"),
-    hasHarvesterUrlError: hasError("harvesterUrl"),
+  const auxiliaryItems = getCreateHarvesterAuxiliaryItems({
+    items: pageContent.createAuxiliaryItems,
   });
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: "Harvesters", url: "/admin/system/harvesters" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: t("admin-harvesters:title"), url: "/admin/system/harvesters" },
         {
-          label: "Formulário de publicação de um harvester",
+          label: pageTitle,
           url: "/admin/harvesters/new",
         },
       ]}
-      title="Formulário de publicação de um harvester"
+      title={pageTitle}
     >
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
-        labelWord="Passo"
+        labelWord={t("admin-common:stepper.step")}
         labelFormat="slash"
-        stepTitle={stepTitles[currentStep] || ""}
+        stepTitle={stepTitle}
       />
 
       <div className="admin-page__body">
         <div className="admin-page__form-area">
           {currentStep === 1 && (
             <>
-              <StatusCard
-                variant="informative"
-                showIcon
-                description={
-                  <>
-                    <strong>O que é um harvester?</strong>
-                    <br />
-                    Um harvester é um mecanismo para recolher metadados a partir de um catálogo e
-                    armazená-los noutra plataforma, garantindo o acesso aos dados.
-                  </>
-                }
-              />
+              {pageContent.introduction ? (
+                <StatusCard
+                  variant="informative"
+                  showIcon
+                  description={
+                    <>
+                      <strong>{pageContent.introduction.title}</strong>
+                      <br />
+                      {formatHtmlParagraphs(pageContent.introduction.description)}
+                    </>
+                  }
+                />
+              ) : null}
 
               <form
                 className="admin-page__form"
@@ -194,7 +205,7 @@ export default function HarvestersNewClient() {
                 }}
               >
                 <p className="pt-32 text-base leading-7 text-neutral-900">
-                  Os campos marcados com um asterisco ( * ) são obrigatórios.
+                  {t("admin-harvesters:form.requiredFields")}
                 </p>
 
                 <HarvesterProducerSection
@@ -258,7 +269,7 @@ export default function HarvestersNewClient() {
 
                 <AdminStepActions
                   primaryAction={{
-                    label: "Seguinte",
+                    label: t("admin-harvesters:form.next"),
                     type: "submit",
                     hasIcon: true,
                     trailingIcon: "agora-line-arrow-right-circle",
@@ -285,6 +296,7 @@ export default function HarvestersNewClient() {
           {currentStep === 3 && (
             <HarvesterPublishStep
               createError={createError}
+              createdPendingCard={pageContent.createdPendingCard}
               onViewInAdmin={() =>
                 router.push(
                   createdHarvesterId
@@ -297,7 +309,9 @@ export default function HarvestersNewClient() {
           )}
         </div>
 
-        {currentStep === 1 && <AdminAuxiliarySidebar items={auxiliaryItems} />}
+        {currentStep === 1 && auxiliaryItems.length > 0 ? (
+          <AdminAuxiliarySidebar items={auxiliaryItems} />
+        ) : null}
       </div>
     </AdminLayout>
   );

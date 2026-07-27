@@ -1,0 +1,43 @@
+{
+  "title": "Estatísticas",
+  "breadcrumbs": {
+    "user": "Estatísticas",
+    "organization": "Estatísticas"
+  },
+  "tabs": {
+    "user": "Utilizador",
+    "organization": "Organização",
+    "datasets": "Conjuntos de dados",
+    "dataservices": "API",
+    "reuses": "Reutilizações"
+  },
+  "actions": {
+    "publishOnPortal": "Publique no portal",
+    "report": "Relatório",
+    "catalog": "Catálogo",
+    "aggregatedStatistics": "Estatísticas agregadas"
+  },
+  "states": {
+    "loading": "A carregar...",
+    "results_zero": "{{count}} resultado",
+    "results_one": "{{count}} resultado",
+    "results_other": "{{count}} resultados"
+  },
+  "table": {
+    "datasetTitle": "TÍTULO DO CONJUNTO DE DADOS",
+    "dataserviceTitle": "TÍTULO DA API",
+    "reuseTitle": "TÍTULO DA REUTILIZAÇÃO",
+    "title": "Título",
+    "discussions": "Discussões",
+    "views": "Visualizações",
+    "downloads": "Downloads",
+    "reuses": "Reutilizações",
+    "favorites": "Favoritos",
+    "status": "Estado"
+  },
+  "status": {
+    "private": "Privado",
+    "archived": "Arquivado",
+    "public": "Público"
+  }
+}

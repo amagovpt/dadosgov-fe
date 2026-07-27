@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   DropdownOption,
   DropdownSection,
@@ -26,7 +27,6 @@ type ReusesEditDatasetsTabProps = {
   onRemoveAssociatedDataset: (datasetId: string) => void;
   onRemoveAllAssociatedDatasets: () => void;
   onDatasetLinkChange: (index: number, value: string) => void;
-  // LEDG-1748 PR 2: per-URL metadata inputs.
   onDatasetTitleChange: (index: number, value: string) => void;
   onDatasetDescriptionChange: (index: number, value: string) => void;
   onRemoveDatasetLink: (index: number) => void;
@@ -54,6 +54,8 @@ export default function ReusesEditDatasetsTab({
   onAddDatasetLink,
   onSave,
 }: ReusesEditDatasetsTabProps) {
+  const { t } = useTranslation("admin-reuses");
+
   const availableDatasets = (() => {
     const combined: Dataset[] = [...selectedDatasets, ...datasetSearchResults, ...myDatasets];
     const associatedIds = new Set(associatedDatasets.map((dataset) => dataset.id));
@@ -90,18 +92,18 @@ export default function ReusesEditDatasetsTab({
             <StatusCard
               variant="warning"
               showIcon
-              description="Pode associar conjuntos de dados deste portal ou indicar links para conjuntos de dados externos, mas não as duas opções na mesma reutilização."
+              description={t("form.datasetMutualExclusion")}
             />
           </div>
 
           <InputSelect
-            label="Pesquisar um conjunto de dados"
-            placeholder="Selecione conjuntos de dados..."
+            label={t("form.datasetSearchLabel")}
+            placeholder={t("form.datasetSearchPlaceholder")}
             id="edit-dataset-search"
             type="checkbox"
             searchable
-            searchInputPlaceholder="Escreva para pesquisar em todos os conjuntos de dados..."
-            searchNoResultsText="Nenhum resultado encontrado"
+            searchInputPlaceholder={t("form.datasetSearchInputPlaceholder")}
+            searchNoResultsText={t("form.noResults")}
             onSearchInputChange={onDatasetSearchChange}
             onChange={(options) => {
               const selectedIds = options.map((option) => String(option.value));
@@ -126,7 +128,7 @@ export default function ReusesEditDatasetsTab({
               {selectedDatasets.map((dataset) => (
                 <Tag
                   key={dataset.id}
-                  aria-label={`Remover ${dataset.title}`}
+                  aria-label={t("form.removeDataset", { title: dataset.title })}
                   onClick={() => onRemoveSelectedDataset(dataset.id)}
                 >
                   {dataset.title}
@@ -136,7 +138,7 @@ export default function ReusesEditDatasetsTab({
           )}
 
           <div className="admin-page__divider-or">
-            <span className="admin-page__divider-or-text">ou</span>
+            <span className="admin-page__divider-or-text">{t("form.or")}</span>
           </div>
 
           <ReuseExternalDatasetFields

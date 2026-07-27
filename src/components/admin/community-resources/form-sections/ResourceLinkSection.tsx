@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { InputText } from "@ama-pt/agora-design-system";
 
 interface ResourceLinkSectionProps {
@@ -14,21 +15,25 @@ export default function ResourceLinkSection({
   hasUrlError,
   onResourceUrlChange,
 }: ResourceLinkSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-community-resources"]);
+
   return (
     <>
-      <h2 className="admin-page__section-title">Reutilização</h2>
+      <h2 className="admin-page__section-title">
+        {t("admin-community-resources:form.reuse")}
+      </h2>
 
       <div className="admin-page__fields-group">
         <InputText
-          label="Link exato para o ficheiro *"
-          placeholder="Insira o link para o ficheiro"
+          label={t("admin-community-resources:form.exactFileLinkRequired")}
+          placeholder={t("admin-community-resources:form.exactFileLinkPlaceholder")}
           id="resource-url"
           value={resourceUrl}
           onChange={onResourceUrlChange}
           hasError={hasUrlError}
           hasFeedback={hasUrlError}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("admin-common:forms.requiredField")}
         />
       </div>
     </>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgReuses } from "@/service/api/organizations";
@@ -10,13 +11,21 @@ import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { useViewedOrganizationName } from "@/hooks/useViewedOrganization";
 import { useAuth } from "@/context/AuthContext";
 import { filterByStatus } from "@/utils/filterByStatus";
+import { buildOrganizationAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { SortOrder, useSortControls } from "@/hooks/admin-lists/useClientTableState";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import { StatusFilterSelect } from "@/components/admin/StatusFilterSelect";
 import { ReuseSortField, createReuseColumns, sortReuses } from "@/components/admin/reuses/config/reusesListConfig";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function OrgReusesClient() {
+interface OrgReusesClientProps {
+  orgId?: string;
+  pageContent: BoReusesPage;
+}
+
+export default function OrgReusesClient({ pageContent }: OrgReusesClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const params = useParams();
   const routeOrgId = (params?.orgId as string | undefined) ?? undefined;
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
@@ -81,28 +90,36 @@ export default function OrgReusesClient() {
       createReuseColumns({
         linkStyle: "anchor",
         editHref: (reuse) => `/admin/org/reuses/edit?slug=${reuse.slug}`,
+        labels: {
+          title: t("admin-reuses:columns.title"),
+          titleShort: t("admin-reuses:columns.titleShort"),
+          status: t("admin-reuses:columns.status"),
+          createdAt: t("admin-reuses:columns.createdAt"),
+          datasets: t("admin-reuses:columns.datasets"),
+          actions: t("admin-reuses:columns.actions"),
+        },
       }),
-    []
+    [t]
   );
 
   if (!isOrgLoading && !resolvedOrgId) {
     return (
       <AdminEmptyState
         icon="agora-line-user-buildings"
-        title="Sem organizações"
-        description="Não pertence a nenhuma organização."
+        title={t("admin-reuses:empty.noOrganizationTitle")}
+        description={t("admin-reuses:empty.noOrganizationDescription")}
       />
     );
   }
 
   return (
     <AdminListPage
-      breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: orgName || "Organização", url: "#" },
-        { label: "Reutilizações", url: "#" },
-      ]}
-      title="Reutilizações"
+      breadcrumbItems={buildOrganizationAdminBreadcrumbItems({
+        t,
+        organizationLabel: orgName ?? undefined,
+        sectionLabel: t("admin-reuses:title"),
+      })}
+      title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={filteredReuses.length}
       currentPage={currentPage}
@@ -110,8 +127,9 @@ export default function OrgReusesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setItemsPerPage}
       search={{
-        placeholder: "Pesquise o nome da reutilização",
-        ariaLabel: "Pesquisar reutilizações",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       filters={
         <StatusFilterSelect
@@ -124,9 +142,7 @@ export default function OrgReusesClient() {
       }
       emptyState={
         <AdminEmptyState
-          icon="agora-line-edit"
-          title="Sem publicações"
-          description="A organização ainda não publicou uma reutilização."
+          noResults={pageContent.orgNoResults}
           createUrl="/admin/reuses/new"
         />
       }

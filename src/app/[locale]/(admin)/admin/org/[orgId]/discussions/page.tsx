@@ -1,16 +1,31 @@
 import type { Metadata } from "next";
 import OrgDiscussionsClient from "@/components/admin/discussions/OrgDiscussionsClient";
+import {
+  getBoDiscussions,
+  getBoDiscussionsMetadata,
+} from "@/service/queries/admin/discussions";
 
-export const metadata: Metadata = {
-  title: "Discussões - Organização - Admin - dados.gov.pt",
-  description: "Gestão de discussões da organização no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; orgId: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoDiscussionsMetadata(locale, "orgMetadata");
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
 
 export default async function OrgDiscussionsPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { orgId } = await params;
-  return <OrgDiscussionsClient orgId={orgId} />;
+  const { locale, orgId } = await params;
+  const pageContent = await getBoDiscussions(locale);
+
+  return <OrgDiscussionsClient orgId={orgId} pageContent={pageContent} />;
 }

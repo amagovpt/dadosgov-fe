@@ -1,0 +1,43 @@
+{
+  "title": "Organizations",
+  "columns": {
+    "name": "Name",
+    "createdAt": "Created at",
+    "datasets": "Datasets",
+    "reuses": "Reuses",
+    "members": "Members",
+    "deleteAriaLabel": "Delete {{name}}"
+  },
+  "delete": {
+    "title": "Are you sure you want to delete this organization?",
+    "description": "This action is irreversible.",
+    "closeAriaLabel": "Close"
+  },
+  "form": {
+    "nameRequired": "Enter the organization name.",
+    "descriptionRequired": "Describe the organization.",
+    "createError": "Error creating the organization.",
+    "fileTooLarge": "The file exceeds the maximum size of 4 MB.",
+    "requiredFields": "Fields marked with an asterisk ( * ) are required.",
+    "organizationLabel": "Organization",
+    "organizationPlaceholder": "Search for an organization on dados.gov.pt...",
+    "searchInputPlaceholder": "Type to search...",
+    "noResults": "No results found",
+    "or": "or",
+    "createOrganization": "Create an organization",
+    "descriptionSectionTitle": "Description",
+    "nameField": "Name *",
+    "namePlaceholder": "Enter the name here",
+    "acronymField": "Acronym",
+    "acronymPlaceholder": "Enter the acronym here",
+    "descriptionField": "Description *",
+    "descriptionPlaceholder": "Enter the description here",
+    "websiteField": "Website",
+    "websitePlaceholder": "Enter the URL here",
+    "logoSectionTitle": "Logo",
+    "logoFileLabel": "File",
+    "logoPreviewAlt": "Logo preview",
+    "logoPreviewLabel": "Preview:",
+    "previous": "Previous"
+  }
+}

@@ -1,7 +1,11 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Button, InputText, InputTextArea, StatusCard, usePopupContext } from "@ama-pt/agora-design-system";
 import { ApiToken, UserPublic } from "@/service/types/identity";
+import AdminDangerActions from "@/components/admin/forms/AdminDangerActions";
+import type { AdminCard } from "@/service/types/admin/common";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { AvatarSection } from "./AvatarSection";
 import { ApiKeysSection } from "./ApiKeysSection";
 import { EmailSection } from "./EmailSection";
@@ -26,6 +30,7 @@ interface ProfileFormTabProps {
   avatarError: string | null;
   avatarUploaderKey: number;
   isDeletingAvatar: boolean;
+  deleteAvatarCard?: AdminCard;
   onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDeleteAvatar: () => Promise<void>;
   onAvatarSecurityError: () => void;
@@ -69,6 +74,7 @@ export function ProfileFormTab({
   avatarError,
   avatarUploaderKey,
   isDeletingAvatar,
+  deleteAvatarCard,
   onAvatarChange,
   onDeleteAvatar,
   onAvatarSecurityError,
@@ -93,6 +99,7 @@ export function ProfileFormTab({
   onConfirmEmailChange,
   onCancelEmailChange,
 }: ProfileFormTabProps) {
+  const { t } = useTranslation(["admin-common", "admin-profile"]);
   const { show } = usePopupContext();
 
   return (
@@ -102,10 +109,10 @@ export function ProfileFormTab({
         maxWidth: "calc(100% - var(--admin-auxiliar-width) - var(--admin-auxiliar-gap))",
       }}
     >
-      <h2 className="admin-page__section-title">EDITAR PERFIL</h2>
+      <h2 className="admin-page__section-title">{t("admin-profile:form.sectionTitle")}</h2>
 
       {saveSuccess && (
-        <StatusCard variant="success" showIcon description="Perfil guardado com sucesso." />
+        <StatusCard variant="success" showIcon description={t("admin-profile:form.saveSuccess")} />
       )}
       {saveError && <StatusCard variant="danger" showIcon description={saveError} />}
 
@@ -113,8 +120,8 @@ export function ProfileFormTab({
         <div className="flex gap-[18px]">
           <div className="flex-1">
             <InputText
-              label="Nome *"
-              placeholder="Insira o nome aqui"
+              label={t("admin-profile:form.firstNameLabel")}
+              placeholder={t("admin-profile:form.firstNamePlaceholder")}
               id="first-name"
               value={firstName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -124,8 +131,8 @@ export function ProfileFormTab({
           </div>
           <div className="flex-1">
             <InputText
-              label="Último nome *"
-              placeholder="Insira o apelido aqui"
+              label={t("admin-profile:form.lastNameLabel")}
+              placeholder={t("admin-profile:form.lastNamePlaceholder")}
               id="last-name"
               value={lastName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -136,8 +143,8 @@ export function ProfileFormTab({
         </div>
 
         <InputTextArea
-          label="Biografia"
-          placeholder="Insira a descrição aqui"
+          label={t("admin-profile:form.biographyLabel")}
+          placeholder={t("admin-profile:form.biographyPlaceholder")}
           id="biography"
           rows={4}
           value={about}
@@ -145,8 +152,8 @@ export function ProfileFormTab({
         />
 
         <InputText
-          label="Site da Internet"
-          placeholder="Insira o URL aqui"
+          label={t("admin-profile:form.websiteLabel")}
+          placeholder={t("admin-profile:form.websitePlaceholder")}
           id="website"
           value={website}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onWebsiteChange(e.target.value)}
@@ -189,8 +196,8 @@ export function ProfileFormTab({
         <div className="flex items-end gap-16">
           <div className="flex-1">
             <InputText
-              label="Senha"
-              placeholder="••••••••"
+              label={t("admin-profile:form.passwordLabel")}
+              placeholder="........"
               id="password"
               type="password"
               readOnly
@@ -205,13 +212,13 @@ export function ProfileFormTab({
               leadingIconHover="agora-solid-edit"
               onClick={() =>
                 show(<ChangePasswordPopupContent />, {
-                  title: "Altere a sua senha",
-                  closeAriaLabel: "Fechar",
+                  title: t("admin-profile:form.changePasswordTitle"),
+                  closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
                   dimensions: "m",
                 })
               }
             >
-              Alterar senha
+              {t("admin-profile:form.changePasswordButton")}
             </Button>
           )}
         </div>
@@ -226,38 +233,30 @@ export function ProfileFormTab({
           onClick={onSave}
           disabled={isSaving}
         >
-          {isSaving ? "A guardar..." : "Guardar"}
+          {isSaving ? t("admin-common:actions.saving") : t("admin-common:actions.save")}
         </Button>
       </div>
 
       {profile?.avatar_thumbnail && (
-        <div className="dataset-edit-danger-actions" style={{ marginTop: 16 }}>
-          <StatusCard
-            variant="danger"
-            showIcon
-            description={
-              <>
-                <strong>Atenção esta ação é irreversível.</strong>
-                <br />
-                <Button
-                  appearance="link"
-                  variant="primary"
-                  hasIcon
-                  trailingIcon="agora-line-arrow-right-circle"
-                  trailingIconHover="agora-solid-arrow-right-circle"
-                  onClick={() =>
-                    show(<DeleteAvatarPopupContent onConfirm={onDeleteAvatar} />, {
-                      title: "Eliminar foto de perfil",
-                      closeAriaLabel: "Fechar",
-                      dimensions: "s",
-                    })
-                  }
-                  disabled={isDeletingAvatar}
-                >
-                  {isDeletingAvatar ? "A eliminar..." : "Eliminar foto de perfil"}
-                </Button>
-              </>
-            }
+        <div style={{ marginTop: 16 }}>
+          <AdminDangerActions
+            actions={[
+              {
+                variant: "danger",
+                heading: deleteAvatarCard?.title,
+                description: formatHtmlParagraphs(deleteAvatarCard?.description),
+                actionLabel: isDeletingAvatar
+                  ? t("admin-profile:form.deleteAvatarLoading")
+                  : deleteAvatarCard?.anchor?.children,
+                onAction: () =>
+                  show(<DeleteAvatarPopupContent onConfirm={onDeleteAvatar} />, {
+                    title: t("admin-profile:form.deleteAvatarTitle"),
+                    closeAriaLabel: t("admin-common:deleteAccount.closeAriaLabel"),
+                    dimensions: "s",
+                  }),
+              },
+            ]}
+            disabled={isDeletingAvatar}
           />
         </div>
       )}

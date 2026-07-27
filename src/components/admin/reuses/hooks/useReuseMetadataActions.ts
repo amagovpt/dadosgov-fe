@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { updateReuse } from "@/service/api/reuses";
 import type { Reuse } from "@/service/types/reuse";
 
@@ -38,6 +39,8 @@ export function useReuseMetadataActions({
   focusFirstError,
   showApiSuccess,
 }: UseReuseMetadataActionsParams) {
+  const { t } = useTranslation("admin-reuses");
+
   async function handleSaveMetadata() {
     if (!reuse) return;
 
@@ -74,7 +77,7 @@ export function useReuseMetadataActions({
       });
 
       setReuse(updated);
-      showApiSuccess("Reutilização atualizada com sucesso.");
+      showApiSuccess(t("edit.metadataSaved"));
     } catch (error: unknown) {
       const err = error as { data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
@@ -83,7 +86,7 @@ export function useReuseMetadataActions({
           .join(", ");
         setApiError(messages);
       } else {
-        setApiError("Erro ao atualizar a reutilização.");
+        setApiError(t("edit.metadataSaveError"));
       }
     } finally {
       setIsSubmitting(false);

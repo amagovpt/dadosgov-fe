@@ -2,6 +2,7 @@
 
 import type { ChangeEvent } from "react";
 import { Button, InputText } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 interface ExternalUrlEntry {
   url: string;
@@ -36,6 +37,8 @@ export default function AdminExternalUrlFields({
   addLabel,
   onAddEntry,
 }: AdminExternalUrlFieldsProps) {
+  const { t } = useTranslation("admin-common");
+
   return (
     <>
       {entries.map((entry, index) => (
@@ -64,7 +67,7 @@ export default function AdminExternalUrlFields({
                 leadingIconHover="agora-solid-trash"
                 onClick={() => onRemoveEntry(index)}
               >
-                Eliminar
+                {t("actions.delete")}
               </Button>
             </div>
           )}

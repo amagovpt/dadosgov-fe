@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, InputText } from "@ama-pt/agora-design-system";
 import DragAndDropUploader from "@/components/Primitives/DragAndDropUploader/DragAndDropUploader";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
@@ -15,6 +16,7 @@ export default function FileUploadModal({
   hasError,
   allowedExtensions = null,
 }: FileUploadModalProps) {
+  const { t } = useTranslation("admin-common");
   const hasSelection = uploadedFiles.length > 0 || resourceUrls.length > 0;
   const [localUrl, setLocalUrl] = useState("");
   const localUrlRef = useRef("");
@@ -33,20 +35,22 @@ export default function FileUploadModal({
   const [securityErrors, setSecurityErrors] = useState<string[]>([]);
   const [uploaderKey, setUploaderKey] = useState(0);
 
+  const invalidUrlMessage = t("fileUpload.url.invalid");
+
   const handleAddUrl = () => {
     const trimmedUrl = (localUrl || localUrlRef.current).trim();
     if (!trimmedUrl) {
-      setUrlError("Insira um URL válido, começando com https://");
+      setUrlError(invalidUrlMessage);
       return;
     }
     try {
       const parsed = new URL(trimmedUrl);
       if (parsed.protocol !== "https:") {
-        setUrlError("Insira um URL válido, começando com https://");
+        setUrlError(invalidUrlMessage);
         return;
       }
     } catch {
-      setUrlError("Insira um URL válido, começando com https://");
+      setUrlError(invalidUrlMessage);
       return;
     }
     onUrlAdd(trimmedUrl);
@@ -59,7 +63,7 @@ export default function FileUploadModal({
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <InputText
-          label="Link exato para o ficheiro"
+          label={t("fileUpload.url.label")}
           placeholder="https://"
           id="inline-resource-url"
           value={localUrl}
@@ -85,14 +89,14 @@ export default function FileUploadModal({
             leadingIconHover="agora-solid-plus-circle"
             onClick={handleAddUrl}
           >
-            Adicionar
+            {t("fileUpload.actions.add")}
           </Button>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
         <div className="flex-1 border-t border-neutral-300" />
-        <span className="text-sm px-3 text-neutral-500">ou</span>
+        <span className="px-3 text-sm text-neutral-500">{t("fileUpload.or")}</span>
         <div className="flex-1 border-t border-neutral-300" />
       </div>
 
@@ -100,14 +104,14 @@ export default function FileUploadModal({
         <DragAndDropUploader
           key={uploaderKey}
           multiple
-          label="Ficheiros"
-          dragAndDropLabel="Arraste e largue os ficheiros aqui"
-          inputLabel="Selecione ou arraste os ficheiros"
-          selectedFilesLabel="ficheiros selecionados"
-          removeFileButtonLabel="Remover ficheiro"
-          replaceFileButtonLabel="Substituir ficheiro"
-          maxSizeExceededErrorLabel="O ficheiro excede o tamanho máximo permitido."
-          forbiddenExtensionErrorLabel="Formato de ficheiro não permitido."
+          label={t("fileUpload.files.label")}
+          dragAndDropLabel={t("fileUpload.files.dragAndDrop")}
+          inputLabel={t("fileUpload.files.selectOrDrag")}
+          selectedFilesLabel={t("fileUpload.files.selectedFiles")}
+          removeFileButtonLabel={t("fileUpload.files.removeFile")}
+          replaceFileButtonLabel={t("fileUpload.files.replaceFile")}
+          maxSizeExceededErrorLabel={t("fileUpload.files.maxSizeExceeded")}
+          forbiddenExtensionErrorLabel={t("fileUpload.files.forbiddenExtension")}
           hasError={
             securityErrors.length > 0 || extensionErrors.length > 0 || (hasError && !hasSelection)
           }
@@ -117,13 +121,15 @@ export default function FileUploadModal({
           feedbackState="danger"
           feedbackText={
             securityErrors.length > 0
-              ? "O ficheiro contém código malicioso ou scripts não autorizados que comprometem a segurança do sistema."
+              ? t("fileUpload.files.securityError")
               : extensionErrors.length > 0
                 ? extensionErrors.length === 1
-                  ? `Tipo de ficheiro inválido. "${extensionErrors[0]}" não foi adicionado.`
-                  : `Tipo de ficheiro inválido. Os seguintes ficheiros não foram adicionados: ${extensionErrors.join(", ")}`
+                  ? t("fileUpload.files.invalidSingle", { name: extensionErrors[0] })
+                  : t("fileUpload.files.invalidMultiple", {
+                      names: extensionErrors.join(", "),
+                    })
                 : hasError && !hasSelection
-                  ? "Campo obrigatório"
+                  ? t("forms.requiredField")
                   : undefined
           }
           onChange={(e) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChangeEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, InputText, InputTextArea } from "@ama-pt/agora-design-system";
 import type { RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 
@@ -25,13 +26,15 @@ export default function ReuseExternalDatasetFields({
   onDatasetDescriptionChange,
   onRemoveDatasetLink,
 }: ReuseExternalDatasetFieldsProps) {
+  const { t } = useTranslation("admin-reuses");
+
   return (
     <>
       {datasetLinks.map((link, index) => (
         <div key={`dataset-${index}`} className={itemClassName}>
           <InputText
-            label="Link para o conjunto de dados"
-            placeholder="Insira o URL aqui"
+            label={t("form.externalDataset.linkLabel")}
+            placeholder={t("form.externalDataset.linkPlaceholder")}
             id={`${idPrefix}-dataset-url-${index}`}
             value={link.url}
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
@@ -43,8 +46,8 @@ export default function ReuseExternalDatasetFields({
             errorFeedbackText={datasetLinkErrors[index]}
           />
           <InputText
-            label="Título (opcional)"
-            placeholder="Nome do conjunto de dados externo"
+            label={t("form.externalDataset.titleLabel")}
+            placeholder={t("form.externalDataset.titlePlaceholder")}
             id={`${idPrefix}-dataset-title-${index}`}
             value={link.title ?? ""}
             required={false}
@@ -53,8 +56,8 @@ export default function ReuseExternalDatasetFields({
             }
           />
           <InputTextArea
-            label="Descrição (opcional)"
-            placeholder="Pequena descrição do conjunto de dados"
+            label={t("form.externalDataset.descriptionLabel")}
+            placeholder={t("form.externalDataset.descriptionPlaceholder")}
             id={`${idPrefix}-dataset-description-${index}`}
             value={link.description ?? ""}
             required={false}
@@ -73,7 +76,7 @@ export default function ReuseExternalDatasetFields({
                 leadingIconHover="agora-solid-trash"
                 onClick={() => onRemoveDatasetLink(index)}
               >
-                Eliminar
+                {t("form.externalDataset.delete")}
               </Button>
             </div>
           )}

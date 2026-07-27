@@ -1,0 +1,29 @@
+{
+  "title": "Logs",
+  "actions": {
+    "stopAutoRefresh": "Stop auto-refresh",
+    "autoRefresh": "Auto-refresh (10s)",
+    "refresh": "Refresh",
+    "download": "Download"
+  },
+  "loadingFiles": "Loading log files...",
+  "select": {
+    "label": "Log file",
+    "placeholder": "Select file"
+  },
+  "summary": {
+    "file": "File:",
+    "size": "Size:",
+    "modified": "Modified:",
+    "truncated": "Showing only the end of the file",
+    "updatedAt": "Updated at {{time}}"
+  },
+  "errors": {
+    "contentLoad": "Could not load the file content."
+  },
+  "viewer": {
+    "ariaLabel": "Log file content",
+    "loading": "Loading content...",
+    "empty": "Empty file."
+  }
+}

@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
 import SystemPostsClient from "@/components/admin/posts/views/SystemPostsClient";
+import { getBoPosts, getBoPostsMetadata } from "@/service/queries/admin/posts";
 
-export const metadata: Metadata = {
-  title: "Artigos - Sistema - Admin - dados.gov.pt",
-  description: "Gestão de artigos do sistema no portal dados.gov.pt.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const metadata = await getBoPostsMetadata(locale, "systemMetadata");
 
-export default function SystemPostsPage() {
-  return <SystemPostsClient />;
+  return {
+    title: metadata.title,
+    description: metadata.description,
+  };
+}
+
+export default async function SystemPostsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const pageContent = await getBoPosts(locale);
+
+  return <SystemPostsClient pageContent={pageContent} />;
 }

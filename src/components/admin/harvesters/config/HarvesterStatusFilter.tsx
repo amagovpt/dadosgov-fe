@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import {
   DropdownOption,
   DropdownSection,
@@ -13,12 +14,14 @@ interface HarvesterStatusFilterProps {
 }
 
 export function HarvesterStatusFilter({ value, onChange }: HarvesterStatusFilterProps) {
+  const { t } = useTranslation(["admin-common", "admin-harvesters"]);
+
   return (
     <>
       <InputSelect
         label=""
         hideLabel
-        placeholder="Filtrar por estado"
+        placeholder={t("admin-common:filters.statusPlaceholder")}
         id="filter-status"
         onChange={(options) => {
           onChange(options.length > 0 ? (options[0].value as string) : "");
@@ -26,22 +29,22 @@ export function HarvesterStatusFilter({ value, onChange }: HarvesterStatusFilter
       >
         <DropdownSection name="status">
           <DropdownOption value="" selected={value === ""}>
-            Todos
+            {t("admin-harvesters:filters.options.all")}
           </DropdownOption>
           <DropdownOption value="pending" selected={value === "pending"}>
-            Em espera de validação
+            {t("admin-harvesters:filters.options.pending")}
           </DropdownOption>
           <DropdownOption value="accepted" selected={value === "accepted"}>
-            Validado
+            {t("admin-harvesters:filters.options.accepted")}
           </DropdownOption>
           <DropdownOption value="refused" selected={value === "refused"}>
-            Recusado
+            {t("admin-harvesters:filters.options.refused")}
           </DropdownOption>
           <DropdownOption value="done" selected={value === "done"}>
-            Terminado
+            {t("admin-harvesters:filters.options.done")}
           </DropdownOption>
           <DropdownOption value="failed" selected={value === "failed"}>
-            Falhado
+            {t("admin-harvesters:filters.options.failed")}
           </DropdownOption>
         </DropdownSection>
       </InputSelect>
@@ -51,7 +54,7 @@ export function HarvesterStatusFilter({ value, onChange }: HarvesterStatusFilter
           <StatusCard
             variant="informative"
             showIcon
-            description="O estado 'Validado' refere-se ao processo de aprovação do harvester e é independente da última execução — a lista pode incluir harvesters com última execução 'Terminado' ou 'Falhado'."
+            description={t("admin-harvesters:filters.acceptedInfo")}
           />
         </div>
       )}

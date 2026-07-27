@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar, CardNoResults, Icon } from "@ama-pt/agora-design-system";
 import type { Activity } from "@/service/types/catalog";
 import TextLink from "@/components/Primitives/TextLink";
@@ -16,22 +17,24 @@ export default function DataservicesEditActivitiesTab({
   activitiesLoaded,
   translateActivityLabel,
 }: DataservicesEditActivitiesTabProps) {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+
   return (
     <div className="mt-24">
-      {activitiesLoading && <p className="text-sm text-neutral-700">A carregar...</p>}
+      {activitiesLoading && <p className="text-sm text-neutral-700">{t("admin-common:loading")}</p>}
       {activitiesLoaded && activities.length === 0 && (
         <CardNoResults
           position="center"
           icon={<Icon name="agora-line-time" className="icon-xl h-12 w-12 text-primary-500" />}
-          title="Sem atividades"
-          description="Ainda não existem atividades registadas nesta API."
+          title={t("admin-dataservices:edit.activitiesEmptyTitle")}
+          description={t("admin-dataservices:edit.activitiesEmptyDescription")}
           hasAnchor={false}
         />
       )}
       {activitiesLoaded && activities.length > 0 && (
         <>
           <h2 className="mb-16 text-base font-medium text-neutral-900">
-            {activities.length} ATIVIDADES
+            {t("admin-dataservices:edit.activitiesCount", { count: activities.length })}
           </h2>
           <div className="flex flex-col gap-12">
             {activities.map((activity, index) => (

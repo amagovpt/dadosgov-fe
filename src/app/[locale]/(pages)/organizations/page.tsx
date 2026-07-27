@@ -3,22 +3,46 @@ import OrganizationsClient from '@/components/organizations/OrganizationsClient'
 import { OrganizationFilters } from "@/service/types/identity";
 import { serverForwardedHeaders } from "@/service/utils/serverForwardedHeaders";
 import { Metadata } from 'next';
+import { getFrontOfficeMetadata, getFrontOfficePage } from "@/service/queries/common";
+import { stripHtmlTags } from "@/utils/htmlToParagraphs";
+import { FrontOfficePage } from "@/service/types/shared/common";
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+
+    try {
+        const metadata = await getFrontOfficeMetadata("organizations", locale);
+
+        return {
+            title: metadata.title,
+            description: stripHtmlTags(metadata.description),
+        };
+    } catch (error) {
+        // Fall back to the layout's default title/description rather than failing
+        // the whole page render when the CMS is unreachable.
+        console.error("Error fetching organizations metadata:", error);
+        return {};
+    }
+}
 
 // The page is already dynamic (it reads searchParams); we intentionally do NOT
 // force-dynamic so the listing fetch can use the Next.js Data Cache
 // (revalidate: 60) — repeated page/query loads are served from cache and don't
 // hit the backend rate-limit (per-IP, collapsed site-wide by the F5).
 
-export const metadata: Metadata = {
-    title: 'Organizações - dados.gov.pt',
-    description: 'Conheça as organizações que partilham dados abertos connosco e explore os recursos que disponibilizam.',
-};
-
 export default async function OrganizationsPage({
+    params,
     searchParams,
 }: {
+    params: Promise<{ locale: string }>;
     searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+    const { locale } = await params;
+
     const resolved = await searchParams;
     const page = Number(resolved?.page) || 1;
 
@@ -40,8 +64,21 @@ export default async function OrganizationsPage({
     const forwarded = await serverForwardedHeaders();
     const data = await fetchOrganizationsListing(page, 20, apiFilters, forwarded);
 
+    // Get page content (hero, search, noResults) from the CMS. The CMS is the
+    // source of truth, but it must not be able to take the listing down: on error
+    // (including a missing `organizations` CMS entry, where getFrontOfficePage
+    // calls notFound()) we hand `undefined` to the client, which falls back to the
+    // `organizations` namespace for every string.
+    let pageContent: FrontOfficePage | undefined;
+    try {
+        pageContent = await getFrontOfficePage("organizations", locale);
+    } catch (error) {
+        console.error("Error fetching organizations page content:", error);
+    }
+
     return (
         <OrganizationsClient
+            pageContent={pageContent}
             initialData={data.listing}
             currentPage={page}
             orgBadges={data.badges}

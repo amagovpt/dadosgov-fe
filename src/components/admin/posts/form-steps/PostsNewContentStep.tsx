@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import AdminStepActions from "@/components/admin/forms/AdminStepActions";
 import PostContentSection from "@/components/admin/posts/form-sections/PostContentSection";
 
@@ -27,6 +28,8 @@ export default function PostsNewContentStep({
   onSaveDraft,
   onPublish,
 }: PostsNewContentStepProps) {
+  const { t } = useTranslation("admin-posts");
+
   return (
     <form
       className="admin-page__form"
@@ -46,7 +49,7 @@ export default function PostsNewContentStep({
 
       <AdminStepActions
         previousAction={{
-          label: "Anterior",
+          label: t("steps.previous"),
           appearance: "outline",
           variant: "primary",
           hasIcon: true,
@@ -55,7 +58,7 @@ export default function PostsNewContentStep({
           onClick: onPrevious,
         }}
         secondaryAction={{
-          label: pendingAction === "draft" ? "A guardar..." : "Guardar como rascunho",
+          label: pendingAction === "draft" ? t("steps.savingDraft") : t("steps.saveDraft"),
           appearance: "outline",
           variant: "primary",
           hasIcon: true,
@@ -65,7 +68,10 @@ export default function PostsNewContentStep({
           disabled: isSaving,
         }}
         primaryAction={{
-          label: pendingAction === "publish" ? "A publicar..." : "Publicar artigo",
+          label:
+            pendingAction === "publish"
+              ? t("steps.publishingArticle")
+              : t("steps.publishArticle"),
           type: "submit",
           hasIcon: true,
           trailingIcon: "agora-line-check-circle",

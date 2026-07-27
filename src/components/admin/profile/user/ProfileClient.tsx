@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useTemporaryMessage } from "@/hooks/forms/useTemporaryMessage";
@@ -27,14 +28,21 @@ import {
   TabBody,
 } from "@ama-pt/agora-design-system";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import { buildUserAdminBreadcrumbItems } from "@/utils/adminBreadcrumbs";
 import { POISONED_FILE_WARNING } from "@/lib/security/translateUploadError";
 import { toProxiedUrl } from "@/components/admin/profile/shared/profileUtils";
 import { ProfileCard } from "./ProfileCard";
 import { ProfileFormTab } from "./ProfileFormTab";
 import { SubscriptionsTab } from "./SubscriptionsTab";
 import { ActivitiesTab } from "./ActivitiesTab";
+import type { BoProfilePage } from "@/service/types/admin/profile";
 
-export default function ProfileClient() {
+interface ProfileClientProps {
+  pageContent: BoProfilePage;
+}
+
+export default function ProfileClient({ pageContent }: ProfileClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-profile"]);
   const router = useRouter();
   const { displayName } = useCurrentUser();
   const { user, samlLogin, refresh } = useAuth();
@@ -167,7 +175,7 @@ export default function ProfileClient() {
       await refresh();
     } catch (error) {
       console.error("Error saving profile:", error);
-      setSaveError("Erro ao guardar o perfil. Tente novamente.");
+      setSaveError(t("admin-profile:messages.saveError"));
     } finally {
       setIsSaving(false);
     }
@@ -197,7 +205,7 @@ export default function ProfileClient() {
       setNewTokenName("");
     } catch (error) {
       console.error("Error generating API key:", error);
-      setSaveError("Erro ao gerar a chave da API. Tente novamente.");
+      setSaveError(t("admin-profile:messages.generateApiKeyError"));
     } finally {
       setIsGeneratingKey(false);
     }
@@ -220,7 +228,7 @@ export default function ProfileClient() {
       setApiTokens((previousTokens) => previousTokens.filter((token) => token.id !== tokenId));
     } catch (error) {
       console.error("Error revoking API token:", error);
-      setSaveError("Erro ao revogar a chave da API. Tente novamente.");
+      setSaveError(t("admin-profile:messages.revokeApiKeyError"));
     } finally {
       setRevokingTokenId(null);
     }
@@ -240,7 +248,7 @@ export default function ProfileClient() {
       await refresh();
     } catch (error) {
       console.error("Error deleting avatar:", error);
-      setSaveError("Erro ao eliminar a foto de perfil. Tente novamente.");
+      setSaveError(t("admin-profile:messages.deleteAvatarError"));
     } finally {
       setIsDeletingAvatar(false);
     }
@@ -252,7 +260,7 @@ export default function ProfileClient() {
 
     const file = files[0];
     if (file.size > 4194304) {
-      setAvatarError("O ficheiro excede o tamanho máximo de 4 MB.");
+      setAvatarError(t("admin-profile:messages.avatarMaxSize"));
       return;
     }
 
@@ -274,7 +282,7 @@ export default function ProfileClient() {
       console.error("Error uploading avatar:", error);
       if (localPreview.startsWith("blob:")) URL.revokeObjectURL(localPreview);
       setAvatarPreview(null);
-      setSaveError("Erro ao carregar a foto de perfil. Tente novamente.");
+      setSaveError(t("admin-profile:messages.uploadAvatarError"));
     }
   };
 
@@ -291,9 +299,7 @@ export default function ProfileClient() {
       setNewEmail("");
     } catch (error) {
       console.error("Error requesting email change:", error);
-      setSaveError(
-        "Erro ao solicitar a alteração de e-mail. Verifique o endereço e tente novamente.",
-      );
+      setSaveError(t("admin-profile:messages.emailChangeError"));
     } finally {
       setIsChangingEmail(false);
     }
@@ -301,12 +307,12 @@ export default function ProfileClient() {
 
   return (
     <AdminLayout
-      breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: displayName || "...", url: "#" },
-        { label: "Perfil", url: "/admin/me/profile" },
-      ]}
-      title="Perfil"
+      breadcrumbItems={buildUserAdminBreadcrumbItems({
+        t,
+        userLabel: displayName,
+        sectionLabel: t("admin-profile:breadcrumbs.profile"),
+      })}
+      title={pageContent.hero?.title ?? ""}
       headerAction={null}
     >
       <ProfileCard
@@ -318,7 +324,7 @@ export default function ProfileClient() {
       <div className="mt-32">
         <Tabs>
           <Tab active>
-            <TabHeader>Perfil</TabHeader>
+            <TabHeader>{t("admin-profile:tabs.profile")}</TabHeader>
             <TabBody>
               <ProfileFormTab
                 profile={profile}
@@ -338,6 +344,7 @@ export default function ProfileClient() {
                 avatarError={avatarError}
                 avatarUploaderKey={avatarUploaderKey}
                 isDeletingAvatar={isDeletingAvatar}
+                deleteAvatarCard={pageContent.deleteAvatarCard}
                 onAvatarChange={handleAvatarChange}
                 onDeleteAvatar={handleDeleteAvatar}
                 onAvatarSecurityError={() => setAvatarError(POISONED_FILE_WARNING)}
@@ -371,13 +378,13 @@ export default function ProfileClient() {
             </TabBody>
           </Tab>
           <Tab>
-            <TabHeader>Subscrições</TabHeader>
+            <TabHeader>{t("admin-profile:tabs.subscriptions")}</TabHeader>
             <TabBody>
               <SubscriptionsTab subscriptions={subscriptions} isLoading={isLoadingSubscriptions} />
             </TabBody>
           </Tab>
           <Tab>
-            <TabHeader>Acompanhamentos</TabHeader>
+            <TabHeader>{t("admin-profile:tabs.followings")}</TabHeader>
             <TabBody>
               <div className="mt-24">
                 <CardNoResults
@@ -386,15 +393,15 @@ export default function ProfileClient() {
                   icon={
                     <Icon name="agora-line-star" className="icon-xl h-12 w-12 text-primary-500" />
                   }
-                  title="Sem acompanhamentos"
-                  description="Não tem seguidores"
+                  title={pageContent.followingsNoResults?.title ?? ""}
+                  description={pageContent.followingsNoResults?.description ?? ""}
                   hasAnchor={false}
                 />
               </div>
             </TabBody>
           </Tab>
           <Tab>
-            <TabHeader>Atividades</TabHeader>
+            <TabHeader>{t("admin-profile:tabs.activities")}</TabHeader>
             <TabBody>
               <ActivitiesTab
                 activities={activities}

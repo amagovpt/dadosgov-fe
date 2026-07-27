@@ -1,6 +1,8 @@
+import { useTranslation } from "react-i18next";
 import { HERO_COLORS, type HeroData } from "../editorial-blocks";
 
 export function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: HeroData) => void }) {
+  const { t } = useTranslation("admin-editorial");
   const colorBg = HERO_COLORS.find((c) => c.value === data.color)?.bg ?? "bg-primary-900";
 
   return (
@@ -9,14 +11,14 @@ export function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: H
         type="text"
         value={data.title}
         onChange={(e) => onChange({ ...data, title: e.target.value })}
-        placeholder="Título"
+        placeholder={t("hero.titlePlaceholder")}
         className="text-2xl mb-8 w-full border-none bg-transparent font-bold placeholder-white/60 outline-none"
       />
       <input
         type="text"
         value={data.description}
         onChange={(e) => onChange({ ...data, description: e.target.value })}
-        placeholder="Adicione uma descrição"
+        placeholder={t("hero.descriptionPlaceholder")}
         className="text-sm mb-[20px] w-full border-none bg-transparent placeholder-white/60 outline-none"
       />
       <div className="mb-8">
@@ -25,7 +27,7 @@ export function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: H
             type="text"
             value={data.buttonLabel}
             onChange={(e) => onChange({ ...data, buttonLabel: e.target.value })}
-            placeholder="Título do botão"
+            placeholder={t("hero.buttonTitlePlaceholder")}
             className="border-none bg-transparent text-primary-900 placeholder-neutral-400 outline-none"
           />
         </span>
@@ -34,11 +36,11 @@ export function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: H
         type="text"
         value={data.buttonUrl}
         onChange={(e) => onChange({ ...data, buttonUrl: e.target.value })}
-        placeholder="URL do botão"
+        placeholder={t("hero.buttonUrlPlaceholder")}
         className="text-sm border-orange-400 mb-16 w-[300px] max-w-full rounded-6 border bg-white px-12 py-6 text-neutral-800 placeholder-neutral-400 outline-none"
       />
       <div className="flex items-center gap-8">
-        <span className="text-sm">Cor :</span>
+        <span className="text-sm">{t("hero.colorLabel")}</span>
         {HERO_COLORS.map((c) => (
           <button
             key={c.value}
@@ -47,6 +49,7 @@ export function HeroEditor({ data, onChange }: { data: HeroData; onChange: (d: H
             className={`h-[28px] w-[28px] rounded-full border-2 ${
               data.color === c.value ? "border-white ring-2 ring-white/50" : "border-white/40"
             } ${c.bg}`}
+            title={t(`hero.colors.${c.value}`)}
           />
         ))}
       </div>

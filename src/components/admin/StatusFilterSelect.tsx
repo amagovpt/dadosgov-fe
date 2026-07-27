@@ -1,6 +1,7 @@
 "use client";
 
 import { InputSelect, DropdownSection, DropdownOption } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 type Option = { value: string; label: string };
 
@@ -18,18 +19,20 @@ export function StatusFilterSelect({
   value = "",
   onChange,
   id = "filter-status",
-  placeholder = "Filtrar por estado",
+  placeholder,
   className,
   options,
   defaultValue,
 }: Props) {
+  const { t } = useTranslation("admin-common");
+  const resolvedPlaceholder = placeholder ?? t("filters.statusPlaceholder");
   const opts: Option[] =
     options ?? [
-      { value: "", label: "Todos" },
-      { value: "public", label: "Público" },
-      { value: "archived", label: "Arquivado" },
-      { value: "draft", label: "Rascunho" },
-      { value: "deleted", label: "Excluído" },
+      { value: "", label: t("filters.all") },
+      { value: "public", label: t("status.public") },
+      { value: "archived", label: t("status.archived") },
+      { value: "draft", label: t("status.draft") },
+      { value: "deleted", label: t("status.deleted") },
     ];
 
   return (
@@ -37,7 +40,7 @@ export function StatusFilterSelect({
       id={id}
       label=""
       hideLabel
-      placeholder={placeholder}
+      placeholder={resolvedPlaceholder}
       className={className}
       defaultValue={defaultValue ?? (value || undefined)}
       onChange={(options) => {

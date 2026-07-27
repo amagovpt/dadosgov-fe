@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { InputText, InputTextArea } from "@ama-pt/agora-design-system";
 
 interface DataserviceDescriptionSectionProps {
@@ -10,15 +11,19 @@ interface DataserviceDescriptionSectionProps {
   baseApiUrl: string;
   machineDocUrl: string;
   technicalDocUrl: string;
+  rateLimiting?: string;
   availability: string;
   hasApiNameError: boolean;
   hasApiDescriptionError: boolean;
+  idPrefix?: string;
+  showRateLimiting?: boolean;
   onApiNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onApiAcronymChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onApiDescriptionChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onBaseApiUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onMachineDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onTechnicalDocUrlChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onRateLimitingChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onAvailabilityChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -29,44 +34,50 @@ export default function DataserviceDescriptionSection({
   baseApiUrl,
   machineDocUrl,
   technicalDocUrl,
+  rateLimiting = "",
   availability,
   hasApiNameError,
   hasApiDescriptionError,
+  idPrefix = "api",
+  showRateLimiting = true,
   onApiNameChange,
   onApiAcronymChange,
   onApiDescriptionChange,
   onBaseApiUrlChange,
   onMachineDocUrlChange,
   onTechnicalDocUrlChange,
+  onRateLimitingChange,
   onAvailabilityChange,
 }: DataserviceDescriptionSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
+
   return (
     <>
-      <h2 className="admin-page__section-title">Descrição</h2>
+      <h2 className="admin-page__section-title">{t("admin-dataservices:fields.description")}</h2>
 
       <div className="admin-page__fields-group">
         <InputText
-          label="Nome da API *"
-          placeholder="Insira o nome aqui"
-          id="api-name"
+          label={t("admin-dataservices:fields.apiName")}
+          placeholder={t("admin-dataservices:fields.namePlaceholder")}
+          id={`${idPrefix}-name`}
           value={apiName}
           onChange={onApiNameChange}
           hasError={hasApiNameError}
           hasFeedback={hasApiNameError}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("admin-common:forms.requiredField")}
         />
         <InputText
-          label="Sigla"
-          placeholder="Insira a sigla aqui"
-          id="api-acronym"
+          label={t("admin-dataservices:fields.acronym")}
+          placeholder={t("admin-dataservices:fields.acronymPlaceholder")}
+          id={`${idPrefix}-acronym`}
           value={apiAcronym}
           onChange={onApiAcronymChange}
         />
         <InputTextArea
-          label="Descrição *"
-          placeholder="Insira a descrição aqui"
-          id="api-description"
+          label={t("admin-dataservices:fields.apiDescription")}
+          placeholder={t("admin-dataservices:fields.descriptionPlaceholder")}
+          id={`${idPrefix}-description`}
           rows={4}
           maxLength={246}
           value={apiDescription}
@@ -74,33 +85,42 @@ export default function DataserviceDescriptionSection({
           hasError={hasApiDescriptionError}
           hasFeedback={hasApiDescriptionError}
           feedbackState="danger"
-          errorFeedbackText="Campo obrigatório"
+          errorFeedbackText={t("admin-common:forms.requiredField")}
         />
         <InputText
-          label="URL base da API"
-          placeholder="Insira o URL aqui"
-          id="api-root-link"
+          label={t("admin-dataservices:fields.baseApiUrl")}
+          placeholder={t("admin-dataservices:fields.urlPlaceholder")}
+          id={`${idPrefix}-root-link`}
           value={baseApiUrl}
           onChange={onBaseApiUrlChange}
         />
         <InputText
-          label="Link para a documentação da API (ficheiro OpenAPI ou Swagger)"
-          placeholder="Insira o URL aqui"
-          id="api-doc-openapi"
+          label={t("admin-dataservices:fields.machineDocUrl")}
+          placeholder={t("admin-dataservices:fields.urlPlaceholder")}
+          id={`${idPrefix}-doc-openapi`}
           value={machineDocUrl}
           onChange={onMachineDocUrlChange}
         />
         <InputText
-          label="Link para a documentação técnica da API"
-          placeholder="Insira o URL aqui"
-          id="api-doc-technical"
+          label={t("admin-dataservices:fields.technicalDocUrl")}
+          placeholder={t("admin-dataservices:fields.urlPlaceholder")}
+          id={`${idPrefix}-doc-technical`}
           value={technicalDocUrl}
           onChange={onTechnicalDocUrlChange}
         />
+        {showRateLimiting && (
+          <InputText
+            label={t("admin-dataservices:fields.rateLimiting")}
+            placeholder={t("admin-dataservices:fields.shortPlaceholder")}
+            id={`${idPrefix}-rate-limit`}
+            value={rateLimiting}
+            onChange={onRateLimitingChange ?? (() => {})}
+          />
+        )}
         <InputText
-          label="Disponibilidade"
+          label={t("admin-dataservices:fields.availability")}
           placeholder="99,9"
-          id="api-availability"
+          id={`${idPrefix}-availability`}
           value={availability}
           onChange={onAvailabilityChange}
         />

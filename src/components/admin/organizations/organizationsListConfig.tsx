@@ -13,17 +13,28 @@ export const organizationSortFieldMap: Record<OrganizationSortField, string> = {
 
 interface OrganizationColumnsOptions {
   deletingOrgId: string | null;
+  labels: OrganizationColumnLabels;
   onDelete: (organization: Organization) => void;
+}
+
+interface OrganizationColumnLabels {
+  name: string;
+  createdAt: string;
+  datasets: string;
+  reuses: string;
+  members: string;
+  deleteAriaLabel: (name: string) => string;
 }
 
 export function createOrganizationColumns({
   deletingOrgId,
+  labels,
   onDelete,
 }: OrganizationColumnsOptions): AdminListColumn<Organization, OrganizationSortField>[] {
   return [
     {
       id: "name",
-      header: "Nome",
+      header: labels.name,
       sortField: "name",
       sortType: "string",
       renderCell: (organization) => (
@@ -34,24 +45,24 @@ export function createOrganizationColumns({
     },
     {
       id: "created_at",
-      header: "Criado em",
+      header: labels.createdAt,
       sortField: "created_at",
       sortType: "date",
       renderCell: (organization) => formatDateToDMY(organization.created_at),
     },
     {
       id: "datasets",
-      header: "Conjuntos de dados",
+      header: labels.datasets,
       renderCell: (organization) => organization.metrics?.datasets ?? 0,
     },
     {
       id: "reuses",
-      header: "Reutilizações",
+      header: labels.reuses,
       renderCell: (organization) => organization.metrics?.reuses ?? 0,
     },
     {
       id: "members",
-      header: "Membros",
+      header: labels.members,
       renderCell: (organization) => organization.members?.length ?? 0,
     },
     createTableActionsColumn<Organization>({
@@ -62,7 +73,7 @@ export function createOrganizationColumns({
         href: `/admin/org/${organization.id}/profile`,
       }),
       deleteAction: (organization) => ({
-        ariaLabel: `Eliminar ${organization.name}`,
+        ariaLabel: labels.deleteAriaLabel(organization.name),
         disabled: deletingOrgId === organization.id,
         handler: () => onDelete(organization),
       }),

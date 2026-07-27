@@ -1,43 +1,49 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import ReusesFormClient from "@/components/admin/reuses/views/ReusesFormClient";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AdminStepper } from "@/components/admin/AdminStepper";
+import { getAdminStepTitle } from "@/components/admin/getAdminStepTitle";
 import AdminLayout from "@/components/Layout/AdminLayout";
+import type { BoReusesPage } from "@/service/types/admin/reuses";
 
-export default function ReusesNewClient() {
+interface ReusesNewClientProps {
+  pageContent: BoReusesPage;
+}
+
+export default function ReusesNewClient({ pageContent }: ReusesNewClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-reuses"]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const { displayName } = useCurrentUser();
   const totalSteps = 3;
   const currentStep = Number(searchParams.get("step")) || 1;
+  const pageTitle = pageContent.createHero?.title ?? "";
 
-  const stepTitles: Record<number, string> = {
-    1: "Descreva a sua reutilização",
-    2: "Associe os conjuntos de dados",
-    3: "Finalize a publicação da sua reutilização",
-  };
+  const stepTitle = getAdminStepTitle(pageContent.steps?.[currentStep - 1]);
 
   return (
     <AdminLayout
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
         { label: displayName || "...", url: "#" },
-        { label: "Reutilizações", url: "/admin/me/reuses" },
+        { label: t("admin-reuses:title"), url: "/admin/me/reuses" },
       ]}
-      title="Formulário de publicação de uma reutilização"
+      title={pageTitle}
     >
       <AdminStepper
         currentStep={currentStep}
         totalSteps={totalSteps}
-        labelWord="Passo"
+        labelWord={t("admin-common:stepper.step")}
         labelFormat="slash"
-        stepTitle={stepTitles[currentStep] || ""}
+        stepTitle={stepTitle}
       />
 
       <ReusesFormClient
+        pageContent={pageContent}
         currentStep={currentStep}
         onNextStep={() => router.push(`${pathname}?step=${currentStep + 1}`)}
         onPreviousStep={() => router.push(`${pathname}?step=${currentStep - 1}`)}

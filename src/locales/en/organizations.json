@@ -1,0 +1,98 @@
+{
+  "theOrganizations": "the organizations",
+  "hero": {
+    "title": "Organizations",
+    "subtitle": "Get to know the organizations that share open data with us and explore the resources they make available."
+  },
+  "search": {
+    "placeholder": "Search organizations..."
+  },
+  "sort": {
+    "ariaLabel": "Sort by {{label}}",
+    "relevancia": "Relevance",
+    "mais_dados": "Most data",
+    "mais_reutilizacoes": "Most reuses",
+    "subscritores": "Subscribers"
+  },
+  "noResults": {
+    "title": "No organization found",
+    "subtitle": "There are no organizations matching the applied filters.",
+    "description": "Try removing filters or using other search terms."
+  },
+  "filters": {
+    "orgType": {
+      "title": "Organization type",
+      "options": {
+        "publicService": "Public service",
+        "localAuthority": "Local authority",
+        "company": "Companies",
+        "association": "Association"
+      }
+    },
+    "badges": {
+      "association": "Association",
+      "certified": "Certified",
+      "company": "Company",
+      "local-authority": "Local Authority",
+      "public-service": "Public Service"
+    },
+    "advanced": {
+      "orgTypeGroup": "Organization Type",
+      "orgsEmpty": "No organization found.",
+      "badgeEmpty": "No badge found."
+    }
+  },
+  "detail": {
+    "requestMembership": "Request to join",
+    "requestMembershipTitle": "Request to join {{name}}",
+    "commentLabel": "Comment (optional)",
+    "commentPlaceholder": "Explain why you would like to join this organization...",
+    "sending": "Sending...",
+    "sendRequest": "Send request",
+    "requestSuccess": "Membership request sent successfully. The organization administrator will review your request.",
+    "requestError": "Error sending the membership request.",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
+    "edit": "Edit",
+    "preliminaryNotes": "Preliminary notes",
+    "preliminaryNotesText": "Additional information about this organization's role in managing and publishing open data.",
+    "about": "About the organization",
+    "aboutText": "{{name}} is an active publisher on the Open Data Portal, contributing to the transparency and reuse of public information in Portugal.",
+    "organizationLabel": "Organization",
+    "views": "Views",
+    "followers": "Followers",
+    "totalSuffix": "total",
+    "since": "since {{date}}"
+  },
+  "tabs": {
+    "description": "Description",
+    "noDescription": "This organization has no description.",
+    "createdAt": "Creation date",
+    "datasets": "Datasets",
+    "datasetsWithCount": "Datasets ({{count}})",
+    "datasetsNoun_one": "DATASET",
+    "datasetsNoun_other": "DATASETS",
+    "noDatasetsTitle": "No datasets",
+    "noDatasetsDesc": "This organization has no published datasets.",
+    "reusesAndApis": "Reuses and APIs ({{count}})",
+    "apisNoun_one": "API",
+    "apisNoun_other": "APIS",
+    "reusesNoun_one": "REUSE",
+    "reusesNoun_other": "REUSES",
+    "noReusesTitle": "No reuses",
+    "noReusesDesc": "No reuse associated with this organization.",
+    "discussions": "Discussions",
+    "info": "Information",
+    "statistics": "Statistics",
+    "reuses": "Reuses",
+    "followers": "Followers",
+    "members": "Members",
+    "roleAdmin": "Administrator",
+    "roleEditor": "Editor",
+    "technicalInfo": "Technical information",
+    "metadataUpdate": "Metadata update",
+    "identifier": "Identifier",
+    "website": "Website",
+    "taxId": "Tax ID"
+  }
+}

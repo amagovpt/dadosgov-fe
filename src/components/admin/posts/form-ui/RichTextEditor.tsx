@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -39,12 +40,12 @@ const icons = {
   ),
   h2: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <text x="1" y="16" fontSize="11" fontWeight="700" fontFamily="system-ui">H₂</text>
+      <text x="1" y="16" fontSize="11" fontWeight="700" fontFamily="system-ui">H2</text>
     </svg>
   ),
   h3: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <text x="1" y="16" fontSize="11" fontWeight="700" fontFamily="system-ui">H₃</text>
+      <text x="1" y="16" fontSize="11" fontWeight="700" fontFamily="system-ui">H3</text>
     </svg>
   ),
   table: (
@@ -88,6 +89,8 @@ const icons = {
 };
 
 function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
+  const { t } = useTranslation("admin-posts");
+
   if (!editor) return null;
 
   const btnClass = (active: boolean) =>
@@ -100,7 +103,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         className="rte-toolbar__btn"
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
-        title="Desfazer"
+        title={t("editor.undo")}
       >
         {icons.undo}
       </button>
@@ -109,7 +112,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         className="rte-toolbar__btn"
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
-        title="Refazer"
+        title={t("editor.redo")}
       >
         {icons.redo}
       </button>
@@ -120,7 +123,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         type="button"
         className={btnClass(editor.isActive("bold"))}
         onClick={() => editor.chain().focus().toggleBold().run()}
-        title="Negrito"
+        title={t("editor.bold")}
       >
         {icons.bold}
       </button>
@@ -128,7 +131,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         type="button"
         className={btnClass(editor.isActive("italic"))}
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        title="Itálico"
+        title={t("editor.italic")}
       >
         {icons.italic}
       </button>
@@ -137,7 +140,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         type="button"
         className={btnClass(editor.isActive("heading", { level: 2 }))}
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        title="Título H2"
+        title={t("editor.heading2")}
       >
         {icons.h2}
       </button>
@@ -145,7 +148,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         type="button"
         className={btnClass(editor.isActive("heading", { level: 3 }))}
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        title="Título H3"
+        title={t("editor.heading3")}
       >
         {icons.h3}
       </button>
@@ -162,7 +165,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
             .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
             .run()
         }
-        title="Tabela"
+        title={t("editor.table")}
       >
         {icons.table}
       </button>
@@ -173,13 +176,13 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
           if (editor.isActive("link")) {
             editor.chain().focus().unsetLink().run();
           } else {
-            const url = window.prompt("URL do link:");
+            const url = window.prompt(t("editor.linkPrompt"));
             if (url) {
               editor.chain().focus().setLink({ href: url }).run();
             }
           }
         }}
-        title="Link"
+        title={t("editor.link")}
       >
         {icons.link}
       </button>
@@ -187,12 +190,12 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         type="button"
         className="rte-toolbar__btn"
         onClick={() => {
-          const url = window.prompt("URL da imagem:");
+          const url = window.prompt(t("editor.imagePrompt"));
           if (url) {
             editor.chain().focus().setImage({ src: url }).run();
           }
         }}
-        title="Imagem"
+        title={t("editor.image")}
       >
         {icons.image}
       </button>
@@ -203,7 +206,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         type="button"
         className={btnClass(editor.isActive("bulletList"))}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        title="Lista não ordenada"
+        title={t("editor.bulletList")}
       >
         {icons.bulletList}
       </button>
@@ -211,7 +214,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         type="button"
         className={btnClass(editor.isActive("orderedList"))}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        title="Lista ordenada"
+        title={t("editor.orderedList")}
       >
         {icons.orderedList}
       </button>
@@ -222,7 +225,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         type="button"
         className={btnClass(editor.isActive("codeBlock"))}
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        title="Bloco de código"
+        title={t("editor.codeBlock")}
       >
         {icons.code}
       </button>
@@ -230,7 +233,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
         type="button"
         className={btnClass(editor.isActive("blockquote"))}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        title="Citação"
+        title={t("editor.blockquote")}
       >
         {icons.quote}
       </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { InputTextArea } from "@ama-pt/agora-design-system";
 
 interface PostContentSectionProps {
@@ -14,11 +15,13 @@ export default function PostContentSection({
   hasError = false,
   onChange,
 }: PostContentSectionProps) {
+  const { t } = useTranslation(["admin-common", "admin-posts"]);
+
   return (
     <div className="admin-page__fields-group">
       <InputTextArea
-        label="Conteúdo *"
-        placeholder="Insira aqui"
+        label={t("admin-posts:contentForm.label")}
+        placeholder={t("admin-posts:contentForm.placeholder")}
         id="article-content"
         rows={12}
         value={content}
@@ -26,7 +29,7 @@ export default function PostContentSection({
         hasError={hasError}
         hasFeedback={hasError}
         feedbackState="danger"
-        errorFeedbackText="Campo obrigatório"
+        errorFeedbackText={t("admin-common:forms.requiredField")}
       />
     </div>
   );

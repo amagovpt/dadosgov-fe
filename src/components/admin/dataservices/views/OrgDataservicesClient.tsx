@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import { fetchOrgDataservices } from "@/service/api/dataservices";
@@ -19,8 +20,15 @@ import {
   sortDataservices,
 } from "@/components/admin/dataservices/config/dataservicesListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
 
-export default function OrgDataservicesClient() {
+interface OrgDataservicesClientProps {
+  orgId?: string;
+  pageContent: BoDataservicesPage;
+}
+
+export default function OrgDataservicesClient({ pageContent }: OrgDataservicesClientProps) {
+  const { t } = useTranslation(["admin-common", "admin-dataservices"]);
   const params = useParams();
   const routeOrgId = params?.orgId as string | undefined;
   const { activeOrg } = useActiveOrganization();
@@ -54,8 +62,20 @@ export default function OrgDataservicesClient() {
     [sortedApis, currentPage, pageSize]
   );
   const columns = useMemo(
-    () => createDataserviceColumns(),
-    []
+    () =>
+      createDataserviceColumns({
+        ownerMetaStyle: "dot",
+        labels: {
+          title: t("admin-dataservices:columns.title"),
+          titleShort: t("admin-dataservices:columns.titleShort"),
+          status: t("admin-dataservices:columns.status"),
+          createdAt: t("admin-dataservices:columns.createdAt"),
+          modifiedAt: t("admin-dataservices:columns.modifiedAt"),
+          by: t("admin-dataservices:columns.by"),
+          about: t("admin-dataservices:columns.about"),
+        },
+      }),
+    [t]
   );
 
   useEffect(() => {
@@ -77,11 +97,11 @@ export default function OrgDataservicesClient() {
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: orgName || "Organização", url: "#" },
-        { label: "API" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: orgName || t("admin-common:breadcrumbs.organization"), url: "#" },
+        { label: t("admin-dataservices:title") },
       ]}
-      title="API"
+      title={t("admin-dataservices:title")}
       isLoading={isLoading}
       count={filteredApis.length}
       currentPage={currentPage}
@@ -89,8 +109,9 @@ export default function OrgDataservicesClient() {
       setCurrentPage={setCurrentPage}
       setPageSize={setPageSize}
       search={{
-        placeholder: "Pesquise o nome da API",
-        ariaLabel: "Pesquisar APIs",
+        label: pageContent.search?.label,
+        placeholder: pageContent.search?.placeholder ?? "",
+        hint: pageContent.search?.hint,
       }}
       filters={
         <StatusFilterSelect
@@ -103,9 +124,7 @@ export default function OrgDataservicesClient() {
       }
       emptyState={
         <AdminEmptyState
-          icon="agora-line-edit"
-          title="Sem publicações"
-          description="A organização ainda não publicou uma API."
+          noResults={pageContent.orgNoResults}
           createUrl="/admin/dataservices/new"
         />
       }

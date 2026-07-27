@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Icon } from "@ama-pt/agora-design-system";
-import { BLOCK_DEFINITIONS, type BlockDefinition, type BlockType } from "../editorial-blocks";
+import { useTranslation } from "react-i18next";
+import { getBlockDefinitions, type BlockDefinition, type BlockType } from "../editorial-blocks";
 
 export function BlockPicker({ onSelect }: { onSelect: (type: BlockType) => void }) {
+  const { t } = useTranslation("admin-editorial");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const blockDefinitions = getBlockDefinitions(t);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -16,7 +19,7 @@ export function BlockPicker({ onSelect }: { onSelect: (type: BlockType) => void 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const categories = BLOCK_DEFINITIONS.reduce(
+  const categories = blockDefinitions.reduce(
     (acc, block) => {
       if (!acc[block.category]) acc[block.category] = [];
       acc[block.category].push(block);
@@ -35,7 +38,7 @@ export function BlockPicker({ onSelect }: { onSelect: (type: BlockType) => void 
         leadingIconHover="agora-solid-plus-circle"
         onClick={() => setIsOpen(!isOpen)}
       >
-        Adicionar um bloco
+        {t("blockPicker.addBlock")}
       </Button>
 
       {isOpen && (

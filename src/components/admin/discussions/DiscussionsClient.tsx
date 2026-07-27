@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
 import { paginateItems } from "@/utils/admin-lists/listHelpers";
@@ -12,6 +13,7 @@ import AdminEmptyState from "../AdminEmptyState";
 import { createDiscussionColumns } from "./discussionsListConfig";
 
 export default function DiscussionsClient() {
+  const { t } = useTranslation(["admin-common", "admin-discussions"]);
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,24 +55,38 @@ export default function DiscussionsClient() {
     };
   }, [activeOrg]);
 
-  const columns = useMemo(() => createDiscussionColumns(), []);
+  const columns = useMemo(
+    () =>
+      createDiscussionColumns({
+        title: t("admin-discussions:columns.title"),
+        author: t("admin-discussions:columns.author"),
+        status: t("admin-discussions:columns.status"),
+        date: t("admin-discussions:columns.date"),
+        messages: t("admin-discussions:columns.messages"),
+        createdAt: t("admin-discussions:columns.createdAt"),
+        closedAt: t("admin-discussions:columns.closedAt"),
+        open: t("admin-discussions:status.open"),
+        closed: t("admin-discussions:status.closed"),
+      }),
+    [t],
+  );
   const paginatedDiscussions = useMemo(
     () => paginateItems(discussions, currentPage, pageSize),
-    [discussions, currentPage, pageSize]
+    [discussions, currentPage, pageSize],
   );
 
   if (isOrgLoading || isLoading) {
-    return <div className="admin-page">A carregar...</div>;
+    return <div className="admin-page">{t("admin-common:loading")}</div>;
   }
 
   return (
     <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/admin" },
-        { label: activeOrg?.name || "Organização", url: "#" },
-        { label: "Discussões", url: "/admin/org/discussions" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: activeOrg?.name || t("admin-common:breadcrumbs.organization"), url: "#" },
+        { label: t("admin-discussions:title"), url: "/admin/org/discussions" },
       ]}
-      title="Discussões"
+      title={t("admin-discussions:title")}
       isLoading={false}
       count={discussions.length}
       currentPage={currentPage}
@@ -80,7 +96,7 @@ export default function DiscussionsClient() {
       emptyState={
         <AdminEmptyState
           icon="agora-line-chat"
-          description="Ainda não há discussões sobre esta organização."
+          description={t("admin-discussions:empty.descriptionOrganization")}
         />
       }
     >
@@ -92,4 +108,3 @@ export default function DiscussionsClient() {
     </AdminListPage>
   );
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import { normalizeRemoteDatasets, type RemoteDatasetEntry } from "@/lib/reuse-remote-datasets";
 import {
   fetchReuse,
@@ -50,6 +51,8 @@ export function useReuseAssociationActions({
   setApiError,
   showApiSuccess,
 }: UseReuseAssociationActionsParams) {
+  const { t } = useTranslation("admin-reuses");
+
   async function handleSaveDatasetAssociations() {
     if (!reuse) return;
 
@@ -64,6 +67,7 @@ export function useReuseAssociationActions({
     const selectionError = validateReuseDatasetSelection(
       selectedDatasets.length,
       remoteEntries,
+      t("form.validationErrors.datasetSelection"),
     );
     if (selectionError) {
       setApiError(selectionError);
@@ -96,7 +100,7 @@ export function useReuseAssociationActions({
       previousRemoteEntriesRef.current = refreshedEntries;
       setDatasetLinks(refreshedEntries.length > 0 ? refreshedEntries : [{ url: "" }]);
       setSelectedDatasets([]);
-      showApiSuccess("Conjuntos de dados associados com sucesso.");
+      showApiSuccess(t("edit.datasetAssociationsSaved"));
     } catch (error: unknown) {
       const err = error as { data?: Record<string, unknown> };
       if (err.data && typeof err.data === "object") {
@@ -105,7 +109,7 @@ export function useReuseAssociationActions({
           .join(", ");
         setApiError(messages);
       } else {
-        setApiError("Erro ao associar conjuntos de dados.");
+        setApiError(t("edit.datasetAssociationsError"));
       }
     } finally {
       setIsSubmitting(false);
@@ -118,7 +122,7 @@ export function useReuseAssociationActions({
     const errors: Record<number, string> = {};
     apiLinks.forEach((link, index) => {
       if (!link.url.trim() && apiLinks.length > 1) {
-        errors[index] = "Campo obrigat\u00f3rio";
+        errors[index] = t("form.fieldRequired");
       }
     });
 
@@ -141,9 +145,9 @@ export function useReuseAssociationActions({
       const updated = await fetchReuse(reuseId);
       setReuse(updated);
       setApiLinks([{ url: "" }]);
-      showApiSuccess("APIs associadas com sucesso.");
+      showApiSuccess(t("edit.apiAssociationsSaved"));
     } catch {
-      setApiError("Erro ao associar APIs.");
+      setApiError(t("edit.apiAssociationsError"));
     } finally {
       setIsSubmitting(false);
     }

@@ -1,20 +1,23 @@
 import { Button } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 export function DeleteBlockPopupContent({
   onClose,
   onConfirm,
-  message = "Essa ação é irreversível. Tem a certeza que quer eliminar este bloco?",
+  message,
 }: {
   onClose: () => void;
   onConfirm: () => void;
   message?: string;
 }) {
+  const { t } = useTranslation(["admin-common", "admin-editorial"]);
+
   return (
     <div className="flex flex-col gap-16">
-      <p>{message}</p>
+      <p>{message ?? t("admin-editorial:blockActions.deleteBlockMessage")}</p>
       <div className="flex justify-end gap-16 pt-16">
         <Button appearance="outline" variant="neutral" onClick={onClose}>
-          Cancelar
+          {t("admin-common:actions.cancel")}
         </Button>
         <Button
           variant="danger"
@@ -23,7 +26,7 @@ export function DeleteBlockPopupContent({
           leadingIcon="agora-line-trash"
           leadingIconHover="agora-solid-trash"
         >
-          Eliminar
+          {t("admin-common:actions.delete")}
         </Button>
       </div>
     </div>

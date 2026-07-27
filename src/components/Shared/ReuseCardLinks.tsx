@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { CardLinks } from "@ama-pt/agora-design-system";
 import { Reuse } from "@/service/types/reuse";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { formatDateToDMY } from "@/utils/formatDate";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 
 interface ReuseCardLinksProps {
@@ -14,6 +14,7 @@ interface ReuseCardLinksProps {
 }
 
 export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLinksProps) {
+  const { t } = useTranslation("common");
   const router = useRouter();
 
   const links = [
@@ -26,7 +27,7 @@ export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLi
       trailingIconHover: "",
       trailingIconActive: "",
       children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
-      title: "Visualizações",
+      title: t("card.views"),
       onClick: (e: React.MouseEvent) => e.preventDefault(),
       className: "text-[#034AD8]",
     },
@@ -40,8 +41,8 @@ export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLi
             trailingIcon: "",
             trailingIconHover: "",
             trailingIconActive: "",
-            children: `${reuse.datasets?.length || 0} datasets`,
-            title: "Datasets",
+            children: t("card.datasetsCount", { count: reuse.datasets?.length || 0 }),
+            title: t("card.datasets"),
             onClick: (e: React.MouseEvent) => e.preventDefault(),
             className: "text-[#034AD8]",
           },
@@ -56,7 +57,7 @@ export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLi
       trailingIconHover: "",
       trailingIconActive: "",
       children: reuse.metrics?.followers || 0,
-      title: "Favoritos",
+      title: t("card.favorites"),
       onClick: (e: React.MouseEvent) => e.preventDefault(),
       className: "text-[#034AD8]",
     },
@@ -76,7 +77,7 @@ export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLi
           reuse.organization?.name ||
           (reuse.owner
             ? `${reuse.owner.first_name} ${reuse.owner.last_name}`.trim()
-            : "Reutilização")
+            : t("card.reuse"))
         }
         title={
           <div className="text-xl-bold underline">{sanitizeUserMarkdown(reuse.title)}</div>
@@ -90,7 +91,9 @@ export function ReuseCardLinks({ reuse, showDatasetsCount = false }: ReuseCardLi
         }
         date={
           <span className="font-[300]">
-            {`Atualizado ${format(new Date(reuse.last_modified || reuse.created_at), "dd MM yyyy", { locale: pt })}`}
+            {t("card.updated", {
+              date: formatDateToDMY(reuse.last_modified || reuse.created_at),
+            })}
           </span>
         }
         links={links}

@@ -1,16 +1,19 @@
 "use client";
 
 import React from "react";
-import { Button, CardNoResults, Icon } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
+import { Button, CardNoResults, Icon, type IconName } from "@ama-pt/agora-design-system";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import type { Activity } from "@/service/types/catalog";
+import type { FoListPageNoResults } from "@/service/types/shared";
 
 type UserAdminActivitiesTabProps = {
   activities: Activity[];
   isLoading: boolean;
   activityPage: number;
   totalActivityPages: number;
+  noResults?: FoListPageNoResults;
   onPreviousPage: () => void;
   onNextPage: () => void;
 };
@@ -30,20 +33,28 @@ export default function UserAdminActivitiesTab({
   isLoading,
   activityPage,
   totalActivityPages,
+  noResults,
   onPreviousPage,
   onNextPage,
 }: UserAdminActivitiesTabProps) {
+  const { t } = useTranslation("admin-users");
+
   return (
     <div className="mt-24">
       {isLoading ? (
-        <p className="text-neutral-900 text-base">A carregar atividades...</p>
+        <p className="text-neutral-900 text-base">{t("activities.loading")}</p>
       ) : activities.length === 0 ? (
         <CardNoResults
           className="admin-page__empty"
           position="center"
-          icon={<Icon name="agora-line-edit" className="w-12 h-12 text-primary-500 icon-xl" />}
-          title="Sem atividades"
-          description="Nenhuma atividade registada."
+          icon={
+            <Icon
+              name={(noResults?.icon || "agora-line-edit") as IconName}
+              className="w-12 h-12 text-primary-500 icon-xl"
+            />
+          }
+          title={noResults?.title ?? ""}
+          description={noResults?.description ?? ""}
           hasAnchor={false}
         />
       ) : (
@@ -104,10 +115,10 @@ export default function UserAdminActivitiesTab({
                 onClick={onPreviousPage}
                 disabled={activityPage === 1}
               >
-                Anterior
+                {t("activities.previous")}
               </Button>
               <span className="text-neutral-900 text-sm">
-                Pagina {activityPage} de {totalActivityPages}
+                {t("activities.page", { page: activityPage, total: totalActivityPages })}
               </span>
               <Button
                 variant="primary"
@@ -115,7 +126,7 @@ export default function UserAdminActivitiesTab({
                 onClick={onNextPage}
                 disabled={activityPage === totalActivityPages}
               >
-                Seguinte
+                {t("activities.next")}
               </Button>
             </div>
           )}

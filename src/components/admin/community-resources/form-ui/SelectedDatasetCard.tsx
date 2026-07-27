@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Button, CardLinks, Icon } from "@ama-pt/agora-design-system";
 import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
@@ -18,6 +19,8 @@ export default function SelectedDatasetCard({
   canRemove,
   onRemove,
 }: SelectedDatasetCardProps) {
+  const { t } = useTranslation("admin-community-resources");
+
   return (
     <div className="agora-card-links-datasets-px0 mt-16">
       <CardLinks
@@ -26,7 +29,7 @@ export default function SelectedDatasetCard({
         variant="transparent"
         image={{
           src: dataset.organization?.logo || "/images/placeholders/organization.png",
-          alt: dataset.organization?.name || "Organização sem logo",
+          alt: dataset.organization?.name || t("form.noOrganizationLogo"),
         }}
         category={dataset.organization?.name}
         title={dataset.title}
@@ -37,23 +40,24 @@ export default function SelectedDatasetCard({
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-8">
               <span className="text-sm font-medium text-neutral-900">
-                Metadados: {dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0}%
+                {t("form.metadataScore")}:{" "}
+                {dataset.quality?.score != null ? Math.round(dataset.quality.score * 100) : 0}%
               </span>
             </div>
             <div className="text-xs mb-32 mt-32 flex flex-wrap items-center gap-32 text-[#034AD8]">
-              <div className="flex items-center gap-8" title="Visualizações">
+              <div className="flex items-center gap-8" title={t("form.views")}>
                 <Icon name="agora-line-eye" className="" aria-hidden="true" />
                 <span>{formatMetricValue(dataset.metrics?.views)}</span>
               </div>
-              <div className="flex items-center gap-8" title="Downloads">
+              <div className="flex items-center gap-8" title={t("form.downloads")}>
                 <Icon name="agora-line-download" className="" aria-hidden="true" />
                 <span>{formatMetricValue(dataset.metrics?.resources_downloads, 0)}</span>
               </div>
-              <div className="flex items-center gap-8" title="Reutilizações">
+              <div className="flex items-center gap-8" title={t("form.reuses")}>
                 <img src="/Icons/bar_chart.svg" className="" alt="" aria-hidden="true" />
                 <span>{dataset.metrics?.reuses || 0}</span>
               </div>
-              <div className="flex items-center gap-8" title="Favoritos">
+              <div className="flex items-center gap-8" title={t("form.favorites")}>
                 <img src="/Icons/favorite.svg" className="" alt="" aria-hidden="true" />
                 <span>{formatMetricValue(dataset.metrics?.followers, 0)}</span>
               </div>
@@ -62,11 +66,13 @@ export default function SelectedDatasetCard({
         }
         date={
           <span className="font-[300]">
-            {`Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
-              .replace("aproximadamente ", "")
-              .replace("quase ", "")
-              .replace("menos de ", "")
-              .replace("cerca de ", "")}`}
+            {t("form.updatedAgo", {
+              time: formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })
+                .replace("aproximadamente ", "")
+                .replace("quase ", "")
+                .replace("menos de ", "")
+                .replace("cerca de ", ""),
+            })}
           </span>
         }
         mainLink={
@@ -86,7 +92,7 @@ export default function SelectedDatasetCard({
             leadingIconHover="agora-solid-trash"
             onClick={onRemove}
           >
-            Remover
+            {t("form.remove")}
           </Button>
         </div>
       )}
