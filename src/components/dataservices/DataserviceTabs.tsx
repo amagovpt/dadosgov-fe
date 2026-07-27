@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Tabs, Tab, TabHeader, Icon, CardNoResults } from "@ama-pt/agora-design-system";
 import { TabBodyWrapper } from "@/components/Shared/Wrappers/TabBodyWrapper";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
@@ -8,23 +9,24 @@ import CardMetrics, { CardMetricsProps } from "@/components/Primitives/Cards/Car
 import { Dataservice } from "@/service/types/dataservice";
 import { Dataset } from "@/service/types/dataset";
 import { fetchDatasets } from "@/service/api/datasets";
-import { formatDateToTimeAgo } from "@/utils/formatDate";
+import { formatDateToTimeAgo, formatDateLong } from "@/utils/formatDate";
 
 interface DataserviceTabsProps {
   dataservice: Dataservice;
 }
 
-const formatLongDate = (value?: string | null) => {
-  if (!value) return null;
-  const d = new Date(value);
-  return isNaN(d.getTime())
-    ? null
-    : d.toLocaleDateString("pt-PT", { day: "numeric", month: "long", year: "numeric" });
-};
-
 export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
+  const { i18n } = useTranslation("common");
+  const { t: tDs } = useTranslation("dataservices");
+  const language = i18n.language as "pt" | "en";
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [datasetCount, setDatasetCount] = useState(0);
+
+  const formatLongDate = (value?: string | null) => {
+    if (!value) return null;
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : formatDateLong(value, language);
+  };
 
   const lastUpdate =
     formatLongDate(dataservice.metadata_modified_at) ||
@@ -48,14 +50,11 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
     <div className="w-full">
       <Tabs>
         <Tab>
-          <TabHeader>Informações</TabHeader>
+          <TabHeader>{tDs("tabs.info")}</TabHeader>
           <TabBodyWrapper>
             <div className="flex flex-col gap-16">
               <h3 className="text-base font-medium text-neutral-900">
-                {datasetCount}{" "}
-                {datasetCount === 1
-                  ? "CONJUNTO DE DADOS RELACIONADO"
-                  : "CONJUNTOS DE DADOS RELACIONADOS"}
+                {tDs("tabs.relatedDatasetsCount", { count: datasetCount })}
               </h3>
               {datasetCount === 0 ? (
                 <CardNoResults
@@ -66,8 +65,8 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
                       className="icon-xl h-40 w-40 text-primary-500"
                     />
                   }
-                  title="Sem conjuntos de dados relacionados"
-                  description="Esta API ainda não tem conjuntos de dados associados."
+                  title={tDs("tabs.noRelatedTitle")}
+                  description={tDs("tabs.noRelatedDesc")}
                   hasAnchor={false}
                 />
               ) : (
@@ -79,7 +78,7 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
                   {datasets.map((dataset, index) => {
                     const cardProps = {
                       ...dataset,
-                      last_modified: formatDateToTimeAgo(dataset.last_modified),
+                      last_modified: formatDateToTimeAgo(dataset.last_modified, language),
                       link: `/datasets/${dataset.slug}`,
                     } as CardMetricsProps;
                     return <CardMetrics key={`dataset-${index}`} {...cardProps} />;
@@ -90,13 +89,13 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
               {/* Technical information */}
               <div className="mt-32 rounded-4 bg-white p-32">
                 <h3 className="mb-24 text-base font-medium uppercase text-neutral-900">
-                  Informações técnicas
+                  {tDs("tabs.technicalInfo")}
                 </h3>
                 <div className="grid gap-32 md:grid-cols-2 xl:grid-cols-3">
                   {lastUpdate && (
                     <div>
                       <h4 className="text-sm mb-8 font-bold tracking-wider text-neutral-900">
-                        Última atualização
+                        {tDs("tabs.lastUpdate")}
                       </h4>
                       <p className="font-medium text-neutral-900">{lastUpdate}</p>
                     </div>
@@ -104,14 +103,14 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
                   {createdAt && (
                     <div>
                       <h4 className="text-sm mb-8 font-bold tracking-wider text-neutral-900">
-                        Data de criação
+                        {tDs("tabs.createdAt")}
                       </h4>
                       <p className="font-medium text-neutral-900">{createdAt}</p>
                     </div>
                   )}
                   <div>
                     <h4 className="text-sm mb-8 font-bold tracking-wider text-neutral-900">
-                      Identificador
+                      {tDs("tabs.identifier")}
                     </h4>
                     <p className="break-all font-medium text-neutral-900">{dataservice.id}</p>
                   </div>
@@ -121,7 +120,9 @@ export const DataserviceTabs = ({ dataservice }: DataserviceTabsProps) => {
           </TabBodyWrapper>
         </Tab>
         <Tab>
-          <TabHeader>Discussões ({dataservice.metrics?.discussions || 0})</TabHeader>
+          <TabHeader>
+            {tDs("tabs.discussions", { count: dataservice.metrics?.discussions || 0 })}
+          </TabHeader>
           <TabBodyWrapper>
             <DiscussionSection entityId={dataservice.id} entityClass="Dataservice" />
           </TabBodyWrapper>

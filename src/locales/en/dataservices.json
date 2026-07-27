@@ -1,0 +1,111 @@
+{
+  "hero": {
+    "title": "APIs",
+    "subtitleCount": "Search through {{count, number}} APIs on dados.gov.pt",
+    "subtitleEmpty": "There are no results available for your search",
+    "subtitleText": "Explore the APIs shared by organisations that provide public services, and integrate open data automatically into your services and applications."
+  },
+  "search": {
+    "placeholder": "Search APIs...",
+    "examples": "Examples: \"geolocation\", \"transport\", \"health\""
+  },
+  "sort": {
+    "relevancia": "Relevance",
+    "recentes": "Most recent",
+    "ariaLabel": "Sort by {{label}}"
+  },
+  "noResults": {
+    "title": "Didn't find what you were looking for?",
+    "subtitle": "Try resetting the filters to broaden your search.",
+    "description": "Explore our full list of open data APIs."
+  },
+  "filters": {
+    "orgType": {
+      "title": "Organisation type",
+      "publicService": "Public service"
+    },
+    "accessType": {
+      "title": "Access type",
+      "open": "Open",
+      "openWithAccount": "Open with account",
+      "restricted": "Restricted"
+    }
+  },
+  "detail": {
+    "notFound": "API not found.",
+    "draft": "Draft",
+    "archived": "Archived",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
+    "edit": "Edit",
+    "noAuthor": "No author",
+    "lastUpdate": "Last update:",
+    "accessConditions": "Access conditions",
+    "access": "Access",
+    "authentication": "Authentication",
+    "eligibleAudiences": "Eligible audiences",
+    "notSpecified": "Not specified",
+    "restrictionReason": "Restriction reason:",
+    "requestAccess": "Request access",
+    "technicalCharacteristics": "Technical characteristics",
+    "baseApiUrl": "API base URL",
+    "rateLimit": "Rate limit",
+    "availability": "Availability",
+    "documentation": "Documentation",
+    "technicalDocumentation": "Technical documentation",
+    "functionalDocumentation": "Functional documentation",
+    "swagger": "Swagger",
+    "notProvided": "Not provided"
+  },
+  "access": {
+    "auth": {
+      "open": "None (public access)",
+      "open_with_account": "User account required",
+      "restricted": "Upon authorisation"
+    },
+    "pill": {
+      "open": "OPEN",
+      "open_with_account": "OPEN WITH ACCOUNT",
+      "restricted": "RESTRICTED"
+    },
+    "audienceRole": {
+      "local_authority_and_administration": "Community and Administration",
+      "company_and_association": "Business and Associations",
+      "private": "Special"
+    },
+    "audienceCondition": {
+      "yes": "Yes",
+      "no": "No",
+      "under_condition": "Under condition"
+    },
+    "restrictionReason": {
+      "confidentiality_of_proceedings_of_public_authorities": "Confidentiality of the proceedings of public authorities",
+      "international_relations_public_security_or_national_defence": "International relations, public security or national defence",
+      "course_of_justice_or_fair_trial": "Course of justice",
+      "confidentiality_of_commercial_or_industrial_information": "Commercial or industrial confidentiality",
+      "intellectual_property_rights": "Intellectual property rights",
+      "confidentiality_of_personal_data": "Confidentiality of personal data",
+      "protection_of_voluntary_information_suppliers": "Protection of voluntary information suppliers",
+      "protection_of_environment": "Environmental protection",
+      "other": "Other"
+    }
+  },
+  "tabs": {
+    "info": "Information",
+    "relatedDatasetsCount_one": "{{count}} RELATED DATASET",
+    "relatedDatasetsCount_other": "{{count}} RELATED DATASETS",
+    "noRelatedTitle": "No related datasets",
+    "noRelatedDesc": "This API has no associated datasets yet.",
+    "technicalInfo": "Technical information",
+    "lastUpdate": "Last update",
+    "createdAt": "Creation date",
+    "identifier": "Identifier",
+    "discussions": "Discussions ({{count}})"
+  },
+  "swagger": {
+    "versionLabel": "Version",
+    "openInSwaggerUi": "Open in Swagger UI ↗",
+    "baseUrl": "Base URL",
+    "models": "Models"
+  }
+}
