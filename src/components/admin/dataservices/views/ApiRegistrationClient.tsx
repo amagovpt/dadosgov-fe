@@ -20,6 +20,7 @@ import DataserviceProducerSection from "@/components/admin/dataservices/form-sec
 import DataserviceDescriptionSection from "@/components/admin/dataservices/form-sections/DataserviceDescriptionSection";
 import DataserviceAccessSection from "@/components/admin/dataservices/form-sections/DataserviceAccessSection";
 import { getDataserviceAuxiliaryItems } from "@/components/admin/dataservices/config/dataserviceAuxiliaryContent";
+import DataserviceTermsSection from "../form-sections/DataserviceTermsSection";
 
 interface ApiRegistrationClientProps {
   currentStep: number;
@@ -65,8 +66,21 @@ export default function ApiRegistrationClient({
   const [isResolvingLink, setIsResolvingLink] = useState(false);
   const [isLinkingDatasets, setIsLinkingDatasets] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const { hasError, setErrors, clearError, resetErrors, focusFirstError } =
-    useFormErrors<"apiName" | "apiDescription">();
+  const { hasError, setErrors, clearError, resetErrors, focusFirstError } = useFormErrors<
+    "apiName" | "apiDescription"
+  >();
+
+  // An API can only be published in the name of an organization carrying the
+  // "public-service" badge (LEDG-2190) — personal publishing is not offered.
+  const eligibleOrgs = useMemo(
+    () =>
+      (user?.organizations || []).filter((org) =>
+        org.badges?.some((badge) => badge.kind === "public-service"),
+      ),
+    [user?.organizations],
+  );
+  // Default to the first eligible organization when the user hasn't picked one.
+  const effectiveProducer = producer || eligibleOrgs[0]?.id || "";
 
   async function handleStep1Next() {
     const errors: Partial<Record<"apiName" | "apiDescription", string>> = {};
@@ -76,6 +90,14 @@ export default function ApiRegistrationClient({
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       focusFirstError();
+      return;
+    }
+
+    if (!effectiveProducer) {
+      setApiError(
+        "Só é possível publicar uma API em nome de uma organização com o emblema " +
+          "'Serviço público'.",
+      );
       return;
     }
 
@@ -95,7 +117,7 @@ export default function ApiRegistrationClient({
     try {
       const dataservice = await createDataservice({
         title: apiName.trim(),
-        organization: producer && producer !== "user" ? producer : undefined,
+        organization: effectiveProducer || undefined,
         description: apiDescription.trim(),
         acronym: apiAcronym.trim() || undefined,
         base_api_url: baseApiUrl.trim() || undefined,
@@ -126,8 +148,7 @@ export default function ApiRegistrationClient({
 
   // Preload the dataset pool (user's own + their organizations' datasets).
   useEffect(() => {
-    const dedupe = (items: Dataset[]) =>
-      Array.from(new Map(items.map((d) => [d.id, d])).values());
+    const dedupe = (items: Dataset[]) => Array.from(new Map(items.map((d) => [d.id, d])).values());
     const personal = fetchMyDatasets(1, 100);
     const orgs = (user?.organizations || []).map((org) => fetchOrgDatasets(org.id, 1, 100));
     Promise.all([personal, ...orgs])
@@ -293,12 +314,11 @@ export default function ApiRegistrationClient({
               </p>
 
               <DataserviceProducerSection
-                displayName={user ? `${user.first_name} ${user.last_name}` : "Eu próprio"}
-                organizations={(user?.organizations || []).map((organization) => ({
+                organizations={eligibleOrgs.map((organization) => ({
                   id: organization.id,
                   name: organization.name,
                 }))}
-                initialValue={producer}
+                initialValue={effectiveProducer}
                 onValueChange={setProducer}
               />
 
@@ -309,8 +329,6 @@ export default function ApiRegistrationClient({
                 baseApiUrl={baseApiUrl}
                 machineDocUrl={machineDocUrl}
                 technicalDocUrl={technicalDocUrl}
-                rateLimiting={rateLimiting}
-                rateLimitingUrl={rateLimitingUrl}
                 availability={availability}
                 hasApiNameError={hasError("apiName")}
                 hasApiDescriptionError={hasError("apiDescription")}
@@ -330,8 +348,6 @@ export default function ApiRegistrationClient({
                 onBaseApiUrlChange={(event) => setBaseApiUrl(event.target.value)}
                 onMachineDocUrlChange={(event) => setMachineDocUrl(event.target.value)}
                 onTechnicalDocUrlChange={(event) => setTechnicalDocUrl(event.target.value)}
-                onRateLimitingChange={(event) => setRateLimiting(event.target.value)}
-                onRateLimitingUrlChange={(event) => setRateLimitingUrl(event.target.value)}
                 onAvailabilityChange={(event) => setAvailability(event.target.value)}
               />
 
@@ -350,6 +366,13 @@ export default function ApiRegistrationClient({
                 onReasonTextChange={(event) => setReasonText(event.target.value)}
                 onAuthRequestUrlChange={(event) => setAuthRequestUrl(event.target.value)}
                 onBusinessDocUrlChange={(event) => setBusinessDocUrl(event.target.value)}
+              />
+
+              <DataserviceTermsSection
+                rateLimiting={rateLimiting}
+                rateLimitingUrl={rateLimitingUrl}
+                onRateLimitingChange={(event) => setRateLimiting(event.target.value)}
+                onRateLimitingUrlChange={(event) => setRateLimitingUrl(event.target.value)}
               />
 
               <AdminStepActions

@@ -20,17 +20,18 @@ import HeroGeneral from "@/components/HeroGeneral";
 import PublishDropdown from "@/components/admin/PublishDropdown";
 import { ReusesFilters } from "@/components/reuses/ReusesFilters";
 import { useReusesListing } from "@/hooks/useReusesListing";
-import { REUSE_SORT_LABELS } from "@/utils/reusesListingQuery";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { twJoin } from "tailwind-merge";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
 import { useTranslation } from "react-i18next";
+import { FrontOfficePage } from "@/service/types/shared/common";
 
 interface ReusesClientProps {
   initialData: APIResponse<Reuse>;
   currentPage: number;
   filterCounts?: Record<string, number>;
   allOrganizations?: Organization[];
+  dataCms?: FrontOfficePage;
 }
 
 export default function ReusesClient({
@@ -38,8 +39,19 @@ export default function ReusesClient({
   currentPage,
   filterCounts = {},
   allOrganizations = [],
+  dataCms,
 }: ReusesClientProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
+  const { t: tr } = useTranslation("reuses");
+
+  const { language } = i18n;
+
+  const REUSE_SORT_LABELS: Record<string, string> = {
+    relevancia: tr("sort.relevancia"),
+    recentes: tr("sort.recentes"),
+    antigos: tr("sort.antigos"),
+    subscritores: tr("sort.subscritores"),
+  };
 
   const router = useRouter();
 
@@ -61,17 +73,12 @@ export default function ReusesClient({
   return (
     <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        title="Reutilizações"
+        title={dataCms?.hero.title ?? t("reuses")}
         breadcrumbItems={[
-          { label: "Início", url: "/" },
-          { label: "Reutilizações", url: "/reuses" },
+          { label: t("home"), url: "/" },
+          { label: t("reuses"), url: "/reuses" },
         ]}
-        subtitle={
-          <p className="max-w-[592px] text-primary-100">
-            Conheça estudos, visualizações e aplicações úteis para a sociedade, que reutilizam dados
-            públicos disponíveis neste portal.
-          </p>
-        }
+        subtitle={<p className="max-w-[592px] text-primary-100">{dataCms?.hero.subtitle ?? tr("hero.subtitle")}</p>}
       >
         <PublishDropdown darkMode={true} outline={false} />
       </HeroGeneral>
@@ -79,7 +86,7 @@ export default function ReusesClient({
       {/* Search Filter */}
       <SearchFilter
         id="reuses-search"
-        placeholder="Pesquisar reutilizações..."
+        placeholder={tr("search.placeholder")}
         value={searchQuery}
         onChange={setSearchQuery}
         onSearch={handleSearch}
@@ -95,16 +102,16 @@ export default function ReusesClient({
               hasIcon
               {...(filtersOpen
                 ? {
-                    leadingIcon: "agora-line-chevron-left",
-                    leadingIconHover: "agora-solid-chevron-left",
-                  }
+                  leadingIcon: "agora-line-chevron-left",
+                  leadingIconHover: "agora-solid-chevron-left",
+                }
                 : {
-                    trailingIcon: "agora-line-chevron-right",
-                    trailingIconHover: "agora-solid-chevron-right",
-                  })}
+                  trailingIcon: "agora-line-chevron-right",
+                  trailingIconHover: "agora-solid-chevron-right",
+                })}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
-              {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
+              {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
               {t("results", { count: total })}
@@ -122,7 +129,7 @@ export default function ReusesClient({
               }}
             >
               {Object.entries(REUSE_SORT_LABELS).map(([key, label]) => (
-                <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
+                <Toggle key={key} value={key} aria-label={tr("sort.ariaLabel", { label })}>
                   {label}
                 </Toggle>
               ))}
@@ -149,12 +156,12 @@ export default function ReusesClient({
               >
                 {listData.error ? (
                   <ListingErrorBanner
-                    entity="as reutilizações"
+                    entity={tr("theReuses")}
                     errorStatus={listData.errorStatus}
                   />
                 ) : reuses.length > 0 ? (
                   reuses.map((reuse) => {
-                    const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at);
+                    const timeAgo = formatDateToTimeAgo(reuse.last_modified || reuse.created_at, language as "pt" | "en");
                     return (
                       <div key={reuse.id} className="h-full">
                         <CardLinks
@@ -165,7 +172,7 @@ export default function ReusesClient({
                             src: reuse.image_thumbnail || reuse.image || "/laptop.png",
                             alt: reuse.title,
                           }}
-                          category={reuse.organization?.name || "Reutilização"}
+                          category={reuse.organization?.name || tr("card.category")}
                           title={<div className="text-xl-bold underline">{reuse.title}</div>}
                           description={
                             reuse.description ? (
@@ -174,7 +181,9 @@ export default function ReusesClient({
                               </p>
                             ) : undefined
                           }
-                          date={<span className="font-[300]">Atualizado há {timeAgo}</span>}
+                          date={
+                            <span className="font-[300]">{tr("card.updatedAgo", { timeAgo })}</span>
+                          }
                           links={[
                             {
                               href: "#",
@@ -185,7 +194,7 @@ export default function ReusesClient({
                               trailingIconHover: "",
                               trailingIconActive: "",
                               children: reuse.metrics?.views?.toLocaleString("pt-PT") || "0",
-                              title: "Visualizações",
+                              title: tr("card.views"),
                               onClick: (e: MouseEvent) => e.preventDefault(),
                               className: "text-[#034AD8]",
                             },
@@ -197,8 +206,10 @@ export default function ReusesClient({
                               trailingIcon: "",
                               trailingIconHover: "",
                               trailingIconActive: "",
-                              children: `${reuse.datasets?.length || 0} datasets`,
-                              title: "Datasets",
+                              children: tr("card.datasetsCount", {
+                                count: reuse.datasets?.length || 0,
+                              }),
+                              title: tr("card.datasets"),
                               onClick: (e: MouseEvent) => e.preventDefault(),
                               className: "text-[#034AD8]",
                             },
@@ -211,7 +222,7 @@ export default function ReusesClient({
                               trailingIconHover: "",
                               trailingIconActive: "",
                               children: reuse.metrics?.followers || 0,
-                              title: "Favoritos",
+                              title: tr("card.favorites"),
                               onClick: (e: MouseEvent) => e.preventDefault(),
                               className: "text-[#034AD8]",
                             },
@@ -230,18 +241,15 @@ export default function ReusesClient({
                   <div className="col-span-full">
                     <CardNoResults
                       icon={
-                        <Icon name="agora-line-search" className="h-12 w-12 text-primary-500" />
+                        <Icon name={dataCms?.noResults.icon ?? "agora-line-search"} className="h-12 w-12 text-primary-500" />
                       }
-                      title="Não encontrou nenhuma reutilização?"
-                      subtitle={
-                        <span className="font-bold">
-                          Tente redefinir os filtros para ampliar sua busca.
-                        </span>
-                      }
-                      description="Explore a nossa lista completa de reutilizações de dados abertos."
+                      title={dataCms?.noResults.title ?? tr("noResults.title")}
+                      subtitle={<span className="font-bold">{dataCms?.noResults.subtitle ?? tr("noResults.subtitle")}</span>}
+                      description={dataCms?.noResults.description ?? tr("noResults.description")}
                       position="center"
                       hasAnchor={true}
-                      valueAnchor="Redefinir filtros"
+                      valueAnchor={t("filters.reset")}
+                      anchorTarget="_self"
                       anchorHref="/reuses"
                       anchorTrailingIcon="agora-line-arrow-right-circle"
                       anchorTrailingIconHover="agora-solid-arrow-right-circle"

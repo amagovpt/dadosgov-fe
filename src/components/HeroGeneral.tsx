@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Breadcrumb } from '@ama-pt/agora-design-system';
+import Breadcrumb from '@/components/Primitives/Breadcrumb/Breadcrumb';
 import { twJoin } from 'tailwind-merge';
 
 interface HeroGeneralProps {
   title: React.ReactNode;
-  breadcrumbItems?: { label: string; url: string }[];
+  breadcrumbItems?: { label: React.ReactNode; url: string }[];
   subtitle?: React.ReactNode;
   children?: React.ReactNode;
   variant?: 'dark' | 'light';

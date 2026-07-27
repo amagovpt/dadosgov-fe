@@ -118,7 +118,9 @@ export function createOrgHarvesterColumns({
       renderCell: (harvester) => (
         <TableActionsCell
           viewAction={can(harvester, "edit") ? undefined : { href: editHref(harvester) }}
-          editAction={can(harvester, "edit") ? { href: editHref(harvester) } : undefined}
+          editAction={
+            can(harvester, "edit") ? { href: `${editHref(harvester)}?tab=config` } : undefined
+          }
         />
       ),
     },

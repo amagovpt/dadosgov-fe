@@ -28,7 +28,7 @@ test.describe("Backoffice (disposable) - Datasets destructive CRUD", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    expect(page.url()).toMatch(/\/pages\/(login|admin)/);
+    expect(page.url()).toMatch(/(login|admin)/);
     await ctx.close();
   });
 

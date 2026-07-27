@@ -14,7 +14,6 @@
     "modal": "Elimine o conjunto de dados"
   },
   "filters": {
-    "all": "Todos",
     "format": {
       "label": "Formato dos recursos",
       "options": {
@@ -24,14 +23,6 @@
         "geographic": "Geográfico",
         "documents": "Documentos",
         "other": "Outro"
-      }
-    },
-    "update": {
-      "label": "Data da atualização",
-      "options": {
-        "30_days": "Os últimos 30 dias",
-        "12_months": "Os últimos 12 meses",
-        "3_years": "Os últimos 3 anos"
       }
     },
     "type": {

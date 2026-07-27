@@ -1,17 +1,31 @@
 import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
+import { enGB, pt } from "date-fns/locale";
+import type { Locale } from "date-fns";
+
+const DATE_FNS_LOCALES: Record<"pt" | "en", Locale> = { pt, en: enGB };
+
+// date-fns fuzzy prefixes to strip so the distance reads cleanly, for both locales.
+const FUZZY_PREFIXES = [
+  // pt
+  "aproximadamente ",
+  "quase ",
+  "menos de ",
+  "cerca de ",
+  // en
+  "about ",
+  "over ",
+  "almost ",
+  "less than ",
+];
 
 export function formatDateToTimeAgo(
   date: string | undefined | null,
-  unknown: string = "Desconhecido"
+  // PT default is an intentional fallback; migrated callers pass a translated string.
+  locale: "pt" | "en" = "pt"
 ) {
-  return date
-    ? formatDistanceToNow(new Date(date), { locale: pt })
-        .replace("aproximadamente ", "")
-        .replace("quase ", "")
-        .replace("menos de ", "")
-        .replace("cerca de ", "")
-    : unknown;
+  if (!date) return locale === "pt" ? "Desconhecido" : "Unknown";
+  const distance = formatDistanceToNow(new Date(date), { locale: DATE_FNS_LOCALES[locale] });
+  return FUZZY_PREFIXES.reduce((acc, prefix) => acc.replace(prefix, ""), distance);
 }
 
 export function formatDateToDMY(dateStr: string | null | undefined, fallback: string = "—") {
@@ -24,8 +38,12 @@ export function formatDateToDMY(dateStr: string | null | undefined, fallback: st
   return `${d}/${m}/${y}`;
 }
 
-export function formatDateLong(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("pt-PT", {
+const INTL_LOCALES: Record<"pt" | "en", string> = { pt: "pt-PT", en: "en-GB" };
+
+export function formatDateLong(dateStr: string, locale: "pt" | "en" = "pt") {
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return dateStr;
+  return date.toLocaleDateString(INTL_LOCALES[locale], {
     year: "numeric",
     month: "long",
     day: "numeric",

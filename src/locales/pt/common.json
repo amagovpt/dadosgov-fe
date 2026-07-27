@@ -48,6 +48,17 @@
     "filters": "Filtros",
     "hideFilters": "Ocultar filtros",
     "openFilters": "Abrir filtros",
+    "clear": "Limpar filtros",
+    "all": "Todos",
+    "update": {
+      "label": "Data da atualização",
+      "options": {
+        "30_days": "Os últimos 30 dias",
+        "12_months": "Os últimos 12 meses",
+        "3_years": "Os últimos 3 anos"
+      }
+    },
+    "reset": "Redefinir filtros",
     "advanced": {
       "label": "Filtros avançados",
       "organization": "Organizações",
@@ -84,5 +95,33 @@
     "subtitle": "Ocorreu um erro ao contactar o servidor. Tente novamente dentro de momentos."
   },
   "retry": "Tentar novamente",
-  "auth": "Autenticação"
+  "auth": "Autenticação",
+  "discussions": {
+    "count_one": "{{count}} DISCUSSÃO",
+    "count_other": "{{count}} DISCUSSÕES",
+    "searchAria": "Pesquisar discussões",
+    "newDiscussion": "Nova discussão",
+    "requiredFieldsBefore": "Os campos marcados com um asterisco (",
+    "requiredFieldsAfter": ") são obrigatórios.",
+    "identityLabel": "Escolha a identidade com a qual deseja publicar esta mensagem",
+    "identitySearchPlaceholder": "Para pesquisar...",
+    "noResults": "Sem resultados",
+    "userIdentitySuffix": "(utilizador)",
+    "titleLabel": "Título",
+    "yourMessage": "A sua mensagem",
+    "messagePlaceholder": "Por favor, mantenha a cordialidade e uma postura construtiva. Evite partilhar informações pessoais.",
+    "sending": "A enviar...",
+    "submit": "Enviar",
+    "reply": "Responder",
+    "postedOn": "Publicado em",
+    "editDiscussion": "Editar discussão",
+    "deleteDiscussion": "Eliminar discussão",
+    "editComment": "Editar comentário",
+    "deleteComment": "Eliminar comentário",
+    "editMessage": "Editar a mensagem",
+    "deleteDiscussionConfirm": "Tem certeza de que deseja eliminar esta discussão?",
+    "deleteMessageConfirm": "Tem certeza de que deseja apagar esta mensagem?",
+    "noDiscussionsTitle": "Sem discussões",
+    "noDiscussionsDescription": "Ainda não existem discussões."
+  }
 }

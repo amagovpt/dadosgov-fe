@@ -55,11 +55,17 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
           { label: "APIs", url: "/dataservices" },
         ]}
         subtitle={
-          <p className="max-w-[592px] text-primary-100">
-            {total === 0
-              ? "Não existem resultados disponíveis para a sua pesquisa"
-              : `Pesquise através de ${total.toLocaleString("pt-PT")} APIs em dados.gov.pt`}
-          </p>
+          <div className="max-w-[592px] text-primary-100">
+            <p>
+              {total === 0
+                ? "Não existem resultados disponíveis para a sua pesquisa"
+                : `Pesquise através de ${total.toLocaleString("pt-PT")} APIs em dados.gov.pt`}
+            </p>
+            <p className="mt-8">
+              Explore as APIs partilhadas por organizações que prestam serviço público, e integre
+              dados abertos, de forma automatizada, nos seus serviços e aplicações.
+            </p>
+          </div>
         }
       >
         <PublishDropdown darkMode={true} outline={false} />
@@ -184,7 +190,7 @@ export default function DataservicesClient({ initialData, currentPage }: Dataser
                             trailingIcon: "",
                             trailingIconHover: "",
                             trailingIconActive: "",
-                            children: `${ds.datasets?.length || 0} datasets`,
+                            children: `${ds.datasets?.total ?? 0} datasets`,
                             title: "Datasets",
                             onClick: (e: MouseEvent) => e.preventDefault(),
                             className: "text-[#034AD8]",

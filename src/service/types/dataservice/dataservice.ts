@@ -1,6 +1,5 @@
 import type { Organization, UserRef } from '@/service/types/identity';
 import type { Metric } from '@/service/types/shared';
-import type { DatasetRef } from '@/service/types/dataset';
 
 /**
  * Access audience entry for restricted dataservices.
@@ -55,7 +54,9 @@ export interface Dataservice {
   tags: string[];
   private: boolean;
   featured: boolean;
-  datasets: DatasetRef[];
+  // Serialized by the API as a paginated subsection reference (not an array):
+  // { rel, href, total, type }. Use `datasets.total` for the count.
+  datasets: { rel: string; href: string; total: number; type: string };
   // Backend-computed authorization for the current user (single source of truth).
   permissions?: DataservicePermissions;
 }

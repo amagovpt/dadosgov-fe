@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import { Accordion, AccordionGroup } from "@ama-pt/agora-design-system";
 import { Dataset } from "@/service/types/dataset";
 import { frequencyLabelsMap } from "@/utils/frequencyLabels";
 import { getGranularityLabel } from "@/utils/granularityLabels";
+import { formatDateLong } from "@/utils/formatDate";
 import { TagsCollapse } from "@/components/Shared/TagsCollapse";
 
 interface DatasetInfoProps {
@@ -31,14 +31,6 @@ const formatZone = (zone: string): string => {
     return parts[1].toUpperCase();
   }
   return zone;
-};
-
-const formatDate = (dateStr: string): string => {
-  try {
-    return format(new Date(dateStr), "d 'de' MMMM 'de' yyyy", { locale: pt });
-  } catch {
-    return dateStr;
-  }
 };
 
 const CopyButton = ({ text }: { text: string }) => {
@@ -83,6 +75,7 @@ const CopyButton = ({ text }: { text: string }) => {
 };
 
 export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
+  const { i18n } = useTranslation("common");
   if (!dataset) return null;
   const tags = dataset.tags ?? [];
   const contactPoints = dataset.contact_points ?? [];
@@ -208,7 +201,9 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
             {dataset.created_at && (
               <div>
                 <p className="font-bold text-neutral-900 text-sm mb-8">Criação</p>
-                <span className="text-neutral-900 text-sm">{formatDate(dataset.created_at)}</span>
+                <span className="text-neutral-900 text-sm">
+                  {formatDateLong(dataset.created_at, i18n.language as "pt" | "en")}
+                </span>
               </div>
             )}
             {dataset.frequency && (
@@ -223,7 +218,7 @@ export const DatasetInfo: React.FC<DatasetInfoProps> = ({ dataset }) => {
               <div>
                 <p className="font-bold text-neutral-900 text-sm mb-8">Última atualização</p>
                 <span className="text-neutral-900 text-sm">
-                  {formatDate(dataset.last_modified)}
+                  {formatDateLong(dataset.last_modified, i18n.language as "pt" | "en")}
                 </span>
               </div>
             )}

@@ -19,7 +19,7 @@ async function gotoFirstReuseDetail(page: Page) {
   const firstCard = page.locator("div.cursor-pointer").first();
   await expect(firstCard).toBeVisible({ timeout: 15000 });
   await firstCard.click();
-  await page.waitForURL(/\/pages\/reuses\/.+/, { timeout: 15000 });
+  await page.waitForURL(/reuses\/.+/, { timeout: 15000 });
   await page.waitForLoadState("networkidle");
   // Reuse detail uses Agora's <CardArticle> for the title; the title heading is h3.
   await expect(
