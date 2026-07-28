@@ -19,7 +19,13 @@ import type {
 } from "@/service/types/dataset";
 import type { Organization } from "@/service/types/identity";
 import type { APIResponse } from "@/service/types/shared";
-import { API_AUTH_URL, API_BASE_URL, authFetch, translateUploadErrorPayload } from "@/service/utils/API";
+import {
+  API_AUTH_URL,
+  API_BASE_URL,
+  authFetch,
+  chunkedUploadFetch,
+  translateUploadErrorPayload,
+} from "@/service/utils/API";
 
 
 /**
@@ -130,6 +136,7 @@ export async function fetchDatasets(
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
       if (filters.owner) params.set("owner", filters.owner);
       if (filters.modified_since) params.set("modified_since", filters.modified_since);
+      if (filters.dataservice) params.set("dataservice", filters.dataservice);
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],
@@ -239,11 +246,20 @@ export async function fetchAdminDatasets(
   }
 }
 
-export async function fetchDataset(slug: string): Promise<Dataset> {
+export async function fetchDataset(
+  slug: string,
+  forwarded?: Record<string, string>
+): Promise<Dataset> {
   try {
-    const res = await fetch(`${API_AUTH_URL}/datasets/${slug}/`, {
+    // API_BASE_URL (not API_AUTH_URL) so this is callable from Server Components:
+    // API_AUTH_URL is always the relative "/api/1", which Node's fetch cannot
+    // resolve. On the client API_BASE_URL still resolves to "/api/1" via the
+    // Next proxy, so existing client callers are unaffected. `forwarded` relays
+    // the session cookie + client IP on SSR (omitted client-side).
+    const res = await fetch(`${API_BASE_URL}/datasets/${slug}/`, {
       cache: "no-store",
       credentials: "include",
+      headers: forwarded,
     });
 
     if (!res.ok) {
@@ -380,13 +396,7 @@ export async function createResource(
 
 
 export async function uploadResource(datasetId: string, file: File): Promise<Resource> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(`${API_AUTH_URL}/datasets/${datasetId}/upload/`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
-  });
+  const res = await chunkedUploadFetch(`${API_AUTH_URL}/datasets/${datasetId}/upload/`, file);
   const text = await res.text();
   if (!res.ok) {
     let data: Record<string, unknown> = {};
@@ -434,15 +444,9 @@ export async function replaceResourceFile(
   resourceId: string,
   file: File
 ): Promise<Resource> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(
+  const res = await chunkedUploadFetch(
     `${API_AUTH_URL}/datasets/${datasetId}/resources/${resourceId}/upload/`,
-    {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-    }
+    file
   );
   const text = await res.text();
   if (!res.ok) {
@@ -604,7 +608,7 @@ export interface DatasetsListingResponse {
 
 
 /**
- * Aggregated fetch for the /pages/datasets listing page.
+ * Aggregated fetch for the /datasets listing page.
  * Hits /api/1/site/datasets-listing/ which returns the paginated listing,
  * sidebar filter counts and metadata in one response (LEDG-1836).
  */
@@ -637,6 +641,7 @@ export async function fetchDatasetsListing(
       if (filters.featured !== undefined) params.set("featured", String(filters.featured));
       if (filters.owner) params.set("owner", filters.owner);
       if (filters.modified_since) params.set("modified_since", filters.modified_since);
+      if (filters.dataservice) params.set("dataservice", filters.dataservice);
 
       const arrayParams: [string, string | string[] | undefined][] = [
         ["tag", filters.tag],

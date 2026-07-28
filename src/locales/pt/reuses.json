@@ -1,0 +1,53 @@
+{
+  "hero": {
+    "subtitle": "Conheça estudos, visualizações e aplicações úteis para a sociedade, que reutilizam dados públicos disponíveis neste portal."
+  },
+  "search": {
+    "placeholder": "Pesquisar reutilizações..."
+  },
+  "sort": {
+    "relevancia": "Relevância",
+    "recentes": "Mais recente",
+    "antigos": "Mais antigo",
+    "subscritores": "Subscritores",
+    "ariaLabel": "Ordenar por {{label}}"
+  },
+  "card": {
+    "category": "Reutilização",
+    "updatedAgo": "Atualizado há {{timeAgo}}",
+    "views": "Visualizações",
+    "datasets": "Datasets",
+    "favorites": "Favoritos",
+    "datasetsCount": "{{count}} datasets"
+  },
+  "noResults": {
+    "title": "Não encontrou nenhuma reutilização?",
+    "subtitle": "Tente redefinir os filtros para ampliar sua busca.",
+    "description": "Explore a nossa lista completa de reutilizações de dados abertos.",
+    "reset": "Redefinir filtros"
+  },
+  "theReuses": "as reutilizações",
+  "detail": {
+    "addFavorite": "Adicionar aos favoritos",
+    "removeFavorite": "Remover dos favoritos",
+    "viewReuse": "Veja reutilização",
+    "edit": "Editar",
+    "draft": "RASCUNHO",
+    "createdBy": "Criado por:",
+    "noOrganization": "Sem organização",
+    "defaultType": "Aplicação",
+    "description": "Descrição",
+    "discussions": "Discussões",
+    "tags": "Etiquetas",
+    "lastUpdate": "Última atualização",
+    "creationDate": "Data de criação",
+    "discussionQuestion": "A sua questão não é sobre a reutilização?",
+    "visitForum": "Visite o nosso fórum.",
+    "notFound": "Reutilização não encontrada.",
+    "datasetsLoadError": "Não foi possível carregar os conjuntos de dados associados.",
+    "associatedDatasets_one": "{{count}} conjunto de dados associado",
+    "associatedDatasets_other": "{{count}} conjuntos de dados associados",
+    "externalDatasets_one": "{{count}} conjunto de dados externo",
+    "externalDatasets_other": "{{count}} conjuntos de dados externos"
+  }
+}

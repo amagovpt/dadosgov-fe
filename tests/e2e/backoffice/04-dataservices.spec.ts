@@ -13,20 +13,50 @@ test.describe("Backoffice - Data Services CRUD", () => {
     page,
   }) => {
     // Reachable via the publish menu and direct URL — admin should not see 404.
-    await page.goto("/pages/admin/me/dataservices");
+    await page.goto("/admin/me/dataservices");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
     const url = page.url();
-    expect(url).toMatch(/\/pages\/admin\//);
+    expect(url).toMatch(/admin\//);
   });
 
-  test.skip("API-02: Step 1 - fill all fields and validate", async () => {
-    // Requires a working dataservice creation wizard route.
+  test("API-02: Wizard step 1 exposes the required name + description fields", async ({
+    page,
+  }) => {
+    await page.goto("/admin/dataservices/new?step=1");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    const nameInput = page.locator("#api-name").first();
+    await expect(nameInput).toBeVisible({ timeout: 10000 });
+    await nameInput.fill("E2E temporary API draft");
+    await expect(nameInput).toHaveValue("E2E temporary API draft");
+
+    await expect(page.locator("#api-description").first()).toBeVisible();
   });
 
-  test.skip("API-03: Step 2 - associate datasets and license", async () => {
-    // Requires datasets in the system + form persistence cleanup.
+  test("API-03: Wizard step 2 offers both dataset-association methods at once", async ({
+    page,
+  }) => {
+    // Regression for the "one or the other" bug: the search multi-select and
+    // the "add by URL" field must coexist so a dataset added one way is not
+    // wiped by the other. Step 2 renders from the query param regardless of
+    // step-1 state, so the affordances can be asserted non-destructively.
+    await page.goto("/admin/dataservices/new?step=2");
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    // Method 1: the search multi-select.
+    await expect(
+      page.getByText("Pesquisar um conjunto de dados").first()
+    ).toBeVisible({ timeout: 10000 });
+
+    // Method 2: the paste-a-URL field + its "Adicionar" button.
+    await expect(page.locator("#dataset-link-url").first()).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^Adicionar$/i }).first()
+    ).toBeVisible();
   });
 
   test.skip("API-04: Step 3 - cover image and save", async () => {

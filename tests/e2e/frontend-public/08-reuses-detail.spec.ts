@@ -1,11 +1,11 @@
 import { test, expect, type Page } from "playwright/test";
 
-const REUSES_URL = "/pages/reuses";
+const REUSES_URL = "/reuses";
 
 async function getFirstReuseHref(page: Page): Promise<string> {
   await page.goto(REUSES_URL);
   await page.waitForLoadState("networkidle");
-  const firstLink = page.locator("a[href^='/pages/reuses/']").first();
+  const firstLink = page.locator("a[href^='/reuses/']").first();
   await expect(firstLink).toBeVisible({ timeout: 15000 });
   const href = await firstLink.getAttribute("href");
   if (!href) throw new Error("No reuse link found on listing");
@@ -19,7 +19,7 @@ async function gotoFirstReuseDetail(page: Page) {
   const firstCard = page.locator("div.cursor-pointer").first();
   await expect(firstCard).toBeVisible({ timeout: 15000 });
   await firstCard.click();
-  await page.waitForURL(/\/pages\/reuses\/.+/, { timeout: 15000 });
+  await page.waitForURL(/reuses\/.+/, { timeout: 15000 });
   await page.waitForLoadState("networkidle");
   // Reuse detail uses Agora's <CardArticle> for the title; the title heading is h3.
   await expect(

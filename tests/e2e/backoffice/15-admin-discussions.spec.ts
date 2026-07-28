@@ -2,8 +2,8 @@ import { test, expect } from "playwright/test";
 
 /**
  * Admin discussions module — listings live under:
- *   - /pages/admin/org/discussions          (active org)
- *   - /pages/admin/org/[orgId]/discussions  (specific org, admin-impersonating)
+ *   - /admin/org/discussions          (active org)
+ *   - /admin/org/[orgId]/discussions  (specific org, admin-impersonating)
  *
  * Auth via auth-setup storage state. The seeded e2e admin has no organisation
  * membership, so /admin/org/discussions redirects to /admin/me/datasets.
@@ -13,7 +13,7 @@ test.describe("Backoffice - Admin Discussions", () => {
   test("AD-01: Org discussions page resolves to a backoffice URL", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/org/discussions");
+    await page.goto("/admin/org/discussions");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2500);
 
@@ -21,7 +21,7 @@ test.describe("Backoffice - Admin Discussions", () => {
     // With the seeded org membership the page renders /admin/org/discussions;
     // without it the user is redirected to /admin/me/*. Either is acceptable —
     // a backoffice route must resolve.
-    expect(url).toMatch(/\/pages\/admin\//);
+    expect(url).toMatch(/admin\//);
   });
 
   test.skip(
@@ -65,11 +65,11 @@ test.describe("Backoffice - Admin Discussions", () => {
   }) => {
     const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
-    await page.goto("/pages/admin/org/discussions");
+    await page.goto("/admin/org/discussions");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
-    expect(page.url()).toMatch(/\/pages\/(login|admin)/);
+    expect(page.url()).toMatch(/(login|admin)/);
     await context.close();
   });
 });

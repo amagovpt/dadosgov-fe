@@ -2,30 +2,34 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Icon,
-  Breadcrumb,
   Pill,
   CardArticle,
   InputTextArea,
   StatusCard,
 } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { Organization } from "@/service/types/identity";
 import { OrganizationTabs } from "./OrganizationTabs";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
+import { OrganizationBadges } from "@/components/organizations/OrganizationBadges";
 import { useAuth } from "@/context/AuthContext";
 import { followEntity, unfollowEntity, isFollowing } from "@/service/api/followers";
-import { requestMembership } from "@/service/api/organizations";
+import { fetchOrganization, requestMembership } from "@/service/api/organizations";
 import { formatMetricValue } from "@/utils/formatNumber";
+import { formatMonthYear } from "@/utils/formatDate";
 
 interface OrganizationDetailClientProps {
   organization: Organization;
 }
 
 export default function OrganizationDetailClient({ organization }: OrganizationDetailClientProps) {
+  const { t, i18n } = useTranslation("common");
+  const { t: tOrg } = useTranslation("organizations");
+  const language = i18n.language as "pt" | "en";
   const { user } = useAuth();
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -37,6 +41,26 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
   const [requestError, setRequestError] = useState<string | null>(null);
 
   const isMember = user?.organizations?.some((org) => org.id === organization.id) ?? false;
+
+  // Edit permission is decided by the backend (the single source of truth).
+  // The SSR org fetch is anonymous (no session), so re-fetch the org with the
+  // user's session to read its `permissions`. Anonymous users never edit.
+  const [canEditOrg, setCanEditOrg] = useState(false);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetchOrganization(organization.id)
+      .then((o) => {
+        if (!cancelled) setCanEditOrg(o?.permissions?.edit ?? false);
+      })
+      .catch(() => {
+        if (!cancelled) setCanEditOrg(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, organization.id]);
+  const canEdit = Boolean(user) && canEditOrg;
 
   useEffect(() => {
     let cancelled = false;
@@ -60,7 +84,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
     if (isTogglingFavorite) return;
@@ -90,7 +114,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
       setRequestComment("");
     } catch (error) {
       console.error("Error requesting membership:", error);
-      setRequestError("Erro ao enviar o pedido de adesão.");
+      setRequestError(tOrg("detail.requestError"));
     } finally {
       setIsRequesting(false);
     }
@@ -102,13 +126,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
     <main className="flex w-full flex-col items-center justify-center gap-24">
       {/* Breadcrumb & Action Section */}
       <div className="container flex items-center justify-between">
-        <Breadcrumb
-          items={[
-            { label: "Home", url: "/" },
-            { label: "Organizações", url: "/pages/organizations" },
-            { label: organization.name, url: `/pages/organizations/${organization.slug}` },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} currentLabel={organization.name} />
       </div>
 
       <div className="container flex justify-end gap-12">
@@ -121,7 +139,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
             leadingIconHover="agora-solid-plus-circle"
             onClick={() => setShowRequestForm(!showRequestForm)}
           >
-            Pedir adesão
+            {tOrg("detail.requestMembership")}
           </Button>
         )}
         <Button
@@ -134,30 +152,35 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
           onClick={handleToggleFavorite}
           disabled={isTogglingFavorite}
         >
-          {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          {isFavorite ? tOrg("detail.removeFavorite") : tOrg("detail.addFavorite")}
         </Button>
+        {canEdit && (
+          <Button
+            variant="primary"
+            hasIcon={true}
+            leadingIcon="agora-line-edit"
+            leadingIconHover="agora-solid-edit"
+            className="flex-shrink-0"
+            onClick={() => router.push(`/admin/org/${organization.id}/profile`)}
+          >
+            {tOrg("detail.edit")}
+          </Button>
+        )}
       </div>
 
-      {user && isMember && (
-        <StatusCard variant="informative" showIcon description="Já pertence a esta organização." />
-      )}
       {requestSuccess && (
-        <StatusCard
-          variant="success"
-          showIcon
-          description="Pedido de adesão enviado com sucesso. O administrador da organização irá analisar o seu pedido."
-        />
+        <StatusCard variant="success" showIcon description={tOrg("detail.requestSuccess")} />
       )}
       {requestError && <StatusCard variant="danger" showIcon description={requestError} />}
 
       {showRequestForm && (
         <div className="rounded-lg container flex flex-col gap-16 bg-neutral-50 p-24">
           <h3 className="text-base font-semibold text-primary-900">
-            Pedir adesão a {organization.name}
+            {tOrg("detail.requestMembershipTitle", { name: organization.name })}
           </h3>
           <InputTextArea
-            label="Comentário (opcional)"
-            placeholder="Explique por que pretende aderir a esta organização..."
+            label={tOrg("detail.commentLabel")}
+            placeholder={tOrg("detail.commentPlaceholder")}
             id="membership-comment"
             rows={3}
             value={requestComment}
@@ -175,10 +198,10 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 setRequestError(null);
               }}
             >
-              Cancelar
+              {t("cancel")}
             </Button>
             <Button variant="primary" onClick={handleRequestMembership} disabled={isRequesting}>
-              {isRequesting ? "A enviar..." : "Enviar pedido"}
+              {isRequesting ? tOrg("detail.sending") : tOrg("detail.sendRequest")}
             </Button>
           </div>
         </div>
@@ -194,6 +217,7 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                 {organization.name}
               </h1>
             </div>
+            <OrganizationBadges badges={organization.badges} className="mb-24" />
           </div>
 
           {/* Description Section */}
@@ -206,19 +230,18 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
               <>
                 <div className="mt-8">
                   <h3 className="text-xl mb-16 font-bold text-primary-900">
-                    Observações preliminares
+                    {tOrg("detail.preliminaryNotes")}
                   </h3>
                   <p className="mb-16 max-w-[592px] text-neutral-900">
-                    Informações adicionais sobre o papel desta organização na gestão e publicação de
-                    dados abertos.
+                    {tOrg("detail.preliminaryNotesText")}
                   </p>
                 </div>
                 <div className="mt-8">
-                  <h3 className="text-xl mb-16 font-bold text-primary-900">Sobre a organização</h3>
+                  <h3 className="text-xl mb-16 font-bold text-primary-900">
+                    {tOrg("detail.about")}
+                  </h3>
                   <p className="max-w-[592px] text-neutral-900">
-                    {organization.name} é um publicador ativo no Portal de Dados Abertos,
-                    contribuindo para a transparência e reutilização de informação pública em
-                    Portugal.
+                    {tOrg("detail.aboutText", { name: organization.name })}
                   </p>
                 </div>
               </>
@@ -248,65 +271,45 @@ export default function OrganizationDetailClient({ organization }: OrganizationD
                       <Icon name="agora-line-building" className="h-6 w-6" />
                     </div>
                   )}
-                  <div className="mb-8 text-m-light text-neutral-900">Organização</div>
+                  <div className="mb-8 text-m-light text-neutral-900">
+                    {tOrg("detail.organizationLabel")}
+                  </div>
                 </div>
               }
-            >
-              <div className="space-y-16">
-                <div className="text-sm mb-16 text-neutral-900">
-                  <span className="text-m-semibold">Última atualização:</span>{" "}
-                  {new Date(organization.last_modified).toLocaleDateString("pt-PT", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </div>
-                {/* <div className="pt-8">
-                    <div className="text-neutral-900 text-sm font-medium">
-                      <span className="text-m-semibold">Tipo:</span> Publicador Oficial
-                    </div>
-                  </div> */}
-              </div>
-            </CardArticle>
-
+            />
             {/* Metrics Box */}
             <div className="mb-16 grid grid-cols-2 gap-16">
               <div className="rounded-4 bg-[#F2F6FF] p-32">
-                <div className="text-sm mb-8">Visualizações</div>
+                <div className="text-sm mb-8">{tOrg("detail.views")}</div>
                 <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(organization.metrics?.views)}
                 </div>
                 <div className="gap-1 mb-8 flex items-center">
                   <Pill appearance="outline" variant="success" className="h-auto">
-                    +{formatMetricValue(organization.metrics?.views, 2)} total
+                    +{formatMetricValue(organization.metrics?.views, 2)} {tOrg("detail.totalSuffix")}
                   </Pill>
                 </div>
                 <div className="text-xs mt-1 text-neutral-900">
-                  desde{" "}
-                  {organization.created_at
-                    ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
-                        locale: pt,
-                      })
-                    : "—"}
+                  {tOrg("detail.since", {
+                    date: formatMonthYear(organization.created_at, language),
+                  })}
                 </div>
               </div>
               <div className="rounded-4 bg-[#F2F6FF] p-32">
-                <div className="text-sm mb-8">Seguidores</div>
+                <div className="text-sm mb-8">{tOrg("detail.followers")}</div>
                 <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(organization.metrics?.followers)}
                 </div>
                 <div className="gap-1 mb-8 flex items-center">
                   <Pill appearance="outline" variant="success" className="h-auto">
-                    +{formatMetricValue(organization.metrics?.followers, 2)} total
+                    +{formatMetricValue(organization.metrics?.followers, 2)}{" "}
+                    {tOrg("detail.totalSuffix")}
                   </Pill>
                 </div>
                 <div className="text-xs mt-1 text-neutral-900">
-                  desde{" "}
-                  {organization.created_at
-                    ? format(new Date(organization.created_at), "MMMM 'de' yyyy", {
-                        locale: pt,
-                      })
-                    : "—"}
+                  {tOrg("detail.since", {
+                    date: formatMonthYear(organization.created_at, language),
+                  })}
                 </div>
               </div>
             </div>

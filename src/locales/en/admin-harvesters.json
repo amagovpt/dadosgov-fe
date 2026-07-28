@@ -1,0 +1,247 @@
+{
+  "title": "Harvesters",
+  "empty": {
+    "noOrganizationsTitle": "No organizations",
+    "noOrganizationsDescription": "You do not belong to any organization.",
+    "notFound": "Harvester not found."
+  },
+  "feedback": {
+    "approved": "Harvester \"{{name}}\" approved.",
+    "rejected": "Harvester \"{{name}}\" rejected."
+  },
+  "status": {
+    "pendingValidation": "Pending validation",
+    "accepted": "Validated",
+    "refused": "Refused",
+    "pending": "Pending",
+    "initializing": "Initializing",
+    "initialized": "Initialized",
+    "processing": "Processing",
+    "done": "Finished",
+    "doneErrors": "Finished with errors",
+    "failed": "Failed",
+    "started": "Running",
+    "noCurrentJob": "No current job",
+    "noExecution": "No execution"
+  },
+  "columns": {
+    "name": "Name",
+    "status": "Status",
+    "implementation": "Implementation",
+    "createdAt": "Created at",
+    "lastJob": "Last execution",
+    "datasets": "Datasets",
+    "api": "API",
+    "actions": "Actions",
+    "notYet": "Not yet"
+  },
+  "actions": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "save": "Save",
+    "saving": "Saving...",
+    "preview": "Preview",
+    "previewing": "Previewing...",
+    "approveHarvester": "Approve harvester",
+    "rejectHarvester": "Reject harvester",
+    "deleteHarvester": "Delete harvester",
+    "approveHarvesterNamed": "Approve harvester {{name}}",
+    "rejectHarvesterNamed": "Reject harvester {{name}}",
+    "approving": "Approving...",
+    "rejecting": "Rejecting...",
+    "copyUrl": "Copy URL",
+    "copied": "Copied!"
+  },
+  "detail": {
+    "tabs": {
+      "jobs": "Jobs",
+      "configuration": "Configuration"
+    },
+    "fields": {
+      "implementation": "Implementation",
+      "url": "URL",
+      "schedule": "Schedule",
+      "status": "Status"
+    },
+    "notApplicable": "Not applicable",
+    "deleteConfirm": "This action is irreversible. Are you sure you want to delete this harvester?"
+  },
+  "filters": {
+    "options": {
+      "all": "All",
+      "pending": "Pending validation",
+      "accepted": "Validated",
+      "refused": "Refused",
+      "done": "Finished",
+      "failed": "Failed"
+    },
+    "acceptedInfo": "The 'Validated' status refers to the harvester approval process and is independent from the last execution — the list may include harvesters whose last execution is 'Finished' or 'Failed'."
+  },
+  "validation": {
+    "popup": {
+      "approveTitle": "Approve harvester",
+      "rejectTitle": "Reject harvester",
+      "closeAriaLabel": "Close",
+      "approveDescription": "Do you want to approve the harvester \"{{name}}\"? The owner will be notified.",
+      "rejectDescription": "Do you want to reject the harvester \"{{name}}\"? The reason below will be sent to the owner.",
+      "optionalComment": "Comment (optional)",
+      "rejectionReason": "Rejection reason",
+      "approveError": "Failed to approve the harvester.",
+      "rejectError": "Failed to reject the harvester.",
+      "rejectReasonRequired": "A rejection reason is required."
+    },
+    "labels": {
+      "pending": "VALIDATION PENDING",
+      "accepted": "VALIDATED",
+      "refused": "REFUSED"
+    }
+  },
+  "form": {
+    "requiredFields": "Fields marked with an asterisk ( * ) are required.",
+    "requiredFieldsRichPrefix": "Fields marked with an asterisk (",
+    "requiredFieldsRichSuffix": ") are required.",
+    "next": "Next",
+    "createError": "Error creating the harvester.",
+    "previewError": "Error previewing the harvester.",
+    "creating": "Creating...",
+    "previous": "Previous",
+    "typeField": "Type *",
+    "typeFieldPlain": "Type",
+    "typePlaceholder": "Select a type...",
+    "searchInputPlaceholder": "Type to search...",
+    "noResults": "No results found",
+    "filtersTitle": "Filters",
+    "filterModeField": "Mode",
+    "filterModeInclude": "Include",
+    "filterModeExclude": "Exclude",
+    "filterModeIncludeInline": " (include)",
+    "filterModeExcludeInline": " (exclude)",
+    "filterKeyField": "Filter key",
+    "filterKeyPlaceholder": "Select a key",
+    "removeFilter": "Delete filter",
+    "addFilter": "Add a filter",
+    "orphanFiltersWarning": "The filters below are not supported by the selected implementation and will not be saved. Remove them or choose a compatible implementation.",
+    "removeUnsupportedFilter": "Remove unsupported filter",
+    "enabled": "Enabled",
+    "autoArchive": "Automatic archiving",
+    "autoArchiveShort": "Automatic archive",
+    "advancedTitle": "Advanced",
+    "configureRemoteUrlPrefix": "Configure remote URL prefix",
+    "remoteUrlPrefix": "Remote URL prefix",
+    "schedulePlaceholder": "Mask: * * * * * (example: 0 12 * * *)",
+    "scheduleError": "The schedule must have exactly 5 space-separated fields, each field being a number or * (minute hour day-of-month month day-of-week).",
+    "saveSuccess": "Saved successfully.",
+    "previewResultTitle": "Preview result",
+    "viewInAdmin": "View in administration",
+    "requestValidation": "Request harvester validation",
+    "createErrorTitle": "Error creating the harvester",
+    "validationErrors": {
+      "producer": "Select a producer organization.",
+      "name": "Enter the harvester name.",
+      "url": "Enter the harvester URL."
+    },
+    "saveErrorRetry": "Try again.",
+    "saveError": "Error saving ({{status}}) — {{message}}",
+    "filterLabels": {
+      "organization": "Organization",
+      "tag": "Tag"
+    }
+  },
+  "fields": {
+    "producer": "Producer",
+    "producerLabel": "Confirm the identity you want to use for publication. *",
+    "producerPlaceholder": "Select the producer...",
+    "producerError": "Select an organization",
+    "description": "Description",
+    "descriptionRequired": "Description *",
+    "name": "Name *",
+    "namePlaceholder": "Enter the name here",
+    "descriptionPlaceholder": "Enter the description here",
+    "urlPlaceholder": "Enter the URL here"
+  },
+  "preview": {
+    "previewingStrong": "Previewing the harvester...",
+    "pleaseWait": "Please wait.",
+    "pleaseWaitTesting": "Please wait while the harvester is tested.",
+    "error": "Error",
+    "startedAt": "Started at",
+    "endedAt": "Ended at",
+    "status": "Status",
+    "items": "Items",
+    "total": "in total",
+    "errors": "Errors",
+    "errorUpper": "ERROR",
+    "noErrors": "No errors found.",
+    "itemsCount": "{{count}} items",
+    "emptyDate": "—",
+    "statusLabels": {
+      "done": "Completed",
+      "failed": "Error",
+      "doneErrors": "Completed with errors",
+      "processing": "Processing",
+      "pending": "Pending"
+    }
+  },
+  "jobDetail": {
+    "notFound": "Job not found.",
+    "startedAt": "Started at",
+    "endedAt": "Ended at",
+    "status": "Status",
+    "items": "Items",
+    "itemsHeading": "{{count}} ITEMS",
+    "total": "in total",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search by ID",
+    "searchAriaLabel": "Search items",
+    "statusFilterPlaceholder": "Filter by status",
+    "emptyTitle": "No items",
+    "emptyDescription": "No item found with the applied filters.",
+    "table": {
+      "taskId": "Task ID",
+      "completedAt": "Completed at",
+      "completed": "Completed",
+      "skipped": "Skipped",
+      "archived": "Archived",
+      "failed": "Failed",
+      "status": "Status",
+      "dadosGovLink": "dados.gov.pt link",
+      "sourceLink": "Source link",
+      "warnings": "Warnings",
+      "logs": "Logs",
+      "remoteId": "Remote ID",
+      "dadosGovId": "dados.gov ID",
+      "archivedAlt": "Archived",
+      "closeLogs": "Close logs",
+      "viewErrorLogs": "View error logs"
+    },
+    "jobs": {
+      "noLogs": "No logs available.",
+      "jobErrors": "Job errors",
+      "datasetErrors": "Dataset errors",
+      "emptyTitle": "No jobs at the moment",
+      "settings": "Go to settings",
+      "viewLogs": "View logs",
+      "errorsCount_one": "{{count}} error",
+      "errorsCount_other": "{{count}} errors"
+    },
+    "itemStatus": {
+      "all": "All",
+      "pending": "Pending",
+      "started": "Started",
+      "done": "Completed",
+      "failed": "Failed",
+      "skipped": "Skipped",
+      "archived": "Archived"
+    },
+    "jobStatus": {
+      "pending": "Pending",
+      "initializing": "Initializing",
+      "initialized": "Initialized",
+      "started": "Started",
+      "processing": "Processing",
+      "done": "Completed",
+      "doneErrors": "Failed",
+      "failed": "Failed"
+    }
+  }
+}

@@ -17,21 +17,22 @@ import {
   toggleSelection,
   writeQueryParamValues,
 } from "@/utils/filterUtils";
+import { useTranslation } from "react-i18next";
 
 const ORG_TYPE_OPTIONS = [
-  { id: "all", label: "Todos", badge: "" },
-  { id: "public-service", label: "Serviço público", badge: "public-service" },
-  { id: "local-authority", label: "Autoridade local", badge: "local-authority" },
-  { id: "company", label: "Empresas", badge: "company" },
-  { id: "association", label: "Associação", badge: "association" },
+  { id: "all", badge: "" },
+  { id: "public-service", badge: "public-service" },
+  { id: "local-authority", badge: "local-authority" },
+  { id: "company", badge: "company" },
+  { id: "association", badge: "association" },
 ];
 
-const BADGE_LABELS_PT: Record<string, string> = {
-  association: "Associação",
-  certified: "Certificado",
-  company: "Empresa",
-  "local-authority": "Autoridade Local",
-  "public-service": "Serviço Público",
+// Maps an org-type option id to its label key in the `organizations` namespace.
+const ORG_TYPE_OPTION_LABEL_KEYS: Record<string, string> = {
+  "public-service": "filters.orgType.options.publicService",
+  "local-authority": "filters.orgType.options.localAuthority",
+  company: "filters.orgType.options.company",
+  association: "filters.orgType.options.association",
 };
 
 interface OrganizationsFiltersProps {
@@ -45,6 +46,9 @@ export const OrganizationsFilters = ({
   orgBadgeCounts = {},
   allOrganizations = [],
 }: OrganizationsFiltersProps) => {
+  const { t } = useTranslation("common");
+  const { t: tOrg } = useTranslation("organizations");
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -52,6 +56,12 @@ export const OrganizationsFilters = ({
   const paramsRef = useRef(queryString);
   const [badgeSearch, setBadgeSearch] = useState("");
   const [orgSearch, setOrgSearch] = useState("");
+
+  // Advanced-filter group names double as their identity keys in
+  // `AdvancedFiltersSidebar` (searchQueries / onSearchChange), so compute them
+  // once and reuse the same translated value everywhere below.
+  const orgGroupName = t("filters.advanced.organization");
+  const badgeGroupName = tOrg("filters.advanced.orgTypeGroup");
 
   const activeBadges = searchParams.getAll("badge");
   const activeOrgs = searchParams.getAll("organization");
@@ -121,10 +131,10 @@ export const OrganizationsFilters = ({
     () =>
       Object.keys(orgBadges).map((kind) => ({
         id: kind,
-        label: BADGE_LABELS_PT[kind] || orgBadges[kind],
+        label: tOrg(`filters.badges.${kind}`, { defaultValue: orgBadges[kind] }),
         count: orgBadgeCounts[kind] ?? 0,
       })),
-    [orgBadges, orgBadgeCounts]
+    [orgBadges, orgBadgeCounts, tOrg]
   );
 
   const orgItems = useMemo(
@@ -152,40 +162,43 @@ export const OrganizationsFilters = ({
     () => [
       {
         key: "orgType",
-        title: "Tipo de organização",
+        title: tOrg("filters.orgType.title"),
         options: ORG_TYPE_OPTIONS.map((option) => ({
           id: option.id,
-          label: option.label,
+          label:
+            option.id === "all"
+              ? t("filters.all")
+              : tOrg(ORG_TYPE_OPTION_LABEL_KEYS[option.id]),
           count: option.id === "all" ? totalOrgs : orgBadgeCounts[option.badge] ?? 0,
         })),
       },
     ],
-    [orgBadgeCounts, totalOrgs]
+    [orgBadgeCounts, totalOrgs, t, tOrg]
   );
 
   const advancedGroups = useMemo<AdvancedFilterGroup[]>(
     () => [
       {
-        name: "Organizações",
+        name: orgGroupName,
         param: "organization",
         data: allOrgItems,
         searchable: true,
-        searchPlaceholder: "Pesquisar",
-        emptyMessage: "Nenhuma organização encontrada.",
+        searchPlaceholder: t("search.label"),
+        emptyMessage: tOrg("filters.advanced.orgsEmpty"),
       },
       {
-        name: "Tipo de Organização",
+        name: badgeGroupName,
         param: "badge",
         data: badgeEntries.map((entry) => ({
           id: entry.id,
           name: `${entry.label} (${entry.count.toLocaleString("pt-PT")})`,
         })),
         searchable: badgeEntries.length > 10,
-        searchPlaceholder: "Pesquisar",
-        emptyMessage: "Nenhum badge encontrado.",
+        searchPlaceholder: t("search.label"),
+        emptyMessage: tOrg("filters.advanced.badgeEmpty"),
       },
     ],
-    [allOrgItems, badgeEntries]
+    [allOrgItems, badgeEntries, orgGroupName, badgeGroupName, t, tOrg]
   );
 
   const getActiveValues = useCallback(
@@ -205,10 +218,13 @@ export const OrganizationsFilters = ({
     [toggleBadge, toggleOrg]
   );
 
-  const handleGroupSearch = useCallback((groupName: string, value: string) => {
-    if (groupName === "Organizações") setOrgSearch(value);
-    if (groupName === "Tipo de Organização") setBadgeSearch(value);
-  }, []);
+  const handleGroupSearch = useCallback(
+    (groupName: string, value: string) => {
+      if (groupName === orgGroupName) setOrgSearch(value);
+      if (groupName === badgeGroupName) setBadgeSearch(value);
+    },
+    [orgGroupName, badgeGroupName]
+  );
 
   return (
     <div className="h-full organizations-filters">
@@ -219,13 +235,15 @@ export const OrganizationsFilters = ({
         idPrefix="org-filter-type"
       />
 
-      <h2 className="font-bold text-xl text-neutral-900 mt-64 mb-32">Filtros avançados</h2>
+      <h2 className="font-bold text-xl text-neutral-900 mt-64 mb-32">
+        {t("filters.advanced.label")}
+      </h2>
 
       <AdvancedFiltersSidebar
         groups={advancedGroups}
         searchQueries={{
-          Organizações: orgSearch,
-          "Tipo de Organização": badgeSearch,
+          [orgGroupName]: orgSearch,
+          [badgeGroupName]: badgeSearch,
         }}
         getActiveValues={getActiveValues}
         onToggleValue={handleAdvancedToggle}
@@ -238,10 +256,10 @@ export const OrganizationsFilters = ({
           variant="primary"
           appearance="outline"
           onClick={() => {
-            router.replace("/pages/organizations", { scroll: false });
+            router.replace("/organizations", { scroll: false });
           }}
         >
-          Limpar filtros
+          {t("filters.clear")}
         </Button>
       </div>
     </div>

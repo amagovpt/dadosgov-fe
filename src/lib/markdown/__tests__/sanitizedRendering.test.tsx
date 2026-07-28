@@ -1,6 +1,6 @@
 /**
  * Regression suite for the markdown rendering stack used by
- * `ArticleDetail.tsx`, `GitHubMarkdownPage.tsx`, `GitHubArticlePage.tsx`,
+ * `noticias/[rid]/page.tsx`, `GitHubMarkdownPage.tsx`, `GitHubArticlePage.tsx`,
  * `OrganizationTabs.tsx`, `OrganizationDetailClient.tsx`,
  * `ReuseDetailClient.tsx`, and `DatasetDetailClient.tsx`.
  *

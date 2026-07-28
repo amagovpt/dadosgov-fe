@@ -114,11 +114,15 @@ export async function fetchReuses(
   }
 }
 
-export async function fetchReuse(rid: string): Promise<Reuse> {
+export async function fetchReuse(
+  rid: string,
+  forwarded?: Record<string, string>
+): Promise<Reuse> {
   try {
     const res = await fetch(`${API_BASE_URL}/reuses/${rid}/`, {
       cache: "no-store",
       credentials: "include",
+      headers: forwarded,
     });
 
     if (!res.ok) {
@@ -312,7 +316,7 @@ export interface ReusesListingResponse {
 
 
 /**
- * Aggregated fetch for the /pages/reuses listing page (LEDG-1836).
+ * Aggregated fetch for the /reuses listing page (LEDG-1836).
  * Replaces 6 parallel calls with 1 to /api/1/site/reuses-listing/.
  */
 export async function fetchReusesListing(

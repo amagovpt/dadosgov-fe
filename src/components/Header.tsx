@@ -3,7 +3,7 @@
 import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import NextImage from "next/image";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Header as AgoraHeader,
@@ -23,18 +23,39 @@ import {
   NavigationLink,
   NavigationRoot,
   Button,
+  HeaderElement,
 } from "@ama-pt/agora-design-system";
 import SearchDropdown from "@/components/search/SearchDropdown";
 import { HeaderCard } from "@/components/HeaderCard";
 import { useAuth } from "@/context/AuthContext";
 import { logout } from "@/service/api/auth";
+import { stripLocale } from "@/utils/stripLocale";
 import TextLink from "@/components/Primitives/TextLink";
+import { areas, isEnabled, languages } from "@/config/headerNav";
+import type { HeaderNavigationData, HeaderNavCard } from "@/service/types/header";
+import Anchor from "./Shared/Anchor";
 
-export const Header = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const headerRef = useRef<any>(null);
+export const Header = ({ data }: { data: HeaderNavigationData }) => {
+  const {
+    topLevelLinks = [],
+    authMenuItems = [],
+    dropdowns = [],
+    ecosytems,
+  } = data;
+
+  const ecosystemEntries = ecosytems?.ecosystemEntries ?? [];
+  const artePortals = ecosytems?.artePortals ?? [];
+  const allSubmenus = React.useMemo(
+    () => dropdowns.flatMap((d) => d.submenus ?? []),
+    [dropdowns]
+  );
+
+  const headerRef = useRef<HeaderElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+  // usePathname() is locale-prefixed (`/pt/login`); normalize for route
+  // comparisons while keeping the full path for the post-login `next` redirect.
+  const localePath = stripLocale(pathname);
   const { user, samlLogin } = useAuth();
 
   const [ecosystemOpen, setEcosystemOpen] = useState(false);
@@ -125,7 +146,7 @@ export const Header = () => {
 
   const [selectedLanguage, setSelectedLanguage] = useState("pt");
   const [submenu, setSubmenu] = useState<string | null>(null);
-  const selectedArea = pathname === "/pages/login" ? "2" : "1";
+  const selectedArea = localePath === "/login" ? "2" : "1";
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
@@ -152,7 +173,7 @@ export const Header = () => {
   }, [ecosystemOpen, ecosystemPanelNode]);
 
   // Mark header when on auth pages so CSS can style the "Autenticar" button
-  const isAuthPage = pathname === "/pages/login" || pathname === "/pages/login";
+  const isAuthPage = localePath === "/login";
 
   // Reset submenu when clicking anywhere outside the card grid (.links)
   const handleHeaderClickCapture = React.useCallback((e: React.MouseEvent) => {
@@ -166,108 +187,23 @@ export const Header = () => {
   }, []);
 
   React.useLayoutEffect(() => {
-    const submenuTitles: Record<string, string> = {
-      desenvolvimento: "Desenvolvimento",
-      publicacoes: "Publicações",
-    };
+    const submenuTitles: Record<string, string> = Object.fromEntries(
+      allSubmenus.map((s) => [s.id, s.label])
+    );
     const titleEl = document.querySelector(
       ".agora-header .navigation-links-layout > .title"
     ) as HTMLElement | null;
     if (!titleEl) return;
     if (submenu && submenuTitles[submenu]) {
       if (!titleEl.dataset.originalTitle) {
-        titleEl.dataset.originalTitle = titleEl.textContent || "Conhecimento";
+        titleEl.dataset.originalTitle = titleEl.textContent || "Recursos";
       }
       titleEl.textContent = submenuTitles[submenu];
     } else if (titleEl.dataset.originalTitle) {
       titleEl.textContent = titleEl.dataset.originalTitle;
       delete titleEl.dataset.originalTitle;
     }
-  }, [submenu]);
-
-  const ecosystemCol1 = [
-    {
-      href: "https://www.gov.pt/",
-      label: "gov.pt",
-      logo: "/Ecossistema/logo_gov.svg",
-      bgColor: "#034AD8",
-    },
-    {
-      href: "https://digital.gov.pt/",
-      label: "Digital.gov",
-      logo: "/Ecossistema/digital_gov.svg",
-      bgColor: "#0902A2",
-    },
-    {
-      href: "https://mosaico.gov.pt/",
-      label: "Mosaico.gov",
-      logo: "/Ecossistema/mosaico_gov.svg",
-      bgColor: "#0B2C5E",
-    },
-    {
-      href: "https://www.autenticacao.gov.pt/",
-      label: "Autenticação.gov",
-      logo: "/Ecossistema/autent_gov.svg",
-      bgColor: "#1A65FA",
-    },
-    {
-      href: "https://www.acessibilidade.gov.pt/",
-      label: "Acessibilidade.gov",
-      logo: "/Ecossistema/acessibilidade_gov.svg",
-      bgColor: "#0338A2",
-    },
-  ];
-
-  const ecosystemCol2 = [
-    {
-      href: "https://www.iap.gov.pt/",
-      label: "Interoperabilidade",
-      logo: "/Ecossistema/iap_gov.svg",
-      bgColor: "#006BE0",
-    },
-    {
-      href: "https://participa.gov.pt/base/home",
-      label: "Participa",
-      logo: "/Ecossistema/participa_gov.svg",
-      bgColor: "#092C4C",
-    },
-    {
-      href: "https://transparencia.gov.pt/pt",
-      label: "Mais Transparência",
-      logo: "/Ecossistema/transparencia_gov.svg",
-      bgColor: "#FFC200",
-    },
-    {
-      href: "https://territoriosinteligentes.gov.pt/",
-      label: "Territórios Inteligentes",
-      logo: "/Ecossistema/territorios_gov.svg",
-      bgColor: "#198656",
-    },
-    {
-      href: "https://eavalia.arte.gov.pt/",
-      label: "E-avalia",
-      logo: "/Ecossistema/eavalia_gov.svg",
-      bgColor: "#2B658D",
-    },
-  ];
-
-  const artePortals = [
-    { href: "https://www.arte.gov.pt/", label: "Portal ARTE" },
-    { href: "https://academia.arte.gov.pt/", label: "Academia ARTE" },
-    { href: "https://recrutamento.arte.gov.pt/public/recruitment", label: "Recrutamento" },
-  ];
-
-  const languages = [
-    { value: "pt", label: "Português", abbr: "PT" },
-    { value: "en", label: "English", abbr: "EN" },
-    { value: "es", label: "Español", abbr: "ES" },
-    { value: "fr", label: "Français", abbr: "FR" },
-  ];
-
-  const areas = [
-    { value: "1", label: "Portal" },
-    { value: "2", label: "Iniciar Sessão" },
-  ];
+  }, [submenu, allSubmenus]);
 
   const currentLangLabel =
     languages.find((l) => l.value === selectedLanguage)?.label || "Português";
@@ -285,6 +221,71 @@ export const Header = () => {
     }
   };
 
+  // Renders a HeaderCard inside a NavigationLink. Cards with `opensSubmenu` get
+  // the button wrapper that switches the active submenu instead of navigating.
+  const renderCard = (card: HeaderNavCard, dataGroup: string) => {
+    const cardEl = (
+      <HeaderCard
+        iconDefault={card.iconDefault}
+        iconHover={card.iconHover}
+        title={card.title}
+        description={card.description}
+        href={card.href}
+        onLinkClick={handleLinkClick}
+      />
+    );
+    return (
+      <NavigationLink key={card.id} appearance="link">
+        {card.opensSubmenu ? (
+          <div
+            data-group={dataGroup}
+            role="button"
+            tabIndex={0}
+            onClickCapture={(e) => {
+              e.preventDefault();
+              setSubmenu(card.opensSubmenu!);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setSubmenu(card.opensSubmenu!);
+              }
+            }}
+            className="cursor-pointer"
+          >
+            {cardEl}
+          </div>
+        ) : (
+          <div data-group={dataGroup}>{cardEl}</div>
+        )}
+      </NavigationLink>
+    );
+  };
+
+  // "Voltar" button that closes the active submenu.
+  const renderBackButton = (submenuId: string) => (
+    <NavigationLink key={`back-${submenuId}`} appearance="link">
+      <div data-group={`submenu-${submenuId}`} data-is-back="true">
+        <Button
+          appearance="link"
+          variant="neutral"
+          hasIcon
+          leadingIcon="agora-line-arrow-left-anchor"
+          leadingIconHover="agora-solid-arrow-left-anchor"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSubmenu(null);
+          }}
+        >
+          Voltar
+        </Button>
+      </div>
+    </NavigationLink>
+  );
+
+  const adminItem = authMenuItems.find((i) => i.id === "admin");
+  const logoutItem = authMenuItems.find((i) => i.id === "logout");
+
   return (
     <>
       <header
@@ -294,11 +295,11 @@ export const Header = () => {
         data-no-user={!user || undefined}
         onClickCapture={handleHeaderClickCapture}
       >
-        <AgoraHeader ref={headerRef} maxNavigationItems={6}>
+        <AgoraHeader ref={headerRef} maxNavigationItems={7}>
           <Brand>
             <Logo>
               <Link href="/" className="flex items-center">
-                <NextImage
+                <Image
                   src="/Logos/Dados.gov_logocores.png"
                   alt="dados.gov.pt"
                   height={43}
@@ -314,39 +315,40 @@ export const Header = () => {
               aria-label="Áreas do portal"
               // @ts-expect-error - Prop label does exist in component logic
               label={currentAreaLabel}
-              onChange={() => {}}
+              onChange={() => { }}
             >
-              <Area
-                value="1"
-                label="Portal"
-                onClick={() => router.push("/")}
-                active={selectedArea === "1"}
-              />
-              <div className="hidden">
-                <Area
-                  value="2"
-                  label="Iniciar Sessão"
-                  onClick={() => router.push("/pages/login")}
-                  active={selectedArea === "2"}
-                />
-              </div>
+              {areas.map((area) => {
+                const areaEl = (
+                  <Area
+                    value={area.value}
+                    label={area.label}
+                    onClick={() => router.push(area.href)}
+                    active={selectedArea === area.value}
+                  />
+                );
+                return area.hidden ? (
+                  <div key={area.value} className="hidden">
+                    {areaEl}
+                  </div>
+                ) : (
+                  <React.Fragment key={area.value}>{areaEl}</React.Fragment>
+                );
+              })}
             </Areas>
 
             <Languages
               aria-label="Selecionar idioma"
-              // @ts-expect-error - Prop label does exist in component logic
-              label={currentLangLabel}
               onChange={(lang: string) => setSelectedLanguage(lang)}
             >
-              <Language
-                value="pt"
-                label="Português"
-                abbr="PT"
-                checked={selectedLanguage === "pt"}
-              />
-              <Language value="en" label="English" abbr="EN" checked={selectedLanguage === "en"} />
-              <Language value="es" label="Español" abbr="ES" checked={selectedLanguage === "es"} />
-              <Language value="fr" label="Français" abbr="FR" checked={selectedLanguage === "fr"} />
+              {languages.map((lang) => (
+                <Language
+                  key={lang.value}
+                  value={lang.value}
+                  label={lang.label}
+                  abbr={lang.abbr}
+                  checked={selectedLanguage === lang.value}
+                />
+              ))}
             </Languages>
 
             <Search label="Pesquisar">
@@ -357,7 +359,6 @@ export const Header = () => {
                     hasVoiceActionButton={false}
                     label="O que procura no Portal?"
                     placeholder="Pesquisar conjunto de dados, organizações, temas..."
-                    excludeTypes={["dataservices"]}
                   />
                 </div>
               </CustomSearch>
@@ -375,8 +376,8 @@ export const Header = () => {
                 <Link
                   href={
                     user
-                      ? `/pages/users/${user.slug}`
-                      : `/pages/login${pathname && pathname !== "/pages/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`
+                      ? `/users/${user.slug}`
+                      : `/login${pathname && localePath !== "/login" ? `?next=${encodeURIComponent(pathname)}` : ""}`
                   }
                 >
                   {user ? `${user.first_name} ${user.last_name}` : "Autenticar"}
@@ -393,215 +394,62 @@ export const Header = () => {
             modalAriaLabel="Menu de navegação"
             modalCloseLabel="Fechar"
           >
-            <NavigationLink appearance="link">
-              <Link
-                href="/pages/datastories"
-                onClick={(e) => handleLinkClick(e, "/pages/datastories")}
-              >
-                Data Stories
-              </Link>
-            </NavigationLink>
-
-            <NavigationLink appearance="link">
-              <Link href="/pages/datasets" onClick={(e) => handleLinkClick(e, "/pages/datasets")}>
-                Conjuntos de dados
-              </Link>
-            </NavigationLink>
-
-            <NavigationLink appearance="link">
-              <Link href="/pages/reuses" onClick={(e) => handleLinkClick(e, "/pages/reuses")}>
-                Reutilizações
-              </Link>
-            </NavigationLink>
-
-            <NavigationLink appearance="link">
-              <Link
-                href="/pages/organizations"
-                onClick={(e) => handleLinkClick(e, "/pages/organizations")}
-              >
-                Organizações
-              </Link>
-            </NavigationLink>
-
-            <NavigationRoot label="Conhecimento">
-              {/* Main menu items — always in DOM, hidden via CSS when a submenu is active */}
-              <NavigationLink appearance="link">
-                <div data-group="main">
-                  <HeaderCard
-                    iconDefault="agora-line-info-mark"
-                    iconHover="agora-solid-info-mark"
-                    title="O que é o dados.gov.pt"
-                    description="Sobre o portal"
-                    href="/pages/faqs/about_dadosgov"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-              <NavigationLink appearance="link">
-                <div data-group="main">
-                  <HeaderCard
-                    iconDefault="agora-line-info-mark"
-                    iconHover="agora-solid-info-mark"
-                    title="Publicar dados"
-                    description="Guia de publicação"
-                    href="/pages/faqs/publish"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-              <NavigationLink appearance="link">
-                <div data-group="main">
-                  <HeaderCard
-                    iconDefault="/Icons/bar_char_white.svg"
-                    iconHover="/Icons/bar_char_white.svg"
-                    title="Reutilizar dados"
-                    description="Guia de reutilização"
-                    href="/pages/faqs/reuse"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-              <NavigationLink appearance="link">
-                <div data-group="main">
-                  <HeaderCard
-                    iconDefault="agora-line-info-mark"
-                    iconHover="agora-solid-info-mark"
-                    title="Sobre dados abertos"
-                    description="Informação geral"
-                    href="/pages/about-open-data"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-              <NavigationLink appearance="link">
-                <div
-                  data-group="main"
-                  role="button"
-                  tabIndex={0}
-                  onClickCapture={(e) => {
-                    e.preventDefault();
-                    setSubmenu("desenvolvimento");
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setSubmenu("desenvolvimento");
-                    }
-                  }}
-                  className="cursor-pointer"
-                >
-                  <HeaderCard
-                    iconDefault="agora-line-user-group"
-                    iconHover="agora-solid-user-group"
-                    title="Desenvolvimento"
-                    description="Portal e código"
-                    href="#"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-
-              {/* Desenvolvimento submenu items — hidden by default, shown via CSS */}
-              <NavigationLink appearance="link">
-                <div data-group="submenu-desenvolvimento" data-is-back="true">
-                  <Button
-                    appearance="link"
-                    variant="neutral"
-                    hasIcon
-                    leadingIcon="agora-line-arrow-left-anchor"
-                    leadingIconHover="agora-solid-arrow-left-anchor"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSubmenu(null);
-                    }}
-                  >
-                    Voltar
-                  </Button>
-                </div>
-              </NavigationLink>
-              <NavigationLink appearance="link">
-                <div data-group="submenu-desenvolvimento">
-                  <HeaderCard
-                    iconDefault="agora-line-plus-circle"
-                    iconHover="agora-solid-plus-circle"
-                    title="Documentação da API"
-                    description="Documentação técnica"
-                    href="/pages/faqs/api-documentation"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-              <NavigationLink appearance="link">
-                <div data-group="main">
-                  <HeaderCard
-                    iconDefault="agora-line-edit"
-                    iconHover="agora-solid-edit"
-                    title="Aprender"
-                    description="Cursos e Minicursos"
-                    href="/pages/learn"
-                    onLinkClick={handleLinkClick}
-                  />
-                </div>
-              </NavigationLink>
-            </NavigationRoot>
-
-            <NavigationRoot label="Publicar">
-              {[
-                {
-                  iconDefault: "agora-line-layers-menu",
-                  iconHover: "agora-solid-layers-menu",
-                  title: "Novo Conjunto de Dados",
-                  description: "Publicar dados",
-                  href: "/pages/admin/datasets/new",
-                },
-                {
-                  iconDefault: "/Icons/bar_char_white.svg",
-                  iconHover: "/Icons/bar_char_white.svg",
-                  title: "Nova Reutilização",
-                  description: "Casos de uso",
-                  href: "/pages/admin/reuses/new",
-                },
-                {
-                  iconDefault: "agora-line-buildings",
-                  iconHover: "agora-solid-buildings",
-                  title: "Nova Organização",
-                  description: "Entidades",
-                  href: "/pages/admin/organizations/new?step=1",
-                },
-                {
-                  iconDefault: "/Icons/harvester.svg",
-                  iconHover: "/Icons/harvester-solid.svg",
-                  title: "Novo Harvester",
-                  description: "Recolha automática",
-                  href: "/pages/admin/harvesters/new",
-                },
-              ].map((card) => (
-                <NavigationLink key={card.title} appearance="link">
-                  <HeaderCard {...card} onLinkClick={handleLinkClick} />
-                </NavigationLink>
-              ))}
-            </NavigationRoot>
+            {[
+              ...topLevelLinks
+                .filter((link) => isEnabled(link, !!user))
+                .map((link) => (
+                  <NavigationLink key={link.id ?? link.href} appearance="link">
+                    <Link href={link.href} onClick={(e) => handleLinkClick(e, link.href)}>
+                      {link.label}
+                    </Link>
+                  </NavigationLink>
+                )),
+              ...dropdowns
+                .filter((d) => isEnabled(d.root, !!user))
+                .map((d) => (
+                  <NavigationRoot key={d.root.id} label={d.root.label}>
+                    {d.root.cards
+                      .filter((card) => isEnabled(card, !!user))
+                      .flatMap((card) => {
+                        const mainEl = renderCard(card, "main");
+                        const submenu = card.opensSubmenu
+                          ? d.submenus.find((s) => s.id === card.opensSubmenu)
+                          : undefined;
+                        if (!submenu) return [mainEl];
+                        return [
+                          mainEl,
+                          renderBackButton(submenu.id),
+                          ...submenu.cards
+                            .filter((c) => isEnabled(c, !!user))
+                            .map((c) => renderCard(c, `submenu-${submenu.id}`)),
+                        ];
+                      })}
+                  </NavigationRoot>
+                )),
+            ]}
           </NavigationBar>
         </AgoraHeader>
       </header>
       {adminPortalNode &&
+        adminItem &&
         createPortal(
           <div className="panel-menu unauthenticated-panel-menu">
-            <span className="agora-link-wrapper agora-link-wrapper-link-neutral full-width custom-header-link-wrapper panel-menu-link-wrapper inline-flex min-h-[44px] min-w-[44px] items-center justify-center py-8">
-              <Link className="link-with-icon" href="/pages/admin/me/datasets">
+            <span className="agora-link-wrapper agora-link-wrapper-link-neutral full-width custom-header-link-wrapper panel-menu-link-wrapper inline-flex min-h-[44px] min-w-[44px] !items-center !justify-center ">
+              <Link className="link-with-icon" href={adminItem.href ?? "#"}>
                 <div className="icon-wrapper leading">
-                  <Icon name="agora-line-hardware-settings" dimensions="s" />
+                  <Icon name={adminItem.icon ?? ""} dimensions="s" />
                 </div>
-                <span className="children-wrapper">Administração</span>
+                <span className="children-wrapper">{adminItem.label}</span>
               </Link>
             </span>
           </div>,
           adminPortalNode
         )}
       {logoutPortalNode &&
+        logoutItem &&
         createPortal(
           <div className="panel-menu unauthenticated-panel-menu">
-            <span className="agora-link-wrapper agora-link-wrapper-link-neutral full-width custom-header-link-wrapper panel-menu-link-wrapper inline-flex min-h-[44px] min-w-[44px] items-center justify-center py-8">
+            <span className="agora-link-wrapper agora-link-wrapper-link-neutral full-width custom-header-link-wrapper panel-menu-link-wrapper inline-flex min-h-[44px] min-w-[44px] !items-center !justify-center">
               <a
                 className="link-with-icon"
                 href="#"
@@ -620,9 +468,9 @@ export const Header = () => {
                 }}
               >
                 <div className="icon-wrapper leading">
-                  <Icon name="agora-line-log-out" dimensions="s" />
+                  <Icon name={logoutItem.icon ?? ""} dimensions="s" />
                 </div>
-                <span className="children-wrapper">Sair</span>
+                <span className="children-wrapper">{logoutItem.label}</span>
               </a>
             </span>
           </div>,
@@ -631,7 +479,7 @@ export const Header = () => {
       {ecosystemBtnPortalNode &&
         createPortal(
           <>
-            <span className="agora-link-wrapper agora-link-wrapper-link-neutral custom-header-link-wrapper panel-menu-link-wrapper inline-flex items-center">
+            <span className="agora-link-wrapper agora-link-wrapper-link-neutral custom-header-link-wrapper panel-menu-link-wrapper inline-flex items-center !px-8">
               <a
                 className="link-with-icon"
                 href="#"
@@ -645,15 +493,15 @@ export const Header = () => {
                   <Icon name="agora-line-dashboard" className="h-24 w-24" />
                 </div>
                 <span className="children-wrapper">Ecossistema</span>
+                <Image
+                  src="/Ecossistema/arte_black_simple.svg"
+                  alt="arte.gov.pt"
+                  width={170}
+                  height={64}
+                  className="ml-8 h-20 w-auto self-center"
+                />
               </a>
             </span>
-            <NextImage
-              src="/Ecossistema/arte_black_simple.svg"
-              alt="arte.gov.pt"
-              width={170}
-              height={64}
-              className="-ml-4 h-[12px] w-auto self-center"
-            />
           </>,
           ecosystemBtnPortalNode
         )}
@@ -680,66 +528,48 @@ export const Header = () => {
                     </p>
                   </div>
                   <p className="max-w-[488px] text-base text-primary-900">
-                    Agência para a Reforma Tecnológica do Estado, para a simplificação e
-                    digitalização da Administração Pública
+                    {ecosytems?.description ?? ""}
                   </p>
                 </div>
-                <div className="flex flex-row gap-32">
-                  <ul className="flex flex-col gap-8">
-                    {ecosystemCol1.map((item) => (
-                      <li key={item.href}>
-                        <a
+                <div className="flex">
+                  <ul
+                    className="grid grid-flow-col gap-x-32 gap-y-8"
+                    style={{
+                      gridTemplateRows: `repeat(${Math.max(
+                        1,
+                        Math.ceil(ecosystemEntries.length / 2)
+                      )}, minmax(0, auto))`,
+                    }}
+                  >
+                    {ecosystemEntries.map((item) => (
+                      <li key={item.href} className="max-w-256">
+                        <Anchor
                           href={item.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="group flex items-center gap-8 py-8"
+                          appearance="link"
+
                         >
-                          <div
-                            className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
-                            style={{ backgroundColor: item.bgColor }}
-                          >
-                            <div className="relative h-[20px] w-[20px]">
-                              <NextImage
-                                src={item.logo}
-                                alt={item.label}
-                                fill
-                                className="object-contain"
-                              />
+                          <div className="flex items-center gap-8 py-8">
+
+                            <div
+                              className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
+                              style={{ backgroundColor: item.bgColor ?? undefined }}
+                            >
+                              <div className="relative h-[20px] w-[20px]">
+                                <Image
+                                  src={item.logo ?? ""}
+                                  alt={item.label}
+                                  fill
+                                  className="object-contain"
+                                />
+                              </div>
                             </div>
+                            <span className="text-base font-medium ">
+                              {item.label}
+                            </span>
                           </div>
-                          <span className="text-base font-medium text-[#2B363C] group-hover:text-primary-600">
-                            {item.label}
-                          </span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                  <ul className="flex flex-col gap-8">
-                    {ecosystemCol2.map((item) => (
-                      <li key={item.href}>
-                        <a
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group flex items-center gap-8 py-8"
-                        >
-                          <div
-                            className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
-                            style={{ backgroundColor: item.bgColor }}
-                          >
-                            <div className="relative h-[20px] w-[20px]">
-                              <NextImage
-                                src={item.logo}
-                                alt={item.label}
-                                fill
-                                className="object-contain"
-                              />
-                            </div>
-                          </div>
-                          <span className="text-base font-medium text-[#2B363C] group-hover:text-primary-600">
-                            {item.label}
-                          </span>
-                        </a>
+                        </Anchor>
                       </li>
                     ))}
                   </ul>
@@ -750,6 +580,7 @@ export const Header = () => {
                     <TextLink
                       key={link.href}
                       href={link.href}
+                      target="_blank"
                       className="text-base hover:text-primary-800"
                     >
                       {link.label}

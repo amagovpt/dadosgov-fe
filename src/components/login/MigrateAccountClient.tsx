@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, InputText, InputPassword, Icon, Breadcrumb } from "@ama-pt/agora-design-system";
+import { Button, InputText, InputPassword, Icon } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { fetchMigrationPending, searchMigrationAccount, sendMigrationCode, confirmMigration, skipMigration } from "@/service/api/migration";
 import AppIcon from "../Primitives/AppIcon";
 
@@ -40,18 +41,13 @@ export default function MigrateAccountClient() {
   // Password verification
   const [password, setPassword] = useState("");
 
-  const breadcrumbItems = [
-    { label: "Home", url: "/" },
-    { label: "Migrar conta", url: "#" },
-  ];
-
   // Check pending migration on mount
   useEffect(() => {
     async function check() {
       try {
         const data = await fetchMigrationPending();
         if (!data.pending) {
-          router.push("/pages/login");
+          router.push("/login");
           return;
         }
         if (data.email) setMaskedEmail(data.email);
@@ -64,7 +60,7 @@ export default function MigrateAccountClient() {
           setStep("search");
         }
       } catch {
-        router.push("/pages/login");
+        router.push("/login");
       }
     }
     check();
@@ -192,7 +188,7 @@ export default function MigrateAccountClient() {
     <main className="min-h-screen flex-grow bg-white">
       <div className="container mx-auto max-w-7xl px-16 pb-64 pt-32">
         <div>
-          <Breadcrumb items={breadcrumbItems} />
+          <BreadcrumbDynamic darkMode={false} />
         </div>
 
         <div className="mt-64 max-w-[560px]">

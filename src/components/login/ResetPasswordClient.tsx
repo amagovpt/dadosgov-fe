@@ -3,16 +3,11 @@
 import React, { useState } from "react";
 import {
   Button,
-  Breadcrumb,
   InputPassword,
   StatusCard,
   Icon,
 } from "@ama-pt/agora-design-system";
-
-const breadcrumbItems = [
-  { label: "Home", url: "/" },
-  { label: "Redefinir palavra-passe", url: "#" },
-];
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 
 interface Props {
   token: string;
@@ -39,7 +34,7 @@ export function ResetPasswordClient({ token }: Props) {
     setError(null);
 
     try {
-      const res = await fetch(`/reset-password/${token}`, {
+      const res = await fetch(`/auth/reset-password/${token}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password, password_confirm: passwordConfirm }),
@@ -61,7 +56,8 @@ export function ResetPasswordClient({ token }: Props) {
     <main className="flex-grow bg-white min-h-screen relative">
       <div className="container mx-auto px-16 pt-32 pb-64 max-w-7xl">
         <div className="mb-32">
-          <Breadcrumb items={breadcrumbItems} />
+          {/* The reset token is a credential: keep it out of the trail. */}
+          <BreadcrumbDynamic darkMode={false} path="/reset-password" />
         </div>
 
         <div className="grid xl:grid-cols-12 gap-32">
@@ -85,7 +81,7 @@ export function ResetPasswordClient({ token }: Props) {
                   <Button
                     variant="primary"
                     className="px-48 h-56 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-                    onClick={() => (window.location.href = "/pages/login")}
+                    onClick={() => (window.location.href = "/login")}
                   >
                     Iniciar sessão
                   </Button>

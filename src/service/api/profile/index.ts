@@ -1,5 +1,5 @@
 import type { ApiToken, ApiTokenCreated, UserMetrics, UserPublic } from "@/service/types/identity";
-import { API_AUTH_URL, translateUploadErrorPayload } from "@/service/utils/API";
+import { API_AUTH_URL, API_BASE_URL, translateUploadErrorPayload } from "@/service/utils/API";
 
 
 export async function uploadAvatar(file: File): Promise<{ image: string }> {
@@ -29,10 +29,13 @@ export async function deleteAvatar(): Promise<void> {
 }
 
 
-export async function fetchFullProfile(): Promise<UserPublic> {
-  const res = await fetch(`${API_AUTH_URL}/me/`, {
+export async function fetchFullProfile(
+  forwarded?: Record<string, string>
+): Promise<UserPublic> {
+  const res = await fetch(`${API_BASE_URL}/me/`, {
     cache: "no-store",
     credentials: "include",
+    headers: forwarded,
   });
   if (!res.ok) throw new Error(`Failed to fetch profile: ${res.statusText}`);
   return await res.json();
@@ -79,7 +82,7 @@ export async function requestEmailChange(
     new_email: newEmail,
     new_email_confirm: newEmail,
   });
-  const res = await fetch("/change-email", {
+  const res = await fetch("/auth/change-email", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     credentials: "include",
@@ -103,7 +106,7 @@ export async function changePassword(
     new_password: newPassword,
     new_password_confirm: newPasswordConfirm,
   });
-  const res = await fetch("/change", {
+  const res = await fetch("/auth/change", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     credentials: "include",

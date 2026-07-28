@@ -110,6 +110,14 @@ export interface OrganizationMetrics {
   dataservice_views: number;
 }
 
+export interface OrganizationPermissions {
+  edit: boolean;
+  delete: boolean;
+  members: boolean;
+  harvest: boolean;
+  private: boolean;
+}
+
 export interface Organization {
   id: string;
   name: string;
@@ -127,6 +135,9 @@ export interface Organization {
   last_modified: string;
   page: string;
   uri: string;
+  // Backend-computed authorization for the current user (the single source of
+  // truth). Present when the organization is fetched with the user's session.
+  permissions?: OrganizationPermissions;
 }
 
 export interface OrganizationCreatePayload {
@@ -165,7 +176,7 @@ export interface OrganizationFilters {
   organization?: string | string[];
 }
 
-export type FollowableEntityType = "datasets" | "organizations" | "reuses";
+export type FollowableEntityType = "datasets" | "dataservices" | "organizations" | "reuses";
 
 export interface Follow {
   id: string;

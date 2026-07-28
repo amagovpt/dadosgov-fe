@@ -21,10 +21,11 @@ import EditDiscussionPopup from "@/components/discussions/EditDiscussionPopup";
 import DeleteDiscussionPopup from "@/components/discussions/DeleteDiscussionPopup";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 
 interface DiscussionSectionProps {
   entityId: string;
-  entityClass: "Reuse" | "Dataset" | "Organization";
+  entityClass: "Reuse" | "Dataset" | "Organization" | "Dataservice";
 }
 
 interface ReplyFormProps {
@@ -35,6 +36,7 @@ interface ReplyFormProps {
 }
 
 const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitted }) => {
+  const { t } = useTranslation("common");
   const [replyMessage, setReplyMessage] = useState("");
   const [isReplying, setIsReplying] = useState(false);
   const identityRef = useRef("");
@@ -42,7 +44,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
     () => (
       <DropdownSection name="identity">
         <DropdownOption value="user">
-          {user.first_name} {user.last_name} (utilizador)
+          {user.first_name} {user.last_name} {t("discussions.userIdentitySuffix")}
         </DropdownOption>
         <>
           {(user.organizations ?? []).map((org) => (
@@ -53,12 +55,14 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
         </>
       </DropdownSection>
     ),
-    [user],
+    [user, t],
   );
   return (
     <div className="mt-48 pt-32">
       <div className="flex justify-between items-center mb-24">
-        <h4 className="font-bold text-neutral-900 text-sm uppercase">Responder</h4>
+        <h4 className="font-bold text-neutral-900 text-sm uppercase">
+          {t("discussions.reply")}
+        </h4>
         <Button
           variant="primary"
           appearance="outline"
@@ -67,23 +71,23 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
           leadingIconHover="agora-solid-x"
           onClick={onClose}
         >
-          Fechar
+          {t("close")}
         </Button>
       </div>
       {(user.organizations ?? []).length > 0 && (
         <div className="mb-32">
           <span className="block text-sm font-medium text-neutral-900 mb-8">
-            Escolha a identidade com a qual deseja publicar esta mensagem
+            {t("discussions.identityLabel")}
           </span>
           <IsolatedSelect
             label=""
             hideLabel
-            placeholder="Para pesquisar..."
+            placeholder={t("discussions.identitySearchPlaceholder")}
             id={`reply-identity-${discId}`}
             onChangeRef={identityRef}
             searchable
-            searchInputPlaceholder="Para pesquisar..."
-            searchNoResultsText="Sem resultados"
+            searchInputPlaceholder={t("discussions.identitySearchPlaceholder")}
+            searchNoResultsText={t("discussions.noResults")}
           >
             {identityOptions}
           </IsolatedSelect>
@@ -91,11 +95,11 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
       )}
       <div className="mb-32">
         <InputTextArea
-          label="A sua mensagem"
+          label={t("discussions.yourMessage")}
           value={replyMessage}
           onChange={(e) => setReplyMessage(e.target.value)}
           rows={3}
-          placeholder="Por favor, mantenha a cordialidade e a postura construtiva. Evite partilhar informações pessoais."
+          placeholder={t("discussions.messagePlaceholder")}
         />
       </div>
       <div className="flex justify-end gap-16">
@@ -116,7 +120,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
             setIsReplying(false);
           }}
         >
-          Responder
+          {t("discussions.reply")}
         </Button>
       </div>
     </div>
@@ -124,6 +128,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({ discId, user, onClose, onSubmitte
 };
 
 export function DiscussionSection({ entityId, entityClass }: DiscussionSectionProps) {
+  const { t } = useTranslation("common");
   const { user } = useAuth();
   const { show } = usePopupContext();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
@@ -187,13 +192,13 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
     <div>
       <div className="flex items-center justify-between mb-24">
         <h3 className="font-medium text-neutral-900 text-base">
-          {discussionCount} {discussionCount === 1 ? "DISCUSSÃO" : "DISCUSSÕES"}
+          {t("discussions.count", { count: discussionCount })}
         </h3>
         <div className="flex items-center gap-24">
           <InputSearchBar
             hasVoiceActionButton={false}
-            placeholder="Pesquisar"
-            aria-label="Pesquisar discussões"
+            placeholder={t("search.label")}
+            aria-label={t("discussions.searchAria")}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setDiscussionSearch(e.target.value)
             }
@@ -207,13 +212,13 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
             className="self-stretch"
             onClick={() => {
               if (!user) {
-                window.location.href = "/pages/login";
+                window.location.href = "/login";
               } else {
                 setShowNewDiscussion(!showNewDiscussion);
               }
             }}
           >
-            Nova discussão
+            {t("discussions.newDiscussion")}
           </Button>
         </div>
       </div>
@@ -221,7 +226,9 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
       {showNewDiscussion && (
         <div className="bg-white rounded-8 p-32 mb-24">
           <div className="flex justify-between items-center mb-16">
-            <h3 className="font-bold text-neutral-900 text-base">Nova discussão</h3>
+            <h3 className="font-bold text-neutral-900 text-base">
+              {t("discussions.newDiscussion")}
+            </h3>
             <Button
               variant="primary"
               appearance="outline"
@@ -230,31 +237,32 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
               leadingIconHover="agora-solid-x"
               onClick={() => setShowNewDiscussion(false)}
             >
-              Fechar
+              {t("close")}
             </Button>
           </div>
           <p className="text-sm text-neutral-900 mb-16">
-            Os campos marcados com um asterisco (<span className="text-red-500">*</span>) são
-            obrigatórios.
+            {t("discussions.requiredFieldsBefore")}
+            <span className="text-red-500">*</span>
+            {t("discussions.requiredFieldsAfter")}
           </p>
           {(user?.organizations ?? []).length > 0 && (
             <div className="mb-24">
               <span className="block text-sm font-medium text-neutral-900 mb-8">
-                Escolha a identidade com a qual deseja publicar esta mensagem
+                {t("discussions.identityLabel")}
               </span>
               <IsolatedSelect
                 label=""
                 hideLabel
-                placeholder="Para pesquisar..."
+                placeholder={t("discussions.identitySearchPlaceholder")}
                 id={`discussion-identity-${entityClass}-${entityId}`}
                 onChangeRef={selectedIdentityRef}
                 searchable
-                searchInputPlaceholder="Para pesquisar..."
-                searchNoResultsText="Sem resultados"
+                searchInputPlaceholder={t("discussions.identitySearchPlaceholder")}
+                searchNoResultsText={t("discussions.noResults")}
               >
                 <DropdownSection name="identity">
                   <DropdownOption value="user">
-                    {user?.first_name} {user?.last_name} (utilizador)
+                    {user?.first_name} {user?.last_name} {t("discussions.userIdentitySuffix")}
                   </DropdownOption>
                   <>
                     {(user?.organizations ?? []).map((org) => (
@@ -269,7 +277,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
           )}
           <div className="mb-24">
             <InputText
-              label="Título *"
+              label={`${t("discussions.titleLabel")} *`}
               value={newDiscTitle}
               onChange={(e) => setNewDiscTitle(e.target.value)}
               required
@@ -277,11 +285,11 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
           </div>
           <div className="mb-24">
             <InputTextArea
-              label="A sua mensagem *"
+              label={`${t("discussions.yourMessage")} *`}
               value={newDiscMessage}
               onChange={(e) => setNewDiscMessage(e.target.value)}
               rows={4}
-              placeholder="Por favor, mantenha a cordialidade e uma postura construtiva. Evite partilhar informações pessoais."
+              placeholder={t("discussions.messagePlaceholder")}
               required
             />
           </div>
@@ -292,7 +300,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
               onClick={handleCreateDiscussion}
               disabled={isSubmitting || !newDiscTitle.trim() || !newDiscMessage.trim()}
             >
-              {isSubmitting ? "A enviar..." : "Enviar"}
+              {isSubmitting ? t("discussions.sending") : t("discussions.submit")}
             </Button>
           </div>
         </div>
@@ -304,8 +312,8 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
           icon={
             <Icon name="agora-line-chat" className="w-40 h-40 text-primary-500 icon-xl" />
           }
-          title="Sem discussões"
-          description="Ainda não existem discussões."
+          title={t("discussions.noDiscussionsTitle")}
+          description={t("discussions.noDiscussionsDescription")}
           hasAnchor={false}
         />
       ) : (
@@ -330,7 +338,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                       <span className="text-primary-600 font-medium">
                         {disc.user.first_name} {disc.user.last_name}
                       </span>
-                      {" — Publicado em "}
+                      {` — ${t("discussions.postedOn")} `}
                       {format(new Date(disc.created), "d 'de' MMMM 'de' yyyy", { locale: pt })}
                     </p>
                   </div>
@@ -344,7 +352,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                       iconOnly
                       leadingIcon="agora-line-edit"
                       leadingIconHover="agora-solid-edit"
-                      aria-label="Editar discussão"
+                      aria-label={t("discussions.editDiscussion")}
                       onClick={() =>
                         show(
                           <EditDiscussionPopup
@@ -356,7 +364,11 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                               )
                             }
                           />,
-                          { title: "Editar a mensagem", closeAriaLabel: "Fechar", dimensions: "m" },
+                          {
+                            title: t("discussions.editMessage"),
+                            closeAriaLabel: t("close"),
+                            dimensions: "m",
+                          },
                         )
                       }
                     >
@@ -371,7 +383,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                       iconOnly
                       leadingIcon="agora-line-trash"
                       leadingIconHover="agora-solid-trash"
-                      aria-label="Eliminar discussão"
+                      aria-label={t("discussions.deleteDiscussion")}
                       onClick={() =>
                         show(
                           <DeleteDiscussionPopup
@@ -383,8 +395,8 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                             }}
                           />,
                           {
-                            title: "Tem certeza de que deseja eliminar esta discussão?",
-                            closeAriaLabel: "Fechar",
+                            title: t("discussions.deleteDiscussionConfirm"),
+                            closeAriaLabel: t("close"),
                             dimensions: "l",
                           },
                         )
@@ -433,7 +445,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                               iconOnly
                               leadingIcon="agora-line-edit"
                               leadingIconHover="agora-solid-edit"
-                              aria-label="Editar comentário"
+                              aria-label={t("discussions.editComment")}
                               onClick={() =>
                                 show(
                                   <EditDiscussionPopup
@@ -446,8 +458,8 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                                     }
                                   />,
                                   {
-                                    title: "Editar a mensagem",
-                                    closeAriaLabel: "Fechar",
+                                    title: t("discussions.editMessage"),
+                                    closeAriaLabel: t("close"),
                                     dimensions: "m",
                                   },
                                 )
@@ -464,7 +476,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                               iconOnly
                               leadingIcon="agora-line-trash"
                               leadingIconHover="agora-solid-trash"
-                              aria-label="Eliminar comentário"
+                              aria-label={t("discussions.deleteComment")}
                               onClick={() =>
                                 show(
                                   <DeleteDiscussionPopup
@@ -486,8 +498,8 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                                     }
                                   />,
                                   {
-                                    title: "Tem certeza de que deseja apagar esta mensagem?",
-                                    closeAriaLabel: "Fechar",
+                                    title: t("discussions.deleteMessageConfirm"),
+                                    closeAriaLabel: t("close"),
                                     dimensions: "l",
                                   },
                                 )
@@ -524,7 +536,7 @@ export function DiscussionSection({ entityId, entityClass }: DiscussionSectionPr
                     appearance="outline"
                     onClick={() => setReplyingTo(disc.id)}
                   >
-                    Responder
+                    {t("discussions.reply")}
                   </Button>
                 </div>
               ) : null}

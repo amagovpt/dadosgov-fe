@@ -3,71 +3,41 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Icon,
-  Breadcrumb,
   Pill,
   ProgressBar,
   CardExpandable,
 } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { Dataset } from "@/service/types/dataset";
-import { fetchDataset } from "@/service/api/datasets";
 import { followEntity, isFollowing, unfollowEntity } from "@/service/api/followers";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import { DatasetTabs } from "@/components/datasets/DatasetTabs";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
+import {
+  QUALITY_CRITERIA,
+  getQualityDetails,
+  getQualityMissing,
+} from "@/utils/datasetQuality";
+import { formatDateLong } from "@/utils/formatDate";
 import { formatMetricValue } from "@/utils/formatNumber";
 import TextLink from "@/components/Primitives/TextLink";
 import { DescriptionWithReadMore } from "@/components/Shared/DescriptionWithReadMore";
 
 interface DatasetDetailClientProps {
-  slug: string;
+  dataset: Dataset;
 }
 
-const QUALITY_CRITERIA: [keyof NonNullable<Dataset["quality"]>, string][] = [
-  ["dataset_description_quality", "Descrição"],
-  ["has_resources", "Recursos"],
-  ["license", "Licença"],
-  ["update_frequency", "Frequência"],
-  ["temporal_coverage", "Cobertura temporal"],
-  ["spatial", "Cobertura espacial"],
-  ["has_open_format", "Formato aberto"],
-  ["resources_documentation", "Documentação"],
-  ["all_resources_available", "Recursos disponíveis"],
-];
-
-function getQualityDetails(quality?: Dataset["quality"]): string[] {
-  if (!quality) return [];
-  return QUALITY_CRITERIA.filter(([key]) => quality[key] === true).map(([, label]) => label);
-}
-
-function getQualityMissing(quality?: Dataset["quality"]): string[] {
-  if (!quality) return QUALITY_CRITERIA.map(([, label]) => label);
-  return QUALITY_CRITERIA.filter(([key]) => quality[key] !== true).map(([, label]) => label);
-}
-
-const CONTACT_ROLE_LABELS: Record<string, string> = {
-  contact: "Contacto",
-  creator: "Criador",
-  publisher: "Publicador",
-  rightsHolder: "Titular de Direitos",
-  custodian: "Custódio",
-  distributor: "Distribuidor",
-  originator: "Originador",
-  principalInvestigator: "Investigador Principal",
-  processor: "Processador",
-  resourceProvider: "Fornecedor de Recurso",
-  user: "Utilizador",
-};
-
-export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) {
+export default function DatasetDetailClient({ dataset }: DatasetDetailClientProps) {
+  const { i18n } = useTranslation("common");
+  const { t: tds } = useTranslation("datasets");
   const { user, isAdmin } = useAuth();
   const { organizations } = useActiveOrganization();
   const router = useRouter();
-  const [dataset, setDataset] = useState<Dataset | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const [qualityExpanded, setQualityExpanded] = useState(false);
@@ -75,37 +45,28 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
   const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    async function loadDataset() {
-      try {
-        const data = await fetchDataset(slug);
-        setDataset(data);
-        if (user && data) {
-          const following = await isFollowing("datasets", data.id, user.id);
-          setIsFavorite(following);
-        }
-      } catch (error) {
-        console.error("Error loading dataset:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadDataset();
-  }, [slug, user]);
+    if (!user) return;
+    let cancelled = false;
+    isFollowing("datasets", dataset.id, user.id)
+      .then((following) => { if (!cancelled) setIsFavorite(following); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user?.id, dataset.id]);
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      router.push("/pages/login");
+      router.push("/login");
       return;
     }
-    if (!dataset || isTogglingFavorite) return;
+    if (isTogglingFavorite) return;
     setIsTogglingFavorite(true);
     try {
       if (isFavorite) {
-        const success = await unfollowEntity("datasets", dataset.id);
-        if (success) setIsFavorite(false);
+        await unfollowEntity("datasets", dataset.id);
+        setIsFavorite(false);
       } else {
-        const result = await followEntity("datasets", dataset.id);
-        if (result) setIsFavorite(true);
+        await followEntity("datasets", dataset.id);
+        setIsFavorite(true);
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
@@ -113,18 +74,6 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
       setIsTogglingFavorite(false);
     }
   };
-
-  if (isLoading) {
-    return null;
-  }
-
-  if (!dataset) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-neutral-500">Conjunto de dados não encontrado.</p>
-      </div>
-    );
-  }
 
   const ownerFullName = dataset.owner
     ? `${dataset.owner.first_name} ${dataset.owner.last_name}`.trim()
@@ -138,22 +87,19 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
     <main className="flex w-full flex-col items-center justify-center gap-64">
       {/* Breadcrumb */}
       <div className="container flex items-center justify-between py-64">
-        <Breadcrumb
-          items={[
-            { label: "Home", url: "/" },
-            { label: "Conjuntos de dados", url: "/pages/datasets" },
-            { label: dataset.title, url: `/pages/datasets/${dataset.slug}` },
-          ]}
+        <BreadcrumbDynamic
+          darkMode={false}
+          overrides={{ [dataset.slug]: dataset.title }}
         />
       </div>
 
       {/* Actions */}
       <div className="container flex items-center justify-end gap-16">
-        {dataset.private && <Pill variant="warning">Rascunho</Pill>}
-        {dataset.archived && <Pill variant="neutral">Arquivado</Pill>}
+        {dataset.private && <Pill variant="warning">{tds("detail.draft")}</Pill>}
+        {dataset.archived && <Pill variant="neutral">{tds("detail.archived")}</Pill>}
         <Button
-          variant="primary"
-          appearance={isFavorite ? "solid" : "outline"}
+          variant="neutral"
+          appearance="link"
           hasIcon={true}
           leadingIcon={isFavorite ? "agora-solid-star" : "agora-line-star"}
           leadingIconHover="agora-solid-star"
@@ -161,20 +107,20 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
           onClick={handleToggleFavorite}
           disabled={isTogglingFavorite}
         >
-          {isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          {isFavorite ? tds("detail.removeFavorite") : tds("detail.addFavorite")}
         </Button>
         {(isAdmin ||
           (user && dataset.owner?.id === user.id) ||
           (dataset.organization &&
             organizations.some((org) => org.id === dataset.organization?.id))) && (
-          <Link href={`/pages/admin/me/datasets/edit?id=${dataset.id}`}>
+          <Link href={`/admin/me/datasets/edit?id=${dataset.id}`}>
             <Button
               variant="primary"
               hasIcon={true}
               leadingIcon="agora-line-edit"
               leadingIconHover="agora-solid-edit"
             >
-              Editar
+              {tds("detail.edit")}
             </Button>
           </Link>
         )}
@@ -211,7 +157,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                 <div className="card-article-3_2-img flex h-48 w-fit items-center justify-center rounded-8 border-2 border-primary-300 py-8">
                   <img
                     src={dataset.owner.avatar_thumbnail}
-                    alt={ownerFullName ?? "Autor"}
+                    alt={ownerFullName ?? tds("detail.authorAlt")}
                     className="max-h-full max-w-full rounded-full object-cover"
                   />
                 </div>
@@ -228,7 +174,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                 <div className="mb-8 text-m-light text-neutral-900">
                   {dataset.organization ? (
                     <Link
-                      href={`/pages/organizations/${dataset.organization.slug}`}
+                      href={`/organizations/${dataset.organization.slug}`}
                       className="hover:underline"
                     >
                       {dataset.organization.name}
@@ -238,32 +184,29 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                        profile instead of the broken "Organização Desconhecida"
                        fallback. */
                     <Link
-                      href={`/pages/users/${dataset.owner.slug}`}
+                      href={`/users/${dataset.owner.slug}`}
                       className="hover:underline"
                     >
                       {ownerFullName}
                     </Link>
                   ) : (
-                    "Sem autor"
+                    tds("detail.noAuthor")
                   )}
                 </div>
                 <div className="text-sm mb-16 text-neutral-900">
-                  <span className="text-m-semibold">Última atualização:</span>{" "}
-                  {new Date(dataset.last_modified).toLocaleDateString("pt-PT", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  <span className="text-m-semibold">{tds("detail.lastUpdate")}</span>{" "}
+                  {formatDateLong(dataset.last_modified, i18n.language as "pt" | "en")}
                 </div>
                 {dataset.license && (
                   <div className="text-sm">
                     <TextLink
                       href={
                         dataset.license_url ||
-                        `/pages/licenses/${dataset.license}/`
+                        `/licenses/${dataset.license}/`
                       }
+                      target="_blank"
                     >
-                      <span className="text-m-semibold">Licença:</span>{" "}
+                      <span className="text-m-semibold">{tds("detail.license")}</span>{" "}
                       {dataset.license_title || dataset.license}
                     </TextLink>
                   </div>
@@ -273,7 +216,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     {dataset.contact_points.map((cp) => (
                       <div key={cp.id} className="text-sm">
                         <div className="mb-4 text-m-semibold">
-                          {CONTACT_ROLE_LABELS[cp.role] ?? cp.role}
+                          {tds(`contactRoles.${cp.role}`, { defaultValue: cp.role })}
                         </div>
                         <div className="mb-4 text-neutral-900">{cp.name}</div>
                         {cp.email && (
@@ -282,8 +225,8 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                           </TextLink>
                         )}
                         {cp.contact_form && (
-                          <TextLink href={cp.contact_form} className="block">
-                            Formulário de contacto
+                          <TextLink href={cp.contact_form} target="_blank" className="block">
+                            {tds("detail.contactForm")}
                           </TextLink>
                         )}
                       </div>
@@ -296,13 +239,13 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
             {/* Metrics */}
             <div className="mb-16 grid grid-cols-2 gap-16">
               <div className="rounded-4 bg-[#F2F6FF] p-32">
-                <div className="text-sm mb-8">Visualizações</div>
+                <div className="text-sm mb-8">{tds("detail.views")}</div>
                 <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(dataset.metrics?.views)}
                 </div>
               </div>
               <div className="rounded-4 bg-[#F2F6FF] p-32">
-                <div className="text-sm mb-8">Downloads</div>
+                <div className="text-sm mb-8">{tds("detail.downloads")}</div>
                 <div className="mb-8 text-l-semibold font-bold text-neutral-900">
                   {formatMetricValue(dataset.metrics?.resources_downloads)}
                 </div>
@@ -312,7 +255,7 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
             {/* Quality */}
             <CardExpandable
               variant="primary-100"
-              cardTitle="Qualidade dos metadados"
+              cardTitle={tds("detail.quality.title")}
               cardHeadingLevel="h3"
               cardSubtitle={
                 <div className="mt-8 flex flex-col gap-4">
@@ -328,11 +271,15 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
                     <ProgressBar value={qualityScore} max={100} hidePercentageValue={true} />
                   </div>
                   <div className="text-xs text-neutral-700">
-                    {qualityScore}%{qualityDetails.length > 0 && ` (${qualityDetails.join(", ")})`}
+                    {qualityScore}%
+                    {qualityDetails.length > 0 &&
+                      ` (${qualityDetails.map((key) => tds(`quality.${key}`)).join(", ")})`}
                   </div>
                 </div>
               }
-              accordionHeadingTitle={qualityExpanded ? "Fechar informação" : "Ver mais informação"}
+              accordionHeadingTitle={
+                qualityExpanded ? tds("detail.quality.collapse") : tds("detail.quality.expand")
+              }
               accordionHeadingLevel="h4"
               expanded={qualityExpanded}
               onExpanded={() => setQualityExpanded(true)}
@@ -340,14 +287,14 @@ export default function DatasetDetailClient({ slug }: DatasetDetailClientProps) 
             >
               {qualityMissing.length > 0 && (
                 <div className="flex flex-col gap-8">
-                  {qualityMissing.map((label) => (
-                    <div key={label} className="flex items-center gap-8">
+                  {qualityMissing.map((key) => (
+                    <div key={key} className="flex items-center gap-8">
                       <Icon
                         name="agora-line-alert-triangle"
                         className="h-20 w-20 fill-[#B06112]"
                       />
                       <span className="text-base text-neutral-900">
-                        {label} dos dados não preenchidos
+                        {tds("detail.quality.missing", { label: tds(`quality.${key}`) })}
                       </span>
                     </div>
                   ))}

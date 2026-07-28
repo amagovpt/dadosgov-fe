@@ -1,0 +1,123 @@
+import { ResourceStatusBadge } from "@/components/admin/ResourceStatusBadge";
+import TextLink from "@/components/Primitives/TextLink";
+import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
+import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
+import { formatDateToDMY } from "@/utils/formatDate";
+import { can } from "@/utils/permissions";
+import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
+import type { Dataservice } from "@/service/types/dataservice";
+import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
+
+export type DataserviceSortField = "title" | "status" | "created_at" | "last_modified";
+
+export const dataserviceSortFieldMap: Record<DataserviceSortField, string | null> = {
+  title: "title",
+  status: null,
+  created_at: "created",
+  last_modified: "last_modified",
+};
+
+const getDataserviceModifiedAt = (api: Dataservice) =>
+  api.metadata_modified_at || api.last_modified;
+
+export function sortDataservices(
+  items: Dataservice[],
+  sortField: DataserviceSortField | null,
+  sortOrder: SortOrder
+): Dataservice[] {
+  if (!sortField || sortOrder === "none") return items;
+  const dir = sortOrder === "ascending" ? 1 : -1;
+  const collator = new Intl.Collator("pt", { sensitivity: "base" });
+
+  return [...items].sort((a, b) => {
+    if (sortField === "title") {
+      return collator.compare(a.title ?? "", b.title ?? "") * dir;
+    }
+    if (sortField === "status") {
+      return (getResourceStatusSortValue(a) - getResourceStatusSortValue(b)) * dir;
+    }
+    const aValue = sortField === "created_at" ? a.created_at : getDataserviceModifiedAt(a);
+    const bValue = sortField === "created_at" ? b.created_at : getDataserviceModifiedAt(b);
+    const aTime = aValue ? Date.parse(aValue) : 0;
+    const bTime = bValue ? Date.parse(bValue) : 0;
+    return (aTime - bTime) * dir;
+  });
+}
+
+interface DataserviceColumnsOptions {
+  ownerMetaStyle?: "dot" | "by";
+  labels: DataserviceColumnLabels;
+}
+
+interface DataserviceColumnLabels {
+  title: string;
+  titleShort: string;
+  status: string;
+  createdAt: string;
+  modifiedAt: string;
+  by: string;
+  about: string;
+}
+
+export function createDataserviceColumns({
+  ownerMetaStyle = "dot",
+  labels,
+}: DataserviceColumnsOptions): AdminListColumn<Dataservice, DataserviceSortField>[] {
+  return [
+    {
+      id: "title",
+      header: labels.title,
+      headerLabel: labels.titleShort,
+      sortField: "title",
+      sortType: "numeric",
+      renderCell: (api) => <TextLink href={`/dataservices/${api.slug}`}>{api.title}</TextLink>,
+    },
+    {
+      id: "status",
+      header: labels.status,
+      sortField: "status",
+      sortType: "string",
+      renderCell: (api) => <ResourceStatusBadge item={api} />,
+    },
+    {
+      id: "created_at",
+      header: labels.createdAt,
+      sortField: "created_at",
+      sortType: "date",
+      renderCell: (api) => formatDateToDMY(api.created_at),
+    },
+    {
+      id: "last_modified",
+      header: labels.modifiedAt,
+      sortField: "last_modified",
+      sortType: "date",
+      renderCell: (api) => (
+        <>
+          {formatDateToDMY(getDataserviceModifiedAt(api))}
+          {(api.owner || api.organization) && (
+            <>
+              <br />
+              <span className="text-sm text-neutral-500">
+                {ownerMetaStyle === "by" ? labels.by : labels.about}{" "}
+                {ownerMetaStyle === "dot" ? (
+                  <span className="text-success-600">{"\u25cf"}</span>
+                ) : null}{" "}
+                {api.owner
+                  ? `${api.owner.first_name} ${api.owner.last_name}`
+                  : api.organization?.name}
+              </span>
+            </>
+          )}
+        </>
+      ),
+    },
+    createTableActionsColumn<Dataservice>({
+      viewAction: (api) => ({
+        href: `/dataservices/${api.slug}`,
+      }),
+      editAction: (api) =>
+        can(api, "edit") ? { href: `/admin/dataservices/edit?slug=${api.slug}` } : undefined,
+    }),
+  ];
+}
+

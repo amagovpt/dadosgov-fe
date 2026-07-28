@@ -1,9 +1,9 @@
 import { test, expect, type Page } from "playwright/test";
 
-const REUSES_URL = "/pages/reuses";
+const REUSES_URL = "/reuses";
 
 // Reuse cards use Agora's <CardLinks> with blockedLink=true, so the only
-// real <a href="/pages/reuses/{slug}"> is suppressed and navigation happens
+// real <a href="/reuses/{slug}"> is suppressed and navigation happens
 // via onClick on a `.cursor-pointer` div. Tests rely on this affordance
 // rather than href matching.
 const CARD_SELECTOR = "div.cursor-pointer";
@@ -51,8 +51,8 @@ test.describe("Reuses Listing", () => {
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     await firstCard.click();
-    await page.waitForURL(/\/pages\/reuses\/.+/, { timeout: 15000 });
-    await expect(page).toHaveURL(/\/pages\/reuses\/.+/);
+    await page.waitForURL(/reuses\/.+/, { timeout: 15000 });
+    await expect(page).toHaveURL(/reuses\/.+/);
   });
 
   test("RL-04: Search filters by name", async ({ page }) => {

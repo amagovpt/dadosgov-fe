@@ -6,7 +6,7 @@ const FRONTEND_URL = "http://localhost:3000";
 test("download link routes through backend redirect for tracking", async ({
   page,
 }) => {
-  await page.goto(`${FRONTEND_URL}/pages/datasets/${DATASET_SLUG}`, {
+  await page.goto(`${FRONTEND_URL}/datasets/${DATASET_SLUG}`, {
     waitUntil: "networkidle",
   });
 

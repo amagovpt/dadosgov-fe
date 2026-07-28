@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@ama-pt/agora-design-system";
 import { suggestFormats } from "@/service/api/datasets";
-import { suggestSpatialZones, suggestTags } from "@/service/api/search";
+import { getSpatialZones, suggestSpatialZones, suggestTags } from "@/service/api/search";
 import { Frequency, Granularity, License } from "@/service/types/catalog";
 import { Organization } from "@/service/types/identity";
 import {
@@ -22,43 +22,12 @@ import {
   uniqueStrings,
   writeQueryParamValues,
 } from "@/utils/filterUtils";
+import { useTranslation } from "react-i18next";
 
 interface FilterOption {
   id: string;
   name: string;
 }
-
-const DATASET_TOGGLE_FILTERS = {
-  formato: {
-    title: "Formato dos recursos",
-    options: [
-      { id: "all", label: "Todos", description: undefined as string | undefined },
-      { id: "tabular", label: "Tabular", description: "csv, xls, xlsx, ods, parquet..." },
-      { id: "structured", label: "Estruturado", description: "JSON, RDF, XML, SQL..." },
-      { id: "geographic", label: "Geográfico", description: "geojson, shp, kml..." },
-      { id: "documents", label: "Documentos", description: "pdf, doc, docx, md, txt, ..." },
-      { id: "other", label: "Outro", description: undefined as string | undefined },
-    ],
-  },
-  atualizacao: {
-    title: "Data da atualização",
-    options: [
-      { id: "all", label: "Todos", description: undefined as string | undefined },
-      { id: "30_days", label: "Os últimos 30 dias", description: undefined as string | undefined },
-      { id: "12_months", label: "Os últimos 12 meses", description: undefined as string | undefined },
-      { id: "3_years", label: "Os últimos 3 anos", description: undefined as string | undefined },
-    ],
-  },
-  rotulo: {
-    title: "Tipo de dados",
-    options: [
-      { id: "all", label: "Todos", description: undefined as string | undefined },
-      { id: "high_value", label: "Conjuntos de dados de Elevado Valor", description: undefined as string | undefined },
-    ],
-  },
-};
-
-type ToggleFilterKey = keyof typeof DATASET_TOGGLE_FILTERS;
 
 const FORMAT_GROUP_MAP: Record<string, string[]> = {
   tabular: ["csv", "xls", "xlsx", "ods", "parquet", "tsv"],
@@ -130,12 +99,90 @@ export const DatasetsFilters = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
+  const { t } = useTranslation("common");
+  const { t: tds } = useTranslation("datasets");
+
+  const DATASET_TOGGLE_FILTERS = useMemo(
+    () => ({
+      formato: {
+        title: tds("filters.format.label"),
+        options: [
+          { id: "all", label: t("filters.all"), description: undefined as string | undefined },
+          {
+            id: "tabular",
+            label: tds("filters.format.options.tabular"),
+            description: "csv, xls, xlsx, ods, parquet...",
+          },
+          {
+            id: "structured",
+            label: tds("filters.format.options.structured"),
+            description: "JSON, RDF, XML, SQL...",
+          },
+          {
+            id: "geographic",
+            label: tds("filters.format.options.geographic"),
+            description: "geojson, shp, kml...",
+          },
+          {
+            id: "documents",
+            label: tds("filters.format.options.documents"),
+            description: "pdf, doc, docx, md, txt, ...",
+          },
+          {
+            id: "other",
+            label: tds("filters.format.options.other"),
+            description: undefined as string | undefined,
+          },
+        ],
+      },
+      atualizacao: {
+        title: t("filters.update.label"),
+        options: [
+          { id: "all", label: t("filters.all"), description: undefined as string | undefined },
+          {
+            id: "30_days",
+            label: t("filters.update.options.30_days"),
+            description: undefined as string | undefined,
+          },
+          {
+            id: "12_months",
+            label: t("filters.update.options.12_months"),
+            description: undefined as string | undefined,
+          },
+          {
+            id: "3_years",
+            label: t("filters.update.options.3_years"),
+            description: undefined as string | undefined,
+          },
+        ],
+      },
+      rotulo: {
+        title: tds("filters.type.label"),
+        options: [
+          { id: "all", label: t("filters.all"), description: undefined as string | undefined },
+          {
+            id: "high_value",
+            label: tds("filters.type.options.high_value"),
+            description: undefined as string | undefined,
+          },
+        ],
+      },
+    }),
+    [tds, t]
+  );
+
+  type ToggleFilterKey = keyof typeof DATASET_TOGGLE_FILTERS;
+
   const paramsRef = useRef(queryString);
   const filterCounts = useMemo(() => serverCounts ?? {}, [serverCounts]);
 
   const [tagOptions, setTagOptions] = useState<FilterOption[]>([]);
   const [formatOptions, setFormatOptions] = useState<FilterOption[]>([]);
   const [zoneOptions, setZoneOptions] = useState<FilterOption[]>([]);
+  // Persists the human-readable name of selected zones so a selection keeps its
+  // label after it drops out of the live suggestions list (e.g. clearing the
+  // search input) or after a page reload with a `geozone` already in the URL.
+  const [zoneLabels, setZoneLabels] = useState<Record<string, string>>({});
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
   const selectedToggleFilters = useMemo<Record<ToggleFilterKey, string>>(
     () => ({
@@ -163,6 +210,27 @@ export const DatasetsFilters = ({
   useEffect(() => {
     paramsRef.current = queryString;
   }, [queryString]);
+
+  // Resolve labels for any selected zones whose name we don't know yet (e.g.
+  // on first load or a shared link that already carries a `geozone` filter).
+  useEffect(() => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    const selectedZones = readQueryParamValues(params, "geozone");
+    const missing = selectedZones.filter((id) => !(id in zoneLabels));
+    if (missing.length === 0) return;
+    let cancelled = false;
+    getSpatialZones(missing).then((zones) => {
+      if (cancelled || zones.length === 0) return;
+      setZoneLabels((prev) => {
+        const next = { ...prev };
+        for (const zone of zones) next[zone.id] = zone.name;
+        return next;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, zoneLabels]);
 
   const handleToggleFilterChange = useCallback(
     (filterKey: ToggleFilterKey, optionId: string) => {
@@ -228,6 +296,11 @@ export const DatasetsFilters = ({
     try {
       const results = await suggestSpatialZones(query);
       setZoneOptions(results.map((zone) => ({ id: zone.id, name: zone.name })));
+      setZoneLabels((prev) => {
+        const next = { ...prev };
+        for (const zone of results) next[zone.id] = zone.name;
+        return next;
+      });
     } catch {
       setZoneOptions([]);
     }
@@ -249,9 +322,9 @@ export const DatasetsFilters = ({
   const handleSearchChange = useCallback(
     (groupName: string, value: string) => {
       setSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-      if (groupName === "Palavras-chave") handleTagSearch(value);
-      if (groupName === "Formatos") handleFormatSearch(value);
-      if (groupName === "Cobertura Espacial") handleZoneSearch(value);
+      if (groupName === "tags") handleTagSearch(value);
+      if (groupName === "format") handleFormatSearch(value);
+      if (groupName === "geozone") handleZoneSearch(value);
     },
     [handleFormatSearch, handleTagSearch, handleZoneSearch]
   );
@@ -279,63 +352,70 @@ export const DatasetsFilters = ({
               : undefined,
         })),
       })),
-    [filterCounts]
+    [filterCounts, DATASET_TOGGLE_FILTERS]
   );
 
   const advancedFilterGroups = useMemo<AdvancedFilterGroup[]>(
     () => [
       {
-        name: "Organizações",
+        name: t("filters.advanced.organization"),
         param: "organization",
-        data: allOrganizations.map((organization) => ({ id: organization.id, name: organization.name })),
+        data: allOrganizations.map((organization) => ({
+          id: organization.id,
+          name: organization.name,
+        })),
         searchable: true,
       },
       {
-        name: "Palavras-chave",
+        name: t("filters.advanced.tag"),
         param: "tag",
         data: tagOptions,
         searchable: true,
         suggest: true,
-        searchPlaceholder: "Escreva para pesquisar...",
-        minCharsMessage: "Escreva pelo menos 2 caracteres...",
-        emptyMessage: "Nenhum resultado encontrado.",
+        searchPlaceholder: t("filters.advanced.search.placeholder"),
+        minCharsMessage: t("filters.advanced.search.minCharsMessage"),
+        emptyMessage: t("filters.advanced.search.noResults"),
       },
       {
-        name: "Formatos",
+        name: t("filters.advanced.format"),
         param: "format",
         data: formatOptions,
         searchable: true,
         suggest: true,
-        searchPlaceholder: "Escreva para pesquisar...",
-        minCharsMessage: "Escreva pelo menos 2 caracteres...",
-        emptyMessage: "Nenhum resultado encontrado.",
+        searchPlaceholder: t("filters.advanced.search.placeholder"),
+        minCharsMessage: t("filters.advanced.search.minCharsMessage"),
+        emptyMessage: t("filters.advanced.search.noResults"),
       },
       {
-        name: "Licenças",
+        name: t("filters.advanced.license"),
         param: "license",
         data: allLicenses.map((license) => ({ id: license.id, name: license.title })),
         searchable: true,
       },
       {
-        name: "Frequência",
+        name: t("filters.advanced.frequency"),
         param: "frequency",
         data: allFrequencies.map((frequency) => ({ id: frequency.id, name: frequency.label })),
         searchable: true,
       },
       {
-        name: "Cobertura Espacial",
+        name: t("filters.advanced.geozone"),
         param: "geozone",
         data: zoneOptions,
         searchable: true,
         suggest: true,
-        searchPlaceholder: "Escreva para pesquisar...",
-        minCharsMessage: "Escreva pelo menos 2 caracteres...",
-        emptyMessage: "Nenhum resultado encontrado.",
+        searchPlaceholder: t("filters.advanced.search.placeholder"),
+        minCharsMessage: t("filters.advanced.search.minCharsMessage"),
+        emptyMessage: t("filters.advanced.search.noResults"),
+        selectedLabels: zoneLabels,
       },
       {
-        name: "Granularidade Espacial",
+        name: t("filters.advanced.granularity"),
         param: "granularity",
-        data: allGranularities.map((granularity) => ({ id: granularity.id, name: granularity.name })),
+        data: allGranularities.map((granularity) => ({
+          id: granularity.id,
+          name: granularity.name,
+        })),
         searchable: true,
       },
     ],
@@ -346,7 +426,9 @@ export const DatasetsFilters = ({
       allLicenses,
       allFrequencies,
       zoneOptions,
+      zoneLabels,
       allGranularities,
+      t,
     ]
   );
 
@@ -361,7 +443,9 @@ export const DatasetsFilters = ({
         idPrefix="ds-filter"
       />
 
-      <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">Filtros avançados</h2>
+      <h2 className="text-xl mb-32 mt-[36px] font-bold text-neutral-900">
+        {t("filters.advanced.label")}
+      </h2>
 
       <AdvancedFiltersSidebar
         groups={advancedFilterGroups}
@@ -378,10 +462,10 @@ export const DatasetsFilters = ({
           appearance="outline"
           onClick={() => {
             paramsRef.current = "";
-            router.replace("/pages/datasets", { scroll: false });
+            router.replace("/datasets", { scroll: false });
           }}
         >
-          Limpar filtros
+          {t("filters.clear")}
         </Button>
       </div>
     </div>

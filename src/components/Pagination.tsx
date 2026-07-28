@@ -1,29 +1,34 @@
-'use client';
+"use client";
 
-import React, { useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@ama-pt/agora-design-system';
+import React, { useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 interface PaginationProps {
   currentPage: number;
   totalItems: number;
   pageSize: number;
   baseUrl?: string; // kept for API compatibility, not used
+  // When provided, navigation is handled in-memory via this callback instead
+  // of pushing a `?page=` URL change (used for paginating embedded content
+  // such as the resource preview, where the route must not change).
+  onPageChange?: (page: number) => void;
 }
 
 function buildPageUrl(page: number): string {
-  if (typeof window === 'undefined') return `?page=${page}`;
+  if (typeof window === "undefined") return `?page=${page}`;
   const params = new URLSearchParams(window.location.search);
   if (page === 1) {
-    params.delete('page');
+    params.delete("page");
   } else {
-    params.set('page', String(page));
+    params.set("page", String(page));
   }
   const qs = params.toString();
-  return `${window.location.pathname}${qs ? `?${qs}` : ''}`;
+  return `${window.location.pathname}${qs ? `?${qs}` : ""}`;
 }
 
-function getPageRange(current: number, total: number): (number | '...')[] {
+function getPageRange(current: number, total: number): (number | "...")[] {
   const boundary = 1;
   const sibling = 1;
   const pages = new Set<number>();
@@ -35,25 +40,36 @@ function getPageRange(current: number, total: number): (number | '...')[] {
   }
 
   const sorted = Array.from(pages).sort((a, b) => a - b);
-  const range: (number | '...')[] = [];
+  const range: (number | "...")[] = [];
   let prev = 0;
   for (const p of sorted) {
-    if (p - prev > 1) range.push('...');
+    if (p - prev > 1) range.push("...");
     range.push(p);
     prev = p;
   }
   return range;
 }
 
-export const Pagination = ({ currentPage, totalItems, pageSize }: PaginationProps) => {
+export const Pagination = ({
+  currentPage,
+  totalItems,
+  pageSize,
+  onPageChange,
+}: PaginationProps) => {
+  const { t } = useTranslation("common");
+
   const router = useRouter();
   const totalPages = Math.ceil(totalItems / pageSize);
 
   const navigate = useCallback(
     (page: number) => {
+      if (onPageChange) {
+        onPageChange(page);
+        return;
+      }
       router.push(buildPageUrl(page));
     },
-    [router]
+    [router, onPageChange]
   );
 
   if (totalPages <= 1) return null;
@@ -61,7 +77,7 @@ export const Pagination = ({ currentPage, totalItems, pageSize }: PaginationProp
   const pageRange = getPageRange(currentPage, totalPages);
 
   return (
-    <nav aria-label="Paginação" className="agora-search-pagination">
+    <nav aria-label={t("pagination.pagination")} className="agora-search-pagination">
       <Button
         appearance="link"
         hasIcon="true"
@@ -70,22 +86,22 @@ export const Pagination = ({ currentPage, totalItems, pageSize }: PaginationProp
         leadingIconHover="agora-solid-chevron-left"
         disabled={currentPage <= 1}
         className="nav-arrows show-arrow"
-        aria-label="Página anterior"
+        aria-label={t("pagination.previous")}
         onClick={() => navigate(currentPage - 1)}
       />
       <div className="nav-pages">
         {pageRange.map((p, i) =>
-          p === '...' ? (
+          p === "..." ? (
             <div key={`dots-${i}`} className="nav-number-overlay">
               ...
             </div>
           ) : (
             <div key={p} onClick={() => navigate(p)}>
               <Button
-                className={`search-page${p === currentPage ? ' current' : ''}`}
+                className={`search-page${p === currentPage ? "current" : ""}`}
                 appearance="link"
                 aria-label={String(p)}
-                {...(p === currentPage ? { 'aria-current': 'page' } : {})}
+                {...(p === currentPage ? { "aria-current": "page" } : {})}
               >
                 {p}
               </Button>
@@ -101,7 +117,7 @@ export const Pagination = ({ currentPage, totalItems, pageSize }: PaginationProp
         trailingIconHover="agora-solid-chevron-right"
         disabled={currentPage >= totalPages}
         className="nav-arrows show-arrow"
-        aria-label="Próxima página"
+        aria-label={t("pagination.next")}
         onClick={() => navigate(currentPage + 1)}
       />
     </nav>

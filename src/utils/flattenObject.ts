@@ -1,6 +1,6 @@
 export function flattenData(
   data: Record<string, unknown>,
-  preferredLocales: string | string[] = ["pt", "pt-PT", "en"],
+  preferredLocales: string | string[] = ["pt", "pt-PT", "en"]
 ): Record<string, unknown> {
   if (!data || typeof data !== "object") return {};
 
@@ -14,7 +14,7 @@ export function flattenData(
 
     const obj = value as Record<string, unknown>;
     const cleaned = Object.keys(obj).reduce<Record<string, unknown>>((acc, k) => {
-      if (k !== "__typename" && k !== "schemaId" && k !== "schemaName") acc[k] = obj[k];
+      if (k !== "__typename" && k !== "schemaId" /*&& k !== "schemaName"*/) acc[k] = obj[k];
       return acc;
     }, {});
 

@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "playwright/test";
 
-const DATASETS_URL = "/pages/datasets";
+const DATASETS_URL = "/datasets";
 const PLACEHOLDER_SRC = "/images/placeholders/organization.png";
 
 async function openFiltersPanel(page: Page) {
@@ -28,7 +28,7 @@ test.describe("Datasets Listing", () => {
     });
     await expect(heading).toBeVisible({ timeout: 10000 });
 
-    const cards = page.locator("a[href^='/pages/datasets/']").first();
+    const cards = page.locator("a[href^='/datasets/']").first();
     await expect(cards).toBeVisible({ timeout: 15000 });
 
     // Filters are collapsed by default; the toggle must be present.
@@ -37,7 +37,7 @@ test.describe("Datasets Listing", () => {
   });
 
   test("DL-02: Each card has meaningful textual content", async ({ page }) => {
-    const firstCard = page.locator("a[href^='/pages/datasets/']").first();
+    const firstCard = page.locator("a[href^='/datasets/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     const cardText = await firstCard.textContent();
@@ -45,12 +45,12 @@ test.describe("Datasets Listing", () => {
   });
 
   test("DL-03: Click card opens dataset detail", async ({ page }) => {
-    const firstCard = page.locator("a[href^='/pages/datasets/']").first();
+    const firstCard = page.locator("a[href^='/datasets/']").first();
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     await firstCard.click();
-    await page.waitForURL(/\/pages\/datasets\/.+/, { timeout: 15000 });
-    await expect(page).toHaveURL(/\/pages\/datasets\/.+/);
+    await page.waitForURL(/datasets\/.+/, { timeout: 15000 });
+    await expect(page).toHaveURL(/datasets\/.+/);
   });
 
   test("DL-04: Search field filters results", async ({ page }) => {
@@ -122,7 +122,7 @@ test.describe("Datasets Listing", () => {
   });
 
   test("DL-11: Result list renders cards for the page", async ({ page }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     const count = await cards.count();
@@ -153,7 +153,7 @@ test.describe("Datasets Listing", () => {
       timeout: 10000,
     });
 
-    const results = page.locator("a[href^='/pages/datasets/']");
+    const results = page.locator("a[href^='/datasets/']");
     await expect(results.first()).toBeVisible({ timeout: 15000 });
     expect(await results.count()).toBeGreaterThan(0);
   });
@@ -270,7 +270,7 @@ test.describe("Datasets Listing", () => {
   test("DL-19: Every dataset card renders an img element with a non-empty src", async ({
     page,
   }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     const count = await cards.count();
@@ -289,13 +289,13 @@ test.describe("Datasets Listing", () => {
   test("DL-20: Org logos from the API reach the dataset card img src (no server-side stripping)", async ({
     page,
   }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     // Collect every card img src from the DOM
     const srcs: string[] = await page.evaluate(() =>
       Array.from(
-        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        document.querySelectorAll("a[href^='/datasets/'] img")
       ).map((img) => (img as HTMLImageElement).getAttribute("src") ?? "")
     );
 
@@ -354,16 +354,97 @@ test.describe("Datasets Listing", () => {
     await expect(mensal).toBeChecked({ timeout: 10000 });
   });
 
+  test("DL-25: Spatial granularity options are localized to Portuguese", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    // Expand the "Granularidade Espacial" accordion section.
+    const granBtn = page
+      .getByRole("button", { name: /^Granularidade Espacial/i })
+      .first();
+    await expect(granBtn).toBeVisible({ timeout: 10000 });
+    await granBtn.click();
+
+    // The PT administrative levels must render in Portuguese.
+    // Regression: they used to surface the untranslated English geolevel
+    // labels ("District" / "County" / "Parish").
+    await expect(
+      page.getByRole("checkbox", { name: /^Distrito$/i })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByRole("checkbox", { name: /^Concelho$/i })
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByRole("checkbox", { name: /^Freguesia$/i })
+    ).toBeVisible({ timeout: 10000 });
+
+    // The English labels must not appear anywhere in the filter panel.
+    await expect(page.getByRole("checkbox", { name: /^District$/i })).toHaveCount(0);
+    await expect(page.getByRole("checkbox", { name: /^County$/i })).toHaveCount(0);
+    await expect(page.getByRole("checkbox", { name: /^Parish$/i })).toHaveCount(0);
+  });
+
+  test("DL-26: Selected spatial coverage keeps its name after clearing the search", async ({
+    page,
+  }) => {
+    await openFiltersPanel(page);
+
+    // Expand the "Cobertura Espacial" accordion section.
+    const geoBtn = page
+      .getByRole("button", { name: /^Cobertura Espacial/i })
+      .first();
+    await expect(geoBtn).toBeVisible({ timeout: 10000 });
+    await geoBtn.click();
+
+    // Only the expanded section's search input is visible.
+    const search = page
+      .locator('[placeholder="Escreva para pesquisar..."]:visible')
+      .first();
+    await expect(search).toBeVisible({ timeout: 10000 });
+    await search.fill("Lisboa");
+
+    // Wait for a zone suggestion whose label contains "Lisboa". If the dev DB
+    // has no matching zone, the suggestion never appears — skip rather than fail.
+    const suggestion = page.getByRole("checkbox", { name: /Lisboa/i }).first();
+    try {
+      await expect(suggestion).toBeVisible({ timeout: 15000 });
+    } catch {
+      test.info().annotations.push({
+        type: "note",
+        description: "No 'Lisboa' spatial zone suggestion in this environment.",
+      });
+      return;
+    }
+
+    await suggestion.click();
+    await page.waitForURL(/geozone=/, { timeout: 10000 });
+
+    // Clearing the search empties the live suggestions list. The selection must
+    // keep its human-readable name — regression: it fell back to the raw zone
+    // code (e.g. "pt:concelho:1106").
+    await search.fill("");
+
+    const selected = page.getByRole("checkbox", { name: /Lisboa/i }).first();
+    await expect(selected).toBeVisible({ timeout: 10000 });
+    await expect(selected).toBeChecked();
+
+    // No remaining checkbox should be labeled with a raw zone code.
+    await expect(
+      page.getByRole("checkbox", { name: /(pt:(distrito|concelho|freguesia)|country):/i })
+    ).toHaveCount(0);
+  });
+
   test("DL-21: onError fallback replaces a failed org logo with the placeholder", async ({
     page,
   }) => {
-    const cards = page.locator("a[href^='/pages/datasets/']");
+    const cards = page.locator("a[href^='/datasets/']");
     await expect(cards.first()).toBeVisible({ timeout: 15000 });
 
     // Find card indices whose img currently shows a real logo (not the placeholder).
     const indicesWithLogo: number[] = await page.evaluate((placeholder) => {
       const imgs = Array.from(
-        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        document.querySelectorAll("a[href^='/datasets/'] img")
       );
       return imgs
         .map((img, i) => ({ i, src: (img as HTMLImageElement).getAttribute("src") ?? "" }))
@@ -386,7 +467,7 @@ test.describe("Datasets Listing", () => {
     // triggers the setImgSrc(PLACEHOLDER) state update in CardMetrics.
     await page.evaluate((placeholder) => {
       const imgs = Array.from(
-        document.querySelectorAll("a[href^='/pages/datasets/'] img")
+        document.querySelectorAll("a[href^='/datasets/'] img")
       ) as HTMLImageElement[];
       imgs.forEach((img) => {
         const src = img.getAttribute("src") ?? "";
@@ -400,7 +481,7 @@ test.describe("Datasets Listing", () => {
     await page.waitForFunction(
       ({ indices, placeholder }: { indices: number[]; placeholder: string }) => {
         const imgs = Array.from(
-          document.querySelectorAll("a[href^='/pages/datasets/'] img")
+          document.querySelectorAll("a[href^='/datasets/'] img")
         ) as HTMLImageElement[];
         return indices.every((i) =>
           (imgs[i]?.getAttribute("src") ?? "").includes("organization.png")
@@ -412,7 +493,7 @@ test.describe("Datasets Listing", () => {
 
     // Verify the placeholder is now shown for each formerly-logo card.
     for (const idx of indicesWithLogo.slice(0, 3)) {
-      const img = page.locator("a[href^='/pages/datasets/'] img").nth(idx);
+      const img = page.locator("a[href^='/datasets/'] img").nth(idx);
       const src = await img.getAttribute("src");
       expect(src).toContain("organization.png");
     }

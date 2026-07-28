@@ -1,0 +1,287 @@
+{
+  "theDatasets": "the datasets",
+  "notFound": "Dataset not found.",
+  "hero": {
+    "title": "Datasets",
+    "subtitle": "Explore open datasets from a range of sources, topics and formats, and use them as the basis for new studies and insights."
+  },
+  "search": {
+    "placeholder": "Search datasets..."
+  },
+  "noResults": {
+    "title": "Couldn't find any dataset?",
+    "subtitle": "Try resetting the filters to broaden your search.",
+    "description": "Explore our full list of open datasets."
+  },
+  "sort": {
+    "ariaLabel": "Sort by {{label}}",
+    "relevancia": "Relevance",
+    "criacao": "Most recent",
+    "antigo": "Oldest",
+    "subscritores": "Subscribers"
+  },
+  "delete": {
+    "delete": "Delete",
+    "irreversible": "This action is irreversible.",
+    "confirmation": "Are you sure you want to delete this dataset?",
+    "modal": "Delete dataset"
+  },
+  "filters": {
+    "format": {
+      "label": "Resource format",
+      "options": {
+        "all": "All",
+        "tabular": "Tabular",
+        "structured": "Structured",
+        "geographic": "Geographic",
+        "documents": "Documents",
+        "other": "Other"
+      }
+    },
+    "type": {
+      "label": "Data type",
+      "options": {
+        "all": "All",
+        "high_value": "High-Value Datasets"
+      }
+    }
+  },
+  "detail": {
+    "draft": "Draft",
+    "archived": "Archived",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
+    "edit": "Edit",
+    "noAuthor": "No author",
+    "authorAlt": "Author",
+    "lastUpdate": "Last update:",
+    "license": "License:",
+    "contactForm": "Contact form",
+    "views": "Views",
+    "downloads": "Downloads",
+    "quality": {
+      "title": "Metadata quality",
+      "expand": "See more information",
+      "collapse": "Close information",
+      "missing": "{{label}} of the data not filled in"
+    }
+  },
+  "contactRoles": {
+    "contact": "Contact",
+    "creator": "Creator",
+    "publisher": "Publisher",
+    "rightsHolder": "Rights Holder",
+    "custodian": "Custodian",
+    "distributor": "Distributor",
+    "originator": "Originator",
+    "principalInvestigator": "Principal Investigator",
+    "processor": "Processor",
+    "resourceProvider": "Resource Provider",
+    "user": "User"
+  },
+  "quality": {
+    "dataset_description_quality": "Description",
+    "has_resources": "Resources",
+    "license": "License",
+    "update_frequency": "Frequency",
+    "temporal_coverage": "Temporal coverage",
+    "spatial": "Spatial coverage",
+    "has_open_format": "Open format",
+    "resources_documentation": "Documentation",
+    "all_resources_available": "Available resources"
+  },
+  "tabs": {
+    "files": "Files ({{count}})",
+    "reusesAndApis": "Reuses and APIs ({{count}})",
+    "discussions": "Discussions ({{count}})",
+    "communityResources": "Community resources ({{count}})",
+    "info": "Information",
+    "apisCount_one": "{{count}} API",
+    "apisCount_other": "{{count}} APIS",
+    "reusesCount_one": "{{count}} REUSE",
+    "reusesCount_other": "{{count}} REUSES",
+    "communityCount_one": "{{count}} COMMUNITY RESOURCE",
+    "communityCount_other": "{{count}} COMMUNITY RESOURCES",
+    "noReuses": {
+      "title": "No reuses",
+      "description": "There are no reuses associated with this dataset yet.",
+      "cta": "Add one"
+    },
+    "noCommunity": {
+      "title": "No community resources",
+      "description": "There are currently no community resources available for this dataset.",
+      "cta": "Share one"
+    },
+    "communityDisclaimer": "These resources are published by the community and are not the responsibility of the data producer."
+  },
+  "info": {
+    "title": "Information",
+    "keywords": "Keywords",
+    "identifier": "Identifier",
+    "license": "License",
+    "temporal": "Temporality",
+    "created": "Created",
+    "frequency": "Frequency",
+    "lastUpdate": "Last update",
+    "spatial": "Spatial coverage",
+    "zones": "Zones",
+    "granularity": "Territorial coverage granularity",
+    "extras": "Extras",
+    "harvest": "Harvest",
+    "unavailable": "Not available",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "licenses": {
+    "cc-by": "Creative Commons Attribution",
+    "cc-by-sa": "Creative Commons Attribution Share-Alike",
+    "cc-zero": "Creative Commons Zero",
+    "fr-lo": "Licence Ouverte / Open Licence",
+    "odc-by": "Open Data Commons Attribution",
+    "odc-odbl": "Open Data Commons Open Database License",
+    "odc-pddl": "Open Data Commons Public Domain Dedication and License",
+    "notspecified": "Not specified"
+  },
+  "frequency": {
+    "continuous": "Continuous",
+    "oneMinute": "Every minute",
+    "fiveMinutes": "Every 5 minutes",
+    "tenMinutes": "Every 10 minutes",
+    "fifteenMinutes": "Every 15 minutes",
+    "thirtyMinutes": "Every 30 minutes",
+    "hourly": "Hourly",
+    "bihourly": "Every 2 hours",
+    "trihourly": "Every 3 hours",
+    "twelveHours": "Every 12 hours",
+    "severalTimesADay": "Several times a day",
+    "threeTimesADay": "3 times a day",
+    "semidaily": "Semi-daily",
+    "daily": "Daily",
+    "fiveTimesAWeek": "5 times a week",
+    "threeTimesAWeek": "3 times a week",
+    "semiweekly": "Semi-weekly",
+    "weekly": "Weekly",
+    "biweekly": "Fortnightly",
+    "threeTimesAMonth": "3 times a month",
+    "semimonthly": "Semi-monthly",
+    "monthly": "Monthly",
+    "bimonthly": "Bimonthly",
+    "quarterly": "Quarterly",
+    "threeTimesAYear": "3 times a year",
+    "semiannual": "Semi-annual",
+    "annual": "Annual",
+    "biennial": "Biennial",
+    "triennial": "Triennial",
+    "quadrennial": "Quadrennial",
+    "quinquennial": "Quinquennial",
+    "decennial": "Decennial",
+    "bidecennial": "Bidecennial",
+    "tridecennial": "Tridecennial",
+    "punctual": "One-off",
+    "irregular": "Irregular",
+    "never": "Never",
+    "notPlanned": "Not planned",
+    "other": "Other",
+    "unknown": "Unknown"
+  },
+  "granularity": {
+    "pt_distrito": "District",
+    "pt_concelho": "Municipality",
+    "pt_freguesia": "Parish",
+    "country-group": "Country group",
+    "country": "Country",
+    "canton": "Canton",
+    "town": "Town",
+    "commune": "Commune",
+    "district": "District",
+    "municipality": "Municipality",
+    "parish": "Parish",
+    "epci": "EPCI",
+    "iris": "IRIS",
+    "fr_commune": "Commune",
+    "fr_departement": "Department",
+    "fr_region": "Region",
+    "fr_arrondissement": "Arrondissement",
+    "poi": "Point of interest",
+    "other": "Other"
+  },
+  "resources": {
+    "mainFiles_one": "{{count}} MAIN FILE",
+    "mainFiles_other": "{{count}} MAIN FILES",
+    "documentation_one": "{{count}} DOCUMENTATION",
+    "documentation_other": "{{count}} DOCUMENTATION",
+    "copyTitle": "Copy title",
+    "copy": "Copy {{label}}",
+    "copied": "Copied!",
+    "updatedOn": "Updated on {{date}}",
+    "by": "By",
+    "format": "{{format}} format",
+    "fileFallback": "File",
+    "download": "Download {{title}}",
+    "seeMore": "See more",
+    "seeLess": "See less",
+    "tabs": {
+      "preview": "Preview",
+      "structure": "Data structure",
+      "metadata": "Metadata",
+      "downloads": "Downloads"
+    },
+    "preview": {
+      "loading": "Loading preview...",
+      "loadingStructure": "Loading structure...",
+      "unavailableRemote": "Preview not available for external files.",
+      "loadError": "Could not load the data for preview.",
+      "unavailable": "Preview not available for this resource.",
+      "structureUnavailable": "Data structure not available for this resource.",
+      "exploreTitle": "Explore the data in detail.",
+      "exploreDescription": "Use this tool to get an overview of the data, learn more about the different columns or apply filters and sorting.",
+      "exploreCta": "Explore the data",
+      "footer": "Preview last updated: {{date}} — {{cols}} columns — {{rows}} rows",
+      "limited": " (preview limited to {{count}} rows)"
+    },
+    "metadata": {
+      "url": "URL",
+      "stableUrl": "Stable URL",
+      "identifier": "Identifier",
+      "createdAt": "Created on",
+      "size": "Size",
+      "modifiedAt": "Modified on",
+      "type": "Type",
+      "mime": "MIME type",
+      "extras": "Extra resources"
+    },
+    "downloads": {
+      "originalFormat": "Original format",
+      "copyUrl": "Copy URL"
+    },
+    "types": {
+      "main": "Main files",
+      "file": "Main files",
+      "documentation": "Documentation"
+    },
+    "extrasKeys": {
+      "check_id": "check:id",
+      "check_available": "check:available",
+      "check_status": "check:status",
+      "check_timeout": "check:timeout",
+      "check_date": "check:date",
+      "check_headers_content-type": "check:headers:content-type",
+      "check_headers_content-length": "check:headers:content-length",
+      "analysis_check_id": "analysis:check_id",
+      "analysis_content-length": "analysis:content-length",
+      "analysis_checksum": "analysis:checksum",
+      "analysis_mime-type": "analysis:mime-type",
+      "analysis_last-modified-at": "analysis:last-modified-at",
+      "analysis_last-modified-detection": "analysis:last-modified-detection",
+      "analysis_parsing_started_at": "analysis:parsing:started_at",
+      "analysis_parsing_finished_at": "analysis:parsing:finished_at",
+      "analysis_parsing_error": "analysis:parsing:error",
+      "analysis_parsing_parsing_table": "analysis:parsing:parsing_table"
+    },
+    "extrasValues": {
+      "true": "true",
+      "false": "false",
+      "empty": "—"
+    }
+  }
+}

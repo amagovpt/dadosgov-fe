@@ -12,7 +12,7 @@ test.describe("Backoffice - Posts CRUD", () => {
   test("PT-01: System posts listing renders with the Artigos heading", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/posts");
+    await page.goto("/admin/system/posts");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -23,7 +23,7 @@ test.describe("Backoffice - Posts CRUD", () => {
   test("PT-02: 'Criar um artigo' affordance is exposed to the admin", async ({
     page,
   }) => {
-    await page.goto("/pages/admin/system/posts");
+    await page.goto("/admin/system/posts");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -32,7 +32,7 @@ test.describe("Backoffice - Posts CRUD", () => {
   });
 
   test("PT-03: Listing exposes search affordance", async ({ page }) => {
-    await page.goto("/pages/admin/system/posts");
+    await page.goto("/admin/system/posts");
     await page.waitForLoadState("networkidle");
     await page.waitForTimeout(2000);
 
@@ -54,7 +54,7 @@ test.describe("Backoffice - Posts CRUD", () => {
     // Destructive — needs a disposable test database.
   });
 
-  test.skip("PT-07: Article appears on /pages/posts after publish", async () => {
+  test.skip("PT-07: Article appears on /posts after publish", async () => {
     // Requires a publish + cleanup cycle.
   });
 });

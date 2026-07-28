@@ -1,13 +1,7 @@
 ﻿"use client";
 
 import React, { useState } from "react";
-import {
-  Icon,
-  ToggleGroup,
-  Toggle,
-  CardNoResults,
-  usePopupContext,
-} from "@ama-pt/agora-design-system";
+import { ToggleGroup, Toggle, usePopupContext } from "@ama-pt/agora-design-system";
 import { deleteDataset } from "@/service/api/datasets";
 import { Pagination } from "@/components/Pagination";
 import { DatasetsFilters } from "@/components/datasets/DatasetsFilters";
@@ -22,10 +16,13 @@ import PublishDropdown from "@/components/admin/PublishDropdown";
 import Button from "../Primitives/Button";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
-import { DATASET_SORT_LABELS } from "@/utils/datasetsListingQuery";
 import { useDatasetsListing } from "@/hooks/useDatasetsListing";
 import { twJoin } from "tailwind-merge";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
+import { useTranslation } from "react-i18next";
+import FoNoResults from "../common/FoNoResults";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { FrontOfficePage } from "@/service/types/shared/common";
 
 interface DatasetsClientProps {
   initialData: APIResponse<Dataset>;
@@ -35,6 +32,8 @@ interface DatasetsClientProps {
   allLicenses?: License[];
   allFrequencies?: Frequency[];
   allGranularities?: Granularity[];
+  /** Optional: the CMS is the source of truth, the `datasets` namespace is the fallback. */
+  pageContent?: FrontOfficePage;
 }
 
 export default function DatasetsClient({
@@ -45,7 +44,19 @@ export default function DatasetsClient({
   allLicenses = [],
   allFrequencies = [],
   allGranularities = [],
+  pageContent,
 }: DatasetsClientProps) {
+  const { t, i18n } = useTranslation("common");
+  const { t: tds } = useTranslation("datasets");
+  const { language } = i18n;
+
+  const DATASET_SORT_LABELS: Record<string, string> = {
+    relevancia: tds("sort.relevancia"),
+    criacao: tds("sort.criacao"),
+    antigo: tds("sort.antigo"),
+    subscritores: tds("sort.subscritores"),
+  };
+
   const { show, hide } = usePopupContext();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -68,12 +79,12 @@ export default function DatasetsClient({
     show(
       <div className="flex flex-col gap-16">
         <p>
-          Essa ação é irreversível.{" "}
-          <span className="text-red-600">Tem a certeza que quer eliminar este conjunto de dados?</span>
+          {tds("delete.irreversible")}{" "}
+          <span className="text-red-600">{tds("delete.confirmation")}</span>
         </p>
         <div className="flex justify-end gap-16 pt-16">
           <Button appearance="outline" variant="neutral" onClick={hide}>
-            Cancelar
+            {t("cancel")}
           </Button>
           <Button
             variant="danger"
@@ -89,28 +100,22 @@ export default function DatasetsClient({
               }
             }}
           >
-            Eliminar
+            {tds("delete.delete")}
           </Button>
         </div>
       </div>,
-      { title: "Elimine o conjunto de dados", closeAriaLabel: "Fechar", dimensions: "m" }
+      { title: tds("delete.modal"), closeAriaLabel: t("close"), dimensions: "m" }
     );
   };
 
   return (
-    <main className="w-full flex flex-col justify-center items-center bg-primary-50 gap-32">
+    <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        title="Conjuntos de dados"
-        breadcrumbItems={[
-          { label: "Home", url: "/" },
-          { label: "Conjuntos de dados", url: "/pages/datasets" },
-        ]}
+        title={pageContent?.hero?.title ?? tds("hero.title")}
         subtitle={
-          <p className="text-primary-100 max-w-[592px]">
-            {total === 0
-              ? "Não existem resultados disponíveis para a sua pesquisa"
-              : `Pesquise através de ${total.toLocaleString("pt-PT")} conjuntos de dados em dados.gov.pt`}
-          </p>
+          formatHtmlParagraphs(
+            pageContent?.hero?.description ?? tds("hero.subtitle")
+          ) as string[]
         }
       >
         <PublishDropdown darkMode={true} outline={false} />
@@ -119,38 +124,38 @@ export default function DatasetsClient({
       {/* Search Filter */}
       <SearchFilter
         id="datasets-search"
-        placeholder="Pesquisar por conjuntos de dados..."
+        placeholder={pageContent?.search?.placeholder ?? tds("search.placeholder")}
         value={searchQuery}
         onChange={setSearchQuery}
         onSearch={handleSearch}
       />
       {/* Main Content */}
-      <div className="container flex flex-col gap-24 justify-center items-center py-32">
+      <div className="container flex flex-col items-center justify-center gap-24 py-32">
         {/* Results count + Sort toggles */}
-        <div className="w-full flex xl:flex-row flex-col gap-16">
-          <div className="w-full flex flex-row items-end gap-32 ">
+        <div className="flex w-full flex-col gap-16 xl:flex-row">
+          <div className="flex w-full flex-row items-end gap-32">
             <Button
               appearance="outline"
               variant="neutral"
               hasIcon
               {...(filtersOpen
                 ? {
-                  leadingIcon: "agora-line-chevron-left",
-                  leadingIconHover: "agora-solid-chevron-left",
-                }
+                    leadingIcon: "agora-line-chevron-left",
+                    leadingIconHover: "agora-solid-chevron-left",
+                  }
                 : {
-                  trailingIcon: "agora-line-chevron-right",
-                  trailingIconHover: "agora-solid-chevron-right",
-                })}
+                    trailingIcon: "agora-line-chevron-right",
+                    trailingIconHover: "agora-solid-chevron-right",
+                  })}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
-              {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
+              {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
-            <span className="text-neutral-900 text-l-regular whitespace-nowrap">
-              {total.toLocaleString("pt-PT")} Resultados
+            <span className="whitespace-nowrap text-l-regular text-neutral-900">
+              {t("results", { count: total })}
             </span>
           </div>
-          <div className="w-full flex items-center xl:justify-end ">
+          <div className="flex w-full items-center xl:justify-end">
             <ToggleGroup
               multiple={false}
               value={sortDefault}
@@ -162,20 +167,18 @@ export default function DatasetsClient({
               }}
             >
               {Object.entries(DATASET_SORT_LABELS).map(([key, label]) => (
-                <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
+                <Toggle key={key} value={key} aria-label={tds("sort.ariaLabel", { label })}>
                   {label}
                 </Toggle>
               ))}
             </ToggleGroup>
           </div>
         </div>
-        <div className="w-full divider-neutral-200 mb-24" />
-        <div
-          className={twJoin("grid gap-32 w-full", filtersOpen ? "grid-cols-12" : "")}
-        >
+        <div className="divider-neutral-200 mb-24 w-full" />
+        <div className={twJoin("grid w-full gap-32", filtersOpen ? "grid-cols-12" : "")}>
           {/* Sidebar */}
           {filtersOpen && (
-            <div className="col-span-4 ">
+            <div className="col-span-4">
               <DatasetsFilters
                 filterCounts={filterCounts}
                 allOrganizations={allOrganizations}
@@ -190,54 +193,49 @@ export default function DatasetsClient({
           <div className={filtersOpen ? "col-span-8" : "col-span-full"}>
             <div>
               <div
-                className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3")}
+                className={twJoin(
+                  "grid gap-32",
+                  filtersOpen
+                    ? "grid-cols-1 lg:grid-cols-2"
+                    : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+                )}
               >
                 {listData.error ? (
                   <ListingErrorBanner
-                    entity="os conjuntos de dados"
+                    entity={tds("theDatasets")}
                     errorStatus={listData.errorStatus}
                   />
                 ) : datasets.length > 0 ? (
                   datasets.map((dataset) => {
-                    const timeAgo = formatDateToTimeAgo(dataset.last_modified);
+                    const timeAgo = formatDateToTimeAgo(
+                      dataset.last_modified || dataset.created_at,
+                      language as "pt" | "en"
+                    );
                     const cardProps = {
                       ...dataset,
                       last_modified: timeAgo,
-                      link: `/pages/datasets/${dataset.slug}`
+                      link: `/datasets/${dataset.slug}`,
                     } as CardMetricsProps;
-                    return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />
+                    return <CardMetrics key={`dataset-${dataset.slug}`} {...cardProps} />;
                   })
                 ) : (
                   <div className="col-span-full">
-                    <CardNoResults
-                      icon={
-                        <Icon
-                          name="agora-line-search"
-                          className="w-12 h-12 text-primary-500 icon-xl"
-                        />
-                      }
-                      title="Não encontrámos o que procura"
-                      subtitle={
-                        <span className="font-bold">A sua pesquisa não devolveu resultados.</span>
-                      }
+                    <FoNoResults
+                      icon={pageContent?.noResults?.icon ?? "agora-line-search"}
+                      title={pageContent?.noResults?.title ?? tds("noResults.title")}
+                      subtitle={pageContent?.noResults?.subtitle ?? tds("noResults.subtitle")}
                       description={
-                        <div className="max-w-[592px] mx-auto">
-                          Verifique os termos introduzidos ou ajuste os filtros para ver mais
-                          resultados.
-                        </div>
+                        pageContent?.noResults?.description ?? tds("noResults.description")
                       }
-                      position="center"
-                      hasAnchor={false}
                     />
                   </div>
                 )}
               </div>
-
             </div>
           </div>
         </div>
         {/* Pagination */}
-        <div className="w-1/2 flex justify-center">
+        <div className="flex w-1/2 justify-center">
           <Pagination
             currentPage={activePage}
             totalItems={total}

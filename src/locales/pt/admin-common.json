@@ -1,0 +1,183 @@
+{
+  "loading": "A carregar...",
+  "results_one": "{{formattedCount}} resultado",
+  "results_other": "{{formattedCount}} resultados",
+  "search": {
+    "label": "Pesquisar"
+  },
+  "breadcrumbs": {
+    "administration": "Administração",
+    "system": "Sistema",
+    "organization": "Organização"
+  },
+  "filters": {
+    "all": "Todos",
+    "statusPlaceholder": "Filtrar por estado"
+  },
+  "stepper": {
+    "step": "Passo",
+    "of": "de"
+  },
+  "actions": {
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "A guardar..."
+  },
+  "header": {
+    "search": "Pesquisar",
+    "adminOptions": "Barra de opções do administrador",
+    "profile": "O meu perfil",
+    "notifications": "Notificações",
+    "deleteAccount": "Eliminar conta",
+    "logout": "Terminar sessão"
+  },
+  "deleteAccount": {
+    "title": "Tem a certeza que deseja eliminar esta conta?",
+    "closeAriaLabel": "Fechar",
+    "irreversible": "Esta ação é irreversível.",
+    "contentRemains": "Todo o conteúdo publicado em seu nome permanecerá online, nos mesmos URLs, mas de forma anónima, ou seja, sem estar associado a um produtor de dados.",
+    "deletePublishedContentFirst": "Se também pretender eliminar o conteúdo que publicou, apague-o antes de eliminar a conta."
+  },
+  "auxiliary": {
+    "title": "Auxiliar"
+  },
+  "emptyState": {
+    "title": "Sem publicações",
+    "description": "Ainda não publicou uma API.",
+    "create": "Publique no portal"
+  },
+  "forms": {
+    "requiredField": "Campo obrigatório",
+    "producerTitle": "Produtor",
+    "producerLabel": "Verifique a identidade que deseja usar na publicação.",
+    "producerPlaceholder": "Para pesquisar...",
+    "noOrganizationTitle": "Não pertence a nenhuma organização.",
+    "organizationLink": "Crie ou integre uma organização em dados.gov.pt",
+    "imageUpload": {
+      "coverImage": "Imagem de capa",
+      "files": "Ficheiros",
+      "dragAndDrop": "Arraste e largue o ficheiro aqui",
+      "selectOrDrag": "Selecione ou arraste o ficheiro",
+      "selectedFile": "ficheiro selecionado",
+      "removeFile": "Remover ficheiro",
+      "replaceFile": "Substituir ficheiro",
+      "extensionsInstructions": "Tamanho máximo: 4 MB. Formatos aceites: JPG, JPEG, PNG.",
+      "maxSizeExceeded": "O ficheiro excede o tamanho máximo de 4 MB.",
+      "forbiddenExtension": "Formato de ficheiro não permitido."
+    },
+    "keywords": {
+      "label": "Palavras-chave",
+      "placeholder": "Pesquise ou insira palavras-chave...",
+      "searchPlaceholder": "Escreva para pesquisar ou criar...",
+      "noResults": "Nenhum resultado encontrado",
+      "remove": "Remover {{keyword}}"
+    }
+  },
+  "status": {
+    "deleted": "Excluído",
+    "archived": "Arquivado",
+    "draft": "Rascunho",
+    "public": "Público"
+  },
+  "danger": {
+    "irreversible": "Atenção esta ação é irreversível."
+  },
+  "pagination": {
+    "itemsPerPage": "Linhas por página",
+    "selectItemsPerPage": "Selecionar linhas por página",
+    "itemsPerPageOptions": "Opções de linhas por página",
+    "previous": "Página anterior",
+    "next": "Próxima página"
+  },
+  "recipient": {
+    "minChars": "Escreva pelo menos {{count}} caracteres para procurar...",
+    "searching": "A pesquisar...",
+    "noResults": "Nenhum utilizador ou organização encontrado",
+    "searchPlaceholder": "Escreva para procurar...",
+    "usersSection": "Utilizadores",
+    "organizationsSection": "Organizações"
+  },
+  "publish": {
+    "buttonPrefix": "Publicar",
+    "items": {
+      "dataset": "Um conjunto de dados",
+      "api": "Uma API",
+      "reuse": "Uma reutilização",
+      "harvester": "Um harvester",
+      "organization": "Uma organização"
+    }
+  },
+  "feedback": {
+    "publicationProcess": "Dê-nos o seu feedback sobre o processo de publicação"
+  },
+  "fileUpload": {
+    "or": "ou",
+    "url": {
+      "label": "Link exato para o ficheiro",
+      "invalid": "Insira um URL válido, começando com https://"
+    },
+    "actions": {
+      "add": "Adicionar",
+      "confirm": "Confirmar",
+      "edit": "Editar",
+      "replaceFile": "Substituir o ficheiro",
+      "deleteFile": "Eliminar ficheiro",
+      "viewDetails": "Ver detalhes",
+      "viewNamed": "Ver {{name}}",
+      "editNamed": "Editar {{name}}",
+      "deleteNamed": "Eliminar {{name}}"
+    },
+    "files": {
+      "label": "Ficheiros",
+      "dragAndDrop": "Arraste e largue os ficheiros aqui",
+      "selectOrDrag": "Selecione ou arraste os ficheiros",
+      "selectedFiles": "ficheiros selecionados",
+      "removeFile": "Remover ficheiro",
+      "replaceFile": "Substituir ficheiro",
+      "maxSizeExceeded": "O ficheiro excede o tamanho máximo permitido.",
+      "forbiddenExtension": "Formato de ficheiro não permitido.",
+      "securityError": "O ficheiro contém código malicioso ou scripts não autorizados que comprometem a segurança do sistema.",
+      "invalidSingle": "Tipo de ficheiro inválido. \"{{name}}\" não foi adicionado.",
+      "invalidMultiple": "Tipo de ficheiro inválido. Os seguintes ficheiros não foram adicionados: {{names}}"
+    },
+    "table": {
+      "fileName": "Nome do ficheiro",
+      "type": "Tipo",
+      "format": "Formato",
+      "size": "Tamanho",
+      "action": "Ação"
+    },
+    "deleteConfirm": {
+      "message": {
+        "before": "Tem a certeza que pretende eliminar ",
+        "after": "?"
+      }
+    },
+    "resourceEdit": {
+      "titleLabel": "Título *",
+      "titlePlaceholder": "Título do recurso",
+      "typeLabel": "Tipo *",
+      "typePlaceholder": "Selecione um tipo...",
+      "descriptionLabel": "Descrição",
+      "descriptionPlaceholder": "Descrição do recurso",
+      "urlLabel": "URL *",
+      "sizeLabel": "Tamanho",
+      "sizePlaceholder": "Tamanho em bytes",
+      "formatLabel": "Formato",
+      "formatPlaceholder": "csv, json, xlsx...",
+      "mimeTypeLabel": "Mime Type",
+      "mimeTypePlaceholder": "application/json, text/csv..."
+    },
+    "resourceView": {
+      "locationLabel": "Localização",
+      "location": {
+        "external": "Este recurso é um link externo",
+        "internal": "Este recurso encontra-se nos nossos servidores"
+      }
+    },
+    "popup": {
+      "close": "Fechar"
+    }
+  }
+}

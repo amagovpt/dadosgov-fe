@@ -13,6 +13,16 @@ export interface HarvestItem {
   errors: HarvestError[];
 }
 
+export interface HarvestJobItemCounts {
+  pending: number;
+  started: number;
+  done: number;
+  failed: number;
+  skipped: number;
+  archived: number;
+  total: number;
+}
+
 export interface HarvestJob {
   id: string;
   status: "pending" | "initializing" | "initialized" | "started" | "processing" | "done" | "done-errors" | "failed";
@@ -20,7 +30,12 @@ export interface HarvestJob {
   started: string | null;
   ended: string | null;
   errors: Record<string, unknown>[];
-  items: HarvestItem[];
+  // Present on the job detail endpoint (/job/<id>/). The jobs list omits it and
+  // returns `item_counts` + `error_items` instead to keep the payload small.
+  items?: HarvestItem[];
+  // Present on the jobs list endpoint: per-status counts + only the failed items.
+  item_counts?: HarvestJobItemCounts;
+  error_items?: HarvestItem[];
   source: string;
 }
 
@@ -56,6 +71,15 @@ export interface HarvestPreviewJob {
   source: string;
 }
 
+export interface HarvestSourcePermissions {
+  edit: boolean;
+  delete: boolean;
+  run: boolean;
+  preview: boolean;
+  validate: boolean;
+  schedule: boolean;
+}
+
 export interface HarvestSource {
   id: string;
   name: string;
@@ -74,6 +98,8 @@ export interface HarvestSource {
   last_modified: string;
   last_job: HarvestJob | null;
   datasets_count: number;
+  // Backend-computed authorization for the current user (single source of truth).
+  permissions?: HarvestSourcePermissions;
 }
 
 export interface HarvestSourceCreatePayload {

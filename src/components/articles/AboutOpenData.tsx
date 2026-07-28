@@ -12,11 +12,6 @@ const AboutOpenData = ({ initialContent }: { initialContent?: string }) => {
     <GitHubArticlePage
       slug="pages/faqs/about_opendata"
       initialContent={processedContent}
-      breadcrumbItems={[
-        { label: "Home", url: "/" },
-        { label: "Conhecimento", url: "#" },
-        { label: "Sobre dados abertos", url: "/pages/about-open-data" },
-      ]}
     />
   );
 };

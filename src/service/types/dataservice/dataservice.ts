@@ -1,6 +1,24 @@
 import type { Organization, UserRef } from '@/service/types/identity';
 import type { Metric } from '@/service/types/shared';
-import type { DatasetRef } from '@/service/types/dataset';
+
+/**
+ * Access audience entry for restricted dataservices.
+ * `role` mirrors the backend AccessAudienceType
+ * (local_authority_and_administration | company_and_association | private)
+ * and `condition` the AccessAudienceCondition (yes | no | under_condition).
+ */
+
+export interface DataservicePermissions {
+  edit: boolean;
+  delete: boolean;
+  read: boolean;
+}
+
+
+export interface AccessAudience {
+  role: string;
+  condition: string;
+}
 
 export interface Dataservice {
   id: string;
@@ -18,19 +36,29 @@ export interface Dataservice {
   availability: number | null;
   availability_url: string | null;
   access_type: string | null;
+  access_audiences?: AccessAudience[];
+  access_type_reason_category?: string | null;
+  access_type_reason?: string | null;
   format: string | null;
   license: string | null;
   organization: Organization | null;
   owner: UserRef | null;
   created_at: string;
   last_modified: string;
-  archived: string | null;
-  deleted: string | null;
+  // The list endpoint serialises the modification timestamp as
+  // metadata_modified_at; last_modified may be absent there.
+  metadata_modified_at?: string | null;
+  archived_at: string | null;
+  deleted_at: string | null;
   metrics: Metric;
   tags: string[];
   private: boolean;
   featured: boolean;
-  datasets: DatasetRef[];
+  // Serialized by the API as a paginated subsection reference (not an array):
+  // { rel, href, total, type }. Use `datasets.total` for the count.
+  datasets: { rel: string; href: string; total: number; type: string };
+  // Backend-computed authorization for the current user (single source of truth).
+  permissions?: DataservicePermissions;
 }
 
 export interface DataserviceCreatePayload {
@@ -43,8 +71,12 @@ export interface DataserviceCreatePayload {
   business_documentation_url?: string;
   authorization_request_url?: string;
   rate_limiting?: string;
+  rate_limiting_url?: string;
   availability?: number;
   access_type?: string;
+  access_audiences?: AccessAudience[];
+  access_type_reason_category?: string;
+  access_type_reason?: string;
   format?: string;
   license?: string;
   tags?: string[];
@@ -63,14 +95,18 @@ export interface DataserviceUpdatePayload {
   business_documentation_url?: string;
   authorization_request_url?: string;
   rate_limiting?: string;
+  rate_limiting_url?: string;
   availability?: number;
   access_type?: string;
+  access_audiences?: AccessAudience[];
+  access_type_reason_category?: string;
+  access_type_reason?: string;
   format?: string;
   license?: string;
   tags?: string[];
   organization?: string;
   private?: boolean;
-  archived?: string;
+  archived_at?: string | null;
   datasets?: string[];
 }
 

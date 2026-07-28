@@ -6,7 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   CardLinks,
   CardNoResults,
@@ -18,6 +17,7 @@ import {
   TableRow,
   TableCell,
 } from "@ama-pt/agora-design-system";
+import BreadcrumbDynamic from "@/components/Shared/BreadcrumbDynamic";
 import { Dataset } from "@/service/types/dataset";
 import { Follow, UserFollowing, UserPublic } from "@/service/types/identity";
 import { Reuse } from "@/service/types/reuse";
@@ -29,14 +29,26 @@ import { format, formatDistanceToNow } from "date-fns";
 import StatusDot from "@/components/admin/StatusDot";
 import { pt } from "date-fns/locale";
 import AppIcon from "../Primitives/AppIcon";
+import CardMetrics from "@/components/Primitives/Cards/CardMetrics";
+import { formatDateToTimeAgo, formatDateLong } from "@/utils/formatDate";
 import { createPaginationProps } from "@/utils/createPaginationProps";
+import { useTranslation } from "react-i18next";
 
 export default function PublicProfileClient() {
-  const { user } = useAuth();
+  const { i18n } = useTranslation("common");
+  const { user, isLoading: isAuthLoading } = useAuth();
   const params = useParams();
   const router = useRouter();
   const slug = params?.slug as string;
   const isOwnProfile = user?.slug === slug;
+
+  // User profile endpoints now require authentication (LEDG-2113 / VULN-2092).
+  // Gate anonymous visitors to login, preserving the profile as the return URL.
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push(`/login?next=${encodeURIComponent(`/users/${slug}`)}`);
+    }
+  }, [isAuthLoading, user, slug, router]);
 
   const [profileUser, setProfileUser] = useState<UserPublic | null>(null);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
@@ -54,6 +66,9 @@ export default function PublicProfileClient() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
+    // Wait for auth to resolve; anonymous visitors are redirected to login by
+    // the gate effect above, so don't attempt the (now authenticated) fetches.
+    if (isAuthLoading || !user) return;
     async function loadData() {
       try {
         if (isOwnProfile) {
@@ -83,7 +98,7 @@ export default function PublicProfileClient() {
       }
     }
     loadData();
-  }, [slug, isOwnProfile, user]);
+  }, [slug, isOwnProfile, user, isAuthLoading]);
 
   const displayUser = isOwnProfile ? user : profileUser;
 
@@ -160,14 +175,6 @@ export default function PublicProfileClient() {
     setCurrentPage(1);
   };
 
-  const formatDate = (dateStr: string) => {
-    try {
-      return format(new Date(dateStr), "d 'de' MMMM 'de' yyyy", { locale: pt });
-    } catch {
-      return dateStr;
-    }
-  };
-
   const formatShortDate = (dateStr: string) => {
     try {
       return format(new Date(dateStr), "dd/MM/yyyy");
@@ -186,12 +193,7 @@ export default function PublicProfileClient() {
   return (
     <div className="container mx-auto mb-64">
       <div className="pb-64">
-        <Breadcrumb
-          items={[
-            { label: "Início", url: "/" },
-            { label: userName || "Perfil", url: "#" },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} currentLabel={userName || "Perfil"} />
       </div>
 
       <h1 className="text-2xl-bold text-brand-blue-secondary mt-64 mb-32 max-w-[696px]">Perfil</h1>
@@ -272,7 +274,7 @@ export default function PublicProfileClient() {
                 hasIcon={true}
                 leadingIcon="agora-line-edit"
                 leadingIconHover="agora-solid-edit"
-                onClick={() => router.push("/pages/admin/me/profile")}
+                onClick={() => router.push("/admin/me/profile")}
               >
                 Editar o meu perfil
               </Button>
@@ -297,12 +299,12 @@ export default function PublicProfileClient() {
             {displayUser.organizations.length === 1 ? "Organização" : "Organizações"}
           </h2>
 
-          <div className="grid grid-cols-2 agora-card-links-datasets-px0 profile-org-cards gap-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
             {displayUser.organizations.map((org) => (
               <div key={org.id} className="h-full">
                 <CardLinks
                   onClick={() =>
-                    (window.location.href = `/pages/organizations/${org.slug}`)
+                    (window.location.href = `/organizations/${org.slug}`)
                   }
                   className="cursor-pointer text-neutral-900"
                   variant="transparent"
@@ -396,7 +398,7 @@ export default function PublicProfileClient() {
                     },
                   ]}
                   mainLink={
-                    <Link href={`/pages/organizations/${org.slug}`}>
+                    <Link href={`/organizations/${org.slug}`}>
                       <span className="underline">{org.name}</span>
                     </Link>
                   }
@@ -544,8 +546,7 @@ export default function PublicProfileClient() {
               setCurrentPage,
               setItemsPerPage,
               {
-                currentPageIsZeroBased: true,
-                onPageChange: (page) => handlePageChange(page),
+                onPageChange: (page) => handlePageChange(page + 1),
                 onPageSizeChange: (size) => handleItemsPerPageChange(String(size)),
               }
             )}
@@ -595,7 +596,7 @@ export default function PublicProfileClient() {
                     {formatShortDate(dataset.last_modified || dataset.created_at)}
                   </TableCell>
                   <TableCell headerLabel="">
-                    <a href={`/pages/datasets/${dataset.slug}`}>
+                    <a href={`/datasets/${dataset.slug}`}>
                       <AppIcon name="agora-line-eye" />
                     </a>
                   </TableCell>
@@ -627,7 +628,7 @@ export default function PublicProfileClient() {
             {reuses.map((reuse) => (
               <div key={reuse.id} className="h-full">
                 <CardLinks
-                  onClick={() => (window.location.href = `/pages/reuses/${reuse.slug}`)}
+                  onClick={() => (window.location.href = `/reuses/${reuse.slug}`)}
                   className="cursor-pointer text-neutral-900"
                   variant="transparent"
                   image={{
@@ -645,7 +646,11 @@ export default function PublicProfileClient() {
                   }
                   date={
                     <span className="font-[300]">
-                      Atualizado {formatDate(reuse.last_modified || reuse.created_at)}
+                      Atualizado{" "}
+                      {formatDateLong(
+                        reuse.last_modified || reuse.created_at,
+                        i18n.language as "pt" | "en"
+                      )}
                     </span>
                   }
                   links={[
@@ -677,7 +682,7 @@ export default function PublicProfileClient() {
                     },
                   ]}
                   mainLink={
-                    <Link href={`/pages/reuses/${reuse.slug}`}>
+                    <Link href={`/reuses/${reuse.slug}`}>
                       <span className="underline">{reuse.title}</span>
                     </Link>
                   }

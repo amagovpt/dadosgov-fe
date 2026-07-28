@@ -1,12 +1,12 @@
 import { test, expect, type Page } from "playwright/test";
 
-const DATASETS_URL = "/pages/datasets";
+const DATASETS_URL = "/datasets";
 
 async function gotoFirstDatasetDetail(page: Page) {
   await page.goto(DATASETS_URL);
   await page.waitForLoadState("networkidle");
 
-  const firstLink = page.locator("a[href^='/pages/datasets/']").first();
+  const firstLink = page.locator("a[href^='/datasets/']").first();
   await expect(firstLink).toBeVisible({ timeout: 15000 });
   const href = await firstLink.getAttribute("href");
   if (!href) throw new Error("No dataset link found on listing");
@@ -81,7 +81,7 @@ test.describe("Dataset Detail", () => {
     page,
   }) => {
     const orgLink = page
-      .locator("a[href^='/pages/organizations/']")
+      .locator("a[href^='/organizations/']")
       .first();
     await expect(orgLink).toBeVisible({ timeout: 10000 });
   });

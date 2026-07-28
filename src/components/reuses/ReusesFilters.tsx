@@ -19,18 +19,7 @@ import {
   toggleSelection,
   writeQueryParamValues,
 } from "@/utils/filterUtils";
-
-const REUSE_TOGGLE_FILTERS = {
-  atualizacao: {
-    title: "Data da atualização",
-    options: [
-      { id: "all", label: "Todos" },
-      { id: "30_days", label: "Os últimos 30 dias" },
-      { id: "12_months", label: "Os últimos 12 meses" },
-      { id: "3_years", label: "Os últimos 3 anos" },
-    ],
-  },
-};
+import { useTranslation } from "react-i18next";
 
 const DATE_RANGE_MAP: Record<string, () => string> = {
   "30_days": () => {
@@ -60,7 +49,7 @@ function detectAtualizacaoFromParams(params: URLSearchParams): string {
   return "all";
 }
 
-type ReuseFilterKey = keyof typeof REUSE_TOGGLE_FILTERS;
+type ReuseFilterKey = "atualizacao";
 
 interface ReusesFiltersProps {
   filterCounts?: Record<string, number>;
@@ -73,6 +62,22 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
   const paramsRef = useRef(queryString);
+  const { t } = useTranslation("common");
+
+  const REUSE_TOGGLE_FILTERS = useMemo(
+    () => ({
+      atualizacao: {
+        title: t("filters.update.label"),
+        options: [
+          { id: "all", label: t("filters.all") },
+          { id: "30_days", label: t("filters.update.options.30_days") },
+          { id: "12_months", label: t("filters.update.options.12_months") },
+          { id: "3_years", label: t("filters.update.options.3_years") },
+        ],
+      },
+    }),
+    [t]
+  );
 
   const [filterTagOptions, setFilterTagOptions] = useState<{ id: string; name: string }[]>([]);
   const [filterSearchQueries, setFilterSearchQueries] = useState<Record<string, string>>({});
@@ -154,9 +159,9 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
   const handleFilterSearchChange = useCallback(
     (groupName: string, value: string) => {
       setFilterSearchQueries((prev) => ({ ...prev, [groupName]: value }));
-      if (groupName === "Palavras-chave") handleTagSearch(value);
+      if (groupName === t("filters.advanced.tag")) handleTagSearch(value);
     },
-    [handleTagSearch]
+    [handleTagSearch, t]
   );
 
   const getActiveValues = useCallback(
@@ -182,31 +187,31 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
         })),
       },
     ],
-    [filterCounts]
+    [filterCounts, REUSE_TOGGLE_FILTERS]
   );
 
   const advancedFilterGroups = useMemo<AdvancedFilterGroup[]>(
     () => [
       {
-        name: "Organizações",
+        name: t("filters.advanced.organization"),
         param: "organization",
         data: allOrganizations.map((organization) => ({ id: organization.id, name: organization.name })),
         searchable: true,
-        searchPlaceholder: "Pesquisar",
-        emptyMessage: "Sem resultados",
+        searchPlaceholder: t("search.label"),
+        emptyMessage: t("filters.advanced.search.noResults"),
       },
       {
-        name: "Palavras-chave",
+        name: t("filters.advanced.tag"),
         param: "tag",
         data: filterTagOptions,
         searchable: true,
         suggest: true,
-        searchPlaceholder: "Escreva para pesquisar...",
-        minCharsMessage: "Escreva pelo menos 2 caracteres...",
-        emptyMessage: "Sem resultados",
+        searchPlaceholder: t("filters.advanced.search.placeholder"),
+        minCharsMessage: t("filters.advanced.search.minCharsMessage"),
+        emptyMessage: t("filters.advanced.search.noResults"),
       },
     ],
-    [allOrganizations, filterTagOptions]
+    [allOrganizations, filterTagOptions, t]
   );
 
   return (
@@ -219,7 +224,7 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
       />
 
       <h2 className="font-bold text-xl text-neutral-900 mt-[36px] mb-32">
-        Filtros avançados
+        {t("filters.advanced.label")}
       </h2>
 
       <AdvancedFiltersSidebar
@@ -239,10 +244,10 @@ export function ReusesFilters({ filterCounts = {}, allOrganizations = [] }: Reus
           appearance="outline"
           onClick={() => {
             paramsRef.current = "";
-            router.replace("/pages/reuses", { scroll: false });
+            router.replace("/reuses", { scroll: false });
           }}
         >
-          Limpar filtros
+          {t("filters.clear")}
         </Button>
       </div>
     </div>

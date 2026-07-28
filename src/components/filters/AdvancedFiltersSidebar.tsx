@@ -1,6 +1,7 @@
 "use client";
 
 import { Sidebar, SidebarItem, Checkbox, InputSearch, Icon } from "@ama-pt/agora-design-system";
+import { useTranslation } from "react-i18next";
 
 export interface AdvancedFilterOption {
   id: string;
@@ -17,6 +18,12 @@ export interface AdvancedFilterGroup {
   minSearchChars?: number;
   minCharsMessage?: string;
   emptyMessage?: string;
+  /**
+   * Display labels for selected ids (`suggest` groups only). Lets a selected
+   * item keep its human-readable name once it drops out of the live
+   * suggestions list (e.g. after clearing the search input).
+   */
+  selectedLabels?: Record<string, string>;
 }
 
 interface AdvancedFiltersSidebarProps {
@@ -42,6 +49,8 @@ export function AdvancedFiltersSidebar({
   checkboxIdPrefix,
   isLoading = false,
 }: AdvancedFiltersSidebarProps) {
+  const { t } = useTranslation("common");
+
   return (
     <Sidebar variant="filter" className="font-bold">
       {groups.map((group) => {
@@ -52,18 +61,14 @@ export function AdvancedFiltersSidebar({
         const selectedItems: AdvancedFilterOption[] = group.suggest
           ? activeValues
               .filter((value) => !group.data.some((item) => item.id === value))
-              .map((value) => ({ id: value, name: value }))
+              .map((value) => ({ id: value, name: group.selectedLabels?.[value] ?? value }))
           : [];
 
         const uniqueData = Array.from(
           new Map([...selectedItems, ...group.data].map((item) => [item.id, item])).values()
         );
 
-        const normalize = (s: string) =>
-          s
-            .normalize("NFD")
-            .replace(/[̀-ͯ]/g, "")
-            .toLowerCase();
+        const normalize = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
         const filteredData = group.suggest
           ? uniqueData
           : uniqueData.filter((item) => normalize(item.name).includes(normalize(searchQuery)));
@@ -89,23 +94,23 @@ export function AdvancedFiltersSidebar({
               {showClearActions && onClearGroup && activeCount > 0 && (
                 <button
                   onClick={() => onClearGroup(group.param)}
-                  className="text-xs text-primary-500 hover:text-primary-700 underline mb-4 mt-4 cursor-pointer"
+                  className="text-xs mb-4 mt-4 cursor-pointer text-primary-500 underline hover:text-primary-700"
                 >
                   Limpar {group.name.toLowerCase()}
                 </button>
               )}
               {group.searchable && (
-                <div className="mb-4 mt-8 relative">
+                <div className="relative mb-4 mt-8">
                   <InputSearch
-                    label="Pesquisar"
+                    label={t("search.label")}
                     hideLabel
-                    placeholder={group.searchPlaceholder || "Pesquisar"}
+                    placeholder={group.searchPlaceholder || t("search.placeholder")}
                     value={searchQuery}
                     onChange={(event) => onSearchChange(group.name, event.target.value)}
                   />
                   <Icon
                     name="agora-solid-search"
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary-500 w-5 h-5 pointer-events-none"
+                    className="w-5 h-5 pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform text-primary-500"
                     aria-hidden="true"
                   />
                 </div>
@@ -129,12 +134,12 @@ export function AdvancedFiltersSidebar({
                 ) : group.suggest && searchQuery.length < minSearchChars ? (
                   activeCount > 0 ? null : (
                     <p className="text-sm text-neutral-900">
-                      {group.minCharsMessage || "Escreva pelo menos 2 caracteres..."}
+                      {group.minCharsMessage || t("search.minCharsMessage")}
                     </p>
                   )
                 ) : (
                   <p className="text-sm text-neutral-500">
-                    {group.emptyMessage || "Sem resultados"}
+                    {group.emptyMessage || t("search.noResults")}
                   </p>
                 )}
               </div>

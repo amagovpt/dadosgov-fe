@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Breadcrumb } from '@ama-pt/agora-design-system';
+import { Button } from '@ama-pt/agora-design-system';
+import BreadcrumbDynamic from '@/components/Shared/BreadcrumbDynamic';
 import { getMiniCourseBySlug } from '@/data/miniCoursesData';
 import Image from 'next/image';
 
@@ -25,14 +26,7 @@ export default function MiniCourseDetailClient({ slug }: Props) {
   return (
     <main className="flex justify-center items-center w-full bg-primary-100 py-64">
       <div className="container flex flex-col gap-64">
-        <Breadcrumb
-          items={[
-            { label: 'Home', url: '/' },
-            { label: 'Aprender', url: '/pages/learn/' },
-            { label: 'Minicursos', url: '/pages/learn/mini-courses/' },
-            { label: course.title, url: '#' },
-          ]}
-        />
+        <BreadcrumbDynamic darkMode={false} currentLabel={course.title} />
         <div className="flex">
           <div className="w-full flex flex-col gap-64">
             <h1 className="text-3xl-bold text-primary-600 ">
@@ -51,7 +45,7 @@ export default function MiniCourseDetailClient({ slug }: Props) {
                 trailingIcon="agora-line-arrow-right-circle"
                 trailingIconHover="agora-solid-arrow-right-circle"
                 onClick={() =>
-                  router.push(`/pages/learn/mini-courses/${slug}/objectives`)
+                  router.push(`/recursos/aprender/minicursos/${slug}/objectives`)
                 }
                 className="px-24 h-48"
               >

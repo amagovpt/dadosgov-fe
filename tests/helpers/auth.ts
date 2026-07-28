@@ -11,7 +11,7 @@ import { Page } from "playwright/test";
  * strict-mode duplicates.
  */
 async function performLogin(page: Page, email: string, password: string) {
-  await page.goto("/pages/login");
+  await page.goto("/login");
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(2000);
 

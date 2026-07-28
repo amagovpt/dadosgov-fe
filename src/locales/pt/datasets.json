@@ -1,0 +1,287 @@
+{
+  "theDatasets": "os conjuntos de dados",
+  "notFound": "Conjunto de dados não encontrado.",
+  "hero": {
+    "title":"Conjuntos de dados",
+    "subtitle": "Explore conjuntos de dados abertos de diversas origens, temas e em diferentes formatos, e utilize-os como base para novos estudos e insights."
+  },
+  "search": {
+    "placeholder": "Pesquisar conjuntos de dados..."
+  },
+  "noResults": {
+    "title": "Não encontrou nenhum conjunto de dados?",
+    "subtitle": "Tente redefinir os filtros para ampliar a sua pesquisa.",
+    "description": "Explore a nossa lista completa de conjuntos de dados abertos."
+  },
+  "sort": {
+    "ariaLabel": "Ordenar por {{label}}",
+    "relevancia": "Relevância",
+    "criacao": "Mais recente",
+    "antigo": "Mais antigo",
+    "subscritores": "Subscritores"
+  },
+  "delete": {
+    "delete": "Eliminar",
+    "irreversible": "Esta ação é irreversível.",
+    "confirmation": "Tem a certeza que quer eliminar este conjunto de dados?",
+    "modal": "Elimine o conjunto de dados"
+  },
+  "filters": {
+    "format": {
+      "label": "Formato dos recursos",
+      "options": {
+        "all": "Todos",
+        "tabular": "Tabular",
+        "structured": "Estruturado",
+        "geographic": "Geográfico",
+        "documents": "Documentos",
+        "other": "Outro"
+      }
+    },
+    "type": {
+      "label": "Tipo de dados",
+      "options": {
+        "all": "Todos",
+        "high_value": "Conjuntos de dados de Elevado Valor"
+      }
+    }
+  },
+  "detail": {
+    "draft": "Rascunho",
+    "archived": "Arquivado",
+    "addFavorite": "Adicionar aos favoritos",
+    "removeFavorite": "Remover dos favoritos",
+    "edit": "Editar",
+    "noAuthor": "Sem autor",
+    "authorAlt": "Autor",
+    "lastUpdate": "Última atualização:",
+    "license": "Licença:",
+    "contactForm": "Formulário de contacto",
+    "views": "Visualizações",
+    "downloads": "Downloads",
+    "quality": {
+      "title": "Qualidade dos metadados",
+      "expand": "Ver mais informação",
+      "collapse": "Fechar informação",
+      "missing": "{{label}} dos dados não preenchidos"
+    }
+  },
+  "contactRoles": {
+    "contact": "Contacto",
+    "creator": "Criador",
+    "publisher": "Publicador",
+    "rightsHolder": "Titular de Direitos",
+    "custodian": "Custódio",
+    "distributor": "Distribuidor",
+    "originator": "Originador",
+    "principalInvestigator": "Investigador Principal",
+    "processor": "Processador",
+    "resourceProvider": "Fornecedor de Recurso",
+    "user": "Utilizador"
+  },
+  "quality": {
+    "dataset_description_quality": "Descrição",
+    "has_resources": "Recursos",
+    "license": "Licença",
+    "update_frequency": "Frequência",
+    "temporal_coverage": "Cobertura temporal",
+    "spatial": "Cobertura espacial",
+    "has_open_format": "Formato aberto",
+    "resources_documentation": "Documentação",
+    "all_resources_available": "Recursos disponíveis"
+  },
+  "tabs": {
+    "files": "Ficheiros ({{count}})",
+    "reusesAndApis": "Reutilizações e APIs ({{count}})",
+    "discussions": "Discussões ({{count}})",
+    "communityResources": "Recursos comunitários ({{count}})",
+    "info": "Informação",
+    "apisCount_one": "{{count}} API",
+    "apisCount_other": "{{count}} APIS",
+    "reusesCount_one": "{{count}} REUTILIZAÇÃO",
+    "reusesCount_other": "{{count}} REUTILIZAÇÕES",
+    "communityCount_one": "{{count}} RECURSO COMUNITÁRIO",
+    "communityCount_other": "{{count}} RECURSOS COMUNITÁRIOS",
+    "noReuses": {
+      "title": "Sem reutilizações",
+      "description": "Ainda não existem reutilizações associadas a este conjunto de dados.",
+      "cta": "Adicione"
+    },
+    "noCommunity": {
+      "title": "Sem recursos comunitários",
+      "description": "Atualmente, não existem recursos comunitários disponíveis para este conjunto de dados.",
+      "cta": "Partilhe"
+    },
+    "communityDisclaimer": "Estes recursos são publicados pela comunidade e não são da responsabilidade do produtor dos dados."
+  },
+  "info": {
+    "title": "Informação",
+    "keywords": "Palavras-chave",
+    "identifier": "Identificador",
+    "license": "Licença",
+    "temporal": "Temporalidade",
+    "created": "Criação",
+    "frequency": "Frequência",
+    "lastUpdate": "Última atualização",
+    "spatial": "Cobertura espacial",
+    "zones": "Zonas",
+    "granularity": "Granularidade da cobertura territorial",
+    "extras": "Extras",
+    "harvest": "Harvest",
+    "unavailable": "Não disponível",
+    "copy": "Copiar",
+    "copied": "Copiado!"
+  },
+  "licenses": {
+    "cc-by": "Creative Commons Attribution",
+    "cc-by-sa": "Creative Commons Attribution Share-Alike",
+    "cc-zero": "Creative Commons Zero",
+    "fr-lo": "Licence Ouverte / Open Licence",
+    "odc-by": "Open Data Commons Attribution",
+    "odc-odbl": "Open Data Commons Open Database License",
+    "odc-pddl": "Open Data Commons Public Domain Dedication and License",
+    "notspecified": "Não especificada"
+  },
+  "frequency": {
+    "continuous": "Contínua",
+    "oneMinute": "A cada minuto",
+    "fiveMinutes": "A cada 5 minutos",
+    "tenMinutes": "A cada 10 minutos",
+    "fifteenMinutes": "A cada 15 minutos",
+    "thirtyMinutes": "A cada 30 minutos",
+    "hourly": "Horária",
+    "bihourly": "A cada 2 horas",
+    "trihourly": "A cada 3 horas",
+    "twelveHours": "A cada 12 horas",
+    "severalTimesADay": "Várias vezes ao dia",
+    "threeTimesADay": "3 vezes ao dia",
+    "semidaily": "Semidiária",
+    "daily": "Diária",
+    "fiveTimesAWeek": "5 vezes por semana",
+    "threeTimesAWeek": "3 vezes por semana",
+    "semiweekly": "Bissemanal",
+    "weekly": "Semanal",
+    "biweekly": "Quinzenal",
+    "threeTimesAMonth": "3 vezes por mês",
+    "semimonthly": "Bimensal",
+    "monthly": "Mensal",
+    "bimonthly": "Bimestral",
+    "quarterly": "Trimestral",
+    "threeTimesAYear": "3 vezes por ano",
+    "semiannual": "Semestral",
+    "annual": "Anual",
+    "biennial": "Bienal",
+    "triennial": "Trienal",
+    "quadrennial": "Quadrienal",
+    "quinquennial": "Quinquenal",
+    "decennial": "Decenal",
+    "bidecennial": "Bidecenal",
+    "tridecennial": "Tridecenal",
+    "punctual": "Pontual",
+    "irregular": "Irregular",
+    "never": "Nunca",
+    "notPlanned": "Não planeado",
+    "other": "Outro",
+    "unknown": "Desconhecida"
+  },
+  "granularity": {
+    "pt_distrito": "Distrito",
+    "pt_concelho": "Concelho",
+    "pt_freguesia": "Freguesia",
+    "country-group": "Grupo de países",
+    "country": "País",
+    "canton": "Cantão",
+    "town": "Cidade",
+    "commune": "Município",
+    "district": "Distrito",
+    "municipality": "Município",
+    "parish": "Freguesia",
+    "epci": "EPCI",
+    "iris": "IRIS",
+    "fr_commune": "Município",
+    "fr_departement": "Departamento",
+    "fr_region": "Região",
+    "fr_arrondissement": "Distrito",
+    "poi": "Ponto de interesse",
+    "other": "Outro"
+  },
+  "resources": {
+    "mainFiles_one": "{{count}} FICHEIRO PRINCIPAL",
+    "mainFiles_other": "{{count}} FICHEIROS PRINCIPAIS",
+    "documentation_one": "{{count}} DOCUMENTAÇÃO",
+    "documentation_other": "{{count}} DOCUMENTAÇÃO",
+    "copyTitle": "Copiar título",
+    "copy": "Copiar {{label}}",
+    "copied": "Copiado!",
+    "updatedOn": "Atualizado em {{date}}",
+    "by": "Por",
+    "format": "Formato {{format}}",
+    "fileFallback": "Ficheiro",
+    "download": "Descarregar {{title}}",
+    "seeMore": "Ver mais",
+    "seeLess": "Ver menos",
+    "tabs": {
+      "preview": "Pré-visualização",
+      "structure": "Estrutura de dados",
+      "metadata": "Metadados",
+      "downloads": "Downloads"
+    },
+    "preview": {
+      "loading": "A carregar pré-visualização...",
+      "loadingStructure": "A carregar estrutura...",
+      "unavailableRemote": "Pré-visualização não disponível para ficheiros externos.",
+      "loadError": "Não foi possível carregar os dados para pré-visualização.",
+      "unavailable": "Pré-visualização não disponível para este recurso.",
+      "structureUnavailable": "Estrutura de dados não disponível para este recurso.",
+      "exploreTitle": "Explore os dados em detalhes.",
+      "exploreDescription": "Utilize esta ferramenta para obter uma visão geral dos dados, aprender mais sobre as diferentes colunas ou realizar filtros e classificações.",
+      "exploreCta": "Explore os dados",
+      "footer": "Última atualização da pré-visualização: {{date}} — {{cols}} colunas — {{rows}} linhas",
+      "limited": " (pré-visualização limitada a {{count}} linhas)"
+    },
+    "metadata": {
+      "url": "URL",
+      "stableUrl": "URL estável",
+      "identifier": "Identificador",
+      "createdAt": "Criado em",
+      "size": "Tamanho",
+      "modifiedAt": "Modificado em",
+      "type": "Tipo",
+      "mime": "Tipo MIME",
+      "extras": "Recursos extras"
+    },
+    "downloads": {
+      "originalFormat": "Formato original",
+      "copyUrl": "Copiar URL"
+    },
+    "types": {
+      "main": "Ficheiros principais",
+      "file": "Ficheiros principais",
+      "documentation": "Documentação"
+    },
+    "extrasKeys": {
+      "check_id": "verificação:id",
+      "check_available": "verificar: disponível",
+      "check_status": "verificar:status",
+      "check_timeout": "verificação:tempo limite",
+      "check_date": "verificar:data",
+      "check_headers_content-type": "verificar:cabeçalhos:tipo de conteúdo",
+      "check_headers_content-length": "verificar:cabeçalhos:comprimento do conteúdo",
+      "analysis_check_id": "análise:verificar_id",
+      "analysis_content-length": "análise:comprimento do conteúdo",
+      "analysis_checksum": "análise: checksum",
+      "analysis_mime-type": "análise:tipo MIME",
+      "analysis_last-modified-at": "análise:última-modificação-em",
+      "analysis_last-modified-detection": "análise:detecção de última modificação",
+      "analysis_parsing_started_at": "análise:análise:iniciada_em",
+      "analysis_parsing_finished_at": "análise:análise:concluída_em",
+      "analysis_parsing_error": "análise:análise:erro",
+      "analysis_parsing_parsing_table": "análise:análise sintática:tabela_de_análise"
+    },
+    "extrasValues": {
+      "true": "verdadeiro",
+      "false": "falso",
+      "empty": "—"
+    }
+  }
+}

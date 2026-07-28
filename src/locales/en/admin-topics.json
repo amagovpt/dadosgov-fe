@@ -1,0 +1,9 @@
+{
+  "title": "Topics",
+  "columns": {
+    "name": "Name",
+    "createdAt": "Created on",
+    "datasets": "Datasets",
+    "reuses": "Reuses"
+  }
+}

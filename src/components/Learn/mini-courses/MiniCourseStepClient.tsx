@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { Breadcrumb, Button } from '@ama-pt/agora-design-system';
+import { Button } from '@ama-pt/agora-design-system';
+import BreadcrumbDynamic from '@/components/Shared/BreadcrumbDynamic';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
@@ -78,14 +79,14 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
 
   const handleNext = () => {
     if (isLastStep) {
-      router.push(`/pages/learn/mini-courses`);
+      router.push(`/recursos/aprender/minicursos`);
     } else {
-      router.push(`/pages/learn/mini-courses/${slug}/${step + 1}`);
+      router.push(`/recursos/aprender/minicursos/${slug}/${step + 1}`);
     }
   };
 
   const handlePrevious = () => {
-    router.push(`/pages/learn/mini-courses/${slug}/${step - 1}`);
+    router.push(`/recursos/aprender/minicursos/${slug}/${step - 1}`);
   };
 
 
@@ -93,14 +94,11 @@ export default function CourseStepClient({ title, slug, stepCourse, step }: Prop
   return (
     <main className="w-full flex flex-col justify-center items-center bg-primary-100 gap-64 py-64">
       <div className='container '>
-        <Breadcrumb
-          items={[
-            { label: 'Home', url: '/' },
-            { label: "Conhecimento", url: "#" },
-            { label: 'Aprender', url: '/pages/learn/' },
-            { label: 'Minicursos', url: '/pages/learn/mini-courses/' },
-            { label: title, url: '#' },
-          ]}
+        {/* The step number is not part of the trail: the course is the deepest crumb. */}
+        <BreadcrumbDynamic
+          darkMode={false}
+          path={`/recursos/aprender/minicursos/${slug}`}
+          currentLabel={title}
         />
       </div>
       {/* Dark blue background area */}

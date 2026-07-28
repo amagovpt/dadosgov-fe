@@ -1,4 +1,13 @@
-import { Image } from "@/service/types/shared";
+import {
+  Image,
+  FoListPageHero,
+  FoListPageNoResults,
+  FoListPageSearch,
+} from "@/service/types/shared";
+
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
 
 export type DataStoryMetadata = {
   slug: string;
@@ -14,3 +23,13 @@ export type DataStoryMetadata = {
 };
 
 export type Datastories = DataStoryMetadata[];
+
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
+
+export type DataStoriesPage = {
+  hero: FoListPageHero;
+  search: FoListPageSearch;
+  noResults: FoListPageNoResults;
+};

@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { formatDistanceToNow, format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import {
   Tabs,
   Tab,
@@ -21,31 +20,40 @@ import { ReuseCardLinks } from "@/components/Shared/ReuseCardLinks";
 import { Dataset } from "@/service/types/dataset";
 import { Organization } from "@/service/types/identity";
 import { Reuse } from "@/service/types/reuse";
+import { Dataservice } from "@/service/types/dataservice";
 import { APIResponse } from "@/service/types/shared";
 import { fetchOrgDatasets, fetchOrgReuses } from "@/service/api/organizations";
+import { fetchOrgDataservices } from "@/service/api/dataservices";
 import { formatMetricValue } from "@/utils/formatNumber";
+import { formatDateLong, formatDateToTimeAgo } from "@/utils/formatDate";
 import { sanitizeUserMarkdown } from "@/utils/sanitizeUserMarkdown";
 import { DiscussionSection } from "@/components/discussions/DiscussionSection";
 import { ExpandableMarkdownDescription } from "@/components/Shared/ExpandableMarkdownDescription";
+import { DataserviceCardLinks } from "@/components/Shared/DataserviceCardLinks";
 
 interface OrganizationTabsProps {
   organization: Organization;
 }
 
 export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization }) => {
+  const { t, i18n } = useTranslation("common");
+  const { t: tOrg } = useTranslation("organizations");
+  const language = i18n.language as "pt" | "en";
   const router = useRouter();
 
   const [datasetsResponse, setDatasetsResponse] = useState<APIResponse<Dataset> | null>(null);
   const [datasetsPage, setDatasetsPage] = useState(1);
   const [reuses, setReuses] = useState<Reuse[]>([]);
+  const [dataservices, setDataservices] = useState<Dataservice[]>([]);
   const [isLoadingDatasets, setIsLoadingDatasets] = useState(true);
   const [isLoadingReuses, setIsLoadingReuses] = useState(true);
+  const [isLoadingDataservices, setIsLoadingDataservices] = useState(true);
 
   useEffect(() => {
     async function loadDatasets() {
       if (!datasetsResponse) setIsLoadingDatasets(true);
       try {
-        const response = await fetchOrgDatasets(organization.slug, datasetsPage, 20);
+        const response = await fetchOrgDatasets(organization.slug, datasetsPage, 20, undefined, true);
         setDatasetsResponse(response);
       } catch (error) {
         console.error("Error loading organization datasets:", error);
@@ -71,6 +79,20 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
     loadReuses();
   }, [organization.slug]);
 
+  useEffect(() => {
+    async function loadDataservices() {
+      try {
+        const response = await fetchOrgDataservices(organization.id, 1, 20);
+        setDataservices(response.data);
+      } catch (error) {
+        console.error("Error loading organization dataservices:", error);
+      } finally {
+        setIsLoadingDataservices(false);
+      }
+    }
+    loadDataservices();
+  }, [organization.id]);
+
   const datasets = datasetsResponse?.data || [];
 
   return (
@@ -78,14 +100,14 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
       <Tabs>
         {/* Tab 1: Descrição */}
         <Tab>
-          <TabHeader>Descrição</TabHeader>
+          <TabHeader>{tOrg("tabs.description")}</TabHeader>
           <TabBodyWrapper>
             <div className="mt-6 grid gap-32 xl:grid-cols-12">
               {/* Main Content */}
               <div className="max-w-ch xl:col-span-8">
                 <div className="prose prose-lg relative max-w-none leading-relaxed text-neutral-700">
                   <h2 className="mb-32 text-base font-medium uppercase text-neutral-900">
-                    Descrição
+                    {tOrg("tabs.description")}
                   </h2>
                   {organization.description ? (
                     <>
@@ -96,7 +118,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                       />
                     </>
                   ) : (
-                    <p className="text-neutral-500">Esta organização não possui descrição.</p>
+                    <p className="text-neutral-500">{tOrg("tabs.noDescription")}</p>
                   )}
                 </div>
               </div>
@@ -104,12 +126,10 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               {/* Sidebar Metadata */}
               <aside className="flex flex-col gap-16 md:pt-64 xl:col-span-4 xl:block">
                 <div className="rounded-4 bg-white p-32">
-                  <h3 className="text-sm mb-8 font-bold tracking-wider">Data de criação</h3>
+                  <h3 className="text-sm mb-8 font-bold tracking-wider">{tOrg("tabs.createdAt")}</h3>
                   <p className="font-medium text-neutral-900">
                     {organization.created_at
-                      ? format(new Date(organization.created_at), "d 'de' MMMM 'de' yyyy", {
-                          locale: pt,
-                        })
+                      ? formatDateLong(organization.created_at, language)
                       : "—"}
                   </p>
                 </div>
@@ -120,12 +140,17 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
         {/* Tab 2: Conjuntos de dados */}
         <Tab>
-          <TabHeader> Conjuntos de dados ({organization.metrics?.datasets || 0})</TabHeader>
+          <TabHeader>
+            {" "}
+            {tOrg("tabs.datasetsWithCount", {
+              count: datasetsResponse?.total ?? organization.metrics?.datasets ?? 0,
+            })}
+          </TabHeader>
           <TabBodyWrapper>
             <div>
               <h3 className="mb-24 text-base font-medium text-neutral-900">
                 {datasetsResponse?.total || 0}{" "}
-                {(datasetsResponse?.total || 0) === 1 ? "CONJUNTO DE DADOS" : "CONJUNTOS DE DADOS"}
+                {tOrg("tabs.datasetsNoun", { count: datasetsResponse?.total || 0 })}
               </h3>
               {!isLoadingDatasets && datasets.length > 0 ? (
                 <>
@@ -133,13 +158,13 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                     {datasets.map((dataset) => (
                       <div key={dataset.id} className="h-full">
                         <CardLinks
-                          onClick={() => router.push(`/pages/datasets/${dataset.slug}`)}
-                          className="cursor-pointer text-neutral-900"
+                          onClick={() => router.push(`/datasets/${dataset.slug}`)}
+                          className="cursor-pointer text-neutral-900 h-full"
                           variant="white"
                           image={{
                             src:
                               dataset.organization?.logo || "/images/placeholders/organization.png",
-                            alt: dataset.organization?.name || "Organização sem logo",
+                            alt: dataset.organization?.name || t("card.organization"),
                           }}
                           category={dataset.organization?.name}
                           title={sanitizeUserMarkdown(dataset.title)}
@@ -148,22 +173,22 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                               <p className="text-sm mt-8 line-clamp-3 max-w-[592px] leading-relaxed text-neutral-900">
                                 {sanitizeUserMarkdown(dataset.description)}
                               </p>
-                              <div className="text-xs mt-16 flex flex-wrap items-center gap-32 text-[#034AD8]">
-                                <div className="flex items-center gap-8" title="Visualizações">
+                              <div className="text-xs flex flex-wrap items-center gap-8 text-[#034AD8]">
+                                <div className="flex items-center gap-8" title={t("card.views")}>
                                   <Icon name="agora-line-eye" aria-hidden="true" />
                                   <span>{formatMetricValue(dataset.metrics?.views, 0)}</span>
                                 </div>
-                                <div className="flex items-center gap-8" title="Downloads">
+                                <div className="flex items-center gap-8" title={t("card.downloads")}>
                                   <Icon name="agora-line-download" aria-hidden="true" />
                                   <span>
                                     {formatMetricValue(dataset.metrics?.resources_downloads, 0)}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-8" title="Reutilizações">
+                                <div className="flex items-center gap-8" title={t("card.reuses")}>
                                   <div className="icon-bar-chart-blue" />
                                   <span>{dataset.metrics?.reuses || 0}</span>
                                 </div>
-                                <div className="flex items-center gap-8" title="Favoritos">
+                                <div className="flex items-center gap-8" title={t("card.favorites")}>
                                   <Icon name="agora-line-star" aria-hidden="true" />
                                   <span>{dataset.metrics?.followers || 0}</span>
                                 </div>
@@ -174,12 +199,14 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             <span className="font-[300]">
                               {dataset.last_modified &&
                               !isNaN(new Date(dataset.last_modified).getTime())
-                                ? `Atualizado há ${formatDistanceToNow(new Date(dataset.last_modified), { locale: pt })}`
-                                : "Data indisponível"}
+                                ? t("card.updatedAgo", {
+                                    date: formatDateToTimeAgo(dataset.last_modified, language),
+                                  })
+                                : t("card.dateUnavailable")}
                             </span>
                           }
                           mainLink={
-                            <Link href={`/pages/datasets/${dataset.slug}`}>
+                            <Link href={`/datasets/${dataset.slug}`}>
                               <span className="underline">
                                 {sanitizeUserMarkdown(dataset.title)}
                               </span>
@@ -194,6 +221,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                     <TabPagination
                       total={datasetsResponse.total}
                       pageSize={datasetsResponse.page_size}
+                      currentPage={datasetsPage}
                       onChange={setDatasetsPage}
                     />
                   )}
@@ -204,8 +232,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                   icon={
                     <Icon name="agora-line-file" className="icon-xl h-40 w-40 text-primary-500" />
                   }
-                  title="Sem conjuntos de dados"
-                  description="Esta organização não possui conjuntos de dados publicados."
+                  title={tOrg("tabs.noDatasetsTitle")}
+                  description={tOrg("tabs.noDatasetsDesc")}
                   hasAnchor={false}
                 />
               )}
@@ -213,14 +241,31 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
           </TabBodyWrapper>
         </Tab>
 
-        {/* Tab 3: Reutilizações */}
+        {/* Tab 3: Reutilizações e APIs */}
         <Tab>
-          <TabHeader>Reutilizações ({organization.metrics?.reuses || 0})</TabHeader>
+          <TabHeader>
+            {tOrg("tabs.reusesAndApis", {
+              count:
+                (organization.metrics?.reuses || 0) + (organization.metrics?.dataservices || 0),
+            })}
+          </TabHeader>
 
           <TabBodyWrapper>
+            {!isLoadingDataservices && dataservices.length > 0 && (
+              <div className="mb-40">
+                <h3 className="mb-16 text-base font-medium text-neutral-900">
+                  {dataservices.length} {tOrg("tabs.apisNoun", { count: dataservices.length })}
+                </h3>
+                <div className="agora-card-links-datasets-px0 grid grid-cols-1 gap-32 md:grid-cols-2">
+                  {dataservices.map((dataservice) => (
+                    <DataserviceCardLinks key={dataservice.id} dataservice={dataservice} />
+                  ))}
+                </div>
+              </div>
+            )}
             <div>
               <h3 className="mb-16 text-base font-medium text-neutral-900">
-                {reuses.length} {reuses.length === 1 ? "REUTILIZAÇÃO" : "REUTILIZAÇÕES"}
+                {reuses.length} {tOrg("tabs.reusesNoun", { count: reuses.length })}
               </h3>
               {!isLoadingReuses && reuses.length > 0 ? (
                 <div className="agora-card-links-datasets-px0 grid grid-cols-1 gap-32 md:grid-cols-2">
@@ -234,8 +279,8 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                   icon={
                     <Icon name="agora-line-file" className="icon-xl h-40 w-40 text-primary-500" />
                   }
-                  title="Sem reutilizações"
-                  description="Nenhuma reutilização associada a esta organização."
+                  title={tOrg("tabs.noReusesTitle")}
+                  description={tOrg("tabs.noReusesDesc")}
                   hasAnchor={false}
                 />
               )}
@@ -246,35 +291,35 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
 
         {/* Tab 5: Discussões */}
         <Tab>
-          <TabHeader>Discussões</TabHeader>
+          <TabHeader>{tOrg("tabs.discussions")}</TabHeader>
           <TabBodyWrapper>
             <DiscussionSection entityId={organization.id} entityClass="Organization" />
           </TabBodyWrapper>
         </Tab>
         {/* Tab 6: Informações (Statistics, Members, Technical Info) */}
         <Tab>
-          <TabHeader>Informações</TabHeader>
+          <TabHeader>{tOrg("tabs.info")}</TabHeader>
           <TabBodyWrapper>
             <div className="rounded-8 bg-white p-32">
               {/* Statistics Section */}
               <div>
                 <h3 className="mb-16 text-base font-medium uppercase text-neutral-900">
-                  Estatísticas
+                  {tOrg("tabs.statistics")}
                 </h3>
                 <div className="flex gap-24 pb-48">
                   <div className="flex-1">
                     <CardFrame label={String(organization.metrics?.datasets || 0)}>
-                      <p className="text-base">Conjuntos de dados</p>
+                      <p className="text-base">{tOrg("tabs.datasets")}</p>
                     </CardFrame>
                   </div>
                   <div className="flex-1">
                     <CardFrame label={String(organization.metrics?.reuses || 0)}>
-                      <p className="text-base">Reutilizações</p>
+                      <p className="text-base">{tOrg("tabs.reuses")}</p>
                     </CardFrame>
                   </div>
                   <div className="flex-1">
                     <CardFrame label={String(organization.metrics?.followers || 0)}>
-                      <p className="text-base">Seguidores</p>
+                      <p className="text-base">{tOrg("tabs.followers")}</p>
                     </CardFrame>
                   </div>
                 </div>
@@ -284,7 +329,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               {organization.members?.length > 0 && (
                 <div style={{ marginTop: "64px" }}>
                   <h3 className="mb-16 text-base font-medium uppercase text-neutral-900">
-                    Membros
+                    {tOrg("tabs.members")}
                   </h3>
                   <div className="grid grid-cols-1 gap-24 md:grid-cols-3">
                     {organization.members.map((member, index) => (
@@ -304,7 +349,9 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                             {member.user?.first_name} {member.user?.last_name}
                           </p>
                           <span className="text-xs mt-4 block font-medium text-primary-600">
-                            {member.role === "admin" ? "Administrador" : "Editor"}
+                            {member.role === "admin"
+                              ? tOrg("tabs.roleAdmin")
+                              : tOrg("tabs.roleEditor")}
                           </span>
                         </div>
                       </div>
@@ -316,36 +363,32 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
               {/* Technical Information Section */}
               <div className="mt-32">
                 <h3 className="mb-16 text-base font-medium uppercase text-neutral-900">
-                  Informações técnicas
+                  {tOrg("tabs.technicalInfo")}
                 </h3>
                 <div className="grid grid-cols-3 gap-24">
                   <div>
-                    <p className="text-sm mb-8 font-bold">Última atualização</p>
+                    <p className="text-sm mb-8 font-bold">{tOrg("tabs.metadataUpdate")}</p>
                     <span className="text-sm">
                       {organization.last_modified
-                        ? format(new Date(organization.last_modified), "d 'de' MMMM 'de' yyyy", {
-                            locale: pt,
-                          })
+                        ? formatDateLong(organization.last_modified, language)
                         : "—"}
                     </span>
                   </div>
                   <div>
-                    <p className="text-sm mb-8 font-bold">Identificador</p>
+                    <p className="text-sm mb-8 font-bold">{tOrg("tabs.identifier")}</p>
                     <span className="text-sm">{organization.id}</span>
                   </div>
                   <div>
-                    <p className="text-sm mb-8 font-bold">Data de criação</p>
+                    <p className="text-sm mb-8 font-bold">{tOrg("tabs.createdAt")}</p>
                     <span className="text-sm">
                       {organization.created_at
-                        ? format(new Date(organization.created_at), "d 'de' MMMM 'de' yyyy", {
-                            locale: pt,
-                          })
+                        ? formatDateLong(organization.created_at, language)
                         : "—"}
                     </span>
                   </div>
                   {organization.url && (
                     <div>
-                      <p className="text-sm mb-8 font-bold">Website</p>
+                      <p className="text-sm mb-8 font-bold">{tOrg("tabs.website")}</p>
                       <a
                         href={organization.url}
                         target="_blank"
@@ -358,7 +401,7 @@ export const OrganizationTabs: React.FC<OrganizationTabsProps> = ({ organization
                   )}
                   {organization.business_number_id && (
                     <div>
-                      <p className="text-sm mb-8 font-bold">NIF / Identificação fiscal</p>
+                      <p className="text-sm mb-8 font-bold">{tOrg("tabs.taxId")}</p>
                       <span className="text-sm">{organization.business_number_id}</span>
                     </div>
                   )}

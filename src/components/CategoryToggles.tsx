@@ -30,7 +30,7 @@ const buildItems = (siteMetrics: SiteMetrics): CategoryToggleItem[] => [
   {
     id: 'datasets',
     label: 'Conjunto de dados',
-    href: '/pages/datasets',
+    href: '/datasets',
     count: siteMetrics.datasets,
     leadingIcon: 'agora-line-layers-menu',
     leadingIconHover: 'agora-solid-layers-menu',
@@ -40,17 +40,17 @@ const buildItems = (siteMetrics: SiteMetrics): CategoryToggleItem[] => [
   // {
   //   id: 'apis',
   //   label: 'APIs',
-  //   href: '/pages/dataservices',
+  //   href: '/dataservices',
   //   count: siteMetrics.dataservices ?? 0,
   //   leadingIcon: (active: boolean) =>
-  //     active ? '/Icons/reduce_white.svg' : '/Icons/reduce.svg',
-  //   leadingIconHover: '/Icons/reduce_white.svg',
+  //     active ? '/Icons/api-solid.svg' : '/Icons/api.svg',
+  //   leadingIconHover: '/Icons/api-solid.svg',
   //   className: 'w-full agora-toggle agora-toggle-icon agora-toggle-icon-primary full-width has-icon',
   // },
   {
     id: 'reutilizacoes',
     label: 'Reutilizações',
-    href: '/pages/reuses',
+    href: '/reuses',
     count: siteMetrics.reuses,
     leadingIcon: (active: boolean) =>
       active ? '/Icons/bar_char_white.svg' : '/Icons/bar_chart_primary.svg',
@@ -60,7 +60,7 @@ const buildItems = (siteMetrics: SiteMetrics): CategoryToggleItem[] => [
   {
     id: 'organizacoes',
     label: 'Organizações',
-    href: '/pages/organizations',
+    href: '/organizations',
     count: siteMetrics.organizations,
     leadingIcon: 'agora-line-buildings',
     leadingIconHover: 'agora-solid-buildings',
@@ -69,10 +69,10 @@ const buildItems = (siteMetrics: SiteMetrics): CategoryToggleItem[] => [
 ];
 
 const HREF_TO_ID: Record<string, string> = {
-  '/pages/reuses': 'reutilizacoes',
-  '/pages/datasets': 'datasets',
-  '/pages/dataservices': 'apis',
-  '/pages/organizations': 'organizacoes',
+  '/reuses': 'reutilizacoes',
+  '/datasets': 'datasets',
+  '/dataservices': 'apis',
+  '/organizations': 'organizacoes',
 };
 
 const ID_TO_SEARCH_KEY: Record<string, string> = {
@@ -126,6 +126,8 @@ export const CategoryToggles = ({ siteMetrics, searchQuery, exclude = [] }: Cate
 
   useEffect(() => {
     if (!hasQuery) {
+      // Clear search totals when the query is emptied.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchTotals(null);
       setIsLoadingTotals(false);
       return;

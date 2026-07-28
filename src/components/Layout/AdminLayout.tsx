@@ -4,7 +4,6 @@ import React from 'react'
 import Breadcrumb from '../Primitives/Breadcrumb/Breadcrumb'
 import PublishDropdown from '../admin/PublishDropdown'
 
-
 export type AdminLayoutProps = {
     title: string
     breadcrumbItems: {
@@ -15,6 +14,12 @@ export type AdminLayoutProps = {
     children: React.ReactNode
 }
 
+function buildStaticAdminBreadcrumbItems(items: AdminLayoutProps["breadcrumbItems"]) {
+    return items.map((item, index) => ({
+        ...item,
+        url: index === items.length - 1 ? "" : item.url || "#",
+    }))
+}
 
 export default function AdminLayout({
     title,
@@ -27,7 +32,10 @@ export default function AdminLayout({
             <div className="w-full flex flex-col gap-64 pb-32">
                 <div className="w-full">
                     <Breadcrumb
-                        items={breadcrumbItems.map((item) => ({ ...item, url: item.url ?? "#" }))}
+                        className="admin-breadcrumb-static"
+                        items={buildStaticAdminBreadcrumbItems(breadcrumbItems)}
+                        validateUrls={false}
+                        onClickCapture={(event) => event.preventDefault()}
                     />
                 </div>
 

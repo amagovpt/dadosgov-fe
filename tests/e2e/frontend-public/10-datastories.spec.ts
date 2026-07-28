@@ -1,6 +1,6 @@
 import { test, expect } from "playwright/test";
 
-const DATASTORIES_URL = "/pages/datastories";
+const DATASTORIES_URL = "/datastories";
 
 test.describe("Datastories Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -44,7 +44,7 @@ test.describe("Datastories Page", () => {
     await expect(firstCard).toBeVisible({ timeout: 15000 });
 
     await firstCard.click();
-    await page.waitForURL(/\/pages\/datastories\/.+/, { timeout: 15000 });
+    await page.waitForURL(/datastories\/.+/, { timeout: 15000 });
 
     const heading = page.locator("main h1").first();
     await expect(heading).toBeVisible({ timeout: 10000 });

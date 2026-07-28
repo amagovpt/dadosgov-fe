@@ -1,139 +1,128 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import {
-  CardNoResults,
-  Icon,
-  Table,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@ama-pt/agora-design-system";
-import StatusDot from "@/components/admin/StatusDot";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import AdminListPage from "@/components/admin/lists/AdminListPage";
+import AdminListTable from "@/components/admin/lists/AdminListTable";
+import { paginateItems, sortItems } from "@/utils/admin-lists/listHelpers";
+import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import type { Discussion } from "@/service/types/discussion";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
-import AdminLayout from "@/components/Layout/AdminLayout";
-import { formatDateToDMY } from "@/utils/formatDate";
-import { createPaginationProps } from "@/utils/createPaginationProps";
 import AdminEmptyState from "../AdminEmptyState";
+import { createDiscussionColumns, type DiscussionListSortField } from "./discussionsListConfig";
 
 export default function DiscussionsClient() {
+  const { t } = useTranslation(["admin-common", "admin-discussions"]);
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    sortField,
+    sortOrder,
+    handleSort,
+    getSortOrder,
+  } = useAdminListController<DiscussionListSortField>({
+    initialFilters: {},
+  });
 
   useEffect(() => {
+    let frameId: number | null = null;
+    let isCancelled = false;
+
     if (!activeOrg) {
-      setIsLoading(false);
-      return;
+      frameId = requestAnimationFrame(() => {
+        setIsLoading(false);
+      });
+      return () => {
+        isCancelled = true;
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      };
     }
+    const orgId = activeOrg.id;
 
     async function loadDiscussions() {
       try {
-        const { data } = await fetchOrgDiscussions(activeOrg!.id);
-        if (data) setDiscussions(data);
+        const { data } = await fetchOrgDiscussions(orgId);
+        if (!isCancelled && data) setDiscussions(data);
       } catch (error) {
         console.error("Error loading discussions:", error);
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) setIsLoading(false);
       }
     }
 
-    loadDiscussions();
+    void loadDiscussions();
+
+    return () => {
+      isCancelled = true;
+      if (frameId !== null) cancelAnimationFrame(frameId);
+    };
   }, [activeOrg]);
 
-  const paginatedDiscussions = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return discussions.slice(start, start + itemsPerPage);
-  }, [discussions, currentPage, itemsPerPage]);
+  const columns = useMemo(
+    () =>
+      createDiscussionColumns({
+        title: t("admin-discussions:columns.title"),
+        author: t("admin-discussions:columns.author"),
+        status: t("admin-discussions:columns.status"),
+        date: t("admin-discussions:columns.date"),
+        messages: t("admin-discussions:columns.messages"),
+        createdAt: t("admin-discussions:columns.createdAt"),
+        closedAt: t("admin-discussions:columns.closedAt"),
+        open: t("admin-discussions:status.open"),
+        closed: t("admin-discussions:status.closed"),
+      }),
+    [t],
+  );
+  const sortedDiscussions = useMemo(
+    () =>
+      sortItems(discussions, sortField, sortOrder, {
+        status: (a, b) => Number(Boolean(a.closed)) - Number(Boolean(b.closed)),
+      }),
+    [discussions, sortField, sortOrder],
+  );
+  const paginatedDiscussions = useMemo(
+    () => paginateItems(sortedDiscussions, currentPage, pageSize),
+    [sortedDiscussions, currentPage, pageSize],
+  );
 
   if (isOrgLoading || isLoading) {
-    return <div className="admin-page">A carregar...</div>;
+    return <div className="admin-page">{t("admin-common:loading")}</div>;
   }
 
   return (
-    <AdminLayout
+    <AdminListPage
       breadcrumbItems={[
-        { label: "Administração", url: "/pages/admin" },
-        { label: activeOrg?.name || "Organização", url: "#" },
-        { label: "Discussões", url: "/pages/admin/org/discussions" },
+        { label: t("admin-common:breadcrumbs.administration"), url: "/admin" },
+        { label: activeOrg?.name || t("admin-common:breadcrumbs.organization"), url: "#" },
+        { label: t("admin-discussions:title"), url: "/admin/org/discussions" },
       ]}
-      title="Discussões"
-    >
-
-      {discussions.length === 0 ? (
+      title={t("admin-discussions:title")}
+      isLoading={false}
+      count={discussions.length}
+      currentPage={currentPage}
+      pageSize={pageSize}
+      setCurrentPage={setCurrentPage}
+      setPageSize={setPageSize}
+      emptyState={
         <AdminEmptyState
           icon="agora-line-chat"
-          description="Ainda não há discussões sobre esta organização."
+          description={t("admin-discussions:empty.descriptionOrganization")}
         />
-      ) : (
-        <>
-          <p className="text-sm mb-24 font-semibold uppercase text-neutral-700">
-            {discussions.length} {discussions.length === 1 ? "discussão" : "discussões"}
-          </p>
-
-          <Table
-            paginationProps={createPaginationProps(
-              itemsPerPage,
-              discussions.length,
-              currentPage,
-              setCurrentPage,
-              setItemsPerPage
-            )}
-          >
-            <TableHeader>
-              <TableRow>
-                <TableHeaderCell sortType="date" sortOrder="none">Título</TableHeaderCell>
-                <TableHeaderCell>Autor</TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell sortType="date" sortOrder="none" >Data</TableHeaderCell>
-                <TableHeaderCell>Mensagens</TableHeaderCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedDiscussions.map((discussion) => (
-                <TableRow key={discussion.id}>
-                  <TableCell headerLabel="Título">
-                    <span className="font-medium">{discussion.title}</span>
-                  </TableCell>
-                  <TableCell headerLabel="Autor">
-                    <div className="flex items-center gap-8">
-                      {discussion.user?.avatar_thumbnail ? (
-                        <img
-                          src={discussion.user.avatar_thumbnail}
-                          alt={`${discussion.user.first_name} ${discussion.user.last_name}`}
-                          className="h-24 w-24 rounded-full"
-                        />
-                      ) : (
-                        <Icon name="agora-line-user" className="h-24 w-24" />
-                      )}
-                      <span>
-                        {discussion.user?.first_name} {discussion.user?.last_name}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell headerLabel="Estado">
-                    {discussion.closed ? (
-                      <StatusDot variant="success">FECHADA</StatusDot>
-                    ) : (
-                      <StatusDot variant="informative">ABERTA</StatusDot>
-                    )}
-                  </TableCell>
-                  <TableCell headerLabel="Data">{formatDateToDMY(discussion.created)}</TableCell>
-                  <TableCell headerLabel="Mensagens">
-                    {discussion.discussion?.length || 0}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
-      )}
-    </AdminLayout>
+      }
+    >
+      <AdminListTable
+        items={paginatedDiscussions}
+        columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
+        getRowKey={(discussion) => discussion.id}
+      />
+    </AdminListPage>
   );
 }

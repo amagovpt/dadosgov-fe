@@ -1,4 +1,4 @@
-import { test, expect } from "playwright/test";
+import { test, expect, type APIRequestContext } from "playwright/test";
 import { execSync } from "child_process";
 import { Client } from "pg";
 
@@ -31,7 +31,7 @@ function runUdata(cmd: string): string {
 }
 
 async function triggerDagAndWait(
-  request: any,
+  request: APIRequestContext,
   maxWaitMs = 120_000,
   pollMs = 3_000
 ): Promise<string> {
@@ -139,7 +139,7 @@ with app.app_context():
   });
 
   test("5. Frontend displays updated download count", async ({ page }) => {
-    await page.goto(`${FRONTEND_URL}/pages/datasets/${DATASET_SLUG}`, {
+    await page.goto(`${FRONTEND_URL}/datasets/${DATASET_SLUG}`, {
       waitUntil: "networkidle",
     });
 

@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button, Icon, ToggleGroup, Toggle, CardNoResults } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import { OrganizationsFilters } from "./OrganizationsFilters";
@@ -9,16 +8,16 @@ import SearchFilter from "@/components/Shared/SearchFilter";
 import { OrgBadges, Organization } from "@/service/types/identity";
 import { APIResponse } from "@/service/types/shared";
 import PublishDropdown from "@/components/admin/PublishDropdown";
-import { formatDistanceToNow } from "date-fns";
-import { pt } from "date-fns/locale";
 
 import HeroGeneral from "@/components/HeroGeneral";
 import CardMetrics, { CardMetricsProps } from "../Primitives/Cards/CardMetrics";
+import { OrganizationBadges } from "@/components/organizations/OrganizationBadges";
 import { formatDateToTimeAgo } from "@/utils/formatDate";
 import { useOrganizationsListing } from "@/hooks/useOrganizationsListing";
-import { ORGANIZATION_SORT_LABELS } from "@/utils/organizationsListingQuery";
 import { twJoin } from "tailwind-merge";
 import ListingErrorBanner from "@/components/Shared/ListingErrorBanner";
+import { useTranslation } from "react-i18next";
+import { FrontOfficePage } from "@/service/types/shared/common";
 
 interface OrganizationsClientProps {
   initialData: APIResponse<Organization>;
@@ -26,6 +25,8 @@ interface OrganizationsClientProps {
   orgBadges: OrgBadges;
   orgBadgeCounts: Record<string, number>;
   allOrganizations?: Organization[];
+  /** Optional: the CMS is the source of truth, the `organizations` namespace is the fallback. */
+  pageContent?: FrontOfficePage;
 }
 
 export default function OrganizationsClient({
@@ -34,7 +35,19 @@ export default function OrganizationsClient({
   orgBadges,
   orgBadgeCounts,
   allOrganizations,
+  pageContent,
 }: OrganizationsClientProps) {
+  const { t, i18n } = useTranslation("common");
+  const { t: tOrg } = useTranslation("organizations");
+  const { language } = i18n;
+
+  const ORGANIZATION_SORT_LABELS: Record<string, string> = {
+    relevancia: tOrg("sort.relevancia"),
+    mais_dados: tOrg("sort.mais_dados"),
+    mais_reutilizacoes: tOrg("sort.mais_reutilizacoes"),
+    subscritores: tOrg("sort.subscritores"),
+  };
+
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const {
@@ -51,18 +64,12 @@ export default function OrganizationsClient({
   const { data: organizations, total, page_size } = listData;
 
   return (
-    <main className="w-full flex flex-col items-center justify-center gap-32 bg-primary-50">
+    <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        title="Organizações"
-        breadcrumbItems={[
-          { label: "Home", url: "/" },
-          { label: "Organizações", url: "/pages/organizations" },
-        ]}
+        title={pageContent?.hero?.title ?? tOrg("hero.title")}
         subtitle={
           <p className="max-w-[592px] text-primary-100">
-            {total === 0
-              ? "Não existem resultados disponíveis para a sua pesquisa"
-              : `Pesquise através de ${total.toLocaleString("pt-PT")} organizações em dados.gov.pt`}
+            {pageContent?.hero?.subtitle ?? tOrg("hero.subtitle")}
           </p>
         }
       >
@@ -72,38 +79,38 @@ export default function OrganizationsClient({
       {/* Search Filter */}
       <SearchFilter
         id="organizations-search"
-        placeholder="Pesquisar organizações..."
+        placeholder={pageContent?.search?.placeholder ?? tOrg("search.placeholder")}
         value={searchQuery}
         onChange={setSearchQuery}
         onSearch={handleSearch}
       />
       {/* Main Content */}
-      <div className="container flex flex-col gap-24 justify-center items-center py-32">
+      <div className="container flex flex-col items-center justify-center gap-24 py-32">
         {/* Results count + Sort toggles */}
-        <div className="w-full flex xl:flex-row flex-col gap-16">
-          <div className="w-full flex flex-row items-end gap-32 ">
+        <div className="flex w-full flex-col gap-16 xl:flex-row">
+          <div className="flex w-full flex-row items-end gap-32">
             <Button
               appearance="outline"
               variant="neutral"
               hasIcon
               {...(filtersOpen
                 ? {
-                  leadingIcon: "agora-line-chevron-left",
-                  leadingIconHover: "agora-solid-chevron-left",
-                }
+                    leadingIcon: "agora-line-chevron-left",
+                    leadingIconHover: "agora-solid-chevron-left",
+                  }
                 : {
-                  trailingIcon: "agora-line-chevron-right",
-                  trailingIconHover: "agora-solid-chevron-right",
-                })}
+                    trailingIcon: "agora-line-chevron-right",
+                    trailingIconHover: "agora-solid-chevron-right",
+                  })}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
-              {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
+              {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total.toLocaleString("pt-PT")} Resultados
+              {t("results", { count: total })}
             </span>
           </div>
-          <div className="w-full flex items-center xl:justify-end ">
+          <div className="flex w-full items-center xl:justify-end">
             <ToggleGroup
               multiple={false}
               value={sortDefault}
@@ -115,7 +122,7 @@ export default function OrganizationsClient({
               }}
             >
               {Object.entries(ORGANIZATION_SORT_LABELS).map(([key, label]) => (
-                <Toggle key={key} value={key} aria-label={`Ordenar por ${label}`}>
+                <Toggle key={key} value={key} aria-label={tOrg("sort.ariaLabel", { label })}>
                   {label}
                 </Toggle>
               ))}
@@ -123,9 +130,7 @@ export default function OrganizationsClient({
           </div>
         </div>
         <div className="divider-neutral-200 mb-24" />
-        <div
-          className={twJoin("grid gap-32 w-full", filtersOpen ? "grid-cols-12" : "")}
-        >
+        <div className={twJoin("grid w-full gap-32", filtersOpen ? "grid-cols-12" : "")}>
           {/* Sidebar */}
           {filtersOpen && (
             <div className="col-span-4">
@@ -141,21 +146,28 @@ export default function OrganizationsClient({
           <div className={filtersOpen ? "col-span-8" : "col-span-full"}>
             <div>
               <div
-                className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3")}
-
+                className={twJoin(
+                  "grid gap-32",
+                  filtersOpen
+                    ? "grid-cols-1 lg:grid-cols-2"
+                    : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+                )}
               >
                 {listData.error ? (
                   <ListingErrorBanner
-                    entity="as organizações"
+                    entity={tOrg("theOrganizations")}
                     errorStatus={listData.errorStatus}
                   />
                 ) : organizations.length > 0 ? (
                   organizations.map((org) => {
-                    const timeAgo = formatDateToTimeAgo(org.last_modified);
+                    const timeAgo = formatDateToTimeAgo(
+                      org.last_modified,
+                      language as "pt" | "en"
+                    );
                     const cardProps: CardMetricsProps = {
                       title: org.name,
                       description: org.description ?? "",
-                      link: `/pages/organizations/${org.slug}`,
+                      link: `/organizations/${org.slug}`,
                       last_modified: timeAgo,
                       organization: {
                         name: org.name,
@@ -167,26 +179,28 @@ export default function OrganizationsClient({
                         reuses: org.metrics.reuses,
                         followers: org.metrics.followers,
                       },
+                      titleBadges: <OrganizationBadges badges={org.badges} />,
                     };
-                    return (
-                      <CardMetrics key={`org-${org.slug}`} {...cardProps} hideProgressBar />
-                    );
+                    return <CardMetrics key={`org-${org.slug}`} {...cardProps} hideProgressBar />;
                   })
                 ) : (
                   <div className="col-span-full">
                     <CardNoResults
                       icon={
-                        <Icon name="agora-line-search" className="h-12 w-12 text-primary-500" />
+                        <Icon
+                          name={pageContent?.noResults?.icon ?? "agora-line-search"}
+                          className="h-12 w-12 text-primary-500"
+                        />
                       }
-                      title="Nenhuma organização encontrada"
+                      title={pageContent?.noResults?.title ?? tOrg("noResults.title")}
                       subtitle={
                         <span className="font-bold">
-                          Não existem organizações que correspondam aos filtros aplicados.
+                          {pageContent?.noResults?.subtitle ?? tOrg("noResults.subtitle")}
                         </span>
                       }
                       description={
                         <div className="mx-auto max-w-[592px]">
-                          Experimente remover filtros ou usar outros termos de pesquisa.
+                          {pageContent?.noResults?.description ?? tOrg("noResults.description")}
                         </div>
                       }
                       position="center"

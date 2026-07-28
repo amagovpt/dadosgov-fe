@@ -19,7 +19,7 @@ export const uiConfig = {
   maxPdfPreviewByteSize: 10_000_000,
   maxXmlPreviewCharSize: 100_000,
   maxNumberOfResourcesToUploadInParallel: 3,
-  resourceFileUploadChunk: 2_000_000,
+  resourceFileUploadChunk: 1_000_000,
   maxSortableFiles: 50,
   maxNumberOfDatasetsForDataserviceUpdate: 200,
 } as const;

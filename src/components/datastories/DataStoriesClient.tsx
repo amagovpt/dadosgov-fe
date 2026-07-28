@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CardLinks, Button, Icon, CardNoResults } from "@ama-pt/agora-design-system";
+import { CardLinks, Button } from "@ama-pt/agora-design-system";
 import { Pagination } from "@/components/Pagination";
 import HeroGeneral from "@/components/HeroGeneral";
 import SearchFilter from "@/components/Shared/SearchFilter";
-import { Datastories } from "@/service/types/datastories/datastories";
+import { Datastories, DataStoriesPage } from "@/service/types/datastories/datastories";
 import { DataStoriesFilterState } from "@/service/types/datastories/filters";
 import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { getAssets } from "@/utils/getAssets";
@@ -16,16 +16,20 @@ import { DataStoriesFilters } from "@/components/datastories/DataStoriesFilters"
 import { DATA_STORIES_PAGE_SIZE } from "@/utils/dataStoriesListingQuery";
 import { useDataStoriesListing } from "@/hooks/useDataStoriesListing";
 import { twJoin } from "tailwind-merge";
+import { useTranslation } from "react-i18next";
+import FoNoResults from "../common/FoNoResults";
 
 interface DataStoriesClientProps {
   currentPage: number;
   initialFilters?: { q?: string; sort?: string };
+  pageContent: DataStoriesPage;
   datastories: Datastories;
 }
 
 export default function DataStoriesClient({
   currentPage,
   initialFilters,
+  pageContent,
   datastories,
 }: DataStoriesClientProps) {
   const router = useRouter();
@@ -51,64 +55,54 @@ export default function DataStoriesClient({
     stories,
     activeFilters,
   });
+  const { t } = useTranslation("common");
 
   return (
-    <main className="w-full flex flex-col justify-center items-center bg-primary-50 gap-32">
+    <main className="flex w-full flex-col items-center justify-center gap-32 bg-primary-50">
       <HeroGeneral
-        title="Data Stories"
-        breadcrumbItems={[
-          { label: "Home", url: "/" },
-          { label: "Data Stories", url: "/pages/datastories" },
-        ]}
-        subtitle={
-          <p className="max-w-[592px] text-primary-100">
-            {total === 0
-              ? "Não existem resultados disponíveis para a sua pesquisa"
-              : `Pesquise através de ${total} data stories em dados.gov.pt`}
-          </p>
-        }
+        title={pageContent.hero.title}
+        subtitle={formatHtmlParagraphs(pageContent.hero.description) as string[]}
       />
 
       {/* Search Filter */}
       <SearchFilter
         id="datastories-search"
-        placeholder="Pesquisar data stories, temas..."
+        label={pageContent.search.label}
+        placeholder={pageContent.search.placeholder}
         value={searchQuery}
         onChange={setSearchQuery}
         onSearch={handleSearch}
-        examplesText='Exemplos: "serviços públicos", "turismo", "territórios"'
+        examplesText={pageContent.search.hint}
       />
       {/* Main Content */}
-      <div className="container flex flex-col gap-24 justify-center items-center py-32">
+      <div className="container flex flex-col items-center justify-center gap-24 py-32">
         {/* Results count + Sort toggles */}
-        <div className="w-full flex xl:flex-row flex-col gap-16">
-          <div className="w-full flex flex-row items-end gap-32 ">
+        <div className="flex w-full flex-col gap-16 xl:flex-row">
+          <div className="flex w-full flex-row items-end gap-32">
             <Button
               appearance="outline"
               variant="neutral"
               hasIcon
               {...(filtersOpen
                 ? {
-                  leadingIcon: "agora-line-chevron-left",
-                  leadingIconHover: "agora-solid-chevron-left",
-                }
+                    leadingIcon: "agora-line-chevron-left",
+                    leadingIconHover: "agora-solid-chevron-left",
+                  }
                 : {
-                  trailingIcon: "agora-line-chevron-right",
-                  trailingIconHover: "agora-solid-chevron-right",
-                })}
+                    trailingIcon: "agora-line-chevron-right",
+                    trailingIconHover: "agora-solid-chevron-right",
+                  })}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
-              {filtersOpen ? "Ocultar filtros" : "Abrir filtros"}
+              {filtersOpen ? t("filters.hideFilters") : t("filters.openFilters")}
             </Button>
             <span className="whitespace-nowrap text-l-regular text-neutral-900">
-              {total.toLocaleString("pt-PT")} Resultados
+              {t("results", { count: total })}
             </span>
           </div>
         </div>
         <div className="divider-neutral-200 mb-24" />
-        <div
-          className={`grid gap-32 w-full ${filtersOpen ? "grid-cols-12" : ""}`}
-        >
+        <div className={`grid w-full gap-32 ${filtersOpen ? "grid-cols-12" : ""}`}>
           {/* Sidebar */}
           {filtersOpen && (
             <DataStoriesFilters
@@ -124,7 +118,10 @@ export default function DataStoriesClient({
           {/* Results Area */}
           <div className={filtersOpen ? "col-span-8" : "col-span-full"}>
             <div
-              className={twJoin("grid gap-32", filtersOpen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2")}
+              className={twJoin(
+                "grid gap-32",
+                filtersOpen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+              )}
             >
               {pagedStories.length > 0 ? (
                 pagedStories.map((story) => {
@@ -132,8 +129,8 @@ export default function DataStoriesClient({
                   return (
                     <div key={story.slug} className="h-full">
                       <CardLinks
-                        onClick={() => router.push(`/pages/datastories/${story.slug}`)}
-                        className="!h-full [&_.card-links-container]:!h-full [&_.text-content]:!w-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse cursor-pointer text-neutral-900"
+                        onClick={() => router.push(`/datastories/${story.slug}`)}
+                        className="!h-full cursor-pointer text-neutral-900 [&_.card-links-container]:!h-full [&_.content]:!flex-col [&_.content]:xl:!flex-row-reverse [&_.text-content]:!w-full"
                         variant="transparent"
                         image={{
                           src:
@@ -149,9 +146,13 @@ export default function DataStoriesClient({
                             {formatHtmlParagraphs(story.description)}
                           </p>
                         }
-                        date={<span className="font-[300]">Publicado há {timeAgo}</span>}
+                        date={
+                          <span className="font-[300]">
+                            {t("publishedTimeAgo", { timeAgo: timeAgo })}
+                          </span>
+                        }
                         mainLink={
-                          <Link href={`/pages/datastories/${story.slug}`}>
+                          <Link href={`/datastories/${story.slug}`}>
                             <span className="underline">{story.title}</span>
                           </Link>
                         }
@@ -162,23 +163,11 @@ export default function DataStoriesClient({
                 })
               ) : (
                 <div className="col-span-full">
-                  <CardNoResults
-                    icon={
-                      <Icon name="agora-line-search" className="h-12 w-12 text-primary-500" />
-                    }
-                    title="Não encontrou nenhuma data story?"
-                    subtitle={
-                      <span className="font-bold">
-                        Tente redefinir os filtros para ampliar sua busca.
-                      </span>
-                    }
-                    description="Explore a nossa lista completa de data stories."
-                    position="center"
-                    hasAnchor={true}
-                    valueAnchor="Redefinir filtros"
-                    anchorHref="/pages/datastories"
-                    anchorTrailingIcon="agora-line-arrow-right-circle"
-                    anchorTrailingIconHover="agora-solid-arrow-right-circle"
+                  <FoNoResults
+                    icon={pageContent.noResults.icon}
+                    title={pageContent.noResults.title}
+                    subtitle={pageContent.noResults.subtitle}
+                    description={pageContent.noResults.description}
                   />
                 </div>
               )}

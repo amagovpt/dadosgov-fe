@@ -1,4 +1,4 @@
-import { test, expect } from "playwright/test";
+import { test, expect, type APIRequestContext } from "playwright/test";
 import { execSync } from "child_process";
 import { Client } from "pg";
 
@@ -44,7 +44,7 @@ with app.app_context():
 }
 
 async function getDatasetMetricsFromApi(
-  request: any
+  request: APIRequestContext
 ): Promise<{ views: number; resources_downloads: number }> {
   const response = await request.get(
     `${BACKEND_API}/datasets/${DATASET_SLUG}/`
@@ -58,7 +58,7 @@ async function getDatasetMetricsFromApi(
 }
 
 async function triggerDagAndWait(
-  request: any,
+  request: APIRequestContext,
   maxWaitMs = 120_000,
   pollMs = 3_000
 ): Promise<string> {
@@ -90,7 +90,7 @@ async function triggerDagAndWait(
 }
 
 async function getTaskLogs(
-  request: any,
+  request: APIRequestContext,
   dagRunId: string,
   taskId: string
 ): Promise<string> {
@@ -156,7 +156,7 @@ test.describe("Pipeline direto: api-tabular → udata job → frontend", () => {
   });
 
   test("3. Frontend displays updated metrics", async ({ page }) => {
-    await page.goto(`${FRONTEND_URL}/pages/datasets/${DATASET_SLUG}`, {
+    await page.goto(`${FRONTEND_URL}/datasets/${DATASET_SLUG}`, {
       waitUntil: "networkidle",
     });
 
@@ -259,7 +259,7 @@ test.describe("Pipeline Airflow: MongoDB → DAG → PostgreSQL → MongoDB → 
   });
 
   test("5. Frontend displays Airflow-updated metrics", async ({ page }) => {
-    await page.goto(`${FRONTEND_URL}/pages/datasets/${DATASET_SLUG}`, {
+    await page.goto(`${FRONTEND_URL}/datasets/${DATASET_SLUG}`, {
       waitUntil: "networkidle",
     });
 
