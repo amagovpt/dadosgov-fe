@@ -4,13 +4,15 @@ import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 import { createTableActionsColumn } from "@/utils/admin-lists/listColumnHelpers";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { can } from "@/utils/permissions";
+import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
 import type { Dataservice } from "@/service/types/dataservice";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 
-export type DataserviceSortField = "title" | "created_at" | "last_modified";
+export type DataserviceSortField = "title" | "status" | "created_at" | "last_modified";
 
-export const dataserviceSortFieldMap: Record<DataserviceSortField, string> = {
+export const dataserviceSortFieldMap: Record<DataserviceSortField, string | null> = {
   title: "title",
+  status: null,
   created_at: "created",
   last_modified: "last_modified",
 };
@@ -30,6 +32,9 @@ export function sortDataservices(
   return [...items].sort((a, b) => {
     if (sortField === "title") {
       return collator.compare(a.title ?? "", b.title ?? "") * dir;
+    }
+    if (sortField === "status") {
+      return (getResourceStatusSortValue(a) - getResourceStatusSortValue(b)) * dir;
     }
     const aValue = sortField === "created_at" ? a.created_at : getDataserviceModifiedAt(a);
     const bValue = sortField === "created_at" ? b.created_at : getDataserviceModifiedAt(b);
@@ -70,6 +75,8 @@ export function createDataserviceColumns({
     {
       id: "status",
       header: labels.status,
+      sortField: "status",
+      sortType: "string",
       renderCell: (api) => <ResourceStatusBadge item={api} />,
     },
     {

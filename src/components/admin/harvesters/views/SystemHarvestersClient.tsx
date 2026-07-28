@@ -17,6 +17,8 @@ import StatusFilterSelect from "@/components/admin/StatusFilterSelect";
 import {
   createSystemHarvesterColumns,
   filterHarvestersByStatus,
+  sortHarvesters,
+  type HarvesterSortField,
 } from "@/components/admin/harvesters/config/harvestersListConfig";
 import type { BoHarvestersPage } from "@/service/types/admin/harvesters";
 
@@ -41,9 +43,13 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
     setPageSize,
     searchQuery,
     handleSearch,
+    sortField,
+    sortOrder,
+    handleSort,
+    getSortOrder,
     filters,
     updateFilter,
-  } = useAdminListController<never, { statusFilter: string }>({
+  } = useAdminListController<HarvesterSortField, { statusFilter: string }>({
     initialFilters: { statusFilter: "" },
   });
 
@@ -169,6 +175,10 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
     }
     return filterHarvestersByStatus(result, filters.statusFilter);
   }, [harvesters, searchQuery, filters.statusFilter]);
+  const visibleHarvesters = useMemo(
+    () => sortHarvesters(filteredHarvesters, sortField, sortOrder),
+    [filteredHarvesters, sortField, sortOrder]
+  );
 
   const columns = useMemo(
     () =>
@@ -223,7 +233,7 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
       title={t("admin-harvesters:title")}
       isLoading={isLoading}
       count={totalItems}
-      hasItems={filteredHarvesters.length > 0}
+      hasItems={visibleHarvesters.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={handlePageChange}
@@ -258,8 +268,10 @@ export default function SystemHarvestersClient({ pageContent }: SystemHarvesters
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
-        items={filteredHarvesters}
+        items={visibleHarvesters}
         columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
         getRowKey={(harvester) => harvester.id}
       />
     </AdminListPage>

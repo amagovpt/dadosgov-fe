@@ -5,12 +5,19 @@ import TableActionsCell from "@/components/admin/TableActionsCell";
 import { can } from "@/utils/permissions";
 import { calculateQualityScore } from "@/utils/calculateQualityScore";
 import { QUALITY_CRITERIA } from "@/utils/datasetQuality";
+import { getResourceStatusSortValue } from "@/utils/admin-lists/listHelpers";
 import type { Dataset } from "@/service/types/dataset";
 import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import type { AdminListColumn } from "@/components/admin/lists/AdminListTable";
 
-export type DatasetSortField = "title" | "created_at" | "last_modified" | "resources";
-export type OrgDatasetSortField = "title" | "created" | "last_update";
+export type DatasetSortField =
+  | "title"
+  | "status"
+  | "created_at"
+  | "last_modified"
+  | "resources"
+  | "quality";
+export type OrgDatasetSortField = "title" | "status" | "created" | "last_update" | "quality";
 
 export interface DatasetColumnLabels {
   title: string;
@@ -25,9 +32,11 @@ export interface DatasetColumnLabels {
 
 export const systemDatasetSortFieldMap: Record<DatasetSortField, string | null> = {
   title: "title",
+  status: null,
   created_at: "created",
   last_modified: "last_update",
   resources: null,
+  quality: null,
 };
 
 export function sortDatasets(
@@ -43,6 +52,9 @@ export function sortDatasets(
       case "title":
         comparison = (a.title || "").localeCompare(b.title || "");
         break;
+      case "status":
+        comparison = getResourceStatusSortValue(a) - getResourceStatusSortValue(b);
+        break;
       case "created_at":
         comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         break;
@@ -51,6 +63,11 @@ export function sortDatasets(
         break;
       case "resources":
         comparison = (a.resources?.length || 0) - (b.resources?.length || 0);
+        break;
+      case "quality":
+        comparison =
+          calculateQualityScore(QUALITY_CRITERIA, a.quality) -
+          calculateQualityScore(QUALITY_CRITERIA, b.quality);
         break;
       default:
         comparison = 0;
@@ -114,6 +131,8 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
     {
       id: "status",
       header: labels.status,
+      sortField: "status" as DatasetColumnField<TVariant>,
+      sortType: "string",
       renderCell: (dataset) => <ResourceStatusBadge item={dataset} />,
     },
     {
@@ -162,6 +181,8 @@ export function createDatasetColumns<TVariant extends DatasetSortVariant = "syst
       id: "quality",
       header: labels.quality,
       headerLabel: labels.quality,
+      sortField: "quality" as DatasetColumnField<TVariant>,
+      sortType: "numeric",
       renderCell: (dataset) => {
         const score = calculateQualityScore(QUALITY_CRITERIA, dataset.quality);
         return (

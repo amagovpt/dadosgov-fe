@@ -11,6 +11,7 @@ import { useDebouncedSearch } from "@/hooks/admin-lists/useDebouncedSearch";
 import {
   createDatasetColumns,
   DatasetSortField,
+  sortDatasets,
   systemDatasetSortFieldMap,
 } from "@/components/admin/datasets/config/datasetsListConfig";
 import { fetchAdminDatasets, fetchDatasets } from "@/service/api/datasets";
@@ -33,10 +34,11 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const usesLocalSort = sortField === "status" || sortField === "quality" || sortField === "resources";
 
   const sortParam = useMemo(
-    () => buildApiSortParam(sortField, sortOrder, systemDatasetSortFieldMap),
-    [sortField, sortOrder],
+    () => (usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, systemDatasetSortFieldMap)),
+    [sortField, sortOrder, usesLocalSort],
   );
   const columns = useMemo(
     () =>
@@ -126,6 +128,10 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
     setSortOrder,
     setCurrentPage,
   );
+  const visibleDatasets = useMemo(
+    () => (usesLocalSort ? sortDatasets(datasets, sortField, sortOrder) : datasets),
+    [datasets, sortField, sortOrder, usesLocalSort],
+  );
 
   return (
     <AdminListPage
@@ -137,7 +143,7 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
       title={t("admin-datasets:list.title")}
       isLoading={isLoading}
       count={totalItems}
-      hasItems={datasets.length > 0}
+      hasItems={visibleDatasets.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -160,7 +166,7 @@ export default function SystemDatasetsClient({ pageContent }: SystemDatasetsClie
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
-        items={datasets}
+        items={visibleDatasets}
         columns={columns}
         getSortOrder={getSortOrder}
         handleSort={handleSort}

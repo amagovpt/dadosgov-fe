@@ -11,7 +11,7 @@ import type { SortOrder } from "@/hooks/admin-lists/useClientTableState";
 import { formatDateToDMY } from "@/utils/formatDate";
 import type { Post } from "@/service/types/posts";
 
-export type PostSortField = "name" | "created_at" | "last_modified";
+export type PostSortField = "name" | "status" | "created_at" | "last_modified";
 
 export interface PostColumnLabels {
   title: string;
@@ -61,6 +61,7 @@ export function filterPosts(
 export function sortPosts(posts: Post[], sortField: PostSortField | null, sortOrder: SortOrder) {
   return sortItems(posts, sortField, sortOrder, {
     name: createLocaleStringSorter((post) => post.name),
+    status: (a, b) => Number(a.published) - Number(b.published),
     created_at: createDateSorter((post) => post.created_at),
     last_modified: createDateSorter((post) => post.last_modified),
   });
@@ -84,6 +85,8 @@ export function createPostColumns(labels: PostColumnLabels): AdminListColumn<Pos
     {
       id: "status",
       header: labels.status,
+      sortField: "status",
+      sortType: "string",
       renderCell: (post) => (
         <StatusDot variant={post.published ? "success" : "warning"}>
           {post.published ? labels.published : labels.unpublished}

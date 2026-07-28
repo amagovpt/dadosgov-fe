@@ -5,6 +5,7 @@ import type { Discussion } from "@/service/types/discussion";
 import { formatDateToDMY } from "@/utils/formatDate";
 
 export type DiscussionSortField = "created" | "closed";
+export type DiscussionListSortField = "status";
 
 interface OrgDiscussionColumnsOptions {
   onOpenDiscussion: (discussion: Discussion) => void;
@@ -26,7 +27,7 @@ export interface DiscussionColumnLabels {
 
 export function createDiscussionColumns(
   labels: DiscussionColumnLabels,
-): AdminListColumn<Discussion>[] {
+): AdminListColumn<Discussion, DiscussionListSortField>[] {
   return [
     {
       id: "title",
@@ -57,6 +58,8 @@ export function createDiscussionColumns(
     {
       id: "status",
       header: labels.status,
+      sortField: "status",
+      sortType: "string",
       renderCell: (discussion) =>
         discussion.closed ? (
           <StatusDot variant="success">{labels.closed}</StatusDot>
