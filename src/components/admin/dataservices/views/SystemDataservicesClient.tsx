@@ -15,6 +15,7 @@ import {
   DataserviceSortField,
   createDataserviceColumns,
   dataserviceSortFieldMap,
+  sortDataservices,
 } from "@/components/admin/dataservices/config/dataservicesListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import type { BoDataservicesPage } from "@/service/types/admin/dataservices";
@@ -34,10 +35,11 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<DataserviceSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+  const usesLocalSort = sortField === "status";
 
   const sortParam = useMemo(
-    () => buildApiSortParam(sortField, sortOrder, dataserviceSortFieldMap),
-    [sortField, sortOrder]
+    () => (usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, dataserviceSortFieldMap)),
+    [sortField, sortOrder, usesLocalSort]
   );
   const columns = useMemo(
     () =>
@@ -99,6 +101,10 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
   });
 
   const filteredApis = useMemo(() => filterByStatus(apis, statusFilter), [apis, statusFilter]);
+  const visibleApis = useMemo(
+    () => (usesLocalSort ? sortDataservices(filteredApis, sortField, sortOrder) : filteredApis),
+    [filteredApis, sortField, sortOrder, usesLocalSort]
+  );
 
   return (
     <AdminListPage
@@ -110,7 +116,7 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
       title={t("admin-dataservices:title")}
       isLoading={isLoading}
       count={totalItems}
-      hasItems={filteredApis.length > 0}
+      hasItems={visibleApis.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -133,7 +139,7 @@ export default function SystemDataservicesClient({ pageContent }: SystemDataserv
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
-        items={filteredApis}
+        items={visibleApis}
         columns={columns}
         getSortOrder={getSortOrder}
         handleSort={handleSort}

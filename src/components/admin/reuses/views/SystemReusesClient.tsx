@@ -14,6 +14,7 @@ import { buildApiSortParam } from "@/utils/admin-lists/listHelpers";
 import {
   SystemReuseSortField,
   createReuseColumns,
+  sortReuses,
   systemReuseSortFieldMap,
 } from "@/components/admin/reuses/config/reusesListConfig";
 import AdminEmptyState from "@/components/admin/AdminEmptyState";
@@ -34,10 +35,11 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
   const [statusFilter, setStatusFilter] = useState("");
   const [sortField, setSortField] = useState<SystemReuseSortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("none");
+  const usesLocalSort = sortField === "status";
 
   const sortParam = useMemo(
-    () => buildApiSortParam(sortField, sortOrder, systemReuseSortFieldMap),
-    [sortField, sortOrder]
+    () => (usesLocalSort ? undefined : buildApiSortParam(sortField, sortOrder, systemReuseSortFieldMap)),
+    [sortField, sortOrder, usesLocalSort]
   );
   const columns = useMemo(
     () =>
@@ -102,6 +104,10 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
     () => filterByStatus(reuses, statusFilter),
     [reuses, statusFilter]
   );
+  const visibleReuses = useMemo(
+    () => (usesLocalSort ? sortReuses(filteredReuses, sortField, sortOrder) : filteredReuses),
+    [filteredReuses, sortField, sortOrder, usesLocalSort]
+  );
 
   return (
     <AdminListPage
@@ -113,7 +119,7 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
       title={t("admin-reuses:title")}
       isLoading={isLoading}
       count={totalItems}
-      hasItems={filteredReuses.length > 0}
+      hasItems={visibleReuses.length > 0}
       currentPage={currentPage}
       pageSize={pageSize}
       setCurrentPage={setCurrentPage}
@@ -136,7 +142,7 @@ export default function SystemReusesClient({ pageContent }: SystemReusesClientPr
       emptyState={<AdminEmptyState noResults={pageContent.systemNoResults} />}
     >
       <AdminListTable
-        items={filteredReuses}
+        items={visibleReuses}
         columns={columns}
         getSortOrder={getSortOrder}
         handleSort={handleSort}

@@ -13,13 +13,19 @@ import { can } from "@/utils/permissions";
 import { formatDateToDMY } from "@/utils/formatDate";
 import { getHarvesterStatus, type HarvesterStatusLabels } from "@/utils/harvesterStatus";
 
-export type HarvesterSortField = "name" | "created_at" | "last_job";
+export type HarvesterSortField = "name" | "status" | "created_at" | "last_job";
 
 export function getLastJobTimestamp(harvester: HarvestSource): number {
   const job = harvester.last_job;
   if (!job) return 0;
   const value = job.started ?? job.ended ?? job.created;
   return value ? Date.parse(value) : 0;
+}
+
+function getHarvesterStatusSortValue(harvester: HarvestSource): string {
+  const validationState = harvester.validation?.state ?? "pending";
+  const lastJobStatus = harvester.last_job?.status ?? "no_job";
+  return `${validationState}:${lastJobStatus}`;
 }
 
 export function filterHarvestersByStatus(harvesters: HarvestSource[], statusFilter: string) {
@@ -44,6 +50,7 @@ export function sortHarvesters(
 ) {
   return sortItems(harvesters, sortField, sortOrder, {
     name: createLocaleStringSorter((harvester) => harvester.name),
+    status: createLocaleStringSorter(getHarvesterStatusSortValue),
     created_at: createDateSorter((harvester) => harvester.created_at),
     last_job: (a, b) => getLastJobTimestamp(a) - getLastJobTimestamp(b),
   });
@@ -98,6 +105,8 @@ export function createOrgHarvesterColumns({
     {
       id: "status",
       header: labels.status,
+      sortField: "status",
+      sortType: "string",
       renderCell: (harvester) => {
         const status = getHarvesterStatus(harvester, statusLabels);
         return <StatusDot variant={status.variant}>{status.label}</StatusDot>;
@@ -159,7 +168,7 @@ export function createSystemHarvesterColumns({
   labels,
   statusLabels,
   actions,
-}: SystemHarvesterColumnsOptions): AdminListColumn<HarvestSource>[] {
+}: SystemHarvesterColumnsOptions): AdminListColumn<HarvestSource, HarvesterSortField>[] {
   return [
     {
       id: "name",
@@ -171,6 +180,8 @@ export function createSystemHarvesterColumns({
     {
       id: "status",
       header: labels.status,
+      sortField: "status",
+      sortType: "string",
       renderCell: (harvester) => {
         const status = getHarvesterStatus(harvester, statusLabels);
         return <StatusDot variant={status.variant}>{status.label}</StatusDot>;

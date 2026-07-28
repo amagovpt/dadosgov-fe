@@ -4,20 +4,29 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AdminListPage from "@/components/admin/lists/AdminListPage";
 import AdminListTable from "@/components/admin/lists/AdminListTable";
-import { paginateItems } from "@/utils/admin-lists/listHelpers";
+import { paginateItems, sortItems } from "@/utils/admin-lists/listHelpers";
 import { useAdminListController } from "@/hooks/admin-lists/useAdminListController";
 import { fetchOrgDiscussions } from "@/service/api/discussions-topics";
 import type { Discussion } from "@/service/types/discussion";
 import { useActiveOrganization } from "@/hooks/useActiveOrganization";
 import AdminEmptyState from "../AdminEmptyState";
-import { createDiscussionColumns } from "./discussionsListConfig";
+import { createDiscussionColumns, type DiscussionListSortField } from "./discussionsListConfig";
 
 export default function DiscussionsClient() {
   const { t } = useTranslation(["admin-common", "admin-discussions"]);
   const { activeOrg, isLoading: isOrgLoading } = useActiveOrganization();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { currentPage, setCurrentPage, pageSize, setPageSize } = useAdminListController({
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    sortField,
+    sortOrder,
+    handleSort,
+    getSortOrder,
+  } = useAdminListController<DiscussionListSortField>({
     initialFilters: {},
   });
 
@@ -70,9 +79,16 @@ export default function DiscussionsClient() {
       }),
     [t],
   );
+  const sortedDiscussions = useMemo(
+    () =>
+      sortItems(discussions, sortField, sortOrder, {
+        status: (a, b) => Number(Boolean(a.closed)) - Number(Boolean(b.closed)),
+      }),
+    [discussions, sortField, sortOrder],
+  );
   const paginatedDiscussions = useMemo(
-    () => paginateItems(discussions, currentPage, pageSize),
-    [discussions, currentPage, pageSize],
+    () => paginateItems(sortedDiscussions, currentPage, pageSize),
+    [sortedDiscussions, currentPage, pageSize],
   );
 
   if (isOrgLoading || isLoading) {
@@ -103,6 +119,8 @@ export default function DiscussionsClient() {
       <AdminListTable
         items={paginatedDiscussions}
         columns={columns}
+        getSortOrder={getSortOrder}
+        handleSort={handleSort}
         getRowKey={(discussion) => discussion.id}
       />
     </AdminListPage>
