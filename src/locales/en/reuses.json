@@ -22,6 +22,8 @@
   },
   "theReuses": "the reuses",
   "detail": {
+    "untitled": "No title",
+    "noDescription": "No description",
     "addFavorite": "Add to favorites",
     "removeFavorite": "Remove from favorites",
     "viewReuse": "View reuse",

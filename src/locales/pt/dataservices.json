@@ -33,6 +33,8 @@
   },
   "detail": {
     "notFound": "API não encontrada.",
+    "untitled": "Sem título",
+    "noDescription": "Sem descrição",
     "draft": "Rascunho",
     "archived": "Arquivado",
     "addFavorite": "Adicionar aos favoritos",
