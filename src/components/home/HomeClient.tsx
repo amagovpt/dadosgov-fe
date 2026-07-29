@@ -88,12 +88,12 @@ export default function HomeClient({
           <HeroGeneral
             hasBreadcrumb={false}
             title={
-              <h1 className="text-white flex flex-col items-start leading-tight">
+              <span className="text-white flex flex-col items-start leading-tight">
                 {highlightText(HomeHero.title, HomeHero.highlight, {
                   highlightClassName: "text-2xl-bold",
                   textClassName: "text-2xl-regular",
                 })}
-              </h1>
+              </span>
             }
             subtitle={
               <span className="text-white text-m-regular">
