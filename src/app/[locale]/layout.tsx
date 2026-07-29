@@ -105,7 +105,7 @@ export default async function RootLayout({
 }) {
   const { locale: rawLocale } = await params;
   const locale = i18nConfig.locales.includes(rawLocale) ? rawLocale : i18nConfig.defaultLocale;
-  const { resources, t } = await initTranslations({
+  const { resources } = await initTranslations({
     locale,
     namespaces,
   });
