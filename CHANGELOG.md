@@ -6,6 +6,15 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(docker): make the `.next/cache` bind mount writable by the app user** [#524](https://github.com/amagovpt/dadosgov-fe/pull/524)
+  - Docker auto-creates the `./.next/cache` bind dir as `root:root` 755, but
+    the container runs as `nextjs` (uid 10001), so every disk-cache write
+    failed with `EACCES` — constant "Failed to update prerender cache" log
+    spam and no fetch/ISR or image-optimizer caching at all in PPR. The
+    one-shot init container that already fixes `./logs` ownership on each
+    `up` (renamed `init-logs` → `init-dirs`) now chowns both bind mounts,
+    so no manual `chown` on the host is ever needed.
+
 - **fix(listings): share the SSR listing cache across visitors** [#522](https://github.com/amagovpt/dadosgov-fe/pull/522)
   - The aggregated listing fetches (datasets / organizations / reuses) used
     `next: { revalidate: 60 }` while relaying the visitor's `X-Forwarded-For`,
