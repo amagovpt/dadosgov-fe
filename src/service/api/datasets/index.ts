@@ -26,6 +26,7 @@ import {
   chunkedUploadFetch,
   translateUploadErrorPayload,
 } from "@/service/utils/API";
+import { cachedListingFetch } from "@/service/utils/listingCache";
 
 
 /**
@@ -662,25 +663,26 @@ export async function fetchDatasetsListing(
     }
 
     const url = `${API_BASE_URL}/site/datasets-listing/?${params.toString()}`;
-    // SSR listing: cache per-URL in the Next.js Data Cache (matches the backend
-    // @cache.cached(60)). Repeated identical page/query loads are served from
-    // cache and never reach the backend, so they don't consume the per-IP
+    // SSR listing: cached per-URL for 60s in `listingCache` (matches the
+    // backend @cache.cached(60)), shared across visitors — the Next.js Data
+    // Cache keys on headers, so it would fragment per client IP. Repeated
+    // page/query loads never reach the backend and don't consume the per-IP
     // PUBLIC_SEARCH_LIMIT bucket that the F5 IP-collapse turns site-wide.
     // On a cache-miss, `forwarded` relays the real client IP so the backend
     // keys the limiter per visitor instead of the Next.js server IP.
-    const res = await fetch(url, { next: { revalidate: 60 }, headers: forwarded });
+    const result = await cachedListingFetch<DatasetsListingResponse>(url, forwarded);
 
-    if (!res.ok) {
-      console.error(`Error fetching datasets listing: ${res.status} ${res.statusText}`);
+    if (!result.ok) {
+      console.error(`Error fetching datasets listing: ${result.status} ${result.statusText}`);
       return {
         ...emptyShape,
-        listing: { ...emptyShape.listing, error: true, errorStatus: res.status },
+        listing: { ...emptyShape.listing, error: true, errorStatus: result.status },
         error: true,
-        errorStatus: res.status,
+        errorStatus: result.status,
       };
     }
 
-    return await res.json();
+    return result.data;
   } catch (error) {
     console.error("Error fetching datasets listing:", error);
     return {

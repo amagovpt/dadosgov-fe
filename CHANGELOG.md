@@ -6,6 +6,18 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(listings): share the SSR listing cache across visitors** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The aggregated listing fetches (datasets / organizations / reuses) used
+    `next: { revalidate: 60 }` while relaying the visitor's `X-Forwarded-For`,
+    but the Next.js Data Cache includes request headers in its cache key — so
+    every client IP got its own ~500 KB entry, each visitor's first load
+    always hit the backend, and the on-disk fetch-cache grew with
+    IP × query combinations. The fetches now go through a shared in-memory
+    cache keyed by URL alone (`src/service/utils/listingCache.ts`, 60s TTL
+    matching the backend `@cache.cached(60)`, in-flight dedupe, LRU cap).
+    The real client IP is still relayed on the single upstream miss, so the
+    backend rate limiter keeps per-visitor attribution.
+
 - **fix(publications): cache PDF page counts instead of PDF bytes** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - The publications page counted each PDF's pages by fetching the asset with
     `cache: "force-cache"`, but Next's Data Cache rejects entries over 2 MB —
