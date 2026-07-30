@@ -3,7 +3,7 @@ import HeroGeneral from "@/components/HeroGeneral";
 import { getPublicationsPage } from "@/service/queries/resources/publications";
 import { parseHtmlToParagraphs } from "@/utils/htmlToParagraphs";
 import { getCmsBaseUrl } from "@/service/utils/cmsBaseUrl";
-import { getDocumentProxy } from "unpdf";
+import { fetchPdfPageCount } from "@/lib/pdfPageCount";
 import PublicationsClient from "@/components/resources/PublicationsClient";
 import {
   PUBLICATIONS_PAGE_SIZE,
@@ -14,12 +14,18 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { hero } = await getPublicationsPage("pt");
-
-  return {
-    title: `${hero.title} - Dados Gov PT`,
-    description: hero.description,
-  };
+  try {
+    const { hero } = await getPublicationsPage("pt");
+    return {
+      title: `${hero.title} - Dados Gov PT`,
+      description: hero.description,
+    };
+  } catch (error) {
+    // Fall back to the layout's default title rather than failing the whole
+    // page render when the CMS is unreachable.
+    console.error("Error fetching publicacoes metadata:", error);
+    return {};
+  }
 }
 
 export default async function PublicationsPage({
@@ -35,23 +41,7 @@ export default async function PublicationsPage({
 
   const getPagesNum = async (pdfDocument: string): Promise<number | null> => {
     if (pdfDocument === "#") return null;
-
-    const url = `${getCmsBaseUrl()}/api/assets/${pdfDocument}`;
-
-    try {
-      const res = await fetch(url, { cache: "force-cache" });
-      if (!res.ok) {
-        console.error(`[publications] page count fetch ${url} returned ${res.status}`);
-        return null;
-      }
-
-      const bytes = await res.arrayBuffer();
-      const pdf = await getDocumentProxy(new Uint8Array(bytes));
-      return pdf.numPages;
-    } catch (error) {
-      console.error(`[publications] page count fetch ${url} failed:`, error);
-      return null;
-    }
+    return fetchPdfPageCount(`${getCmsBaseUrl()}/api/assets/${pdfDocument}`);
   };
 
   const sorted = sortPublications(publications, sort);
