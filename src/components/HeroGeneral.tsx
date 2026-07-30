@@ -71,7 +71,7 @@ export default function HeroGeneral({
               </h1>
             )}
             {subtitle && (
-              <span className="text-white text-m-regular">
+              <span className="text-white text-m-regular [&_a]:text-[length:inherit] [&_a]:font-[inherit]">
                 {subtitle}
               </span>
             )}
