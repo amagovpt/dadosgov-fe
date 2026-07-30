@@ -6,6 +6,16 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(publications): cache PDF page counts instead of PDF bytes** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - The publications page counted each PDF's pages by fetching the asset with
+    `cache: "force-cache"`, but Next's Data Cache rejects entries over 2 MB —
+    so most PDFs were silently re-downloaded and re-parsed from the CMS on
+    every request (the page is `force-dynamic`), and the few under 2 MB were
+    cached forever, going stale if the asset changed under the same slug.
+    Page counts are now cached in memory (`src/lib/pdfPageCount.ts`, 1h TTL,
+    same singleton pattern as the Apollo CMS cache) and the PDF bytes are
+    fetched with `cache: "no-store"` only on a cache miss.
+
 - **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - The "nova API" producer step no longer offers personal ("Eu próprio")
     publishing and lists only the user's organizations carrying the
