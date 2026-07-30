@@ -6,7 +6,7 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
-- **fix(cms): stop a slow CMS from hanging SSR — timeout + stale-while-revalidate** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(cms): stop a slow CMS from hanging SSR — timeout + stale-while-revalidate** [#523](https://github.com/amagovpt/dadosgov-fe/pull/523)
   - Root cause of the intermittent multi-second loads/timeouts in PRD
     (measured 2026-07-30: homepage 500s with 6–25s TTFB while the backend
     answered in 60–80ms): every public SSR page depends on Squidex, the
