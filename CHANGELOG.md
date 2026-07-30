@@ -6,6 +6,19 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(cms): stop a slow CMS from hanging SSR — timeout + stale-while-revalidate** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+  - Root cause of the intermittent multi-second loads/timeouts in PRD
+    (measured 2026-07-30: homepage 500s with 6–25s TTFB while the backend
+    answered in 60–80ms): every public SSR page depends on Squidex, the
+    Apollo cache was fully reset each TTL, and no CMS request had a deadline
+    — so an expired cache + slow CMS blocked renders until the F5 time limit.
+  - Server-side GraphQL requests now carry a per-request 5s abort signal
+    (`CMS_FETCH_TIMEOUT_MS`), and the Apollo client serves
+    stale-while-revalidate instead of resetting: past the TTL the last good
+    result is returned immediately and refreshed in the background (a failed
+    refresh keeps the stale copy). A slow CMS now degrades freshness, never
+    latency. The CMS asset proxy (`/assets/*`) also gets a 10s deadline.
+
 - **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - The "nova API" producer step no longer offers personal ("Eu próprio")
     publishing and lists only the user's organizations carrying the
