@@ -1,21 +1,33 @@
 "use client";
 
 import React from "react";
-import { ToggleGroup, Toggle, StatusCard } from "@ama-pt/agora-design-system";
+import { StatusCard, Toggle, ToggleGroup } from "@ama-pt/agora-design-system";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useTranslation } from "react-i18next";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
 import { useSupportForm } from "./hooks/useSupportForm";
 import { shouldPreselectFeedbackFromUrl } from "./utils";
-import { SupportHero } from "./components/SupportHero";
-import { FaqSection } from "./components/FaqSection";
-import { SupportSidebar } from "./components/SupportSidebar";
-import { SupportForm } from "./components/SupportForm";
 import { DatasetInfoCard } from "./components/DatasetInfoCard";
+import { FaqSection } from "./components/FaqSection";
+import { SupportForm } from "./components/SupportForm";
+import { SupportHero } from "./components/SupportHero";
+import { SupportSidebar } from "./components/SupportSidebar";
+import type { SupportPageContent as SupportPageContentType } from "@/service/types/support";
 
-export function SupportPageContent() {
+interface SupportPageContentProps {
+  pageContent: SupportPageContentType;
+}
+
+export function SupportPageContent({ pageContent }: SupportPageContentProps) {
+  const { t } = useTranslation("support");
   const { executeRecaptcha } = useGoogleReCaptcha();
+  const faqSections = React.useMemo(
+    () => (pageContent.faqSections ?? []).filter((section) => section.enabled !== false),
+    [pageContent.faqSections]
+  );
 
   const [activeItem, setActiveItem] = React.useState(() =>
-    shouldPreselectFeedbackFromUrl() ? "Ajuda" : "Nesta página"
+    shouldPreselectFeedbackFromUrl() ? "help" : "current"
   );
 
   const form = useSupportForm({ executeRecaptcha });
@@ -27,37 +39,53 @@ export function SupportPageContent() {
     form.setSuccessMessage("");
     form.setErrorMessage("");
   };
+  const selectedInfoCard =
+    form.selectedToggle === "question"
+      ? pageContent.questionInfoCard
+      : form.selectedToggle === "feedback"
+        ? pageContent.feedbackInfoCard
+        : null;
 
   return (
     <main id="nesta-pagina" className="flex-grow bg-white pb-64">
-      <SupportHero />
+      <SupportHero content={pageContent.hero} />
 
       <div className="container mx-auto px-4 py-64">
         <div className="grid gap-32 md:grid-cols-3 xl:grid-cols-12">
           <div className="max-w-ch xl:col-span-8 xl:block">
-            <FaqSection />
+            <FaqSection
+              title={t("faq.title")}
+              updatedDate={pageContent.faqUpdatedDate}
+              categories={faqSections}
+            />
           </div>
 
           <div className="sticky top-[190px] h-fit self-start xl:col-span-4 xl:block">
-            <SupportSidebar activeItem={activeItem} onItemClick={setActiveItem} />
+            <SupportSidebar
+              activeItem={activeItem}
+              categories={faqSections}
+              currentLabel={t("sidebar.currentPage")}
+              helpLabel={pageContent.helpCard.title ?? t("help.title")}
+              onItemClick={setActiveItem}
+            />
           </div>
         </div>
 
-        <div id="ajuda" className="mt-80 scroll-mt-[190px] border-neutral-200 pt-64">
-          <h2 className="mb-24 text-24 font-bold text-[#021C51]">Ajuda</h2>
+        <div id="help" className="mt-80 scroll-mt-[190px] border-neutral-200 pt-64">
+          <h2 className="mb-24 text-24 font-bold text-[#021C51]">
+            {pageContent.helpCard.title}
+          </h2>
           <h3 className="mb-16 text-[20px] font-[500] text-[#021C51]">
-            Não encontrou o que procurava?
+            {pageContent.helpCard.subtitle}
           </h3>
 
-          <p className="mb-8 text-[16px] text-neutral-800">
-            Antes de nos contactar, consulte as Perguntas Frequentes e a área de Conhecimento do
-            dados.gov.pt. A sua questão poderá já estar respondida nos conteúdos disponíveis sobre
-            dados abertos, publicação de datasets, reutilização de dados, metadados, licenças e
-            funcionamento do portal.
-          </p>
-          <p className="mb-24 text-[16px] text-neutral-800">
-            Caso ainda necessite de apoio, selecione a opção mais adequada:
-          </p>
+          <div className="mb-8 text-[16px] text-neutral-800">
+            {formatHtmlParagraphs(
+              pageContent.helpCard.description ?? "",
+              "text-[16px] text-neutral-800"
+            )}
+          </div>
+          <p className="mb-24 text-[16px] text-neutral-800">{t("help.optionIntro")}</p>
 
           <ToggleGroup
             multiple={false}
@@ -70,7 +98,7 @@ export function SupportPageContent() {
               leadingIconHover="agora-solid-question-mark"
               hasIcon={true}
             >
-              Tenho uma pergunta
+              {t("toggles.question")}
             </Toggle>
             <Toggle
               value="bug"
@@ -78,7 +106,7 @@ export function SupportPageContent() {
               leadingIconHover="agora-solid-alert-triangle"
               hasIcon={true}
             >
-              Reportar um problema
+              {t("toggles.bug")}
             </Toggle>
             <Toggle
               value="feedback"
@@ -86,7 +114,7 @@ export function SupportPageContent() {
               leadingIconHover="agora-solid-chat"
               hasIcon={true}
             >
-              Envie o seu feedback
+              {t("toggles.feedback")}
             </Toggle>
             <Toggle
               value="dataset"
@@ -94,7 +122,7 @@ export function SupportPageContent() {
               leadingIconHover="agora-solid-plus-circle"
               hasIcon={true}
             >
-              Pedir um dataset
+              {t("toggles.dataset")}
             </Toggle>
           </ToggleGroup>
 
@@ -118,10 +146,13 @@ export function SupportPageContent() {
               setProblemDateTime={form.setProblemDateTime}
               setErrors={form.setErrors}
               handleSubmit={form.handleSubmit}
+              infoCard={selectedInfoCard}
             />
           )}
 
-          {form.selectedToggle === "dataset" && <DatasetInfoCard />}
+          {form.selectedToggle === "dataset" && (
+            <DatasetInfoCard cards={pageContent.datasetRequestCards ?? []} />
+          )}
 
           {form.successMessage && (
             <div className="mt-32 max-w-2xl">

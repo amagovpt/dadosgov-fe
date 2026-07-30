@@ -1,0 +1,104 @@
+{
+  "hero": {
+    "links": [
+      {
+        "children": "O que é o dados.gov.pt",
+        "href": "/recursos/como-usar-o-portal/o-que-e-dados-gov-pt",
+        "icon": "agora-line-arrow-right-circle"
+      },
+      {
+        "children": "Saber mais sobre dados abertos",
+        "href": "/recursos/como-usar-o-portal/sobre-dados-abertos",
+        "icon": "agora-line-arrow-right-circle"
+      }
+    ]
+  },
+  "sidebar": {
+    "currentPage": "Nesta página"
+  },
+  "faq": {
+    "title": "Perguntas frequentes"
+  },
+  "legalAnswers": {
+    "personalDataTitle": "Proteção de Dados Pessoais / RGPD",
+    "contactPrefix": "Contactar a",
+    "cnpdLink": "Comissão Nacional de Proteção de Dados",
+    "removalRequestTitle": "Pedido de remoção de dados pessoais",
+    "supportPrefix": "Contactar a equipa do dados.gov.pt na página de",
+    "supportLink": "Suporte"
+  },
+  "help": {
+    "title": "Ajuda",
+    "optionIntro": "Caso ainda necessite de apoio, selecione a opção mais adequada:"
+  },
+  "toggles": {
+    "question": "Tenho uma pergunta",
+    "bug": "Reportar um problema",
+    "feedback": "Envie o seu feedback",
+    "dataset": "Pedir um dataset"
+  },
+  "form": {
+    "title": {
+      "question": "Qual o problema que está a enfrentar?",
+      "bug": "Qual o problema que está a enfrentar?",
+      "feedback": "Envie o seu feedback"
+    },
+    "prefix": {
+      "question": "Pergunta",
+      "bug": "Problema",
+      "feedback": "Feedback"
+    },
+    "subjectLabel": {
+      "question": "O assunto da sua pergunta *",
+      "bug": "O assunto do seu problema *",
+      "feedback": "O assunto do seu feedback *"
+    },
+    "contentLabel": {
+      "question": "A sua pergunta *",
+      "bug": "Descreva o problema *",
+      "feedback": "Descreva a situação *"
+    },
+    "categories": {
+      "question": [
+        "Questão sobre o funcionamento do portal",
+        "Questão sobre publicação de dados",
+        "Questão sobre reutilização de dados",
+        "Questão sobre organizações ou fornecedores de dados",
+        "Questão sobre metadados, formatos ou licenças",
+        "Outra questão geral"
+      ],
+      "bug": [
+        "Erro técnico no portal",
+        "Problema no acesso ou autenticação",
+        "Problema ao publicar ou editar um dataset",
+        "Problema com ficheiros, ligações ou APIs",
+        "Problema com uma organização ou reutilização",
+        "Conteúdo incorreto ou indisponível",
+        "Outro problema"
+      ],
+      "feedback": [
+        "Sugestão de melhoria do portal",
+        "Sugestão sobre conteúdos de literacia/conhecimento",
+        "Sugestão sobre pesquisa e navegação",
+        "Sugestão sobre datasets ou reutilizações",
+        "Feedback geral sobre a experiência de utilização"
+      ]
+    },
+    "success": {
+      "question": "Pergunta enviada com sucesso.",
+      "bug": "Problema reportado com sucesso.",
+      "feedback": "Feedback enviado com sucesso."
+    },
+    "emailLabel": "O seu e-mail *",
+    "categoryLabel": "Categoria *",
+    "categoryPlaceholder": "Selecione uma categoria...",
+    "problemUrlLabel": "Página ou URL onde ocorreu o problema",
+    "problemUrlPlaceholder": "https://dados.gov.pt/...",
+    "problemDateTimeLabel": "Data/hora aproximada",
+    "problemDateTimePlaceholder": "Ex.: 05/06/2026 14:30",
+    "submit": "Enviar",
+    "sending": "A enviar...",
+    "requiredField": "Campo obrigatório",
+    "submitError": "Não foi possível enviar o seu pedido. Tente novamente em alguns instantes."
+  }
+}
