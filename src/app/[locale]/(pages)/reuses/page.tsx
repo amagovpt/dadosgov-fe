@@ -60,7 +60,7 @@ export default async function ReusesPage({
     }
 
     // LEDG-1836: one aggregated call replaces the prior Promise.all of 6 fetches.
-    // Relay the real client IP on the SSR fetch (which, on a Data Cache miss,
+    // Relay the real client IP on the SSR fetch (which, on a listing-cache miss,
     // goes direct to the backend) so the limiter keys per visitor, not the Next IP.
     const forwarded = await serverForwardedHeaders();
     const data = await fetchReusesListing(page, 12, apiFilters, forwarded);

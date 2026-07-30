@@ -6,6 +6,28 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
+- **fix(listings): share the SSR listing cache across visitors** [#522](https://github.com/amagovpt/dadosgov-fe/pull/522)
+  - The aggregated listing fetches (datasets / organizations / reuses) used
+    `next: { revalidate: 60 }` while relaying the visitor's `X-Forwarded-For`,
+    but the Next.js Data Cache includes request headers in its cache key — so
+    every client IP got its own ~500 KB entry, each visitor's first load
+    always hit the backend, and the on-disk fetch-cache grew with
+    IP × query combinations. The fetches now go through a shared in-memory
+    cache keyed by URL alone (`src/service/utils/listingCache.ts`, 60s TTL
+    matching the backend `@cache.cached(60)`, in-flight dedupe, LRU cap).
+    The real client IP is still relayed on the single upstream miss, so the
+    backend rate limiter keeps per-visitor attribution.
+
+- **fix(publications): cache PDF page counts instead of PDF bytes** [#522](https://github.com/amagovpt/dadosgov-fe/pull/522)
+  - The publications page counted each PDF's pages by fetching the asset with
+    `cache: "force-cache"`, but Next's Data Cache rejects entries over 2 MB —
+    so most PDFs were silently re-downloaded and re-parsed from the CMS on
+    every request (the page is `force-dynamic`), and the few under 2 MB were
+    cached forever, going stale if the asset changed under the same slug.
+    Page counts are now cached in memory (`src/lib/pdfPageCount.ts`, 1h TTL,
+    same singleton pattern as the Apollo CMS cache) and the PDF bytes are
+    fetched with `cache: "no-store"` only on a cache miss.
+
 - **fix(cms): stop a slow CMS from hanging SSR — timeout + stale-while-revalidate** [#523](https://github.com/amagovpt/dadosgov-fe/pull/523)
   - Root cause of the intermittent multi-second loads/timeouts in PRD
     (measured 2026-07-30: homepage 500s with 6–25s TTFB while the backend
