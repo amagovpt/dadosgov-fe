@@ -18,6 +18,12 @@ This project has no version tags, so entries are grouped by month (newest first)
     result is returned immediately and refreshed in the background (a failed
     refresh keeps the stale copy). A slow CMS now degrades freshness, never
     latency. The CMS asset proxy (`/assets/*`) also gets a 10s deadline.
+  - Hardened the uncaught CMS call sites: the 12 `generateMetadata` functions
+    that queried the CMS bare now fall back to the layout's default metadata
+    on error, and a new `[locale]/error.tsx` route boundary renders a
+    friendly retry page (header/footer intact) instead of the framework 500
+    for any remaining uncaught render error — the likely source of the
+    intermittent PRD 500s.
 
 - **feat(dataservices): restrict API creation to public-service organizations** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
   - The "nova API" producer step no longer offers personal ("Eu próprio")
