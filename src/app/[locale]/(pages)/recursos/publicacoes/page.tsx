@@ -14,12 +14,18 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { hero } = await getPublicationsPage("pt");
-
-  return {
-    title: `${hero.title} - Dados Gov PT`,
-    description: hero.description,
-  };
+  try {
+    const { hero } = await getPublicationsPage("pt");
+    return {
+      title: `${hero.title} - Dados Gov PT`,
+      description: hero.description,
+    };
+  } catch (error) {
+    // Fall back to the layout's default title rather than failing the whole
+    // page render when the CMS is unreachable.
+    console.error("Error fetching publicacoes metadata:", error);
+    return {};
+  }
 }
 
 export default async function PublicationsPage({

@@ -10,12 +10,18 @@ export async function generateMetadata({
   const { slug } = await params;
   const datastorySlug = slug.join("/");
 
-  const datastory = await getDatastoryMetadata(datastorySlug, "pt");
-
-  return {
-    title: datastory.title,
-    description: datastory.description,
-  };
+  try {
+    const datastory = await getDatastoryMetadata(datastorySlug, "pt");
+    return {
+      title: datastory.title,
+      description: datastory.description,
+    };
+  } catch (error) {
+    // Fall back to the layout's default title rather than failing the whole
+    // page render when the CMS is unreachable.
+    console.error("Error fetching datastory metadata:", error);
+    return {};
+  }
 }
 
 export default async function DataStoryDetailPage({
