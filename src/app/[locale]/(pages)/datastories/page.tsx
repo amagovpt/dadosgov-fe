@@ -12,12 +12,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
 
-  const metadata = await getDataStoriesMetadata(locale);
-
-  return {
-    title: metadata.title,
-    description: stripHtmlTags(metadata.description),
-  };
+  try {
+    const metadata = await getDataStoriesMetadata(locale);
+    return {
+      title: metadata.title,
+      description: stripHtmlTags(metadata.description),
+    };
+  } catch (error) {
+    // Fall back to the layout's default title/description rather than failing
+    // the whole page render when the CMS is unreachable.
+    console.error("Error fetching datastories metadata:", error);
+    return {};
+  }
 }
 
 export default async function DataStoriesPage({
