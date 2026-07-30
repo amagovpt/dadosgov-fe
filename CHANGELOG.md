@@ -6,7 +6,7 @@ This project has no version tags, so entries are grouped by month (newest first)
 
 ## Unreleased
 
-- **fix(docker): make the `.next/cache` bind mount writable by the app user** [#XXX](https://github.com/amagovpt/dadosgov-fe/pull/XXX)
+- **fix(docker): make the `.next/cache` bind mount writable by the app user** [#524](https://github.com/amagovpt/dadosgov-fe/pull/524)
   - Docker auto-creates the `./.next/cache` bind dir as `root:root` 755, but
     the container runs as `nextjs` (uid 10001), so every disk-cache write
     failed with `EACCES` — constant "Failed to update prerender cache" log
