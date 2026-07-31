@@ -25,7 +25,7 @@ export function SupportSidebar({
         <li className="mb-16 cursor-pointer" onClick={() => onItemClick("current")}>
           <a
             href="#nesta-pagina"
-            className={`text-neutral-900 ${activeItem === "current" ? "text-m-bold font-bold" : "text-m-regular"}`}
+            className={`text-neutral-900 inline-block w-full ${activeItem === "current" ? "text-m-bold font-bold" : "text-m-regular"}`}
             style={activeItem === "current" ? { fontWeight: 700 } : {}}
           >
             {currentLabel}
@@ -38,7 +38,7 @@ export function SupportSidebar({
             <li key={slug} className="mb-8 cursor-pointer" onClick={() => onItemClick(slug)}>
               <a
                 href={`#${slug}`}
-                className={`text-neutral-900 ${activeItem === slug ? "text-m-bold font-bold" : "text-m-regular"}`}
+                className={`text-neutral-900 inline-block w-full ${activeItem === slug ? "text-m-bold font-bold" : "text-m-regular"}`}
                 style={activeItem === slug ? { fontWeight: 700 } : {}}
               >
                 {category.title}
@@ -50,7 +50,7 @@ export function SupportSidebar({
         <li className="cursor-pointer" onClick={() => onItemClick("help")}>
           <a
             href="#help"
-            className={`text-neutral-900 ${activeItem === "help" ? "text-m-bold font-bold" : "text-m-regular"}`}
+            className={`text-neutral-900 inline-block w-full ${activeItem === "help" ? "text-m-bold font-bold" : "text-m-regular"}`}
             style={activeItem === "help" ? { fontWeight: 700 } : {}}
           >
             {helpLabel}
