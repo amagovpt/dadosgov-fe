@@ -16,6 +16,10 @@
   "sidebar": {
     "currentPage": "Nesta página"
   },
+  "anchors": {
+    "currentPage": "nesta-pagina",
+    "help": "ajuda"
+  },
   "faq": {
     "title": "Perguntas frequentes"
   },
