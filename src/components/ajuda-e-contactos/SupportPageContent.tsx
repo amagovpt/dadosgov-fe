@@ -29,7 +29,7 @@ export function SupportPageContent() {
   };
 
   return (
-    <main id="nesta-pagina" className="flex-grow bg-white pb-64">
+    <main id="nesta-pagina" className="flex-grow !scroll-mt-[200px] bg-white pb-64">
       <SupportHero />
 
       <div className="container mx-auto px-4 py-64">
@@ -43,7 +43,7 @@ export function SupportPageContent() {
           </div>
         </div>
 
-        <div id="ajuda" className="mt-80 scroll-mt-[190px] border-neutral-200 pt-64">
+        <div id="ajuda" className="mt-80 border-neutral-200 pt-64">
           <h2 className="mb-24 text-24 font-bold text-[#021C51]">Ajuda</h2>
           <h3 className="mb-16 text-[20px] font-[500] text-[#021C51]">
             Não encontrou o que procurava?
