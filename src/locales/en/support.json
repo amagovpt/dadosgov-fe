@@ -16,6 +16,10 @@
   "sidebar": {
     "currentPage": "On this page"
   },
+  "anchors": {
+    "currentPage": "current-page",
+    "help": "help"
+  },
   "faq": {
     "title": "Frequently asked questions"
   },

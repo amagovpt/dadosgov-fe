@@ -18,18 +18,52 @@ interface SupportPageContentProps {
   pageContent: SupportPageContentType;
 }
 
+function getActiveItemFromHash(
+  hash: string,
+  faqSections: SupportPageContentType["faqSections"],
+  currentAnchorId: string,
+  helpAnchorId: string
+) {
+  if (!hash) return null;
+  if (hash === currentAnchorId || hash === helpAnchorId) return hash;
+
+  const section = (faqSections ?? []).find(
+    (section) => section.enabled !== false && section.id === hash
+  );
+  return section?.id ?? null;
+}
+
+function getHashSnapshot() {
+  return decodeURIComponent(window.location.hash.replace(/^#/, ""));
+}
+
+function getServerHashSnapshot() {
+  return "";
+}
+
+function subscribeToHashChange(onStoreChange: () => void) {
+  window.addEventListener("hashchange", onStoreChange);
+  return () => window.removeEventListener("hashchange", onStoreChange);
+}
+
 export function SupportPageContent({ pageContent }: SupportPageContentProps) {
   const { t } = useTranslation("support");
   const { executeRecaptcha } = useGoogleReCaptcha();
+  const currentAnchorId = t("anchors.currentPage");
+  const helpAnchorId = t("anchors.help");
   const faqSections = React.useMemo(
     () => (pageContent.faqSections ?? []).filter((section) => section.enabled !== false),
     [pageContent.faqSections]
   );
 
-  const [activeItem, setActiveItem] = React.useState(() =>
-    shouldPreselectFeedbackFromUrl() ? "help" : "current"
+  const hash = React.useSyncExternalStore(
+    subscribeToHashChange,
+    getHashSnapshot,
+    getServerHashSnapshot
   );
-
+  const activeItem =
+    getActiveItemFromHash(hash, pageContent.faqSections, currentAnchorId, helpAnchorId) ??
+    (shouldPreselectFeedbackFromUrl() ? helpAnchorId : currentAnchorId);
   const form = useSupportForm({ executeRecaptcha });
 
   const handleToggleChange = (val: string[]) => {
@@ -47,7 +81,7 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
         : null;
 
   return (
-    <main id="nesta-pagina" className="flex-grow bg-white pb-64 !scroll-mt-[200px]">
+    <main id={currentAnchorId} className="flex-grow bg-white pb-64 !scroll-mt-[200px]">
       <SupportHero content={pageContent.hero} />
 
       <div className="container mx-auto px-4 py-64">
@@ -64,14 +98,15 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
             <SupportSidebar
               activeItem={activeItem}
               categories={faqSections}
+              currentAnchorId={currentAnchorId}
               currentLabel={t("sidebar.currentPage")}
+              helpAnchorId={helpAnchorId}
               helpLabel={pageContent.helpCard.title ?? t("help.title")}
-              onItemClick={setActiveItem}
             />
           </div>
         </div>
 
-        <div id="help" className="mt-80 border-neutral-200 pt-64">
+        <div id={helpAnchorId} className="mt-80 border-neutral-200 pt-64">
           <h2 className="mb-24 text-24 font-bold text-[#021C51]">
             {pageContent.helpCard.title}
           </h2>

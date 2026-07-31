@@ -5,28 +5,30 @@ import type { FaqCategory } from "@/service/types/support";
 interface SupportSidebarProps {
   activeItem: string;
   categories: FaqCategory[];
+  currentAnchorId: string;
   currentLabel: string;
+  helpAnchorId: string;
   helpLabel: string;
-  onItemClick: (item: string) => void;
 }
 
 export function SupportSidebar({
   activeItem,
   categories,
+  currentAnchorId,
   currentLabel,
+  helpAnchorId,
   helpLabel,
-  onItemClick,
 }: SupportSidebarProps) {
   const enabledCategories = categories.filter((category) => category.enabled !== false);
 
   return (
     <div className="sidebar-index border-l border-neutral-700 pr-64">
       <ul>
-        <li className="mb-16 cursor-pointer" onClick={() => onItemClick("current")}>
+        <li className="mb-16 cursor-pointer">
           <a
-            href="#nesta-pagina"
-            className={`text-neutral-900 inline-block w-full ${activeItem === "current" ? "text-m-bold font-bold" : "text-m-regular"}`}
-            style={activeItem === "current" ? { fontWeight: 700 } : {}}
+            href={`#${currentAnchorId}`}
+            className={`text-neutral-900 inline-block w-full ${activeItem === currentAnchorId ? "text-m-bold font-bold" : "text-m-regular"}`}
+            style={activeItem === currentAnchorId ? { fontWeight: 700 } : {}}
           >
             {currentLabel}
           </a>
@@ -35,7 +37,7 @@ export function SupportSidebar({
         {enabledCategories.map((category) => {
           const slug = category.id;
           return (
-            <li key={slug} className="mb-8 cursor-pointer" onClick={() => onItemClick(slug)}>
+            <li key={slug} className="mb-8 cursor-pointer">
               <a
                 href={`#${slug}`}
                 className={`text-neutral-900 inline-block w-full ${activeItem === slug ? "text-m-bold font-bold" : "text-m-regular"}`}
@@ -47,11 +49,11 @@ export function SupportSidebar({
           );
         })}
 
-        <li className="cursor-pointer" onClick={() => onItemClick("help")}>
+        <li className="cursor-pointer">
           <a
-            href="#help"
-            className={`text-neutral-900 inline-block w-full ${activeItem === "help" ? "text-m-bold font-bold" : "text-m-regular"}`}
-            style={activeItem === "help" ? { fontWeight: 700 } : {}}
+            href={`#${helpAnchorId}`}
+            className={`text-neutral-900 inline-block w-full ${activeItem === helpAnchorId ? "text-m-bold font-bold" : "text-m-regular"}`}
+            style={activeItem === helpAnchorId ? { fontWeight: 700 } : {}}
           >
             {helpLabel}
           </a>
