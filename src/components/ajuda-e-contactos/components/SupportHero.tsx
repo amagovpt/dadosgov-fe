@@ -2,59 +2,56 @@
 
 import HeroGeneral from "@/components/HeroGeneral";
 import AppIcon from "@/components/Primitives/AppIcon";
+import { formatHtmlParagraphs } from "@/utils/formatHtmlParagraphs";
+import { useTranslation } from "react-i18next";
+import type { SupportAnchor, SupportHeroContent } from "@/service/types/support";
 
-export function SupportHero() {
+interface SupportHeroProps {
+  content: SupportHeroContent;
+}
+
+export function SupportHero({ content }: SupportHeroProps) {
+  const { t } = useTranslation("support");
+  const links = t("hero.links", { returnObjects: true }) as SupportAnchor[];
+
   return (
     <HeroGeneral
       title={
         <>
           <span className="mb-[10px] text-32 font-[500] text-white">
-            Bem-vindo à página de suporte do{" "}
+            {content.title}{" "}
           </span>
-          <span className="text-32 font-[500] text-white">portal dados.gov.pt</span>
+          {content.highlight ? (
+            <span className="text-32 font-[500] text-white">{content.highlight}</span>
+          ) : null}
         </>
       }
       backgroundImageUrl="/Banner/hero-bg.png"
       subtitle={
         <>
-          <label className="mt-48 block text-[20px] font-bold text-white">
-            Antes de nos contactar, recomendamos a consulta das Perguntas Frequentes desta página
-            ou da área de Recursos do{" "}
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline font-bold text-white text-[20px]"
-            >
-              dados.gov.pt
-            </a>
-            , onde pode encontrar respostas e informação de apoio sobre dados abertos, publicação e
-            reutilização de dados.
-          </label>
+          <div className="mt-48 block text-[20px] font-bold text-white">
+            {formatHtmlParagraphs(content.description ?? "", "text-[20px] font-bold text-white")}
+          </div>
 
           <div className="shadow-lg dropdown absolute mb-64 w-full bg-white text-neutral-900"></div>
 
-          <div className="mt-16 flex flex-col gap-16">
-            <a
-              href="/recursos/como-usar-o-portal/o-que-e-dados-gov-pt"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex cursor-pointer items-center gap-8 text-white hover:underline"
-            >
-              O que é o dados.gov.pt
-              <AppIcon name="agora-line-arrow-right-circle" className="fill-white" />
-            </a>
-
-            <a
-              href="/recursos/como-usar-o-portal/sobre-dados-abertos"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex cursor-pointer items-center gap-8 text-white hover:underline"
-            >
-              Saber mais sobre dados abertos
-              <AppIcon name="agora-line-arrow-right-circle" className="fill-white" />
-            </a>
-          </div>
+          {links.length > 0 ? (
+            <div className="mt-16 flex flex-col gap-16">
+              {links.map((link) => (
+                <a
+                  key={`${link.href}-${link.children}`}
+                  href={link.href}
+                  className="flex cursor-pointer items-center gap-8 text-white hover:underline"
+                >
+                  {link.children}
+                  <AppIcon
+                    name={link.icon ?? "agora-line-arrow-right-circle"}
+                    className="fill-white"
+                  />
+                </a>
+              ))}
+            </div>
+          ) : null}
         </>
       }
     />
