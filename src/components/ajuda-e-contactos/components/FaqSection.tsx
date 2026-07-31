@@ -29,7 +29,7 @@ export function FaqSection({ title, updatedDate, categories }: FaqSectionProps) 
   };
 
   return (
-    <div id="faq" className="mx-auto max-w-4xl scroll-mt-[190px]">
+    <div id="faq" className="mx-auto max-w-4xl">
       <p className="text-sm mb-32 text-neutral-700">{updatedDate}</p>
       <h2 className="mb-32 text-xl-semibold text-primary-900">{title}</h2>
 
@@ -38,7 +38,7 @@ export function FaqSection({ title, updatedDate, categories }: FaqSectionProps) 
           <section
             key={category.id}
             id={category.id}
-            className={`${idx > 0 ? "mt-32" : ""} scroll-mt-[190px]`}
+            className={`${idx > 0 ? "mt-32" : ""} !scroll-mt-[200px]`}
           >
             <h3 className="mb-16 text-[20px] font-bold text-[#021C51]">{category.title}</h3>
             <div>

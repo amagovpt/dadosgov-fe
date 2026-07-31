@@ -47,7 +47,7 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
         : null;
 
   return (
-    <main id="nesta-pagina" className="flex-grow bg-white pb-64">
+    <main id="nesta-pagina" className="flex-grow bg-white pb-64 !scroll-mt-[200px]">
       <SupportHero content={pageContent.hero} />
 
       <div className="container mx-auto px-4 py-64">
@@ -71,7 +71,7 @@ export function SupportPageContent({ pageContent }: SupportPageContentProps) {
           </div>
         </div>
 
-        <div id="help" className="mt-80 scroll-mt-[190px] border-neutral-200 pt-64">
+        <div id="help" className="mt-80 border-neutral-200 pt-64">
           <h2 className="mb-24 text-24 font-bold text-[#021C51]">
             {pageContent.helpCard.title}
           </h2>
