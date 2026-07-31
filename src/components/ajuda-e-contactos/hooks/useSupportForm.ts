@@ -1,10 +1,16 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { submitSupportContact, type SupportTopic } from "@/service/api/system";
-import { TOGGLE_SUCCESS_MAP } from "../constants";
 import { shouldPreselectFeedbackFromUrl, composeMessage } from "../utils";
-import type { SupportFormErrors } from "../types";
+
+export interface SupportFormErrors {
+  email: string;
+  subject: string;
+  description: string;
+  category: string;
+}
 
 interface UseSupportFormOptions {
   executeRecaptcha: ((action?: string) => Promise<string>) | undefined;
@@ -39,7 +45,10 @@ export interface SupportFormHandlers {
   handleSubmit: () => Promise<void>;
 }
 
-export function useSupportForm({ executeRecaptcha }: UseSupportFormOptions): SupportFormState & SupportFormHandlers {
+export function useSupportForm({
+  executeRecaptcha,
+}: UseSupportFormOptions): SupportFormState & SupportFormHandlers {
+  const { t } = useTranslation("support");
   const [selectedToggle, setSelectedToggle] = React.useState<string | null>(() =>
     shouldPreselectFeedbackFromUrl() ? "feedback" : null
   );
@@ -73,11 +82,12 @@ export function useSupportForm({ executeRecaptcha }: UseSupportFormOptions): Sup
   const handleSubmit = React.useCallback(async () => {
     if (!selectedToggle || selectedToggle === "dataset") return;
 
+    const requiredField = t("form.requiredField");
     const newErrors: SupportFormErrors = {
-      email: email.trim() ? "" : "Campo obrigatório",
-      subject: subjectBody.trim() ? "" : "Campo obrigatório",
-      description: description.trim() ? "" : "Campo obrigatório",
-      category: category ? "" : "Campo obrigatório",
+      email: email.trim() ? "" : requiredField,
+      subject: subjectBody.trim() ? "" : requiredField,
+      description: description.trim() ? "" : requiredField,
+      category: category ? "" : requiredField,
     };
     setErrors(newErrors);
     const hasErrors = Object.values(newErrors).some(Boolean);
@@ -102,13 +112,11 @@ export function useSupportForm({ executeRecaptcha }: UseSupportFormOptions): Sup
         message: composeMessage(description, category, selectedToggle, problemUrl, problemDateTime),
         recaptchaToken,
       });
-      setSuccessMessage(TOGGLE_SUCCESS_MAP[selectedToggle]);
+      setSuccessMessage(t(`form.success.${selectedToggle}`));
       resetFormFields();
     } catch (err) {
       console.error("Support form submission failed:", err);
-      setErrorMessage(
-        "Não foi possível enviar o seu pedido. Tente novamente em alguns instantes."
-      );
+      setErrorMessage(t("form.submitError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -122,6 +130,7 @@ export function useSupportForm({ executeRecaptcha }: UseSupportFormOptions): Sup
     problemDateTime,
     executeRecaptcha,
     resetFormFields,
+    t,
   ]);
 
   return {
