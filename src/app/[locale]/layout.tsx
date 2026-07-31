@@ -39,6 +39,7 @@ const namespaces = [
   "reuses",
   "organizations",
   "dataservices",
+  "support",
   "admin-common",
   "admin-harvesters",
   "admin-dataservices",
