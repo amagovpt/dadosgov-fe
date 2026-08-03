@@ -8,19 +8,21 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   {
-    //params,
+    params,
   }: {
     params: Promise<{ locale: string }>;
   }
 ): Promise<Metadata> {
-  const { title } = await getFaqs("como-reutilizar-dados", "pt");
+  const { locale } = await params;
+  const { title } = await getFaqs("como-reutilizar-dados", locale);
 
   return {
     title,
   };
 }
-export default async function ReuseFaqPage() {
-  const { body } = await getFaqs("como-reutilizar-dados", "pt");
+export default async function ReuseFaqPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const { body } = await getFaqs("como-reutilizar-dados", locale);
 
   return (
     <main className="flex flex-col pt-32 pb-64 bg-white gap-64 justify-center items-center w-full h-full">

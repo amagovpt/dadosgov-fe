@@ -9,7 +9,8 @@ import ReactMarkdown from 'react-markdown';
 
 export const dynamic = "force-dynamic";
 
-export default async function page() {
+export default async function page({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
 
     const { hero,
         sitemap,
@@ -20,7 +21,7 @@ export default async function page() {
         followAlongAndJoinIn,
         history,
         historyOfDevelopment,
-    } = await getRoadmapPage("pt");
+    } = await getRoadmapPage(locale);
 
     const tableHeaders = [
         "Funcionalidade",

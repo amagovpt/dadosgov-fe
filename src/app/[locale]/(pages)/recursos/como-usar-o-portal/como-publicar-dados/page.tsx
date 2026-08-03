@@ -7,19 +7,21 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   {
-    //params,
+    params,
   }: {
     params: Promise<{ locale: string }>;
   }
 ): Promise<Metadata> {
-  const { title } = await getFaqs("como-publicar-dados", "pt");
+  const { locale } = await params;
+  const { title } = await getFaqs("como-publicar-dados", locale);
 
   return {
     title,
   };
 }
-export default async function PublishFaqPage() {
-  const { body } = await getFaqs("como-publicar-dados", "pt");
+export default async function PublishFaqPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const { body } = await getFaqs("como-publicar-dados", locale);
 
   return (
     <main className="flex flex-col pt-32 pb-64 bg-white gap-64 justify-center items-center w-full h-full">
